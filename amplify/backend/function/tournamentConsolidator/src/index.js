@@ -25,10 +25,13 @@ Amplify Params - DO NOT EDIT */
  * 
  * The core consolidation LOGIC is extracted to ./consolidation-logic.js
  * so it can be used by both handlers without duplication.
+ * 
+ * FIX: Added sourceUrl to parent records for bySourceUrl GSI compatibility
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { unmarshall } = require('@aws-sdk/util-dynamodb');
 const { v4: uuidv4 } = require('uuid');
 const { LambdaMonitoring } = require('./lambda-monitoring');
 
@@ -324,8 +327,12 @@ const consolidateEntries = async (parentId, children) => {
                 await monitoredDdbDocClient.send(new UpdateCommand({
                     TableName: PLAYER_ENTRY_TABLE,
                     Key: { id: entry.id },
-                    UpdateExpression: "SET entryType = :et",
-                    ExpressionAttributeValues: { ":et": newType }
+                    UpdateExpression: "SET entryType = :et, _lastChangedAt = :lastChanged ADD _version :versionIncrement",
+                    ExpressionAttributeValues: { 
+                        ":et": newType,
+                        ":lastChanged": Date.now(),
+                        ":versionIncrement": 1
+                    }
                 }));
             }
         }
@@ -368,7 +375,11 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
         await syncParentResults(parentId, aggregated.finalDayChild.results);
     }
 
-    // Update parent record
+    // Update parent record with all aggregated fields
+    // *** FIX: Ensure GSI key fields are never null ***
+    const safeStart = aggregated.earliestStart || currentParentRecord?.gameStartDateTime || new Date().toISOString();
+    const safeEnd = aggregated.latestEnd || null; // gameEndDateTime is not a GSI key, null is OK
+    
     await monitoredDdbDocClient.send(new UpdateCommand({
         TableName: GAME_TABLE,
         Key: { id: parentId },
@@ -378,29 +389,53 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
                 totalRebuys = :tr, 
                 totalAddons = :ta, 
                 prizepool = :pp,
+                totalRake = :totalRake,
+                revenueByBuyIns = :revenue,
+                profitLoss = :profit,
+                startingStack = :stack,
+                playersRemaining = :remaining,
+                totalChipsInPlay = :chips,
+                averagePlayerStack = :avgStack,
+                guaranteeOverlay = :overlay,
+                guaranteeSurplus = :surplus,
                 gameStartDateTime = :start,
                 gameEndDateTime = :end,
+                totalDuration = :duration,
                 gameStatus = :status,
                 isPartialData = :partial,
                 missingFlightCount = :miss,
-                updatedAt = :now
+                updatedAt = :now,
+                _lastChangedAt = :lastChanged
+            ADD _version :versionIncrement
         `,
         ExpressionAttributeValues: {
             ':te': calculatedTotalEntries,
             ':ace': uniqueRunners,
-            ':tr': aggregated.totalRebuys,
-            ':ta': aggregated.totalAddons,
-            ':pp': aggregated.prizepool,
-            ':start': aggregated.earliestStart,
-            ':end': aggregated.latestEnd,
-            ':status': aggregated.parentStatus,
+            ':tr': aggregated.totalRebuys || 0,
+            ':ta': aggregated.totalAddons || 0,
+            ':pp': aggregated.prizepool || 0,
+            ':totalRake': aggregated.totalRake || 0,
+            ':revenue': aggregated.revenueByBuyIns || 0,
+            ':profit': aggregated.profitLoss || 0,
+            ':stack': aggregated.startingStack || 0,
+            ':remaining': aggregated.playersRemaining,
+            ':chips': aggregated.totalChipsInPlay,
+            ':avgStack': aggregated.averagePlayerStack,
+            ':overlay': aggregated.guaranteeOverlay || 0,
+            ':surplus': aggregated.guaranteeSurplus || 0,
+            ':start': safeStart,
+            ':end': safeEnd,
+            ':duration': aggregated.totalDuration,
+            ':status': aggregated.parentStatus || 'RUNNING',
             ':partial': aggregated.isPartialData,
             ':miss': aggregated.missingFlightCount,
-            ':now': new Date().toISOString()
+            ':now': new Date().toISOString(),
+            ':lastChanged': Date.now(),
+            ':versionIncrement': 1
         }
     }));
     
-    console.log(`[Consolidator] Recalculated Parent ${parentId}. Entries: ${calculatedTotalEntries}, Partial: ${aggregated.isPartialData}`);
+    console.log(`[Consolidator] Recalculated Parent ${parentId}. Entries: ${calculatedTotalEntries}, Children: ${aggregated.childCount}, Partial: ${aggregated.isPartialData}`);
 };
 
 /**
@@ -427,22 +462,34 @@ const processParentRecord = async (childGame, consolidationKey) => {
         parentId = uuidv4();
         const now = new Date().toISOString();
         
-        // Use pure function to build parent data
-        const parentData = buildParentRecord(childGame, consolidationKey);
+        // *** FIX: Pass parentId to buildParentRecord for sourceUrl generation ***
+        // This is required because the bySourceUrl GSI cannot have NULL partition keys
+        const parentData = buildParentRecord(childGame, consolidationKey, parentId);
         
         parentRecord = {
             id: parentId,
             ...parentData,
             createdAt: now,
             updatedAt: now,
-            __typename: 'Game'
+            __typename: 'Game',
+            // Required Amplify DataStore fields
+            _version: 1,
+            _lastChangedAt: Date.now(),
+            _deleted: null
         };
+
+        // *** FIX: Remove null/undefined values to prevent GSI validation errors ***
+        // DynamoDB GSIs reject explicit NULL values - fields must be absent instead
+        // This affects: tournamentSeriesId, parentGameId, and other optional GSI partition keys
+        const cleanedRecord = Object.fromEntries(
+            Object.entries(parentRecord).filter(([_, value]) => value !== null && value !== undefined)
+        );
 
         await monitoredDdbDocClient.send(new PutCommand({
             TableName: GAME_TABLE,
-            Item: parentRecord
+            Item: cleanedRecord
         }));
-        console.log(`[Consolidator] Created New Parent: ${parentId}`);
+        console.log(`[Consolidator] Created New Parent: ${parentId} with sourceUrl: ${cleanedRecord.sourceUrl}`);
     }
 
     // Link child to parent
@@ -450,11 +497,13 @@ const processParentRecord = async (childGame, consolidationKey) => {
         await monitoredDdbDocClient.send(new UpdateCommand({
             TableName: GAME_TABLE,
             Key: { id: childGame.id },
-            UpdateExpression: 'SET parentGameId = :pid, consolidationType = :ctype, consolidationKey = :ckey',
+            UpdateExpression: 'SET parentGameId = :pid, consolidationType = :ctype, consolidationKey = :ckey, _lastChangedAt = :lastChanged ADD _version :versionIncrement',
             ExpressionAttributeValues: {
                 ':pid': parentId,
                 ':ctype': 'CHILD',
-                ':ckey': consolidationKey
+                ':ckey': consolidationKey,
+                ':lastChanged': Date.now(),
+                ':versionIncrement': 1
             }
         }));
     }
@@ -470,7 +519,7 @@ const handleDynamoDBStream = async (event) => {
     for (const record of event.Records) {
         if (record.eventName === 'REMOVE') continue;
 
-        const newImage = DynamoDBDocumentClient.unmarshallAttributes(record.dynamodb?.NewImage);
+        const newImage = unmarshall(record.dynamodb?.NewImage || {});
         
         // Filters
         if (!newImage || newImage.consolidationType === 'PARENT') continue; 
@@ -505,7 +554,7 @@ const handleDynamoDBStream = async (event) => {
 exports.handler = async (event) => {
     // Set Entity ID for monitoring
     if (event.Records && event.Records.length > 0) {
-        const firstImage = DynamoDBDocumentClient.unmarshallAttributes(event.Records[0].dynamodb?.NewImage || {});
+        const firstImage = unmarshall(event.Records[0].dynamodb?.NewImage || {});
         if (firstImage && firstImage.entityId) {
             monitoring.entityId = firstImage.entityId;
         }

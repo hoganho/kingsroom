@@ -475,6 +475,11 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             startedAt
             __typename
           }
+          socialAccounts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -732,6 +737,11 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             startedAt
             __typename
           }
+          linkedSocialPosts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -806,6 +816,89 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           }
           createdAt
           updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      socialAccounts {
+        items {
+          id
+          platform
+          platformAccountId
+          accountName
+          accountHandle
+          accountUrl
+          profileImageUrl
+          coverImageUrl
+          bio
+          followerCount
+          followingCount
+          postCount
+          status
+          isScrapingEnabled
+          scrapeFrequencyMinutes
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          nextScheduledScrapeAt
+          consecutiveFailures
+          lastErrorMessage
+          hasPostAccess
+          accessTokenExpiry
+          permissionsGranted
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          posts {
+            nextToken
+            startedAt
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          createdBy
           _version
           _deleted
           _lastChangedAt
@@ -1298,6 +1391,11 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             startedAt
             __typename
           }
+          socialAccounts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -1555,6 +1653,11 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             startedAt
             __typename
           }
+          linkedSocialPosts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -1629,6 +1732,89 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           }
           createdAt
           updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      socialAccounts {
+        items {
+          id
+          platform
+          platformAccountId
+          accountName
+          accountHandle
+          accountUrl
+          profileImageUrl
+          coverImageUrl
+          bio
+          followerCount
+          followingCount
+          postCount
+          status
+          isScrapingEnabled
+          scrapeFrequencyMinutes
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          nextScheduledScrapeAt
+          consecutiveFailures
+          lastErrorMessage
+          hasPostAccess
+          accessTokenExpiry
+          permissionsGranted
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          posts {
+            nextToken
+            startedAt
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          createdBy
           _version
           _deleted
           _lastChangedAt
@@ -2137,6 +2323,11 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             startedAt
             __typename
           }
+          socialAccounts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -2394,6 +2585,11 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             startedAt
             __typename
           }
+          linkedSocialPosts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -2468,6 +2664,89 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           }
           createdAt
           updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      socialAccounts {
+        items {
+          id
+          platform
+          platformAccountId
+          accountName
+          accountHandle
+          accountUrl
+          profileImageUrl
+          coverImageUrl
+          bio
+          followerCount
+          followingCount
+          postCount
+          status
+          isScrapingEnabled
+          scrapeFrequencyMinutes
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          nextScheduledScrapeAt
+          consecutiveFailures
+          lastErrorMessage
+          hasPostAccess
+          accessTokenExpiry
+          permissionsGranted
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          posts {
+            nextToken
+            startedAt
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          createdBy
           _version
           _deleted
           _lastChangedAt
@@ -2963,6 +3242,11 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             startedAt
             __typename
           }
+          socialAccounts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -3220,6 +3504,11 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             startedAt
             __typename
           }
+          linkedSocialPosts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -3294,6 +3583,89 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           }
           createdAt
           updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      socialAccounts {
+        items {
+          id
+          platform
+          platformAccountId
+          accountName
+          accountHandle
+          accountUrl
+          profileImageUrl
+          coverImageUrl
+          bio
+          followerCount
+          followingCount
+          postCount
+          status
+          isScrapingEnabled
+          scrapeFrequencyMinutes
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          nextScheduledScrapeAt
+          consecutiveFailures
+          lastErrorMessage
+          hasPostAccess
+          accessTokenExpiry
+          permissionsGranted
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          posts {
+            nextToken
+            startedAt
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          createdBy
           _version
           _deleted
           _lastChangedAt
@@ -3789,6 +4161,11 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             startedAt
             __typename
           }
+          socialAccounts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -4046,6 +4423,11 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             startedAt
             __typename
           }
+          linkedSocialPosts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -4120,6 +4502,89 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           }
           createdAt
           updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      socialAccounts {
+        items {
+          id
+          platform
+          platformAccountId
+          accountName
+          accountHandle
+          accountUrl
+          profileImageUrl
+          coverImageUrl
+          bio
+          followerCount
+          followingCount
+          postCount
+          status
+          isScrapingEnabled
+          scrapeFrequencyMinutes
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          nextScheduledScrapeAt
+          consecutiveFailures
+          lastErrorMessage
+          hasPostAccess
+          accessTokenExpiry
+          permissionsGranted
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          posts {
+            nextToken
+            startedAt
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          createdBy
           _version
           _deleted
           _lastChangedAt
@@ -4612,6 +5077,11 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             startedAt
             __typename
           }
+          socialAccounts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -4869,6 +5339,11 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             startedAt
             __typename
           }
+          linkedSocialPosts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -4943,6 +5418,89 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           }
           createdAt
           updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      socialAccounts {
+        items {
+          id
+          platform
+          platformAccountId
+          accountName
+          accountHandle
+          accountUrl
+          profileImageUrl
+          coverImageUrl
+          bio
+          followerCount
+          followingCount
+          postCount
+          status
+          isScrapingEnabled
+          scrapeFrequencyMinutes
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          nextScheduledScrapeAt
+          consecutiveFailures
+          lastErrorMessage
+          hasPostAccess
+          accessTokenExpiry
+          permissionsGranted
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          posts {
+            nextToken
+            startedAt
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          createdBy
           _version
           _deleted
           _lastChangedAt
@@ -5448,6 +6006,11 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             startedAt
             __typename
           }
+          socialAccounts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -5705,6 +6268,11 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             startedAt
             __typename
           }
+          linkedSocialPosts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -5779,6 +6347,89 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           }
           createdAt
           updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      socialAccounts {
+        items {
+          id
+          platform
+          platformAccountId
+          accountName
+          accountHandle
+          accountUrl
+          profileImageUrl
+          coverImageUrl
+          bio
+          followerCount
+          followingCount
+          postCount
+          status
+          isScrapingEnabled
+          scrapeFrequencyMinutes
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          nextScheduledScrapeAt
+          consecutiveFailures
+          lastErrorMessage
+          hasPostAccess
+          accessTokenExpiry
+          permissionsGranted
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          posts {
+            nextToken
+            startedAt
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          createdBy
           _version
           _deleted
           _lastChangedAt
@@ -6284,6 +6935,11 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             startedAt
             __typename
           }
+          socialAccounts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -6541,6 +7197,11 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             startedAt
             __typename
           }
+          linkedSocialPosts {
+            nextToken
+            startedAt
+            __typename
+          }
           entityId
           entity {
             id
@@ -6615,6 +7276,89 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           }
           createdAt
           updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      socialAccounts {
+        items {
+          id
+          platform
+          platformAccountId
+          accountName
+          accountHandle
+          accountUrl
+          profileImageUrl
+          coverImageUrl
+          bio
+          followerCount
+          followingCount
+          postCount
+          status
+          isScrapingEnabled
+          scrapeFrequencyMinutes
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          nextScheduledScrapeAt
+          consecutiveFailures
+          lastErrorMessage
+          hasPostAccess
+          accessTokenExpiry
+          permissionsGranted
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          posts {
+            nextToken
+            startedAt
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          createdBy
           _version
           _deleted
           _lastChangedAt

@@ -1,0 +1,762 @@
+[
+  {
+    "timestamp": 1764124836178,
+    "message": "INIT_START Runtime Version: nodejs:22.v68\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:685b5bdd1a5972cbde591187200f592fbd417cd448d71e500b10e41759692493\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837125,
+    "message": "START RequestId: b51a2a3d-cf9e-4955-8cfa-0d80f67aae1e Version: $LATEST\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837127,
+    "message": "2025-11-26T02:40:37.127Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[HANDLER] Incoming event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"fetchTournamentData\",\n  \"arguments\": {\n    \"url\": \"https://kingsroom.com.au/tournament/?id=1\",\n    \"s3Key\": null,\n    \"forceRefresh\": false,\n    \"scraperApiKey\": \"62c905a307da2591dc89f94d193caacf\"\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"dcbe6569-c63a-45dd-957a-0d6aa9728f08\",\n      \"event_id\": \"b8a9cf13-bdbf-464e-8e3c-e5e5d59243f1\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1763666135,\n      \"exp\": 1764127787,\n      \"iat\": 1764124187,\n      \"jti\": \"8e59a43a-a9a7-49a5-9b53-4ab81be16b4d\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"86.48.8.96\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"86.48.8.96,15.158.53.49\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"6e12655d-4460-4b1f-a17d-115d3ffa2b94\",\n      \"via\": \"2.0 9cf5cbf8514846e19da4f6d5ee83d100.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"2282\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.8\",\n      \"host\": \"moi5t5e25vbajg2funkwklyhqq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"137409\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"86.48.8.96\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-692668a3-5db2090f326452f511009b6f\",\n      \"x-amz-cf-id\": \"Iug4oq4iIy0XlGLu3fN1CYSFjdFyvDEqqI5HDefdI5LQTSooY6lZvw==\",\n      \"authorization\": \"eyJraWQiOiI0ZjE0SDRUWituNW01dUN4UzV6Tkh0VlBVN0x6TU9PS3VnZ1ppandhWlwvVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfajJrQWQ0a3BPIiwiY2xpZW50X2lkIjoiNHN0aDIxZGdyaDNyampuc2w2M2thMzJrNHEiLCJvcmlnaW5fanRpIjoiZGNiZTY1NjktYzYzYS00NWRkLTk1N2EtMGQ2YWE5NzI4ZjA4IiwiZXZlbnRfaWQiOiJiOGE5Y2YxMy1iZGJmLTQ2NGUtOGUzYy1lNWU1ZDU5MjQzZjEiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzYzNjY2MTM1LCJleHAiOjE3NjQxMjc3ODcsImlhdCI6MTc2NDEyNDE4NywianRpIjoiOGU1OWE0M2EtYTlhNy00OWE1LTliNTMtNGFiODFiZTE2YjRkIiwidXNlcm5hbWUiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYifQ.Tu7Q0VYPwL21FMwljFeE16CLH35hY-5UYVTgD_whUE7K9k-yp92Uyp7Hi73N_Vmm6qYM28AjWaZfdsVK-RG-G5ojbHHr3n0KlGHc4EEkLqRcrX8Ud1B6YZeBzdcouK7e9NR0pEv50IyGAllPSzTo5IOxHf67cvEqQmtqtS9epICxmAnEl1Y14KNppsPcqO4-7eqiAUbCLLUA9aXLVjXT1igfjydoGmP3eUmU0puOO-OhltiYHQrQtuX9PvOm1o3h9D8-NdCscwxJxXt3qGRPVoMGYtTyhsSoQIlch_q0Zmq23hwl3W7_twqWyESAAah4BvtoDrdH-IsMGINn539mvQ\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Chromium\\\";v=\\\"142\\\", \\\"Brave\\\";v=\\\"142\\\", \\\"Not_A Brand\\\";v=\\\"99\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837251,
+    "message": "2025-11-26T02:40:37.251Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[HANDLER] Op: fetchTournamentData. Job: N/A, Entity: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837251,
+    "message": "2025-11-26T02:40:37.251Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[HANDLER] ScraperAPI Key: { hasCustomKey: true, keyLength: 32, keyPreview: '62c905a3...' }\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837291,
+    "message": "2025-11-26T02:40:37.291Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[enhancedHandleFetch] Starting fetch for https://kingsroom.com.au/tournament/?id=1\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837291,
+    "message": "2025-11-26T02:40:37.291Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[enhancedHandleFetch] Force refresh: false\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837291,
+    "message": "2025-11-26T02:40:37.291Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[enhancedHandleFetch] Entity ID: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837291,
+    "message": "2025-11-26T02:40:37.291Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[enhancedHandleFetch] Has S3 key: true\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837291,
+    "message": "2025-11-26T02:40:37.291Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[enhancedHandleFetch] Has custom API key: true\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837292,
+    "message": "2025-11-26T02:40:37.292Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[handleFetch] Starting fetch process {\n  url: 'https://kingsroom.com.au/tournament/?id=1',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 1,\n  forceRefresh: false,\n  hasS3Key: true,\n  cacheEnabled: true\n}\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837510,
+    "message": "2025-11-26T02:40:37.510Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[S3] Successfully retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1/2025-11-22T08-54-14-934Z_tid1_cb5ed4af.html\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837510,
+    "message": "2025-11-26T02:40:37.510Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[handleFetch] ✅ S3 cache hit - using cached content {\n  url: 'https://kingsroom.com.au/tournament/?id=1',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 1,\n  forceRefresh: false,\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1/2025-11-22T08-54-14-934Z_tid1_cb5ed4af.html',\n  contentLength: 75549,\n  metadata: {\n    url: 'https://kingsroom.com.au/tournament/?id=1',\n    ismanual: 'false',\n    contenthash: 'cb5ed4af7f8c8fdff2d33c7f8e977afef538473ae9d2f43da7454c253b14b46b',\n    etag: 'W/\"12720-7cuAazpZ/pY6JZyGdGeyVFuJgrM\"',\n    scrapedat: '2025-11-22T08:54:14.934Z',\n    entityid: '42101695-1332-48e3-963b-3c6ad4e909a0',\n    tournamentid: '1'\n  }\n}\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837521,
+    "message": "2025-11-26T02:40:37.521Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[enhancedHandleFetch] Success - Source: S3_CACHE, Cached: true\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837712,
+    "message": "2025-11-26T02:40:37.712Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[runScraper] Starting run for tournament 1, forceRefresh: false\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837712,
+    "message": "2025-11-26T02:40:37.712Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[runScraper] Database data: 37 venues, 6 series titles\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837728,
+    "message": "2025-11-26T02:40:37.728Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[Scraper] Warning badge detected: \"tournament not published!\"\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837729,
+    "message": "2025-11-26T02:40:37.729Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[Scraper] State detected: Tournament Not Published\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837729,
+    "message": "2025-11-26T02:40:37.729Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[Scraper] Aborting scrape due to NOT_PUBLISHED status\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837729,
+    "message": "2025-11-26T02:40:37.729Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[runScraper] Aborting scrape due to page state: NOT_PUBLISHED\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837810,
+    "message": "2025-11-26T02:40:37.810Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\tSaving new structure fingerprint: 75830010a4edf1e9\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837837,
+    "message": "2025-11-26T02:40:37.837Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[DEBUG-SCRAPER] Scraped status: NOT_PUBLISHED, doNotScrape: true, tournamentId: 1, forceRefresh: false\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837837,
+    "message": "2025-11-26T02:40:37.837Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[HANDLER] Marking tournament as doNotScrape due to status: NOT_PUBLISHED\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837847,
+    "message": "2025-11-26T02:40:37.847Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[UpdateScrapeURL] Set doNotScrape=true for https://kingsroom.com.au/tournament/?id=1\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837847,
+    "message": "2025-11-26T02:40:37.847Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[updateS3StorageWithParsedData] Looking for S3Storage record: {\n  tournamentId: 1,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  s3Key: 'html/1/2025-11-22T08-54-14-934Z_tid1_cb5ed4af.html'\n}\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837847,
+    "message": "2025-11-26T02:40:37.847Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[updateS3StorageWithParsedData] Strategy 1: Querying by tournamentId 1 + entityId 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837858,
+    "message": "2025-11-26T02:40:37.858Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[updateS3StorageWithParsedData] Found record: {\n  id: '4bc328b7-ac8c-4155-a980-579e883ddb5f',\n  currentS3Key: 'html/1/2025-11-22T08-54-14-934Z_tid1_cb5ed4af.html',\n  tournamentId: 1\n}\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837858,
+    "message": "2025-11-26T02:40:37.858Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[updateS3StorageWithParsedData] Data comparison: {\n  existingHash: 'none',\n  newHash: 'e1ec66c78d35cdb6',\n  dataChanged: true,\n  isRescrape: false,\n  recordId: '4bc328b7-ac8c-4155-a980-579e883ddb5f'\n}\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837870,
+    "message": "2025-11-26T02:40:37.870Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[updateS3StorageWithParsedData] ✅ Updated S3Storage record: {\n  id: '4bc328b7-ac8c-4155-a980-579e883ddb5f',\n  dataChanged: true,\n  fieldsExtracted: 8,\n  gameStatus: 'NOT_PUBLISHED',\n  registrationStatus: 'N_A',\n  isRescrape: false\n}\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837870,
+    "message": "2025-11-26T02:40:37.870Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[HANDLER] Flushing monitoring metrics...\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837916,
+    "message": "2025-11-26T02:40:37.916Z\tb51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tINFO\t[HANDLER] Monitoring flush complete.\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837919,
+    "message": "END RequestId: b51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124837919,
+    "message": "REPORT RequestId: b51a2a3d-cf9e-4955-8cfa-0d80f67aae1e\tDuration: 794.12 ms\tBilled Duration: 1738 ms\tMemory Size: 1024 MB\tMax Memory Used: 141 MB\tInit Duration: 943.47 ms\t\n",
+    "ingestionTime": 1764124838422
+  },
+  {
+    "timestamp": 1764124847267,
+    "message": "2025-11-26T02:40:47.267Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[HANDLER] Incoming event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"fetchTournamentData\",\n  \"arguments\": {\n    \"url\": \"https://kingsroom.com.au/tournament/?id=2\",\n    \"s3Key\": null,\n    \"forceRefresh\": false,\n    \"scraperApiKey\": \"62c905a307da2591dc89f94d193caacf\"\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"dcbe6569-c63a-45dd-957a-0d6aa9728f08\",\n      \"event_id\": \"b8a9cf13-bdbf-464e-8e3c-e5e5d59243f1\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1763666135,\n      \"exp\": 1764127787,\n      \"iat\": 1764124187,\n      \"jti\": \"8e59a43a-a9a7-49a5-9b53-4ab81be16b4d\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"86.48.8.96\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"86.48.8.96,15.158.53.23\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"148355e3-4213-4da7-8459-37a9a582e722\",\n      \"via\": \"2.0 0ea9275b520295dc60df246b1de3192a.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"2282\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.8\",\n      \"host\": \"moi5t5e25vbajg2funkwklyhqq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"137409\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"86.48.8.96\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-692668af-6a5aa7ce271acac5249f415c\",\n      \"x-amz-cf-id\": \"MwgH01oyHCArCHFua-vQP0HSEinN-yuZnWyBVdMvbLFt0jrkRBorZQ==\",\n      \"authorization\": \"eyJraWQiOiI0ZjE0SDRUWituNW01dUN4UzV6Tkh0VlBVN0x6TU9PS3VnZ1ppandhWlwvVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfajJrQWQ0a3BPIiwiY2xpZW50X2lkIjoiNHN0aDIxZGdyaDNyampuc2w2M2thMzJrNHEiLCJvcmlnaW5fanRpIjoiZGNiZTY1NjktYzYzYS00NWRkLTk1N2EtMGQ2YWE5NzI4ZjA4IiwiZXZlbnRfaWQiOiJiOGE5Y2YxMy1iZGJmLTQ2NGUtOGUzYy1lNWU1ZDU5MjQzZjEiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzYzNjY2MTM1LCJleHAiOjE3NjQxMjc3ODcsImlhdCI6MTc2NDEyNDE4NywianRpIjoiOGU1OWE0M2EtYTlhNy00OWE1LTliNTMtNGFiODFiZTE2YjRkIiwidXNlcm5hbWUiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYifQ.Tu7Q0VYPwL21FMwljFeE16CLH35hY-5UYVTgD_whUE7K9k-yp92Uyp7Hi73N_Vmm6qYM28AjWaZfdsVK-RG-G5ojbHHr3n0KlGHc4EEkLqRcrX8Ud1B6YZeBzdcouK7e9NR0pEv50IyGAllPSzTo5IOxHf67cvEqQmtqtS9epICxmAnEl1Y14KNppsPcqO4-7eqiAUbCLLUA9aXLVjXT1igfjydoGmP3eUmU0puOO-OhltiYHQrQtuX9PvOm1o3h9D8-NdCscwxJxXt3qGRPVoMGYtTyhsSoQIlch_q0Zmq23hwl3W7_twqWyESAAah4BvtoDrdH-IsMGINn539mvQ\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Chromium\\\";v=\\\"142\\\", \\\"Brave\\\";v=\\\"142\\\", \\\"Not_A Brand\\\";v=\\\"99\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847267,
+    "message": "START RequestId: 8432e6ba-4a50-4401-ac81-d90c529718c6 Version: $LATEST\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847282,
+    "message": "2025-11-26T02:40:47.282Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[HANDLER] Op: fetchTournamentData. Job: N/A, Entity: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847282,
+    "message": "2025-11-26T02:40:47.282Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[HANDLER] ScraperAPI Key: { hasCustomKey: true, keyLength: 32, keyPreview: '62c905a3...' }\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847301,
+    "message": "2025-11-26T02:40:47.301Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[enhancedHandleFetch] Starting fetch for https://kingsroom.com.au/tournament/?id=2\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847301,
+    "message": "2025-11-26T02:40:47.301Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[enhancedHandleFetch] Force refresh: false\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847301,
+    "message": "2025-11-26T02:40:47.301Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[enhancedHandleFetch] Entity ID: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847301,
+    "message": "2025-11-26T02:40:47.301Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[enhancedHandleFetch] Has S3 key: true\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847301,
+    "message": "2025-11-26T02:40:47.301Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[enhancedHandleFetch] Has custom API key: true\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847301,
+    "message": "2025-11-26T02:40:47.301Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[handleFetch] Starting fetch process {\n  url: 'https://kingsroom.com.au/tournament/?id=2',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 2,\n  forceRefresh: false,\n  hasS3Key: true,\n  cacheEnabled: true\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847426,
+    "message": "2025-11-26T02:40:47.426Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[S3] Successfully retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/2/2025-11-22T22-18-55-633Z_tid2_a326dc77.html\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847426,
+    "message": "2025-11-26T02:40:47.426Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[handleFetch] ✅ S3 cache hit - using cached content {\n  url: 'https://kingsroom.com.au/tournament/?id=2',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 2,\n  forceRefresh: false,\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/2/2025-11-22T22-18-55-633Z_tid2_a326dc77.html',\n  contentLength: 75549,\n  metadata: {\n    url: 'https://kingsroom.com.au/tournament/?id=2',\n    ismanual: 'false',\n    contenthash: 'a326dc7736651d194b1681bc1a745bcbc669453044f4764e9b60d7ddc14d0b0a',\n    etag: 'W/\"12720-qtdXwsqIRxc1OSpsbTEzRny1aIg\"',\n    scrapedat: '2025-11-22T22:18:55.633Z',\n    entityid: '42101695-1332-48e3-963b-3c6ad4e909a0',\n    tournamentid: '2'\n  }\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847433,
+    "message": "2025-11-26T02:40:47.433Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[enhancedHandleFetch] Success - Source: S3_CACHE, Cached: true\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847510,
+    "message": "2025-11-26T02:40:47.510Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[runScraper] Starting run for tournament 2, forceRefresh: false\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847510,
+    "message": "2025-11-26T02:40:47.510Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[runScraper] Database data: 37 venues, 6 series titles\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847511,
+    "message": "2025-11-26T02:40:47.511Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[Scraper] Warning badge detected: \"tournament not published!\"\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847511,
+    "message": "2025-11-26T02:40:47.511Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[Scraper] State detected: Tournament Not Published\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847511,
+    "message": "2025-11-26T02:40:47.511Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[Scraper] Aborting scrape due to NOT_PUBLISHED status\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847511,
+    "message": "2025-11-26T02:40:47.511Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[runScraper] Aborting scrape due to page state: NOT_PUBLISHED\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847555,
+    "message": "2025-11-26T02:40:47.555Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[DEBUG-SCRAPER] Scraped status: NOT_PUBLISHED, doNotScrape: true, tournamentId: 2, forceRefresh: false\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847555,
+    "message": "2025-11-26T02:40:47.555Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[HANDLER] Marking tournament as doNotScrape due to status: NOT_PUBLISHED\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847561,
+    "message": "2025-11-26T02:40:47.561Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[UpdateScrapeURL] Set doNotScrape=true for https://kingsroom.com.au/tournament/?id=2\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847561,
+    "message": "2025-11-26T02:40:47.561Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[updateS3StorageWithParsedData] Looking for S3Storage record: {\n  tournamentId: 2,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  s3Key: 'html/2/2025-11-22T22-18-55-633Z_tid2_a326dc77.html'\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847561,
+    "message": "2025-11-26T02:40:47.561Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[updateS3StorageWithParsedData] Strategy 1: Querying by tournamentId 2 + entityId 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847565,
+    "message": "2025-11-26T02:40:47.565Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[updateS3StorageWithParsedData] Found record: {\n  id: '27ef6650-a483-4f25-9119-bb56364e776a',\n  currentS3Key: 'html/2/2025-11-22T22-18-55-633Z_tid2_a326dc77.html',\n  tournamentId: 2\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847565,
+    "message": "2025-11-26T02:40:47.565Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[updateS3StorageWithParsedData] Data comparison: {\n  existingHash: 'none',\n  newHash: '19f9e9e9e63f0236',\n  dataChanged: true,\n  isRescrape: false,\n  recordId: '27ef6650-a483-4f25-9119-bb56364e776a'\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847574,
+    "message": "2025-11-26T02:40:47.574Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[updateS3StorageWithParsedData] ✅ Updated S3Storage record: {\n  id: '27ef6650-a483-4f25-9119-bb56364e776a',\n  dataChanged: true,\n  fieldsExtracted: 8,\n  gameStatus: 'NOT_PUBLISHED',\n  registrationStatus: 'N_A',\n  isRescrape: false\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847574,
+    "message": "2025-11-26T02:40:47.574Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[HANDLER] Flushing monitoring metrics...\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847609,
+    "message": "2025-11-26T02:40:47.609Z\t8432e6ba-4a50-4401-ac81-d90c529718c6\tINFO\t[HANDLER] Monitoring flush complete.\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847612,
+    "message": "END RequestId: 8432e6ba-4a50-4401-ac81-d90c529718c6\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124847612,
+    "message": "REPORT RequestId: 8432e6ba-4a50-4401-ac81-d90c529718c6\tDuration: 344.62 ms\tBilled Duration: 345 ms\tMemory Size: 1024 MB\tMax Memory Used: 144 MB\t\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124851904,
+    "message": "START RequestId: 4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d Version: $LATEST\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124851905,
+    "message": "2025-11-26T02:40:51.905Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[HANDLER] Incoming event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"fetchTournamentData\",\n  \"arguments\": {\n    \"url\": \"https://kingsroom.com.au/tournament/?id=3\",\n    \"s3Key\": null,\n    \"forceRefresh\": false,\n    \"scraperApiKey\": \"62c905a307da2591dc89f94d193caacf\"\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"dcbe6569-c63a-45dd-957a-0d6aa9728f08\",\n      \"event_id\": \"b8a9cf13-bdbf-464e-8e3c-e5e5d59243f1\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1763666135,\n      \"exp\": 1764127787,\n      \"iat\": 1764124187,\n      \"jti\": \"8e59a43a-a9a7-49a5-9b53-4ab81be16b4d\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"86.48.8.96\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"86.48.8.96,15.158.53.43\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"e5638465-b73a-4dc9-a4e8-27309dec25a8\",\n      \"via\": \"2.0 0ea9275b520295dc60df246b1de3192a.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"2282\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.8\",\n      \"host\": \"moi5t5e25vbajg2funkwklyhqq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"137409\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"86.48.8.96\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-692668b3-77f6e7852f00a1a45a316c90\",\n      \"x-amz-cf-id\": \"vfmkI1kehO9w68vBaurMgZafIyiytYRzAsiZgSDLhUv05w4TD7m7LQ==\",\n      \"authorization\": \"eyJraWQiOiI0ZjE0SDRUWituNW01dUN4UzV6Tkh0VlBVN0x6TU9PS3VnZ1ppandhWlwvVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfajJrQWQ0a3BPIiwiY2xpZW50X2lkIjoiNHN0aDIxZGdyaDNyampuc2w2M2thMzJrNHEiLCJvcmlnaW5fanRpIjoiZGNiZTY1NjktYzYzYS00NWRkLTk1N2EtMGQ2YWE5NzI4ZjA4IiwiZXZlbnRfaWQiOiJiOGE5Y2YxMy1iZGJmLTQ2NGUtOGUzYy1lNWU1ZDU5MjQzZjEiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzYzNjY2MTM1LCJleHAiOjE3NjQxMjc3ODcsImlhdCI6MTc2NDEyNDE4NywianRpIjoiOGU1OWE0M2EtYTlhNy00OWE1LTliNTMtNGFiODFiZTE2YjRkIiwidXNlcm5hbWUiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYifQ.Tu7Q0VYPwL21FMwljFeE16CLH35hY-5UYVTgD_whUE7K9k-yp92Uyp7Hi73N_Vmm6qYM28AjWaZfdsVK-RG-G5ojbHHr3n0KlGHc4EEkLqRcrX8Ud1B6YZeBzdcouK7e9NR0pEv50IyGAllPSzTo5IOxHf67cvEqQmtqtS9epICxmAnEl1Y14KNppsPcqO4-7eqiAUbCLLUA9aXLVjXT1igfjydoGmP3eUmU0puOO-OhltiYHQrQtuX9PvOm1o3h9D8-NdCscwxJxXt3qGRPVoMGYtTyhsSoQIlch_q0Zmq23hwl3W7_twqWyESAAah4BvtoDrdH-IsMGINn539mvQ\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Chromium\\\";v=\\\"142\\\", \\\"Brave\\\";v=\\\"142\\\", \\\"Not_A Brand\\\";v=\\\"99\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124851918,
+    "message": "2025-11-26T02:40:51.918Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[HANDLER] Op: fetchTournamentData. Job: N/A, Entity: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124851918,
+    "message": "2025-11-26T02:40:51.918Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[HANDLER] ScraperAPI Key: { hasCustomKey: true, keyLength: 32, keyPreview: '62c905a3...' }\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124851932,
+    "message": "2025-11-26T02:40:51.932Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[enhancedHandleFetch] Starting fetch for https://kingsroom.com.au/tournament/?id=3\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124851933,
+    "message": "2025-11-26T02:40:51.933Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[enhancedHandleFetch] Force refresh: false\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124851933,
+    "message": "2025-11-26T02:40:51.933Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[enhancedHandleFetch] Entity ID: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124851933,
+    "message": "2025-11-26T02:40:51.933Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[enhancedHandleFetch] Has S3 key: true\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124851933,
+    "message": "2025-11-26T02:40:51.933Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[enhancedHandleFetch] Has custom API key: true\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124851933,
+    "message": "2025-11-26T02:40:51.933Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[handleFetch] Starting fetch process {\n  url: 'https://kingsroom.com.au/tournament/?id=3',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 3,\n  forceRefresh: false,\n  hasS3Key: true,\n  cacheEnabled: true\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852029,
+    "message": "2025-11-26T02:40:52.029Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[S3] Successfully retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/3/2025-11-15T11-41-26-599Z_tid3_dac90658.html\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852029,
+    "message": "2025-11-26T02:40:52.029Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[handleFetch] ✅ S3 cache hit - using cached content {\n  url: 'https://kingsroom.com.au/tournament/?id=3',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 3,\n  forceRefresh: false,\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/3/2025-11-15T11-41-26-599Z_tid3_dac90658.html',\n  contentLength: 75534,\n  metadata: {\n    url: 'https://kingsroom.com.au/tournament/?id=3',\n    ismanual: 'false',\n    contenthash: 'dac906587444dce2bc235e5b32a68cce753dfe5ebffeaebd20c9985e18d2009e',\n    etag: 'W/\"12711-j4wrJPsw/KL+AnHHz0m4+ub7rDw\"',\n    scrapedat: '2025-11-15T11:41:26.599Z',\n    entityid: '42101695-1332-48e3-963b-3c6ad4e909a0',\n    tournamentid: '3'\n  }\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852036,
+    "message": "2025-11-26T02:40:52.036Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[enhancedHandleFetch] Success - Source: S3_CACHE, Cached: true\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852067,
+    "message": "2025-11-26T02:40:52.067Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[runScraper] Starting run for tournament 3, forceRefresh: false\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852067,
+    "message": "2025-11-26T02:40:52.067Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[runScraper] Database data: 37 venues, 6 series titles\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852068,
+    "message": "2025-11-26T02:40:52.068Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[Scraper] Warning badge detected: \"tournament not published!\"\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852068,
+    "message": "2025-11-26T02:40:52.068Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[Scraper] State detected: Tournament Not Published\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852068,
+    "message": "2025-11-26T02:40:52.068Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[Scraper] Aborting scrape due to NOT_PUBLISHED status\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852068,
+    "message": "2025-11-26T02:40:52.068Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[runScraper] Aborting scrape due to page state: NOT_PUBLISHED\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852097,
+    "message": "2025-11-26T02:40:52.097Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[DEBUG-SCRAPER] Scraped status: NOT_PUBLISHED, doNotScrape: true, tournamentId: 3, forceRefresh: false\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852097,
+    "message": "2025-11-26T02:40:52.097Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[HANDLER] Marking tournament as doNotScrape due to status: NOT_PUBLISHED\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852105,
+    "message": "2025-11-26T02:40:52.105Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[UpdateScrapeURL] Set doNotScrape=true for https://kingsroom.com.au/tournament/?id=3\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852105,
+    "message": "2025-11-26T02:40:52.105Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[updateS3StorageWithParsedData] Looking for S3Storage record: {\n  tournamentId: 3,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  s3Key: 'html/3/2025-11-15T11-41-26-599Z_tid3_dac90658.html'\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852105,
+    "message": "2025-11-26T02:40:52.105Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[updateS3StorageWithParsedData] Strategy 1: Querying by tournamentId 3 + entityId 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852109,
+    "message": "2025-11-26T02:40:52.109Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[updateS3StorageWithParsedData] Found record: {\n  id: '9f06d24e-80fd-47b7-9240-7669f6115c3b',\n  currentS3Key: 'html/3/2025-11-15T11-41-26-599Z_tid3_dac90658.html',\n  tournamentId: 3\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852109,
+    "message": "2025-11-26T02:40:52.109Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[updateS3StorageWithParsedData] Data comparison: {\n  existingHash: 'none',\n  newHash: '94d1974aa593e90a',\n  dataChanged: true,\n  isRescrape: false,\n  recordId: '9f06d24e-80fd-47b7-9240-7669f6115c3b'\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852118,
+    "message": "2025-11-26T02:40:52.118Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[updateS3StorageWithParsedData] ✅ Updated S3Storage record: {\n  id: '9f06d24e-80fd-47b7-9240-7669f6115c3b',\n  dataChanged: true,\n  fieldsExtracted: 8,\n  gameStatus: 'NOT_PUBLISHED',\n  registrationStatus: 'N_A',\n  isRescrape: false\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852118,
+    "message": "2025-11-26T02:40:52.118Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[HANDLER] Flushing monitoring metrics...\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852136,
+    "message": "2025-11-26T02:40:52.136Z\t4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tINFO\t[HANDLER] Monitoring flush complete.\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852139,
+    "message": "END RequestId: 4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124852139,
+    "message": "REPORT RequestId: 4f1493d6-5fbb-4ce4-8ec7-c519d3093c3d\tDuration: 234.64 ms\tBilled Duration: 235 ms\tMemory Size: 1024 MB\tMax Memory Used: 151 MB\t\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855667,
+    "message": "START RequestId: 44ecb957-38ce-4d07-b686-0faee31d8c86 Version: $LATEST\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855668,
+    "message": "2025-11-26T02:40:55.668Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[HANDLER] Incoming event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"fetchTournamentData\",\n  \"arguments\": {\n    \"url\": \"https://kingsroom.com.au/tournament/?id=4\",\n    \"s3Key\": null,\n    \"forceRefresh\": false,\n    \"scraperApiKey\": \"62c905a307da2591dc89f94d193caacf\"\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"dcbe6569-c63a-45dd-957a-0d6aa9728f08\",\n      \"event_id\": \"b8a9cf13-bdbf-464e-8e3c-e5e5d59243f1\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1763666135,\n      \"exp\": 1764127787,\n      \"iat\": 1764124187,\n      \"jti\": \"8e59a43a-a9a7-49a5-9b53-4ab81be16b4d\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"86.48.8.96\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"86.48.8.96,15.158.53.47\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"fa178784-e389-44f2-ae48-a36a341d5ba5\",\n      \"via\": \"2.0 0ea9275b520295dc60df246b1de3192a.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"2282\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.8\",\n      \"host\": \"moi5t5e25vbajg2funkwklyhqq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"137409\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"86.48.8.96\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-692668b7-175c42f210d08dcc787cccfd\",\n      \"x-amz-cf-id\": \"RL9j-Oet28dc08GB3fLO89ixZxB6puxH9haDF9LWCE3xoiLyTon16A==\",\n      \"authorization\": \"eyJraWQiOiI0ZjE0SDRUWituNW01dUN4UzV6Tkh0VlBVN0x6TU9PS3VnZ1ppandhWlwvVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfajJrQWQ0a3BPIiwiY2xpZW50X2lkIjoiNHN0aDIxZGdyaDNyampuc2w2M2thMzJrNHEiLCJvcmlnaW5fanRpIjoiZGNiZTY1NjktYzYzYS00NWRkLTk1N2EtMGQ2YWE5NzI4ZjA4IiwiZXZlbnRfaWQiOiJiOGE5Y2YxMy1iZGJmLTQ2NGUtOGUzYy1lNWU1ZDU5MjQzZjEiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzYzNjY2MTM1LCJleHAiOjE3NjQxMjc3ODcsImlhdCI6MTc2NDEyNDE4NywianRpIjoiOGU1OWE0M2EtYTlhNy00OWE1LTliNTMtNGFiODFiZTE2YjRkIiwidXNlcm5hbWUiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYifQ.Tu7Q0VYPwL21FMwljFeE16CLH35hY-5UYVTgD_whUE7K9k-yp92Uyp7Hi73N_Vmm6qYM28AjWaZfdsVK-RG-G5ojbHHr3n0KlGHc4EEkLqRcrX8Ud1B6YZeBzdcouK7e9NR0pEv50IyGAllPSzTo5IOxHf67cvEqQmtqtS9epICxmAnEl1Y14KNppsPcqO4-7eqiAUbCLLUA9aXLVjXT1igfjydoGmP3eUmU0puOO-OhltiYHQrQtuX9PvOm1o3h9D8-NdCscwxJxXt3qGRPVoMGYtTyhsSoQIlch_q0Zmq23hwl3W7_twqWyESAAah4BvtoDrdH-IsMGINn539mvQ\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Chromium\\\";v=\\\"142\\\", \\\"Brave\\\";v=\\\"142\\\", \\\"Not_A Brand\\\";v=\\\"99\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855679,
+    "message": "2025-11-26T02:40:55.679Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[HANDLER] Op: fetchTournamentData. Job: N/A, Entity: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855679,
+    "message": "2025-11-26T02:40:55.679Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[HANDLER] ScraperAPI Key: { hasCustomKey: true, keyLength: 32, keyPreview: '62c905a3...' }\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855694,
+    "message": "2025-11-26T02:40:55.694Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[enhancedHandleFetch] Starting fetch for https://kingsroom.com.au/tournament/?id=4\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855694,
+    "message": "2025-11-26T02:40:55.694Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[enhancedHandleFetch] Force refresh: false\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855694,
+    "message": "2025-11-26T02:40:55.694Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[enhancedHandleFetch] Entity ID: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855694,
+    "message": "2025-11-26T02:40:55.694Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[enhancedHandleFetch] Has S3 key: true\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855694,
+    "message": "2025-11-26T02:40:55.694Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[enhancedHandleFetch] Has custom API key: true\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855694,
+    "message": "2025-11-26T02:40:55.694Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[handleFetch] Starting fetch process {\n  url: 'https://kingsroom.com.au/tournament/?id=4',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 4,\n  forceRefresh: false,\n  hasS3Key: true,\n  cacheEnabled: true\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855759,
+    "message": "2025-11-26T02:40:55.759Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[S3] Successfully retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/4/2025-11-18T08-49-48-110Z_tid4_9d43df39.html\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855759,
+    "message": "2025-11-26T02:40:55.759Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[handleFetch] ✅ S3 cache hit - using cached content {\n  url: 'https://kingsroom.com.au/tournament/?id=4',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 4,\n  forceRefresh: false,\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/4/2025-11-18T08-49-48-110Z_tid4_9d43df39.html',\n  contentLength: 87743,\n  metadata: {\n    url: 'https://kingsroom.com.au/tournament/?id=4',\n    ismanual: 'false',\n    contenthash: '9d43df393dcdcfd34f7c7bd735db2596c48ed588b31c8775241fea6bae9fe11d',\n    etag: 'W/\"156c2-T6sPA2M/AJl1ZA4gx3cih/ZCHMY\"',\n    scrapedat: '2025-11-18T08:49:48.110Z',\n    entityid: '42101695-1332-48e3-963b-3c6ad4e909a0',\n    tournamentid: '4'\n  }\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855766,
+    "message": "2025-11-26T02:40:55.766Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[enhancedHandleFetch] Success - Source: S3_CACHE, Cached: true\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855798,
+    "message": "2025-11-26T02:40:55.798Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[runScraper] Starting run for tournament 4, forceRefresh: false\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855798,
+    "message": "2025-11-26T02:40:55.798Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[runScraper] Database data: 37 venues, 6 series titles\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855811,
+    "message": "2025-11-26T02:40:55.811Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[Series Match] Database exact match: \"Signature Series\"\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855888,
+    "message": "2025-11-26T02:40:55.888Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[Venue Match] Database exact match: \"St. George Leagues Club\"\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855888,
+    "message": "2025-11-26T02:40:55.888Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[runScraper] Completed. Found keys: 33, Status: FINISHED, DoNotScrape: false\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855908,
+    "message": "2025-11-26T02:40:55.908Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\tSaving new structure fingerprint: bad2184677036989\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855916,
+    "message": "2025-11-26T02:40:55.916Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[DEBUG-SCRAPER] Scraped status: FINISHED, doNotScrape: false, tournamentId: 4, forceRefresh: false\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855917,
+    "message": "2025-11-26T02:40:55.917Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[updateS3StorageWithParsedData] Looking for S3Storage record: {\n  tournamentId: 4,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  s3Key: 'html/4/2025-11-18T08-49-48-110Z_tid4_9d43df39.html'\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855917,
+    "message": "2025-11-26T02:40:55.917Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[updateS3StorageWithParsedData] Strategy 1: Querying by tournamentId 4 + entityId 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855921,
+    "message": "2025-11-26T02:40:55.921Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[updateS3StorageWithParsedData] Found record: {\n  id: '0c9bbf3c-9158-436c-956d-c9feb4b67100',\n  currentS3Key: 'html/4/2025-11-18T08-49-48-110Z_tid4_9d43df39.html',\n  tournamentId: 4\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855921,
+    "message": "2025-11-26T02:40:55.921Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[updateS3StorageWithParsedData] Data comparison: {\n  existingHash: 'none',\n  newHash: 'fd9ad121224547cc',\n  dataChanged: true,\n  isRescrape: false,\n  recordId: '0c9bbf3c-9158-436c-956d-c9feb4b67100'\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855928,
+    "message": "2025-11-26T02:40:55.928Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[updateS3StorageWithParsedData] ✅ Updated S3Storage record: {\n  id: '0c9bbf3c-9158-436c-956d-c9feb4b67100',\n  dataChanged: true,\n  fieldsExtracted: 34,\n  gameStatus: 'FINISHED',\n  registrationStatus: 'CLOSED',\n  isRescrape: false\n}\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855929,
+    "message": "2025-11-26T02:40:55.929Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[HANDLER] Flushing monitoring metrics...\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855965,
+    "message": "2025-11-26T02:40:55.965Z\t44ecb957-38ce-4d07-b686-0faee31d8c86\tINFO\t[HANDLER] Monitoring flush complete.\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855968,
+    "message": "END RequestId: 44ecb957-38ce-4d07-b686-0faee31d8c86\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124855968,
+    "message": "REPORT RequestId: 44ecb957-38ce-4d07-b686-0faee31d8c86\tDuration: 300.45 ms\tBilled Duration: 301 ms\tMemory Size: 1024 MB\tMax Memory Used: 160 MB\t\n",
+    "ingestionTime": 1764124856293
+  },
+  {
+    "timestamp": 1764124869302,
+    "message": "START RequestId: e925ca41-919c-4080-bdb2-35eac9e8a13a Version: $LATEST\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869327,
+    "message": "2025-11-26T02:41:09.327Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[HANDLER] Incoming event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"fetchTournamentData\",\n  \"arguments\": {\n    \"url\": \"https://kingsroom.com.au/tournament/?id=5\",\n    \"s3Key\": null,\n    \"forceRefresh\": false,\n    \"scraperApiKey\": \"62c905a307da2591dc89f94d193caacf\"\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"dcbe6569-c63a-45dd-957a-0d6aa9728f08\",\n      \"event_id\": \"b8a9cf13-bdbf-464e-8e3c-e5e5d59243f1\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1763666135,\n      \"exp\": 1764127787,\n      \"iat\": 1764124187,\n      \"jti\": \"8e59a43a-a9a7-49a5-9b53-4ab81be16b4d\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"86.48.8.96\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"86.48.8.96,15.158.53.43\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"4271e6ec-e2bd-4873-9fd8-d12bf7261e1b\",\n      \"via\": \"2.0 2c789043412562398f09d18eaf511294.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"2282\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.8\",\n      \"host\": \"moi5t5e25vbajg2funkwklyhqq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"137409\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"86.48.8.96\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-692668c5-038f55fa16955c4168b1c174\",\n      \"x-amz-cf-id\": \"CPjR_8vf9ulVcfPFaKD_PWV9GHjsiIcMV3Y4vHBhETFylrpgb2vyUw==\",\n      \"authorization\": \"eyJraWQiOiI0ZjE0SDRUWituNW01dUN4UzV6Tkh0VlBVN0x6TU9PS3VnZ1ppandhWlwvVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfajJrQWQ0a3BPIiwiY2xpZW50X2lkIjoiNHN0aDIxZGdyaDNyampuc2w2M2thMzJrNHEiLCJvcmlnaW5fanRpIjoiZGNiZTY1NjktYzYzYS00NWRkLTk1N2EtMGQ2YWE5NzI4ZjA4IiwiZXZlbnRfaWQiOiJiOGE5Y2YxMy1iZGJmLTQ2NGUtOGUzYy1lNWU1ZDU5MjQzZjEiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzYzNjY2MTM1LCJleHAiOjE3NjQxMjc3ODcsImlhdCI6MTc2NDEyNDE4NywianRpIjoiOGU1OWE0M2EtYTlhNy00OWE1LTliNTMtNGFiODFiZTE2YjRkIiwidXNlcm5hbWUiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYifQ.Tu7Q0VYPwL21FMwljFeE16CLH35hY-5UYVTgD_whUE7K9k-yp92Uyp7Hi73N_Vmm6qYM28AjWaZfdsVK-RG-G5ojbHHr3n0KlGHc4EEkLqRcrX8Ud1B6YZeBzdcouK7e9NR0pEv50IyGAllPSzTo5IOxHf67cvEqQmtqtS9epICxmAnEl1Y14KNppsPcqO4-7eqiAUbCLLUA9aXLVjXT1igfjydoGmP3eUmU0puOO-OhltiYHQrQtuX9PvOm1o3h9D8-NdCscwxJxXt3qGRPVoMGYtTyhsSoQIlch_q0Zmq23hwl3W7_twqWyESAAah4BvtoDrdH-IsMGINn539mvQ\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Chromium\\\";v=\\\"142\\\", \\\"Brave\\\";v=\\\"142\\\", \\\"Not_A Brand\\\";v=\\\"99\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869391,
+    "message": "2025-11-26T02:41:09.391Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[HANDLER] Op: fetchTournamentData. Job: N/A, Entity: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869391,
+    "message": "2025-11-26T02:41:09.391Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[HANDLER] ScraperAPI Key: { hasCustomKey: true, keyLength: 32, keyPreview: '62c905a3...' }\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869409,
+    "message": "2025-11-26T02:41:09.409Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[enhancedHandleFetch] Starting fetch for https://kingsroom.com.au/tournament/?id=5\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869409,
+    "message": "2025-11-26T02:41:09.409Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[enhancedHandleFetch] Force refresh: false\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869409,
+    "message": "2025-11-26T02:41:09.409Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[enhancedHandleFetch] Entity ID: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869409,
+    "message": "2025-11-26T02:41:09.409Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[enhancedHandleFetch] Has S3 key: true\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869409,
+    "message": "2025-11-26T02:41:09.409Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[enhancedHandleFetch] Has custom API key: true\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869409,
+    "message": "2025-11-26T02:41:09.409Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[handleFetch] Starting fetch process {\n  url: 'https://kingsroom.com.au/tournament/?id=5',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 5,\n  forceRefresh: false,\n  hasS3Key: true,\n  cacheEnabled: true\n}\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869536,
+    "message": "2025-11-26T02:41:09.536Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[S3] Successfully retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/5/2025-11-19T00-28-43-510Z_tid5_6e4956db.html\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869536,
+    "message": "2025-11-26T02:41:09.536Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[handleFetch] ✅ S3 cache hit - using cached content {\n  url: 'https://kingsroom.com.au/tournament/?id=5',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 5,\n  forceRefresh: false,\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/5/2025-11-19T00-28-43-510Z_tid5_6e4956db.html',\n  contentLength: 96295,\n  metadata: {\n    url: 'https://kingsroom.com.au/tournament/?id=5',\n    ismanual: 'false',\n    contenthash: '6e4956db7a3f103770457bd3669c6d885eef173e06a82dd5d4f7c6e6893ecc1a',\n    etag: 'W/\"1782a-Wna1jnmsNj+K6FvqPUbrf7K9hHY\"',\n    scrapedat: '2025-11-19T00:28:43.510Z',\n    entityid: '42101695-1332-48e3-963b-3c6ad4e909a0',\n    tournamentid: '5'\n  }\n}\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869548,
+    "message": "2025-11-26T02:41:09.548Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[enhancedHandleFetch] Success - Source: S3_CACHE, Cached: true\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869809,
+    "message": "2025-11-26T02:41:09.809Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[runScraper] Starting run for tournament 5, forceRefresh: false\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869809,
+    "message": "2025-11-26T02:41:09.809Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[runScraper] Database data: 37 venues, 6 series titles\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869830,
+    "message": "2025-11-26T02:41:09.830Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[Series Match] Database exact match: \"Signature Series\"\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869872,
+    "message": "2025-11-26T02:41:09.872Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[Venue Match] Database exact match: \"St. George Leagues Club\"\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869872,
+    "message": "2025-11-26T02:41:09.872Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[runScraper] Completed. Found keys: 33, Status: FINISHED, DoNotScrape: false\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869898,
+    "message": "2025-11-26T02:41:09.898Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[DEBUG-SCRAPER] Scraped status: FINISHED, doNotScrape: false, tournamentId: 5, forceRefresh: false\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869898,
+    "message": "2025-11-26T02:41:09.898Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[updateS3StorageWithParsedData] Looking for S3Storage record: {\n  tournamentId: 5,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  s3Key: 'html/5/2025-11-19T00-28-43-510Z_tid5_6e4956db.html'\n}\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869898,
+    "message": "2025-11-26T02:41:09.898Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[updateS3StorageWithParsedData] Strategy 1: Querying by tournamentId 5 + entityId 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869905,
+    "message": "2025-11-26T02:41:09.905Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[updateS3StorageWithParsedData] Found record: {\n  id: '340f3bcd-fdb2-4b2f-a385-7c56f4cf0ef2',\n  currentS3Key: 'html/5/2025-11-19T00-28-43-510Z_tid5_6e4956db.html',\n  tournamentId: 5\n}\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869906,
+    "message": "2025-11-26T02:41:09.906Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[updateS3StorageWithParsedData] Data comparison: {\n  existingHash: 'none',\n  newHash: '0869bd270b485965',\n  dataChanged: true,\n  isRescrape: false,\n  recordId: '340f3bcd-fdb2-4b2f-a385-7c56f4cf0ef2'\n}\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869916,
+    "message": "2025-11-26T02:41:09.916Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[updateS3StorageWithParsedData] ✅ Updated S3Storage record: {\n  id: '340f3bcd-fdb2-4b2f-a385-7c56f4cf0ef2',\n  dataChanged: true,\n  fieldsExtracted: 34,\n  gameStatus: 'FINISHED',\n  registrationStatus: 'CLOSED',\n  isRescrape: false\n}\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869916,
+    "message": "2025-11-26T02:41:09.916Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[HANDLER] Flushing monitoring metrics...\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869945,
+    "message": "2025-11-26T02:41:09.945Z\te925ca41-919c-4080-bdb2-35eac9e8a13a\tINFO\t[HANDLER] Monitoring flush complete.\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869948,
+    "message": "END RequestId: e925ca41-919c-4080-bdb2-35eac9e8a13a\n",
+    "ingestionTime": 1764124878325
+  },
+  {
+    "timestamp": 1764124869948,
+    "message": "REPORT RequestId: e925ca41-919c-4080-bdb2-35eac9e8a13a\tDuration: 645.07 ms\tBilled Duration: 646 ms\tMemory Size: 1024 MB\tMax Memory Used: 160 MB\t\n",
+    "ingestionTime": 1764124878325
+  }
+]

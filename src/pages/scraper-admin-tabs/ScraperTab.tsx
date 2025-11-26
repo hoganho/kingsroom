@@ -227,7 +227,7 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
   const [isSavingDefaultVenue, setIsSavingDefaultVenue] = useState(false);
 
   // --- Section Collapse State ---
-  const [entitySectionOpen, setEntitySectionOpen] = useState(true);
+  const [_entitySectionOpen, setEntitySectionOpen] = useState(true);
   const [configSectionOpen, setConfigSectionOpen] = useState(true);
 
   // --- State for UI ---
@@ -260,12 +260,13 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
   const [selectedGameDetails, setSelectedGameDetails] = useState<ScrapedGameData | null>(null);
   const [venueModalOpen, setVenueModalOpen] = useState(false);
   
-  // Scrape Options Modal (for doNotScrape handling)
+  // ✅ UPDATED: Scrape Options Modal (for doNotScrape AND NOT_PUBLISHED handling)
   const [scrapeOptionsModal, setScrapeOptionsModal] = useState<{
     isOpen: boolean;
     tournamentId: number;
     url: string;
     gameStatus?: string;
+    isDoNotScrape?: boolean;  // ✅ NEW: Track if it's actually a doNotScrape game
   } | null>(null);
 
   // Gap Tracker
@@ -509,14 +510,21 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
         ((parsedData as any).skipped && (parsedData as any).skipReason === 'DO_NOT_SCRAPE') ||
         (parsedData.doNotScrape && parsedData.name?.includes('Skipped')) ||
         (parsedData.name === 'Skipped - Do Not Scrape');
-      
-      if (isSkippedDoNotScrape && !options.ignoreDoNotScrape) {
+
+      // ✅ NEW: Also check for NOT_PUBLISHED games - they should always show the options modal
+      const isNotPublished = parsedData.gameStatus === 'NOT_PUBLISHED';
+
+      // ✅ UPDATED: Show modal for doNotScrape (unless ignored) OR for NOT_PUBLISHED games
+      if ((isSkippedDoNotScrape && !options.ignoreDoNotScrape) || isNotPublished) {
         setIsPaused(true);
         setProcessingResults(prev => prev.map(r =>
           r.id === tournamentId ? {
             ...r,
             status: 'review',
-            message: 'Tournament marked as Do Not Scrape - awaiting decision...',
+            // ✅ NEW: Dynamic message based on game state
+            message: isNotPublished 
+              ? 'Tournament not published - choose save option...'
+              : 'Tournament marked as Do Not Scrape - awaiting decision...',
             parsedData // Pass current data
           } : r
         ));
@@ -527,7 +535,8 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
             isOpen: true,
             tournamentId,
             url,
-            gameStatus: parsedData.gameStatus || undefined
+            gameStatus: parsedData.gameStatus || undefined,
+            isDoNotScrape: isSkippedDoNotScrape  // ✅ NEW: Track actual doNotScrape status
           });
           (window as any).__scrapeOptionsResolver = resolve;
         });
@@ -1095,50 +1104,12 @@ const handleManualSave = async (result: ProcessingResult) => {
 
   return (
     <div className="space-y-4">
-      {/* Progress Summary */}
-      {(isProcessing || processingResults.length > 0) && (
-        <ProgressSummary
-          results={processingResults}
-          isProcessing={isProcessing}
-          isPaused={isPaused}
-          mode={idSelectionMode}
-          flow={scrapeFlow}
-          onStop={handleStopProcessing}
-        />
-      )}
-
-      {/* Scraping For - Collapsible */}
-      <CollapsibleSection
-        title={
-          <div className="flex items-center gap-2">
-            <span>Scraping For</span>
-            <span className="text-sm font-normal text-gray-500">— {currentEntity.entityName}</span>
-          </div>
-        }
-        isOpen={entitySectionOpen}
-        onToggle={() => setEntitySectionOpen(!entitySectionOpen)}
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-lg font-semibold text-gray-900">{currentEntity.entityName}</p>
-            <p className="text-xs text-gray-600 mt-1">{currentEntity.gameUrlDomain}</p>
-          </div>
-          {currentEntity.entityLogo && (
-            <img 
-              src={currentEntity.entityLogo} 
-              alt={currentEntity.entityName}
-              className="h-12 w-12 object-contain rounded"
-            />
-          )}
-        </div>
-      </CollapsibleSection>
-
       {/* Scraper Configuration - Collapsible */}
       <CollapsibleSection
         title={
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
-            <span>Scraper Configuration</span>
+            <span>Scraper Configuration: {currentEntity.entityName} ({currentEntity.gameUrlDomain})</span>
           </div>
         }
         isOpen={configSectionOpen}
@@ -1313,6 +1284,18 @@ const handleManualSave = async (result: ProcessingResult) => {
         </div>
       </CollapsibleSection>
 
+      {/* Progress Summary */}
+      {(isProcessing || processingResults.length > 0) && (
+        <ProgressSummary
+          results={processingResults}
+          isProcessing={isProcessing}
+          isPaused={isPaused}
+          mode={idSelectionMode}
+          flow={scrapeFlow}
+          onStop={handleStopProcessing}
+        />
+      )}
+      
       {/* Processing Results - Using GameListItem */}
       {processingResults.length > 0 && (
         <div className="bg-white rounded-lg shadow">
@@ -1340,9 +1323,9 @@ const handleManualSave = async (result: ProcessingResult) => {
                 tournamentId={result.id}
                 sourceUrl={result.url}
                 dataSource={(() => {
-                  // ✅ UPDATED LOGIC: Suppress confusing "web" fallback during loading
+                  // ✅ UPDATED LOGIC: Show 'pending' for items awaiting retrieval
                   if (result.status === 'pending' || result.status === 'scraping') {
-                    return 'web'; // Default visual (or 'none') - no log needed
+                    return 'pending'; // ✅ Show "Pending" badge instead of confusing "Web Scrape"
                   }
 
                   const source = (result.parsedData as any)?.source;
@@ -1360,8 +1343,8 @@ const handleManualSave = async (result: ProcessingResult) => {
                   if (source === 'S3_CACHE' || source === 'HTTP_304_CACHE' || s3Key) return 's3';
                   if (source === 'LIVE') return 'web';
                   
-                  return 'web'; // Fallback
-                })() as 's3' | 'web' | 'none'}
+                  return 'pending'; // ✅ Default to pending instead of web
+                })() as 's3' | 'web' | 'none' | 'pending'}
               />
             ))}
           </div>
@@ -1404,7 +1387,7 @@ const handleManualSave = async (result: ProcessingResult) => {
         />
       )}
 
-      {/* Scrape Options Modal for doNotScrape handling */}
+      {/* ✅ UPDATED: Scrape Options Modal for doNotScrape AND NOT_PUBLISHED handling */}
       {scrapeOptionsModal && (
         <ScrapeOptionsModal
           isOpen={scrapeOptionsModal.isOpen}
@@ -1422,9 +1405,13 @@ const handleManualSave = async (result: ProcessingResult) => {
           }}
           url={scrapeOptionsModal.url}
           entityId={currentEntity?.id || ''}
-          doNotScrape={true}
+          doNotScrape={scrapeOptionsModal.isDoNotScrape || false}  // ✅ Use actual value instead of hardcoded true
           gameStatus={scrapeOptionsModal.gameStatus}
-          warningMessage="This tournament is marked as 'Do Not Scrape'. You can use cached S3 data or force a live scrape."
+          warningMessage={
+            scrapeOptionsModal.gameStatus === 'NOT_PUBLISHED'
+              ? "This tournament is not published yet. You can save it as a placeholder to track this ID."
+              : "This tournament is marked as 'Do Not Scrape'. You can use cached S3 data or force a live scrape."
+          }
         />
       )}
     </div>

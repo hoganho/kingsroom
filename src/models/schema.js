@@ -161,6 +161,22 @@ export const schema = {
                             "entity"
                         ]
                     }
+                },
+                "socialAccounts": {
+                    "name": "socialAccounts",
+                    "isArray": true,
+                    "type": {
+                        "model": "SocialAccount"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "entity"
+                        ]
+                    }
                 }
             },
             "syncable": true,
@@ -361,6 +377,22 @@ export const schema = {
                         "connectionType": "HAS_MANY",
                         "associatedWith": [
                             "registrationVenue"
+                        ]
+                    }
+                },
+                "socialAccounts": {
+                    "name": "socialAccounts",
+                    "isArray": true,
+                    "type": {
+                        "model": "SocialAccount"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "venue"
                         ]
                     }
                 },
@@ -1566,6 +1598,22 @@ export const schema = {
                         "connectionType": "HAS_MANY",
                         "associatedWith": [
                             "game"
+                        ]
+                    }
+                },
+                "linkedSocialPosts": {
+                    "name": "linkedSocialPosts",
+                    "isArray": true,
+                    "type": {
+                        "model": "SocialPost"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "linkedGame"
                         ]
                     }
                 },
@@ -7182,6 +7230,15 @@ export const schema = {
                 "platform": {
                     "name": "platform",
                     "isArray": false,
+                    "type": {
+                        "enum": "SocialPlatform"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "platformAccountId": {
+                    "name": "platformAccountId",
+                    "isArray": false,
                     "type": "String",
                     "isRequired": true,
                     "attributes": []
@@ -7193,35 +7250,238 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "apiKey": {
-                    "name": "apiKey",
+                "accountHandle": {
+                    "name": "accountHandle",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
-                "apiSecret": {
-                    "name": "apiSecret",
+                "accountUrl": {
+                    "name": "accountUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "profileImageUrl": {
+                    "name": "profileImageUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "coverImageUrl": {
+                    "name": "coverImageUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "bio": {
+                    "name": "bio",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
                     "attributes": []
+                },
+                "followerCount": {
+                    "name": "followerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "followingCount": {
+                    "name": "followingCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "postCount": {
+                    "name": "postCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SocialAccountStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "isScrapingEnabled": {
+                    "name": "isScrapingEnabled",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "scrapeFrequencyMinutes": {
+                    "name": "scrapeFrequencyMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastScrapedAt": {
+                    "name": "lastScrapedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastSuccessfulScrapeAt": {
+                    "name": "lastSuccessfulScrapeAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "nextScheduledScrapeAt": {
+                    "name": "nextScheduledScrapeAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveFailures": {
+                    "name": "consecutiveFailures",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastErrorMessage": {
+                    "name": "lastErrorMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasPostAccess": {
+                    "name": "hasPostAccess",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "accessTokenExpiry": {
+                    "name": "accessTokenExpiry",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "permissionsGranted": {
+                    "name": "permissionsGranted",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venue": {
+                    "name": "venue",
+                    "isArray": false,
+                    "type": {
+                        "model": "Venue"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "venueId"
+                        ]
+                    }
+                },
+                "posts": {
+                    "name": "posts",
+                    "isArray": true,
+                    "type": {
+                        "model": "SocialPost"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "socialAccount"
+                        ]
+                    }
+                },
+                "scrapeAttempts": {
+                    "name": "scrapeAttempts",
+                    "isArray": true,
+                    "type": {
+                        "model": "SocialScrapeAttempt"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "socialAccount"
+                        ]
+                    }
                 },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
+                    "isRequired": true,
+                    "attributes": []
                 },
                 "updatedAt": {
                     "name": "updatedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdBy": {
+                    "name": "createdBy",
+                    "isArray": false,
+                    "type": "String",
                     "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
+                    "attributes": []
                 }
             },
             "syncable": true,
@@ -7231,6 +7491,43 @@ export const schema = {
                     "type": "model",
                     "properties": {
                         "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byPlatformAccountId",
+                        "queryField": "socialAccountByPlatformId",
+                        "fields": [
+                            "platformAccountId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byAccountName",
+                        "fields": [
+                            "accountName"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySocialAccountEntity",
+                        "fields": [
+                            "entityId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySocialAccountVenue",
+                        "fields": [
+                            "venueId"
+                        ]
                     }
                 },
                 {
@@ -7261,17 +7558,104 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "content": {
-                    "name": "content",
+                "platformPostId": {
+                    "name": "platformPostId",
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
                     "attributes": []
                 },
-                "imageUrl": {
-                    "name": "imageUrl",
+                "postUrl": {
+                    "name": "postUrl",
                     "isArray": false,
                     "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "postType": {
+                    "name": "postType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SocialPostType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "content": {
+                    "name": "content",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentPreview": {
+                    "name": "contentPreview",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rawContent": {
+                    "name": "rawContent",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "mediaUrls": {
+                    "name": "mediaUrls",
+                    "isArray": true,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "thumbnailUrl": {
+                    "name": "thumbnailUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "mediaType": {
+                    "name": "mediaType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "likeCount": {
+                    "name": "likeCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "commentCount": {
+                    "name": "commentCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "shareCount": {
+                    "name": "shareCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reactionCount": {
+                    "name": "reactionCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "viewCount": {
+                    "name": "viewCount",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -7282,6 +7666,94 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "scrapedAt": {
+                    "name": "scrapedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastUpdatedAt": {
+                    "name": "lastUpdatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SocialPostStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "isPromotional": {
+                    "name": "isPromotional",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isPinned": {
+                    "name": "isPinned",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isTournamentRelated": {
+                    "name": "isTournamentRelated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tags": {
+                    "name": "tags",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "sentiment": {
+                    "name": "sentiment",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentCategory": {
+                    "name": "contentCategory",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "linkedGameId": {
+                    "name": "linkedGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "linkedGame": {
+                    "name": "linkedGame",
+                    "isArray": false,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "linkedGameId"
+                        ]
+                    }
+                },
                 "socialAccountId": {
                     "name": "socialAccountId",
                     "isArray": false,
@@ -7289,21 +7761,48 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "socialAccount": {
+                    "name": "socialAccount",
+                    "isArray": false,
+                    "type": {
+                        "model": "SocialAccount"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "socialAccountId"
+                        ]
+                    }
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
+                    "isRequired": true,
+                    "attributes": []
                 },
                 "updatedAt": {
                     "name": "updatedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
+                    "isRequired": true,
+                    "attributes": []
                 }
             },
             "syncable": true,
@@ -7318,10 +7817,406 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "byPlatformPostId",
+                        "queryField": "socialPostByPlatformId",
+                        "fields": [
+                            "platformPostId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byPostedAt",
+                        "fields": [
+                            "postedAt",
+                            "likeCount"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byPostStatus",
+                        "fields": [
+                            "status",
+                            "postedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySocialPostGame",
+                        "fields": [
+                            "linkedGameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "bySocialAccount",
                         "fields": [
                             "socialAccountId",
                             "postedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySocialPostEntity",
+                        "fields": [
+                            "entityId",
+                            "postedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySocialPostVenue",
+                        "fields": [
+                            "venueId",
+                            "postedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "SocialScrapeAttempt": {
+            "name": "SocialScrapeAttempt",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SocialScrapeStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "startedAt": {
+                    "name": "startedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "completedAt": {
+                    "name": "completedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "durationMs": {
+                    "name": "durationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "postsFound": {
+                    "name": "postsFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newPostsAdded": {
+                    "name": "newPostsAdded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "postsUpdated": {
+                    "name": "postsUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "errorMessage": {
+                    "name": "errorMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "errorCode": {
+                    "name": "errorCode",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "triggerSource": {
+                    "name": "triggerSource",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScraperJobTriggerSource"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "triggeredBy": {
+                    "name": "triggeredBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "socialAccountId": {
+                    "name": "socialAccountId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "socialAccount": {
+                    "name": "socialAccount",
+                    "isArray": false,
+                    "type": {
+                        "model": "SocialAccount"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "socialAccountId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "SocialScrapeAttempts",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySocialAccountAttempt",
+                        "fields": [
+                            "socialAccountId",
+                            "startedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "SocialScheduledPost": {
+            "name": "SocialScheduledPost",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "content": {
+                    "name": "content",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "mediaUrls": {
+                    "name": "mediaUrls",
+                    "isArray": true,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "linkUrl": {
+                    "name": "linkUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scheduledFor": {
+                    "name": "scheduledFor",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "publishedAt": {
+                    "name": "publishedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScheduledPostStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "targetAccountIds": {
+                    "name": "targetAccountIds",
+                    "isArray": true,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "linkedGameId": {
+                    "name": "linkedGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "templateType": {
+                    "name": "templateType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdBy": {
+                    "name": "createdBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "SocialScheduledPosts",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byScheduledTime",
+                        "fields": [
+                            "scheduledFor"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byScheduledPostStatus",
+                        "fields": [
+                            "status",
+                            "scheduledFor"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byScheduledPostGame",
+                        "fields": [
+                            "linkedGameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byScheduledPostEntity",
+                        "fields": [
+                            "entityId",
+                            "scheduledFor"
                         ]
                     }
                 },
@@ -7722,6 +8617,65 @@ export const schema = {
                 "DISABLE",
                 "STATUS",
                 "RESET"
+            ]
+        },
+        "SocialPlatform": {
+            "name": "SocialPlatform",
+            "values": [
+                "FACEBOOK",
+                "INSTAGRAM",
+                "TWITTER",
+                "LINKEDIN"
+            ]
+        },
+        "SocialAccountStatus": {
+            "name": "SocialAccountStatus",
+            "values": [
+                "ACTIVE",
+                "INACTIVE",
+                "PENDING_VERIFICATION",
+                "ERROR",
+                "RATE_LIMITED"
+            ]
+        },
+        "SocialPostType": {
+            "name": "SocialPostType",
+            "values": [
+                "TEXT",
+                "IMAGE",
+                "VIDEO",
+                "LINK",
+                "EVENT",
+                "ALBUM",
+                "LIVE"
+            ]
+        },
+        "SocialScrapeStatus": {
+            "name": "SocialScrapeStatus",
+            "values": [
+                "SUCCESS",
+                "FAILED",
+                "SKIPPED",
+                "RATE_LIMITED",
+                "NO_NEW_CONTENT"
+            ]
+        },
+        "SocialPostStatus": {
+            "name": "SocialPostStatus",
+            "values": [
+                "ACTIVE",
+                "HIDDEN",
+                "ARCHIVED",
+                "DELETED"
+            ]
+        },
+        "ScheduledPostStatus": {
+            "name": "ScheduledPostStatus",
+            "values": [
+                "SCHEDULED",
+                "PUBLISHED",
+                "FAILED",
+                "CANCELLED"
             ]
         }
     },
@@ -10465,6 +11419,150 @@ export const schema = {
                 }
             }
         },
+        "SocialFeedConnection": {
+            "name": "SocialFeedConnection",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "SocialPost"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SocialPostConnection": {
+            "name": "SocialPostConnection",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "SocialPost"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SocialAccountConnection": {
+            "name": "SocialAccountConnection",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "SocialAccount"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SocialAccountMetrics": {
+            "name": "SocialAccountMetrics",
+            "fields": {
+                "accountId": {
+                    "name": "accountId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPosts": {
+                    "name": "totalPosts",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalEngagement": {
+                    "name": "totalEngagement",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "avgLikesPerPost": {
+                    "name": "avgLikesPerPost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgCommentsPerPost": {
+                    "name": "avgCommentsPerPost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgSharesPerPost": {
+                    "name": "avgSharesPerPost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "postsThisPeriod": {
+                    "name": "postsThisPeriod",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "engagementGrowth": {
+                    "name": "engagementGrowth",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topPerformingPosts": {
+                    "name": "topPerformingPosts",
+                    "isArray": true,
+                    "type": {
+                        "model": "SocialPost"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
         "RefreshResponse": {
             "name": "RefreshResponse",
             "fields": {
@@ -10739,5 +11837,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "d85b21e9f87d0f6378a2dde97027b149"
+    "version": "3bfcaffb6464a0a6d909f57c7b2c038d"
 };

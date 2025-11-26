@@ -133,52 +133,105 @@ const checkIsMultiDay = (game) => {
 };
 
 /**
+ * Extracts a date bucket (YYYY-MM) from a datetime string
+ * Used for temporal grouping to prevent year-over-year collisions
+ * 
+ * @param {string} dateTimeStr - ISO datetime string
+ * @returns {string|null} - Date bucket like "2023-02" or null
+ */
+const getDateBucket = (dateTimeStr) => {
+    if (!dateTimeStr) return null;
+    try {
+        const date = new Date(dateTimeStr);
+        if (isNaN(date.getTime())) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        return `${year}-${month}`;
+    } catch {
+        return null;
+    }
+};
+
+/**
  * Generates the consolidation key that links flights together
  * 
- * Strategy A: Series + Event Number (most reliable)
- * Strategy B: Venue + BuyIn + Name stem (fallback)
+ * Strategy Priority (most reliable to least):
+ * 1. SERIES_EVENT: Series ID + Event Number (best - explicit linkage)
+ * 2. ENTITY_SERIES_EVENT: Entity + Series Name + Event Number + Date Bucket
+ * 3. VENUE_EVENT_DATE: Venue + Event Number + Buy-in + Date Bucket
+ * 4. VENUE_BUYIN_DATE: Venue + Buy-in + Date Bucket (no event number)
+ * 
+ * NOTE: We deliberately avoid using tournament NAME in keys because:
+ * - Names have variations (Turbo, Flight 1A, Day 1, etc.)
+ * - After stripping day/flight suffixes, subtle differences remain
+ * - Event number + date proximity is more reliable
  * 
  * @param {Object} game - Game data object
- * @param {string} game.name - Tournament name
- * @param {string} [game.tournamentSeriesId] - Series ID
- * @param {number} [game.eventNumber] - Event number
- * @param {string} [game.venueId] - Venue ID
- * @param {number} [game.buyIn] - Buy-in amount
- * @returns {{key: string|null, strategy: string|null, reason: string}}
+ * @returns {{key: string|null, strategy: string|null, reason: string, confidence: number}}
  */
 const generateConsolidationKey = (game) => {
-    // Strategy A: Explicit Series + Event (Best)
+    const dateBucket = getDateBucket(game.gameStartDateTime);
+    
+    // Strategy 1: Explicit Series ID + Event Number (Best - 100% confidence)
+    // This is set by the system when series is properly assigned
     if (game.tournamentSeriesId && game.eventNumber) {
         return {
             key: `SERIES_${game.tournamentSeriesId}_EVT_${game.eventNumber}`,
             strategy: 'SERIES_EVENT',
-            reason: 'Using series ID + event number for precise grouping'
+            reason: 'Using series ID + event number for precise grouping',
+            confidence: 100
         };
     }
-
-    // Strategy B: Venue + BuyIn + Name Stem (Fallback)
-    if (game.venueId && game.buyIn) {
-        const rootName = deriveParentName(game.name);
-        const cleanedName = clean(rootName);
-        
+    
+    // Strategy 2: Entity + Series Name + Event Number + Date Bucket (95% confidence)
+    // Series name is usually consistent, event number is strong, date bucket prevents year collision
+    if (game.entityId && game.seriesName && game.eventNumber && dateBucket) {
+        const cleanSeriesName = clean(game.seriesName);
         return {
-            key: `VENUE_${game.venueId}_BI_${game.buyIn}_NAME_${cleanedName}`,
-            strategy: 'VENUE_BUYIN_NAME',
-            reason: 'Using venue + buy-in + name pattern (series/event not available)'
+            key: `ENT_${game.entityId}_SER_${cleanSeriesName}_EVT_${game.eventNumber}_DT_${dateBucket}`,
+            strategy: 'ENTITY_SERIES_EVENT',
+            reason: 'Using entity + series name + event number + date bucket',
+            confidence: 95
+        };
+    }
+    
+    // Strategy 3: Venue + Event Number + Buy-in + Date Bucket (90% confidence)
+    // Even without series name, event number + venue + buy-in is strong
+    if (game.venueId && game.eventNumber && game.buyIn && dateBucket) {
+        return {
+            key: `VEN_${game.venueId}_EVT_${game.eventNumber}_BI_${game.buyIn}_DT_${dateBucket}`,
+            strategy: 'VENUE_EVENT_DATE',
+            reason: 'Using venue + event number + buy-in + date bucket',
+            confidence: 90
+        };
+    }
+    
+    // Strategy 4: Venue + Buy-in + Date Bucket (70% confidence)
+    // Fallback when no event number - relies on same venue/buy-in/month
+    // This could group different tournaments with same buy-in, but better than name-based
+    if (game.venueId && game.buyIn && dateBucket) {
+        return {
+            key: `VEN_${game.venueId}_BI_${game.buyIn}_DT_${dateBucket}`,
+            strategy: 'VENUE_BUYIN_DATE',
+            reason: 'Using venue + buy-in + date bucket (no event number - lower confidence)',
+            confidence: 70
         };
     }
 
-    // Cannot generate key
+    // Cannot generate key - list what's missing
     const missingFields = [];
     if (!game.tournamentSeriesId) missingFields.push('tournamentSeriesId');
     if (!game.eventNumber) missingFields.push('eventNumber');
+    if (!game.seriesName) missingFields.push('seriesName');
     if (!game.venueId) missingFields.push('venueId');
     if (!game.buyIn) missingFields.push('buyIn');
+    if (!dateBucket) missingFields.push('gameStartDateTime');
     
     return {
         key: null,
         strategy: null,
-        reason: `Cannot generate key - missing fields: ${missingFields.join(', ')}`
+        reason: `Cannot generate key - missing fields: ${missingFields.join(', ')}`,
+        confidence: 0
     };
 };
 
@@ -186,7 +239,7 @@ const generateConsolidationKey = (game) => {
  * Main preview function - analyzes a game and returns what consolidation would do
  * 
  * @param {Object} game - Game data object
- * @returns {{willConsolidate: boolean, reason: string, consolidationKey: string|null, keyStrategy: string|null, derivedParentName: string, detectedPattern: Object, warnings: string[]}}
+ * @returns {{willConsolidate: boolean, reason: string, consolidationKey: string|null, keyStrategy: string|null, keyConfidence: number, derivedParentName: string, detectedPattern: Object, warnings: string[]}}
  */
 const previewConsolidation = (game) => {
     const warnings = [];
@@ -201,6 +254,7 @@ const previewConsolidation = (game) => {
             reason: 'Not detected as a multi-day tournament. No consolidation needed.',
             consolidationKey: null,
             keyStrategy: null,
+            keyConfidence: 0,
             derivedParentName,
             detectedPattern,
             warnings
@@ -214,6 +268,7 @@ const previewConsolidation = (game) => {
             reason: 'Game status is NOT_PUBLISHED - consolidation skipped.',
             consolidationKey: null,
             keyStrategy: null,
+            keyConfidence: 0,
             derivedParentName,
             detectedPattern,
             warnings
@@ -227,6 +282,7 @@ const previewConsolidation = (game) => {
             reason: 'This game is already a PARENT record.',
             consolidationKey: game.consolidationKey || null,
             keyStrategy: null,
+            keyConfidence: 0,
             derivedParentName,
             detectedPattern,
             warnings
@@ -243,17 +299,31 @@ const previewConsolidation = (game) => {
             reason: keyResult.reason,
             consolidationKey: null,
             keyStrategy: null,
+            keyConfidence: 0,
             derivedParentName,
             detectedPattern,
             warnings
         };
     }
     
-    // Add helpful warnings
-    if (keyResult.strategy === 'VENUE_BUYIN_NAME') {
+    // Add helpful warnings based on strategy used
+    if (keyResult.confidence < 100) {
+        if (!game.tournamentSeriesId) {
+            warnings.push(
+                'No tournamentSeriesId set. For best results, assign this tournament to a series.'
+            );
+        }
+        if (!game.eventNumber) {
+            warnings.push(
+                'No eventNumber set. Setting event number improves grouping accuracy.'
+            );
+        }
+    }
+    
+    if (keyResult.strategy === 'VENUE_BUYIN_DATE' && keyResult.confidence <= 70) {
         warnings.push(
-            'Using fallback key strategy. For more reliable grouping, ' +
-            'set tournamentSeriesId and eventNumber.'
+            'Low confidence grouping (70%). Multiple tournaments with same buy-in may be grouped together. ' +
+            'Set eventNumber or seriesName for more accurate grouping.'
         );
     }
     
@@ -280,9 +350,10 @@ const previewConsolidation = (game) => {
     
     return {
         willConsolidate: true,
-        reason: `Will be grouped under "${derivedParentName}" using ${keyResult.strategy} strategy.`,
+        reason: `Will be grouped under "${derivedParentName}" using ${keyResult.strategy} strategy (${keyResult.confidence}% confidence).`,
         consolidationKey: keyResult.key,
         keyStrategy: keyResult.strategy,
+        keyConfidence: keyResult.confidence,
         derivedParentName,
         detectedPattern,
         warnings
@@ -295,7 +366,7 @@ const previewConsolidation = (game) => {
  * 
  * @param {Object[]} children - Array of child game objects
  * @param {number} [expectedTotalEntries] - Expected total entries for comparison
- * @returns {{totalEntries: number, uniqueRunners: number, totalRebuys: number, totalAddons: number, prizepool: number, earliestStart: string|null, latestEnd: string|null, parentStatus: string, isPartialData: boolean, missingFlightCount: number, finalDayChild: Object|null}}
+ * @returns {Object} Aggregated totals for parent record
  */
 const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     // Sort chronologically
@@ -308,19 +379,36 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     let totalRebuys = 0;
     let totalAddons = 0;
     let maxPrizepool = 0;
+    let totalRake = 0;
+    let revenueByBuyIns = 0;
+    let profitLoss = 0;
     let earliestStart = Number.MAX_SAFE_INTEGER;
     let latestEnd = 0;
     let finalDayChild = null;
+    let playersRemaining = null;
+    let totalChipsInPlay = null;
+    let averagePlayerStack = null;
+    let startingStack = 0;
+    let guaranteeOverlay = 0;
+    let guaranteeSurplus = 0;
 
     for (const child of sortedChildren) {
         // Simple sums
         totalEntries += (child.totalEntries || 0);
         totalRebuys += (child.totalRebuys || 0);
         totalAddons += (child.totalAddons || 0);
+        totalRake += (child.totalRake || 0);
+        revenueByBuyIns += (child.revenueByBuyIns || 0);
+        profitLoss += (child.profitLoss || 0);
         
         // Prizepool: take the largest (usually final day)
         if ((child.prizepool || 0) > maxPrizepool) {
             maxPrizepool = child.prizepool || 0;
+        }
+        
+        // Starting stack: take from first child (they should be consistent)
+        if (!startingStack && child.startingStack) {
+            startingStack = child.startingStack;
         }
 
         // Date range
@@ -340,6 +428,15 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
                 finalDayChild = child;
             }
         }
+    }
+    
+    // Get live stats from final day child if available
+    if (finalDayChild) {
+        playersRemaining = finalDayChild.playersRemaining ?? null;
+        totalChipsInPlay = finalDayChild.totalChipsInPlay ?? null;
+        averagePlayerStack = finalDayChild.averagePlayerStack ?? null;
+        guaranteeOverlay = finalDayChild.guaranteeOverlay ?? 0;
+        guaranteeSurplus = finalDayChild.guaranteeSurplus ?? 0;
     }
 
     // Determine parent status
@@ -374,6 +471,15 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     if (expected > 0 && totalEntries < (expected * 0.9)) {
         isPartialData = true;
     }
+    
+    // Calculate total duration if we have both start and end
+    let totalDuration = null;
+    if (earliestStart < Number.MAX_SAFE_INTEGER && latestEnd > 0) {
+        const durationMs = latestEnd - earliestStart;
+        const hours = Math.floor(durationMs / (1000 * 60 * 60));
+        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+        totalDuration = `${hours}h ${minutes}m`;
+    }
 
     return {
         totalEntries,
@@ -381,49 +487,139 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         totalRebuys,
         totalAddons,
         prizepool: maxPrizepool,
+        totalRake,
+        revenueByBuyIns,
+        profitLoss,
+        startingStack,
+        playersRemaining,
+        totalChipsInPlay,
+        averagePlayerStack,
+        guaranteeOverlay,
+        guaranteeSurplus,
         earliestStart: earliestStart < Number.MAX_SAFE_INTEGER 
             ? new Date(earliestStart).toISOString() 
             : null,
         latestEnd: latestEnd > 0 
             ? new Date(latestEnd).toISOString() 
             : null,
+        totalDuration,
         parentStatus,
         isPartialData,
         missingFlightCount,
-        finalDayChild
+        finalDayChild,
+        childCount: sortedChildren.length
     };
 };
 
 /**
  * Builds the data structure for a new parent record
+ * Ensures all non-nullable fields are populated
+ * 
+ * *** FIX: Now requires parentId to generate sourceUrl for GSI compatibility ***
  * 
  * @param {Object} childGame - The child game triggering parent creation
  * @param {string} consolidationKey - The consolidation key
+ * @param {string} parentId - The parent record ID (REQUIRED for sourceUrl)
  * @returns {Object} Parent record data
  */
-const buildParentRecord = (childGame, consolidationKey) => {
+const buildParentRecord = (childGame, consolidationKey, parentId) => {
+    // Validate parentId is provided - it's required for sourceUrl
+    if (!parentId) {
+        throw new Error('parentId is required for buildParentRecord - needed for sourceUrl GSI');
+    }
+    
     return {
+        // Consolidation fields
         consolidationKey,
         consolidationType: 'PARENT',
         name: deriveParentName(childGame.name),
+        parentGameId: null, // Parents don't have parents
         
         // Copy immutable traits from child
-        gameType: childGame.gameType,
-        gameVariant: childGame.gameVariant,
+        gameType: childGame.gameType || 'TOURNAMENT',
+        gameVariant: childGame.gameVariant || 'NLHE',
         venueId: childGame.venueId,
-        buyIn: childGame.buyIn,
-        rake: childGame.rake,
+        buyIn: childGame.buyIn || 0,
+        rake: childGame.rake || 0,
         entityId: childGame.entityId,
-        hasGuarantee: childGame.hasGuarantee,
-        guaranteeAmount: childGame.guaranteeAmount,
-        tournamentSeriesId: childGame.tournamentSeriesId,
-        seriesName: childGame.seriesName,
+        
+        // Guarantee fields
+        hasGuarantee: childGame.hasGuarantee || false,
+        guaranteeAmount: childGame.guaranteeAmount || 0,
+        guaranteeOverlay: 0,
+        guaranteeSurplus: 0,
+        
+        // Series fields
+        tournamentSeriesId: childGame.tournamentSeriesId || null,
+        seriesName: childGame.seriesName || null,
         isSeries: true,
-        eventNumber: childGame.eventNumber,
-
-        // Initial state
+        eventNumber: childGame.eventNumber || null,
+        seriesAssignmentStatus: childGame.seriesAssignmentStatus || 'NOT_SERIES',
+        seriesAssignmentConfidence: childGame.seriesAssignmentConfidence || 0,
+        suggestedSeriesName: null,
+        
+        // Multi-day specific (parents aggregate, don't have specific day/flight)
+        dayNumber: null,
+        flightLetter: null,
+        finalDay: null,
+        
+        // Tournament type flags
+        isMainEvent: childGame.isMainEvent || false,
+        isRegular: false,
+        isSatellite: childGame.isSatellite || false,
+        tournamentType: childGame.tournamentType || null,
+        
+        // Game state (will be updated by recalculation)
+        gameStatus: 'RUNNING',
+        registrationStatus: 'N_A',
         isPartialData: true,
-        gameStatus: 'RUNNING'
+        missingFlightCount: 0,
+        
+        // Totals (will be calculated/aggregated)
+        totalEntries: 0,
+        actualCalculatedEntries: 0,
+        totalRebuys: 0,
+        totalAddons: 0,
+        prizepool: 0,
+        totalRake: 0,
+        profitLoss: 0,
+        revenueByBuyIns: 0,
+        
+        // Stack/chip tracking
+        startingStack: childGame.startingStack || 0,
+        averagePlayerStack: null,
+        playersRemaining: null,
+        totalChipsInPlay: null,
+        
+        // Time tracking - MUST have gameStartDateTime for byRegistrationStatus GSI
+        // Initialize from child, will be updated during aggregation to earliest child start
+        gameStartDateTime: childGame.gameStartDateTime || new Date().toISOString(),
+        gameEndDateTime: childGame.gameEndDateTime || null,
+        totalDuration: null,
+        gameFrequency: 'UNKNOWN',
+        
+        // Structure
+        levels: [],
+        gameTags: [],
+        
+        // Venue assignment
+        venueAssignmentStatus: childGame.venueAssignmentStatus || 'MANUALLY_ASSIGNED',
+        venueAssignmentConfidence: childGame.venueAssignmentConfidence || 1,
+        suggestedVenueName: null,
+        requiresVenueAssignment: false,
+        venueFee: null,
+        
+        // *** FIX: Source URL is REQUIRED for bySourceUrl GSI ***
+        // DynamoDB GSIs cannot have NULL partition keys
+        // Use a synthetic URL that identifies this as a consolidated parent record
+        sourceUrl: `consolidated://parent/${parentId}`,
+        
+        // tournamentId: For byEntityAndTournamentId GSI, if entityId is set (non-null),
+        // tournamentId (sort key) must also be non-null. Use 0 for consolidated parents.
+        tournamentId: 0,
+        
+        // Edit tracking
+        wasEdited: false
     };
 };
 
@@ -432,6 +628,7 @@ const buildParentRecord = (childGame, consolidationKey) => {
 module.exports = {
     clean,
     deriveParentName,
+    getDateBucket,
     checkIsMultiDay,
     generateConsolidationKey,
     previewConsolidation,

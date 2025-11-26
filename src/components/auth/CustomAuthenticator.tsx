@@ -12,7 +12,7 @@ export const CustomAuthenticator = ({ children }: CustomAuthenticatorProps) => {
       return (
         <View textAlign="center" padding="2rem">
           <Heading level={3} style={{ color: '#4f46e5' }}>
-            🎰 PokerPro Live
+            PokerPro Live
           </Heading>
           <Text color="neutral.60" marginTop="0.5rem">
             Tournament Management System
@@ -25,7 +25,7 @@ export const CustomAuthenticator = ({ children }: CustomAuthenticatorProps) => {
       return (
         <View textAlign="center" padding="1rem">
           <Text color="neutral.60" fontSize="0.875rem">
-            &copy; {new Date().getFullYear()} KingsRoom. All rights reserved.
+            &copy; {new Date().getFullYear()} PokerPro Live. All rights reserved.
           </Text>
         </View>
       );

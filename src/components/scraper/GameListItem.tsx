@@ -17,6 +17,7 @@ import {
     Loader2,
     Ban,
     Globe,
+    HelpCircle,  // ✅ NEW: Icon for pending state
 } from 'lucide-react';
 import type { GameState } from '../../types/game';
 import type { Venue } from '../../API';
@@ -86,10 +87,10 @@ const getProcessingStatusStyles = (status: ProcessingStatus): string => {
     }
 };
 
-// Data source badge configuration
+// ✅ UPDATED: Data source badge configuration - added 'pending' type
 const DATA_SOURCE_CONFIG = {
     's3': {
-        label: 'S3 Query',
+        label: 'S3 Cache',
         icon: HardDrive,
         className: 'bg-purple-100 text-purple-700 border-purple-200',
         tooltip: 'Data retrieved from S3 cache storage'
@@ -105,6 +106,13 @@ const DATA_SOURCE_CONFIG = {
         icon: Ban,
         className: 'bg-gray-100 text-gray-600 border-gray-300',
         tooltip: 'Data not retrieved - marked as Do Not Scrape'
+    },
+    // ✅ NEW: Pending state - shown before retrieval method is determined
+    'pending': {
+        label: 'Awaiting Retrieval',
+        icon: HelpCircle,
+        className: 'bg-slate-100 text-slate-500 border-slate-200',
+        tooltip: 'Retrieval method pending - waiting in queue'
     }
 };
 
@@ -123,7 +131,8 @@ interface GameListItemProps {
     showActions?: boolean;
     onClick?: () => void;
     enableCreateVenue?: boolean;
-    dataSource?: 's3' | 'web' | 'none' | 'live' | 'skipped'; // 'live' and 'skipped' for backward compatibility
+    // ✅ UPDATED: Added 'pending' to dataSource type
+    dataSource?: 's3' | 'web' | 'none' | 'pending' | 'live' | 'skipped'; // 'live' and 'skipped' for backward compatibility
     // NEW: Compact mode props
     compact?: boolean;
     processingStatus?: ProcessingStatus;
@@ -238,12 +247,12 @@ export const GameListItem: React.FC<GameListItemProps> = ({
         return null;
     };
 
-    // Render data source badge
+    // ✅ UPDATED: Render data source badge with 'pending' support
     const DataSourceBadge = ({ showLabel = true }: { showLabel?: boolean }) => {
         if (!dataSource) return null;
         
         // Normalize old values to new values for backward compatibility
-        let normalizedSource: 's3' | 'web' | 'none' = dataSource as 's3' | 'web' | 'none';
+        let normalizedSource: 's3' | 'web' | 'none' | 'pending' = dataSource as 's3' | 'web' | 'none' | 'pending';
         if (dataSource === 'live' as any) normalizedSource = 'web';
         if (dataSource === 'skipped' as any) normalizedSource = 'none';
         
@@ -328,11 +337,11 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                             {processingStatus === 'success' && (
                                 <div className="text-xs text-gray-600 mt-1 space-y-0.5">
                                     {/* Step 1: Retrieved */}
-                                    {dataSource && (
+                                    {dataSource && dataSource !== 'pending' && (
                                         <div className="flex items-center gap-1">
                                             <span className="font-medium text-gray-700">Retrieved:</span>
                                             <span>
-                                                {dataSource === 's3' ? 'S3 Query' :
+                                                {dataSource === 's3' ? 'S3 Cache' :
                                                  dataSource === 'web' ? 'Web Scrape' :
                                                  'None'}
                                             </span>
@@ -489,8 +498,8 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                             </div>
                         )}
 
-                        {/* Data source info */}
-                        {dataSource && (
+                        {/* Data source info - only show if not pending */}
+                        {dataSource && dataSource !== 'pending' && (
                             <div className="flex items-center gap-2">
                                 <DataSourceBadge />
                             </div>

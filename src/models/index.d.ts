@@ -309,6 +309,53 @@ export enum ScraperOperation {
   RESET = "RESET"
 }
 
+export enum SocialPlatform {
+  FACEBOOK = "FACEBOOK",
+  INSTAGRAM = "INSTAGRAM",
+  TWITTER = "TWITTER",
+  LINKEDIN = "LINKEDIN"
+}
+
+export enum SocialAccountStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  PENDING_VERIFICATION = "PENDING_VERIFICATION",
+  ERROR = "ERROR",
+  RATE_LIMITED = "RATE_LIMITED"
+}
+
+export enum SocialPostType {
+  TEXT = "TEXT",
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+  LINK = "LINK",
+  EVENT = "EVENT",
+  ALBUM = "ALBUM",
+  LIVE = "LIVE"
+}
+
+export enum SocialScrapeStatus {
+  SUCCESS = "SUCCESS",
+  FAILED = "FAILED",
+  SKIPPED = "SKIPPED",
+  RATE_LIMITED = "RATE_LIMITED",
+  NO_NEW_CONTENT = "NO_NEW_CONTENT"
+}
+
+export enum SocialPostStatus {
+  ACTIVE = "ACTIVE",
+  HIDDEN = "HIDDEN",
+  ARCHIVED = "ARCHIVED",
+  DELETED = "DELETED"
+}
+
+export enum ScheduledPostStatus {
+  SCHEDULED = "SCHEDULED",
+  PUBLISHED = "PUBLISHED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED"
+}
+
 type EagerConsolidationPreviewResult = {
   readonly willConsolidate: boolean;
   readonly reason: string;
@@ -1493,6 +1540,78 @@ export declare type GamesNeedingVenueResponse = LazyLoading extends LazyLoadingD
 
 export declare const GamesNeedingVenueResponse: (new (init: ModelInit<GamesNeedingVenueResponse>) => GamesNeedingVenueResponse)
 
+type EagerSocialFeedConnection = {
+  readonly items: SocialPost[];
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+type LazySocialFeedConnection = {
+  readonly items: AsyncCollection<SocialPost>;
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+export declare type SocialFeedConnection = LazyLoading extends LazyLoadingDisabled ? EagerSocialFeedConnection : LazySocialFeedConnection
+
+export declare const SocialFeedConnection: (new (init: ModelInit<SocialFeedConnection>) => SocialFeedConnection)
+
+type EagerSocialPostConnection = {
+  readonly items: SocialPost[];
+  readonly nextToken?: string | null;
+}
+
+type LazySocialPostConnection = {
+  readonly items: AsyncCollection<SocialPost>;
+  readonly nextToken?: string | null;
+}
+
+export declare type SocialPostConnection = LazyLoading extends LazyLoadingDisabled ? EagerSocialPostConnection : LazySocialPostConnection
+
+export declare const SocialPostConnection: (new (init: ModelInit<SocialPostConnection>) => SocialPostConnection)
+
+type EagerSocialAccountConnection = {
+  readonly items: SocialAccount[];
+  readonly nextToken?: string | null;
+}
+
+type LazySocialAccountConnection = {
+  readonly items: AsyncCollection<SocialAccount>;
+  readonly nextToken?: string | null;
+}
+
+export declare type SocialAccountConnection = LazyLoading extends LazyLoadingDisabled ? EagerSocialAccountConnection : LazySocialAccountConnection
+
+export declare const SocialAccountConnection: (new (init: ModelInit<SocialAccountConnection>) => SocialAccountConnection)
+
+type EagerSocialAccountMetrics = {
+  readonly accountId: string;
+  readonly totalPosts: number;
+  readonly totalEngagement: number;
+  readonly avgLikesPerPost?: number | null;
+  readonly avgCommentsPerPost?: number | null;
+  readonly avgSharesPerPost?: number | null;
+  readonly postsThisPeriod?: number | null;
+  readonly engagementGrowth?: number | null;
+  readonly topPerformingPosts?: SocialPost[] | null;
+}
+
+type LazySocialAccountMetrics = {
+  readonly accountId: string;
+  readonly totalPosts: number;
+  readonly totalEngagement: number;
+  readonly avgLikesPerPost?: number | null;
+  readonly avgCommentsPerPost?: number | null;
+  readonly avgSharesPerPost?: number | null;
+  readonly postsThisPeriod?: number | null;
+  readonly engagementGrowth?: number | null;
+  readonly topPerformingPosts: AsyncCollection<SocialPost>;
+}
+
+export declare type SocialAccountMetrics = LazyLoading extends LazyLoadingDisabled ? EagerSocialAccountMetrics : LazySocialAccountMetrics
+
+export declare const SocialAccountMetrics: (new (init: ModelInit<SocialAccountMetrics>) => SocialAccountMetrics)
+
 type EagerRefreshResponse = {
   readonly message: string;
   readonly status: string;
@@ -1652,6 +1771,7 @@ type EagerEntity = {
   readonly venues?: (Venue | null)[] | null;
   readonly games?: (Game | null)[] | null;
   readonly assets?: (Asset | null)[] | null;
+  readonly socialAccounts?: (SocialAccount | null)[] | null;
 }
 
 type LazyEntity = {
@@ -1673,6 +1793,7 @@ type LazyEntity = {
   readonly venues: AsyncCollection<Venue>;
   readonly games: AsyncCollection<Game>;
   readonly assets: AsyncCollection<Asset>;
+  readonly socialAccounts: AsyncCollection<SocialAccount>;
 }
 
 export declare type Entity = LazyLoading extends LazyLoadingDisabled ? EagerEntity : LazyEntity
@@ -1701,6 +1822,7 @@ type EagerVenue = {
   readonly series?: (TournamentSeries | null)[] | null;
   readonly playerMemberships?: (PlayerVenue | null)[] | null;
   readonly registeredPlayers?: (Player | null)[] | null;
+  readonly socialAccounts?: (SocialAccount | null)[] | null;
   readonly entityId?: string | null;
   readonly entity?: Entity | null;
   readonly createdAt?: string | null;
@@ -1728,6 +1850,7 @@ type LazyVenue = {
   readonly series: AsyncCollection<TournamentSeries>;
   readonly playerMemberships: AsyncCollection<PlayerVenue>;
   readonly registeredPlayers: AsyncCollection<Player>;
+  readonly socialAccounts: AsyncCollection<SocialAccount>;
   readonly entityId?: string | null;
   readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt?: string | null;
@@ -1956,6 +2079,7 @@ type EagerGame = {
   readonly gameCost?: GameCost | null;
   readonly playerEntries?: (PlayerEntry | null)[] | null;
   readonly playerResults?: (PlayerResult | null)[] | null;
+  readonly linkedSocialPosts?: (SocialPost | null)[] | null;
   readonly entityId?: string | null;
   readonly entity?: Entity | null;
   readonly createdAt: string;
@@ -2038,6 +2162,7 @@ type LazyGame = {
   readonly gameCost: AsyncItem<GameCost | undefined>;
   readonly playerEntries: AsyncCollection<PlayerEntry>;
   readonly playerResults: AsyncCollection<PlayerResult>;
+  readonly linkedSocialPosts: AsyncCollection<SocialPost>;
   readonly entityId?: string | null;
   readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt: string;
@@ -3618,29 +3743,77 @@ export declare const PlayerMarketingPreferences: (new (init: ModelInit<PlayerMar
 type EagerSocialAccount = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<SocialAccount, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly platform: string;
+  readonly platform: SocialPlatform | keyof typeof SocialPlatform;
+  readonly platformAccountId: string;
   readonly accountName: string;
-  readonly apiKey?: string | null;
-  readonly apiSecret?: string | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
+  readonly accountHandle?: string | null;
+  readonly accountUrl: string;
+  readonly profileImageUrl?: string | null;
+  readonly coverImageUrl?: string | null;
+  readonly bio?: string | null;
+  readonly followerCount?: number | null;
+  readonly followingCount?: number | null;
+  readonly postCount?: number | null;
+  readonly status: SocialAccountStatus | keyof typeof SocialAccountStatus;
+  readonly isScrapingEnabled: boolean;
+  readonly scrapeFrequencyMinutes?: number | null;
+  readonly lastScrapedAt?: string | null;
+  readonly lastSuccessfulScrapeAt?: string | null;
+  readonly nextScheduledScrapeAt?: string | null;
+  readonly consecutiveFailures?: number | null;
+  readonly lastErrorMessage?: string | null;
+  readonly hasPostAccess?: boolean | null;
+  readonly accessTokenExpiry?: string | null;
+  readonly permissionsGranted?: (string | null)[] | null;
+  readonly entityId?: string | null;
+  readonly entity?: Entity | null;
+  readonly venueId?: string | null;
+  readonly venue?: Venue | null;
+  readonly posts?: (SocialPost | null)[] | null;
+  readonly scrapeAttempts?: (SocialScrapeAttempt | null)[] | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly createdBy?: string | null;
 }
 
 type LazySocialAccount = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<SocialAccount, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly platform: string;
+  readonly platform: SocialPlatform | keyof typeof SocialPlatform;
+  readonly platformAccountId: string;
   readonly accountName: string;
-  readonly apiKey?: string | null;
-  readonly apiSecret?: string | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
+  readonly accountHandle?: string | null;
+  readonly accountUrl: string;
+  readonly profileImageUrl?: string | null;
+  readonly coverImageUrl?: string | null;
+  readonly bio?: string | null;
+  readonly followerCount?: number | null;
+  readonly followingCount?: number | null;
+  readonly postCount?: number | null;
+  readonly status: SocialAccountStatus | keyof typeof SocialAccountStatus;
+  readonly isScrapingEnabled: boolean;
+  readonly scrapeFrequencyMinutes?: number | null;
+  readonly lastScrapedAt?: string | null;
+  readonly lastSuccessfulScrapeAt?: string | null;
+  readonly nextScheduledScrapeAt?: string | null;
+  readonly consecutiveFailures?: number | null;
+  readonly lastErrorMessage?: string | null;
+  readonly hasPostAccess?: boolean | null;
+  readonly accessTokenExpiry?: string | null;
+  readonly permissionsGranted?: (string | null)[] | null;
+  readonly entityId?: string | null;
+  readonly entity: AsyncItem<Entity | undefined>;
+  readonly venueId?: string | null;
+  readonly venue: AsyncItem<Venue | undefined>;
+  readonly posts: AsyncCollection<SocialPost>;
+  readonly scrapeAttempts: AsyncCollection<SocialScrapeAttempt>;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly createdBy?: string | null;
 }
 
 export declare type SocialAccount = LazyLoading extends LazyLoadingDisabled ? EagerSocialAccount : LazySocialAccount
@@ -3652,33 +3825,181 @@ export declare const SocialAccount: (new (init: ModelInit<SocialAccount>) => Soc
 type EagerSocialPost = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<SocialPost, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly content: string;
-  readonly imageUrl?: string | null;
+  readonly platformPostId: string;
+  readonly postUrl?: string | null;
+  readonly postType: SocialPostType | keyof typeof SocialPostType;
+  readonly content?: string | null;
+  readonly contentPreview?: string | null;
+  readonly rawContent?: string | null;
+  readonly mediaUrls?: (string | null)[] | null;
+  readonly thumbnailUrl?: string | null;
+  readonly mediaType?: string | null;
+  readonly likeCount?: number | null;
+  readonly commentCount?: number | null;
+  readonly shareCount?: number | null;
+  readonly reactionCount?: number | null;
+  readonly viewCount?: number | null;
   readonly postedAt: string;
+  readonly scrapedAt: string;
+  readonly lastUpdatedAt?: string | null;
+  readonly status: SocialPostStatus | keyof typeof SocialPostStatus;
+  readonly isPromotional?: boolean | null;
+  readonly isPinned?: boolean | null;
+  readonly isTournamentRelated?: boolean | null;
+  readonly tags?: (string | null)[] | null;
+  readonly sentiment?: string | null;
+  readonly contentCategory?: string | null;
+  readonly linkedGameId?: string | null;
+  readonly linkedGame?: Game | null;
   readonly socialAccountId: string;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
+  readonly socialAccount?: SocialAccount | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 type LazySocialPost = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<SocialPost, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly content: string;
-  readonly imageUrl?: string | null;
+  readonly platformPostId: string;
+  readonly postUrl?: string | null;
+  readonly postType: SocialPostType | keyof typeof SocialPostType;
+  readonly content?: string | null;
+  readonly contentPreview?: string | null;
+  readonly rawContent?: string | null;
+  readonly mediaUrls?: (string | null)[] | null;
+  readonly thumbnailUrl?: string | null;
+  readonly mediaType?: string | null;
+  readonly likeCount?: number | null;
+  readonly commentCount?: number | null;
+  readonly shareCount?: number | null;
+  readonly reactionCount?: number | null;
+  readonly viewCount?: number | null;
   readonly postedAt: string;
+  readonly scrapedAt: string;
+  readonly lastUpdatedAt?: string | null;
+  readonly status: SocialPostStatus | keyof typeof SocialPostStatus;
+  readonly isPromotional?: boolean | null;
+  readonly isPinned?: boolean | null;
+  readonly isTournamentRelated?: boolean | null;
+  readonly tags?: (string | null)[] | null;
+  readonly sentiment?: string | null;
+  readonly contentCategory?: string | null;
+  readonly linkedGameId?: string | null;
+  readonly linkedGame: AsyncItem<Game | undefined>;
   readonly socialAccountId: string;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
+  readonly socialAccount: AsyncItem<SocialAccount | undefined>;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 export declare type SocialPost = LazyLoading extends LazyLoadingDisabled ? EagerSocialPost : LazySocialPost
 
 export declare const SocialPost: (new (init: ModelInit<SocialPost>) => SocialPost) & {
   copyOf(source: SocialPost, mutator: (draft: MutableModel<SocialPost>) => MutableModel<SocialPost> | void): SocialPost;
+}
+
+type EagerSocialScrapeAttempt = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialScrapeAttempt, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly status: SocialScrapeStatus | keyof typeof SocialScrapeStatus;
+  readonly startedAt: string;
+  readonly completedAt?: string | null;
+  readonly durationMs?: number | null;
+  readonly postsFound?: number | null;
+  readonly newPostsAdded?: number | null;
+  readonly postsUpdated?: number | null;
+  readonly errorMessage?: string | null;
+  readonly errorCode?: string | null;
+  readonly triggerSource?: ScraperJobTriggerSource | keyof typeof ScraperJobTriggerSource | null;
+  readonly triggeredBy?: string | null;
+  readonly socialAccountId: string;
+  readonly socialAccount?: SocialAccount | null;
+  readonly createdAt: string;
+  readonly updatedAt?: string | null;
+}
+
+type LazySocialScrapeAttempt = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialScrapeAttempt, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly status: SocialScrapeStatus | keyof typeof SocialScrapeStatus;
+  readonly startedAt: string;
+  readonly completedAt?: string | null;
+  readonly durationMs?: number | null;
+  readonly postsFound?: number | null;
+  readonly newPostsAdded?: number | null;
+  readonly postsUpdated?: number | null;
+  readonly errorMessage?: string | null;
+  readonly errorCode?: string | null;
+  readonly triggerSource?: ScraperJobTriggerSource | keyof typeof ScraperJobTriggerSource | null;
+  readonly triggeredBy?: string | null;
+  readonly socialAccountId: string;
+  readonly socialAccount: AsyncItem<SocialAccount | undefined>;
+  readonly createdAt: string;
+  readonly updatedAt?: string | null;
+}
+
+export declare type SocialScrapeAttempt = LazyLoading extends LazyLoadingDisabled ? EagerSocialScrapeAttempt : LazySocialScrapeAttempt
+
+export declare const SocialScrapeAttempt: (new (init: ModelInit<SocialScrapeAttempt>) => SocialScrapeAttempt) & {
+  copyOf(source: SocialScrapeAttempt, mutator: (draft: MutableModel<SocialScrapeAttempt>) => MutableModel<SocialScrapeAttempt> | void): SocialScrapeAttempt;
+}
+
+type EagerSocialScheduledPost = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialScheduledPost, 'id'>;
+  };
+  readonly id: string;
+  readonly content: string;
+  readonly mediaUrls?: (string | null)[] | null;
+  readonly linkUrl?: string | null;
+  readonly scheduledFor: string;
+  readonly publishedAt?: string | null;
+  readonly status: ScheduledPostStatus | keyof typeof ScheduledPostStatus;
+  readonly targetAccountIds: string[];
+  readonly linkedGameId?: string | null;
+  readonly templateType?: string | null;
+  readonly entityId: string;
+  readonly createdBy: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazySocialScheduledPost = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialScheduledPost, 'id'>;
+  };
+  readonly id: string;
+  readonly content: string;
+  readonly mediaUrls?: (string | null)[] | null;
+  readonly linkUrl?: string | null;
+  readonly scheduledFor: string;
+  readonly publishedAt?: string | null;
+  readonly status: ScheduledPostStatus | keyof typeof ScheduledPostStatus;
+  readonly targetAccountIds: string[];
+  readonly linkedGameId?: string | null;
+  readonly templateType?: string | null;
+  readonly entityId: string;
+  readonly createdBy: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type SocialScheduledPost = LazyLoading extends LazyLoadingDisabled ? EagerSocialScheduledPost : LazySocialScheduledPost
+
+export declare const SocialScheduledPost: (new (init: ModelInit<SocialScheduledPost>) => SocialScheduledPost) & {
+  copyOf(source: SocialScheduledPost, mutator: (draft: MutableModel<SocialScheduledPost>) => MutableModel<SocialScheduledPost> | void): SocialScheduledPost;
 }

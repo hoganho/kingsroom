@@ -1,0 +1,2962 @@
+[
+  {
+    "timestamp": 1764121167338,
+    "message": "INIT_START Runtime Version: nodejs:22.v68\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:685b5bdd1a5972cbde591187200f592fbd417cd448d71e500b10e41759692493\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167717,
+    "message": "START RequestId: 373f31c2-9382-582e-bebc-5062cf0a027e Version: $LATEST\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167719,
+    "message": "2025-11-26T01:39:27.719Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[HANDLER] START: Player Data Processor invoked.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167753,
+    "message": "2025-11-26T01:39:27.753Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\tReceived Lambda Event (Raw): {\n  \"Records\": [\n    {\n      \"messageId\": \"a0dd09c8-d4c6-4232-b674-5fad02b3c172\",\n      \"receiptHandle\": \"AQEBYxwCi73ahfIbWQ1OIHCIGXd9hc1R36hF6K5smb/Y/mAUKTJV6bZdFxQmsIrIe2EoECbY7pT19UylN3+xFgqKd10LwP1UFoB1mR7pMQovtHArWbb1Anz2eS7nlPIuA9jmQGjts3VvLC/2H8e+5RHHT6Il4nqFfHv2B5mlU8SLJpepug2jY6xrPZctDo3+nahV8eTbmq6BQSYeQ4lNjnewTKcxqgVQEjnPvUVPvJZWsUohvntSIQYLgwasR8Z1gK76Xb3BvPBZUmE/a0rhgId0XqkKlShaNvSGC+z4pcjYhiI=\",\n      \"body\": \"{\\\"game\\\":{\\\"id\\\":\\\"0cc49ec2-fe21-4907-aaef-e39363e65169\\\",\\\"name\\\":\\\"Kings Room Signature Series Event 8: MAIN EVENT Flight 1D Turbo\\\",\\\"gameType\\\":\\\"TOURNAMENT\\\",\\\"gameVariant\\\":\\\"NLHE\\\",\\\"gameStatus\\\":\\\"FINISHED\\\",\\\"gameStartDateTime\\\":\\\"2023-02-25T19:00:00.000Z\\\",\\\"gameEndDateTime\\\":null,\\\"buyIn\\\":750,\\\"rake\\\":90,\\\"prizepool\\\":21780,\\\"totalEntries\\\":33,\\\"totalRebuys\\\":0,\\\"totalAddons\\\":0,\\\"venueId\\\":\\\"fd4f7fb1-67fd-4398-b4b4-d85722256d45\\\",\\\"entityId\\\":\\\"42101695-1332-48e3-963b-3c6ad4e909a0\\\",\\\"isSeries\\\":true,\\\"seriesName\\\":\\\"Signature Series\\\",\\\"isSatellite\\\":false,\\\"gameFrequency\\\":\\\"UNKNOWN\\\",\\\"wasEdited\\\":false},\\\"players\\\":{\\\"allPlayers\\\":[{\\\"name\\\":\\\"Maroun, Charlie\\\",\\\"rank\\\":1,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Casas, Alan\\\",\\\"rank\\\":2,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Awerbuch, Chad\\\",\\\"rank\\\":3,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Seymour, Marc\\\",\\\"rank\\\":4,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Abbas, Amir\\\",\\\"rank\\\":5,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Alam, George\\\",\\\"rank\\\":6,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Podvorec, Joseph\\\",\\\"rank\\\":6,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Luo, Louis\\\",\\\"rank\\\":7,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Uka, Uno\\\",\\\"rank\\\":8,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Bo, Marcello\\\",\\\"rank\\\":9,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"He, Yibo\\\",\\\"rank\\\":10,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Lo, Daniel\\\",\\\"rank\\\":10,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Sy, Yves\\\",\\\"rank\\\":11,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Cappelluto, Steven\\\",\\\"rank\\\":12,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Sakellariou, Tolly\\\",\\\"rank\\\":13,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Cunningham, Jarod\\\",\\\"rank\\\":14,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Panayides, Peter\\\",\\\"rank\\\":15,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Xenos, Con\\\",\\\"rank\\\":15,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Wong, Justin\\\",\\\"rank\\\":16,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Agresta, Adam\\\",\\\"rank\\\":17,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Ho, Desmond\\\",\\\"rank\\\":18,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Soto, Humberto\\\",\\\"rank\\\":18,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Burbar, Odai\\\",\\\"rank\\\":19,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Levy, Michael\\\",\\\"rank\\\":19,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null},{\\\"name\\\":\\\"Mathers, Jazz\\\",\\\"rank\\\":20,\\\"winnings\\\":0,\\\"points\\\":null,\\\"isQualification\\\":null,\\\"rebuys\\\":null,\\\"addons\\\":null}],\\\"totalPlayers\\\":33,\\\"hasCompleteResults\\\":true,\\\"totalPrizesPaid\\\":null,\\\"hasEntryList\\\":true,\\\"hasSeatingData\\\":false},\\\"metadata\\\":{\\\"processedAt\\\":\\\"2025-11-26T01:39:27.058Z\\\",\\\"sourceUrl\\\":\\\"https://kingsroom.com.au/tournament/?id=4\\\",\\\"venueId\\\":\\\"fd4f7fb1-67fd-4398-b4b4-d85722256d45\\\",\\\"entityId\\\":\\\"42101695-1332-48e3-963b-3c6ad4e909a0\\\",\\\"hasCompleteResults\\\":true,\\\"totalPlayersProcessed\\\":25,\\\"totalPrizesPaid\\\":0,\\\"wasEdited\\\":false}}\",\n      \"attributes\": {\n        \"ApproximateReceiveCount\": \"1\",\n        \"AWSTraceHeader\": \"Root=1-69265a4e-6ec7b2d22f9174fe13481ccb;Parent=5be9540b42ead8c5;Sampled=0;Lineage=1:80d373e6:0\",\n        \"SentTimestamp\": \"1764121167200\",\n        \"SequenceNumber\": \"18898359092512751616\",\n        \"MessageGroupId\": \"4\",\n        \"SenderId\": \"AROAXGZAMIHYSUMTO4ZVG:saveGameFunction-dev\",\n        \"MessageDeduplicationId\": \"0cc49ec2-fe21-4907-aaef-e39363e65169-1764121167058\",\n        \"ApproximateFirstReceiveTimestamp\": \"1764121167200\"\n      },\n      \"messageAttributes\": {},\n      \"md5OfBody\": \"e93982e1c7c38da2eb36547223c19843\",\n      \"eventSource\": \"aws:sqs\",\n      \"eventSourceARN\": \"arn:aws:sqs:ap-southeast-2:495599763953:GameProcessingQueue.fifo\",\n      \"awsRegion\": \"ap-southeast-2\"\n    }\n  ]\n}\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167754,
+    "message": "2025-11-26T01:39:27.754Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[HANDLER] Processing 1 SQS message(s).\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167754,
+    "message": "2025-11-26T01:39:27.754Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[HANDLER] Processing message ID: a0dd09c8-d4c6-4232-b674-5fad02b3c172\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167754,
+    "message": "2025-11-26T01:39:27.754Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[HANDLER] SUCCESS: Message body parsed.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167754,
+    "message": "2025-11-26T01:39:27.754Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[HANDLER] Game ID from SQS: 0cc49ec2-fe21-4907-aaef-e39363e65169\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167754,
+    "message": "2025-11-26T01:39:27.754Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[HANDLER] Entity ID from SQS: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167755,
+    "message": "2025-11-26T01:39:27.755Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Maroun, Charlie (ID: 0d9754454e4043c27bbe6d76319559be) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167795,
+    "message": "2025-11-26T01:39:27.795Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Casas, Alan (ID: 851034a446734a47613711a67c20ef2a) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167796,
+    "message": "2025-11-26T01:39:27.796Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Awerbuch, Chad (ID: 39250f624de3afa26f155c7ce4ea60e8) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167853,
+    "message": "2025-11-26T01:39:27.853Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Seymour, Marc (ID: f8d9f641c2c7d59b9c202bd4e77a5161) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167854,
+    "message": "2025-11-26T01:39:27.854Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Abbas, Amir (ID: 80ae53f268954c115412b8e685173232) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167854,
+    "message": "2025-11-26T01:39:27.854Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Alam, George (ID: 439101fddb185c1764ddd98b3d86cabc) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167854,
+    "message": "2025-11-26T01:39:27.854Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Podvorec, Joseph (ID: 3651d8b2bcddaae19f5c02f1078a9fa2) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167855,
+    "message": "2025-11-26T01:39:27.855Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Luo, Louis (ID: 3a4638063d155c9a331415b5469084e3) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167855,
+    "message": "2025-11-26T01:39:27.855Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Uka, Uno (ID: 0e34a5dc11bcb0a74e1214602d81a2d8) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167856,
+    "message": "2025-11-26T01:39:27.856Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Bo, Marcello (ID: 3f84bc5361832d3d50e7e177f96ae17a) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167856,
+    "message": "2025-11-26T01:39:27.856Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: He, Yibo (ID: 0f9cbd9d6e484f9e873c611f032591c1) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167913,
+    "message": "2025-11-26T01:39:27.913Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Lo, Daniel (ID: 74747c93cca572510b599cf5c0648c61) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167913,
+    "message": "2025-11-26T01:39:27.913Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Sy, Yves (ID: 674fdcae44f91178dcd4dfb6e9dae904) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167914,
+    "message": "2025-11-26T01:39:27.914Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Cappelluto, Steven (ID: 88de83b688e4b0c7d0b7a0a054892315) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167914,
+    "message": "2025-11-26T01:39:27.914Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Sakellariou, Tolly (ID: 63202821d5a9b413b05e31079373dcfb) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167914,
+    "message": "2025-11-26T01:39:27.914Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Cunningham, Jarod (ID: 3a3d31e5815de28357300807822a06bc) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167914,
+    "message": "2025-11-26T01:39:27.914Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Panayides, Peter (ID: 126b1bf3af74fe03777fe0dbcd8ea42a) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167914,
+    "message": "2025-11-26T01:39:27.914Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Xenos, Con (ID: ccd320e55565aebaaede97794ec2b337) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167916,
+    "message": "2025-11-26T01:39:27.916Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Wong, Justin (ID: e1eae06dbb66ff1b9f85c1f9d295591c) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167916,
+    "message": "2025-11-26T01:39:27.916Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Agresta, Adam (ID: b27cf7837057dfe2f2cfdb253ebca80e) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167973,
+    "message": "2025-11-26T01:39:27.973Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Ho, Desmond (ID: fcc904012a357b31efb186d339fee612) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167973,
+    "message": "2025-11-26T01:39:27.973Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Soto, Humberto (ID: d62147a76ada275cb69e35b881d15f96) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167974,
+    "message": "2025-11-26T01:39:27.974Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Burbar, Odai (ID: 51ae6955325ac28593c9a20285978ae7) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167974,
+    "message": "2025-11-26T01:39:27.974Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Levy, Michael (ID: d98cc10fd5c1bb6fa3357033aef7f551) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121167974,
+    "message": "2025-11-26T01:39:27.974Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Starting processing for player: Mathers, Jazz (ID: 8f1851d242c2d0553d6c2c0bc5904948) with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170414,
+    "message": "2025-11-26T01:39:30.414Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170414,
+    "message": "2025-11-26T01:39:30.414Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Maroun, Charlie (0d9754454e4043c27bbe6d76319559be)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170474,
+    "message": "2025-11-26T01:39:30.474Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170474,
+    "message": "2025-11-26T01:39:30.474Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Awerbuch, Chad (39250f624de3afa26f155c7ce4ea60e8)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170476,
+    "message": "2025-11-26T01:39:30.476Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170476,
+    "message": "2025-11-26T01:39:30.476Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Casas, Alan (851034a446734a47613711a67c20ef2a)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170534,
+    "message": "2025-11-26T01:39:30.534Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170534,
+    "message": "2025-11-26T01:39:30.534Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Seymour, Marc (f8d9f641c2c7d59b9c202bd4e77a5161)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170536,
+    "message": "2025-11-26T01:39:30.536Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170536,
+    "message": "2025-11-26T01:39:30.536Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Abbas, Amir (80ae53f268954c115412b8e685173232)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170595,
+    "message": "2025-11-26T01:39:30.595Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170595,
+    "message": "2025-11-26T01:39:30.595Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Alam, George (439101fddb185c1764ddd98b3d86cabc)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170653,
+    "message": "2025-11-26T01:39:30.653Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170653,
+    "message": "2025-11-26T01:39:30.653Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Luo, Louis (3a4638063d155c9a331415b5469084e3)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170655,
+    "message": "2025-11-26T01:39:30.655Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170655,
+    "message": "2025-11-26T01:39:30.655Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Uka, Uno (0e34a5dc11bcb0a74e1214602d81a2d8)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170716,
+    "message": "2025-11-26T01:39:30.716Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170716,
+    "message": "2025-11-26T01:39:30.716Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Bo, Marcello (3f84bc5361832d3d50e7e177f96ae17a)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170775,
+    "message": "2025-11-26T01:39:30.775Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170775,
+    "message": "2025-11-26T01:39:30.775Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player He, Yibo (0f9cbd9d6e484f9e873c611f032591c1)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170833,
+    "message": "2025-11-26T01:39:30.833Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170833,
+    "message": "2025-11-26T01:39:30.833Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Lo, Daniel (74747c93cca572510b599cf5c0648c61)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170835,
+    "message": "2025-11-26T01:39:30.835Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170835,
+    "message": "2025-11-26T01:39:30.835Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Podvorec, Joseph (3651d8b2bcddaae19f5c02f1078a9fa2)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170995,
+    "message": "2025-11-26T01:39:30.995Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 0d9754454e4043c27bbe6d76319559be. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121170995,
+    "message": "2025-11-26T01:39:30.995Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 0d9754454e4043c27bbe6d76319559be. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171055,
+    "message": "2025-11-26T01:39:31.055Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 39250f624de3afa26f155c7ce4ea60e8. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171055,
+    "message": "2025-11-26T01:39:31.055Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 39250f624de3afa26f155c7ce4ea60e8. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171095,
+    "message": "2025-11-26T01:39:31.095Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 851034a446734a47613711a67c20ef2a. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171096,
+    "message": "2025-11-26T01:39:31.096Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 851034a446734a47613711a67c20ef2a. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171154,
+    "message": "2025-11-26T01:39:31.154Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player f8d9f641c2c7d59b9c202bd4e77a5161. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171155,
+    "message": "2025-11-26T01:39:31.155Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player f8d9f641c2c7d59b9c202bd4e77a5161. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171215,
+    "message": "2025-11-26T01:39:31.215Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 80ae53f268954c115412b8e685173232. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171215,
+    "message": "2025-11-26T01:39:31.215Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 80ae53f268954c115412b8e685173232. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171273,
+    "message": "2025-11-26T01:39:31.273Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 439101fddb185c1764ddd98b3d86cabc. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171273,
+    "message": "2025-11-26T01:39:31.273Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 439101fddb185c1764ddd98b3d86cabc. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171275,
+    "message": "2025-11-26T01:39:31.275Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 3a4638063d155c9a331415b5469084e3. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171275,
+    "message": "2025-11-26T01:39:31.275Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 3a4638063d155c9a331415b5469084e3. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171335,
+    "message": "2025-11-26T01:39:31.335Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 0e34a5dc11bcb0a74e1214602d81a2d8. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171335,
+    "message": "2025-11-26T01:39:31.335Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 0e34a5dc11bcb0a74e1214602d81a2d8. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171393,
+    "message": "2025-11-26T01:39:31.393Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 3f84bc5361832d3d50e7e177f96ae17a. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171393,
+    "message": "2025-11-26T01:39:31.393Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 3f84bc5361832d3d50e7e177f96ae17a. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171396,
+    "message": "2025-11-26T01:39:31.396Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 0f9cbd9d6e484f9e873c611f032591c1. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171396,
+    "message": "2025-11-26T01:39:31.396Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 0f9cbd9d6e484f9e873c611f032591c1. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171454,
+    "message": "2025-11-26T01:39:31.454Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 74747c93cca572510b599cf5c0648c61. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171454,
+    "message": "2025-11-26T01:39:31.454Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 74747c93cca572510b599cf5c0648c61. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171513,
+    "message": "2025-11-26T01:39:31.513Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 3651d8b2bcddaae19f5c02f1078a9fa2. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171513,
+    "message": "2025-11-26T01:39:31.513Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 3651d8b2bcddaae19f5c02f1078a9fa2. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171516,
+    "message": "2025-11-26T01:39:31.516Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171516,
+    "message": "2025-11-26T01:39:31.516Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Xenos, Con (ccd320e55565aebaaede97794ec2b337)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171575,
+    "message": "2025-11-26T01:39:31.575Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171575,
+    "message": "2025-11-26T01:39:31.575Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Cunningham, Jarod (3a3d31e5815de28357300807822a06bc)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171576,
+    "message": "2025-11-26T01:39:31.576Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171576,
+    "message": "2025-11-26T01:39:31.576Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Wong, Justin (e1eae06dbb66ff1b9f85c1f9d295591c)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171635,
+    "message": "2025-11-26T01:39:31.635Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171635,
+    "message": "2025-11-26T01:39:31.635Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Panayides, Peter (126b1bf3af74fe03777fe0dbcd8ea42a)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171695,
+    "message": "2025-11-26T01:39:31.695Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171695,
+    "message": "2025-11-26T01:39:31.695Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Sakellariou, Tolly (63202821d5a9b413b05e31079373dcfb)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171774,
+    "message": "2025-11-26T01:39:31.774Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171774,
+    "message": "2025-11-26T01:39:31.774Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Sy, Yves (674fdcae44f91178dcd4dfb6e9dae904)\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171893,
+    "message": "2025-11-26T01:39:31.893Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 0d9754454e4043c27bbe6d76319559be\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171893,
+    "message": "2025-11-26T01:39:31.893Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171893,
+    "message": "2025-11-26T01:39:31.893Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 0d9754454e4043c27bbe6d76319559be.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171896,
+    "message": "2025-11-26T01:39:31.896Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 39250f624de3afa26f155c7ce4ea60e8\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171896,
+    "message": "2025-11-26T01:39:31.896Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171896,
+    "message": "2025-11-26T01:39:31.896Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 39250f624de3afa26f155c7ce4ea60e8.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171954,
+    "message": "2025-11-26T01:39:31.954Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 851034a446734a47613711a67c20ef2a\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171954,
+    "message": "2025-11-26T01:39:31.954Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171954,
+    "message": "2025-11-26T01:39:31.954Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 851034a446734a47613711a67c20ef2a.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171956,
+    "message": "2025-11-26T01:39:31.956Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player f8d9f641c2c7d59b9c202bd4e77a5161\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171956,
+    "message": "2025-11-26T01:39:31.956Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121171956,
+    "message": "2025-11-26T01:39:31.956Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for f8d9f641c2c7d59b9c202bd4e77a5161.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172014,
+    "message": "2025-11-26T01:39:32.014Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 80ae53f268954c115412b8e685173232\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172014,
+    "message": "2025-11-26T01:39:32.014Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172014,
+    "message": "2025-11-26T01:39:32.014Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 80ae53f268954c115412b8e685173232.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172016,
+    "message": "2025-11-26T01:39:32.016Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 439101fddb185c1764ddd98b3d86cabc\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172016,
+    "message": "2025-11-26T01:39:32.016Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172016,
+    "message": "2025-11-26T01:39:32.016Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 439101fddb185c1764ddd98b3d86cabc.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172095,
+    "message": "2025-11-26T01:39:32.095Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 3a4638063d155c9a331415b5469084e3\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172095,
+    "message": "2025-11-26T01:39:32.095Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172095,
+    "message": "2025-11-26T01:39:32.095Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 3a4638063d155c9a331415b5469084e3.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172153,
+    "message": "2025-11-26T01:39:32.153Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 0e34a5dc11bcb0a74e1214602d81a2d8\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172153,
+    "message": "2025-11-26T01:39:32.153Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172153,
+    "message": "2025-11-26T01:39:32.153Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 0e34a5dc11bcb0a74e1214602d81a2d8.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172155,
+    "message": "2025-11-26T01:39:32.155Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 3f84bc5361832d3d50e7e177f96ae17a\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172155,
+    "message": "2025-11-26T01:39:32.155Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172155,
+    "message": "2025-11-26T01:39:32.155Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 3f84bc5361832d3d50e7e177f96ae17a.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172235,
+    "message": "2025-11-26T01:39:32.235Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 0f9cbd9d6e484f9e873c611f032591c1\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172235,
+    "message": "2025-11-26T01:39:32.235Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172235,
+    "message": "2025-11-26T01:39:32.235Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 0f9cbd9d6e484f9e873c611f032591c1.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172293,
+    "message": "2025-11-26T01:39:32.293Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 74747c93cca572510b599cf5c0648c61\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172293,
+    "message": "2025-11-26T01:39:32.293Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172293,
+    "message": "2025-11-26T01:39:32.293Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 74747c93cca572510b599cf5c0648c61.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172353,
+    "message": "2025-11-26T01:39:32.353Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 3651d8b2bcddaae19f5c02f1078a9fa2\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172353,
+    "message": "2025-11-26T01:39:32.353Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172353,
+    "message": "2025-11-26T01:39:32.353Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 3651d8b2bcddaae19f5c02f1078a9fa2.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172355,
+    "message": "2025-11-26T01:39:32.355Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player ccd320e55565aebaaede97794ec2b337. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172355,
+    "message": "2025-11-26T01:39:32.355Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player ccd320e55565aebaaede97794ec2b337. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172413,
+    "message": "2025-11-26T01:39:32.413Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 3a3d31e5815de28357300807822a06bc. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172413,
+    "message": "2025-11-26T01:39:32.413Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 3a3d31e5815de28357300807822a06bc. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172415,
+    "message": "2025-11-26T01:39:32.415Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player e1eae06dbb66ff1b9f85c1f9d295591c. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172416,
+    "message": "2025-11-26T01:39:32.416Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player e1eae06dbb66ff1b9f85c1f9d295591c. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172474,
+    "message": "2025-11-26T01:39:32.474Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 126b1bf3af74fe03777fe0dbcd8ea42a. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172474,
+    "message": "2025-11-26T01:39:32.474Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 126b1bf3af74fe03777fe0dbcd8ea42a. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172476,
+    "message": "2025-11-26T01:39:32.476Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 63202821d5a9b413b05e31079373dcfb. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172476,
+    "message": "2025-11-26T01:39:32.476Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 63202821d5a9b413b05e31079373dcfb. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172535,
+    "message": "2025-11-26T01:39:32.535Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 674fdcae44f91178dcd4dfb6e9dae904. Creating record.\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172535,
+    "message": "2025-11-26T01:39:32.535Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 674fdcae44f91178dcd4dfb6e9dae904. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121172736
+  },
+  {
+    "timestamp": 1764121172754,
+    "message": "2025-11-26T01:39:32.754Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172754,
+    "message": "2025-11-26T01:39:32.754Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172754,
+    "message": "2025-11-26T01:39:32.754Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 0d9754454e4043c27bbe6d76319559be at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172756,
+    "message": "2025-11-26T01:39:32.756Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172756,
+    "message": "2025-11-26T01:39:32.756Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172756,
+    "message": "2025-11-26T01:39:32.756Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 39250f624de3afa26f155c7ce4ea60e8 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172816,
+    "message": "2025-11-26T01:39:32.816Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172816,
+    "message": "2025-11-26T01:39:32.816Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172816,
+    "message": "2025-11-26T01:39:32.816Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 851034a446734a47613711a67c20ef2a at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172875,
+    "message": "2025-11-26T01:39:32.875Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172875,
+    "message": "2025-11-26T01:39:32.875Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172875,
+    "message": "2025-11-26T01:39:32.875Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player f8d9f641c2c7d59b9c202bd4e77a5161 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172933,
+    "message": "2025-11-26T01:39:32.933Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172933,
+    "message": "2025-11-26T01:39:32.933Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172933,
+    "message": "2025-11-26T01:39:32.933Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 80ae53f268954c115412b8e685173232 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172935,
+    "message": "2025-11-26T01:39:32.935Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172935,
+    "message": "2025-11-26T01:39:32.935Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172935,
+    "message": "2025-11-26T01:39:32.935Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 439101fddb185c1764ddd98b3d86cabc at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172993,
+    "message": "2025-11-26T01:39:32.993Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172993,
+    "message": "2025-11-26T01:39:32.993Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172993,
+    "message": "2025-11-26T01:39:32.993Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 3a4638063d155c9a331415b5469084e3 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172995,
+    "message": "2025-11-26T01:39:32.995Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172995,
+    "message": "2025-11-26T01:39:32.995Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172995,
+    "message": "2025-11-26T01:39:32.995Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 0e34a5dc11bcb0a74e1214602d81a2d8 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172996,
+    "message": "2025-11-26T01:39:32.996Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172996,
+    "message": "2025-11-26T01:39:32.996Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121172996,
+    "message": "2025-11-26T01:39:32.996Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 3f84bc5361832d3d50e7e177f96ae17a at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173034,
+    "message": "2025-11-26T01:39:33.034Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173034,
+    "message": "2025-11-26T01:39:33.034Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173034,
+    "message": "2025-11-26T01:39:33.034Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 0f9cbd9d6e484f9e873c611f032591c1 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173036,
+    "message": "2025-11-26T01:39:33.036Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173036,
+    "message": "2025-11-26T01:39:33.036Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173036,
+    "message": "2025-11-26T01:39:33.036Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 74747c93cca572510b599cf5c0648c61 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173094,
+    "message": "2025-11-26T01:39:33.094Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173094,
+    "message": "2025-11-26T01:39:33.094Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173094,
+    "message": "2025-11-26T01:39:33.094Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 3651d8b2bcddaae19f5c02f1078a9fa2 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173153,
+    "message": "2025-11-26T01:39:33.153Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player ccd320e55565aebaaede97794ec2b337\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173153,
+    "message": "2025-11-26T01:39:33.153Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173153,
+    "message": "2025-11-26T01:39:33.153Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for ccd320e55565aebaaede97794ec2b337.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173155,
+    "message": "2025-11-26T01:39:33.155Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 3a3d31e5815de28357300807822a06bc\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173156,
+    "message": "2025-11-26T01:39:33.156Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173156,
+    "message": "2025-11-26T01:39:33.156Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 3a3d31e5815de28357300807822a06bc.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173214,
+    "message": "2025-11-26T01:39:33.214Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player e1eae06dbb66ff1b9f85c1f9d295591c\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173214,
+    "message": "2025-11-26T01:39:33.214Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173214,
+    "message": "2025-11-26T01:39:33.214Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for e1eae06dbb66ff1b9f85c1f9d295591c.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173216,
+    "message": "2025-11-26T01:39:33.216Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 126b1bf3af74fe03777fe0dbcd8ea42a\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173216,
+    "message": "2025-11-26T01:39:33.216Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173216,
+    "message": "2025-11-26T01:39:33.216Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 126b1bf3af74fe03777fe0dbcd8ea42a.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173274,
+    "message": "2025-11-26T01:39:33.274Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 63202821d5a9b413b05e31079373dcfb\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173274,
+    "message": "2025-11-26T01:39:33.274Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173274,
+    "message": "2025-11-26T01:39:33.274Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 63202821d5a9b413b05e31079373dcfb.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173316,
+    "message": "2025-11-26T01:39:33.316Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 674fdcae44f91178dcd4dfb6e9dae904\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173316,
+    "message": "2025-11-26T01:39:33.316Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173316,
+    "message": "2025-11-26T01:39:33.316Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 674fdcae44f91178dcd4dfb6e9dae904.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173394,
+    "message": "2025-11-26T01:39:33.394Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173413,
+    "message": "2025-11-26T01:39:33.413Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Agresta, Adam (b27cf7837057dfe2f2cfdb253ebca80e)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173415,
+    "message": "2025-11-26T01:39:33.415Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173415,
+    "message": "2025-11-26T01:39:33.415Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Ho, Desmond (fcc904012a357b31efb186d339fee612)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173416,
+    "message": "2025-11-26T01:39:33.416Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173416,
+    "message": "2025-11-26T01:39:33.416Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Cappelluto, Steven (88de83b688e4b0c7d0b7a0a054892315)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173474,
+    "message": "2025-11-26T01:39:33.474Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173474,
+    "message": "2025-11-26T01:39:33.474Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Soto, Humberto (d62147a76ada275cb69e35b881d15f96)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173476,
+    "message": "2025-11-26T01:39:33.476Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173476,
+    "message": "2025-11-26T01:39:33.476Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Burbar, Odai (51ae6955325ac28593c9a20285978ae7)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173936,
+    "message": "2025-11-26T01:39:33.936Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173936,
+    "message": "2025-11-26T01:39:33.936Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173936,
+    "message": "2025-11-26T01:39:33.936Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player ccd320e55565aebaaede97794ec2b337 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173994,
+    "message": "2025-11-26T01:39:33.994Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173994,
+    "message": "2025-11-26T01:39:33.994Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173994,
+    "message": "2025-11-26T01:39:33.994Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 3a3d31e5815de28357300807822a06bc at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173996,
+    "message": "2025-11-26T01:39:33.996Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173996,
+    "message": "2025-11-26T01:39:33.996Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121173996,
+    "message": "2025-11-26T01:39:33.996Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player e1eae06dbb66ff1b9f85c1f9d295591c at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174033,
+    "message": "2025-11-26T01:39:34.033Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174033,
+    "message": "2025-11-26T01:39:34.033Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174033,
+    "message": "2025-11-26T01:39:34.033Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 126b1bf3af74fe03777fe0dbcd8ea42a at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174035,
+    "message": "2025-11-26T01:39:34.035Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174035,
+    "message": "2025-11-26T01:39:34.035Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174035,
+    "message": "2025-11-26T01:39:34.035Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 63202821d5a9b413b05e31079373dcfb at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174036,
+    "message": "2025-11-26T01:39:34.036Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174036,
+    "message": "2025-11-26T01:39:34.036Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174036,
+    "message": "2025-11-26T01:39:34.036Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 674fdcae44f91178dcd4dfb6e9dae904 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174094,
+    "message": "2025-11-26T01:39:34.094Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player b27cf7837057dfe2f2cfdb253ebca80e. Creating record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174095,
+    "message": "2025-11-26T01:39:34.095Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player b27cf7837057dfe2f2cfdb253ebca80e. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174154,
+    "message": "2025-11-26T01:39:34.154Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player fcc904012a357b31efb186d339fee612. Creating record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174154,
+    "message": "2025-11-26T01:39:34.154Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player fcc904012a357b31efb186d339fee612. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174234,
+    "message": "2025-11-26T01:39:34.234Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 88de83b688e4b0c7d0b7a0a054892315. Creating record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174234,
+    "message": "2025-11-26T01:39:34.234Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 88de83b688e4b0c7d0b7a0a054892315. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174236,
+    "message": "2025-11-26T01:39:34.236Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player d62147a76ada275cb69e35b881d15f96. Creating record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174236,
+    "message": "2025-11-26T01:39:34.236Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player d62147a76ada275cb69e35b881d15f96. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174314,
+    "message": "2025-11-26T01:39:34.314Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174314,
+    "message": "2025-11-26T01:39:34.314Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Levy, Michael (d98cc10fd5c1bb6fa3357033aef7f551)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174355,
+    "message": "2025-11-26T01:39:34.355Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 1: upsertPlayerRecord...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174356,
+    "message": "2025-11-26T01:39:34.356Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Starting upsert for player Mathers, Jazz (8f1851d242c2d0553d6c2c0bc5904948)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174415,
+    "message": "2025-11-26T01:39:34.415Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174416,
+    "message": "2025-11-26T01:39:34.416Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174416,
+    "message": "2025-11-26T01:39:34.416Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 0d9754454e4043c27bbe6d76319559be. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174474,
+    "message": "2025-11-26T01:39:34.474Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174474,
+    "message": "2025-11-26T01:39:34.474Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174474,
+    "message": "2025-11-26T01:39:34.474Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 39250f624de3afa26f155c7ce4ea60e8. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174476,
+    "message": "2025-11-26T01:39:34.476Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174476,
+    "message": "2025-11-26T01:39:34.476Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174476,
+    "message": "2025-11-26T01:39:34.476Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 851034a446734a47613711a67c20ef2a. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174534,
+    "message": "2025-11-26T01:39:34.534Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174534,
+    "message": "2025-11-26T01:39:34.534Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174534,
+    "message": "2025-11-26T01:39:34.534Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player f8d9f641c2c7d59b9c202bd4e77a5161. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174535,
+    "message": "2025-11-26T01:39:34.535Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174535,
+    "message": "2025-11-26T01:39:34.535Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174535,
+    "message": "2025-11-26T01:39:34.535Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 80ae53f268954c115412b8e685173232. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174593,
+    "message": "2025-11-26T01:39:34.593Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174593,
+    "message": "2025-11-26T01:39:34.593Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174593,
+    "message": "2025-11-26T01:39:34.593Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 439101fddb185c1764ddd98b3d86cabc. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174595,
+    "message": "2025-11-26T01:39:34.595Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174595,
+    "message": "2025-11-26T01:39:34.595Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174595,
+    "message": "2025-11-26T01:39:34.595Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 3a4638063d155c9a331415b5469084e3. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174654,
+    "message": "2025-11-26T01:39:34.654Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174654,
+    "message": "2025-11-26T01:39:34.654Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174654,
+    "message": "2025-11-26T01:39:34.654Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 0e34a5dc11bcb0a74e1214602d81a2d8. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174656,
+    "message": "2025-11-26T01:39:34.656Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174656,
+    "message": "2025-11-26T01:39:34.656Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174656,
+    "message": "2025-11-26T01:39:34.656Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 3f84bc5361832d3d50e7e177f96ae17a. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174714,
+    "message": "2025-11-26T01:39:34.714Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174714,
+    "message": "2025-11-26T01:39:34.714Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174714,
+    "message": "2025-11-26T01:39:34.714Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 0f9cbd9d6e484f9e873c611f032591c1. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174715,
+    "message": "2025-11-26T01:39:34.715Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174716,
+    "message": "2025-11-26T01:39:34.716Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174716,
+    "message": "2025-11-26T01:39:34.716Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 74747c93cca572510b599cf5c0648c61. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174753,
+    "message": "2025-11-26T01:39:34.753Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174753,
+    "message": "2025-11-26T01:39:34.753Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121174753,
+    "message": "2025-11-26T01:39:34.753Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 3651d8b2bcddaae19f5c02f1078a9fa2. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175074,
+    "message": "2025-11-26T01:39:35.074Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player b27cf7837057dfe2f2cfdb253ebca80e\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175074,
+    "message": "2025-11-26T01:39:35.074Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175074,
+    "message": "2025-11-26T01:39:35.074Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for b27cf7837057dfe2f2cfdb253ebca80e.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175133,
+    "message": "2025-11-26T01:39:35.133Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player fcc904012a357b31efb186d339fee612\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175134,
+    "message": "2025-11-26T01:39:35.134Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175134,
+    "message": "2025-11-26T01:39:35.134Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for fcc904012a357b31efb186d339fee612.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175135,
+    "message": "2025-11-26T01:39:35.135Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 88de83b688e4b0c7d0b7a0a054892315\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175136,
+    "message": "2025-11-26T01:39:35.136Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175136,
+    "message": "2025-11-26T01:39:35.136Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 88de83b688e4b0c7d0b7a0a054892315.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175193,
+    "message": "2025-11-26T01:39:35.193Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player d62147a76ada275cb69e35b881d15f96\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175194,
+    "message": "2025-11-26T01:39:35.194Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175194,
+    "message": "2025-11-26T01:39:35.194Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for d62147a76ada275cb69e35b881d15f96.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175196,
+    "message": "2025-11-26T01:39:35.196Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player d98cc10fd5c1bb6fa3357033aef7f551. Creating record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175196,
+    "message": "2025-11-26T01:39:35.196Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player d98cc10fd5c1bb6fa3357033aef7f551. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175276,
+    "message": "2025-11-26T01:39:35.276Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 51ae6955325ac28593c9a20285978ae7. Creating record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175313,
+    "message": "2025-11-26T01:39:35.313Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 51ae6955325ac28593c9a20285978ae7. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175795,
+    "message": "2025-11-26T01:39:35.795Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175795,
+    "message": "2025-11-26T01:39:35.795Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175795,
+    "message": "2025-11-26T01:39:35.795Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player ccd320e55565aebaaede97794ec2b337. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175796,
+    "message": "2025-11-26T01:39:35.796Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175796,
+    "message": "2025-11-26T01:39:35.796Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175796,
+    "message": "2025-11-26T01:39:35.796Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 3a3d31e5815de28357300807822a06bc. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175854,
+    "message": "2025-11-26T01:39:35.854Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175854,
+    "message": "2025-11-26T01:39:35.854Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175854,
+    "message": "2025-11-26T01:39:35.854Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player e1eae06dbb66ff1b9f85c1f9d295591c. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175856,
+    "message": "2025-11-26T01:39:35.856Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175856,
+    "message": "2025-11-26T01:39:35.856Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175856,
+    "message": "2025-11-26T01:39:35.856Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 126b1bf3af74fe03777fe0dbcd8ea42a. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175934,
+    "message": "2025-11-26T01:39:35.934Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175934,
+    "message": "2025-11-26T01:39:35.934Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175934,
+    "message": "2025-11-26T01:39:35.934Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 63202821d5a9b413b05e31079373dcfb. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175936,
+    "message": "2025-11-26T01:39:35.936Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175973,
+    "message": "2025-11-26T01:39:35.973Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175973,
+    "message": "2025-11-26T01:39:35.973Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 674fdcae44f91178dcd4dfb6e9dae904. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175975,
+    "message": "2025-11-26T01:39:35.975Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175975,
+    "message": "2025-11-26T01:39:35.975Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175975,
+    "message": "2025-11-26T01:39:35.975Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player b27cf7837057dfe2f2cfdb253ebca80e at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121175976,
+    "message": "2025-11-26T01:39:35.976Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176033,
+    "message": "2025-11-26T01:39:36.033Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176033,
+    "message": "2025-11-26T01:39:36.033Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player fcc904012a357b31efb186d339fee612 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176035,
+    "message": "2025-11-26T01:39:36.035Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176035,
+    "message": "2025-11-26T01:39:36.035Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176035,
+    "message": "2025-11-26T01:39:36.035Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 88de83b688e4b0c7d0b7a0a054892315 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176036,
+    "message": "2025-11-26T01:39:36.036Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176036,
+    "message": "2025-11-26T01:39:36.036Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176036,
+    "message": "2025-11-26T01:39:36.036Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player d62147a76ada275cb69e35b881d15f96 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176094,
+    "message": "2025-11-26T01:39:36.094Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player d98cc10fd5c1bb6fa3357033aef7f551\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176094,
+    "message": "2025-11-26T01:39:36.094Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176094,
+    "message": "2025-11-26T01:39:36.094Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for d98cc10fd5c1bb6fa3357033aef7f551.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176096,
+    "message": "2025-11-26T01:39:36.096Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 51ae6955325ac28593c9a20285978ae7\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176096,
+    "message": "2025-11-26T01:39:36.096Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176096,
+    "message": "2025-11-26T01:39:36.096Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 51ae6955325ac28593c9a20285978ae7.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176314,
+    "message": "2025-11-26T01:39:36.314Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] New player 8f1851d242c2d0553d6c2c0bc5904948. Creating record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176314,
+    "message": "2025-11-26T01:39:36.314Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TARGETING] New player 8f1851d242c2d0553d6c2c0bc5904948. Classifying based on game date: 2023-02-25T19:00:00.000Z\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176394,
+    "message": "2025-11-26T01:39:36.394Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176394,
+    "message": "2025-11-26T01:39:36.394Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176395,
+    "message": "2025-11-26T01:39:36.395Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 0d9754454e4043c27bbe6d76319559be.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176575,
+    "message": "2025-11-26T01:39:36.575Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176575,
+    "message": "2025-11-26T01:39:36.575Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176575,
+    "message": "2025-11-26T01:39:36.575Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 39250f624de3afa26f155c7ce4ea60e8.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176793,
+    "message": "2025-11-26T01:39:36.793Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176793,
+    "message": "2025-11-26T01:39:36.793Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176793,
+    "message": "2025-11-26T01:39:36.793Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 851034a446734a47613711a67c20ef2a.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121176955,
+    "message": "2025-11-26T01:39:36.955Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177033,
+    "message": "2025-11-26T01:39:37.033Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177033,
+    "message": "2025-11-26T01:39:37.033Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player f8d9f641c2c7d59b9c202bd4e77a5161.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177055,
+    "message": "2025-11-26T01:39:37.055Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177055,
+    "message": "2025-11-26T01:39:37.055Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177055,
+    "message": "2025-11-26T01:39:37.055Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 80ae53f268954c115412b8e685173232.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177093,
+    "message": "2025-11-26T01:39:37.093Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177093,
+    "message": "2025-11-26T01:39:37.093Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177093,
+    "message": "2025-11-26T01:39:37.093Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 439101fddb185c1764ddd98b3d86cabc.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177095,
+    "message": "2025-11-26T01:39:37.095Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177095,
+    "message": "2025-11-26T01:39:37.095Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177095,
+    "message": "2025-11-26T01:39:37.095Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 3a4638063d155c9a331415b5469084e3.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177154,
+    "message": "2025-11-26T01:39:37.154Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177154,
+    "message": "2025-11-26T01:39:37.154Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177154,
+    "message": "2025-11-26T01:39:37.154Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 0e34a5dc11bcb0a74e1214602d81a2d8.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177156,
+    "message": "2025-11-26T01:39:37.156Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177193,
+    "message": "2025-11-26T01:39:37.193Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177193,
+    "message": "2025-11-26T01:39:37.193Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 3f84bc5361832d3d50e7e177f96ae17a.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177294,
+    "message": "2025-11-26T01:39:37.294Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177294,
+    "message": "2025-11-26T01:39:37.294Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177294,
+    "message": "2025-11-26T01:39:37.294Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 0f9cbd9d6e484f9e873c611f032591c1.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177296,
+    "message": "2025-11-26T01:39:37.296Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177296,
+    "message": "2025-11-26T01:39:37.296Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177296,
+    "message": "2025-11-26T01:39:37.296Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 74747c93cca572510b599cf5c0648c61.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177395,
+    "message": "2025-11-26T01:39:37.395Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177433,
+    "message": "2025-11-26T01:39:37.433Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177433,
+    "message": "2025-11-26T01:39:37.433Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 3651d8b2bcddaae19f5c02f1078a9fa2.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177896,
+    "message": "2025-11-26T01:39:37.896Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177933,
+    "message": "2025-11-26T01:39:37.933Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177933,
+    "message": "2025-11-26T01:39:37.933Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player d98cc10fd5c1bb6fa3357033aef7f551 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177935,
+    "message": "2025-11-26T01:39:37.935Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177935,
+    "message": "2025-11-26T01:39:37.935Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177935,
+    "message": "2025-11-26T01:39:37.935Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 51ae6955325ac28593c9a20285978ae7 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177936,
+    "message": "2025-11-26T01:39:37.936Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PLAYER-UPSERT] Created new player 8f1851d242c2d0553d6c2c0bc5904948\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177936,
+    "message": "2025-11-26T01:39:37.936Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 2: createPlayerResult...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121177936,
+    "message": "2025-11-26T01:39:37.936Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Attempting result creation for 8f1851d242c2d0553d6c2c0bc5904948.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178055,
+    "message": "2025-11-26T01:39:38.055Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178055,
+    "message": "2025-11-26T01:39:38.055Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178055,
+    "message": "2025-11-26T01:39:38.055Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178114,
+    "message": "2025-11-26T01:39:38.114Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178114,
+    "message": "2025-11-26T01:39:38.114Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178114,
+    "message": "2025-11-26T01:39:38.114Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178116,
+    "message": "2025-11-26T01:39:38.116Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178116,
+    "message": "2025-11-26T01:39:38.116Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178116,
+    "message": "2025-11-26T01:39:38.116Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178174,
+    "message": "2025-11-26T01:39:38.174Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178174,
+    "message": "2025-11-26T01:39:38.174Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178174,
+    "message": "2025-11-26T01:39:38.174Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178176,
+    "message": "2025-11-26T01:39:38.176Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178176,
+    "message": "2025-11-26T01:39:38.176Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178176,
+    "message": "2025-11-26T01:39:38.176Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178214,
+    "message": "2025-11-26T01:39:38.214Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178215,
+    "message": "2025-11-26T01:39:38.215Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178215,
+    "message": "2025-11-26T01:39:38.215Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178216,
+    "message": "2025-11-26T01:39:38.216Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178216,
+    "message": "2025-11-26T01:39:38.216Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178216,
+    "message": "2025-11-26T01:39:38.216Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178334,
+    "message": "2025-11-26T01:39:38.334Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178353,
+    "message": "2025-11-26T01:39:38.353Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178353,
+    "message": "2025-11-26T01:39:38.353Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178355,
+    "message": "2025-11-26T01:39:38.355Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178355,
+    "message": "2025-11-26T01:39:38.355Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178355,
+    "message": "2025-11-26T01:39:38.355Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178435,
+    "message": "2025-11-26T01:39:38.435Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178435,
+    "message": "2025-11-26T01:39:38.435Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178435,
+    "message": "2025-11-26T01:39:38.435Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178493,
+    "message": "2025-11-26T01:39:38.493Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178493,
+    "message": "2025-11-26T01:39:38.493Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178493,
+    "message": "2025-11-26T01:39:38.493Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178495,
+    "message": "2025-11-26T01:39:38.495Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178495,
+    "message": "2025-11-26T01:39:38.495Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178495,
+    "message": "2025-11-26T01:39:38.495Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178555,
+    "message": "2025-11-26T01:39:38.555Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178555,
+    "message": "2025-11-26T01:39:38.555Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178555,
+    "message": "2025-11-26T01:39:38.555Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player ccd320e55565aebaaede97794ec2b337.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178613,
+    "message": "2025-11-26T01:39:38.613Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178613,
+    "message": "2025-11-26T01:39:38.613Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178613,
+    "message": "2025-11-26T01:39:38.613Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 3a3d31e5815de28357300807822a06bc.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178615,
+    "message": "2025-11-26T01:39:38.615Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178615,
+    "message": "2025-11-26T01:39:38.615Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178615,
+    "message": "2025-11-26T01:39:38.615Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player e1eae06dbb66ff1b9f85c1f9d295591c.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178673,
+    "message": "2025-11-26T01:39:38.673Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178673,
+    "message": "2025-11-26T01:39:38.673Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178673,
+    "message": "2025-11-26T01:39:38.673Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 126b1bf3af74fe03777fe0dbcd8ea42a.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178675,
+    "message": "2025-11-26T01:39:38.675Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178676,
+    "message": "2025-11-26T01:39:38.676Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178676,
+    "message": "2025-11-26T01:39:38.676Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 63202821d5a9b413b05e31079373dcfb.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178734,
+    "message": "2025-11-26T01:39:38.734Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178753,
+    "message": "2025-11-26T01:39:38.753Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178753,
+    "message": "2025-11-26T01:39:38.753Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 674fdcae44f91178dcd4dfb6e9dae904.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178756,
+    "message": "2025-11-26T01:39:38.756Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178756,
+    "message": "2025-11-26T01:39:38.756Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178756,
+    "message": "2025-11-26T01:39:38.756Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player b27cf7837057dfe2f2cfdb253ebca80e. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178834,
+    "message": "2025-11-26T01:39:38.834Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178834,
+    "message": "2025-11-26T01:39:38.834Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178834,
+    "message": "2025-11-26T01:39:38.834Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player fcc904012a357b31efb186d339fee612. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178836,
+    "message": "2025-11-26T01:39:38.836Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178836,
+    "message": "2025-11-26T01:39:38.836Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178836,
+    "message": "2025-11-26T01:39:38.836Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 88de83b688e4b0c7d0b7a0a054892315. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178894,
+    "message": "2025-11-26T01:39:38.894Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178894,
+    "message": "2025-11-26T01:39:38.894Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121178894,
+    "message": "2025-11-26T01:39:38.894Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player d62147a76ada275cb69e35b881d15f96. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179175,
+    "message": "2025-11-26T01:39:39.175Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[RESULT-CREATE] Created result successfully.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179175,
+    "message": "2025-11-26T01:39:39.175Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 3: upsertPlayerVenue...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179175,
+    "message": "2025-11-26T01:39:39.175Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Starting upsert for player 8f1851d242c2d0553d6c2c0bc5904948 at venue fd4f7fb1-67fd-4398-b4b4-d85722256d45.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179353,
+    "message": "2025-11-26T01:39:39.353Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179355,
+    "message": "2025-11-26T01:39:39.355Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179413,
+    "message": "2025-11-26T01:39:39.413Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179415,
+    "message": "2025-11-26T01:39:39.415Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179474,
+    "message": "2025-11-26T01:39:39.474Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179573,
+    "message": "2025-11-26T01:39:39.573Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179655,
+    "message": "2025-11-26T01:39:39.655Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179713,
+    "message": "2025-11-26T01:39:39.713Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179773,
+    "message": "2025-11-26T01:39:39.773Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179775,
+    "message": "2025-11-26T01:39:39.775Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179835,
+    "message": "2025-11-26T01:39:39.835Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179875,
+    "message": "2025-11-26T01:39:39.875Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179915,
+    "message": "2025-11-26T01:39:39.915Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179915,
+    "message": "2025-11-26T01:39:39.915Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179915,
+    "message": "2025-11-26T01:39:39.915Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179916,
+    "message": "2025-11-26T01:39:39.916Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179916,
+    "message": "2025-11-26T01:39:39.916Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121179916,
+    "message": "2025-11-26T01:39:39.916Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180015,
+    "message": "2025-11-26T01:39:40.015Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180015,
+    "message": "2025-11-26T01:39:40.015Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180015,
+    "message": "2025-11-26T01:39:40.015Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180016,
+    "message": "2025-11-26T01:39:40.016Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180016,
+    "message": "2025-11-26T01:39:40.016Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180016,
+    "message": "2025-11-26T01:39:40.016Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180074,
+    "message": "2025-11-26T01:39:40.074Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180074,
+    "message": "2025-11-26T01:39:40.074Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180074,
+    "message": "2025-11-26T01:39:40.074Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180076,
+    "message": "2025-11-26T01:39:40.076Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180076,
+    "message": "2025-11-26T01:39:40.076Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180076,
+    "message": "2025-11-26T01:39:40.076Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180334,
+    "message": "2025-11-26T01:39:40.334Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180335,
+    "message": "2025-11-26T01:39:40.335Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180335,
+    "message": "2025-11-26T01:39:40.335Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player d98cc10fd5c1bb6fa3357033aef7f551. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180336,
+    "message": "2025-11-26T01:39:40.336Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180336,
+    "message": "2025-11-26T01:39:40.336Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180336,
+    "message": "2025-11-26T01:39:40.336Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 51ae6955325ac28593c9a20285978ae7. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180435,
+    "message": "2025-11-26T01:39:40.435Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 0d9754454e4043c27bbe6d76319559be.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180435,
+    "message": "2025-11-26T01:39:40.435Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Maroun, Charlie completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180435,
+    "message": "2025-11-26T01:39:40.435Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 39250f624de3afa26f155c7ce4ea60e8.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180435,
+    "message": "2025-11-26T01:39:40.435Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Awerbuch, Chad completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180436,
+    "message": "2025-11-26T01:39:40.436Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 851034a446734a47613711a67c20ef2a.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180436,
+    "message": "2025-11-26T01:39:40.436Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Casas, Alan completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180436,
+    "message": "2025-11-26T01:39:40.436Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for f8d9f641c2c7d59b9c202bd4e77a5161.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180436,
+    "message": "2025-11-26T01:39:40.436Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Seymour, Marc completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180436,
+    "message": "2025-11-26T01:39:40.436Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 80ae53f268954c115412b8e685173232.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180436,
+    "message": "2025-11-26T01:39:40.436Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Abbas, Amir completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180493,
+    "message": "2025-11-26T01:39:40.493Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 439101fddb185c1764ddd98b3d86cabc.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180493,
+    "message": "2025-11-26T01:39:40.493Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Alam, George completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180494,
+    "message": "2025-11-26T01:39:40.494Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 3a4638063d155c9a331415b5469084e3.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180494,
+    "message": "2025-11-26T01:39:40.494Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Luo, Louis completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180496,
+    "message": "2025-11-26T01:39:40.496Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 0e34a5dc11bcb0a74e1214602d81a2d8.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180496,
+    "message": "2025-11-26T01:39:40.496Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Uka, Uno completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180553,
+    "message": "2025-11-26T01:39:40.553Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 3f84bc5361832d3d50e7e177f96ae17a.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180553,
+    "message": "2025-11-26T01:39:40.553Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Bo, Marcello completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180554,
+    "message": "2025-11-26T01:39:40.554Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 0f9cbd9d6e484f9e873c611f032591c1.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180554,
+    "message": "2025-11-26T01:39:40.554Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player He, Yibo completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180554,
+    "message": "2025-11-26T01:39:40.554Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 74747c93cca572510b599cf5c0648c61.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180554,
+    "message": "2025-11-26T01:39:40.554Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Lo, Daniel completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180555,
+    "message": "2025-11-26T01:39:40.555Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 3651d8b2bcddaae19f5c02f1078a9fa2.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180555,
+    "message": "2025-11-26T01:39:40.555Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Podvorec, Joseph completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180555,
+    "message": "2025-11-26T01:39:40.555Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180615,
+    "message": "2025-11-26T01:39:40.615Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180655,
+    "message": "2025-11-26T01:39:40.655Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180733,
+    "message": "2025-11-26T01:39:40.733Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180735,
+    "message": "2025-11-26T01:39:40.735Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180814,
+    "message": "2025-11-26T01:39:40.814Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180836,
+    "message": "2025-11-26T01:39:40.836Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180836,
+    "message": "2025-11-26T01:39:40.836Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180836,
+    "message": "2025-11-26T01:39:40.836Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player b27cf7837057dfe2f2cfdb253ebca80e.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180914,
+    "message": "2025-11-26T01:39:40.914Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180914,
+    "message": "2025-11-26T01:39:40.914Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180914,
+    "message": "2025-11-26T01:39:40.914Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player fcc904012a357b31efb186d339fee612.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180916,
+    "message": "2025-11-26T01:39:40.916Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180916,
+    "message": "2025-11-26T01:39:40.916Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180916,
+    "message": "2025-11-26T01:39:40.916Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 88de83b688e4b0c7d0b7a0a054892315.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180974,
+    "message": "2025-11-26T01:39:40.974Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180974,
+    "message": "2025-11-26T01:39:40.974Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121180974,
+    "message": "2025-11-26T01:39:40.974Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player d62147a76ada275cb69e35b881d15f96.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181094,
+    "message": "2025-11-26T01:39:41.094Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[VENUE-UPSERT] Created new PlayerVenue record.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181094,
+    "message": "2025-11-26T01:39:41.094Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 4: upsertPlayerSummary...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181094,
+    "message": "2025-11-26T01:39:41.094Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Starting upsert for player 8f1851d242c2d0553d6c2c0bc5904948. (NewVenue: true)\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181214,
+    "message": "2025-11-26T01:39:41.214Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for ccd320e55565aebaaede97794ec2b337.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181214,
+    "message": "2025-11-26T01:39:41.214Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Xenos, Con completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181215,
+    "message": "2025-11-26T01:39:41.215Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 3a3d31e5815de28357300807822a06bc.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181215,
+    "message": "2025-11-26T01:39:41.215Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Cunningham, Jarod completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181215,
+    "message": "2025-11-26T01:39:41.215Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for e1eae06dbb66ff1b9f85c1f9d295591c.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181215,
+    "message": "2025-11-26T01:39:41.215Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Wong, Justin completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181293,
+    "message": "2025-11-26T01:39:41.293Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 126b1bf3af74fe03777fe0dbcd8ea42a.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181293,
+    "message": "2025-11-26T01:39:41.293Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Panayides, Peter completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181294,
+    "message": "2025-11-26T01:39:41.294Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 63202821d5a9b413b05e31079373dcfb.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181294,
+    "message": "2025-11-26T01:39:41.294Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Sakellariou, Tolly completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181294,
+    "message": "2025-11-26T01:39:41.294Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 674fdcae44f91178dcd4dfb6e9dae904.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181294,
+    "message": "2025-11-26T01:39:41.294Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Sy, Yves completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181295,
+    "message": "2025-11-26T01:39:41.295Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181295,
+    "message": "2025-11-26T01:39:41.295Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181295,
+    "message": "2025-11-26T01:39:41.295Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181353,
+    "message": "2025-11-26T01:39:41.353Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181353,
+    "message": "2025-11-26T01:39:41.353Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181353,
+    "message": "2025-11-26T01:39:41.353Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181374,
+    "message": "2025-11-26T01:39:41.374Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181374,
+    "message": "2025-11-26T01:39:41.374Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181374,
+    "message": "2025-11-26T01:39:41.374Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181376,
+    "message": "2025-11-26T01:39:41.376Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181376,
+    "message": "2025-11-26T01:39:41.376Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181376,
+    "message": "2025-11-26T01:39:41.376Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181435,
+    "message": "2025-11-26T01:39:41.435Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181435,
+    "message": "2025-11-26T01:39:41.435Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181435,
+    "message": "2025-11-26T01:39:41.435Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player d98cc10fd5c1bb6fa3357033aef7f551.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181436,
+    "message": "2025-11-26T01:39:41.436Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181436,
+    "message": "2025-11-26T01:39:41.436Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181436,
+    "message": "2025-11-26T01:39:41.436Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 51ae6955325ac28593c9a20285978ae7.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181556,
+    "message": "2025-11-26T01:39:41.556Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181615,
+    "message": "2025-11-26T01:39:41.615Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181676,
+    "message": "2025-11-26T01:39:41.676Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181734,
+    "message": "2025-11-26T01:39:41.734Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181736,
+    "message": "2025-11-26T01:39:41.736Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181736,
+    "message": "2025-11-26T01:39:41.736Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181736,
+    "message": "2025-11-26T01:39:41.736Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121181794
+  },
+  {
+    "timestamp": 1764121181814,
+    "message": "2025-11-26T01:39:41.814Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181814,
+    "message": "2025-11-26T01:39:41.814Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181814,
+    "message": "2025-11-26T01:39:41.814Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181816,
+    "message": "2025-11-26T01:39:41.816Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[SUMMARY-UPSERT] Created new summary.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181816,
+    "message": "2025-11-26T01:39:41.816Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 5: createPlayerTransactions...\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181816,
+    "message": "2025-11-26T01:39:41.816Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Starting creation for player 8f1851d242c2d0553d6c2c0bc5904948.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181933,
+    "message": "2025-11-26T01:39:41.933Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for b27cf7837057dfe2f2cfdb253ebca80e.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181933,
+    "message": "2025-11-26T01:39:41.933Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Agresta, Adam completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181934,
+    "message": "2025-11-26T01:39:41.934Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for fcc904012a357b31efb186d339fee612.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181934,
+    "message": "2025-11-26T01:39:41.934Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Ho, Desmond completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181934,
+    "message": "2025-11-26T01:39:41.934Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 88de83b688e4b0c7d0b7a0a054892315.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181934,
+    "message": "2025-11-26T01:39:41.934Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Cappelluto, Steven completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181934,
+    "message": "2025-11-26T01:39:41.934Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for d62147a76ada275cb69e35b881d15f96.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181934,
+    "message": "2025-11-26T01:39:41.934Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Soto, Humberto completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181935,
+    "message": "2025-11-26T01:39:41.935Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121181993,
+    "message": "2025-11-26T01:39:41.993Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182155,
+    "message": "2025-11-26T01:39:42.155Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for d98cc10fd5c1bb6fa3357033aef7f551.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182156,
+    "message": "2025-11-26T01:39:42.156Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Levy, Michael completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182156,
+    "message": "2025-11-26T01:39:42.156Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 51ae6955325ac28593c9a20285978ae7.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182156,
+    "message": "2025-11-26T01:39:42.156Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Burbar, Odai completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182214,
+    "message": "2025-11-26T01:39:42.214Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[TRANSACTION-CREATE] Created 1 transactions.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182214,
+    "message": "2025-11-26T01:39:42.214Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] Step 6: upsertPlayerEntry...\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182214,
+    "message": "2025-11-26T01:39:42.214Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Starting upsert for game 0cc49ec2-fe21-4907-aaef-e39363e65169.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182275,
+    "message": "2025-11-26T01:39:42.275Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182395,
+    "message": "2025-11-26T01:39:42.395Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[ENTRY-UPSERT] Created new COMPLETED entry for 8f1851d242c2d0553d6c2c0bc5904948.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182395,
+    "message": "2025-11-26T01:39:42.395Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[PROCESS-PLAYER] SUCCESS: Player Mathers, Jazz completely processed with entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182395,
+    "message": "2025-11-26T01:39:42.395Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t[HANDLER] Game 0cc49ec2-fe21-4907-aaef-e39363e65169 batch processing completed for entity 42101695-1332-48e3-963b-3c6ad4e909a0.\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182395,
+    "message": "2025-11-26T01:39:42.395Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\t--- FINAL SUMMARY ---\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182395,
+    "message": "2025-11-26T01:39:42.395Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\tEntity ID: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182395,
+    "message": "2025-11-26T01:39:42.395Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\tTotal Players Processed: 25\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182395,
+    "message": "2025-11-26T01:39:42.395Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\tSuccessful: 25\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182395,
+    "message": "2025-11-26T01:39:42.395Z\t373f31c2-9382-582e-bebc-5062cf0a027e\tINFO\tFailed: 0\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182476,
+    "message": "END RequestId: 373f31c2-9382-582e-bebc-5062cf0a027e\n",
+    "ingestionTime": 1764121190833
+  },
+  {
+    "timestamp": 1764121182476,
+    "message": "REPORT RequestId: 373f31c2-9382-582e-bebc-5062cf0a027e\tDuration: 14757.85 ms\tBilled Duration: 15135 ms\tMemory Size: 128 MB\tMax Memory Used: 103 MB\tInit Duration: 376.27 ms\t\n",
+    "ingestionTime": 1764121190833
+  }
+]

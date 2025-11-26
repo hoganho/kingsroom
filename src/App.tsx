@@ -1,10 +1,10 @@
-// src/App.tsx - UPDATED WITH CUSTOM AUTHENTICATOR STYLING
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+// src/App.tsx - FIXED ROUTING FOR PUBLIC PAGES
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
-import './authenticator-theme.css'; // Import custom authenticator theme
+import './authenticator-theme.css';
 import awsExports from './aws-exports.js';
 import { useEffect } from 'react';
 
@@ -45,20 +45,26 @@ import { SeriesManagementPage } from './pages/settings/SeriesManagement';
 // Scraper Pages (SuperAdmin)
 import { ScraperAdminPage } from './pages/scraper/ScraperAdmin';
 
+// Social Pages
+import { SocialPulse } from './pages/social/SocialPulse';
+
+// Legal Pages (Public)
+import { PrivacyPolicy } from './pages/legal/PrivacyPolicy';
+
 // Debug Pages (SuperAdmin)
 import { GamesDebug } from './pages/debug/GamesDebug';
 import { PlayersDebug } from './pages/debug/PlayersDebug';
 import { DatabaseMonitorPage } from './pages/debug/DatabaseMonitor';
 import { getMonitoring } from './utils/enhanced-monitoring';
 
-// Error Boundary for error tracking
+// Error Boundary
 import React from 'react';
 import { Heading, Text, View } from '@aws-amplify/ui-react';
 
 // Configure Amplify
 Amplify.configure(awsExports);
 
-// Simple Error Boundary (without CloudWatch)
+// Error Boundary Component
 class ErrorBoundary extends React.Component<
     { children: React.ReactNode },
     { hasError: boolean; error: Error | null }
@@ -73,7 +79,6 @@ class ErrorBoundary extends React.Component<
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        // Just log to console - no CloudWatch tracking
         console.error('Error caught by boundary:', error, errorInfo);
     }
 
@@ -102,7 +107,7 @@ class ErrorBoundary extends React.Component<
     }
 }
 
-// Protected Layout Component - UPDATED with EntityProvider
+// Protected Layout Component
 const ProtectedLayout = () => {
     return (
         <ProtectedRoute>
@@ -132,7 +137,6 @@ const authenticatorComponents = {
             </View>
         );
     },
-
     Footer() {
         return (
             <View textAlign="center" padding="1.5rem 2rem">
@@ -142,7 +146,6 @@ const authenticatorComponents = {
             </View>
         );
     },
-
     SignIn: {
         Header() {
             return (
@@ -157,7 +160,6 @@ const authenticatorComponents = {
             );
         },
     },
-
     SignUp: {
         Header() {
             return (
@@ -172,7 +174,6 @@ const authenticatorComponents = {
             );
         },
     },
-
     ResetPassword: {
         Header() {
             return (
@@ -231,13 +232,126 @@ const authenticatorFormFields = {
     },
 };
 
-// Main App Component
-function App() {
+// ============================================
+// AUTHENTICATED ROUTES COMPONENT
+// ============================================
+const AuthenticatedRoutes = () => {
+    return (
+        <Authenticator
+            components={authenticatorComponents}
+            formFields={authenticatorFormFields}
+            hideSignUp={false}
+        >
+            {({ user }) => {
+                if (user) {
+                    console.log('Authenticated user:', user.username);
+                }
+                
+                return (
+                    <AuthProvider>
+                        <Routes>
+                            {/* Post-login redirection */}
+                            <Route path="/login" element={<Navigate to="/home" replace />} />
+                            <Route path="/" element={<Navigate to="/home" replace />} />
 
+                            {/* Protected routes */}
+                            <Route element={<ProtectedLayout />}>
+                                {/* Home */}
+                                <Route path="/home" element={<HomePage />} />
+                                
+                                {/* Players */}
+                                <Route path="/players/dashboard" element={<PlayersDashboard />} />
+                                <Route path="/players/search" element={<PlayerSearch />} />
+                                <Route path="/players/profile/:playerId" element={<PlayerProfile />} />
+                                
+                                {/* Series */}
+                                <Route path="/series/dashboard" element={<SeriesDashboard />} />
+                                
+                                {/* Games */}
+                                <Route path="/games/dashboard" element={<GamesDashboard />} />
+                                <Route path="/games/search" element={<GameSearch />} />
+                                <Route path="/games/details/:gameId" element={<GameDetails />} />
+                                
+                                {/* Venues */}
+                                <Route path="/venues/dashboard" element={<VenuesDashboard />} />
+                                <Route path="/venues/details" element={<VenueDetails />} />
+                                
+                                {/* Social Pulse */}
+                                <Route path="/social/pulse" element={<SocialPulse />} />
+                                
+                                {/* Settings (Admin/SuperAdmin) */}
+                                <Route path="/settings/entity-management" element={<EntityManagement />} />
+                                <Route path="/settings/venue-management" element={<VenueManagement />} />
+                                <Route path="/settings/series-management" element={<SeriesManagementPage />} />
+                                
+                                {/* Scraper Management (SuperAdmin) */}
+                                <Route path="/scraper/admin" element={<ScraperAdminPage />} />
+                                
+                                {/* Debug Pages (SuperAdmin) */}
+                                <Route path="/debug/games" element={<GamesDebug />} />
+                                <Route path="/debug/players" element={<PlayersDebug />} />
+                                <Route path="/debug/database-monitor" element={<DatabaseMonitorPage />} />
+                            </Route>
+
+                            {/* Catch all - redirect to home */}
+                            <Route path="*" element={<Navigate to="/home" replace />} />
+                        </Routes>
+                    </AuthProvider>
+                );
+            }}
+        </Authenticator>
+    );
+};
+
+// ============================================
+// HELPER: Check if path is public
+// ============================================
+const PUBLIC_PATHS = ['/privacy-policy', '/privacy', '/terms-of-service', '/cookie-policy'];
+
+const isPublicPath = (pathname: string): boolean => {
+    // Remove trailing slash for comparison
+    const normalizedPath = pathname.endsWith('/') && pathname !== '/' 
+        ? pathname.slice(0, -1) 
+        : pathname;
+    return PUBLIC_PATHS.includes(normalizedPath);
+};
+
+// ============================================
+// ROUTER COMPONENT - Decides public vs auth
+// ============================================
+const AppRouter = () => {
+    const location = useLocation();
+    
+    // Debug logging
+    useEffect(() => {
+        console.log('Current path:', location.pathname);
+        console.log('Is public path:', isPublicPath(location.pathname));
+    }, [location.pathname]);
+
+    // Check if current path is public
+    if (isPublicPath(location.pathname)) {
+        return (
+            <Routes>
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
+                {/* Add more public routes here */}
+                {/* <Route path="/terms-of-service" element={<TermsOfService />} /> */}
+            </Routes>
+        );
+    }
+
+    // All other routes require authentication
+    return <AuthenticatedRoutes />;
+};
+
+// ============================================
+// MAIN APP COMPONENT
+// ============================================
+function App() {
     const monitoring = getMonitoring({
         enabled: import.meta.env.VITE_ENABLE_DB_MONITOR !== 'false',
         sendToCloudWatch: import.meta.env.VITE_CLOUDWATCH_ENABLED !== 'false',
-        logToConsole: import.meta.env.DEV // Only log in development
+        logToConsole: import.meta.env.DEV
     });
 
     useEffect(() => {
@@ -245,7 +359,6 @@ function App() {
     }, []);
 
     useEffect(() => {
-        // Listen for auth events (without CloudWatch)
         const unsubscribe = Hub.listen('auth', (data) => {
             const { payload } = data;
             console.log('Auth event:', payload.event);
@@ -263,19 +376,9 @@ function App() {
                 case 'tokenRefresh_failure':
                     console.error('Token refresh failed');
                     break;
-                case 'signInWithRedirect':
-                    console.log('Sign in with redirect initiated');
-                    break;
-                case 'signInWithRedirect_failure':
-                    console.error('Sign in with redirect failed');
-                    break;
-                case 'customOAuthState':
-                    console.log('Custom OAuth state received');
-                    break;
             }
         });
 
-        // Cleanup function
         return () => {
             if (typeof unsubscribe === 'function') {
                 unsubscribe();
@@ -285,72 +388,11 @@ function App() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Authenticator
-                components={authenticatorComponents}
-                formFields={authenticatorFormFields}
-                hideSignUp={false} // Set to true to hide sign up option
-            >
-                {({ user }) => {
-                    // Log user info for debugging (no CloudWatch)
-                    if (user) {
-                        console.log('Authenticated user:', user.username);
-                    }
-                    
-                    return (
-                        <ErrorBoundary>
-                            <BrowserRouter>
-                                <AuthProvider>
-                                    <Routes>
-                                        {/* Post-login redirection */}
-                                        <Route path="/login" element={<Navigate to="/home" replace />} />
-                                        <Route path="/" element={<Navigate to="/home" replace />} />
-
-                                        {/* Protected routes */}
-                                        <Route element={<ProtectedLayout />}>
-                                            {/* Home */}
-                                            <Route path="/home" element={<HomePage />} />
-                                            
-                                            {/* Players */}
-                                            <Route path="/players/dashboard" element={<PlayersDashboard />} />
-                                            <Route path="/players/search" element={<PlayerSearch />} />
-                                            <Route path="/players/profile/:playerId" element={<PlayerProfile />} />
-                                            
-                                            {/* Series */}
-                                            <Route path="/series/dashboard" element={<SeriesDashboard />} />
-                                            
-                                            {/* Games */}
-                                            <Route path="/games/dashboard" element={<GamesDashboard />} />
-                                            <Route path="/games/search" element={<GameSearch />} />
-                                            <Route path="/games/details/:gameId" element={<GameDetails />} />
-                                            
-                                            {/* Venues */}
-                                            <Route path="/venues/dashboard" element={<VenuesDashboard />} />
-                                            <Route path="/venues/details" element={<VenueDetails />} />
-                                            
-                                            {/* Settings (Admin/SuperAdmin) */}
-                                            <Route path="/settings/entity-management" element={<EntityManagement />} />
-                                            <Route path="/settings/venue-management" element={<VenueManagement />} />
-                                            <Route path="/settings/series-management" element={<SeriesManagementPage />} />
-                                            
-                                            {/* Scraper Management (SuperAdmin) */}
-                                            <Route path="/scraper/admin" element={<ScraperAdminPage />} />
-                                            
-                                            {/* Debug Pages (SuperAdmin) */}
-                                            <Route path="/debug/games" element={<GamesDebug />} />
-                                            <Route path="/debug/players" element={<PlayersDebug />} />
-                                            <Route path="/debug/database-monitor" element={<DatabaseMonitorPage />} />
-
-                                        </Route>
-
-                                        {/* Catch all */}
-                                        <Route path="*" element={<Navigate to="/" replace />} />
-                                    </Routes>
-                                </AuthProvider>
-                            </BrowserRouter>
-                        </ErrorBoundary>
-                    );
-                }}
-            </Authenticator>
+            <BrowserRouter>
+                <ErrorBoundary>
+                    <AppRouter />
+                </ErrorBoundary>
+            </BrowserRouter>
         </div>
     );
 }
