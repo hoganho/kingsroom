@@ -1,4 +1,4 @@
-// src/App.tsx - FIXED ROUTING FOR PUBLIC PAGES
+// src/App.tsx - FIXED PUBLIC ROUTES
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
@@ -48,8 +48,9 @@ import { ScraperAdminPage } from './pages/scraper/ScraperAdmin';
 // Social Pages
 import { SocialPulse } from './pages/social/SocialPulse';
 
-// Legal Pages (Public)
+// Legal Pages (Public - No Auth Required)
 import { PrivacyPolicy } from './pages/legal/PrivacyPolicy';
+import { TermsOfService } from './pages/legal/TermsOfService';
 
 // Debug Pages (SuperAdmin)
 import { GamesDebug } from './pages/debug/GamesDebug';
@@ -64,7 +65,19 @@ import { Heading, Text, View } from '@aws-amplify/ui-react';
 // Configure Amplify
 Amplify.configure(awsExports);
 
-// Error Boundary Component
+// ============================================
+// PUBLIC PATHS - No authentication required
+// ============================================
+const PUBLIC_PATHS = ['/privacy-policy', '/privacy', '/terms-of-service', '/terms', '/cookie-policy'];
+
+const isPublicPath = (pathname: string): boolean => {
+    const normalizedPath = pathname.replace(/\/$/, '') || '/'; // Remove trailing slash
+    return PUBLIC_PATHS.some(p => normalizedPath === p || normalizedPath.startsWith(p + '/'));
+};
+
+// ============================================
+// ERROR BOUNDARY
+// ============================================
 class ErrorBoundary extends React.Component<
     { children: React.ReactNode },
     { hasError: boolean; error: Error | null }
@@ -107,7 +120,9 @@ class ErrorBoundary extends React.Component<
     }
 }
 
-// Protected Layout Component
+// ============================================
+// PROTECTED LAYOUT
+// ============================================
 const ProtectedLayout = () => {
     return (
         <ProtectedRoute>
@@ -122,7 +137,9 @@ const ProtectedLayout = () => {
     );
 };
 
-// Custom Authenticator Components
+// ============================================
+// AUTHENTICATOR CUSTOMIZATION
+// ============================================
 const authenticatorComponents = {
     Header() {
         return (
@@ -190,7 +207,6 @@ const authenticatorComponents = {
     },
 };
 
-// Custom Form Fields
 const authenticatorFormFields = {
     signIn: {
         username: {
@@ -233,6 +249,25 @@ const authenticatorFormFields = {
 };
 
 // ============================================
+// PUBLIC ROUTES COMPONENT
+// ============================================
+const PublicRoutes = () => {
+    return (
+        <Routes>
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/terms" element={<Navigate to="/terms-of-service" replace />} />
+            {/* Add more public routes here as needed */}
+            {/* <Route path="/cookie-policy" element={<CookiePolicy />} /> */}
+            
+            {/* Fallback - shouldn't normally hit this */}
+            <Route path="*" element={<Navigate to="/privacy-policy" replace />} />
+        </Routes>
+    );
+};
+
+// ============================================
 // AUTHENTICATED ROUTES COMPONENT
 // ============================================
 const AuthenticatedRoutes = () => {
@@ -250,11 +285,11 @@ const AuthenticatedRoutes = () => {
                 return (
                     <AuthProvider>
                         <Routes>
-                            {/* Post-login redirection */}
+                            {/* Redirects */}
                             <Route path="/login" element={<Navigate to="/home" replace />} />
                             <Route path="/" element={<Navigate to="/home" replace />} />
 
-                            {/* Protected routes */}
+                            {/* Protected routes with layout */}
                             <Route element={<ProtectedLayout />}>
                                 {/* Home */}
                                 <Route path="/home" element={<HomePage />} />
@@ -293,7 +328,7 @@ const AuthenticatedRoutes = () => {
                                 <Route path="/debug/database-monitor" element={<DatabaseMonitorPage />} />
                             </Route>
 
-                            {/* Catch all - redirect to home */}
+                            {/* Catch all */}
                             <Route path="*" element={<Navigate to="/home" replace />} />
                         </Routes>
                     </AuthProvider>
@@ -304,43 +339,25 @@ const AuthenticatedRoutes = () => {
 };
 
 // ============================================
-// HELPER: Check if path is public
-// ============================================
-const PUBLIC_PATHS = ['/privacy-policy', '/privacy', '/terms-of-service', '/cookie-policy'];
-
-const isPublicPath = (pathname: string): boolean => {
-    // Remove trailing slash for comparison
-    const normalizedPath = pathname.endsWith('/') && pathname !== '/' 
-        ? pathname.slice(0, -1) 
-        : pathname;
-    return PUBLIC_PATHS.includes(normalizedPath);
-};
-
-// ============================================
-// ROUTER COMPONENT - Decides public vs auth
+// APP ROUTER - Decides public vs authenticated
 // ============================================
 const AppRouter = () => {
     const location = useLocation();
     
     // Debug logging
     useEffect(() => {
-        console.log('Current path:', location.pathname);
-        console.log('Is public path:', isPublicPath(location.pathname));
+        console.log('🔍 Current path:', location.pathname);
+        console.log('🔓 Is public path:', isPublicPath(location.pathname));
     }, [location.pathname]);
 
-    // Check if current path is public
+    // Render public routes WITHOUT Authenticator
     if (isPublicPath(location.pathname)) {
-        return (
-            <Routes>
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
-                {/* Add more public routes here */}
-                {/* <Route path="/terms-of-service" element={<TermsOfService />} /> */}
-            </Routes>
-        );
+        console.log('📄 Rendering public route');
+        return <PublicRoutes />;
     }
 
-    // All other routes require authentication
+    // All other routes go through Authenticator
+    console.log('🔐 Rendering authenticated route');
     return <AuthenticatedRoutes />;
 };
 
