@@ -80,7 +80,7 @@
         "socialFetcher": {
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/socialFetcher-31564234355774774c79-build.zip"
+          "s3Key": "amplify-builds/socialFetcher-4c6d57737a79646d3832-build.zip"
         }
       },
       "auth": {

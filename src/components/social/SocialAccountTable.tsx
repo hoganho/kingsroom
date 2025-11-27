@@ -5,7 +5,6 @@ import {
   TrashIcon, 
   ArrowPathIcon,
   ArrowDownTrayIcon,
-  PhotoIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
   ClockIcon,
@@ -13,7 +12,7 @@ import {
   PlayIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import { Loader2, Facebook, Instagram, Database } from 'lucide-react';
+import { Loader2, Facebook, Instagram, Database, RefreshCw } from 'lucide-react';
 import { SocialAccount } from '../../hooks/useSocialAccounts';
 
 interface SocialAccountTableProps {
@@ -24,8 +23,9 @@ interface SocialAccountTableProps {
   onToggleScraping: (account: SocialAccount) => void;
   onTriggerScrape: (account: SocialAccount) => void;
   onFullSync?: (account: SocialAccount) => void;
-  onSyncPageInfo?: (account: SocialAccount) => void;
+  onRefreshLogo?: (account: SocialAccount) => void;
   scrapingAccountId: string | null;
+  refreshingLogoAccountId?: string | null;
 }
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
@@ -86,8 +86,9 @@ export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
   onToggleScraping,
   onTriggerScrape,
   onFullSync,
-  onSyncPageInfo,
+  onRefreshLogo,
   scrapingAccountId,
+  refreshingLogoAccountId,
 }) => {
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return 'Never';
@@ -160,6 +161,7 @@ export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {accounts.map((account) => {
               const isCurrentlyScraping = scrapingAccountId === account.id;
+              const isRefreshingLogo = refreshingLogoAccountId === account.id;
               
               return (
                 <tr key={account.id} className="hover:bg-gray-50">
@@ -304,15 +306,19 @@ export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
                         </button>
                       )}
 
-                      {/* Sync Page Info */}
-                      {onSyncPageInfo && (
+                      {/* Refresh Logo Button */}
+                      {onRefreshLogo && (
                         <button
-                          onClick={() => onSyncPageInfo(account)}
-                          disabled={isCurrentlyScraping}
-                          className="inline-flex items-center gap-1 px-2 py-1.5 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          title="Sync page info and logo"
+                          onClick={() => onRefreshLogo(account)}
+                          disabled={isRefreshingLogo || isCurrentlyScraping}
+                          className="inline-flex items-center gap-1 px-2 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          title="Refresh logo from Facebook"
                         >
-                          <PhotoIcon className="w-4 h-4" />
+                          {isRefreshingLogo ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="w-4 h-4" />
+                          )}
                         </button>
                       )}
 

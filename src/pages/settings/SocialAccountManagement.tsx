@@ -41,9 +41,10 @@ const triggerFullSync = /* GraphQL */ `
   }
 `;
 
+// Updated mutation with forceRefresh parameter
 const syncPageInfo = /* GraphQL */ `
-  mutation SyncPageInfo($socialAccountId: ID!) {
-    syncPageInfo(socialAccountId: $socialAccountId) {
+  mutation SyncPageInfo($socialAccountId: ID!, $forceRefresh: Boolean) {
+    syncPageInfo(socialAccountId: $socialAccountId, forceRefresh: $forceRefresh) {
       success
       message
       logoUrl
@@ -222,6 +223,7 @@ const SocialAccountManagement = () => {
   const [isFullSyncing, setIsFullSyncing] = useState(false);
 
   const [scrapingAccountId, setScrapingAccountId] = useState<string | null>(null);
+  const [refreshingLogoAccountId, setRefreshingLogoAccountId] = useState<string | null>(null);
   const [isRefreshingAll, setIsRefreshingAll] = useState(false);
 
   // Track if reference data has been fetched to prevent duplicate calls
@@ -407,35 +409,35 @@ const SocialAccountManagement = () => {
     }
   }, [client, fullSyncAccount, fetchAccounts]);
 
-  // Sync page info (logo, etc.)
-  const handleSyncPageInfo = useCallback(async (account: SocialAccount) => {
-    setScrapingAccountId(account.id);
+  // Refresh Logo (force re-download from Facebook)
+  const handleRefreshLogo = useCallback(async (account: SocialAccount) => {
+    setRefreshingLogoAccountId(account.id);
     setError(null);
 
     try {
       const response = await client.graphql({
         query: syncPageInfo,
-        variables: { socialAccountId: account.id },
+        variables: { socialAccountId: account.id, forceRefresh: true },
       });
 
       if (hasGraphQLData<{ syncPageInfo: { success: boolean; message: string; logoUrl: string | null } }>(response)) {
         const result = response.data.syncPageInfo;
         if (result.success) {
-          setSuccessMessage(`Page info synced for ${account.accountName}`);
+          setSuccessMessage(`Logo refreshed for ${account.accountName}`);
           fetchAccounts();
         } else {
-          setError(result.message || 'Failed to sync page info');
+          setError(result.message || 'Failed to refresh logo');
         }
       }
     } catch (err: any) {
       if (err?.errors?.[0]?.message?.includes('Cannot query field')) {
         setError('syncPageInfo mutation not available. Please deploy the updated Lambda.');
       } else {
-        console.error('Error syncing page info:', err);
-        setError(err?.errors?.[0]?.message || 'Failed to sync page info.');
+        console.error('Error refreshing logo:', err);
+        setError(err?.errors?.[0]?.message || 'Failed to refresh logo.');
       }
     } finally {
-      setScrapingAccountId(null);
+      setRefreshingLogoAccountId(null);
     }
   }, [client, fetchAccounts]);
 
@@ -584,6 +586,7 @@ const SocialAccountManagement = () => {
                 Connect Facebook and Instagram pages to monitor posts and engagement.
                 Use <strong>"Fetch Posts"</strong> for incremental updates (only new posts since last fetch),
                 or <strong>"Full Sync"</strong> to fetch all historical posts for a new account.
+                Use the <strong>camera icon</strong> to refresh the page logo from Facebook.
               </p>
             </div>
           </div>
@@ -615,8 +618,9 @@ const SocialAccountManagement = () => {
         onToggleScraping={handleToggleScraping}
         onTriggerScrape={handleTriggerScrape}
         onFullSync={handleFullSyncClick}
-        onSyncPageInfo={handleSyncPageInfo}
+        onRefreshLogo={handleRefreshLogo}
         scrapingAccountId={scrapingAccountId}
+        refreshingLogoAccountId={refreshingLogoAccountId}
       />
 
       {/* Account Modal */}

@@ -48,6 +48,7 @@ import { ScraperAdminPage } from './pages/scraper/ScraperAdmin';
 // Social Pages
 import { SocialPulse } from './pages/social/SocialPulse';
 import SocialAccountManagement from './pages/settings/SocialAccountManagement.js';
+import { SocialDashboard } from './pages/social/SocialDashboard'; 
 
 // Legal Pages (Public - No Auth Required)
 import { PrivacyPolicy } from './pages/legal/PrivacyPolicy';
@@ -314,6 +315,7 @@ const AuthenticatedRoutes = () => {
                                 
                                 {/* Social Pulse */}
                                 <Route path="/social/pulse" element={<SocialPulse />} />
+                                <Route path="/social/dashboard" element={<SocialDashboard />} />
                                 
                                 {/* Settings (Admin/SuperAdmin) */}
                                 <Route path="/settings/entity-management" element={<EntityManagement />} />

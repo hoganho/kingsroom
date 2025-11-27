@@ -948,7 +948,13 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   mediaUrls: [AWSURL]
   thumbnailUrl: AWSURL
   mediaType: String
-  
+  videoUrl: String
+  videoThumbnailUrl: String
+  videoWidth: Int
+  videoHeight: Int
+  videoTitle: String
+  videoDescription: String
+
   # --- Engagement Metrics ---
   likeCount: Int @default(value: "0")
   commentCount: Int @default(value: "0")
@@ -1970,7 +1976,7 @@ type Mutation {
   # --- Social Pulse Mutations ---
   triggerSocialScrape(socialAccountId: ID!): SocialScrapeResult @function(name: "socialFetcher-${env}")
   triggerFullSync(socialAccountId: ID!): SocialScrapeResult @function(name: "socialFetcher-${env}")
-  syncPageInfo(socialAccountId: ID!): SyncPageInfoResult @function(name: "socialFetcher-${env}")
+  syncPageInfo(socialAccountId: ID!, forceRefresh: Boolean): SyncPageInfoResult @function(name: "socialFetcher-${env}")
 }
 
 type Subscription {

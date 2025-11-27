@@ -7673,6 +7673,48 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "videoUrl": {
+                    "name": "videoUrl",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "videoThumbnailUrl": {
+                    "name": "videoThumbnailUrl",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "videoWidth": {
+                    "name": "videoWidth",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "videoHeight": {
+                    "name": "videoHeight",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "videoTitle": {
+                    "name": "videoTitle",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "videoDescription": {
+                    "name": "videoDescription",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "likeCount": {
                     "name": "likeCount",
                     "isArray": false,
@@ -11952,5 +11994,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "929e4f3d21cd5a7a94e8749be8aa6428"
+    "version": "fc3e6fd54ced0407ce8b9270800a5513"
 };

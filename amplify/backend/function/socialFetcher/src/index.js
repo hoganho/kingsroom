@@ -22,6 +22,7 @@ Amplify Params - DO NOT EDIT */
  * - Incremental fetching - only gets posts since last successful scrape
  * - Downloads and stores page profile pictures to S3
  * - Supports initial full sync and incremental updates
+ * - Refresh logo with forceRefresh option
  * 
  * Triggered:
  * - Manually via GraphQL mutation (triggerSocialScrape)
@@ -32,7 +33,7 @@ Amplify Params - DO NOT EDIT */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
-const { S3Client, PutObjectCommand, HeadObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const https = require('https');
 
 // Initialize clients
@@ -120,7 +121,8 @@ async function handleGraphQLRequest(event) {
       return triggerScrape(args.socialAccountId, { fetchAllHistory: true });
     case 'syncPageInfo':
       // Sync page info including logo without fetching posts
-      return syncPageInfo(args.socialAccountId);
+      // forceRefresh option to re-download logo even if it exists
+      return syncPageInfo(args.socialAccountId, { forceRefresh: args.forceRefresh || false });
     default:
       throw new Error(`Unknown field: ${fieldName}`);
   }
@@ -215,9 +217,12 @@ async function triggerScrape(socialAccountId, options = {}) {
 
 /**
  * Sync page info (logo, follower count, etc.) without fetching posts
+ * @param {string} socialAccountId - Account ID to sync
+ * @param {object} options - { forceRefresh: boolean } - force re-download of logo
  */
-async function syncPageInfo(socialAccountId) {
-  console.log('Syncing page info for account:', socialAccountId);
+async function syncPageInfo(socialAccountId, options = {}) {
+  console.log('Syncing page info for account:', socialAccountId, 'Options:', options);
+  const forceRefresh = options.forceRefresh || false;
 
   if (!FB_ACCESS_TOKEN) {
     return { 
@@ -246,7 +251,8 @@ async function syncPageInfo(socialAccountId) {
       storedLogoUrl = await downloadAndStorePageLogo(
         account.id,
         pageInfo.picture.data.url,
-        pageInfo.name
+        pageInfo.name,
+        forceRefresh // Pass forceRefresh option
       );
     }
 
@@ -260,9 +266,13 @@ async function syncPageInfo(socialAccountId) {
       website: pageInfo.website || null,
     });
 
+    const message = forceRefresh 
+      ? 'Logo refreshed and page info synced successfully'
+      : 'Page info synced successfully';
+
     return {
       success: true,
-      message: 'Page info synced successfully',
+      message,
       logoUrl: storedLogoUrl || pageInfo.picture?.data?.url || null
     };
   } catch (error) {
@@ -313,13 +323,14 @@ async function scrapeAccount(account, options = {}) {
       try {
         const pageInfo = await fetchPageInfo(pageId);
         
-        // Download and store the logo
+        // Download and store the logo (force refresh on full sync)
         let storedLogoUrl = null;
         if (pageInfo.picture?.data?.url) {
           storedLogoUrl = await downloadAndStorePageLogo(
             account.id,
             pageInfo.picture.data.url,
-            pageInfo.name || account.accountName
+            pageInfo.name || account.accountName,
+            fetchAllHistory // Force refresh on full sync
           );
         }
 
@@ -447,8 +458,12 @@ async function fetchPageInfo(pageId) {
 
 /**
  * Download page logo and store in S3
+ * @param {string} accountId - Social account ID
+ * @param {string} imageUrl - URL of the image to download
+ * @param {string} pageName - Name of the page (for filename)
+ * @param {boolean} forceRefresh - If true, delete existing and re-download
  */
-async function downloadAndStorePageLogo(accountId, imageUrl, pageName) {
+async function downloadAndStorePageLogo(accountId, imageUrl, pageName, forceRefresh = false) {
   if (!S3_BUCKET) {
     console.warn('S3_BUCKET not configured, skipping logo storage');
     return null;
@@ -464,17 +479,31 @@ async function downloadAndStorePageLogo(accountId, imageUrl, pageName) {
     
     const s3Key = `${S3_PREFIX}${accountId}/${cleanName}-logo.jpg`;
 
-    // Check if we already have this logo
-    try {
-      await s3Client.send(new HeadObjectCommand({
-        Bucket: S3_BUCKET,
-        Key: s3Key
-      }));
-      // Logo already exists, return the URL
-      console.log('Logo already exists in S3:', s3Key);
-      return `https://${S3_BUCKET}.s3.${process.env.REGION || 'ap-southeast-2'}.amazonaws.com/${s3Key}`;
-    } catch (headError) {
-      // Logo doesn't exist, continue to download
+    // Check if we already have this logo (skip if forceRefresh)
+    if (!forceRefresh) {
+      try {
+        await s3Client.send(new HeadObjectCommand({
+          Bucket: S3_BUCKET,
+          Key: s3Key
+        }));
+        // Logo already exists, return the URL
+        console.log('Logo already exists in S3:', s3Key);
+        return `https://${S3_BUCKET}.s3.${process.env.REGION || 'ap-southeast-2'}.amazonaws.com/${s3Key}`;
+      } catch (headError) {
+        // Logo doesn't exist, continue to download
+      }
+    } else {
+      // Force refresh - delete existing logo first
+      console.log('Force refresh requested, deleting existing logo if present...');
+      try {
+        await s3Client.send(new DeleteObjectCommand({
+          Bucket: S3_BUCKET,
+          Key: s3Key
+        }));
+        console.log('Existing logo deleted');
+      } catch (deleteError) {
+        // Logo didn't exist, continue
+      }
     }
 
     // Download the image
@@ -549,7 +578,7 @@ async function fetchFacebookPosts(pageId, limit = 25) {
   const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
   const url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${limit}`;
 
-  console.log('Fetching from Facebook:', `${FB_API_VERSION}/${pageId}/posts`);
+  console.log('Fetching posts from:', `${FB_API_VERSION}/${pageId}/posts (limit: ${limit})`);
 
   const response = await httpGet(url);
   const data = JSON.parse(response);
@@ -563,66 +592,22 @@ async function fetchFacebookPosts(pageId, limit = 25) {
 }
 
 /**
- * Fetch posts since a specific timestamp (incremental fetch)
- * Uses the 'since' parameter to only get posts newer than the given timestamp
- */
-async function fetchFacebookPostsSince(pageId, sinceTimestamp) {
-  const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
-  let url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${MAX_POSTS_PER_PAGE}&since=${sinceTimestamp}`;
-
-  const allPosts = [];
-  let pageCount = 0;
-  let hasNextPage = true;
-
-  console.log(`Fetching posts since timestamp ${sinceTimestamp}...`);
-
-  while (hasNextPage && pageCount < MAX_PAGES_TO_FETCH) {
-    pageCount++;
-    console.log(`Fetching page ${pageCount}...`);
-
-    const response = await httpGet(url);
-    const data = JSON.parse(response);
-
-    if (data.error) {
-      console.error('Facebook API error:', data.error);
-      throw new Error(data.error.message || 'Facebook API error');
-    }
-
-    const posts = data.data || [];
-    allPosts.push(...posts);
-    console.log(`Page ${pageCount}: Got ${posts.length} posts (total: ${allPosts.length})`);
-
-    // Check for next page
-    if (data.paging?.next) {
-      url = data.paging.next;
-      await new Promise(resolve => setTimeout(resolve, 100)); // Rate limiting delay
-    } else {
-      hasNextPage = false;
-    }
-  }
-
-  console.log(`Incremental fetch complete. Total posts since last scrape: ${allPosts.length}`);
-  return allPosts;
-}
-
-/**
- * Fetch ALL posts from Facebook Graph API with pagination
- * This will retrieve the entire post history
+ * Fetch ALL posts from Facebook with pagination
+ * Used for initial full sync of an account
  */
 async function fetchAllFacebookPosts(pageId) {
   const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
   let url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${MAX_POSTS_PER_PAGE}`;
-
+  
   const allPosts = [];
   let pageCount = 0;
-  let hasNextPage = true;
 
-  console.log('Starting paginated fetch for ALL posts...');
+  console.log('Starting full post fetch with pagination...');
 
-  while (hasNextPage && pageCount < MAX_PAGES_TO_FETCH) {
+  while (url && pageCount < MAX_PAGES_TO_FETCH) {
     pageCount++;
     console.log(`Fetching page ${pageCount}...`);
-
+    
     const response = await httpGet(url);
     const data = JSON.parse(response);
 
@@ -633,38 +618,79 @@ async function fetchAllFacebookPosts(pageId) {
 
     const posts = data.data || [];
     allPosts.push(...posts);
+    
     console.log(`Page ${pageCount}: Got ${posts.length} posts (total: ${allPosts.length})`);
 
-    // Check for next page
-    if (data.paging?.next) {
-      url = data.paging.next;
-      
-      // Add a small delay to avoid rate limiting
+    // Get next page URL if available
+    url = data.paging?.next || null;
+
+    // Small delay to avoid rate limiting
+    if (url) {
       await new Promise(resolve => setTimeout(resolve, 100));
-    } else {
-      hasNextPage = false;
-      console.log('No more pages available');
     }
   }
 
   if (pageCount >= MAX_PAGES_TO_FETCH) {
-    console.warn(`Reached maximum page limit (${MAX_PAGES_TO_FETCH}). Some older posts may not be fetched.`);
+    console.warn(`Reached max page limit (${MAX_PAGES_TO_FETCH}), some older posts may not be fetched`);
   }
 
-  console.log(`Pagination complete. Total posts fetched: ${allPosts.length}`);
+  console.log(`Full fetch complete: ${allPosts.length} posts from ${pageCount} pages`);
   return allPosts;
 }
 
 /**
- * Process fetched posts and save new ones to DynamoDB
+ * Fetch posts since a specific timestamp (for incremental updates)
  */
-async function processAndSavePosts(account, fbPosts) {
+async function fetchFacebookPostsSince(pageId, sinceTimestamp) {
+  const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
+  let url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${MAX_POSTS_PER_PAGE}&since=${sinceTimestamp}`;
+  
+  const allPosts = [];
+  let pageCount = 0;
+
+  console.log(`Fetching posts since timestamp ${sinceTimestamp}...`);
+
+  while (url && pageCount < MAX_PAGES_TO_FETCH) {
+    pageCount++;
+    
+    const response = await httpGet(url);
+    const data = JSON.parse(response);
+
+    if (data.error) {
+      console.error('Facebook API error:', data.error);
+      throw new Error(data.error.message || 'Facebook API error');
+    }
+
+    const posts = data.data || [];
+    allPosts.push(...posts);
+    
+    console.log(`Page ${pageCount}: Got ${posts.length} posts since ${sinceTimestamp}`);
+
+    // Get next page URL if available
+    url = data.paging?.next || null;
+
+    // Small delay to avoid rate limiting
+    if (url) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+
+  console.log(`Incremental fetch complete: ${allPosts.length} posts from ${pageCount} pages`);
+  return allPosts;
+}
+
+/**
+ * Process posts and save new ones to DynamoDB
+ */
+async function processAndSavePosts(account, posts) {
   const newPosts = [];
   const now = new Date().toISOString();
 
-  for (const fbPost of fbPosts) {
+  for (const fbPost of posts) {
+    // Create a deterministic ID from platform + post ID
+    const postId = `${account.platform}_${fbPost.id}`;
+
     // Check if post already exists
-    const postId = `${account.id}_${fbPost.id}`;
     const existingPost = await getExistingPost(postId);
 
     if (!existingPost) {

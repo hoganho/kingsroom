@@ -3881,6 +3881,12 @@ type EagerSocialPost = {
   readonly mediaUrls?: (string | null)[] | null;
   readonly thumbnailUrl?: string | null;
   readonly mediaType?: string | null;
+  readonly videoUrl?: string | null;
+  readonly videoThumbnailUrl?: string | null;
+  readonly videoWidth?: number | null;
+  readonly videoHeight?: number | null;
+  readonly videoTitle?: string | null;
+  readonly videoDescription?: string | null;
   readonly likeCount?: number | null;
   readonly commentCount?: number | null;
   readonly shareCount?: number | null;
@@ -3923,6 +3929,12 @@ type LazySocialPost = {
   readonly mediaUrls?: (string | null)[] | null;
   readonly thumbnailUrl?: string | null;
   readonly mediaType?: string | null;
+  readonly videoUrl?: string | null;
+  readonly videoThumbnailUrl?: string | null;
+  readonly videoWidth?: number | null;
+  readonly videoHeight?: number | null;
+  readonly videoTitle?: string | null;
+  readonly videoDescription?: string | null;
   readonly likeCount?: number | null;
   readonly commentCount?: number | null;
   readonly shareCount?: number | null;
