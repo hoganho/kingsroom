@@ -12,21 +12,19 @@ Amplify Params - DO NOT EDIT */
 
 /**
  * TOURNAMENT CONSOLIDATOR LAMBDA - REFACTORED
- * 
- * This Lambda now handles TWO types of invocations:
- * 
- * 1. DynamoDB Stream Trigger (Original)
- *    - Triggered when Game table changes
- *    - Performs actual consolidation (creates parents, links children)
- * 
- * 2. GraphQL Query: previewConsolidation (NEW)
- *    - Called from frontend to preview what will happen
- *    - Returns analysis without modifying any data
- * 
- * The core consolidation LOGIC is extracted to ./consolidation-logic.js
+ * * This Lambda now handles TWO types of invocations:
+ * * 1. DynamoDB Stream Trigger (Original)
+ * - Triggered when Game table changes
+ * - Performs actual consolidation (creates parents, links children)
+ * * 2. GraphQL Query: previewConsolidation (NEW)
+ * - Called from frontend to preview what will happen
+ * - Returns analysis without modifying any data
+ * * The core consolidation LOGIC is extracted to ./consolidation-logic.js
  * so it can be used by both handlers without duplication.
- * 
- * FIX: Added sourceUrl to parent records for bySourceUrl GSI compatibility
+ * * FIX: Added sourceUrl to parent records for bySourceUrl GSI compatibility
+ * FIX: Proper null handling in DynamoDB UpdateExpressions
+ * FIX: Children now properly marked as CHILD consolidationType
+ * FIX: (v2) Added ExpressionAttributeNames handling for underscored fields (_lastChangedAt, _version)
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
@@ -70,16 +68,37 @@ const PLAYER_RESULT_TABLE = process.env.API_KINGSROOM_PLAYERRESULTTABLE_NAME;
 const handlePreviewConsolidation = async (input) => {
     const { gameData, existingGameId, includeSiblingDetails } = input;
     
+    // *** ENHANCED LOGGING: Track all consolidation-relevant fields ***
     console.log('[Consolidator:Preview] Analyzing:', {
         name: gameData.name,
         venueId: gameData.venueId,
         buyIn: gameData.buyIn,
         tournamentSeriesId: gameData.tournamentSeriesId,
-        eventNumber: gameData.eventNumber
+        eventNumber: gameData.eventNumber,
+        // *** NEW: Log fields needed for ENTITY_SERIES_EVENT strategy ***
+        seriesName: gameData.seriesName || '❌ MISSING',
+        isMainEvent: gameData.isMainEvent || false,
+        entityId: gameData.entityId || '❌ MISSING',
+        dayNumber: gameData.dayNumber,
+        flightLetter: gameData.flightLetter
     });
+    
+    // *** NEW: Warn if seriesName is missing but isSeries is true ***
+    if (gameData.isSeries && !gameData.seriesName) {
+        console.warn('[Consolidator:Preview] ⚠️ isSeries=true but seriesName is missing! Will fall back to lower confidence strategy.');
+    }
     
     // Get the preview from pure logic
     const preview = previewConsolidation(gameData);
+    
+    // *** NEW: Log the strategy that was selected ***
+    console.log('[Consolidator:Preview] Strategy selected:', {
+        willConsolidate: preview.willConsolidate,
+        strategy: preview.keyStrategy,
+        confidence: preview.keyConfidence,
+        consolidationKey: preview.consolidationKey,
+        derivedParentName: preview.derivedParentName
+    });
     
     // Build response
     const response = {
@@ -324,10 +343,17 @@ const consolidateEntries = async (parentId, children) => {
             playerHistory.set(pid, currentState);
 
             if (entry.entryType !== newType) {
+                // _lastChangedAt and _version are reserved/special, should ideally use aliases
+                // but UpdateCommand for entries has worked so far. 
+                // However, let's be safe and use aliases here too for best practice.
                 await monitoredDdbDocClient.send(new UpdateCommand({
                     TableName: PLAYER_ENTRY_TABLE,
                     Key: { id: entry.id },
-                    UpdateExpression: "SET entryType = :et, _lastChangedAt = :lastChanged ADD _version :versionIncrement",
+                    UpdateExpression: "SET entryType = :et, #lca = :lastChanged ADD #v :versionIncrement",
+                    ExpressionAttributeNames: {
+                        "#lca": "_lastChangedAt",
+                        "#v": "_version"
+                    },
                     ExpressionAttributeValues: { 
                         ":et": newType,
                         ":lastChanged": Date.now(),
@@ -350,7 +376,63 @@ const consolidateEntries = async (parentId, children) => {
 };
 
 /**
- * Recalculates parent totals from all children
+ * *** FIX: Helper to build dynamic UpdateExpression with proper null handling ***
+ * *** FIX V2: Now properly aliases fields starting with underscore ***
+ * * DynamoDB doesn't accept null values in ExpressionAttributeValues.
+ * This helper builds the expression dynamically, only including non-null fields.
+ * Fields with null values are moved to a REMOVE clause instead.
+ */
+const buildDynamicUpdateExpression = (updates) => {
+    const setExpressions = [];
+    const removeExpressions = [];
+    const expressionAttributeValues = {};
+    const expressionAttributeNames = {};
+    
+    for (const [field, value] of Object.entries(updates)) {
+        // Skip undefined values entirely
+        if (value === undefined) continue;
+        
+        // Handle reserved words or internal fields (starting with _)
+        let attrName = field;
+        if (field.startsWith('_')) {
+            // Create alias like #lastChangedAt for _lastChangedAt
+            const alias = `#${field.replace(/[^a-zA-Z0-9]/g, '')}`;
+            expressionAttributeNames[alias] = field;
+            attrName = alias;
+        }
+
+        const placeholder = `:${field.replace(/[^a-zA-Z0-9]/g, '')}`;
+        
+        if (value === null) {
+            // NULL values should be removed from DynamoDB
+            removeExpressions.push(attrName);
+        } else {
+            setExpressions.push(`${attrName} = ${placeholder}`);
+            expressionAttributeValues[placeholder] = value;
+        }
+    }
+    
+    // Build the expression parts
+    let expression = '';
+    
+    if (setExpressions.length > 0) {
+        expression += `SET ${setExpressions.join(', ')}`;
+    }
+    
+    if (removeExpressions.length > 0) {
+        if (expression) expression += ' ';
+        expression += `REMOVE ${removeExpressions.join(', ')}`;
+    }
+    
+    return {
+        expression,
+        values: expressionAttributeValues,
+        names: Object.keys(expressionAttributeNames).length > 0 ? expressionAttributeNames : undefined
+    };
+};
+
+/**
+ * *** FIX: Recalculates parent totals from all children with proper null handling ***
  */
 const recalculateParentTotals = async (parentId, currentParentRecord) => {
     const children = await fetchAllItems({
@@ -360,7 +442,12 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
         ExpressionAttributeValues: { ':pid': parentId }
     });
 
-    if (children.length === 0) return;
+    if (children.length === 0) {
+        console.log(`[Consolidator] No children found for parent ${parentId}, skipping recalculation`);
+        return;
+    }
+
+    console.log(`[Consolidator] Recalculating parent ${parentId} with ${children.length} children`);
 
     const { calculatedTotalEntries, uniqueRunners } = await consolidateEntries(parentId, children);
     
@@ -375,71 +462,67 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
         await syncParentResults(parentId, aggregated.finalDayChild.results);
     }
 
-    // Update parent record with all aggregated fields
-    // *** FIX: Ensure GSI key fields are never null ***
+    // *** FIX: Build update with proper null handling ***
+    // Ensure GSI key fields are never null
     const safeStart = aggregated.earliestStart || currentParentRecord?.gameStartDateTime || new Date().toISOString();
-    const safeEnd = aggregated.latestEnd || null; // gameEndDateTime is not a GSI key, null is OK
+    
+    // Build the update fields - the helper will handle nulls properly
+    // _lastChangedAt will be automatically aliased by the helper
+    const updateFields = {
+        totalEntries: calculatedTotalEntries,
+        actualCalculatedEntries: uniqueRunners,
+        totalRebuys: aggregated.totalRebuys || 0,
+        totalAddons: aggregated.totalAddons || 0,
+        prizepool: aggregated.prizepool || 0,
+        totalRake: aggregated.totalRake || 0,
+        revenueByBuyIns: aggregated.revenueByBuyIns || 0,
+        profitLoss: aggregated.profitLoss || 0,
+        startingStack: aggregated.startingStack || 0,
+        playersRemaining: aggregated.playersRemaining,        // May be null - helper handles this
+        totalChipsInPlay: aggregated.totalChipsInPlay,        // May be null - helper handles this
+        averagePlayerStack: aggregated.averagePlayerStack,    // May be null - helper handles this
+        guaranteeOverlay: aggregated.guaranteeOverlay || 0,
+        guaranteeSurplus: aggregated.guaranteeSurplus || 0,
+        gameStartDateTime: safeStart,
+        gameEndDateTime: aggregated.latestEnd,                // May be null - helper handles this
+        totalDuration: aggregated.totalDuration,              // May be null - helper handles this
+        gameStatus: aggregated.parentStatus || 'RUNNING',
+        isPartialData: aggregated.isPartialData,
+        missingFlightCount: aggregated.missingFlightCount,
+        updatedAt: new Date().toISOString(),
+        _lastChangedAt: Date.now()
+    };
+    
+    const { expression: dynamicExpression, values: dynamicValues, names: dynamicNames } = buildDynamicUpdateExpression(updateFields);
+    
+    // Add version increment (this is an ADD operation, handled separately from SET/REMOVE)
+    // We must ensure _version is aliased too
+    const finalExpression = `${dynamicExpression} ADD #v :versionIncrement`;
+    dynamicValues[':versionIncrement'] = 1;
+    
+    // Merge names, ensuring #v is present
+    const finalNames = {
+        ...(dynamicNames || {}),
+        '#v': '_version'
+    };
+    
+    console.log(`[Consolidator] Updating parent with expression: ${finalExpression.substring(0, 100)}...`);
     
     await monitoredDdbDocClient.send(new UpdateCommand({
         TableName: GAME_TABLE,
         Key: { id: parentId },
-        UpdateExpression: `
-            SET totalEntries = :te,
-                actualCalculatedEntries = :ace,
-                totalRebuys = :tr, 
-                totalAddons = :ta, 
-                prizepool = :pp,
-                totalRake = :totalRake,
-                revenueByBuyIns = :revenue,
-                profitLoss = :profit,
-                startingStack = :stack,
-                playersRemaining = :remaining,
-                totalChipsInPlay = :chips,
-                averagePlayerStack = :avgStack,
-                guaranteeOverlay = :overlay,
-                guaranteeSurplus = :surplus,
-                gameStartDateTime = :start,
-                gameEndDateTime = :end,
-                totalDuration = :duration,
-                gameStatus = :status,
-                isPartialData = :partial,
-                missingFlightCount = :miss,
-                updatedAt = :now,
-                _lastChangedAt = :lastChanged
-            ADD _version :versionIncrement
-        `,
-        ExpressionAttributeValues: {
-            ':te': calculatedTotalEntries,
-            ':ace': uniqueRunners,
-            ':tr': aggregated.totalRebuys || 0,
-            ':ta': aggregated.totalAddons || 0,
-            ':pp': aggregated.prizepool || 0,
-            ':totalRake': aggregated.totalRake || 0,
-            ':revenue': aggregated.revenueByBuyIns || 0,
-            ':profit': aggregated.profitLoss || 0,
-            ':stack': aggregated.startingStack || 0,
-            ':remaining': aggregated.playersRemaining,
-            ':chips': aggregated.totalChipsInPlay,
-            ':avgStack': aggregated.averagePlayerStack,
-            ':overlay': aggregated.guaranteeOverlay || 0,
-            ':surplus': aggregated.guaranteeSurplus || 0,
-            ':start': safeStart,
-            ':end': safeEnd,
-            ':duration': aggregated.totalDuration,
-            ':status': aggregated.parentStatus || 'RUNNING',
-            ':partial': aggregated.isPartialData,
-            ':miss': aggregated.missingFlightCount,
-            ':now': new Date().toISOString(),
-            ':lastChanged': Date.now(),
-            ':versionIncrement': 1
-        }
+        UpdateExpression: finalExpression,
+        ExpressionAttributeValues: dynamicValues,
+        ExpressionAttributeNames: finalNames
     }));
     
     console.log(`[Consolidator] Recalculated Parent ${parentId}. Entries: ${calculatedTotalEntries}, Children: ${aggregated.childCount}, Partial: ${aggregated.isPartialData}`);
 };
 
 /**
- * Creates or links parent record for a child game
+ * *** FIX: Creates or links parent record for a child game ***
+ * Now properly separates parent creation from child linking to ensure
+ * children are always marked as CHILD even if recalculation fails.
  */
 const processParentRecord = async (childGame, consolidationKey) => {
     // Find existing parent
@@ -492,30 +575,49 @@ const processParentRecord = async (childGame, consolidationKey) => {
         console.log(`[Consolidator] Created New Parent: ${parentId} with sourceUrl: ${cleanedRecord.sourceUrl}`);
     }
 
-    // Link child to parent
+    // *** FIX: Link child to parent BEFORE recalculation ***
+    // This ensures the child is marked as CHILD even if recalculation fails
     if (childGame.parentGameId !== parentId || childGame.consolidationType !== 'CHILD') {
+        console.log(`[Consolidator] Linking child ${childGame.id} to parent ${parentId}`);
+        
+        // *** FIX V2: Use ExpressionAttributeNames for _lastChangedAt and _version to prevent syntax errors ***
         await monitoredDdbDocClient.send(new UpdateCommand({
             TableName: GAME_TABLE,
             Key: { id: childGame.id },
-            UpdateExpression: 'SET parentGameId = :pid, consolidationType = :ctype, consolidationKey = :ckey, _lastChangedAt = :lastChanged ADD _version :versionIncrement',
+            UpdateExpression: 'SET parentGameId = :pid, consolidationType = :ctype, consolidationKey = :ckey, updatedAt = :now, #lca = :lastChanged ADD #v :versionIncrement',
+            ExpressionAttributeNames: {
+                '#lca': '_lastChangedAt',
+                '#v':   '_version'
+            },
             ExpressionAttributeValues: {
                 ':pid': parentId,
                 ':ctype': 'CHILD',
                 ':ckey': consolidationKey,
+                ':now': new Date().toISOString(),
                 ':lastChanged': Date.now(),
                 ':versionIncrement': 1
             }
         }));
+        
+        console.log(`[Consolidator] Successfully linked child ${childGame.id} as CHILD`);
     }
 
-    // Trigger recalculation
-    await recalculateParentTotals(parentId, parentRecord);
+    // *** FIX: Trigger recalculation in a separate try-catch ***
+    // This way, even if recalculation fails, the child is still linked
+    try {
+        await recalculateParentTotals(parentId, parentRecord);
+    } catch (recalcError) {
+        console.error(`[Consolidator] Recalculation failed for parent ${parentId}, but child ${childGame.id} was still linked:`, recalcError);
+        // Don't re-throw - the child linking was successful
+    }
 };
 
 /**
  * Handles DynamoDB stream events
  */
 const handleDynamoDBStream = async (event) => {
+    console.log(`[Consolidator] Processing ${event.Records?.length || 0} stream records`);
+    
     for (const record of event.Records) {
         if (record.eventName === 'REMOVE') continue;
 
@@ -527,7 +629,23 @@ const handleDynamoDBStream = async (event) => {
 
         // Use pure function to check if multi-day
         const multiDayCheck = checkIsMultiDay(newImage);
-        if (!multiDayCheck.isMultiDay) continue;
+        if (!multiDayCheck.isMultiDay) {
+            console.log(`[Consolidator] Skipping non-multi-day: ${newImage.name} (${newImage.id})`);
+            continue;
+        }
+
+        // *** ENHANCED LOGGING: Show all fields used for key generation ***
+        console.log(`[Consolidator] Multi-day detected for: ${newImage.name}`, {
+            id: newImage.id,
+            detectionSource: multiDayCheck.detectionSource,
+            dayNumber: newImage.dayNumber,
+            flightLetter: newImage.flightLetter,
+            seriesName: newImage.seriesName || '❌ MISSING',
+            eventNumber: newImage.eventNumber,
+            entityId: newImage.entityId,
+            venueId: newImage.venueId,
+            buyIn: newImage.buyIn
+        });
 
         // Use pure function to generate key
         const keyResult = generateConsolidationKey(newImage);
@@ -536,7 +654,12 @@ const handleDynamoDBStream = async (event) => {
             continue;
         }
 
-        console.log(`[Consolidator] Processing: ${newImage.name} (${newImage.id}) Key: ${keyResult.key}`);
+        // *** ENHANCED LOGGING: Show strategy selection ***
+        console.log(`[Consolidator] Processing: ${newImage.name} (${newImage.id})`, {
+            key: keyResult.key,
+            strategy: keyResult.strategy,
+            confidence: keyResult.confidence
+        });
 
         try {
             await processParentRecord(newImage, keyResult.key);

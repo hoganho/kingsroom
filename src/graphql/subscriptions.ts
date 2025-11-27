@@ -839,6 +839,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           followerCount
           followingCount
           postCount
+          hasFullHistory
+          pageDescription
+          category
+          website
           status
           isScrapingEnabled
           scrapeFrequencyMinutes
@@ -1755,6 +1759,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           followerCount
           followingCount
           postCount
+          hasFullHistory
+          pageDescription
+          category
+          website
           status
           isScrapingEnabled
           scrapeFrequencyMinutes
@@ -2687,6 +2695,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           followerCount
           followingCount
           postCount
+          hasFullHistory
+          pageDescription
+          category
+          website
           status
           isScrapingEnabled
           scrapeFrequencyMinutes
@@ -3606,6 +3618,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           followerCount
           followingCount
           postCount
+          hasFullHistory
+          pageDescription
+          category
+          website
           status
           isScrapingEnabled
           scrapeFrequencyMinutes
@@ -4525,6 +4541,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           followerCount
           followingCount
           postCount
+          hasFullHistory
+          pageDescription
+          category
+          website
           status
           isScrapingEnabled
           scrapeFrequencyMinutes
@@ -5441,6 +5461,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           followerCount
           followingCount
           postCount
+          hasFullHistory
+          pageDescription
+          category
+          website
           status
           isScrapingEnabled
           scrapeFrequencyMinutes
@@ -6370,6 +6394,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           followerCount
           followingCount
           postCount
+          hasFullHistory
+          pageDescription
+          category
+          website
           status
           isScrapingEnabled
           scrapeFrequencyMinutes
@@ -7299,6 +7327,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           followerCount
           followingCount
           postCount
+          hasFullHistory
+          pageDescription
+          category
+          website
           status
           isScrapingEnabled
           scrapeFrequencyMinutes

@@ -259,6 +259,20 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "socialFetcher": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "tournamentConsolidator": {
       "build": true,
       "dependsOn": [
@@ -510,6 +524,30 @@
         {
           "category": "function",
           "resourceName": "scraperManagement"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialFetcher_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialFetcher"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialFetcher_fbAccessToken": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialFetcher"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialFetcher_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialFetcher"
         }
       ]
     },

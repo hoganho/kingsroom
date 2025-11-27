@@ -1,6 +1,6 @@
 # ===================================================================
 # KINGSROOM SCHEMA
-# Version: 1.2.0 (Social Pulse Update)
+# Version: 1.2.1 (Fixes: SyncPageInfoResult & GameTracker Types)
 # ===================================================================
 
 # ===================================================================
@@ -44,7 +44,7 @@ enum ScrapeAttemptStatus { SUCCESS, FAILED, SKIPPED_DONOTSCRAPE, SKIPPED_VENUE, 
 enum TimeRange { LAST_HOUR, LAST_24_HOURS, LAST_7_DAYS, LAST_30_DAYS, CUSTOM }
 enum ScraperOperation { START, STOP, ENABLE, DISABLE, STATUS, RESET }
 
-# --- Social Pulse Enums (NEW) ---
+# --- Social Pulse Enums ---
 enum SocialPlatform { FACEBOOK, INSTAGRAM, TWITTER, LINKEDIN }
 enum SocialAccountStatus { ACTIVE, INACTIVE, PENDING_VERIFICATION, ERROR, RATE_LIMITED }
 enum SocialPostType { TEXT, IMAGE, VIDEO, LINK, EVENT, ALBUM, LIVE }
@@ -75,7 +75,7 @@ type Entity @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   games: [Game] @hasMany(indexName: "byEntityGame", fields: ["id"])
   assets: [Asset] @hasMany(indexName: "byEntityAsset", fields: ["id"])
   
-  # Social Pulse Relationships (NEW)
+  # Social Pulse Relationships
   socialAccounts: [SocialAccount] @hasMany(indexName: "bySocialAccountEntity", fields: ["id"])
 }
 
@@ -98,7 +98,7 @@ type Venue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   playerMemberships: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
   registeredPlayers: [Player] @hasMany(indexName: "byRegistrationVenue", fields: ["id"])
   
-  # Social Pulse Relationships (NEW)
+  # Social Pulse Relationships
   socialAccounts: [SocialAccount] @hasMany(indexName: "bySocialAccountVenue", fields: ["id"])
   
   entityId: ID @index(name: "byEntityVenue", sortKeyFields: ["name"])
@@ -215,7 +215,6 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   parentGame: Game @belongsTo(fields: ["parentGameId"])
   childGames: [Game] @hasMany(indexName: "byParentGame", fields: ["id"])
   
-  # Values: "PARENT", "CHILD", "STANDARD"
   consolidationType: String @default(value: "STANDARD") @index(name: "byConsolidationType", sortKeyFields: ["gameStartDateTime"])
   consolidationKey: String @index(name: "byConsolidationKey", queryField: "gamesByConsolidationKey")
 
@@ -259,7 +258,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
   
-  # Social Pulse Relationships (NEW)
+  # Social Pulse Relationships
   linkedSocialPosts: [SocialPost] @hasMany(indexName: "bySocialPostGame", fields: ["id"])
   
   entityId: ID @index(name: "byEntityGame", sortKeyFields: ["gameStartDateTime"])
@@ -304,7 +303,6 @@ type GameCost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   gameId: ID! @index(name: "byGameCost")
   game: Game @belongsTo(fields: ["gameId"]) 
   
-  # Structured cost fields
   totalDealerCost: Float @default(value: "0")
   totalTournamentDirectorCost: Float @default(value: "0")
   totalPrizeContribution: Float @default(value: "0")
@@ -312,14 +310,10 @@ type GameCost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   totalPromotionCost: Float @default(value: "0")
   totalFloorStaffCost: Float @default(value: "0")
   totalOtherCost: Float @default(value: "0")
-  
-  # Total cost
   totalCost: Float! @default(value: "0")
   
-  # Detailed line items
   lineItems: [GameCostLineItem] @hasMany(indexName: "byGameCost", fields: ["id"])
   
-  # Denormalized fields
   entityId: ID @index(name: "byEntityCost", sortKeyFields: ["gameDate"])
   venueId: ID @index(name: "byVenueCost", sortKeyFields: ["gameDate"])
   gameDate: AWSDateTime @index(name: "byGameDateCost", sortKeyFields: ["totalCost"])
@@ -344,7 +338,6 @@ type GameCostLineItem @model(subscriptions: null) @auth(rules: [{ allow: private
   hours: Float
   notes: String
   
-  # Denormalized fields
   gameId: ID @index(name: "byGameLineItem")
   entityId: ID @index(name: "byEntityLineItem", sortKeyFields: ["gameDate"])
   venueId: ID @index(name: "byVenueLineItem", sortKeyFields: ["gameDate"])
@@ -371,34 +364,21 @@ type GameCostItem @model(subscriptions: null) @auth(rules: [{ allow: private }])
 # --- Game Consolidation Preview Types ---
 
 type ConsolidationPreviewResult {
-  
   willConsolidate: Boolean!
-  
   reason: String!
-  
   consolidation: ConsolidationDetails
-  
   warnings: [String!]
-  
   detectedPattern: DetectedMultiDayPattern
 }
 
 type ConsolidationDetails {
-  
   consolidationKey: String!
-  
   keyStrategy: String!
-  
   parentExists: Boolean!
-  
   parentGameId: ID
-  
   parentName: String!
-  
   siblingCount: Int!
-  
   siblings: [ConsolidationSibling!]
-  
   projectedTotals: ProjectedConsolidationTotals
 }
 
@@ -426,16 +406,11 @@ type ProjectedConsolidationTotals {
 }
 
 type DetectedMultiDayPattern {
-  
   isMultiDay: Boolean!
-  
   detectionSource: String
-  
   parsedDayNumber: Int
-  
   parsedFlightLetter: String
   isFinalDay: Boolean
-  
   derivedParentName: String!
 }
 
@@ -459,7 +434,6 @@ type Player @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   creditBalance: Int
   pointsBalance: Int
 
-  # Relationships
   playerSummary: PlayerSummary @hasOne(fields: ["id"])
   knownIdentities: [KnownPlayerIdentity] @hasMany(indexName: "byPlayer", fields: ["id"])
   marketingPreferences: PlayerMarketingPreferences @hasOne(fields: ["id"])
@@ -519,11 +493,8 @@ type PlayerEntry @model(subscriptions: null) @auth(rules: [{ allow: private }]) 
   player: Player @belongsTo(fields: ["playerId"])
   game: Game @belongsTo(fields: ["gameId"])
   
-  # Deduplication Logic
   entryType: EntryType @default(value: "INITIAL")
-  qualifyingGameId: ID # Points to the specific flight they qualified from (if applicable)
-
-  # Values: "CONSOLIDATED" (Rolled up on parent), "ORIGINAL" (Actual flight data)
+  qualifyingGameId: ID
   recordType: String @default(value: "ORIGINAL") @index(name: "byRecordType", sortKeyFields: ["gameStartDateTime"])
 }
 
@@ -540,8 +511,6 @@ type PlayerResult @model(subscriptions: null) @auth(rules: [{ allow: private }])
   player: Player @belongsTo(fields: ["playerId"])
   gameId: ID! @index(name: "byGame")
   game: Game @belongsTo(fields: ["gameId"])
-
-  # Values: "CONSOLIDATED", "ORIGINAL"
   recordType: String @default(value: "ORIGINAL") @index(name: "byRecordTypeResult", sortKeyFields: ["gameStartDateTime"])
 }
 
@@ -682,7 +651,6 @@ type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules:
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
   
-  # Caching Fields
   etag: String
   lastModifiedHeader: String
   contentHash: String
@@ -743,7 +711,7 @@ type ScraperState @model(subscriptions: null) @auth(rules: [{ allow: private }])
   currentLog: [ScraperLogData]
   highestStoredId: Int
   lowestStoredId: Int
-  knownGapRanges: AWSJSON  # Array of {start, end, count}
+  knownGapRanges: AWSJSON
   lastGapScanAt: AWSDateTime
   totalGamesInDatabase: Int
   lastGamesProcessed: [ScrapedGameStatus]
@@ -795,7 +763,6 @@ type S3Storage @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
   
-  # Parsing Stats
   isParsed: Boolean @default(value: "false")
   parsedDataHash: String
   extractedFields: [String]
@@ -901,7 +868,7 @@ type PlayerMarketingPreferences @model(subscriptions: null) @auth(rules: [{ allo
 }
 
 # ===================================================================
-# 6.5 SOCIAL PULSE (ENHANCED)
+# 6.5 SOCIAL PULSE
 # ===================================================================
 
 type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
@@ -922,6 +889,12 @@ type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]
   followingCount: Int
   postCount: Int
   
+  # --- Page Info (from Facebook API) ---
+  hasFullHistory: Boolean @default(value: "false")
+  pageDescription: String
+  category: String
+  website: String
+
   # --- Scraping Configuration ---
   status: SocialAccountStatus! @default(value: "PENDING_VERIFICATION")
   isScrapingEnabled: Boolean! @default(value: "true")
@@ -961,15 +934,20 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   postUrl: AWSURL
   postType: SocialPostType!
   
+  # --- Denormalized Account Info (for fast display without joins) ---
+  accountName: String
+  accountProfileImageUrl: String
+  platform: String
+
   # --- Content ---
   content: String
-  contentPreview: String  # Truncated version for list views
-  rawContent: AWSJSON    # Original scraped data
+  contentPreview: String
+  rawContent: AWSJSON
   
   # --- Media ---
   mediaUrls: [AWSURL]
   thumbnailUrl: AWSURL
-  mediaType: String      # image/jpeg, video/mp4, etc.
+  mediaType: String
   
   # --- Engagement Metrics ---
   likeCount: Int @default(value: "0")
@@ -991,8 +969,8 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   
   # --- Content Classification (for filtering) ---
   tags: [String]
-  sentiment: String       # positive, neutral, negative
-  contentCategory: String # tournament, promotion, news, community, etc.
+  sentiment: String
+  contentCategory: String
   
   # --- Linked Tournament (if post is about a specific game) ---
   linkedGameId: ID @index(name: "bySocialPostGame")
@@ -1018,6 +996,9 @@ type SocialScrapeAttempt @model(subscriptions: null) @auth(rules: [{ allow: priv
   startedAt: AWSDateTime!
   completedAt: AWSDateTime
   durationMs: Int
+  
+  # --- Sync Type ---
+  syncType: String  # "INCREMENTAL" or "FULL_SYNC"
   
   # --- Results ---
   postsFound: Int @default(value: "0")
@@ -1058,7 +1039,7 @@ type SocialScheduledPost @model(subscriptions: null) @auth(rules: [{ allow: priv
   
   # --- Related Game (for tournament results posts) ---
   linkedGameId: ID @index(name: "byScheduledPostGame")
-  templateType: String  # TOURNAMENT_RESULTS, PROMOTION, CUSTOM
+  templateType: String
   
   # --- Relationships ---
   entityId: ID! @index(name: "byScheduledPostEntity", sortKeyFields: ["scheduledFor"])
@@ -1201,8 +1182,6 @@ type ScrapedGameData {
   isRegular: Boolean
   isSeries: Boolean
   isSatellite: Boolean
-  
-  # Series structure fields for multi-day/flight tournaments
   tournamentSeriesId: ID
   seriesTitleId: ID
   isMainEvent: Boolean
@@ -1211,7 +1190,6 @@ type ScrapedGameData {
   flightLetter: String
   finalDay: Boolean
   seriesYear: Int
-  
   gameFrequency: GameFrequency
   gameTags: [String]
   levels: [ScrapedTournamentLevel!]
@@ -1245,7 +1223,6 @@ type ScrapedTournamentLevel {
   durationMinutes: Int
   smallBlind: Int
   bigBlind: Int
-  
   ante: Int
 }
 
@@ -1522,7 +1499,7 @@ type GamesNeedingVenueResponse {
   totalCount: Int
 }
 
-# --- Social Pulse Response Types (NEW) ---
+# --- Social Pulse Response Types (CORRECTED) ---
 type SocialFeedConnection {
   items: [SocialPost!]!
   nextToken: String
@@ -1549,6 +1526,21 @@ type SocialAccountMetrics {
   postsThisPeriod: Int
   engagementGrowth: Float
   topPerformingPosts: [SocialPost!]
+}
+
+# CORRECTED: Matches what the Lambda actually returns
+type SocialScrapeResult {
+  success: Boolean!
+  message: String
+  postsFound: Int
+  newPostsAdded: Int
+}
+
+# CORRECTED: Matches what the Lambda actually returns  
+type SyncPageInfoResult {
+  success: Boolean!
+  message: String
+  logoUrl: String
 }
 
 # --- Misc Response Types ---
@@ -1611,14 +1603,9 @@ type UnfinishedGamesConnection {
 # 8. INPUT TYPES
 # ===================================================================
 
-# --- Consolidation Preview Inputs ---
-
 input ConsolidationPreviewInput {
-  
   gameData: GamePreviewDataInput!
-  
   existingGameId: ID
-  
   includeSiblingDetails: Boolean
 }
 
@@ -1630,24 +1617,20 @@ input GamePreviewDataInput {
   buyIn: Float
   gameStatus: GameStatus
   gameStartDateTime: AWSDateTime
-  
-  # Series fields - key for consolidation
   tournamentSeriesId: ID
   eventNumber: Int
   dayNumber: Int
   flightLetter: String
   finalDay: Boolean
   isSeries: Boolean
-  
-  # Numeric fields for projected totals calculation
+  seriesName: String
+  isMainEvent: Boolean
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
   prizepool: Float
   gameEndDateTime: AWSDateTime
 }
-
-# --- Standard Inputs ---
 
 input ClientMetricInput {
   metricName: String!
@@ -1854,7 +1837,7 @@ input SaveProcessingOptionsInput {
   priority: String
 }
 
-# --- Social Pulse Input Types (NEW) ---
+# --- Social Pulse Input Types ---
 
 input AddSocialAccountInput {
   platform: SocialPlatform!
@@ -1959,10 +1942,6 @@ type Query {
   findTournamentIdGaps(entityId: ID!, startId: Int, endId: Int, maxGapsToReturn: Int): [GapRange!] @function(name: "gameIdTracker-${env}")
   getUnfinishedGamesByEntity(entityId: ID!, limit: Int, nextToken: String): UnfinishedGamesConnection @function(name: "gameIdTracker-${env}")
   listExistingTournamentIds(entityId: ID!, startId: Int, endId: Int, limit: Int): [Int!] @function(name: "gameIdTracker-${env}")
-  
-  # --- Social Pulse Queries ---
-  # Note: Use auto-generated queries (listSocialAccounts, listSocialPosts, etc.)
-  # Custom queries can be added later when socialPulseFunction Lambda is created
 }
 
 type Mutation {
@@ -1989,8 +1968,9 @@ type Mutation {
   uploadManualHTML(input: ManualHTMLUploadInput!): S3Storage
   
   # --- Social Pulse Mutations ---
-  # Note: Use auto-generated mutations (createSocialAccount, updateSocialAccount, etc.)
-  # Custom mutations can be added later when socialPulseFunction Lambda is created
+  triggerSocialScrape(socialAccountId: ID!): SocialScrapeResult @function(name: "socialFetcher-${env}")
+  triggerFullSync(socialAccountId: ID!): SocialScrapeResult @function(name: "socialFetcher-${env}")
+  syncPageInfo(socialAccountId: ID!): SyncPageInfoResult @function(name: "socialFetcher-${env}")
 }
 
 type Subscription {

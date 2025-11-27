@@ -10,10 +10,11 @@ import {
   BeakerIcon,
   BuildingOffice2Icon,
   WrenchIcon,
+  HashtagIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import { EntitySelector } from '../entities/EntitySelector';
-import { Database } from 'lucide-react';
+import { Database, Radio } from 'lucide-react';
 
 interface SidebarProps {
   onClose?: () => void;
@@ -71,6 +72,13 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
         { to: '/venues/details', label: 'Venue Details' },
       ],
     },
+    {
+      label: 'Social',
+      icon: Radio,
+      children: [
+        { to: '/social/pulse', label: 'Social Pulse' },
+      ],
+    },
   ];
 
   // Settings section (Admin and SuperAdmin)
@@ -91,6 +99,12 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
       to: '/settings/series-management',
       label: 'Series Management',
       icon: TrophyIcon,
+      requiredRoles: ['Admin', 'SuperAdmin'],
+    },
+    {
+      to: '/settings/social-accounts',
+      label: 'Social Accounts',
+      icon: HashtagIcon,
       requiredRoles: ['Admin', 'SuperAdmin'],
     },
   ];
@@ -122,7 +136,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
     {
         to: '/debug/database-monitor',
         label: 'Database Monitor',
-        icon: Database as any, // import { Database } from 'lucide-react'
+        icon: Database as any,
         requiredRoles: ['SuperAdmin'],
     }
   ];

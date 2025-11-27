@@ -1,4 +1,5 @@
 // src/hooks/useConsolidationPreview.ts
+// *** FIX: Added seriesName and isMainEvent to extractPreviewInput ***
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -93,7 +94,7 @@ export interface ProjectedConsolidationTotals {
 
 export interface ConsolidationDetails {
     consolidationKey: string;
-    keyStrategy: 'SERIES_EVENT' | 'VENUE_BUYIN_NAME';
+    keyStrategy: 'SERIES_EVENT' | 'ENTITY_SERIES_EVENT' | 'VENUE_EVENT_DATE' | 'VENUE_BUYIN_DATE';
     parentExists: boolean;
     parentGameId: string | null;
     parentName: string;
@@ -240,8 +241,6 @@ export const useConsolidationPreview = (
     // Store callbacks in refs to avoid dependency chain issues
     const onPreviewCompleteRef = useRef(onPreviewComplete);
     const onPreviewErrorRef = useRef(onPreviewError);
-    
-    // Track last fetched input to prevent duplicate requests
     const lastFetchedInputRef = useRef<string | null>(null);
     
     // Keep refs updated without causing re-renders
@@ -251,7 +250,11 @@ export const useConsolidationPreview = (
     }, [onPreviewComplete, onPreviewError]);
 
     /**
-     * Extracts only the fields needed for consolidation preview
+     * *** FIX: Added seriesName and isMainEvent to extractPreviewInput ***
+     * 
+     * These fields are critical for:
+     * 1. seriesName - Used in ENTITY_SERIES_EVENT strategy (95% confidence)
+     * 2. isMainEvent - Used for deriving parent name from structured fields
      */
     const extractPreviewInput = useCallback((data: Partial<GameData>) => {
         return {
@@ -269,6 +272,9 @@ export const useConsolidationPreview = (
             flightLetter: data.flightLetter || null,
             finalDay: data.finalDay || null,
             isSeries: data.isSeries || null,
+            // *** FIX: Added missing fields for consolidation ***
+            seriesName: (data as any).seriesName || null,      // Critical for ENTITY_SERIES_EVENT strategy
+            isMainEvent: (data as any).isMainEvent || null,    // Used for parent name derivation
             // Numeric fields needed for projected totals calculation
             totalEntries: data.totalEntries || null,
             totalRebuys: data.totalRebuys || null,
@@ -280,6 +286,7 @@ export const useConsolidationPreview = (
 
     /**
      * Generates a stable hash for input deduplication
+     * *** FIX: Added seriesName to the hash ***
      */
     const getInputHash = useCallback((data: Partial<GameData>): string => {
         return JSON.stringify({
@@ -291,7 +298,8 @@ export const useConsolidationPreview = (
             dayNumber: data.dayNumber,
             flightLetter: data.flightLetter,
             finalDay: data.finalDay,
-            isSeries: data.isSeries
+            isSeries: data.isSeries,
+            seriesName: (data as any).seriesName  // *** FIX: Include in hash ***
         });
     }, []);
 
@@ -456,11 +464,27 @@ export const formatConsolidationKey = (key: string): string => {
         }
     }
     
-    if (key.startsWith('VENUE_')) {
-        // VENUE_abc_BI_500_NAME_WSOPMAINEVENT → "Venue + $500 + WSOP MAIN EVENT"
-        const match = key.match(/VENUE_(.+)_BI_(\d+)_NAME_(.+)/);
+    if (key.startsWith('ENT_')) {
+        // ENT_xxx_SER_SIGNATURESERIES_EVT_8_DT_2023-02 → "Signature Series Event #8"
+        const match = key.match(/SER_([A-Z]+)_EVT_(\d+)/);
         if (match) {
-            return `$${match[2]} - ${match[3].replace(/([A-Z])/g, ' $1').trim()}`;
+            // Convert SIGNATURESERIES to "Signature Series"
+            const seriesName = match[1].replace(/([A-Z])/g, ' $1').trim();
+            return `${seriesName} Event #${match[2]}`;
+        }
+    }
+    
+    if (key.startsWith('VEN_')) {
+        // VEN_xxx_EVT_8_BI_750_DT_2023-02 → "Event #8 ($750)"
+        const match = key.match(/EVT_(\d+)_BI_(\d+)/);
+        if (match) {
+            return `Event #${match[1]} ($${match[2]})`;
+        }
+        
+        // VEN_xxx_BI_750_DT_2023-02 → "$750 Tournament"
+        const biMatch = key.match(/BI_(\d+)/);
+        if (biMatch) {
+            return `$${biMatch[1]} Tournament`;
         }
     }
     
@@ -473,9 +497,13 @@ export const formatConsolidationKey = (key: string): string => {
 export const getKeyStrategyDescription = (strategy: string): string => {
     switch (strategy) {
         case 'SERIES_EVENT':
-            return 'Linked by Series + Event Number (most reliable)';
-        case 'VENUE_BUYIN_NAME':
-            return 'Linked by Venue + Buy-in + Name pattern (fallback)';
+            return 'Linked by Series ID + Event Number (100% confidence)';
+        case 'ENTITY_SERIES_EVENT':
+            return 'Linked by Entity + Series Name + Event Number (95% confidence)';
+        case 'VENUE_EVENT_DATE':
+            return 'Linked by Venue + Event Number + Buy-in (90% confidence)';
+        case 'VENUE_BUYIN_DATE':
+            return 'Linked by Venue + Buy-in + Date (70% confidence - lower reliability)';
         default:
             return strategy;
     }

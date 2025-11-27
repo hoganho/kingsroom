@@ -7306,6 +7306,34 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "hasFullHistory": {
+                    "name": "hasFullHistory",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "pageDescription": {
+                    "name": "pageDescription",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "category": {
+                    "name": "category",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "website": {
+                    "name": "website",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "status": {
                     "name": "status",
                     "isArray": false,
@@ -7579,6 +7607,27 @@ export const schema = {
                         "enum": "SocialPostType"
                     },
                     "isRequired": true,
+                    "attributes": []
+                },
+                "accountName": {
+                    "name": "accountName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "accountProfileImageUrl": {
+                    "name": "accountProfileImageUrl",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "platform": {
+                    "name": "platform",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "content": {
@@ -7938,6 +7987,13 @@ export const schema = {
                     "name": "durationMs",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "syncType": {
+                    "name": "syncType",
+                    "isArray": false,
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -11563,6 +11619,65 @@ export const schema = {
                 }
             }
         },
+        "SocialScrapeResult": {
+            "name": "SocialScrapeResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "postsFound": {
+                    "name": "postsFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newPostsAdded": {
+                    "name": "newPostsAdded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SyncPageInfoResult": {
+            "name": "SyncPageInfoResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "logoUrl": {
+                    "name": "logoUrl",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "RefreshResponse": {
             "name": "RefreshResponse",
             "fields": {
@@ -11837,5 +11952,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "3bfcaffb6464a0a6d909f57c7b2c038d"
+    "version": "929e4f3d21cd5a7a94e8749be8aa6428"
 };

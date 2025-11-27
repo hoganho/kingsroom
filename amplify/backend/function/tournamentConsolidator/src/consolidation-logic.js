@@ -7,6 +7,8 @@
  * 
  * This module contains NO database operations - it only computes
  * what SHOULD happen. The caller is responsible for executing.
+ * 
+ * *** FIX: Improved deriveParentName to strip additional suffixes like "Turbo" ***
  */
 
 // --- PURE FUNCTIONS ---
@@ -21,27 +23,86 @@ const clean = (str) => {
 };
 
 /**
- * Derives the parent name by removing day/flight suffixes
+ * *** FIX: Enhanced deriveParentName to prefer structured fields ***
  * 
- * Examples:
- * - "WSOP Main Event - Day 1A" → "WSOP Main Event"
- * - "Spring Series Event 8 Flight B" → "Spring Series Event 8"
- * - "Championship Day 2" → "Championship"
+ * Derives the parent name using structured data when available,
+ * falling back to name parsing only when necessary.
  * 
- * @param {string} childName 
+ * Priority:
+ * 1. Build from structured fields (seriesName + eventNumber + isMainEvent)
+ * 2. Fall back to parsing the child name and stripping day/flight suffixes
+ * 
+ * @param {string} childName - The child tournament's name
+ * @param {Object} [game] - Optional game object with structured fields
  * @returns {string}
  */
-const deriveParentName = (childName) => {
+const deriveParentName = (childName, game = null) => {
+    // *** STRATEGY 1: Build from structured fields (most reliable) ***
+    if (game && game.seriesName && game.eventNumber) {
+        let parentName = game.seriesName;
+        
+        // Add event number
+        parentName += ` Event ${game.eventNumber}`;
+        
+        // Add main event designation if applicable
+        if (game.isMainEvent) {
+            parentName += ': MAIN EVENT';
+        }
+        
+        return parentName;
+    }
+    
+    // *** STRATEGY 2: Parse from name (fallback) ***
+    // Extract series name and event number from the child name if possible
+    const eventMatch = childName.match(/^(.+?)\s*Event\s*(\d+)\s*[:\-]?\s*(.+)?$/i);
+    if (eventMatch) {
+        const seriesPart = eventMatch[1].trim();
+        const eventNum = eventMatch[2];
+        const eventTitle = eventMatch[3];
+        
+        // Check if there's a main event or other event title
+        if (eventTitle) {
+            // Strip day/flight/variant suffixes from the event title
+            const cleanEventTitle = eventTitle
+                .replace(/\s*\b(Super\s*)?Turbo\b/gi, '')
+                .replace(/\s*\bHyper(\s*Turbo)?\b/gi, '')
+                .replace(/\s*\bDeep(\s*Stack)?\b/gi, '')
+                .replace(/\s*[-–]?\s*(Day|Flight)\s*(\d+|[A-Z])+/gi, '')
+                .replace(/\s*\bFlight\s*\d*[A-Z]?\b/gi, '')
+                .replace(/\s*[-–]?\s*Final\s*(Day|Table)/gi, '')
+                .replace(/\s+\d+[A-Z]\s*$/gi, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            if (cleanEventTitle) {
+                return `${seriesPart} Event ${eventNum}: ${cleanEventTitle}`;
+            }
+        }
+        
+        return `${seriesPart} Event ${eventNum}`;
+    }
+    
+    // *** STRATEGY 3: Simple name cleanup (last resort) ***
     return childName
+        // Remove "Turbo", "Hyper", "Super Turbo" etc. as these are flight variants
+        .replace(/\s*\b(Super\s*)?Turbo\b/gi, '')
+        .replace(/\s*\bHyper(\s*Turbo)?\b/gi, '')
+        .replace(/\s*\bDeep(\s*Stack)?\b/gi, '')
+        
         // Remove patterns like "- Day 1A", "– Flight B"
         .replace(/\s*[-–]\s*(Day|Flight)\s*(\d+|[A-Z])+/gi, '')
         // Remove patterns like "Day 1A" without dash
         .replace(/\s*\b(Day|Flight)\s*(\d+|[A-Z])+\b/gi, '')
+        // Handle "Flight 1A", "Flight 1B" patterns specifically
+        .replace(/\s*\bFlight\s*\d+[A-Z]?\b/gi, '')
         // Remove "- Final Day"
         .replace(/\s*[-–]\s*Final\s*Day/gi, '')
         // Remove standalone "Final Day" 
         .replace(/\s*\bFinal\s*(Day|Table)\b/gi, '')
+        // Remove standalone day-letter combinations like "1A", "1B", "1D" at end
+        .replace(/\s+\d+[A-Z]\s*$/gi, '')
         // Clean up any leftover whitespace
+        .replace(/\s+/g, ' ')
         .trim();
 };
 
@@ -89,7 +150,7 @@ const checkIsMultiDay = (game) => {
         
         // Patterns to detect
         const dayPattern = /\bDay\s*(\d+)([A-Z])?\b/i;
-        const flightPattern = /\bFlight\s*([A-Z])\b/i;
+        const flightPattern = /\bFlight\s*(\d*)([A-Z])\b/i;  // *** FIX: Handle "Flight 1A", "Flight A" ***
         const finalPattern = /\b(Final\s*(Day|Table)|FT)\b/i;
         const dayLetterPattern = /\b(\d+)([A-Z])\b/; // "1A", "2B" etc.
         
@@ -109,7 +170,11 @@ const checkIsMultiDay = (game) => {
         if (flightMatch) {
             result.isMultiDay = true;
             result.detectionSource = result.detectionSource || 'namePattern';
-            result.parsedFlightLetter = flightMatch[1].toUpperCase();
+            // *** FIX: Handle both "Flight 1A" (extract A) and "Flight A" (extract A) ***
+            if (flightMatch[1] && !result.parsedDayNumber) {
+                result.parsedDayNumber = parseInt(flightMatch[1]);
+            }
+            result.parsedFlightLetter = flightMatch[2].toUpperCase();
         }
         
         // Check final day pattern
@@ -246,7 +311,8 @@ const previewConsolidation = (game) => {
     
     // Step 1: Check if this is a multi-day game
     const detectedPattern = checkIsMultiDay(game);
-    const derivedParentName = deriveParentName(game.name);
+    // *** FIX: Pass game object to use structured fields for parent name ***
+    const derivedParentName = deriveParentName(game.name, game);
     
     if (!detectedPattern.isMultiDay) {
         return {
@@ -516,6 +582,7 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
  * Ensures all non-nullable fields are populated
  * 
  * *** FIX: Now requires parentId to generate sourceUrl for GSI compatibility ***
+ * *** FIX: Uses structured fields for parent name derivation ***
  * 
  * @param {Object} childGame - The child game triggering parent creation
  * @param {string} consolidationKey - The consolidation key
@@ -532,7 +599,8 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         // Consolidation fields
         consolidationKey,
         consolidationType: 'PARENT',
-        name: deriveParentName(childGame.name),
+        // *** FIX: Pass childGame to use structured fields for parent name ***
+        name: deriveParentName(childGame.name, childGame),
         parentGameId: null, // Parents don't have parents
         
         // Copy immutable traits from child

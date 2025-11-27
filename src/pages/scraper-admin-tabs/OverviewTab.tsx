@@ -9,7 +9,7 @@ import {
     Activity,
     CheckCircle,
     Database,
-    TrendingUp, // <-- NEW: Icon for Coverage Info
+    TrendingUp,
 } from 'lucide-react';
 // Import from auto-generated queries
 import { 
@@ -19,7 +19,6 @@ import {
 // Import TimeRange enum from API types
 import { TimeRange, type ScraperJob } from '../../API';
 import { MetricCard, JobStatusBadge } from '../../components/scraper/admin/ScraperAdminShared';
-// --- NEW: Imports for Coverage Info ---
 import { useEntity } from '../../contexts/EntityContext';
 import { useGameIdTracking } from '../../hooks/useGameIdTracking';
 

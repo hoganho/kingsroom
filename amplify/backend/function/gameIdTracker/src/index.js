@@ -1,21 +1,22 @@
 /* Amplify Params - DO NOT EDIT
-	API_KINGSROOM_ENTITYTABLE_ARN
-	API_KINGSROOM_ENTITYTABLE_NAME
-	API_KINGSROOM_GAMETABLE_ARN
-	API_KINGSROOM_GAMETABLE_NAME
-	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
-	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
-	API_KINGSROOM_SCRAPERSTATETABLE_ARN
-	API_KINGSROOM_SCRAPERSTATETABLE_NAME
-	ENV
-	REGION
+    API_KINGSROOM_ENTITYTABLE_ARN
+    API_KINGSROOM_ENTITYTABLE_NAME
+    API_KINGSROOM_GAMETABLE_ARN
+    API_KINGSROOM_GAMETABLE_NAME
+    API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
+    API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+    API_KINGSROOM_SCRAPERSTATETABLE_ARN
+    API_KINGSROOM_SCRAPERSTATETABLE_NAME
+    ENV
+    REGION
 Amplify Params - DO NOT EDIT */
 
 /**
  * gameIdTracker Lambda Function
- * 
- * Efficiently tracks tournament IDs, detects gaps, and manages scraping status
+ * * Efficiently tracks tournament IDs, detects gaps, and manages scraping status
  * Uses composite index for optimal DynamoDB queries
+ * * FIX: Added filtering to exclude 'PARENT' records from consolidation
+ * to prevent them from breaking statistics.
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
@@ -26,12 +27,10 @@ const { LambdaMonitoring } = require('./lambda-monitoring');
 // --- End Lambda Monitoring ---
 
 const client = new DynamoDBClient({});
-const originalDdbDocClient = DynamoDBDocumentClient.from(client); // Renamed original client
+const originalDdbDocClient = DynamoDBDocumentClient.from(client); 
 
 // --- Lambda Monitoring Initialization ---
-// Initialize monitoring for this function
 const monitoring = new LambdaMonitoring('gameIdTracker', null);
-// Wrap the DynamoDB client to automatically track operations
 const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(originalDdbDocClient);
 // --- End Lambda Monitoring ---
 
@@ -60,18 +59,15 @@ exports.handler = async (event) => {
   const fieldName = event.fieldName;
   const args = event.arguments || {};
   
-  // ✅ Track business logic: Handler start
   monitoring.trackOperation('HANDLER_START', 'Handler', fieldName || 'unknown', { operation: fieldName });
   
   try {
     switch (fieldName) {
       case 'getTournamentIdBounds':
-        // ✅ Track business logic: Getting bounds
         monitoring.trackOperation('GET_BOUNDS_START', 'Game', args.entityId, { entityId: args.entityId });
         return await getTournamentIdBounds(args.entityId);
       
       case 'getEntityScrapingStatus':
-        // ✅ Track business logic: Getting scraping status
         monitoring.trackOperation('GET_STATUS_START', 'Game', args.entityId, { 
           entityId: args.entityId, 
           forceRefresh: args.forceRefresh 
@@ -84,7 +80,6 @@ exports.handler = async (event) => {
         );
       
       case 'findTournamentIdGaps':
-        // ✅ Track business logic: Finding gaps
         monitoring.trackOperation('FIND_GAPS_START', 'Game', args.entityId, { 
           entityId: args.entityId,
           startId: args.startId,
@@ -98,7 +93,6 @@ exports.handler = async (event) => {
         );
       
       case 'getUnfinishedGamesByEntity':
-        // ✅ Track business logic: Getting unfinished games
         monitoring.trackOperation('GET_UNFINISHED_START', 'Game', args.entityId, { 
           entityId: args.entityId,
           limit: args.limit
@@ -110,7 +104,6 @@ exports.handler = async (event) => {
         );
       
       case 'listExistingTournamentIds':
-        // ✅ Track business logic: Listing IDs
         monitoring.trackOperation('LIST_IDS_START', 'Game', args.entityId, { 
           entityId: args.entityId,
           startId: args.startId,
@@ -127,7 +120,6 @@ exports.handler = async (event) => {
         throw new Error(`Unknown field: ${fieldName}`);
     }
   } catch (error) {
-    // ✅ Track business logic: Handler error
     monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'fatal', { 
       error: error.message, 
       operation: fieldName 
@@ -135,7 +127,6 @@ exports.handler = async (event) => {
     console.error('Error:', error);
     throw error;
   } finally {
-    // Always flush metrics before the Lambda exits
     if (monitoring) {
       console.log('[gameIdTracker] Flushing monitoring metrics...');
       await monitoring.flush();
@@ -146,20 +137,29 @@ exports.handler = async (event) => {
 
 /**
  * Get highest and lowest tournament IDs for an entity
+ * FIX: Added FilterExpression to ignore PARENT records
  */
 async function getTournamentIdBounds(entityId) {
   console.log(`[getTournamentIdBounds] Getting bounds for entity: ${entityId}`);
   
+  // Common filtering for Parent exclusion
+  const parentFilter = {
+    FilterExpression: 'consolidationType <> :parent',
+    ExpressionAttributeValues: {
+      ':entityId': entityId,
+      ':parent': 'PARENT'
+    }
+  };
+
   // Query for lowest ID
+  // FIX: Increased limit to 10 to skip potential Parent records at the boundary
   const lowestQuery = await monitoredDdbDocClient.send(new QueryCommand({
     TableName: GAME_TABLE,
     IndexName: 'byEntityAndTournamentId',
     KeyConditionExpression: 'entityId = :entityId',
-    ExpressionAttributeValues: {
-      ':entityId': entityId
-    },
-    ProjectionExpression: 'tournamentId',
-    Limit: 1,
+    ...parentFilter,
+    ProjectionExpression: 'tournamentId, consolidationType',
+    Limit: 10, 
     ScanIndexForward: true  // Ascending
   }));
   
@@ -168,32 +168,31 @@ async function getTournamentIdBounds(entityId) {
     TableName: GAME_TABLE,
     IndexName: 'byEntityAndTournamentId',
     KeyConditionExpression: 'entityId = :entityId',
-    ExpressionAttributeValues: {
-      ':entityId': entityId
-    },
-    ProjectionExpression: 'tournamentId',
-    Limit: 1,
+    ...parentFilter,
+    ProjectionExpression: 'tournamentId, consolidationType',
+    Limit: 10,
     ScanIndexForward: false  // Descending
   }));
   
-  // Count total games
+  // Count total games (excluding Parents)
   const countQuery = await monitoredDdbDocClient.send(new QueryCommand({
     TableName: GAME_TABLE,
     IndexName: 'byEntityAndTournamentId',
     KeyConditionExpression: 'entityId = :entityId',
-    ExpressionAttributeValues: {
-      ':entityId': entityId
-    },
+    ...parentFilter,
     Select: 'COUNT'
   }));
   
-  const lowestId = lowestQuery.Items?.[0]?.tournamentId;
-  const highestId = highestQuery.Items?.[0]?.tournamentId;
+  // Find first valid non-parent item in the returned batch
+  const lowestItem = lowestQuery.Items?.find(i => i.consolidationType !== 'PARENT');
+  const highestItem = highestQuery.Items?.find(i => i.consolidationType !== 'PARENT');
+
+  const lowestId = lowestItem?.tournamentId;
+  const highestId = highestItem?.tournamentId;
   const totalCount = countQuery.Count || 0;
   
   console.log(`[getTournamentIdBounds] Bounds: ${lowestId} - ${highestId}, Total: ${totalCount}`);
   
-  // ✅ Track business logic: Bounds retrieved
   monitoring.trackOperation('GET_BOUNDS_COMPLETE', 'Game', entityId, { 
     lowestId, 
     highestId, 
@@ -211,13 +210,11 @@ async function getTournamentIdBounds(entityId) {
 
 /**
  * Get all tournament IDs for an entity (paginated)
- * Uses the byEntityAndTournamentId GSI which has entityId as partition key
- * and tournamentId as sort key for efficient sorted retrieval
+ * FIX: Filter out PARENT records from the stream
  */
 async function getAllTournamentIds(entityId) {
   console.log(`[getAllTournamentIds] Fetching all IDs for entity: ${entityId}`);
   
-  // ✅ Track business logic: Starting ID collection
   monitoring.trackOperation('GET_ALL_IDS_START', 'Game', entityId, { entityId });
   
   const ids = new Set();
@@ -232,13 +229,17 @@ async function getAllTournamentIds(entityId) {
       ExpressionAttributeValues: {
         ':entityId': entityId
       },
-      ProjectionExpression: 'tournamentId',
-      Limit: 1000,  // Max items per query
+      // FIX: Request consolidationType so we can filter in memory
+      ProjectionExpression: 'tournamentId, consolidationType',
+      Limit: 1000,
       ExclusiveStartKey: lastEvaluatedKey
     }));
     
     if (result.Items) {
       result.Items.forEach(item => {
+        // FIX: Explicitly ignore PARENT records
+        if (item.consolidationType === 'PARENT') return;
+
         if (item.tournamentId) {
           ids.add(item.tournamentId);
         }
@@ -254,7 +255,6 @@ async function getAllTournamentIds(entityId) {
   
   console.log(`[getAllTournamentIds] Complete: ${ids.size} unique tournament IDs`);
   
-  // ✅ Track business logic: ID collection complete
   monitoring.trackOperation('GET_ALL_IDS_COMPLETE', 'Game', entityId, { 
     totalIds: ids.size,
     iterations 
@@ -338,10 +338,8 @@ function getGapSummary(gaps, totalRange) {
  */
 async function getCachedStatus(entityId) {
   try {
-    // ✅ Track business logic: Checking cache
     monitoring.trackOperation('CACHE_CHECK', 'ScraperState', entityId, { entityId });
     
-    // Find ScraperState by entityId
     const result = await monitoredDdbDocClient.send(new QueryCommand({
       TableName: SCRAPER_STATE_TABLE,
       IndexName: 'byEntityScraperState',
@@ -355,7 +353,6 @@ async function getCachedStatus(entityId) {
     const scraperState = result.Items?.[0];
     
     if (!scraperState?.lastGapScanAt) {
-      // ✅ Track business logic: Cache miss
       monitoring.trackOperation('CACHE_MISS', 'ScraperState', entityId, { reason: 'no_scan_time' });
       return null;
     }
@@ -367,13 +364,11 @@ async function getCachedStatus(entityId) {
     
     if (cacheAge > CACHE_TTL) {
       console.log(`[getCachedStatus] Cache expired (${cacheAge}s old)`);
-      // ✅ Track business logic: Cache expired
       monitoring.trackOperation('CACHE_EXPIRED', 'ScraperState', entityId, { cacheAge });
       return null;
     }
     
     console.log(`[getCachedStatus] Using cached data (${cacheAge}s old)`);
-    // ✅ Track business logic: Cache hit
     monitoring.trackOperation('CACHE_HIT', 'ScraperState', entityId, { cacheAge });
     
     return {
@@ -389,7 +384,6 @@ async function getCachedStatus(entityId) {
     };
   } catch (error) {
     console.error('[getCachedStatus] Error:', error);
-    // ✅ Track business logic: Cache error
     monitoring.trackOperation('CACHE_ERROR', 'ScraperState', entityId, { error: error.message });
     return null;
   }
@@ -400,7 +394,6 @@ async function getCachedStatus(entityId) {
  */
 async function updateScraperStateCache(scraperStateId, data) {
   try {
-    // ✅ Track business logic: Updating cache
     monitoring.trackOperation('CACHE_UPDATE_START', 'ScraperState', scraperStateId, { 
       highestStoredId: data.highestStoredId,
       lowestStoredId: data.lowestStoredId,
@@ -427,11 +420,9 @@ async function updateScraperStateCache(scraperStateId, data) {
     }));
     
     console.log('[updateScraperStateCache] Cache updated successfully');
-    // ✅ Track business logic: Cache updated
     monitoring.trackOperation('CACHE_UPDATE_COMPLETE', 'ScraperState', scraperStateId);
   } catch (error) {
     console.error('[updateScraperStateCache] Error:', error);
-    // ✅ Track business logic: Cache update failed
     monitoring.trackOperation('CACHE_UPDATE_ERROR', 'ScraperState', scraperStateId, { error: error.message });
   }
 }
@@ -465,13 +456,11 @@ async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, 
   if (!forceRefresh) {
     const cached = await getCachedStatus(entityId);
     if (cached) {
-      // Get unfinished games count
       const unfinishedCount = await getUnfinishedGamesCount(entityId);
       
       const totalRange = (cached.highestStoredId || 0) - (cached.lowestStoredId || 0) + 1;
       const gapSummary = getGapSummary(cached.knownGapRanges, totalRange);
       
-      // ✅ Track business logic: Returning cached status
       monitoring.trackOperation('STATUS_FROM_CACHE', 'Game', entityId, { 
         totalGames: cached.totalGamesInDatabase,
         gapCount: cached.knownGapRanges.length
@@ -492,16 +481,13 @@ async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, 
     }
   }
   
-  // Fresh calculation
   console.log('[getEntityScrapingStatus] Performing fresh calculation...');
-  // ✅ Track business logic: Starting fresh calculation
   monitoring.trackOperation('STATUS_FRESH_CALC_START', 'Game', entityId, { forceRefresh });
   
   // Get bounds
   const bounds = await getTournamentIdBounds(entityId);
   
   if (!bounds.lowestId || !bounds.highestId) {
-    // ✅ Track business logic: No games found
     monitoring.trackOperation('STATUS_NO_GAMES', 'Game', entityId);
     return {
       entityId,
@@ -533,7 +519,6 @@ async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, 
   const totalRange = rangeEnd - rangeStart + 1;
   const gapSummary = getGapSummary(gaps, totalRange);
   
-  // ✅ Track business logic: Fresh calculation complete
   monitoring.trackOperation('STATUS_FRESH_CALC_COMPLETE', 'Game', entityId, { 
     totalGames: bounds.totalCount,
     gapCount: gaps.length,
@@ -570,18 +555,13 @@ async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, 
 async function findTournamentIdGaps(entityId, startId, endId, maxGapsToReturn = 1000) {
   console.log(`[findTournamentIdGaps] Entity: ${entityId}`);
   
-  // Get bounds if not provided
   const bounds = await getTournamentIdBounds(entityId);
   const rangeStart = startId || bounds.lowestId || 1;
   const rangeEnd = endId || bounds.highestId || rangeStart;
   
-  // Get all IDs
   const foundIds = await getAllTournamentIds(entityId);
-  
-  // Calculate gaps
   const gaps = calculateGaps(foundIds, rangeStart, rangeEnd, maxGapsToReturn);
   
-  // ✅ Track business logic: Gaps found
   monitoring.trackOperation('GAPS_FOUND', 'Game', entityId, { 
     gapCount: gaps.length,
     rangeStart,
@@ -595,7 +575,6 @@ async function findTournamentIdGaps(entityId, startId, endId, maxGapsToReturn = 
  * Get count of unfinished games
  */
 async function getUnfinishedGamesCount(entityId) {
-  // ✅ Track business logic: Counting unfinished games
   monitoring.trackOperation('COUNT_UNFINISHED_START', 'Game', entityId);
   
   let count = 0;
@@ -606,10 +585,11 @@ async function getUnfinishedGamesCount(entityId) {
         TableName: GAME_TABLE,
         IndexName: 'byStatus',
         KeyConditionExpression: 'gameStatus = :status',
-        FilterExpression: 'entityId = :entityId',
+        FilterExpression: 'entityId = :entityId AND consolidationType <> :parent',
         ExpressionAttributeValues: {
           ':status': status,
-          ':entityId': entityId
+          ':entityId': entityId,
+          ':parent': 'PARENT'
         },
         Select: 'COUNT'
       }));
@@ -620,7 +600,6 @@ async function getUnfinishedGamesCount(entityId) {
     }
   }
   
-  // ✅ Track business logic: Unfinished count complete
   monitoring.trackOperation('COUNT_UNFINISHED_COMPLETE', 'Game', entityId, { count });
   
   return count;
@@ -635,7 +614,6 @@ async function getUnfinishedGamesByEntity(entityId, limit = 50, nextToken) {
   const items = [];
   let currentToken = nextToken;
   
-  // Query each unfinished status
   for (const status of UNFINISHED_STATUSES) {
     if (items.length >= limit) break;
     
@@ -644,10 +622,11 @@ async function getUnfinishedGamesByEntity(entityId, limit = 50, nextToken) {
         TableName: GAME_TABLE,
         IndexName: 'byStatus',
         KeyConditionExpression: 'gameStatus = :status',
-        FilterExpression: 'entityId = :entityId',
+        FilterExpression: 'entityId = :entityId AND consolidationType <> :parent',
         ExpressionAttributeValues: {
           ':status': status,
-          ':entityId': entityId
+          ':entityId': entityId,
+          ':parent': 'PARENT'
         },
         Limit: limit - items.length,
         ExclusiveStartKey: currentToken ? JSON.parse(Buffer.from(currentToken, 'base64').toString()) : undefined
@@ -666,10 +645,8 @@ async function getUnfinishedGamesByEntity(entityId, limit = 50, nextToken) {
     }
   }
   
-  // Get total count
   const totalCount = await getUnfinishedGamesCount(entityId);
   
-  // ✅ Track business logic: Unfinished games retrieved
   monitoring.trackOperation('GET_UNFINISHED_COMPLETE', 'Game', entityId, { 
     itemsReturned: items.length,
     totalCount 
@@ -691,7 +668,6 @@ async function listExistingTournamentIds(entityId, startId, endId, limit = 1000)
   const ids = await getAllTournamentIds(entityId);
   const idsArray = Array.from(ids).sort((a, b) => a - b);
   
-  // Filter by range if provided
   const filtered = idsArray.filter(id => {
     if (startId && id < startId) return false;
     if (endId && id > endId) return false;
@@ -700,7 +676,6 @@ async function listExistingTournamentIds(entityId, startId, endId, limit = 1000)
   
   const result = filtered.slice(0, limit);
   
-  // ✅ Track business logic: IDs listed
   monitoring.trackOperation('LIST_IDS_COMPLETE', 'Game', entityId, { 
     totalIds: ids.size,
     filteredCount: filtered.length,

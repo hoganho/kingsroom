@@ -1,5 +1,7 @@
 // src/pages/social/SocialPulse.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import { GraphQLResult } from '@aws-amplify/api';
 import { 
   Facebook, 
   Instagram, 
@@ -21,56 +23,28 @@ import {
   Users,
   Calendar,
   MoreVertical,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
-import { useEntity } from '../../contexts/EntityContext';
-
-// Types
-interface SocialAccount {
-  id: string;
-  platform: 'FACEBOOK' | 'INSTAGRAM' | 'TWITTER' | 'LINKEDIN';
-  platformAccountId: string;
-  accountName: string;
-  accountHandle?: string;
-  accountUrl: string;
-  profileImageUrl?: string;
-  followerCount?: number;
-  postCount?: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'PENDING_VERIFICATION' | 'ERROR' | 'RATE_LIMITED';
-  isScrapingEnabled: boolean;
-  lastScrapedAt?: string;
-  lastSuccessfulScrapeAt?: string;
-  consecutiveFailures: number;
-  lastErrorMessage?: string;
-  entityId?: string;
-  venueId?: string;
-  venue?: { id: string; name: string };
-  entity?: { id: string; entityName: string };
-}
-
-interface SocialPost {
-  id: string;
-  platformPostId: string;
-  postUrl?: string;
-  postType: 'TEXT' | 'IMAGE' | 'VIDEO' | 'LINK' | 'EVENT' | 'ALBUM' | 'LIVE';
-  content?: string;
-  contentPreview?: string;
-  mediaUrls?: string[];
-  thumbnailUrl?: string;
-  likeCount: number;
-  commentCount: number;
-  shareCount: number;
-  postedAt: string;
-  scrapedAt: string;
-  status: 'ACTIVE' | 'HIDDEN' | 'ARCHIVED' | 'DELETED';
-  isPromotional: boolean;
-  isTournamentRelated: boolean;
-  tags?: string[];
-  socialAccount: SocialAccount;
-}
+import { useSocialAccounts, SocialAccount } from '../../hooks/useSocialAccounts';
+import { useSocialPosts, SocialPost } from '../../hooks/useSocialPosts';
+import { Link } from 'react-router-dom';
 
 type ViewMode = 'feed' | 'accounts' | 'analytics';
 type PlatformFilter = 'all' | 'FACEBOOK' | 'INSTAGRAM';
+
+// GraphQL mutation for triggering scrapes (incremental - only new posts)
+const triggerSocialScrape = /* GraphQL */ `
+  mutation TriggerSocialScrape($socialAccountId: ID!) {
+    triggerSocialScrape(socialAccountId: $socialAccountId) {
+      success
+      message
+      postsFound
+      newPostsAdded
+    }
+  }
+`;
 
 // Platform icon component
 const PlatformIcon: React.FC<{ platform: string; className?: string }> = ({ platform, className = '' }) => {
@@ -110,181 +84,131 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   );
 };
 
-// Add Account Modal
-const AddAccountModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  onAdd: (account: Partial<SocialAccount>) => void;
-  entities: { id: string; entityName: string }[];
-  venues: { id: string; name: string }[];
-}> = ({ isOpen, onClose, onAdd, entities, venues }) => {
-  const [platform, setPlatform] = useState<'FACEBOOK' | 'INSTAGRAM'>('FACEBOOK');
-  const [accountUrl, setAccountUrl] = useState('');
-  const [accountName, setAccountName] = useState('');
-  const [entityId, setEntityId] = useState('');
-  const [venueId, setVenueId] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+// Helper function to get date key for grouping
+const getDateKey = (dateStr: string | null | undefined): string => {
+  if (!dateStr) return 'unknown';
+  const date = new Date(dateStr);
+  return date.toISOString().split('T')[0]; // YYYY-MM-DD
+};
 
-  if (!isOpen) return null;
+// Helper function to format date for display
+const formatDateLabel = (dateKey: string): string => {
+  if (dateKey === 'unknown') return 'Unknown Date';
+  
+  const date = new Date(dateKey + 'T00:00:00');
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const isToday = date.toDateString() === today.toDateString();
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+  
+  if (isToday) return 'Today';
+  if (isYesterday) return 'Yesterday';
+  
+  return date.toLocaleDateString('en-AU', { 
+    weekday: 'long', 
+    day: 'numeric', 
+    month: 'long',
+    year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+  });
+};
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      await onAdd({
-        platform,
-        accountUrl,
-        accountName,
-        entityId: entityId || undefined,
-        venueId: venueId || undefined,
-        status: 'PENDING_VERIFICATION',
-        isScrapingEnabled: true,
-        consecutiveFailures: 0,
+// Horizontal scroll container with navigation buttons
+const HorizontalScrollRow: React.FC<{ 
+  children: React.ReactNode;
+  dateLabel: string;
+  postCount: number;
+}> = ({ children, dateLabel, postCount }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScrollability = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    checkScrollability();
+    window.addEventListener('resize', checkScrollability);
+    return () => window.removeEventListener('resize', checkScrollability);
+  }, [children]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 400; // Scroll by roughly one card width
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
       });
-      onClose();
-    } catch (error) {
-      console.error('Error adding account:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
-          <h2 className="text-xl font-bold text-white">Add Social Account</h2>
-          <p className="text-indigo-200 text-sm mt-1">Connect a public Facebook or Instagram page</p>
+    <div className="mb-8">
+      {/* Date Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-bold text-slate-800">{dateLabel}</h3>
+          <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-sm font-medium rounded-full">
+            {postCount} post{postCount !== 1 ? 's' : ''}
+          </span>
         </div>
+        
+        {/* Navigation Arrows */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => scroll('left')}
+            disabled={!canScrollLeft}
+            className={`p-2 rounded-full transition-all ${
+              canScrollLeft 
+                ? 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm' 
+                : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+            }`}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            disabled={!canScrollRight}
+            className={`p-2 rounded-full transition-all ${
+              canScrollRight 
+                ? 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm' 
+                : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+            }`}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Platform Selection */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Platform</label>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setPlatform('FACEBOOK')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
-                  platform === 'FACEBOOK'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-slate-200 hover:border-slate-300 text-slate-600'
-                }`}
-              >
-                <Facebook className="w-5 h-5" />
-                <span className="font-medium">Facebook</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPlatform('INSTAGRAM')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
-                  platform === 'INSTAGRAM'
-                    ? 'border-pink-500 bg-pink-50 text-pink-700'
-                    : 'border-slate-200 hover:border-slate-300 text-slate-600'
-                }`}
-              >
-                <Instagram className="w-5 h-5" />
-                <span className="font-medium">Instagram</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Account URL */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Page URL</label>
-            <input
-              type="url"
-              value={accountUrl}
-              onChange={(e) => setAccountUrl(e.target.value)}
-              placeholder={platform === 'FACEBOOK' ? 'https://facebook.com/yourpage' : 'https://instagram.com/yourpage'}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              required
-            />
-          </div>
-
-          {/* Account Name */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Display Name</label>
-            <input
-              type="text"
-              value={accountName}
-              onChange={(e) => setAccountName(e.target.value)}
-              placeholder="e.g., Kings Room Poker"
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              required
-            />
-          </div>
-
-          {/* Entity Selection */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Link to Entity (Optional)</label>
-            <select
-              value={entityId}
-              onChange={(e) => setEntityId(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-            >
-              <option value="">No entity link</option>
-              {entities.map((entity) => (
-                <option key={entity.id} value={entity.id}>
-                  {entity.entityName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Venue Selection */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Link to Venue (Optional)</label>
-            <select
-              value={venueId}
-              onChange={(e) => setVenueId(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-            >
-              <option value="">No venue link</option>
-              {venues.map((venue) => (
-                <option key={venue.id} value={venue.id}>
-                  {venue.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-3 px-4 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Adding...
-                </>
-              ) : (
-                'Add Account'
-              )}
-            </button>
-          </div>
-        </form>
+      {/* Scrollable Container */}
+      <div 
+        ref={scrollRef}
+        onScroll={checkScrollability}
+        className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
+        {children}
       </div>
     </div>
   );
 };
 
-// Social Post Card
+// Social Post Card (updated for horizontal layout with business branding)
 const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return 'Unknown';
     const date = new Date(dateStr);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -297,35 +221,42 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
     return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
   };
 
-  const formatNumber = (num: number) => {
+  const formatNumber = (num?: number | null) => {
+    if (num === undefined || num === null) return '0';
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
   };
 
+  // Use denormalized account data from post, or fall back to socialAccount relation
+  const account = post.socialAccount as SocialAccount;
+  const accountName = post.accountName || account?.accountName || 'Unknown';
+  const profileImageUrl = post.accountProfileImageUrl || account?.profileImageUrl;
+  const platform = post.platform || account?.platform || '';
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
-      {/* Post Header */}
+    <div className="flex-shrink-0 w-[380px] bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+      {/* Post Header with Business Branding */}
       <div className="p-4 flex items-center justify-between border-b border-slate-100">
         <div className="flex items-center gap-3">
           <div className="relative">
-            {post.socialAccount.profileImageUrl ? (
+            {profileImageUrl ? (
               <img
-                src={post.socialAccount.profileImageUrl}
-                alt={post.socialAccount.accountName}
-                className="w-10 h-10 rounded-full object-cover"
+                src={profileImageUrl}
+                alt={accountName}
+                className="w-10 h-10 rounded-full object-cover border-2 border-slate-100"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                {post.socialAccount.accountName.charAt(0)}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm border-2 border-slate-100">
+                {accountName?.charAt(0) || '?'}
               </div>
             )}
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm">
-              <PlatformIcon platform={post.socialAccount.platform} className="w-3 h-3" />
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-100">
+              <PlatformIcon platform={platform} className="w-3 h-3" />
             </div>
           </div>
           <div>
-            <h4 className="font-semibold text-slate-800">{post.socialAccount.accountName}</h4>
+            <h4 className="font-semibold text-slate-800 text-sm">{accountName}</h4>
             <p className="text-xs text-slate-500">{formatDate(post.postedAt)}</p>
           </div>
         </div>
@@ -333,6 +264,11 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
           {post.isTournamentRelated && (
             <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
               Tournament
+            </span>
+          )}
+          {post.isPromotional && (
+            <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+              Promo
             </span>
           )}
           <button className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
@@ -344,11 +280,11 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
       {/* Post Content */}
       <div className="p-4">
         {post.content && (
-          <p className={`text-slate-700 leading-relaxed ${!isExpanded && post.content.length > 280 ? 'line-clamp-4' : ''}`}>
+          <p className={`text-slate-700 text-sm leading-relaxed ${!isExpanded && post.content.length > 200 ? 'line-clamp-3' : ''}`}>
             {post.content}
           </p>
         )}
-        {post.content && post.content.length > 280 && (
+        {post.content && post.content.length > 200 && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-700"
@@ -361,8 +297,8 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
       {/* Post Media */}
       {post.mediaUrls && post.mediaUrls.length > 0 && (
         <div className="px-4 pb-4">
-          <div className={`grid gap-2 ${post.mediaUrls.length === 1 ? 'grid-cols-1' : post.mediaUrls.length === 2 ? 'grid-cols-2' : 'grid-cols-2'}`}>
-            {post.mediaUrls.slice(0, 4).map((url, idx) => (
+          <div className={`grid gap-2 ${post.mediaUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            {(post.mediaUrls.filter(Boolean) as string[]).slice(0, 4).map((url, idx) => (
               <div key={idx} className={`relative rounded-xl overflow-hidden bg-slate-100 ${post.mediaUrls!.length === 1 ? 'aspect-video' : 'aspect-square'}`}>
                 <img
                   src={url}
@@ -386,15 +322,15 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
         <div className="flex items-center gap-5">
           <span className="flex items-center gap-1.5 text-slate-600">
             <Heart className="w-4 h-4 text-red-400" />
-            <span className="text-sm font-medium">{formatNumber(post.likeCount)}</span>
+            <span className="text-sm font-medium">{formatNumber(post.likeCount || 0)}</span>
           </span>
           <span className="flex items-center gap-1.5 text-slate-600">
             <MessageCircle className="w-4 h-4 text-blue-400" />
-            <span className="text-sm font-medium">{formatNumber(post.commentCount)}</span>
+            <span className="text-sm font-medium">{formatNumber(post.commentCount || 0)}</span>
           </span>
           <span className="flex items-center gap-1.5 text-slate-600">
             <Share2 className="w-4 h-4 text-green-400" />
-            <span className="text-sm font-medium">{formatNumber(post.shareCount)}</span>
+            <span className="text-sm font-medium">{formatNumber(post.shareCount || 0)}</span>
           </span>
         </div>
         {post.postUrl && (
@@ -404,7 +340,7 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
           >
-            View post
+            View
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         )}
@@ -417,10 +353,10 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
 const AccountCard: React.FC<{
   account: SocialAccount;
   onScrape: (id: string) => void;
-  onToggleEnabled: (id: string, enabled: boolean) => void;
+  onToggleEnabled: (account: SocialAccount) => void;
   isLoading?: boolean;
 }> = ({ account, onScrape, onToggleEnabled, isLoading }) => {
-  const formatDate = (dateStr?: string) => {
+  const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return 'Never';
     return new Date(dateStr).toLocaleString('en-AU', {
       day: 'numeric',
@@ -428,6 +364,13 @@ const AccountCard: React.FC<{
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const formatNumber = (num?: number | null) => {
+    if (num === undefined || num === null) return '-';
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toString();
   };
 
   return (
@@ -450,104 +393,95 @@ const AccountCard: React.FC<{
                 className="w-16 h-16 rounded-xl object-cover border-4 border-white shadow-lg"
               />
             ) : (
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 border-4 border-white shadow-lg flex items-center justify-center text-white text-xl font-bold">
+              <div className="w-16 h-16 rounded-xl border-4 border-white shadow-lg bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-xl font-bold">
                 {account.accountName.charAt(0)}
               </div>
             )}
+            {/* Full history badge */}
+            {account.hasFullHistory && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center" title="Full history synced">
+                <CheckCircle className="w-3 h-3 text-white" />
+              </div>
+            )}
           </div>
-          <div className="mt-10">
-            <StatusBadge status={account.status} />
-          </div>
+          <StatusBadge status={account.status} />
         </div>
 
         <div className="mt-3">
-          <div className="flex items-center gap-2">
-            <h3 className="font-bold text-lg text-slate-800">{account.accountName}</h3>
-            <PlatformIcon platform={account.platform} className="w-4 h-4" />
-          </div>
+          <h3 className="font-bold text-slate-800 text-lg">{account.accountName}</h3>
           {account.accountHandle && (
-            <p className="text-slate-500 text-sm">@{account.accountHandle}</p>
+            <p className="text-sm text-slate-500">@{account.accountHandle}</p>
           )}
         </div>
 
-        {/* Linked Entity/Venue */}
-        {(account.entity || account.venue) && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {account.entity && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-lg">
-                <Link2 className="w-3 h-3" />
-                {account.entity.entityName}
-              </span>
-            )}
-            {account.venue && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-lg">
-                <Link2 className="w-3 h-3" />
-                {account.venue.name}
-              </span>
-            )}
-          </div>
-        )}
-
         {/* Stats */}
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="bg-slate-50 rounded-xl p-3 text-center">
-            <Users className="w-4 h-4 text-slate-400 mx-auto mb-1" />
-            <p className="text-lg font-bold text-slate-800">
-              {account.followerCount?.toLocaleString() ?? '—'}
-            </p>
-            <p className="text-xs text-slate-500">Followers</p>
+        <div className="mt-4 grid grid-cols-2 gap-4 text-center">
+          <div className="bg-slate-50 rounded-xl p-3">
+            <p className="text-2xl font-bold text-slate-800">{formatNumber(account.followerCount)}</p>
+            <p className="text-xs text-slate-500 font-medium">Followers</p>
           </div>
-          <div className="bg-slate-50 rounded-xl p-3 text-center">
-            <Calendar className="w-4 h-4 text-slate-400 mx-auto mb-1" />
-            <p className="text-lg font-bold text-slate-800">
-              {account.postCount?.toLocaleString() ?? '—'}
-            </p>
-            <p className="text-xs text-slate-500">Posts</p>
+          <div className="bg-slate-50 rounded-xl p-3">
+            <p className="text-2xl font-bold text-slate-800">{formatNumber(account.postCount)}</p>
+            <p className="text-xs text-slate-500 font-medium">Posts</p>
           </div>
         </div>
 
         {/* Last Scraped */}
-        <div className="mt-4 p-3 bg-slate-50 rounded-xl">
+        <div className="mt-4 pt-4 border-t border-slate-100">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-500">Last scraped</span>
-            <span className="font-medium text-slate-700">{formatDate(account.lastScrapedAt)}</span>
+            <span className="text-slate-500">Last checked:</span>
+            <span className="text-slate-700 font-medium">{formatDate(account.lastScrapedAt)}</span>
           </div>
-          {account.consecutiveFailures > 0 && (
-            <div className="flex items-center gap-1 mt-2 text-red-600 text-xs">
-              <AlertCircle className="w-3 h-3" />
-              <span>{account.consecutiveFailures} consecutive failures</span>
-            </div>
+          {account.lastErrorMessage && (
+            <p className="mt-2 text-xs text-red-500 bg-red-50 p-2 rounded-lg">
+              {account.lastErrorMessage}
+            </p>
           )}
         </div>
 
         {/* Actions */}
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex items-center gap-2">
           <button
             onClick={() => onScrape(account.id)}
-            disabled={isLoading}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            disabled={isLoading || !account.isScrapingEnabled}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm"
           >
             {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Fetching...
+              </>
             ) : (
-              <RefreshCw className="w-4 h-4" />
+              <>
+                <RefreshCw className="w-4 h-4" />
+                Fetch Posts
+              </>
             )}
-            Scrape Now
           </button>
           <button
-            onClick={() => onToggleEnabled(account.id, !account.isScrapingEnabled)}
-            className={`p-2.5 rounded-xl border transition-colors ${
+            onClick={() => onToggleEnabled(account)}
+            className={`p-2.5 rounded-xl border-2 transition-all ${
               account.isScrapingEnabled
                 ? 'border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
                 : 'border-slate-200 bg-slate-50 text-slate-400 hover:bg-slate-100'
             }`}
-            title={account.isScrapingEnabled ? 'Disable auto-scraping' : 'Enable auto-scraping'}
+            title={account.isScrapingEnabled ? 'Pause scraping' : 'Enable scraping'}
           >
-            {account.isScrapingEnabled ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+            {account.isScrapingEnabled ? (
+              <Pause className="w-4 h-4" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
           </button>
-          <button className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors">
-            <Settings className="w-4 h-4" />
-          </button>
+          <a
+            href={account.accountUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2.5 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 transition-all"
+            title="View page"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </a>
         </div>
       </div>
     </div>
@@ -556,206 +490,184 @@ const AccountCard: React.FC<{
 
 // Main Component
 export const SocialPulse: React.FC = () => {
-  const { currentEntity } = useEntity();
+  const client = generateClient();
+  // Note: We don't filter by entity here - Social Pulse shows all accounts/posts
   const [viewMode, setViewMode] = useState<ViewMode>('feed');
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [scrapingAccountId, setScrapingAccountId] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   
-  // Data state
-  const [accounts, setAccounts] = useState<SocialAccount[]>([]);
-  const [posts, setPosts] = useState<SocialPost[]>([]);
-  const [entities, setEntities] = useState<{ id: string; entityName: string }[]>([]);
-  const [venues, setVenues] = useState<{ id: string; name: string }[]>([]);
+  // Use hooks for data - show all accounts/posts across all entities
+  const { 
+    accounts, 
+    loading: accountsLoading, 
+    fetchAccounts, 
+    toggleScrapingEnabled 
+  } = useSocialAccounts({ filterByEntity: false });
+  
+  const { 
+    posts, 
+    loading: postsLoading, 
+    totalEngagement, 
+    refresh: refreshPosts 
+  } = useSocialPosts({ filterByEntity: false });
 
-  // Mock data for demonstration (replace with actual GraphQL queries)
+  // Clear notification after delay
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        // TODO: Replace with actual GraphQL queries
-        // const accountsResult = await client.graphql({ query: listSocialAccounts, variables: { entityId: currentEntity?.id } });
-        // const postsResult = await client.graphql({ query: getSocialFeed, variables: { entityId: currentEntity?.id } });
-        
-        // Mock data for demonstration
-        const mockAccounts: SocialAccount[] = [
-          {
-            id: '1',
-            platform: 'FACEBOOK',
-            platformAccountId: 'kingsroompoker',
-            accountName: 'Kings Room Poker',
-            accountHandle: 'kingsroompoker',
-            accountUrl: 'https://facebook.com/kingsroompoker',
-            profileImageUrl: undefined,
-            followerCount: 12500,
-            postCount: 847,
-            status: 'ACTIVE',
-            isScrapingEnabled: true,
-            lastScrapedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            consecutiveFailures: 0,
-          },
-          {
-            id: '2',
-            platform: 'INSTAGRAM',
-            platformAccountId: 'kingsroom_poker',
-            accountName: 'Kings Room Poker',
-            accountHandle: 'kingsroom_poker',
-            accountUrl: 'https://instagram.com/kingsroom_poker',
-            profileImageUrl: undefined,
-            followerCount: 8200,
-            postCount: 412,
-            status: 'ACTIVE',
-            isScrapingEnabled: true,
-            lastScrapedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-            consecutiveFailures: 0,
-          },
-          {
-            id: '3',
-            platform: 'FACEBOOK',
-            platformAccountId: 'starpokerroom',
-            accountName: 'Star Poker Room',
-            accountHandle: 'starpokerroom',
-            accountUrl: 'https://facebook.com/starpokerroom',
-            profileImageUrl: undefined,
-            followerCount: 25000,
-            postCount: 1203,
-            status: 'ERROR',
-            isScrapingEnabled: true,
-            lastScrapedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            consecutiveFailures: 3,
-            lastErrorMessage: 'Rate limit exceeded',
-          },
-        ];
-
-        const mockPosts: SocialPost[] = [
-          {
-            id: 'p1',
-            platformPostId: 'fb_123',
-            postUrl: 'https://facebook.com/post/123',
-            postType: 'IMAGE',
-            content: '🏆 Congratulations to our winner of tonight\'s $50K GTD tournament! Amazing turnout with 127 entries. See you all next week for another exciting event! #poker #tournament #winner',
-            likeCount: 245,
-            commentCount: 32,
-            shareCount: 15,
-            postedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-            scrapedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            status: 'ACTIVE',
-            isPromotional: false,
-            isTournamentRelated: true,
-            tags: ['tournament', 'winner'],
-            socialAccount: mockAccounts[0],
-          },
-          {
-            id: 'p2',
-            platformPostId: 'ig_456',
-            postUrl: 'https://instagram.com/p/456',
-            postType: 'TEXT',
-            content: '📅 This week\'s schedule is now live! Check out our daily tournaments and cash games. Early birds get extra chips on Monday mornings! 🎰',
-            likeCount: 189,
-            commentCount: 24,
-            shareCount: 8,
-            postedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-            scrapedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-            status: 'ACTIVE',
-            isPromotional: true,
-            isTournamentRelated: false,
-            socialAccount: mockAccounts[1],
-          },
-          {
-            id: 'p3',
-            platformPostId: 'fb_789',
-            postUrl: 'https://facebook.com/post/789',
-            postType: 'EVENT',
-            content: '🎊 MASSIVE NEWS! Our Summer Series is coming July 1-15 with over $500,000 in guaranteed prizes! Main Event $1,000 buy-in with $200K GTD. Early registration now open. Don\'t miss the biggest poker series of the year!',
-            likeCount: 523,
-            commentCount: 87,
-            shareCount: 124,
-            postedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            scrapedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            status: 'ACTIVE',
-            isPromotional: true,
-            isTournamentRelated: true,
-            tags: ['series', 'summer', 'main-event'],
-            socialAccount: mockAccounts[0],
-          },
-        ];
-
-        setAccounts(mockAccounts);
-        setPosts(mockPosts);
-        setEntities([{ id: 'e1', entityName: 'PokerPro Live' }]);
-        setVenues([
-          { id: 'v1', name: 'Kings Room' },
-          { id: 'v2', name: 'Star Poker' },
-        ]);
-      } catch (error) {
-        console.error('Error loading social data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [currentEntity]);
-
-  const handleAddAccount = async (account: Partial<SocialAccount>) => {
-    // TODO: Implement GraphQL mutation
-    console.log('Adding account:', account);
-    // const result = await client.graphql({ mutation: addSocialAccount, variables: { input: account } });
-    // setAccounts([...accounts, result.data.addSocialAccount]);
-  };
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const handleScrapeAccount = async (accountId: string) => {
     setScrapingAccountId(accountId);
     try {
-      // TODO: Implement GraphQL mutation
-      console.log('Triggering scrape for account:', accountId);
-      // await client.graphql({ mutation: triggerSocialScrape, variables: { accountId } });
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-    } catch (error) {
-      console.error('Error triggering scrape:', error);
+      const response = await client.graphql({
+        query: triggerSocialScrape,
+        variables: { socialAccountId: accountId },
+      }) as GraphQLResult<{ triggerSocialScrape: { success: boolean; message?: string; newPostsAdded?: number; postsFound?: number } }>;
+
+      if ('data' in response && response.data?.triggerSocialScrape) {
+        const result = response.data.triggerSocialScrape;
+        if (result.success) {
+          setNotification({
+            type: 'success',
+            message: result.newPostsAdded && result.newPostsAdded > 0
+              ? `Found ${result.newPostsAdded} new post${result.newPostsAdded > 1 ? 's' : ''} (scanned ${result.postsFound || 0})`
+              : `No new posts found (scanned ${result.postsFound || 0} recent posts)`
+          });
+          refreshPosts();
+          fetchAccounts();
+        } else {
+          setNotification({ type: 'error', message: result.message || 'Failed to fetch posts' });
+        }
+      }
+    } catch (err: unknown) {
+      const error = err as { errors?: Array<{ message?: string }> };
+      if (error?.errors?.[0]?.message?.includes('Cannot query field')) {
+        setNotification({ type: 'error', message: 'Social scraping Lambda not deployed yet' });
+      } else {
+        console.error('Error triggering scrape:', err);
+        setNotification({ type: 'error', message: 'Failed to fetch posts' });
+      }
     } finally {
       setScrapingAccountId(null);
     }
   };
 
-  const handleToggleScrapingEnabled = async (accountId: string, enabled: boolean) => {
-    // TODO: Implement GraphQL mutation
-    console.log('Toggle scraping for account:', accountId, enabled);
-    setAccounts(accounts.map(a => 
-      a.id === accountId ? { ...a, isScrapingEnabled: enabled } : a
-    ));
+  const handleToggleScrapingEnabled = async (account: SocialAccount) => {
+    try {
+      await toggleScrapingEnabled(account);
+      setNotification({
+        type: 'success',
+        message: `Scraping ${account.isScrapingEnabled ? 'paused' : 'enabled'} for ${account.accountName}`
+      });
+    } catch {
+      setNotification({ type: 'error', message: 'Failed to update scraping status' });
+    }
   };
 
   const handleRefreshAll = async () => {
     setIsRefreshing(true);
-    try {
-      // TODO: Implement bulk scrape
-      await new Promise(resolve => setTimeout(resolve, 3000));
-    } finally {
-      setIsRefreshing(false);
+    const enabledAccounts = accounts.filter((a: SocialAccount) => a.isScrapingEnabled && a.status !== 'ERROR');
+    let totalNewPosts = 0;
+
+    for (const account of enabledAccounts) {
+      try {
+        const response = await client.graphql({
+          query: triggerSocialScrape,
+          variables: { socialAccountId: account.id },
+        }) as GraphQLResult<{ triggerSocialScrape: { success: boolean; newPostsAdded?: number } }>;
+
+        if ('data' in response && response.data?.triggerSocialScrape?.success) {
+          totalNewPosts += response.data.triggerSocialScrape.newPostsAdded || 0;
+        }
+      } catch (err) {
+        console.error(`Error scraping ${account.accountName}:`, err);
+      }
     }
+
+    setIsRefreshing(false);
+    setNotification({
+      type: 'success',
+      message: `Found ${totalNewPosts} new post${totalNewPosts !== 1 ? 's' : ''} across all accounts`
+    });
+    
+    fetchAccounts();
+    refreshPosts();
   };
 
-  const filteredPosts = posts.filter(post => {
-    if (platformFilter !== 'all' && post.socialAccount.platform !== platformFilter) return false;
-    if (searchQuery && !post.content?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  });
+  // Filter posts
+  const filteredPosts = useMemo(() => {
+    return posts.filter((post: SocialPost) => {
+      const account = post.socialAccount as SocialAccount;
+      const postPlatform = post.platform || account?.platform;
+      if (platformFilter !== 'all' && postPlatform !== platformFilter) return false;
+      if (searchQuery && !post.content?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      return true;
+    });
+  }, [posts, platformFilter, searchQuery]);
 
-  const filteredAccounts = accounts.filter(account => {
+  // Group posts by day, sorted most recent first
+  const groupedPosts = useMemo(() => {
+    // First, sort all posts by postedAt (most recent first)
+    const sortedPosts = [...filteredPosts].sort((a, b) => {
+      const dateA = a.postedAt ? new Date(a.postedAt).getTime() : 0;
+      const dateB = b.postedAt ? new Date(b.postedAt).getTime() : 0;
+      return dateB - dateA; // Most recent first
+    });
+
+    // Group by date
+    const groups: Map<string, SocialPost[]> = new Map();
+    
+    for (const post of sortedPosts) {
+      const dateKey = getDateKey(post.postedAt);
+      if (!groups.has(dateKey)) {
+        groups.set(dateKey, []);
+      }
+      groups.get(dateKey)!.push(post);
+    }
+
+    // Convert to array and sort date keys (most recent first)
+    const sortedGroups = Array.from(groups.entries()).sort((a, b) => {
+      if (a[0] === 'unknown') return 1;
+      if (b[0] === 'unknown') return -1;
+      return b[0].localeCompare(a[0]); // Most recent date first
+    });
+
+    return sortedGroups;
+  }, [filteredPosts]);
+
+  const filteredAccounts = accounts.filter((account: SocialAccount) => {
     if (platformFilter !== 'all' && account.platform !== platformFilter) return false;
     if (searchQuery && !account.accountName.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
 
-  const totalEngagement = posts.reduce((sum, p) => sum + p.likeCount + p.commentCount + p.shareCount, 0);
-  const activeAccounts = accounts.filter(a => a.status === 'ACTIVE').length;
+  const activeAccounts = accounts.filter((a: SocialAccount) => a.status === 'ACTIVE').length;
+  const isLoading = accountsLoading || postsLoading;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+      {/* Notification Toast */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg flex items-center gap-3 ${
+          notification.type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+        }`}>
+          {notification.type === 'success' ? (
+            <CheckCircle className="w-5 h-5 text-green-600" />
+          ) : (
+            <AlertCircle className="w-5 h-5 text-red-600" />
+          )}
+          <span className={notification.type === 'success' ? 'text-green-800' : 'text-red-800'}>
+            {notification.message}
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -770,19 +682,19 @@ export const SocialPulse: React.FC = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleRefreshAll}
-                  disabled={isRefreshing}
+                  disabled={isRefreshing || accounts.length === 0}
                   className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                   Refresh All
                 </button>
-                <button
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg shadow-indigo-200"
+                <Link
+                  to="/social/accounts"
+                  className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  <Plus className="w-4 h-4" />
-                  Add Account
-                </button>
+                  <Settings className="w-4 h-4" />
+                  Manage
+                </Link>
               </div>
             </div>
 
@@ -860,7 +772,7 @@ export const SocialPulse: React.FC = () => {
               {/* Platform Filter */}
               <div className="flex bg-slate-100 rounded-xl p-1">
                 {[
-                  { id: 'all', label: 'All' },
+                  { id: 'all', label: 'All', icon: null },
                   { id: 'FACEBOOK', label: 'Facebook', icon: Facebook },
                   { id: 'INSTAGRAM', label: 'Instagram', icon: Instagram },
                 ].map(({ id, label, icon: Icon }) => (
@@ -894,28 +806,34 @@ export const SocialPulse: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Feed View */}
+            {/* Feed View - Now with horizontal scrolling day rows */}
             {viewMode === 'feed' && (
-              <div className="space-y-6">
-                {filteredPosts.length === 0 ? (
+              <div className="space-y-2">
+                {groupedPosts.length === 0 ? (
                   <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
                     <Calendar className="w-12 h-12 text-slate-300 mx-auto" />
                     <h3 className="text-lg font-semibold text-slate-700 mt-4">No posts yet</h3>
-                    <p className="text-slate-500 mt-1">Add social accounts to start seeing posts here</p>
-                    <button
-                      onClick={() => setIsAddModalOpen(true)}
+                    <p className="text-slate-500 mt-1">Add social accounts and fetch posts to see them here</p>
+                    <Link
+                      to="/social/accounts"
                       className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                       Add Account
-                    </button>
+                    </Link>
                   </div>
                 ) : (
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredPosts.map((post) => (
-                      <PostCard key={post.id} post={post} />
-                    ))}
-                  </div>
+                  groupedPosts.map(([dateKey, dayPosts]) => (
+                    <HorizontalScrollRow 
+                      key={dateKey} 
+                      dateLabel={formatDateLabel(dateKey)}
+                      postCount={dayPosts.length}
+                    >
+                      {dayPosts.map((post: SocialPost) => (
+                        <PostCard key={post.id} post={post} />
+                      ))}
+                    </HorizontalScrollRow>
+                  ))
                 )}
               </div>
             )}
@@ -928,16 +846,16 @@ export const SocialPulse: React.FC = () => {
                     <Users className="w-12 h-12 text-slate-300 mx-auto" />
                     <h3 className="text-lg font-semibold text-slate-700 mt-4">No accounts connected</h3>
                     <p className="text-slate-500 mt-1">Connect your first social account to get started</p>
-                    <button
-                      onClick={() => setIsAddModalOpen(true)}
+                    <Link
+                      to="/social/accounts"
                       className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                       Add Account
-                    </button>
+                    </Link>
                   </div>
                 ) : (
-                  filteredAccounts.map((account) => (
+                  filteredAccounts.map((account: SocialAccount) => (
                     <AccountCard
                       key={account.id}
                       account={account}
@@ -964,14 +882,16 @@ export const SocialPulse: React.FC = () => {
         )}
       </div>
 
-      {/* Add Account Modal */}
-      <AddAccountModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddAccount}
-        entities={entities}
-        venues={venues}
-      />
+      {/* Add CSS to hide scrollbar */}
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };

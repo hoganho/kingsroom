@@ -1612,6 +1612,40 @@ export declare type SocialAccountMetrics = LazyLoading extends LazyLoadingDisabl
 
 export declare const SocialAccountMetrics: (new (init: ModelInit<SocialAccountMetrics>) => SocialAccountMetrics)
 
+type EagerSocialScrapeResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly postsFound?: number | null;
+  readonly newPostsAdded?: number | null;
+}
+
+type LazySocialScrapeResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly postsFound?: number | null;
+  readonly newPostsAdded?: number | null;
+}
+
+export declare type SocialScrapeResult = LazyLoading extends LazyLoadingDisabled ? EagerSocialScrapeResult : LazySocialScrapeResult
+
+export declare const SocialScrapeResult: (new (init: ModelInit<SocialScrapeResult>) => SocialScrapeResult)
+
+type EagerSyncPageInfoResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly logoUrl?: string | null;
+}
+
+type LazySyncPageInfoResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly logoUrl?: string | null;
+}
+
+export declare type SyncPageInfoResult = LazyLoading extends LazyLoadingDisabled ? EagerSyncPageInfoResult : LazySyncPageInfoResult
+
+export declare const SyncPageInfoResult: (new (init: ModelInit<SyncPageInfoResult>) => SyncPageInfoResult)
+
 type EagerRefreshResponse = {
   readonly message: string;
   readonly status: string;
@@ -3756,6 +3790,10 @@ type EagerSocialAccount = {
   readonly followerCount?: number | null;
   readonly followingCount?: number | null;
   readonly postCount?: number | null;
+  readonly hasFullHistory?: boolean | null;
+  readonly pageDescription?: string | null;
+  readonly category?: string | null;
+  readonly website?: string | null;
   readonly status: SocialAccountStatus | keyof typeof SocialAccountStatus;
   readonly isScrapingEnabled: boolean;
   readonly scrapeFrequencyMinutes?: number | null;
@@ -3794,6 +3832,10 @@ type LazySocialAccount = {
   readonly followerCount?: number | null;
   readonly followingCount?: number | null;
   readonly postCount?: number | null;
+  readonly hasFullHistory?: boolean | null;
+  readonly pageDescription?: string | null;
+  readonly category?: string | null;
+  readonly website?: string | null;
   readonly status: SocialAccountStatus | keyof typeof SocialAccountStatus;
   readonly isScrapingEnabled: boolean;
   readonly scrapeFrequencyMinutes?: number | null;
@@ -3830,6 +3872,9 @@ type EagerSocialPost = {
   readonly platformPostId: string;
   readonly postUrl?: string | null;
   readonly postType: SocialPostType | keyof typeof SocialPostType;
+  readonly accountName?: string | null;
+  readonly accountProfileImageUrl?: string | null;
+  readonly platform?: string | null;
   readonly content?: string | null;
   readonly contentPreview?: string | null;
   readonly rawContent?: string | null;
@@ -3869,6 +3914,9 @@ type LazySocialPost = {
   readonly platformPostId: string;
   readonly postUrl?: string | null;
   readonly postType: SocialPostType | keyof typeof SocialPostType;
+  readonly accountName?: string | null;
+  readonly accountProfileImageUrl?: string | null;
+  readonly platform?: string | null;
   readonly content?: string | null;
   readonly contentPreview?: string | null;
   readonly rawContent?: string | null;
@@ -3916,6 +3964,7 @@ type EagerSocialScrapeAttempt = {
   readonly startedAt: string;
   readonly completedAt?: string | null;
   readonly durationMs?: number | null;
+  readonly syncType?: string | null;
   readonly postsFound?: number | null;
   readonly newPostsAdded?: number | null;
   readonly postsUpdated?: number | null;
@@ -3939,6 +3988,7 @@ type LazySocialScrapeAttempt = {
   readonly startedAt: string;
   readonly completedAt?: string | null;
   readonly durationMs?: number | null;
+  readonly syncType?: string | null;
   readonly postsFound?: number | null;
   readonly newPostsAdded?: number | null;
   readonly postsUpdated?: number | null;

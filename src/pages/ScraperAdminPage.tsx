@@ -13,12 +13,11 @@ import {
 
 // Import the tab components
 import { OverviewTab } from './scraper-admin-tabs/OverviewTab';
-import { ScrapeTab } from './scraper-admin-tabs/ScraperTab'; // <-- FIXED: Correct import path
+import { ScrapeTab } from './scraper-admin-tabs/ScraperTab';
 import { JobHistoryTab } from './scraper-admin-tabs/JobHistoryTab';
 import { URLManagementTab } from './scraper-admin-tabs/URLManagementTab';
 import { SettingsTab } from './scraper-admin-tabs/SettingsTab';
 import { S3ManagementTab } from './scraper-admin-tabs/S3ManagementTab';
-// --- REMOVED: Old tab imports (AutoScraperTab, SingleScraperTab, BulkScraperTab) ---
 
 // Tab definitions
 type TabKey = 'overview' | 'scrape' | 'jobs' | 'urls' | 's3' | 'settings';
