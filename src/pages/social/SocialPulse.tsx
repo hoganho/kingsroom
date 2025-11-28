@@ -1,7 +1,6 @@
 // src/pages/social/SocialPulse.tsx
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { generateClient } from 'aws-amplify/api';
-// Removed unused GraphQLResult import
 import { 
   Facebook, 
   Instagram, 
@@ -19,7 +18,8 @@ import {
   Check,
   Video,
   Play,
-  X
+  X,
+  Clock // Added for history button
 } from 'lucide-react';
 import { useSocialAccounts, SocialAccount } from '../../hooks/useSocialAccounts';
 import { useSocialPosts, SocialPost } from '../../hooks/useSocialPosts';
@@ -149,7 +149,7 @@ const HorizontalScrollRow: React.FC<{
         className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
         style={{ 
           scrollbarWidth: 'none', 
-          msOverflowStyle: 'none', // FIXED: Wrapped none in quotes
+          msOverflowStyle: 'none',
           WebkitOverflowScrolling: 'touch'
         }}
       >
@@ -434,6 +434,7 @@ export const SocialPulse: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
+  const [showingHistory, setShowingHistory] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
   
   const { 
@@ -445,8 +446,12 @@ export const SocialPulse: React.FC = () => {
   const { 
     posts, 
     loading: postsLoading, 
-    refresh: refreshPosts 
-  } = useSocialPosts({ filterByEntity: false });
+    refresh: refreshPosts,
+    fetchFullHistory 
+  } = useSocialPosts({ 
+    filterByEntity: false, 
+    daysBack: showingHistory ? undefined : 7 
+  });
 
   useEffect(() => {
     if (accounts.length > 0 && selectedAccountIds.length === 0) {
@@ -468,22 +473,38 @@ export const SocialPulse: React.FC = () => {
     setIsRefreshing(true);
     const enabledAccounts = accounts.filter((a: SocialAccount) => a.isScrapingEnabled && a.status !== 'ERROR');
     
-    for (const account of enabledAccounts) {
+    // 1. Fire all triggers in parallel using async/await map
+    const scrapePromises = enabledAccounts.map(async (account) => {
       try {
-        await client.graphql({
+        // Explicitly cast to Promise<any> to satisfy TypeScript
+        const response = client.graphql({
           query: triggerSocialScrape,
           variables: { socialAccountId: account.id },
-        });
-      } catch (err) {
+        }) as Promise<any>;
+        
+        await response;
+      } catch (err: any) {
+        // Explicitly type err as 'any'
         console.error(`Error scraping ${account.accountName}:`, err);
       }
-    }
+    });
 
+    // 2. Wait for all triggers to initiate
+    await Promise.all(scrapePromises);
+
+    // 3. Refresh UI
     setTimeout(() => {
         setIsRefreshing(false);
         fetchAccounts();
         refreshPosts();
     }, 2000);
+  };
+
+  const handleLoadHistory = () => {
+    setShowingHistory(true);
+    if (fetchFullHistory) {
+      fetchFullHistory();
+    }
   };
 
   const toggleAccountSelection = (id: string) => {
@@ -544,7 +565,8 @@ export const SocialPulse: React.FC = () => {
     return sortedGroups;
   }, [filteredPosts]);
 
-  const isLoading = (accountsLoading || postsLoading) && accounts.length === 0;
+  // Combined Loading State
+  const isGlobalLoading = (accountsLoading || postsLoading) && posts.length === 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
@@ -637,12 +659,16 @@ export const SocialPulse: React.FC = () => {
       </div>
 
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-40">
-            <div className="text-center">
-              <RefreshCw className="w-10 h-10 text-indigo-600 animate-spin mx-auto" />
-              <p className="text-slate-500 mt-4 font-medium">Loading your feed...</p>
+        {isGlobalLoading ? (
+          <div className="flex flex-col items-center justify-center py-40">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <RefreshCw className="w-6 h-6 text-indigo-600" />
+              </div>
             </div>
+            <h3 className="text-lg font-semibold text-slate-700 mt-6">Refreshing Social Feed</h3>
+            <p className="text-slate-500 mt-2">Gathering the latest posts...</p>
           </div>
         ) : (
           <>
@@ -668,19 +694,51 @@ export const SocialPulse: React.FC = () => {
                           Select all accounts
                       </button>
                   )}
+                  {/* Show History Button in empty state if we haven't loaded history yet */}
+                  {!showingHistory && selectedAccountIds.length > 0 && !searchQuery && (
+                    <button 
+                      onClick={handleLoadHistory}
+                      className="mt-6 flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors mx-auto font-medium"
+                    >
+                      <Clock className="w-4 h-4" />
+                      Load Older Posts
+                    </button>
+                  )}
                 </div>
               ) : (
-                groupedPosts.map(([dateKey, dayPosts]) => (
-                  <HorizontalScrollRow 
-                    key={dateKey} 
-                    dateLabel={formatDateLabel(dateKey)}
-                    postCount={dayPosts.length}
-                  >
-                    {dayPosts.map((post: SocialPost) => (
-                      <PostCard key={post.id} post={post} />
-                    ))}
-                  </HorizontalScrollRow>
-                ))
+                <>
+                  {groupedPosts.map(([dateKey, dayPosts]) => (
+                    <HorizontalScrollRow 
+                      key={dateKey} 
+                      dateLabel={formatDateLabel(dateKey)}
+                      postCount={dayPosts.length}
+                    >
+                      {dayPosts.map((post: SocialPost) => (
+                        <PostCard key={post.id} post={post} />
+                      ))}
+                    </HorizontalScrollRow>
+                  ))}
+
+                  {/* Load History Button at bottom of list */}
+                  {!showingHistory && (
+                    <div className="flex justify-center pt-8 pb-12">
+                      <button 
+                        onClick={handleLoadHistory}
+                        className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 shadow-sm text-slate-600 rounded-full hover:bg-slate-50 hover:text-indigo-600 transition-all font-medium group"
+                      >
+                        <Clock className="w-4 h-4 group-hover:text-indigo-600" />
+                        Load posts older than 7 days
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Loading indicator when fetching history */}
+                  {showingHistory && postsLoading && (
+                     <div className="flex justify-center py-8">
+                        <RefreshCw className="w-6 h-6 text-indigo-600 animate-spin" />
+                     </div>
+                  )}
+                </>
               )}
             </div>
           </>

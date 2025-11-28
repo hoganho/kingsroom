@@ -4,7 +4,11 @@ import { generateClient } from 'aws-amplify/api';
 import { useEntity } from '../contexts/EntityContext';
 
 // Import generated GraphQL operations
-import { listSocialPosts } from '../graphql/queries';
+import { 
+  listSocialPosts, 
+  socialPostsBySocialAccountIdAndPostedAt,
+  socialPostsByEntityIdAndPostedAt,
+} from '../graphql/queries';
 import { updateSocialPost } from '../graphql/mutations';
 
 // Import Amplify-generated types
@@ -13,9 +17,9 @@ import {
   UpdateSocialPostInput,
   SocialPostStatus,
   ModelSocialPostFilterInput,
+  ModelSortDirection
 } from '../API';
 
-// Re-export types for consumers
 export type { SocialPost, UpdateSocialPostInput };
 export { SocialPostStatus };
 
@@ -25,15 +29,14 @@ export interface UseSocialPostsOptions {
   limit?: number;
   autoFetch?: boolean;
   filterByEntity?: boolean;
+  daysBack?: number;
 }
 
-// Helper to check if response has data
 function hasGraphQLData<T>(response: unknown): response is { data: T } {
   return response !== null && typeof response === 'object' && 'data' in response;
 }
 
 export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
-  // Use useMemo for client - same pattern as useScraperManagement
   const client = useMemo(() => generateClient(), []);
   const { currentEntity } = useEntity();
   
@@ -43,21 +46,24 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
   const [nextToken, setNextToken] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
 
-  // Track if initial fetch has been done
   const hasFetchedRef = useRef(false);
   const lastFetchKeyRef = useRef<string>('');
 
-  // Only use entity filter if filterByEntity is true (default) or entityId explicitly passed
-  const { filterByEntity = true } = options;
+  const { filterByEntity = true, daysBack } = options;
   const effectiveEntityId = options.entityId || (filterByEntity ? currentEntity?.id : undefined);
   const limit = options.limit || 50;
 
-  // Fetch posts
-  const fetchPosts = useCallback(async (loadMore = false, forceRefresh = false) => {
-    // Create key for deduplication
-    const currentFetchKey = `${options.accountId || ''}-${effectiveEntityId || ''}-${filterByEntity}`;
+  // Calculate the date string for filtering
+  const minDate = useMemo(() => {
+    if (!daysBack) return undefined;
+    const d = new Date();
+    d.setDate(d.getDate() - daysBack);
+    return d.toISOString();
+  }, [daysBack]);
+
+  const fetchPosts = useCallback(async (loadMore = false, forceRefresh = false, ignoreDateLimit = false) => {
+    const currentFetchKey = `${options.accountId || ''}-${effectiveEntityId || ''}-${filterByEntity}-${daysBack}-${ignoreDateLimit}`;
     
-    // Skip if we've already fetched for this key and not forcing refresh
     if (!forceRefresh && !loadMore && hasFetchedRef.current && lastFetchKeyRef.current === currentFetchKey) {
       return;
     }
@@ -69,57 +75,93 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
 
     try {
       const token = loadMore ? nextToken : null;
+      const activeFilter = { status: { eq: SocialPostStatus.ACTIVE } };
       
-      // Build filter with proper Amplify types
-      const filter: ModelSocialPostFilterInput = {
-        status: { eq: SocialPostStatus.ACTIVE }
-      };
-      
+      const dateCondition = (minDate && !ignoreDateLimit) ? { gt: minDate } : undefined;
+
+      let response: unknown;
+      let items: SocialPost[] = [];
+      let newNextToken: string | undefined | null = null;
+
       if (options.accountId) {
-        filter.socialAccountId = { eq: options.accountId };
-      } else if (effectiveEntityId) {
-        filter.entityId = { eq: effectiveEntityId };
-      }
-
-      const response = await client.graphql({
-        query: listSocialPosts,
-        variables: { 
-          limit,
-          nextToken: token,
-          filter,
-        },
-      });
-
-      if (hasGraphQLData<{ listSocialPosts: { items: (SocialPost | null)[]; nextToken?: string | null } }>(response)) {
-        const result = response.data.listSocialPosts;
-        const items = (result?.items || [])
-          .filter((item): item is SocialPost => item !== null);
+        response = await client.graphql({
+          query: socialPostsBySocialAccountIdAndPostedAt,
+          variables: { 
+            socialAccountId: options.accountId,
+            postedAt: dateCondition,
+            sortDirection: ModelSortDirection.DESC,
+            filter: activeFilter,
+            limit,
+            nextToken: token
+          },
+        });
         
-        // Sort by postedAt descending (newest first)
-        const sortedItems = [...items].sort((a, b) => 
-          new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime()
-        );
-
-        if (loadMore) {
-          setPosts(prev => [...prev, ...sortedItems]);
-        } else {
-          setPosts(sortedItems);
+        if (hasGraphQLData<{ socialPostsBySocialAccountIdAndPostedAt: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
+            items = response.data.socialPostsBySocialAccountIdAndPostedAt?.items || [];
+            newNextToken = response.data.socialPostsBySocialAccountIdAndPostedAt?.nextToken;
         }
+      } 
+      else if (effectiveEntityId) {
+        response = await client.graphql({
+          query: socialPostsByEntityIdAndPostedAt,
+          variables: { 
+            entityId: effectiveEntityId,
+            postedAt: dateCondition,
+            sortDirection: ModelSortDirection.DESC,
+            filter: activeFilter,
+            limit,
+            nextToken: token
+          },
+        });
 
-        setNextToken(result?.nextToken || null);
-        setHasMore(!!result?.nextToken);
-        hasFetchedRef.current = true;
-        lastFetchKeyRef.current = currentFetchKey;
+        if (hasGraphQLData<{ socialPostsByEntityIdAndPostedAt: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
+            items = response.data.socialPostsByEntityIdAndPostedAt?.items || [];
+            newNextToken = response.data.socialPostsByEntityIdAndPostedAt?.nextToken;
+        }
+      } 
+      else {
+        const filter: ModelSocialPostFilterInput = {
+          status: { eq: SocialPostStatus.ACTIVE },
+          ...(dateCondition ? { postedAt: { gt: minDate } } : {}) 
+        };
+
+        response = await client.graphql({
+          query: listSocialPosts,
+          variables: { 
+            limit,
+            nextToken: token,
+            filter,
+          },
+        });
+
+        if (hasGraphQLData<{ listSocialPosts: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
+            items = response.data.listSocialPosts?.items || [];
+            newNextToken = response.data.listSocialPosts?.nextToken;
+            items.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
+        }
       }
+
+      const validItems = items.filter((item): item is SocialPost => item !== null);
+      
+      if (loadMore) {
+        setPosts(prev => [...prev, ...validItems]);
+      } else {
+        setPosts(validItems);
+      }
+
+      setNextToken(newNextToken || null);
+      setHasMore(!!newNextToken);
+      hasFetchedRef.current = true;
+      lastFetchKeyRef.current = currentFetchKey;
+
     } catch (err) {
       console.error('Error fetching social posts:', err);
       setError('Failed to fetch social posts. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [client, options.accountId, effectiveEntityId, limit, nextToken, filterByEntity]);
+  }, [client, options.accountId, effectiveEntityId, limit, nextToken, filterByEntity, minDate]);
 
-  // Update post
   const updatePostFn = useCallback(async (input: UpdateSocialPostInput): Promise<SocialPost | null> => {
     try {
       const response = await client.graphql({
@@ -130,9 +172,7 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
       if (hasGraphQLData<{ updateSocialPost: SocialPost }>(response) && response.data?.updateSocialPost) {
         const updatedPost = response.data.updateSocialPost;
         setPosts(prev => prev.map(post => 
-          post.id === input.id 
-            ? { ...post, ...updatedPost } as SocialPost
-            : post
+          post.id === input.id ? { ...post, ...updatedPost } as SocialPost : post
         ));
         return updatedPost;
       }
@@ -143,75 +183,57 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
     }
   }, [client]);
 
-  // Hide/archive post
-  const hidePost = useCallback(async (id: string, _version?: number): Promise<void> => {
-    await updatePostFn({
-      id,
-      status: SocialPostStatus.HIDDEN,
-    } as UpdateSocialPostInput);
+  const hidePost = useCallback(async (id: string) => {
+    await updatePostFn({ id, status: SocialPostStatus.HIDDEN } as UpdateSocialPostInput);
   }, [updatePostFn]);
 
-  // Mark as tournament related
-  const markTournamentRelated = useCallback(async (
-    id: string,
-    isTournamentRelated: boolean,
-    linkedGameId?: string,
-    _version?: number
-  ): Promise<void> => {
-    await updatePostFn({
-      id,
-      isTournamentRelated,
-      linkedGameId,
-    } as UpdateSocialPostInput);
+  const markTournamentRelated = useCallback(async (id: string, isTournamentRelated: boolean, linkedGameId?: string) => {
+    await updatePostFn({ id, isTournamentRelated, linkedGameId } as UpdateSocialPostInput);
   }, [updatePostFn]);
 
-  // Update tags
-  const updateTags = useCallback(async (
-    id: string,
-    tags: string[],
-    _version?: number
-  ): Promise<void> => {
-    await updatePostFn({
-      id,
-      tags,
-    } as UpdateSocialPostInput);
+  const updateTags = useCallback(async (id: string, tags: string[]) => {
+    await updatePostFn({ id, tags } as UpdateSocialPostInput);
   }, [updatePostFn]);
 
-  // Load more posts
   const loadMore = useCallback(() => {
     if (hasMore && !loading) {
       fetchPosts(true);
     }
   }, [hasMore, loading, fetchPosts]);
 
-  // Refresh posts (force refresh)
   const refresh = useCallback(() => {
     setNextToken(null);
     fetchPosts(false, true);
   }, [fetchPosts]);
 
-  // Initial fetch - only when parameters change
+  const fetchFullHistory = useCallback(() => {
+    setNextToken(null); 
+    fetchPosts(false, true, true); 
+  }, [fetchPosts]);
+
   useEffect(() => {
     if (options.autoFetch !== false) {
-      const currentFetchKey = `${options.accountId || ''}-${effectiveEntityId || ''}-${filterByEntity}`;
-      
-      // Only fetch if the key changed or we haven't fetched yet
+      const currentFetchKey = `${options.accountId || ''}-${effectiveEntityId || ''}-${filterByEntity}-${daysBack}`;
       if (!hasFetchedRef.current || lastFetchKeyRef.current !== currentFetchKey) {
         fetchPosts();
       }
     }
-  }, [options.accountId, effectiveEntityId, options.autoFetch, fetchPosts, filterByEntity]);
+  }, [options.accountId, effectiveEntityId, options.autoFetch, fetchPosts, filterByEntity, daysBack]);
 
-  // Calculate engagement metrics
-  const totalEngagement = posts.reduce(
-    (sum, post) => sum + (post.likeCount || 0) + (post.commentCount || 0) + (post.shareCount || 0),
-    0
-  );
+  // --- FIX: Restore Engagement Calculations ---
+  const totalEngagement = useMemo(() => {
+    return posts.reduce(
+      (sum, post) => sum + (post.likeCount || 0) + (post.commentCount || 0) + (post.shareCount || 0),
+      0
+    );
+  }, [posts]);
 
-  const averageEngagement = posts.length > 0 ? totalEngagement / posts.length : 0;
+  const averageEngagement = useMemo(() => {
+    return posts.length > 0 ? totalEngagement / posts.length : 0;
+  }, [posts, totalEngagement]);
 
-  const tournamentPosts = posts.filter(p => p.isTournamentRelated);
-  const promotionalPosts = posts.filter(p => p.isPromotional);
+  const tournamentPosts = useMemo(() => posts.filter(p => p.isTournamentRelated), [posts]);
+  const promotionalPosts = useMemo(() => posts.filter(p => p.isPromotional), [posts]);
 
   return {
     posts,
@@ -219,17 +241,19 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
     error,
     hasMore,
     fetchPosts: useCallback(() => fetchPosts(false, true), [fetchPosts]),
+    fetchFullHistory,
     updatePost: updatePostFn,
     hidePost,
     markTournamentRelated,
     updateTags,
     loadMore,
     refresh,
+    postCount: posts.length,
+    // Export metrics
     totalEngagement,
     averageEngagement,
     tournamentPosts,
-    promotionalPosts,
-    postCount: posts.length,
+    promotionalPosts
   };
 };
 
