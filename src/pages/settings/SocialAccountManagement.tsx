@@ -295,7 +295,7 @@ const SocialAccountManagement = () => {
     try {
       if ('platform' in data) {
         // Creating new account - cast to match createAccount's expected input
-        await createAccount({
+        const newAccount = await createAccount({
           platform: data.platform,
           accountUrl: data.accountUrl,
           accountName: data.accountName,
@@ -305,18 +305,45 @@ const SocialAccountManagement = () => {
           venueId: data.venueId,
           scrapeFrequencyMinutes: data.scrapeFrequencyMinutes,
         });
-        setSuccessMessage(`${data.accountName} has been added successfully`);
+        
+        setIsModalOpen(false);
+        setSuccessMessage(`${data.accountName} has been added. Fetching page info...`);
+        
+        // Auto-sync page info to fetch logo and page details from Facebook
+        if (newAccount?.id) {
+          try {
+            const response = await client.graphql({
+              query: syncPageInfo,
+              variables: { socialAccountId: newAccount.id, forceRefresh: false },
+            });
+
+            if (hasGraphQLData<{ syncPageInfo: { success: boolean; message: string; logoUrl: string | null } }>(response)) {
+              const result = response.data.syncPageInfo;
+              if (result.success) {
+                setSuccessMessage(`${data.accountName} added and page info synced successfully`);
+                fetchAccounts();
+              } else {
+                // Page info sync failed, but account was created
+                setSuccessMessage(`${data.accountName} added. Note: ${result.message || 'Could not fetch page info'}`);
+              }
+            }
+          } catch (syncErr) {
+            // Log but don't fail - the account was still created
+            console.warn('Could not auto-sync page info:', syncErr);
+            setSuccessMessage(`${data.accountName} added. Use "Refresh Logo" to fetch page info.`);
+          }
+        }
       } else {
         // Updating existing account
         await updateAccount(data as UpdateSocialAccountInput);
         setSuccessMessage('Account has been updated successfully');
+        setIsModalOpen(false);
       }
-      setIsModalOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save account');
       throw err;
     }
-  }, [createAccount, updateAccount]);
+  }, [createAccount, updateAccount, client, fetchAccounts]);
 
   const handleToggleScraping = useCallback(async (account: SocialAccount) => {
     try {

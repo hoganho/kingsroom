@@ -33,6 +33,7 @@ const LOG_GROUPS_TO_CLEAR = [
   '/aws/lambda/gameIdTracker-dev',
   '/aws/lambda/saveGameFunction-dev',
   '/aws/lambda/tournamentConsolidator-dev',
+  '/aws/lambda/socialFetcher-dev',
 ];
 
 // --- Logger (copied from your script) ---

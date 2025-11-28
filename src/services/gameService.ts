@@ -276,7 +276,7 @@ export const fetchGameDataFromBackend = async (
             variables: { 
                 url, 
                 forceRefresh,
-                scraperApiKey: scraperApiKey || '62c905a307da2591dc89f94d193caacf'
+                scraperApiKey: scraperApiKey || ''
             }
         }) as GraphQLResult<any>;
         

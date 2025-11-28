@@ -21,7 +21,7 @@ const RETRY_DELAY = 1000;
 const REQUEST_TIMEOUT = 30000;
 const HEAD_TIMEOUT = 5000;
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true';
-const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY || "62c905a307da2591dc89f94d193caacf";
+const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY || "";
 
 /**
  * Map new interaction type to old scrape status for backward compatibility
