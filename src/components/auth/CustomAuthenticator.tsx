@@ -194,7 +194,7 @@ export const CustomAuthenticator = ({ children }: CustomAuthenticatorProps) => {
       <Authenticator
         components={components}
         formFields={formFields}
-        hideSignUp={false} // Set to true if you want to hide sign up
+        hideSignUp={true} // Set to true if you want to hide sign up
       >
         {children}
       </Authenticator>

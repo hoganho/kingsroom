@@ -9,7 +9,7 @@ import {
   BuildingOffice2Icon,
   WrenchIcon,
 } from '@heroicons/react/24/outline';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth, UserRole } from '../../contexts/AuthContext';
 
 const MobileBottomNav = () => {
   const { userRole } = useAuth();
@@ -24,7 +24,7 @@ const MobileBottomNav = () => {
   ];
 
   // Add Scraper Admin for SuperAdmin users
-  if (userRole === 'SuperAdmin') {
+  if (userRole === UserRole.SUPER_ADMIN) {
     navItems.push({ 
       to: '/scraper/admin',  // Correct path matching App.tsx route
       label: 'Scraper', 

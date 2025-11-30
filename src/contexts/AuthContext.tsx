@@ -42,8 +42,8 @@ export interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
-  // Add convenient role checking for the new sidebar
-  userRole: 'SuperAdmin' | 'Admin' | 'User' | null;
+  // User's role directly from Cognito group / UserRole enum
+  userRole: UserRole | null;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -227,30 +227,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [checkUser, loading, user]);
 
-  // Map UserRole enum to simplified role for sidebar
-  const mapUserRoleForSidebar = (role?: UserRole): 'SuperAdmin' | 'Admin' | 'User' | null => {
-    if (!role) return null;
-    
-    switch (role) {
-      case UserRole.SUPER_ADMIN:
-        return 'SuperAdmin';
-      case UserRole.ADMIN:
-        return 'Admin';
-      case UserRole.VENUE_MANAGER:
-      case UserRole.TOURNAMENT_DIRECTOR:
-      case UserRole.MARKETING:
-      default:
-        return 'User';
-    }
-  };
-
   const value: AuthContextType = { 
     user, 
     loading, 
     signOut: handleSignOut, 
     refreshUser: checkUser,
-    // Add simplified role for sidebar
-    userRole: mapUserRoleForSidebar(user?.role)
+    // Return the actual UserRole enum value directly
+    userRole: user?.role ?? null
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

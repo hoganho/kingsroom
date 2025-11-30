@@ -54,13 +54,6 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
-    "kingsroomauthCustomMessage": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
     "playerDataProcessor": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
@@ -105,6 +98,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Region": "string"
     },
     "tournamentConsolidator": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
+    "userManagement": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",

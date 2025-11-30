@@ -17,13 +17,6 @@
         "kingsroomauth": {}
       },
       "function": {
-        "kingsroomauthCustomMessage": {
-          "REDIRECTURL": "https://kingsroom.pokerprolive.com/",
-          "EMAILSUBJECT": "Your Kings Room Poker Verification Code",
-          "EMAILMESSAGE": "Welcome to Kings Room Poker! Please use the following code to verify your email address:",
-          "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/kingsroomauthCustomMessage-7a4a6c666b3744623941-build.zip"
-        },
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
           "s3Key": "amplify-builds/autoScraper-69594235454168643873-build.zip"
@@ -84,6 +77,10 @@
           "saveGameFunctionName": "saveGameFunction-dev",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
           "s3Key": "amplify-builds/webScraperFunction-4961366c4c49764e6a44-build.zip"
+        },
+        "userManagement": {
+          "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
+          "s3Key": "amplify-builds/userManagement-48314c6c573349694742-build.zip"
         }
       },
       "api": {

@@ -93,28 +93,103 @@ export const getUserByEmailQuery = /* GraphQL */ `
   }
 `;
 
-// --- MUTATIONS ---
+// --- MUTATIONS (Lambda-backed for Cognito + DynamoDB sync) ---
 
-export const createUserMutation = /* GraphQL */ `
-  mutation CreateUser($input: CreateUserInput!) {
-    createUser(input: $input) {
-      id
-      username
-      email
-      role
-      isActive
-      firstName
-      lastName
-      phone
-      allowedPages
-      allowedEntityIds
-      allowedVenueIds
-      defaultEntityId
-      createdAt
-      updatedAt
+// Creates user in Cognito AND DynamoDB
+export const adminCreateUserMutation = /* GraphQL */ `
+  mutation AdminCreateUser($input: CreateUserInput!) {
+    adminCreateUser(input: $input) {
+      success
+      message
+      temporaryPassword
+      user {
+        id
+        username
+        email
+        role
+        isActive
+        firstName
+        lastName
+        phone
+        allowedPages
+        allowedEntityIds
+        allowedVenueIds
+        defaultEntityId
+        createdAt
+        updatedAt
+      }
     }
   }
 `;
+
+// Updates user in Cognito AND DynamoDB
+export const adminUpdateUserMutation = /* GraphQL */ `
+  mutation AdminUpdateUser($input: UpdateUserInput!) {
+    adminUpdateUser(input: $input) {
+      success
+      message
+      user {
+        id
+        username
+        email
+        role
+        isActive
+        firstName
+        lastName
+        phone
+        avatar
+        allowedPages
+        allowedEntityIds
+        allowedVenueIds
+        defaultEntityId
+        mustChangePassword
+        updatedAt
+        updatedBy
+      }
+    }
+  }
+`;
+
+// Reset password in Cognito
+export const adminResetPasswordMutation = /* GraphQL */ `
+  mutation AdminResetPassword($input: ResetUserPasswordInput!) {
+    adminResetPassword(input: $input) {
+      success
+      message
+      temporaryPassword
+    }
+  }
+`;
+
+// Deactivate user in Cognito AND DynamoDB
+export const adminDeactivateUserMutation = /* GraphQL */ `
+  mutation AdminDeactivateUser($userId: ID!) {
+    adminDeactivateUser(userId: $userId) {
+      success
+      message
+      user {
+        id
+        isActive
+      }
+    }
+  }
+`;
+
+// Reactivate user in Cognito AND DynamoDB
+export const adminReactivateUserMutation = /* GraphQL */ `
+  mutation AdminReactivateUser($userId: ID!) {
+    adminReactivateUser(userId: $userId) {
+      success
+      message
+      user {
+        id
+        isActive
+      }
+    }
+  }
+`;
+
+// --- LEGACY MUTATIONS (DynamoDB only - for non-Cognito updates) ---
 
 export const updateUserMutation = /* GraphQL */ `
   mutation UpdateUser($input: UpdateUserInput!) {
@@ -205,6 +280,25 @@ export interface UpdateUserInput {
   defaultEntityId?: string;
   isActive?: boolean;
   mustChangePassword?: boolean;
+}
+
+export interface ResetUserPasswordInput {
+  userId: string;
+  newPassword?: string;
+  permanent?: boolean;
+}
+
+export interface UserManagementResponse {
+  success: boolean;
+  message: string;
+  user?: User | null;
+  temporaryPassword?: string | null;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+  temporaryPassword?: string | null;
 }
 
 export interface ListUsersResponse {

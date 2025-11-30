@@ -37,17 +37,7 @@
   "auth": {
     "kingsroomauth": {
       "customAuth": false,
-      "dependsOn": [
-        {
-          "attributes": [
-            "Arn",
-            "Name"
-          ],
-          "category": "function",
-          "resourceName": "kingsroomauthCustomMessage",
-          "triggerProvider": "Cognito"
-        }
-      ],
+      "dependsOn": [],
       "frontendAuthConfig": {
         "mfaConfiguration": "OPTIONAL",
         "mfaTypes": [
@@ -164,11 +154,6 @@
           "resourceName": "kingsroomauth"
         }
       ],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "kingsroomauthCustomMessage": {
-      "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
@@ -296,6 +281,11 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "userManagement": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "venueAssignmentService": {
       "build": true,
       "dependsOn": [
@@ -405,46 +395,6 @@
         {
           "category": "function",
           "resourceName": "getUserMetrics"
-        }
-      ]
-    },
-    "AMPLIFY_function_kingsroomauthCustomMessage_EMAILMESSAGE": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "kingsroomauthCustomMessage"
-        }
-      ]
-    },
-    "AMPLIFY_function_kingsroomauthCustomMessage_EMAILSUBJECT": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "kingsroomauthCustomMessage"
-        }
-      ]
-    },
-    "AMPLIFY_function_kingsroomauthCustomMessage_REDIRECTURL": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "kingsroomauthCustomMessage"
-        }
-      ]
-    },
-    "AMPLIFY_function_kingsroomauthCustomMessage_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "kingsroomauthCustomMessage"
-        }
-      ]
-    },
-    "AMPLIFY_function_kingsroomauthCustomMessage_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "kingsroomauthCustomMessage"
         }
       ]
     },
@@ -573,6 +523,22 @@
         {
           "category": "function",
           "resourceName": "tournamentConsolidator"
+        }
+      ]
+    },
+    "AMPLIFY_function_userManagement_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "userManagement"
+        }
+      ]
+    },
+    "AMPLIFY_function_userManagement_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "userManagement"
         }
       ]
     },

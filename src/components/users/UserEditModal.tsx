@@ -4,8 +4,6 @@ import { generateClient } from 'aws-amplify/api';
 import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { updateUserMutation, User, UserRole, UpdateUserInput } from '../../graphql/userManagement';
 
-const client = generateClient();
-
 interface UserEditModalProps {
   user: User;
   onClose: () => void;
@@ -21,6 +19,7 @@ const ROLES: { value: UserRole; label: string }[] = [
 ];
 
 export const UserEditModal = ({ user, onClose, onUserUpdated }: UserEditModalProps) => {
+  const client = generateClient();
   const [formData, setFormData] = useState({
     firstName: user.firstName || '',
     lastName: user.lastName || '',

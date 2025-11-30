@@ -37,22 +37,9 @@ export interface UserPermissions {
 export const useUserPermissions = (): UserPermissions => {
   const { userRole: authRole } = useAuth();
   
-  // Map Cognito group names to GraphQL UserRole enum values
-  const normalizeRole = (role: string | null): UserRole | null => {
-    if (!role) return null;
-    const roleMap: Record<string, UserRole> = {
-      'SuperAdmin': 'SUPER_ADMIN',
-      'Admin': 'ADMIN',
-      'SUPER_ADMIN': 'SUPER_ADMIN',
-      'ADMIN': 'ADMIN',
-      'VENUE_MANAGER': 'VENUE_MANAGER',
-      'TOURNAMENT_DIRECTOR': 'TOURNAMENT_DIRECTOR',
-      'MARKETING': 'MARKETING',
-    };
-    return roleMap[role] || null;
-  };
-  
-  const userRole = normalizeRole(authRole);
+  // Cognito groups now match GraphQL UserRole enum values (SUPER_ADMIN, ADMIN, etc.)
+  // Just cast to UserRole if valid
+  const userRole: UserRole | null = authRole as UserRole | null;
   
   const isSuperAdmin = userRole === 'SUPER_ADMIN';
   
@@ -60,7 +47,7 @@ export const useUserPermissions = (): UserPermissions => {
   // TODO: Pass customAllowedPages when we have access to currentUser from AuthContext
   const canAccess = useCallback((path: string): boolean => {
     if (!userRole) return false;
-    return hasPageAccess(path, userRole as UserRole, null);
+    return hasPageAccess(path, userRole, null);
   }, [userRole]);
   
   // Get all accessible pages
@@ -73,7 +60,7 @@ export const useUserPermissions = (): UserPermissions => {
     // TODO: If user has custom permissions from DB, use those
     // This would require exposing currentUser from AuthContext
     // For now, fall back to default role permissions
-    const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[userRole as UserRole] || [];
+    const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[userRole] || [];
     return ALL_PAGES.filter(page => 
       page.alwaysAllowed || 
       defaultPermissions.some((allowed: string) => pathMatchesPage(page.path, allowed))
@@ -108,7 +95,7 @@ export const useUserPermissions = (): UserPermissions => {
   const hasRole = useCallback((roles: UserRole | UserRole[]): boolean => {
     if (!userRole) return false;
     const roleArray = Array.isArray(roles) ? roles : [roles];
-    return roleArray.includes(userRole as UserRole);
+    return roleArray.includes(userRole);
   }, [userRole]);
   
   return {
@@ -117,7 +104,7 @@ export const useUserPermissions = (): UserPermissions => {
     accessiblePagesByCategory,
     hasRole,
     isSuperAdmin,
-    userRole: userRole as UserRole | null,
+    userRole,
     customAllowedPages: null, // TODO: Get from currentUser when available in AuthContext
   };
 };

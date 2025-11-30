@@ -5,7 +5,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Sidebar } from './Sidebar';
 import { MobileBottomNav } from './MobileBottomNav';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth, UserRole } from '../../contexts/AuthContext';
 import { DatabaseChangeMonitor } from '../monitoring/DatabaseChangeMonitor';
 import logo from '../../assets/Kings-Room-Logo_web.png';
 
@@ -15,7 +15,7 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { user, signOut, userRole } = useAuth();
 
   // Only show monitor toggle for SuperAdmin users
-  const canShowMonitor = userRole === 'SuperAdmin';
+  const canShowMonitor = userRole === UserRole.SUPER_ADMIN;
 
   // Keyboard shortcut to toggle monitor (Ctrl/Cmd + Shift + D)
     useEffect(() => {

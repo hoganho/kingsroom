@@ -1,11 +1,21 @@
 // src/components/users/UserCreateModal.tsx
 import { useState } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { XMarkIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
-import { createUserMutation, User, UserRole, CreateUserInput } from '../../graphql/userManagement';
+import { 
+  XMarkIcon, 
+  ExclamationTriangleIcon, 
+  InformationCircleIcon,
+  CheckCircleIcon,
+  ClipboardDocumentIcon,
+} from '@heroicons/react/24/outline';
+import { 
+  adminCreateUserMutation, 
+  User, 
+  UserRole, 
+  CreateUserInput,
+  UserManagementResponse,
+} from '../../graphql/userManagement';
 import { DEFAULT_ROLE_PERMISSIONS } from '../../config/pagePermissions';
-
-const client = generateClient();
 
 interface UserCreateModalProps {
   onClose: () => void;
@@ -41,6 +51,7 @@ const ROLES: { value: UserRole; label: string; description: string }[] = [
 ];
 
 export const UserCreateModal = ({ onClose, onUserCreated }: UserCreateModalProps) => {
+  const client = generateClient();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -53,9 +64,14 @@ export const UserCreateModal = ({ onClose, onUserCreated }: UserCreateModalProps
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Success state - shows temporary password
+  const [createdUser, setCreatedUser] = useState<User | null>(null);
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const selectedRole = ROLES.find(r => r.value === formData.role);
-  const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[formData.role];
+  const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[formData.role] || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,19 +98,96 @@ export const UserCreateModal = ({ onClose, onUserCreated }: UserCreateModalProps
       };
 
       const response = await client.graphql({
-        query: createUserMutation,
+        query: adminCreateUserMutation,
         variables: { input },
-      }) as { data: { createUser: User } };
+      }) as { data: { adminCreateUser: UserManagementResponse } };
 
-      onUserCreated(response.data.createUser);
-      onClose();
+      const result = response.data.adminCreateUser;
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to create user');
+      }
+
+      if (result.user) {
+        setCreatedUser(result.user);
+        setTemporaryPassword(result.temporaryPassword || null);
+        onUserCreated(result.user);
+      }
     } catch (err: any) {
       console.error('Error creating user:', err);
-      setError(err.message || 'Failed to create user');
+      // Extract error message from GraphQL errors
+      const message = err.errors?.[0]?.message || err.message || 'Failed to create user';
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
+
+  const copyToClipboard = async () => {
+    if (!temporaryPassword) return;
+    
+    try {
+      await navigator.clipboard.writeText(temporaryPassword);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  // Success screen - show temporary password
+  if (createdUser && temporaryPassword) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+          
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+            <div className="text-center">
+              <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                User Created Successfully
+              </h2>
+              <p className="text-gray-600 mb-6">
+                {createdUser.firstName} {createdUser.lastName} ({createdUser.email}) has been created.
+              </p>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+              <p className="text-sm font-medium text-amber-800 mb-2">
+                Temporary Password
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 bg-white px-3 py-2 rounded border border-amber-300 font-mono text-sm">
+                  {temporaryPassword}
+                </code>
+                <button
+                  onClick={copyToClipboard}
+                  className="p-2 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors"
+                  title="Copy to clipboard"
+                >
+                  <ClipboardDocumentIcon className="h-5 w-5" />
+                </button>
+              </div>
+              {copied && (
+                <p className="text-xs text-green-600 mt-1">Copied!</p>
+              )}
+              <p className="text-xs text-amber-700 mt-2">
+                Share this password securely with the user. They will be prompted to change it on first login.
+              </p>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">

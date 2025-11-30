@@ -27,8 +27,6 @@ import { UserCreateModal } from '../../components/users/UserCreateModal';
 import { ResetPasswordModal } from '../../components/users/ResetPasswordModal';
 import { PagePermissionsModal } from '../../components/users/PagePermissionsModal';
 
-const client = generateClient();
-
 const ROLE_COLORS: Record<UserRole, string> = {
   SUPER_ADMIN: 'bg-purple-100 text-purple-800 border-purple-200',
   ADMIN: 'bg-blue-100 text-blue-800 border-blue-200',
@@ -46,6 +44,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 export const UserManagement = () => {
+  const client = generateClient();
   const { userRole: authRole } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,8 +63,8 @@ export const UserManagement = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Check if current user is SUPER_ADMIN (Cognito group name is 'SuperAdmin')
-  const isSuperAdmin = authRole === 'SuperAdmin';
+  // Check if current user is SUPER_ADMIN
+  const isSuperAdmin = authRole === 'SUPER_ADMIN';
 
   // Fetch users
   const fetchUsers = async () => {

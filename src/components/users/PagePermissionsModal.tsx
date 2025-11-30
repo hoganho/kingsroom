@@ -18,8 +18,6 @@ import {
   getGroupedPages
 } from '../../config/pagePermissions';
 
-const client = generateClient();
-
 interface PagePermissionsModalProps {
   user: User;
   onClose: () => void;
@@ -39,6 +37,7 @@ const CATEGORY_ORDER: PageCategory[] = [
 ];
 
 export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: PagePermissionsModalProps) => {
+  const client = generateClient();
   // Initialize with user's current permissions, or default role permissions if none set
   const initialPages = useMemo(() => {
     if (user.allowedPages && user.allowedPages.length > 0) {
