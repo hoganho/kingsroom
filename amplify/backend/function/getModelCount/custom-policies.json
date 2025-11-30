@@ -1,6 +1,23 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "dynamodb:Scan",
+      "dynamodb:DescribeTable"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Player-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerCredits-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerPoints-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTicket-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerMarketingPreferences-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerMarketingMessage-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentStructure-*-dev"
+    ]
   }
 ]

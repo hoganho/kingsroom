@@ -1,6 +1,57 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:GetItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-dev/index/byStatus"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Scan",
+      "dynamodb:GetItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "lambda:InvokeFunction"
+    ],
+    "Resource": [
+      "arn:aws:lambda:ap-southeast-2:*:function:autoScraper-dev"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": [
+      "*"
+    ]
   }
 ]

@@ -556,6 +556,65 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/SocialAccount-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/SocialPost-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/SocialScrapeAttempt-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:HeadObject",
+                "s3:DeleteObject"
+              ],
+              "Resource": [
+                "arn:aws:s3:::pokerpro-scraper-storage/social-media/*"
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

@@ -1,6 +1,18 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": [
+      "*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:PutItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/OperationLog-*-dev"
+    ]
   }
 ]

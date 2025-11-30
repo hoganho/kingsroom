@@ -7,16 +7,25 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "kingsroomc05d6627"
+          "resourceName": "kingsroomauth"
         }
       ],
       "output": {
         "authConfig": {
-          "additionalAuthenticationProviders": [],
+          "additionalAuthenticationProviders": [
+            {
+              "apiKeyConfig": {
+                "apiKeyExpirationDate": "2026-11-30T19:02:34.381Z",
+                "apiKeyExpirationDays": 365,
+                "description": "KingsRoom-Guest"
+              },
+              "authenticationType": "API_KEY"
+            }
+          ],
           "defaultAuthentication": {
             "authenticationType": "AMAZON_COGNITO_USER_POOLS",
             "userPoolConfig": {
-              "userPoolId": "authkingsroomc05d6627"
+              "userPoolId": "authkingsroomauth"
             }
           }
         }
@@ -26,7 +35,7 @@
     }
   },
   "auth": {
-    "kingsroomc05d6627": {
+    "kingsroomauth": {
       "customAuth": false,
       "dependsOn": [
         {
@@ -35,7 +44,7 @@
             "Name"
           ],
           "category": "function",
-          "resourceName": "kingsroomc05d6627CustomMessage",
+          "resourceName": "kingsroomauthCustomMessage",
           "triggerProvider": "Cognito"
         }
       ],
@@ -152,13 +161,13 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "kingsroomc05d6627"
+          "resourceName": "kingsroomauth"
         }
       ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "kingsroomc05d6627CustomMessage": {
+    "kingsroomauthCustomMessage": {
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
@@ -194,7 +203,7 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "kingsroomc05d6627"
+          "resourceName": "kingsroomauth"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -399,43 +408,43 @@
         }
       ]
     },
-    "AMPLIFY_function_kingsroomc05d6627CustomMessage_EMAILMESSAGE": {
+    "AMPLIFY_function_kingsroomauthCustomMessage_EMAILMESSAGE": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "kingsroomc05d6627CustomMessage"
+          "resourceName": "kingsroomauthCustomMessage"
         }
       ]
     },
-    "AMPLIFY_function_kingsroomc05d6627CustomMessage_EMAILSUBJECT": {
+    "AMPLIFY_function_kingsroomauthCustomMessage_EMAILSUBJECT": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "kingsroomc05d6627CustomMessage"
+          "resourceName": "kingsroomauthCustomMessage"
         }
       ]
     },
-    "AMPLIFY_function_kingsroomc05d6627CustomMessage_REDIRECTURL": {
+    "AMPLIFY_function_kingsroomauthCustomMessage_REDIRECTURL": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "kingsroomc05d6627CustomMessage"
+          "resourceName": "kingsroomauthCustomMessage"
         }
       ]
     },
-    "AMPLIFY_function_kingsroomc05d6627CustomMessage_deploymentBucketName": {
+    "AMPLIFY_function_kingsroomauthCustomMessage_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "kingsroomc05d6627CustomMessage"
+          "resourceName": "kingsroomauthCustomMessage"
         }
       ]
     },
-    "AMPLIFY_function_kingsroomc05d6627CustomMessage_s3Key": {
+    "AMPLIFY_function_kingsroomauthCustomMessage_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "kingsroomc05d6627CustomMessage"
+          "resourceName": "kingsroomauthCustomMessage"
         }
       ]
     },

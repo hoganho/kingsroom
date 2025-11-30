@@ -1330,6 +1330,124 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Query",
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byURL",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byTournamentId",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byS3Key"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeStructure-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:HeadObject",
+                "s3:ListBucket"
+              ],
+              "Resource": [
+                "arn:aws:s3:::pokerpro-scraper-storage",
+                "arn:aws:s3:::pokerpro-scraper-storage/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "lambda:InvokeFunction"
+              ],
+              "Resource": [
+                "arn:aws:lambda:ap-southeast-2:*:function:saveGameFunction-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "cloudwatch:PutMetricData"
+              ],
+              "Resource": [
+                "*"
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

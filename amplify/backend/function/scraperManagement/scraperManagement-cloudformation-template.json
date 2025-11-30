@@ -890,6 +890,84 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:GetItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-dev/index/byStatus"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Scan",
+                "dynamodb:GetItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "lambda:InvokeFunction"
+              ],
+              "Resource": [
+                "arn:aws:lambda:ap-southeast-2:*:function:autoScraper-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "cloudwatch:PutMetricData"
+              ],
+              "Resource": [
+                "*"
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

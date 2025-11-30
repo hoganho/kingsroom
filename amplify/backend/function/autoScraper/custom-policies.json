@@ -1,6 +1,47 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byEntityScrapeURL"
+    ]
+  },
+  {
+    "Action": [
+      "appsync:GraphQL"
+    ],
+    "Resource": [
+      "arn:aws:appsync:ap-southeast-2:*:apis/*/types/Mutation/fields/fetchTournamentData",
+      "arn:aws:appsync:ap-southeast-2:*:apis/*/types/Mutation/fields/saveTournamentData"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": [
+      "*"
+    ]
   }
 ]

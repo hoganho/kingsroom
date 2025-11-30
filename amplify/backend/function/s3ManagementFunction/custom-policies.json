@@ -1,6 +1,47 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "s3:PutObject",
+      "s3:GetObject"
+    ],
+    "Resource": [
+      "arn:aws:s3:::pokerpro-scraper-storage/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byURL",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byTournamentId",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byEntityScrapeURL"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byURL",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byEntity",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byScrapeURL"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": [
+      "*"
+    ]
   }
 ]

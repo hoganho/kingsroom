@@ -478,6 +478,54 @@ export declare type DetectedMultiDayPattern = LazyLoading extends LazyLoadingDis
 
 export declare const DetectedMultiDayPattern: (new (init: ModelInit<DetectedMultiDayPattern>) => DetectedMultiDayPattern)
 
+type EagerUserManagementResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly user?: User | null;
+}
+
+type LazyUserManagementResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly user: AsyncItem<User | undefined>;
+}
+
+export declare type UserManagementResponse = LazyLoading extends LazyLoadingDisabled ? EagerUserManagementResponse : LazyUserManagementResponse
+
+export declare const UserManagementResponse: (new (init: ModelInit<UserManagementResponse>) => UserManagementResponse)
+
+type EagerResetPasswordResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly temporaryPassword?: string | null;
+}
+
+type LazyResetPasswordResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly temporaryPassword?: string | null;
+}
+
+export declare type ResetPasswordResponse = LazyLoading extends LazyLoadingDisabled ? EagerResetPasswordResponse : LazyResetPasswordResponse
+
+export declare const ResetPasswordResponse: (new (init: ModelInit<ResetPasswordResponse>) => ResetPasswordResponse)
+
+type EagerUsersConnection = {
+  readonly items: User[];
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+type LazyUsersConnection = {
+  readonly items: AsyncCollection<User>;
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+export declare type UsersConnection = LazyLoading extends LazyLoadingDisabled ? EagerUsersConnection : LazyUsersConnection
+
+export declare const UsersConnection: (new (init: ModelInit<UsersConnection>) => UsersConnection)
+
 type EagerScraperControlResponse = {
   readonly success: boolean;
   readonly message?: string | null;
@@ -3445,29 +3493,59 @@ export declare const S3Storage: (new (init: ModelInit<S3Storage>) => S3Storage) 
 type EagerUser = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<User, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
   readonly username: string;
   readonly email: string;
   readonly role: UserRole | keyof typeof UserRole;
+  readonly isActive?: boolean | null;
+  readonly allowedPages?: (string | null)[] | null;
+  readonly firstName?: string | null;
+  readonly lastName?: string | null;
+  readonly phone?: string | null;
+  readonly avatar?: string | null;
+  readonly allowedEntityIds?: (string | null)[] | null;
+  readonly allowedVenueIds?: (string | null)[] | null;
+  readonly defaultEntityId?: string | null;
+  readonly lastLoginAt?: string | null;
+  readonly passwordLastChangedAt?: string | null;
+  readonly mustChangePassword?: boolean | null;
+  readonly loginAttempts?: number | null;
+  readonly lockedUntil?: string | null;
+  readonly createdBy?: string | null;
+  readonly updatedBy?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
   readonly preferences?: (UserPreference | null)[] | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
 }
 
 type LazyUser = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<User, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
   readonly username: string;
   readonly email: string;
   readonly role: UserRole | keyof typeof UserRole;
+  readonly isActive?: boolean | null;
+  readonly allowedPages?: (string | null)[] | null;
+  readonly firstName?: string | null;
+  readonly lastName?: string | null;
+  readonly phone?: string | null;
+  readonly avatar?: string | null;
+  readonly allowedEntityIds?: (string | null)[] | null;
+  readonly allowedVenueIds?: (string | null)[] | null;
+  readonly defaultEntityId?: string | null;
+  readonly lastLoginAt?: string | null;
+  readonly passwordLastChangedAt?: string | null;
+  readonly mustChangePassword?: boolean | null;
+  readonly loginAttempts?: number | null;
+  readonly lockedUntil?: string | null;
+  readonly createdBy?: string | null;
+  readonly updatedBy?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
   readonly preferences: AsyncCollection<UserPreference>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
 }
 
 export declare type User = LazyLoading extends LazyLoadingDisabled ? EagerUser : LazyUser

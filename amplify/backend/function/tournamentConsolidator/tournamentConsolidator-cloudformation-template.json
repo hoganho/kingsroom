@@ -460,6 +460,77 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/byConsolidationKey",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/byParentGame"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev/index/byGame"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:PutItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:DescribeStream",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:ListStreams"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/stream/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "cloudwatch:PutMetricData"
+              ],
+              "Resource": [
+                "*"
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

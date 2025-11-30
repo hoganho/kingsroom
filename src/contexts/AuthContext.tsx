@@ -90,6 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const result = await client.graphql({
           query: getUser,
           variables: { id: userId },
+          authMode: 'userPool', // Use Cognito auth for private access
         });
 
         const existingUser = result.data?.getUser;
@@ -130,6 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const createResult = await client.graphql({
           query: createUserMutation,
           variables: { input: newUserInput },
+          authMode: 'userPool', // Use Cognito auth for private access
         });
 
         if (createResult.data?.createUser && !createResult.errors) {

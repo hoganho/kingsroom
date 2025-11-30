@@ -2,9 +2,10 @@
   "AppSyncApiName": "kingsroom",
   "DynamoDBBillingMode": "PAY_PER_REQUEST",
   "DynamoDBEnableServerSideEncryption": false,
+  "AuthModeLastUpdated": "2025-11-30T19:02:41.463Z",
   "AuthCognitoUserPoolId": {
     "Fn::GetAtt": [
-      "authkingsroomc05d6627",
+      "authkingsroomauth",
       "Outputs.UserPoolId"
     ]
   }

@@ -3,8 +3,8 @@
 // and restored operational functions.
 // REFACTORED FOR AWS SDK V3
 // FIX: Added proper handleListStoredHTML function
+// MONITORING: Added LambdaMonitoring integration
 
-// const AWS = require('aws-sdk'); // <-- REMOVED V2
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 
@@ -13,19 +13,25 @@ const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/clien
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, QueryCommand, PutCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 
+// --- Lambda Monitoring ---
+const { LambdaMonitoring } = require('./lambda-monitoring');
+
 // Initialize v3 S3 Client
 const s3 = new S3Client({});
 
-// Initialize v3 DynamoDB Document Client
+// Initialize v3 DynamoDB Document Client with monitoring
 const ddbClient = new DynamoDBClient({});
-const dynamodb = DynamoDBDocumentClient.from(ddbClient);
+const originalDdbDocClient = DynamoDBDocumentClient.from(ddbClient);
+
+// --- Lambda Monitoring Initialization ---
+const monitoring = new LambdaMonitoring('s3ManagementFunction', null);
+const dynamodb = monitoring.wrapDynamoDBClient(originalDdbDocClient);
 
 // --- DynamoDB Table Constants ---
 const SCRAPE_URL_TABLE = process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME || process.env.SCRAPE_URL_TABLE || 'ScrapeURL-prod';
 const S3_STORAGE_TABLE = process.env.API_KINGSROOM_S3STORAGETABLE_NAME || process.env.S3_STORAGE_TABLE || 'S3Storage-prod';
 
 // --- S3 Bucket Constant ---
-// Ensure this environment variable is set in your Lambda
 const S3_BUCKET = process.env.S3_BUCKET || 'pokerpro-scraper-storage';
 
 /**
@@ -101,6 +107,8 @@ async function getScrapeURLByUrl(url) {
         throw new Error('URL is required');
     }
     
+    monitoring.trackOperation('QUERY_BY_URL', 'ScrapeURL', null, { url });
+    
     const queryParams = {
         TableName: SCRAPE_URL_TABLE,
         IndexName: 'byURL',
@@ -114,7 +122,6 @@ async function getScrapeURLByUrl(url) {
         Limit: 1
     };
     
-    // V3 Change: .promise() -> .send(new Command())
     const result = await dynamodb.send(new QueryCommand(queryParams));
     return result.Items?.[0];
 }
@@ -129,6 +136,13 @@ async function getOrCreateScrapeURLForManualUpload(url, entityId, tournamentId) 
         return scrapeURL;
     }
     
+    monitoring.trackOperation('CREATE_SCRAPEURL', 'ScrapeURL', null, { 
+        url, 
+        entityId, 
+        tournamentId,
+        source: 'MANUAL_UPLOAD'
+    });
+    
     // Create new ScrapeURL record for manual upload
     const now = new Date().toISOString();
     const newRecord = {
@@ -138,7 +152,7 @@ async function getOrCreateScrapeURLForManualUpload(url, entityId, tournamentId) 
         entityId,
         lastInteractionType: 'MANUAL_UPLOAD',
         lastInteractionAt: now,
-        hasStoredContent: false, // Will be set to true after S3Storage creation
+        hasStoredContent: false,
         status: 'ACTIVE',
         doNotScrape: false,
         isActive: true,
@@ -147,15 +161,14 @@ async function getOrCreateScrapeURLForManualUpload(url, entityId, tournamentId) 
         failedScrapes: 0,
         manualUploads: 1,
         contentChangeCount: 0,
-        cacheHits: 0, // Initialize new cache field
-        hasEtag: false, // Initialize new cache field
-        hasLastModified: false, // Initialize new cache field
+        cacheHits: 0,
+        hasEtag: false,
+        hasLastModified: false,
         createdAt: now,
         updatedAt: now,
         __typename: 'ScrapeURL'
     };
     
-    // V3 Change: .promise() -> .send(new Command())
     await dynamodb.send(new PutCommand({
         TableName: SCRAPE_URL_TABLE,
         Item: newRecord
@@ -167,14 +180,9 @@ async function getOrCreateScrapeURLForManualUpload(url, entityId, tournamentId) 
 
 /**
  * Get storage statistics (STUB)
- * TODO: Implement a performant version of this. A full scan or
- * N+1 query is not suitable for production. This should ideally
- * be a value aggregated onto the Entity table.
  */
 async function getStorageStats(entityId) {
     console.warn(`[getStorageStats] STUB FUNCTION for ${entityId}. Implement real logic.`);
-    // The query-heavy version from your 'refactored' code
-    // is not performant. A simple stub is safer.
     return {
         totalFiles: 0,
         totalSizeMB: 0,
@@ -207,14 +215,22 @@ async function handleManualUpload(event) {
         notes
     } = event;
 
-    // ... (Validation logic remains the same) ...
+    // Set entity for monitoring context
+    if (entityId) monitoring.entityId = entityId;
+
+    monitoring.trackOperation('MANUAL_UPLOAD_START', 'S3Storage', null, {
+        entityId,
+        sourceUrl,
+        fileName
+    });
+
     const tournamentId = providedTournamentId || extractTournamentId(sourceUrl);
     const contentHash = calculateContentHash(fileContent);
     const metadata = extractMetadata(fileContent);
     const now = new Date().toISOString();
 
     try {
-        // 1. Get or create ScrapeURL record (Same as before)
+        // 1. Get or create ScrapeURL record
         const scrapeURL = await getOrCreateScrapeURLForManualUpload(sourceUrl, entityId, tournamentId);
         
         // 2. Check for EXISTING S3Storage record
@@ -229,22 +245,37 @@ async function handleManualUpload(event) {
 
         // 3. Duplicate Check
         if (existingStorage && existingStorage.contentHash === contentHash) {
-             return {
+            monitoring.trackOperation('MANUAL_UPLOAD_DUPLICATE', 'S3Storage', existingStorage.id, {
+                entityId,
+                contentHash
+            });
+            return {
                 statusCode: 200,
                 body: { success: true, message: 'Duplicate content, no update needed.' }
             };
         }
 
-        // 4. Upload NEW content to S3 (Same bucket logic)
+        // 4. Upload NEW content to S3
         const timestamp = now.replace(/[:.]/g, '-');
         const s3Key = `manual/${entityId}/${tournamentId}/${timestamp}${fileName ? `-${fileName}` : '.html'}`;
         
+        monitoring.trackOperation('S3_UPLOAD', 'S3', s3Key, {
+            entityId,
+            tournamentId,
+            contentSize: Buffer.byteLength(fileContent, 'utf8')
+        });
+
         await s3.send(new PutObjectCommand({
             Bucket: S3_BUCKET,
             Key: s3Key,
             Body: fileContent,
             ContentType: 'text/html',
-            Metadata: { /* ... metadata ... */ }
+            Metadata: {
+                entityid: entityId || '',
+                tournamentid: String(tournamentId),
+                uploadedby: uploadedBy || '',
+                contenthash: contentHash
+            }
         }));
 
         // 5. Prepare History Array
@@ -265,7 +296,7 @@ async function handleManualUpload(event) {
 
         // 6. Create or Update S3Storage record (UPSERT)
         const s3StorageItem = {
-            id: scrapeURL.latestS3StorageId || uuidv4(), // Use existing ID or generate new
+            id: scrapeURL.latestS3StorageId || uuidv4(),
             scrapeURLId: scrapeURL.id,
             url: sourceUrl,
             tournamentId: tournamentId,
@@ -290,6 +321,12 @@ async function handleManualUpload(event) {
             updatedAt: now,
             __typename: 'S3Storage'
         };
+
+        monitoring.trackOperation(existingStorage ? 'S3STORAGE_UPDATE' : 'S3STORAGE_CREATE', 'S3Storage', s3StorageItem.id, {
+            entityId,
+            tournamentId,
+            s3Key
+        });
 
         await dynamodb.send(new PutCommand({
             TableName: S3_STORAGE_TABLE,
@@ -324,6 +361,11 @@ async function handleManualUpload(event) {
             }
         }));
 
+        monitoring.trackOperation('MANUAL_UPLOAD_COMPLETE', 'S3Storage', s3StorageItem.id, {
+            entityId,
+            versionsStored: updatedHistory.length + 1
+        });
+
         return {
             statusCode: 200,
             body: {
@@ -339,13 +381,16 @@ async function handleManualUpload(event) {
 
     } catch (error) {
         console.error('[handleManualUpload] Error:', error);
+        monitoring.trackOperation('MANUAL_UPLOAD_ERROR', 'S3Storage', null, {
+            entityId,
+            error: error.message
+        });
         throw error;
     }
 }
 
 /**
- * CRITICAL FIX: New function to handle listStoredHTML query
- * This queries the S3Storage table directly by URL, not ScrapeURL table
+ * Handle listStoredHTML query
  */
 async function handleListStoredHTML(event) {
     const { url, limit = 10 } = event;
@@ -356,8 +401,9 @@ async function handleListStoredHTML(event) {
     
     console.log(`[listStoredHTML] Querying S3Storage for URL: ${url}, limit: ${limit}`);
     
+    monitoring.trackOperation('LIST_STORED_HTML', 'S3Storage', null, { url, limit });
+    
     try {
-        // Query S3Storage table using the byURL GSI
         const queryParams = {
             TableName: S3_STORAGE_TABLE,
             IndexName: 'byURL',
@@ -368,38 +414,23 @@ async function handleListStoredHTML(event) {
             ExpressionAttributeValues: {
                 ':url': url
             },
-            ScanIndexForward: false, // Most recent first (descending scrapedAt)
+            ScanIndexForward: false,
             Limit: limit || 10
         };
-        
-        console.log('[listStoredHTML] Query params:', JSON.stringify(queryParams, null, 2));
         
         const result = await dynamodb.send(new QueryCommand(queryParams));
         
         console.log(`[listStoredHTML] Found ${result.Items?.length || 0} items`);
         
-        // CRITICAL: Ensure all required fields are present
-        const items = (result.Items || []).map(item => {
-            // Validate required fields
-            if (!item.s3Key) {
-                console.error(`[listStoredHTML] WARNING: Item ${item.id} missing s3Key`);
-            }
-            if (!item.scrapedAt) {
-                console.error(`[listStoredHTML] WARNING: Item ${item.id} missing scrapedAt`);
-            }
-            
-            // Return item with guaranteed required fields
-            return {
-                ...item,
-                // Ensure non-nullable fields have values
-                s3Key: item.s3Key || '',
-                scrapedAt: item.scrapedAt || new Date().toISOString(),
-                s3Bucket: item.s3Bucket || S3_BUCKET,
-                entityId: item.entityId || '',
-                tournamentId: item.tournamentId || 0,
-                url: item.url || url
-            };
-        });
+        const items = (result.Items || []).map(item => ({
+            ...item,
+            s3Key: item.s3Key || '',
+            scrapedAt: item.scrapedAt || new Date().toISOString(),
+            s3Bucket: item.s3Bucket || S3_BUCKET,
+            entityId: item.entityId || '',
+            tournamentId: item.tournamentId || 0,
+            url: item.url || url
+        }));
         
         return {
             statusCode: 200,
@@ -411,13 +442,13 @@ async function handleListStoredHTML(event) {
         
     } catch (error) {
         console.error('[listStoredHTML] Error:', error);
+        monitoring.trackOperation('LIST_STORED_HTML_ERROR', 'S3Storage', null, { url, error: error.message });
         throw error;
     }
 }
 
 /**
- * Legacy handler for getS3StorageHistory
- * This should query by tournamentId and entityId
+ * Handle getS3StorageHistory query
  */
 async function handleGetS3StorageHistory(event) {
     const { tournamentId, entityId, limit = 10 } = event;
@@ -428,8 +459,10 @@ async function handleGetS3StorageHistory(event) {
     
     console.log(`[getS3StorageHistory] Query for tournamentId: ${tournamentId}, entityId: ${entityId}`);
     
+    if (entityId) monitoring.entityId = entityId;
+    monitoring.trackOperation('GET_STORAGE_HISTORY', 'S3Storage', null, { tournamentId, entityId });
+    
     try {
-        // Query S3Storage table using byEntity GSI
         const queryParams = {
             TableName: S3_STORAGE_TABLE,
             IndexName: 'byEntity',
@@ -439,7 +472,7 @@ async function handleGetS3StorageHistory(event) {
                 ':eid': entityId,
                 ':tid': tournamentId
             },
-            ScanIndexForward: false, // Most recent first
+            ScanIndexForward: false,
             Limit: limit || 10
         };
         
@@ -457,12 +490,13 @@ async function handleGetS3StorageHistory(event) {
         
     } catch (error) {
         console.error('[getS3StorageHistory] Error:', error);
+        monitoring.trackOperation('GET_STORAGE_HISTORY_ERROR', 'S3Storage', null, { error: error.message });
         throw error;
     }
 }
 
 /**
- * Query URL knowledge from ScrapeURL table (legacy function)
+ * Query URL knowledge from ScrapeURL table
  */
 async function handleQueryURLKnowledge(event) {
     const { 
@@ -473,17 +507,17 @@ async function handleQueryURLKnowledge(event) {
         limit = 10
     } = event;
     
+    if (entityId) monitoring.entityId = entityId;
+    monitoring.trackOperation('QUERY_URL_KNOWLEDGE', 'ScrapeURL', null, { url, tournamentId, entityId });
+    
     try {
         let scrapeURLs = [];
         
-        // Query by URL (most specific)
         if (url) {
             const scrapeURL = await getScrapeURLByUrl(url);
             if (scrapeURL) {
-                 scrapeURLs = [scrapeURL];
+                scrapeURLs = [scrapeURL];
             }
-            
-        // Query by tournament ID
         } else if (tournamentId) {
             const queryParams = {
                 TableName: SCRAPE_URL_TABLE,
@@ -497,8 +531,6 @@ async function handleQueryURLKnowledge(event) {
             
             const result = await dynamodb.send(new QueryCommand(queryParams));
             scrapeURLs = result.Items || [];
-            
-        // Query by entity (broader search)
         } else if (entityId) {
             const queryParams = {
                 TableName: SCRAPE_URL_TABLE,
@@ -507,21 +539,18 @@ async function handleQueryURLKnowledge(event) {
                 ExpressionAttributeValues: {
                     ':eid': entityId
                 },
-                ScanIndexForward: false, // Most recent first
+                ScanIndexForward: false,
                 Limit: limit
             };
             
             const result = await dynamodb.send(new QueryCommand(queryParams));
             scrapeURLs = result.Items || [];
-            
         } else {
             throw new Error('Must provide url, tournamentId, or entityId');
         }
         
-        // Optionally include storage history
         if (includeStorageHistory && scrapeURLs.length > 0) {
             for (const scrapeURL of scrapeURLs) {
-                // Get storage history for this URL
                 const storageParams = {
                     TableName: S3_STORAGE_TABLE,
                     IndexName: 'byScrapeURL',
@@ -529,8 +558,8 @@ async function handleQueryURLKnowledge(event) {
                     ExpressionAttributeValues: {
                         ':suid': scrapeURL.id
                     },
-                    ScanIndexForward: false, // Most recent first
-                    Limit: 5 // Last 5 storage records
+                    ScanIndexForward: false,
+                    Limit: 5
                 };
                 
                 const storageResult = await dynamodb.send(new QueryCommand(storageParams));
@@ -549,6 +578,7 @@ async function handleQueryURLKnowledge(event) {
         
     } catch (error) {
         console.error('[handleQueryURLKnowledge] Error:', error);
+        monitoring.trackOperation('QUERY_URL_KNOWLEDGE_ERROR', 'ScrapeURL', null, { error: error.message });
         throw error;
     }
 }
@@ -559,10 +589,11 @@ async function handleQueryURLKnowledge(event) {
 async function handleGetS3Content(event) {
     const { s3StorageId, s3Key } = event;
     
+    monitoring.trackOperation('GET_S3_CONTENT', 'S3Storage', s3StorageId || s3Key, { s3StorageId, s3Key });
+    
     try {
         let storageRecord;
         
-        // Get storage record by ID or key
         if (s3StorageId) {
             const result = await dynamodb.send(new GetCommand({
                 TableName: S3_STORAGE_TABLE,
@@ -570,7 +601,6 @@ async function handleGetS3Content(event) {
             }));
             storageRecord = result.Item;
         } else if (s3Key) {
-            // Query by s3Key using GSI
             const queryParams = {
                 TableName: S3_STORAGE_TABLE,
                 IndexName: 'byS3Key',
@@ -591,7 +621,10 @@ async function handleGetS3Content(event) {
             throw new Error('Storage record not found');
         }
         
-        // Get HTML from S3
+        monitoring.trackOperation('S3_GET', 'S3', storageRecord.s3Key, { 
+            entityId: storageRecord.entityId 
+        });
+        
         const getCommand = new GetObjectCommand({
             Bucket: storageRecord.s3Bucket || S3_BUCKET,
             Key: storageRecord.s3Key
@@ -621,6 +654,7 @@ async function handleGetS3Content(event) {
         
     } catch (error) {
         console.error('[handleGetS3Content] Error:', error);
+        monitoring.trackOperation('GET_S3_CONTENT_ERROR', 'S3Storage', s3StorageId || s3Key, { error: error.message });
         throw error;
     }
 }
@@ -635,8 +669,9 @@ async function handleGetURLStatistics(event) {
         throw new Error('URL is required');
     }
     
+    monitoring.trackOperation('GET_URL_STATS', 'ScrapeURL', null, { url });
+    
     try {
-        // Get ScrapeURL record
         const scrapeURL = await getScrapeURLByUrl(url);
         
         if (!scrapeURL) {
@@ -649,7 +684,6 @@ async function handleGetURLStatistics(event) {
             };
         }
         
-        // Get storage count for this URL
         const storageParams = {
             TableName: S3_STORAGE_TABLE,
             IndexName: 'byURL',
@@ -686,12 +720,13 @@ async function handleGetURLStatistics(event) {
         
     } catch (error) {
         console.error('[handleGetURLStatistics] Error:', error);
+        monitoring.trackOperation('GET_URL_STATS_ERROR', 'ScrapeURL', null, { url, error: error.message });
         throw error;
     }
 }
 
 /**
- * Clear cache for a URL (delete S3Storage records)
+ * Clear cache for a URL
  */
 async function handleClearCache(event) {
     const { url } = event;
@@ -701,9 +736,9 @@ async function handleClearCache(event) {
     }
     
     console.log(`[handleClearCache] Clearing cache for: ${url}`);
+    monitoring.trackOperation('CLEAR_CACHE_START', 'ScrapeURL', null, { url });
     
     try {
-        // Get ScrapeURL record
         const scrapeURL = await getScrapeURLByUrl(url);
         
         if (!scrapeURL) {
@@ -716,7 +751,6 @@ async function handleClearCache(event) {
             };
         }
         
-        // Query all S3Storage records for this URL
         const queryParams = {
             TableName: S3_STORAGE_TABLE,
             IndexName: 'byURL',
@@ -734,10 +768,6 @@ async function handleClearCache(event) {
         
         console.log(`[handleClearCache] Found ${storageItems.length} storage items to clear`);
         
-        // Note: For production, implement batch delete
-        // For now, just return what would be deleted
-        
-        // Update ScrapeURL to clear cache references
         await dynamodb.send(new UpdateCommand({
             TableName: SCRAPE_URL_TABLE,
             Key: { id: scrapeURL.id },
@@ -754,6 +784,11 @@ async function handleClearCache(event) {
             }
         }));
         
+        monitoring.trackOperation('CLEAR_CACHE_COMPLETE', 'ScrapeURL', scrapeURL.id, { 
+            url, 
+            itemsCleared: storageItems.length 
+        });
+        
         return {
             statusCode: 200,
             body: {
@@ -765,6 +800,7 @@ async function handleClearCache(event) {
         
     } catch (error) {
         console.error('[handleClearCache] Error:', error);
+        monitoring.trackOperation('CLEAR_CACHE_ERROR', 'ScrapeURL', null, { url, error: error.message });
         throw error;
     }
 }
@@ -780,9 +816,9 @@ async function handleForceRefresh(event) {
     }
     
     console.log(`[handleForceRefresh] Force refresh for: ${url}`);
+    monitoring.trackOperation('FORCE_REFRESH_START', 'ScrapeURL', null, { url });
     
     try {
-        // Get ScrapeURL record
         const scrapeURL = await getScrapeURLByUrl(url);
         
         if (!scrapeURL) {
@@ -795,7 +831,6 @@ async function handleForceRefresh(event) {
             };
         }
         
-        // Update ScrapeURL to force next scrape
         await dynamodb.send(new UpdateCommand({
             TableName: SCRAPE_URL_TABLE,
             Key: { id: scrapeURL.id },
@@ -810,6 +845,8 @@ async function handleForceRefresh(event) {
             }
         }));
         
+        monitoring.trackOperation('FORCE_REFRESH_COMPLETE', 'ScrapeURL', scrapeURL.id, { url });
+        
         return {
             statusCode: 200,
             body: {
@@ -821,6 +858,7 @@ async function handleForceRefresh(event) {
         
     } catch (error) {
         console.error('[handleForceRefresh] Error:', error);
+        monitoring.trackOperation('FORCE_REFRESH_ERROR', 'ScrapeURL', null, { url, error: error.message });
         throw error;
     }
 }
@@ -836,6 +874,7 @@ async function handleMarkForReProcess(event) {
     }
     
     console.log(`[handleMarkForReProcess] Marking ${s3StorageId} for re-processing`);
+    monitoring.trackOperation('MARK_REPROCESS_START', 'S3Storage', s3StorageId);
     
     try {
         const updateParams = {
@@ -858,6 +897,7 @@ async function handleMarkForReProcess(event) {
         const result = await dynamodb.send(new UpdateCommand(updateParams));
         
         console.log(`[handleMarkForReProcess] ${s3StorageId} marked.`);
+        monitoring.trackOperation('MARK_REPROCESS_COMPLETE', 'S3Storage', s3StorageId);
         
         return {
             statusCode: 200,
@@ -871,8 +911,9 @@ async function handleMarkForReProcess(event) {
         
     } catch (error) {
         console.error('[handleMarkForReProcess] Error:', error);
+        monitoring.trackOperation('MARK_REPROCESS_ERROR', 'S3Storage', s3StorageId, { error: error.message });
         if (error.code === 'ConditionalCheckFailedException') {
-             return {
+            return {
                 statusCode: 404,
                 body: { success: false, message: 'S3Storage item not found' }
             };
@@ -892,6 +933,8 @@ async function handleGetCachingStats(event) {
     }
 
     console.log(`[CachingStats] Getting stats for entity ${entityId}`);
+    monitoring.entityId = entityId;
+    monitoring.trackOperation('GET_CACHING_STATS_START', 'ScrapeURL', null, { entityId });
     
     const stats = {
         totalURLs: 0,
@@ -952,6 +995,11 @@ async function handleGetCachingStats(event) {
             stats.storageUsedMB = 0;
         }
         
+        monitoring.trackOperation('GET_CACHING_STATS_COMPLETE', 'ScrapeURL', null, { 
+            entityId, 
+            totalURLs: stats.totalURLs 
+        });
+        
         return {
             statusCode: 200,
             body: {
@@ -962,6 +1010,7 @@ async function handleGetCachingStats(event) {
 
     } catch (error) {
         console.error('[CachingStats] Error:', error);
+        monitoring.trackOperation('GET_CACHING_STATS_ERROR', 'ScrapeURL', null, { entityId, error: error.message });
         throw error;
     }
 }
@@ -976,10 +1025,10 @@ async function handleGetCachingStats(event) {
 exports.handler = async (event) => {
     console.log('[S3Management] Received event:', JSON.stringify(event, null, 2));
     
-    // Support AppSync (event.fieldName) and direct invoke (event.operation)
     const operation = event.operation || event.fieldName;
-    // Support AppSync (event.arguments) and direct invoke (event)
     const args = event.arguments || event;
+    
+    monitoring.trackOperation('HANDLER_START', 'Handler', operation, { operation });
     
     try {
         let response;
@@ -989,17 +1038,14 @@ exports.handler = async (event) => {
                 response = await handleManualUpload(args.input || args);
                 break;
                 
-            // CRITICAL FIX: Route listStoredHTML to the correct handler
             case 'listStoredHTML':
                 response = await handleListStoredHTML(args);
                 break;
                 
-            // Keep getS3StorageHistory separate
             case 'getS3StorageHistory':
                 response = await handleGetS3StorageHistory(args);
                 break;
                 
-            // Legacy query operation (for ScrapeURL queries)
             case 'query':
                 response = await handleQueryURLKnowledge(args);
                 break;
@@ -1033,16 +1079,22 @@ exports.handler = async (event) => {
                 throw new Error(`Unknown operation: ${operation}`);
         }
         
-        // Return the body from the handler function
+        monitoring.trackOperation('HANDLER_COMPLETE', 'Handler', operation, { success: true });
+        
         return response.body || response;
         
     } catch (error) {
         console.error('[S3Management] Error:', error);
-        // AppSync expects errors to be thrown
+        
+        monitoring.trackOperation('HANDLER_ERROR', 'Handler', operation, { 
+            error: error.message,
+            operation 
+        });
+        
         if (event.fieldName) {
             throw error;
         }
-        // Direct invoke expects an error object
+        
         return {
             statusCode: 500,
             body: {
@@ -1051,5 +1103,10 @@ exports.handler = async (event) => {
                 stack: error.stack
             }
         };
+    } finally {
+        // Always flush metrics before Lambda exits
+        console.log('[S3Management] Flushing monitoring metrics...');
+        await monitoring.flush();
+        console.log('[S3Management] Monitoring flush complete.');
     }
 };

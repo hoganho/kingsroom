@@ -6,7 +6,7 @@
       ]
     },
     "auth": {
-      "kingsroomc05d6627": [
+      "kingsroomauth": [
         "create",
         "read",
         "update"

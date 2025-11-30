@@ -6236,6 +6236,135 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "isActive": {
+                    "name": "isActive",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "allowedPages": {
+                    "name": "allowedPages",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "firstName": {
+                    "name": "firstName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastName": {
+                    "name": "lastName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "phone": {
+                    "name": "phone",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avatar": {
+                    "name": "avatar",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "allowedEntityIds": {
+                    "name": "allowedEntityIds",
+                    "isArray": true,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "allowedVenueIds": {
+                    "name": "allowedVenueIds",
+                    "isArray": true,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "defaultEntityId": {
+                    "name": "defaultEntityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastLoginAt": {
+                    "name": "lastLoginAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "passwordLastChangedAt": {
+                    "name": "passwordLastChangedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "mustChangePassword": {
+                    "name": "mustChangePassword",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "loginAttempts": {
+                    "name": "loginAttempts",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lockedUntil": {
+                    "name": "lockedUntil",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdBy": {
+                    "name": "createdBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "updatedBy": {
+                    "name": "updatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "preferences": {
                     "name": "preferences",
                     "isArray": true,
@@ -6251,22 +6380,6 @@ export const schema = {
                             "userId"
                         ]
                     }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
                 }
             },
             "syncable": true,
@@ -6279,24 +6392,25 @@ export const schema = {
                     }
                 },
                 {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEmail",
+                        "queryField": "userByEmail",
+                        "fields": [
+                            "email"
+                        ]
+                    }
+                },
+                {
                     "type": "auth",
                     "properties": {
                         "rules": [
                             {
-                                "provider": "userPools",
-                                "ownerField": "id",
-                                "allow": "owner",
-                                "operations": [
-                                    "read",
-                                    "update"
-                                ],
-                                "identityClaim": "cognito:username"
-                            },
-                            {
                                 "allow": "private",
                                 "operations": [
                                     "create",
-                                    "read"
+                                    "read",
+                                    "update"
                                 ]
                             },
                             {
@@ -9065,6 +9179,89 @@ export const schema = {
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "UserManagementResponse": {
+            "name": "UserManagementResponse",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "user": {
+                    "name": "user",
+                    "isArray": false,
+                    "type": {
+                        "model": "User"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ResetPasswordResponse": {
+            "name": "ResetPasswordResponse",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "temporaryPassword": {
+                    "name": "temporaryPassword",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "UsersConnection": {
+            "name": "UsersConnection",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "User"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
                     "attributes": []
                 }
             }
@@ -11994,5 +12191,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "fc3e6fd54ced0407ce8b9270800a5513"
+    "version": "2c74a09799a0d2fb613df6b7426579a5"
 };

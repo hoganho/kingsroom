@@ -24,9 +24,9 @@
       "Type": "String",
       "Default": "apikingsroomGraphQLAPIEndpointOutput"
     },
-    "authkingsroomc05d6627UserPoolId": {
+    "authkingsroomauthUserPoolId": {
       "Type": "String",
-      "Default": "authkingsroomc05d6627UserPoolId"
+      "Default": "authkingsroomauthUserPoolId"
     }
   },
   "Conditions": {
@@ -89,7 +89,7 @@
               "Ref": "apikingsroomGraphQLAPIEndpointOutput"
             },
             "AUTH_KINGSROOMC05D6627_USERPOOLID": {
-              "Ref": "authkingsroomc05d6627UserPoolId"
+              "Ref": "authkingsroomauthUserPoolId"
             }
           }
         },
@@ -262,7 +262,7 @@
                       },
                       ":userpool/",
                       {
-                        "Ref": "authkingsroomc05d6627UserPoolId"
+                        "Ref": "authkingsroomauthUserPoolId"
                       }
                     ]
                   ]
@@ -272,6 +272,34 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "cloudwatch:GetMetricStatistics",
+                "cloudwatch:GetMetricData",
+                "cloudwatch:ListMetrics"
+              ],
+              "Resource": [
+                "*"
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

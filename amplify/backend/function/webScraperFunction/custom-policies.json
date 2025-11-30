@@ -1,10 +1,94 @@
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": ["sqs:SendMessage"],
-      "Resource": "arn:aws:sqs:ap-southeast-2:495599763953:GameProcessingQueue"
-    }
-  ]
-}
+[
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query",
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byURL",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byTournamentId",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byS3Key"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeStructure-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:HeadObject",
+      "s3:ListBucket"
+    ],
+    "Resource": [
+      "arn:aws:s3:::pokerpro-scraper-storage",
+      "arn:aws:s3:::pokerpro-scraper-storage/*"
+    ]
+  },
+  {
+    "Action": [
+      "lambda:InvokeFunction"
+    ],
+    "Resource": [
+      "arn:aws:lambda:ap-southeast-2:*:function:saveGameFunction-dev"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": [
+      "*"
+    ]
+  }
+]

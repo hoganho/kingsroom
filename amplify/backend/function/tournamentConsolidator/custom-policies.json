@@ -1,6 +1,51 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/byConsolidationKey",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/byParentGame"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev/index/byGame"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:PutItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:DescribeStream",
+      "dynamodb:GetRecords",
+      "dynamodb:GetShardIterator",
+      "dynamodb:ListStreams"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/stream/*"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": [
+      "*"
+    ]
   }
 ]

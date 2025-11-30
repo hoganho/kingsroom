@@ -1,6 +1,95 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev/index/byEntityVenue"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byTournamentSeriesTitle",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byYear"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:PutItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:BatchWriteItem",
+      "dynamodb:PutItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev"
+    ]
+  },
+  {
+    "Action": [
+      "sqs:SendMessage"
+    ],
+    "Resource": [
+      "arn:aws:sqs:ap-southeast-2:*:GameProcessingQueue.fifo"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": [
+      "*"
+    ]
   }
 ]

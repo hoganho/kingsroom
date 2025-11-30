@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.1.2\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"I am a current Gen 1 user\"}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.3\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"I am a current Gen 1 user\"}}",
   "Parameters": {
     "REDIRECTURL": {
       "Type": "String",
@@ -75,12 +75,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "kingsroomc05d6627CustomMessage",
+            "kingsroomauthCustomMessage",
             {
               "Fn::Join": [
                 "",
                 [
-                  "kingsroomc05d6627CustomMessage",
+                  "kingsroomauthCustomMessage",
                   "-",
                   {
                     "Ref": "env"
@@ -139,12 +139,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "kingsroomc05d6627CustomMessage",
+            "kingsroomauthCustomMessage",
             {
               "Fn::Join": [
                 "",
                 [
-                  "kingsroomc05d6627CustomMessage",
+                  "kingsroomauthCustomMessage",
                   "-",
                   {
                     "Ref": "env"
@@ -214,6 +214,32 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Resource": [
+                "arn:aws:s3:::*verificationbucket-dev/*"
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

@@ -2,11 +2,12 @@ export type AmplifyDependentResourcesAttributes = {
   "api": {
     "kingsroom": {
       "GraphQLAPIEndpointOutput": "string",
-      "GraphQLAPIIdOutput": "string"
+      "GraphQLAPIIdOutput": "string",
+      "GraphQLAPIKeyOutput": "string"
     }
   },
   "auth": {
-    "kingsroomc05d6627": {
+    "kingsroomauth": {
       "AppClientID": "string",
       "AppClientIDWeb": "string",
       "CreatedSNSRole": "string",
@@ -53,7 +54,7 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
-    "kingsroomc05d6627CustomMessage": {
+    "kingsroomauthCustomMessage": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",

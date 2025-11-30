@@ -928,6 +928,73 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byEntityScrapeURL"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "appsync:GraphQL"
+              ],
+              "Resource": [
+                "arn:aws:appsync:ap-southeast-2:*:apis/*/types/Mutation/fields/fetchTournamentData",
+                "arn:aws:appsync:ap-southeast-2:*:apis/*/types/Mutation/fields/saveTournamentData"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "cloudwatch:PutMetricData"
+              ],
+              "Resource": [
+                "*"
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

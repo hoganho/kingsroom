@@ -1,4 +1,4 @@
-// src/App.tsx - FIXED PUBLIC ROUTES
+// src/App.tsx - WITH USER MANAGEMENT ROUTE
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
@@ -41,6 +41,7 @@ import { VenueDetails } from './pages/venues/VenueDetails';
 import EntityManagement from './pages/settings/EntityManagement';
 import VenueManagement from './pages/settings/VenueManagement';
 import { SeriesManagementPage } from './pages/settings/SeriesManagement';
+import { UserManagement } from './pages/settings/UserManagement'; // NEW
 
 // Scraper Pages (SuperAdmin)
 import { ScraperAdminPage } from './pages/scraper/ScraperAdmin';
@@ -322,6 +323,7 @@ const AuthenticatedRoutes = () => {
                                 <Route path="/settings/venue-management" element={<VenueManagement />} />
                                 <Route path="/settings/series-management" element={<SeriesManagementPage />} />
                                 <Route path="/settings/social-accounts" element={<SocialAccountManagement />} />
+                                <Route path="/settings/user-management" element={<UserManagement />} />
                                 
                                 {/* Scraper Management (SuperAdmin) */}
                                 <Route path="/scraper/admin" element={<ScraperAdminPage />} />

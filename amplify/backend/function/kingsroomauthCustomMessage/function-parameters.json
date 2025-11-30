@@ -3,14 +3,14 @@
   "modules": [
     "verification-link"
   ],
-  "parentResource": "kingsroomc05d6627",
-  "functionName": "kingsroomc05d6627CustomMessage",
-  "resourceName": "kingsroomc05d6627CustomMessage",
+  "parentResource": "kingsroomauth",
+  "functionName": "kingsroomauthCustomMessage",
+  "resourceName": "kingsroomauthCustomMessage",
   "parentStack": "auth",
   "triggerEnvs": "[\n  {\n    \"key\": \"RESOURCENAME\",\n    \"value\": \"resourceName\"\n  }\n]",
   "triggerDir": "/snapshot/amplify-cli/build/node_modules/@aws-amplify/amplify-category-auth/provider-utils/awscloudformation/triggers/CustomMessage",
   "triggerTemplate": "CustomMessage.json.ejs",
   "triggerEventPath": "CustomMessage.event.json",
-  "roleName": "kingsroomc05d6627CustomMessage",
+  "roleName": "kingsroomauthCustomMessage",
   "skipEdit": true
 }

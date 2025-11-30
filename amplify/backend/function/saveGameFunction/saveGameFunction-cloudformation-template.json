@@ -971,6 +971,126 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev/index/byEntityVenue"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Query",
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byTournamentSeriesTitle",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byYear"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:PutItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "sqs:SendMessage"
+              ],
+              "Resource": [
+                "arn:aws:sqs:ap-southeast-2:*:GameProcessingQueue.fifo"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "cloudwatch:PutMetricData"
+              ],
+              "Resource": [
+                "*"
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

@@ -1,0 +1,739 @@
+{
+	"Description": "Root Stack for AWS Amplify CLI",
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Parameters": {
+		"DeploymentBucketName": {
+			"Type": "String",
+			"Default": "DeploymentBucket",
+			"Description": "Name of the common deployment bucket provided by the parent stack"
+		},
+		"AuthRoleName": {
+			"Type": "String",
+			"Default": "AuthRoleName",
+			"Description": "Name of the common deployment bucket provided by the parent stack"
+		},
+		"UnauthRoleName": {
+			"Type": "String",
+			"Default": "UnAuthRoleName",
+			"Description": "Name of the common deployment bucket provided by the parent stack"
+		}
+	},
+	"Outputs": {
+		"Region": {
+			"Description": "CloudFormation provider root stack Region",
+			"Value": {
+				"Ref": "AWS::Region"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-Region"
+				}
+			}
+		},
+		"StackName": {
+			"Description": "CloudFormation provider root stack ID",
+			"Value": {
+				"Ref": "AWS::StackName"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-StackName"
+				}
+			}
+		},
+		"StackId": {
+			"Description": "CloudFormation provider root stack name",
+			"Value": {
+				"Ref": "AWS::StackId"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-StackId"
+				}
+			}
+		},
+		"AuthRoleArn": {
+			"Value": {
+				"Fn::GetAtt": [
+					"AuthRole",
+					"Arn"
+				]
+			}
+		},
+		"UnauthRoleArn": {
+			"Value": {
+				"Fn::GetAtt": [
+					"UnauthRole",
+					"Arn"
+				]
+			}
+		},
+		"DeploymentBucketName": {
+			"Description": "CloudFormation provider root stack deployment bucket name",
+			"Value": {
+				"Ref": "DeploymentBucketName"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-DeploymentBucketName"
+				}
+			}
+		},
+		"AuthRoleName": {
+			"Value": {
+				"Ref": "AuthRole"
+			}
+		},
+		"UnauthRoleName": {
+			"Value": {
+				"Ref": "UnauthRole"
+			}
+		}
+	},
+	"Resources": {
+		"DeploymentBucket": {
+			"Type": "AWS::S3::Bucket",
+			"Properties": {
+				"BucketName": {
+					"Ref": "DeploymentBucketName"
+				},
+				"BucketEncryption": {
+					"ServerSideEncryptionConfiguration": [
+						{
+							"ServerSideEncryptionByDefault": {
+								"SSEAlgorithm": "AES256"
+							}
+						}
+					]
+				}
+			},
+			"UpdateReplacePolicy": "Retain",
+			"DeletionPolicy": "Retain"
+		},
+		"DeploymentBucketBlockHTTP": {
+			"Type": "AWS::S3::BucketPolicy",
+			"Properties": {
+				"Bucket": {
+					"Ref": "DeploymentBucketName"
+				},
+				"PolicyDocument": {
+					"Statement": [
+						{
+							"Action": "s3:*",
+							"Effect": "Deny",
+							"Principal": "*",
+							"Resource": [
+								{
+									"Fn::Join": [
+										"",
+										[
+											"arn:aws:s3:::",
+											{
+												"Ref": "DeploymentBucketName"
+											},
+											"/*"
+										]
+									]
+								},
+								{
+									"Fn::Join": [
+										"",
+										[
+											"arn:aws:s3:::",
+											{
+												"Ref": "DeploymentBucketName"
+											}
+										]
+									]
+								}
+							],
+							"Condition": {
+								"Bool": {
+									"aws:SecureTransport": false
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		"AuthRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "",
+							"Effect": "Deny",
+							"Principal": {
+								"Federated": "cognito-identity.amazonaws.com"
+							},
+							"Action": "sts:AssumeRoleWithWebIdentity"
+						}
+					]
+				},
+				"RoleName": {
+					"Ref": "AuthRoleName"
+				}
+			}
+		},
+		"UnauthRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "",
+							"Effect": "Deny",
+							"Principal": {
+								"Federated": "cognito-identity.amazonaws.com"
+							},
+							"Action": "sts:AssumeRoleWithWebIdentity"
+						}
+					]
+				},
+				"RoleName": {
+					"Ref": "UnauthRoleName"
+				}
+			}
+		},
+		"AuthTriggerCustomLambdaStack": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json",
+				"Parameters": {
+					"env": "dev",
+					"userpoolId": {
+						"Fn::GetAtt": [
+							"authkingsroomc05d6627",
+							"Outputs.UserPoolId"
+						]
+					},
+					"userpoolArn": {
+						"Fn::GetAtt": [
+							"authkingsroomc05d6627",
+							"Outputs.UserPoolArn"
+						]
+					},
+					"snsRoleArn": {
+						"Fn::GetAtt": [
+							"authkingsroomc05d6627",
+							"Outputs.CreatedSNSRole"
+						]
+					},
+					"functionkingsroomc05d6627CustomMessageLambdaExecutionRole": {
+						"Fn::GetAtt": [
+							"functionkingsroomc05d6627CustomMessage",
+							"Outputs.LambdaExecutionRoleArn"
+						]
+					},
+					"functionkingsroomc05d6627CustomMessageArn": {
+						"Fn::GetAtt": [
+							"functionkingsroomc05d6627CustomMessage",
+							"Outputs.Arn"
+						]
+					},
+					"functionkingsroomc05d6627CustomMessageName": {
+						"Fn::GetAtt": [
+							"functionkingsroomc05d6627CustomMessage",
+							"Outputs.Name"
+						]
+					}
+				}
+			},
+			"DependsOn": [
+				"authkingsroomc05d6627",
+				"functionkingsroomc05d6627CustomMessage"
+			]
+		},
+		"authkingsroomc05d6627": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/auth/kingsroomc05d6627-cloudformation-template.json",
+				"Parameters": {
+					"identityPoolName": "kingsroomc05d6627_identitypool_c05d6627",
+					"allowUnauthenticatedIdentities": false,
+					"resourceNameTruncated": "kingsrc05d6627",
+					"userPoolName": "kingsroomc05d6627_userpool_c05d6627",
+					"autoVerifiedAttributes": "email",
+					"mfaConfiguration": "OPTIONAL",
+					"mfaTypes": "SMS Text Message,TOTP",
+					"smsAuthenticationMessage": "Your authentication code is {####}",
+					"smsVerificationMessage": "Your verification code is {####}",
+					"emailVerificationSubject": "Your verification code",
+					"emailVerificationMessage": "Your verification code is {####}",
+					"defaultPasswordPolicy": false,
+					"passwordPolicyMinLength": 8,
+					"passwordPolicyCharacters": "",
+					"requiredAttributes": "email",
+					"aliasAttributes": "",
+					"userpoolClientGenerateSecret": false,
+					"userpoolClientRefreshTokenValidity": "365",
+					"userpoolClientWriteAttributes": "email",
+					"userpoolClientReadAttributes": "email",
+					"userpoolClientLambdaRole": "kingsrc05d6627_userpoolclient_lambda_role",
+					"userpoolClientSetAttributes": false,
+					"sharedId": "c05d6627",
+					"resourceName": "kingsroomc05d6627",
+					"authSelections": "identityPoolAndUserPool",
+					"useDefault": "manual",
+					"usernameAttributes": "email",
+					"userPoolGroupList": "",
+					"serviceName": "Cognito",
+					"usernameCaseSensitive": false,
+					"useEnabledMfas": true,
+					"authRoleArn": {
+						"Fn::GetAtt": [
+							"AuthRole",
+							"Arn"
+						]
+					},
+					"unauthRoleArn": {
+						"Fn::GetAtt": [
+							"UnauthRole",
+							"Arn"
+						]
+					},
+					"breakCircularDependency": true,
+					"dependsOn": "[object Object]",
+					"thirdPartyAuth": true,
+					"authProviders": "",
+					"userPoolGroups": false,
+					"adminQueries": false,
+					"triggers": "{\"CustomMessage\":[\"verification-link\"]}",
+					"hostedUI": false,
+					"verificationBucketName": "kingsroomc05d6627verificationbucket",
+					"parentStack": {
+						"Ref": "AWS::StackId"
+					},
+					"authTriggerConnections": "{\"triggerType\":\"CustomMessage\",\"lambdaFunctionName\":\"kingsroomc05d6627CustomMessage\"}",
+					"permissions": "",
+					"env": "dev"
+				}
+			}
+		},
+		"functionautoScraper": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/autoScraper-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/autoScraper-676d4d42704e44616551-build.zip",
+					"functiongetModelCountName": {
+						"Fn::GetAtt": [
+							"functiongetModelCount",
+							"Outputs.Name"
+						]
+					},
+					"functionplayerDataProcessorName": {
+						"Fn::GetAtt": [
+							"functionplayerDataProcessor",
+							"Outputs.Name"
+						]
+					},
+					"functionwebScraperFunctionName": {
+						"Fn::GetAtt": [
+							"functionwebScraperFunction",
+							"Outputs.Name"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"functiongameIdTracker": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/gameIdTracker-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/gameIdTracker-704a2f7550735430306d-build.zip",
+					"env": "dev"
+				}
+			}
+		},
+		"functiongetDatabaseMetrics": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/getDatabaseMetrics-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/getDatabaseMetrics-412b6c4b3953546e3031-build.zip",
+					"env": "dev"
+				}
+			}
+		},
+		"functiongetModelCount": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/getModelCount-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/getModelCount-3543387a58364a544672-build.zip",
+					"env": "dev"
+				}
+			}
+		},
+		"functiongetUserMetrics": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/getUserMetrics-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/getUserMetrics-7a42586e714d36466143-build.zip",
+					"authkingsroomc05d6627UserPoolId": {
+						"Fn::GetAtt": [
+							"authkingsroomc05d6627",
+							"Outputs.UserPoolId"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"functionkingsroomc05d6627CustomMessage": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/kingsroomc05d6627CustomMessage-cloudformation-template.json",
+				"Parameters": {
+					"modules": "verification-link",
+					"resourceName": "kingsroomc05d6627CustomMessage",
+					"EMAILMESSAGE": "Welcome to Kings Room Poker! Please use the following code to verify your email address:",
+					"EMAILSUBJECT": "Your Kings Room Poker Verification Code",
+					"REDIRECTURL": "http://localhost:5173/",
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/kingsroomc05d6627CustomMessage-424d4c496846614f3754-build.zip",
+					"env": "dev"
+				}
+			}
+		},
+		"functionplayerDataProcessor": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/playerDataProcessor-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/playerDataProcessor-4e543072676c73525674-build.zip",
+					"env": "dev"
+				}
+			}
+		},
+		"functionpublishClientMetrics": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/publishClientMetrics-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/publishClientMetrics-757637545338554a4e4e-build.zip",
+					"authkingsroomc05d6627UserPoolId": {
+						"Fn::GetAtt": [
+							"authkingsroomc05d6627",
+							"Outputs.UserPoolId"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"functions3ManagementFunction": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/s3ManagementFunction-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/s3ManagementFunction-6b545150744443374257-build.zip",
+					"env": "dev"
+				}
+			}
+		},
+		"functionsaveGameFunction": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/saveGameFunction-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/saveGameFunction-6c44306b6a6269683349-build.zip",
+					"playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
+					"env": "dev"
+				}
+			}
+		},
+		"functionscraperManagement": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/scraperManagement-cloudformation-template.json",
+				"Parameters": {
+					"CloudWatchRule": "cron(0 20 * * ? *)",
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/scraperManagement-6e36483639656e397173-build.zip",
+					"functionautoScraperName": {
+						"Fn::GetAtt": [
+							"functionautoScraper",
+							"Outputs.Name"
+						]
+					},
+					"functionwebScraperFunctionName": {
+						"Fn::GetAtt": [
+							"functionwebScraperFunction",
+							"Outputs.Name"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"functionsocialFetcher": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/socialFetcher-cloudformation-template.json",
+				"Parameters": {
+					"fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/socialFetcher-4c6d57737a79646d3832-build.zip",
+					"env": "dev"
+				}
+			}
+		},
+		"functiontournamentConsolidator": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/tournamentConsolidator-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/tournamentConsolidator-2b57336f4e337a66686a-build.zip",
+					"env": "dev"
+				}
+			}
+		},
+		"functionvenueAssignmentService": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/venueAssignmentService-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/venueAssignmentService-7a4a715a3948674d5154-build.zip",
+					"env": "dev"
+				}
+			}
+		},
+		"functionwebScraperFunction": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/function/webScraperFunction-cloudformation-template.json",
+				"Parameters": {
+					"deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+					"s3Key": "amplify-builds/webScraperFunction-4f4f522f683359745a75-build.zip",
+					"playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
+					"scraperS3Bucket": "pokerpro-scraper-storage",
+					"saveGameFunctionName": "saveGameFunction-dev",
+					"env": "dev"
+				}
+			}
+		},
+		"UpdateRolesWithIDPFunction": {
+			"DependsOn": [
+				"AuthRole",
+				"UnauthRole",
+				"authkingsroomc05d6627"
+			],
+			"Type": "AWS::Lambda::Function",
+			"Properties": {
+				"Code": {
+					"ZipFile": {
+						"Fn::Join": [
+							"\n",
+							[
+								"const response = require('cfn-response');",
+								"const { IAMClient, GetRoleCommand, UpdateAssumeRolePolicyCommand } = require('@aws-sdk/client-iam');",
+								"exports.handler = function(event, context) {",
+								"    // Don't return promise, response.send() marks context as done internally",
+								"    const ignoredPromise = handleEvent(event, context)",
+								"};",
+								"async function handleEvent(event, context) {",
+								"    try {",
+								"        let authRoleName = event.ResourceProperties.authRoleName;",
+								"        let unauthRoleName = event.ResourceProperties.unauthRoleName;",
+								"        let idpId = event.ResourceProperties.idpId;",
+								"        let authParamsJson = {",
+								"            'Version': '2012-10-17',",
+								"            'Statement': [{",
+								"                'Effect': 'Allow',",
+								"                'Principal': {'Federated': 'cognito-identity.amazonaws.com'},",
+								"                'Action': 'sts:AssumeRoleWithWebIdentity',",
+								"                'Condition': {",
+								"                    'StringEquals': {'cognito-identity.amazonaws.com:aud': idpId},",
+								"                    'ForAnyValue:StringLike': {'cognito-identity.amazonaws.com:amr': 'authenticated'}",
+								"                }",
+								"            }]",
+								"        };",
+								"        let unauthParamsJson = {",
+								"            'Version': '2012-10-17',",
+								"            'Statement': [{",
+								"                'Effect': 'Allow',",
+								"                'Principal': {'Federated': 'cognito-identity.amazonaws.com'},",
+								"                'Action': 'sts:AssumeRoleWithWebIdentity',",
+								"                'Condition': {",
+								"                    'StringEquals': {'cognito-identity.amazonaws.com:aud': idpId},",
+								"                    'ForAnyValue:StringLike': {'cognito-identity.amazonaws.com:amr': 'unauthenticated'}",
+								"                }",
+								"            }]",
+								"        };",
+								"        if (event.RequestType === 'Delete') {",
+								"            try {",
+								"                delete authParamsJson.Statement[0].Condition;",
+								"                delete unauthParamsJson.Statement[0].Condition;",
+								"                authParamsJson.Statement[0].Effect = 'Deny'",
+								"                unauthParamsJson.Statement[0].Effect = 'Deny'",
+								"                let authParams = {PolicyDocument: JSON.stringify(authParamsJson), RoleName: authRoleName};",
+								"                let unauthParams = {PolicyDocument: JSON.stringify(unauthParamsJson), RoleName: unauthRoleName};",
+								"                const iam = new IAMClient({region: event.ResourceProperties.region});",
+								"                let res = await Promise.all([",
+								"                    iam.send(new GetRoleCommand({RoleName: authParams.RoleName})),",
+								"                    iam.send(new GetRoleCommand({RoleName: unauthParams.RoleName}))",
+								"                ]);",
+								"                res = await Promise.all([",
+								"                    iam.send(new UpdateAssumeRolePolicyCommand(authParams)),",
+								"                    iam.send(new UpdateAssumeRolePolicyCommand(unauthParams))",
+								"                ]);",
+								"                response.send(event, context, response.SUCCESS, {});",
+								"            } catch (err) {",
+								"                console.log(err.stack);",
+								"                response.send(event, context, response.SUCCESS, {Error: err});",
+								"            }",
+								"        } else if (event.RequestType === 'Update' || event.RequestType === 'Create') {",
+								"            const iam = new IAMClient({region: event.ResourceProperties.region});",
+								"            let authParams = {PolicyDocument: JSON.stringify(authParamsJson), RoleName: authRoleName};",
+								"            let unauthParams = {PolicyDocument: JSON.stringify(unauthParamsJson), RoleName: unauthRoleName};",
+								"            const res = await Promise.all([",
+								"                iam.send(new UpdateAssumeRolePolicyCommand(authParams)),",
+								"                iam.send(new UpdateAssumeRolePolicyCommand(unauthParams))",
+								"            ]);",
+								"            response.send(event, context, response.SUCCESS, {});",
+								"        }",
+								"    } catch (err) {",
+								"        console.log(err.stack);",
+								"        response.send(event, context, response.FAILED, {Error: err});",
+								"    }",
+								"};"
+							]
+						]
+					}
+				},
+				"Handler": "index.handler",
+				"Runtime": "nodejs22.x",
+				"Timeout": 300,
+				"Role": {
+					"Fn::GetAtt": [
+						"UpdateRolesWithIDPFunctionRole",
+						"Arn"
+					]
+				}
+			}
+		},
+		"UpdateRolesWithIDPFunctionOutputs": {
+			"Type": "Custom::LambdaCallout",
+			"Properties": {
+				"ServiceToken": {
+					"Fn::GetAtt": [
+						"UpdateRolesWithIDPFunction",
+						"Arn"
+					]
+				},
+				"region": {
+					"Ref": "AWS::Region"
+				},
+				"idpId": {
+					"Fn::GetAtt": [
+						"authkingsroomc05d6627",
+						"Outputs.IdentityPoolId"
+					]
+				},
+				"authRoleName": {
+					"Ref": "AuthRole"
+				},
+				"unauthRoleName": {
+					"Ref": "UnauthRole"
+				}
+			}
+		},
+		"UpdateRolesWithIDPFunctionRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Fn::Join": [
+						"",
+						[
+							{
+								"Ref": "AuthRole"
+							},
+							"-idp"
+						]
+					]
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": [
+									"lambda.amazonaws.com"
+								]
+							},
+							"Action": [
+								"sts:AssumeRole"
+							]
+						}
+					]
+				},
+				"Policies": [
+					{
+						"PolicyName": "UpdateRolesWithIDPFunctionPolicy",
+						"PolicyDocument": {
+							"Version": "2012-10-17",
+							"Statement": [
+								{
+									"Effect": "Allow",
+									"Action": [
+										"logs:CreateLogGroup",
+										"logs:CreateLogStream",
+										"logs:PutLogEvents"
+									],
+									"Resource": "arn:aws:logs:*:*:*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"iam:UpdateAssumeRolePolicy",
+										"iam:GetRole"
+									],
+									"Resource": {
+										"Fn::GetAtt": [
+											"AuthRole",
+											"Arn"
+										]
+									}
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"iam:UpdateAssumeRolePolicy",
+										"iam:GetRole"
+									],
+									"Resource": {
+										"Fn::GetAtt": [
+											"UnauthRole",
+											"Arn"
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	}
+}
