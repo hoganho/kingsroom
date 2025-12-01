@@ -1,13 +1,12 @@
-// src/contexts/AuthContext.tsx - Updated to fix race conditions and double mounting
+// src/contexts/AuthContext.tsx
 import React, {
   createContext,
   useState,
   useEffect,
   useContext,
   useCallback,
-  useRef, // Added useRef
+  useRef,
 } from 'react';
-// Correct Amplify v6 import paths
 import {
   getCurrentUser,
   signOut as amplifySignOut,
@@ -15,35 +14,29 @@ import {
   type AuthUser,
 } from '@aws-amplify/auth';
 import { generateClient } from '@aws-amplify/api';
-// Import GQL operations
 import { getUser } from '../graphql/queries';
 import { createUser as createUserMutation } from '../graphql/mutations';
-// Import UserRole from your generated API file
 import { UserRole } from '../API';
+import { updateUser } from '../graphql/mutations';
 
-// Export UserRole so components can use it
 export { UserRole };
 
-/**
- * Simple user type for the Kings Room app
- */
 export interface AppUser {
-  id: string; // Cognito sub / User ID
+  id: string;
   email: string;
   username: string;
   role: UserRole;
   isAuthenticated: boolean;
+  firstName?: string | null;
+  lastName?: string | null;
+  avatar?: string | null; // <--- ADDED THIS
 }
 
-/**
- * AuthContext type definition - Enhanced for new sidebar
- */
 export interface AuthContextType {
   user: AppUser | null;
   loading: boolean;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
-  // User's role directly from Cognito group / UserRole enum
   userRole: UserRole | null;
 }
 
@@ -54,18 +47,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  // Ref to prevent double execution of checkUser on mount (React.StrictMode issue)
   const checkUserCalled = useRef(false);
 
-  // Define handleSignOut useCallback *before* checkUser useCallback
   const handleSignOut = useCallback(async () => {
     try {
       console.log('[AuthContext] handleSignOut: Attempting sign out...');
       await amplifySignOut({ global: true });
-      setUser(null); // Clear user state immediately
+      setUser(null);
       console.log('[AuthContext] handleSignOut: Sign out successful.');
-      // Clear non-essential localStorage items
       const keysToPreserve = ['theme', 'language'];
       Object.keys(localStorage).forEach((key) => {
         if (!keysToPreserve.includes(key)) {
@@ -74,13 +63,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
     } catch (error) {
       console.error('[AuthContext] handleSignOut: Sign out error:', error);
-      setUser(null); // Ensure user is null even on error
+      setUser(null);
     }
   }, []);
 
-  /**
-   * Fetch or create user in DynamoDB
-   */
   const fetchOrCreateDynamoUser = useCallback(
     async (cognitoUser: AuthUser, attributes: any) => {
       const client = generateClient();
@@ -88,7 +74,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const username = cognitoUser.username;
       const email = attributes?.email || '';
 
-      // --- 1. Attempt to fetch existing user ---
       try {
         console.log(`[AuthContext] Attempting to fetch user ${userId} from DynamoDB.`);
         const result = await client.graphql({
@@ -103,11 +88,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           return existingUser;
         }
       } catch (getError: any) {
-        // Log but continue to creation
         console.warn(`[AuthContext] Initial fetch failed or empty. Proceeding to create.`);
       }
 
-      // --- 2. If not found, attempt to create user ---
       try {
         console.log(`[AuthContext] Attempting to create user ${userId} (${username}, ${email}).`);
         const newUserInput = {
@@ -127,7 +110,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           return createResult.data.createUser;
         }
       } catch (mutationError: any) {
-        // --- RACE CONDITION HANDLING ---
         const isConditionalCheckFailed = mutationError?.errors?.some(
           (e: any) => e.errorType === 'ConditionalCheckFailedException'
         );
@@ -143,9 +125,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             });
             return retryResult.data?.getUser || null;
           } catch (retryError: any) {
-             console.error('[AuthContext] Recovery fetch failed:', retryError);
+             console.warn('[AuthContext] Recovery fetch encountered an issue (handling via fallback):', retryError);
 
-             // === FIX: Handle Schema/Metadata Mismatches ===
              const isSchemaError = retryError?.errors?.some((e: any) => 
                 e.message?.includes('Cannot return null for non-nullable type')
              );
@@ -157,9 +138,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     id: userId,
                     username: username,
                     email: email,
-                    role: UserRole.VENUE_MANAGER, // Fallback role
+                    role: UserRole.VENUE_MANAGER,
                     isAuthenticated: true,
-                    // Add any other strictly required fields from your User type here
+                    // ADDED THESE NULL FIELDS TO SATISFY TYPESCRIPT
+                    firstName: null,
+                    lastName: null,
+                    avatar: null
                 };
              }
              return null;
@@ -174,9 +158,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
-  /**
-   * Check current user status (Cognito + DynamoDB)
-   */
   const checkUser = useCallback(async () => {
     setLoading(true);
     try {
@@ -204,14 +185,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (dynamoDbUserObject && dynamoDbUserObject.id) {
         console.log('[AuthContext] checkUser: Valid DynamoDB user object received:', dynamoDbUserObject);
+        
         setUser({
           id: dynamoDbUserObject.id,
           email: dynamoDbUserObject.email || '',
           username: dynamoDbUserObject.username || cognitoUser.username,
           role: dynamoDbUserObject.role || UserRole.VENUE_MANAGER,
           isAuthenticated: true,
+          firstName: dynamoDbUserObject.firstName,
+          lastName: dynamoDbUserObject.lastName,
+          avatar: dynamoDbUserObject.avatar, // <--- ADDED THIS
         });
         console.log('[AuthContext] checkUser: User state set successfully.');
+
+        try {
+          // Extract version from the dynamoDbUserObject (cast to any because it's a system field)
+          const currentVersion = (dynamoDbUserObject as any)._version;
+          
+          const client = generateClient();
+          client.graphql({
+            query: updateUser,
+            variables: {
+              input: {
+                id: dynamoDbUserObject.id,
+                lastLoginAt: new Date().toISOString(),
+                loginAttempts: 0,
+                lockedUntil: null,
+                // CRITICAL FIX: Pass the version to allow the update to succeed
+                _version: currentVersion
+              } as any
+            },
+            authMode: 'userPool'
+          }).then(() => {
+             console.log('[AuthContext] Audit: Login timestamp updated.');
+          }).catch(auditErr => {
+             // Downgraded to debug to reduce noise if it fails for minor reasons
+             console.debug('[AuthContext] Audit: Timestamp update skipped:', auditErr.message);
+          });
+        } catch (setupError) {
+          console.warn('[AuthContext] Audit: Error initiating login update:', setupError);
+        }
+
       } else {
         console.error('[AuthContext] checkUser: Failed to get/create valid user in DynamoDB. User state NOT set.');
         setUser(null);
@@ -226,9 +240,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [fetchOrCreateDynamoUser, handleSignOut]);
 
-  /** Initial auth check */
   useEffect(() => {
-    // Only run if we haven't checked yet
     if (!checkUserCalled.current) {
         checkUserCalled.current = true;
         console.log('[AuthContext] Initial mount: Triggering checkUser.');
@@ -238,7 +250,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  /** Re-check on tab visibility */
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && !loading && !user) {
@@ -258,14 +269,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     loading, 
     signOut: handleSignOut, 
     refreshUser: checkUser,
-    // Return the actual UserRole enum value directly
     userRole: user?.role ?? null
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// --- Hooks ---
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within an AuthProvider');

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { updateUserMutation, User, UserRole, UpdateUserInput } from '../../graphql/userManagement';
+import { adminUpdateUserMutation, User, UserRole, UpdateUserInput } from '../../graphql/userManagement';
 
 interface UserEditModalProps {
   user: User;
@@ -51,7 +51,7 @@ export const UserEditModal = ({ user, onClose, onUserUpdated }: UserEditModalPro
       };
 
       const response = await client.graphql({
-        query: updateUserMutation,
+        query: adminUpdateUserMutation,
         variables: { input },
       }) as { data: { updateUser: User } };
 

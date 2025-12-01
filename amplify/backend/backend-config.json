@@ -281,6 +281,11 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "userLastActiveUpdater": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "userManagement": {
       "build": true,
       "providerPlugin": "awscloudformation",
@@ -523,6 +528,30 @@
         {
           "category": "function",
           "resourceName": "tournamentConsolidator"
+        }
+      ]
+    },
+    "AMPLIFY_function_userLastActiveUpdater_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "userLastActiveUpdater"
+        }
+      ]
+    },
+    "AMPLIFY_function_userLastActiveUpdater_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "userLastActiveUpdater"
+        }
+      ]
+    },
+    "AMPLIFY_function_userLastActiveUpdater_userTable": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "userLastActiveUpdater"
         }
       ]
     },

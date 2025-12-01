@@ -482,12 +482,14 @@ type EagerUserManagementResponse = {
   readonly success: boolean;
   readonly message?: string | null;
   readonly user?: User | null;
+  readonly temporaryPassword?: string | null;
 }
 
 type LazyUserManagementResponse = {
   readonly success: boolean;
   readonly message?: string | null;
   readonly user: AsyncItem<User | undefined>;
+  readonly temporaryPassword?: string | null;
 }
 
 export declare type UserManagementResponse = LazyLoading extends LazyLoadingDisabled ? EagerUserManagementResponse : LazyUserManagementResponse
@@ -3508,6 +3510,7 @@ type EagerUser = {
   readonly allowedVenueIds?: (string | null)[] | null;
   readonly defaultEntityId?: string | null;
   readonly lastLoginAt?: string | null;
+  readonly lastActiveAt?: string | null;
   readonly passwordLastChangedAt?: string | null;
   readonly mustChangePassword?: boolean | null;
   readonly loginAttempts?: number | null;
@@ -3517,6 +3520,7 @@ type EagerUser = {
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly preferences?: (UserPreference | null)[] | null;
+  readonly auditLogs?: (UserAuditLog | null)[] | null;
 }
 
 type LazyUser = {
@@ -3537,6 +3541,7 @@ type LazyUser = {
   readonly allowedVenueIds?: (string | null)[] | null;
   readonly defaultEntityId?: string | null;
   readonly lastLoginAt?: string | null;
+  readonly lastActiveAt?: string | null;
   readonly passwordLastChangedAt?: string | null;
   readonly mustChangePassword?: boolean | null;
   readonly loginAttempts?: number | null;
@@ -3546,6 +3551,7 @@ type LazyUser = {
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly preferences: AsyncCollection<UserPreference>;
+  readonly auditLogs: AsyncCollection<UserAuditLog>;
 }
 
 export declare type User = LazyLoading extends LazyLoadingDisabled ? EagerUser : LazyUser
@@ -3586,6 +3592,46 @@ export declare type UserPreference = LazyLoading extends LazyLoadingDisabled ? E
 
 export declare const UserPreference: (new (init: ModelInit<UserPreference>) => UserPreference) & {
   copyOf(source: UserPreference, mutator: (draft: MutableModel<UserPreference>) => MutableModel<UserPreference> | void): UserPreference;
+}
+
+type EagerUserAuditLog = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<UserAuditLog, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly userId: string;
+  readonly user?: User | null;
+  readonly action: string;
+  readonly resource?: string | null;
+  readonly details?: string | null;
+  readonly ipAddress?: string | null;
+  readonly userAgent?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt?: string | null;
+}
+
+type LazyUserAuditLog = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<UserAuditLog, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly userId: string;
+  readonly user: AsyncItem<User | undefined>;
+  readonly action: string;
+  readonly resource?: string | null;
+  readonly details?: string | null;
+  readonly ipAddress?: string | null;
+  readonly userAgent?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt?: string | null;
+}
+
+export declare type UserAuditLog = LazyLoading extends LazyLoadingDisabled ? EagerUserAuditLog : LazyUserAuditLog
+
+export declare const UserAuditLog: (new (init: ModelInit<UserAuditLog>) => UserAuditLog) & {
+  copyOf(source: UserAuditLog, mutator: (draft: MutableModel<UserAuditLog>) => MutableModel<UserAuditLog> | void): UserAuditLog;
 }
 
 type EagerStaff = {

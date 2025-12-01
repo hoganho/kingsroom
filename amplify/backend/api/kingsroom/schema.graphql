@@ -805,6 +805,7 @@ type User @model(subscriptions: null) @auth(rules: [
 
   # Metadata
   lastLoginAt: AWSDateTime
+  lastActiveAt: AWSDateTime
   passwordLastChangedAt: AWSDateTime
   mustChangePassword: Boolean @default(value: "false")
   loginAttempts: Int @default(value: "0")
@@ -817,6 +818,9 @@ type User @model(subscriptions: null) @auth(rules: [
   updatedAt: AWSDateTime!
 
   preferences: [UserPreference] @hasMany(indexName: "byUser", fields: ["id"])
+  
+  # Relationship to the log
+  auditLogs: [UserAuditLog] @hasMany(indexName: "byUser", fields: ["id"])
 }
 
 type UserPreference @model(subscriptions: null) @auth(rules: [{ allow: owner, ownerField: "userId" }]) {
@@ -825,6 +829,22 @@ type UserPreference @model(subscriptions: null) @auth(rules: [{ allow: owner, ow
   widget: String!
   preference: AWSJSON
   userId: ID! @index(name: "byUser")
+}
+
+# NEW: Dedicated table for audit history
+type UserAuditLog @model(subscriptions: null) 
+@auth(rules: [{ allow: private }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser", sortKeyFields: ["createdAt"])
+  user: User @belongsTo(fields: ["userId"])
+  
+  action: String!      # e.g., "LOGIN", "VIEW_PAGE", "UPDATE_GAME", "EXPORT_DATA"
+  resource: String     # e.g., "/games/123" or "GameID: 123"
+  details: AWSJSON     # e.g., { "oldStatus": "PENDING", "newStatus": "RUNNING" }
+  ipAddress: String
+  userAgent: String
+  
+  createdAt: AWSDateTime!
 }
 
 type Staff @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
@@ -1094,6 +1114,7 @@ type UserManagementResponse {
   success: Boolean!
   message: String
   user: User
+  temporaryPassword: String
 }
 
 type ResetPasswordResponse {

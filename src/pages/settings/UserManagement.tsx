@@ -16,12 +16,12 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
-  listUsersQuery, 
-  updateUserMutation,
+  adminUpdateUserMutation, // Use Admin mutation for updates
   User,
   UserRole,
   ListUsersResponse,
 } from '../../graphql/userManagement';
+import { listUsers } from '../../graphql/queries';
 import { UserEditModal } from '../../components/users/UserEditModal';
 import { UserCreateModal } from '../../components/users/UserCreateModal';
 import { ResetPasswordModal } from '../../components/users/ResetPasswordModal';
@@ -73,7 +73,7 @@ export const UserManagement = () => {
       setError(null);
       
       const response = await client.graphql({
-        query: listUsersQuery,
+        query: listUsers,
         variables: { limit: 100 },
       }) as { data: ListUsersResponse };
       
@@ -122,7 +122,7 @@ export const UserManagement = () => {
       setActionLoading(user.id);
       
       await client.graphql({
-        query: updateUserMutation,
+        query: adminUpdateUserMutation,
         variables: {
           input: {
             id: user.id,

@@ -6309,6 +6309,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "lastActiveAt": {
+                    "name": "lastActiveAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "passwordLastChangedAt": {
                     "name": "passwordLastChangedAt",
                     "isArray": false,
@@ -6378,6 +6385,22 @@ export const schema = {
                         "connectionType": "HAS_MANY",
                         "associatedWith": [
                             "userId"
+                        ]
+                    }
+                },
+                "auditLogs": {
+                    "name": "auditLogs",
+                    "isArray": true,
+                    "type": {
+                        "model": "UserAuditLog"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "user"
                         ]
                     }
                 }
@@ -6514,6 +6537,126 @@ export const schema = {
                                 "ownerField": "userId",
                                 "allow": "owner",
                                 "identityClaim": "cognito:username",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "UserAuditLog": {
+            "name": "UserAuditLog",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "userId": {
+                    "name": "userId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "user": {
+                    "name": "user",
+                    "isArray": false,
+                    "type": {
+                        "model": "User"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "userId"
+                        ]
+                    }
+                },
+                "action": {
+                    "name": "action",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "resource": {
+                    "name": "resource",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "details": {
+                    "name": "details",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ipAddress": {
+                    "name": "ipAddress",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "userAgent": {
+                    "name": "userAgent",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "UserAuditLogs",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byUser",
+                        "fields": [
+                            "userId",
+                            "createdAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
                                 "operations": [
                                     "create",
                                     "update",
@@ -9206,6 +9349,13 @@ export const schema = {
                     "type": {
                         "model": "User"
                     },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "temporaryPassword": {
+                    "name": "temporaryPassword",
+                    "isArray": false,
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -12191,5 +12341,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "2c74a09799a0d2fb613df6b7426579a5"
+    "version": "1dbb9eba48198b369cca459fce29cb6e"
 };

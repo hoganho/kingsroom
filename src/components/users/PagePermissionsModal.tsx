@@ -8,8 +8,7 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
-import { updateUserMutation, User } from '../../graphql/userManagement';
-import { 
+import { adminUpdateUserMutation, User } from '../../graphql/userManagement';import { 
   ALL_PAGES, 
   PageConfig, 
   PageCategory, 
@@ -130,7 +129,7 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
         selectedArray.every((p, i) => p === defaultArray[i]);
 
       const response = await client.graphql({
-        query: updateUserMutation,
+        query: adminUpdateUserMutation,
         variables: {
           input: {
             id: user.id,

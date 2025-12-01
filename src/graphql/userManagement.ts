@@ -1,103 +1,21 @@
 // src/graphql/userManagement.ts
 // GraphQL operations for User Management
 
-// --- QUERIES ---
-
-export const listUsersQuery = /* GraphQL */ `
-  query ListUsers(
-    $filter: ModelUserFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        username
-        email
-        role
-        isActive
-        firstName
-        lastName
-        phone
-        avatar
-        allowedPages
-        allowedEntityIds
-        allowedVenueIds
-        defaultEntityId
-        lastLoginAt
-        passwordLastChangedAt
-        mustChangePassword
-        loginAttempts
-        lockedUntil
-        createdAt
-        updatedAt
-        createdBy
-        updatedBy
-      }
-      nextToken
-    }
-  }
-`;
-
-export const getUserQuery = /* GraphQL */ `
-  query GetUser($id: ID!) {
-    getUser(id: $id) {
-      id
-      username
-      email
-      role
-      isActive
-      firstName
-      lastName
-      phone
-      avatar
-      allowedPages
-      allowedEntityIds
-      allowedVenueIds
-      defaultEntityId
-      lastLoginAt
-      passwordLastChangedAt
-      mustChangePassword
-      loginAttempts
-      lockedUntil
-      createdAt
-      updatedAt
-      createdBy
-      updatedBy
-      preferences {
-        items {
-          id
-          page
-          widget
-          preference
-        }
-      }
-    }
-  }
-`;
-
-export const getUserByEmailQuery = /* GraphQL */ `
-  query UserByEmail($email: String!) {
-    userByEmail(email: $email) {
-      items {
-        id
-        username
-        email
-        role
-        isActive
-        firstName
-        lastName
-        allowedPages
-      }
-    }
-  }
-`;
+/*
+  NOTE: Standard CRUD operations (ListUsers, GetUser, UpdateUser, DeleteUser) 
+  have been removed from this file to avoid conflicts with Amplify's auto-generated 
+  'src/graphql/queries.ts' and 'src/graphql/mutations.ts'.
+  
+  Please update your React components (like UserManagement.tsx) to import 
+  standard operations from those generated files.
+*/
 
 // --- MUTATIONS (Lambda-backed for Cognito + DynamoDB sync) ---
 
 // Creates user in Cognito AND DynamoDB
+// Renamed operation to 'AdminCreateUserCustom' to avoid conflict with auto-generated code
 export const adminCreateUserMutation = /* GraphQL */ `
-  mutation AdminCreateUser($input: CreateUserInput!) {
+  mutation AdminCreateUserCustom($input: CreateUserInput!) {
     adminCreateUser(input: $input) {
       success
       message
@@ -123,8 +41,9 @@ export const adminCreateUserMutation = /* GraphQL */ `
 `;
 
 // Updates user in Cognito AND DynamoDB
+// Renamed operation to 'AdminUpdateUserCustom' to avoid conflict with auto-generated code
 export const adminUpdateUserMutation = /* GraphQL */ `
-  mutation AdminUpdateUser($input: UpdateUserInput!) {
+  mutation AdminUpdateUserCustom($input: UpdateUserInput!) {
     adminUpdateUser(input: $input) {
       success
       message
@@ -151,8 +70,9 @@ export const adminUpdateUserMutation = /* GraphQL */ `
 `;
 
 // Reset password in Cognito
+// Renamed operation to 'AdminResetPasswordCustom' to avoid conflict with auto-generated code
 export const adminResetPasswordMutation = /* GraphQL */ `
-  mutation AdminResetPassword($input: ResetUserPasswordInput!) {
+  mutation AdminResetPasswordCustom($input: ResetUserPasswordInput!) {
     adminResetPassword(input: $input) {
       success
       message
@@ -162,8 +82,9 @@ export const adminResetPasswordMutation = /* GraphQL */ `
 `;
 
 // Deactivate user in Cognito AND DynamoDB
+// Renamed operation to 'AdminDeactivateUserCustom' to avoid conflict with auto-generated code
 export const adminDeactivateUserMutation = /* GraphQL */ `
-  mutation AdminDeactivateUser($userId: ID!) {
+  mutation AdminDeactivateUserCustom($userId: ID!) {
     adminDeactivateUser(userId: $userId) {
       success
       message
@@ -176,8 +97,9 @@ export const adminDeactivateUserMutation = /* GraphQL */ `
 `;
 
 // Reactivate user in Cognito AND DynamoDB
+// Renamed operation to 'AdminReactivateUserCustom' to avoid conflict with auto-generated code
 export const adminReactivateUserMutation = /* GraphQL */ `
-  mutation AdminReactivateUser($userId: ID!) {
+  mutation AdminReactivateUserCustom($userId: ID!) {
     adminReactivateUser(userId: $userId) {
       success
       message
@@ -185,39 +107,6 @@ export const adminReactivateUserMutation = /* GraphQL */ `
         id
         isActive
       }
-    }
-  }
-`;
-
-// --- LEGACY MUTATIONS (DynamoDB only - for non-Cognito updates) ---
-
-export const updateUserMutation = /* GraphQL */ `
-  mutation UpdateUser($input: UpdateUserInput!) {
-    updateUser(input: $input) {
-      id
-      username
-      email
-      role
-      isActive
-      firstName
-      lastName
-      phone
-      avatar
-      allowedPages
-      allowedEntityIds
-      allowedVenueIds
-      defaultEntityId
-      mustChangePassword
-      updatedAt
-      updatedBy
-    }
-  }
-`;
-
-export const deleteUserMutation = /* GraphQL */ `
-  mutation DeleteUser($input: DeleteUserInput!) {
-    deleteUser(input: $input) {
-      id
     }
   }
 `;
@@ -280,6 +169,8 @@ export interface UpdateUserInput {
   defaultEntityId?: string;
   isActive?: boolean;
   mustChangePassword?: boolean;
+  lastLoginAt?: string;
+  lastActiveAt?: string;
 }
 
 export interface ResetUserPasswordInput {

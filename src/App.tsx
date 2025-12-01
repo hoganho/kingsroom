@@ -7,6 +7,7 @@ import '@aws-amplify/ui-react/styles.css';
 import './authenticator-theme.css';
 import awsExports from './aws-exports.js';
 import { useEffect } from 'react';
+import { useActivityLogger } from './hooks/useActivityLogger';
 
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
@@ -76,6 +77,18 @@ const PUBLIC_PATHS = ['/privacy-policy', '/privacy', '/terms-of-service', '/term
 const isPublicPath = (pathname: string): boolean => {
     const normalizedPath = pathname.replace(/\/$/, '') || '/'; // Remove trailing slash
     return PUBLIC_PATHS.some(p => normalizedPath === p || normalizedPath.startsWith(p + '/'));
+};
+
+export const RouteTracker = () => {
+  const location = useLocation();
+  const { logActivity } = useActivityLogger();
+
+  useEffect(() => {
+    // Log the navigation
+    logActivity('VIEW_PAGE', location.pathname);
+  }, [location.pathname]);
+
+  return null; // Renders nothing
 };
 
 // ============================================
@@ -287,6 +300,7 @@ const AuthenticatedRoutes = () => {
                 
                 return (
                     <AuthProvider>
+                        <RouteTracker />
                         <Routes>
                             {/* Redirects */}
                             <Route path="/login" element={<Navigate to="/home" replace />} />
