@@ -20,5 +20,14 @@
     "Resource": [
       "arn:aws:dynamodb:*:*:table/UserAuditLog-*/stream/*"
     ]
+  },
+  {
+    "Effect": "Allow",
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": [
+      "*"
+    ]
   }
 ]

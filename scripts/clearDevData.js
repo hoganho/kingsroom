@@ -21,16 +21,16 @@ const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 // --- List of Tables to Clear ---
 // This list is based on the table names you provided.
 const TABLES_TO_CLEAR = [
-  'Game-oi5oitkajrgtzm7feellfluriy-dev',
-  'Player-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerCredits-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerEntry-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerPoints-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerResult-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerSummary-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerTicket-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerTransaction-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerVenue-oi5oitkajrgtzm7feellfluriy-dev',
+  'Game-sjyzke3u45golhnttlco6bpcua-dev',
+  'Player-sjyzke3u45golhnttlco6bpcua-dev',
+  'PlayerCredits-sjyzke3u45golhnttlco6bpcua-dev',
+  'PlayerEntry-sjyzke3u45golhnttlco6bpcua-dev',
+  'PlayerPoints-sjyzke3u45golhnttlco6bpcua-dev',
+  'PlayerResult-sjyzke3u45golhnttlco6bpcua-dev',
+  'PlayerSummary-sjyzke3u45golhnttlco6bpcua-dev',
+  'PlayerTicket-sjyzke3u45golhnttlco6bpcua-dev',
+  'PlayerTransaction-sjyzke3u45golhnttlco6bpcua-dev',
+  'PlayerVenue-sjyzke3u45golhnttlco6bpcua-dev',
 ];
 
 // --- Logger (copied from your script) ---

@@ -13,16 +13,23 @@ const {
 } = require('@aws-sdk/client-cognito-identity-provider');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
-const { v4: uuidv4 } = require('uuid');
+const { LambdaMonitoring } = require('./lambda-monitoring');
 
 // Initialize clients
 const cognitoClient = new CognitoIdentityProviderClient({ region: process.env.REGION });
 const dynamoClient = new DynamoDBClient({ region: process.env.REGION });
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
+// Initialize monitoring
+const monitor = new LambdaMonitoring('userManagement');
+
+// Wrap the DynamoDB client for automatic operation tracking
+const monitoredDocClient = monitor.wrapDynamoDBClient(docClient);
+
 // Environment variables (set these in Lambda configuration)
 const USER_POOL_ID = process.env.USER_POOL_ID;
 const USER_TABLE = process.env.USER_TABLE;
+const AUDIT_LOG_TABLE = process.env.AUDIT_LOG_TABLE || process.env.API_KINGSROOM_USERAUDITLOGTABLE_NAME;
 
 // Map GraphQL UserRole to Cognito Group names
 const ROLE_TO_COGNITO_GROUP = {
@@ -33,6 +40,51 @@ const ROLE_TO_COGNITO_GROUP = {
   'MARKETING': 'MARKETING',
 };
 
+// Audit action types
+const AuditActions = {
+  USER_CREATE: 'USER_CREATE',
+  USER_UPDATE: 'USER_UPDATE',
+  USER_DEACTIVATE: 'USER_DEACTIVATE',
+  USER_REACTIVATE: 'USER_REACTIVATE',
+  USER_PASSWORD_RESET: 'USER_PASSWORD_RESET',
+};
+
+/**
+ * Create an audit log entry
+ */
+async function createAuditLog(adminUserId, action, targetUserId, details = {}) {
+  if (!AUDIT_LOG_TABLE) {
+    console.warn('AUDIT_LOG_TABLE not configured, skipping audit log');
+    return;
+  }
+
+  try {
+    const auditEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userId: adminUserId,
+      action,
+      resource: `/admin/users/${targetUserId}`,
+      details: JSON.stringify({
+        targetUserId,
+        ...details,
+        timestamp: new Date().toISOString(),
+      }),
+      createdAt: new Date().toISOString(),
+      __typename: 'UserAuditLog',
+    };
+
+    await monitoredDocClient.send(new PutCommand({
+      TableName: AUDIT_LOG_TABLE,
+      Item: auditEntry,
+    }));
+
+    console.log(`[AuditLog] ${action} by ${adminUserId} on ${targetUserId}`);
+  } catch (error) {
+    // Don't fail the operation if audit logging fails
+    console.error('[AuditLog] Failed to create audit log:', error);
+  }
+}
+
 /**
  * Main Lambda handler - routes to appropriate function based on GraphQL field
  */
@@ -41,23 +93,61 @@ exports.handler = async (event) => {
   
   const { fieldName, arguments: args, identity } = event;
   
+  // Get admin user ID from identity
+  const adminUserId = identity?.sub || identity?.username || 'system';
+  
+  // Track incoming request
+  monitor.trackOperation('REQUEST', 'UserManagement', null, {
+    fieldName,
+    caller: adminUserId
+  });
+  
   try {
+    let result;
+    
     switch (fieldName) {
       case 'adminCreateUser':
-        return await createUser(args.input, identity);
+        result = await createUser(args.input, identity, adminUserId);
+        break;
       case 'adminUpdateUser':
-        return await updateUser(args.input, identity);
+        result = await updateUser(args.input, identity, adminUserId);
+        break;
       case 'adminResetPassword':
-        return await resetPassword(args.input, identity);
+        result = await resetPassword(args.input, identity, adminUserId);
+        break;
       case 'adminDeactivateUser':
-        return await deactivateUser(args.userId, identity);
+        result = await deactivateUser(args.userId, identity, adminUserId);
+        break;
       case 'adminReactivateUser':
-        return await reactivateUser(args.userId, identity);
+        result = await reactivateUser(args.userId, identity, adminUserId);
+        break;
       default:
         throw new Error(`Unknown field: ${fieldName}`);
     }
+    
+    // Track successful completion
+    monitor.trackOperation('RESPONSE', 'UserManagement', null, {
+      fieldName,
+      success: result.success
+    });
+    
+    // Flush metrics before returning
+    await monitor.flush();
+    
+    return result;
+    
   } catch (error) {
     console.error('Error:', error);
+    
+    // Track error
+    monitor.trackOperation('ERROR', 'UserManagement', null, {
+      fieldName,
+      error: error.message,
+      success: false
+    });
+    
+    await monitor.flush();
+    
     return {
       success: false,
       message: error.message || 'An error occurred',
@@ -67,9 +157,31 @@ exports.handler = async (event) => {
 };
 
 /**
+ * Track Cognito operations for monitoring
+ */
+async function trackCognitoOperation(operation, email, action) {
+  const startTime = Date.now();
+  try {
+    const result = await action();
+    monitor.trackOperation(operation, 'Cognito', email, {
+      duration: Date.now() - startTime,
+      success: true
+    });
+    return result;
+  } catch (error) {
+    monitor.trackOperation(operation, 'Cognito', email, {
+      duration: Date.now() - startTime,
+      success: false,
+      error: error.message
+    });
+    throw error;
+  }
+}
+
+/**
  * Create a new user in Cognito and DynamoDB
  */
-async function createUser(input, identity) {
+async function createUser(input, identity, adminUserId) {
   const {
     email,
     username,
@@ -99,13 +211,15 @@ async function createUser(input, identity) {
       ...(phone ? [{ Name: 'phone_number', Value: phone }] : []),
     ],
     TemporaryPassword: tempPassword,
-    MessageAction: 'SUPPRESS', // Don't send email - we'll handle it ourselves
+    MessageAction: 'SUPPRESS',
     DesiredDeliveryMediums: ['EMAIL'],
   });
   
   let cognitoUser;
   try {
-    cognitoUser = await cognitoClient.send(createUserCommand);
+    cognitoUser = await trackCognitoOperation('CREATE_USER', email, async () => {
+      return await cognitoClient.send(createUserCommand);
+    });
   } catch (error) {
     if (error.name === 'UsernameExistsException') {
       throw new Error('A user with this email already exists');
@@ -123,11 +237,13 @@ async function createUser(input, identity) {
   // 2. Add user to Cognito group based on role
   const cognitoGroup = ROLE_TO_COGNITO_GROUP[role];
   if (cognitoGroup) {
-    await cognitoClient.send(new AdminAddUserToGroupCommand({
-      UserPoolId: USER_POOL_ID,
-      Username: email,
-      GroupName: cognitoGroup,
-    }));
+    await trackCognitoOperation('ADD_TO_GROUP', email, async () => {
+      return await cognitoClient.send(new AdminAddUserToGroupCommand({
+        UserPoolId: USER_POOL_ID,
+        Username: email,
+        GroupName: cognitoGroup,
+      }));
+    });
   }
   
   // 3. Create user record in DynamoDB
@@ -157,12 +273,20 @@ async function createUser(input, identity) {
     __typename: 'User',
   };
   
-  await docClient.send(new PutCommand({
+  await monitoredDocClient.send(new PutCommand({
     TableName: USER_TABLE,
     Item: user,
   }));
   
   console.log(`Created user: ${email} with role: ${role}`);
+  
+  // 4. Create audit log entry
+  await createAuditLog(adminUserId, AuditActions.USER_CREATE, cognitoSub, {
+    email,
+    role,
+    firstName,
+    lastName,
+  });
   
   return {
     success: true,
@@ -175,12 +299,12 @@ async function createUser(input, identity) {
 /**
  * Update an existing user
  */
-async function updateUser(input, identity) {
+async function updateUser(input, identity, adminUserId) {
   const { id, role, ...updates } = input;
   const now = new Date().toISOString();
   
   // Get current user to check for role change
-  const currentUser = await docClient.send(new GetCommand({
+  const currentUser = await monitoredDocClient.send(new GetCommand({
     TableName: USER_TABLE,
     Key: { id },
   }));
@@ -190,20 +314,26 @@ async function updateUser(input, identity) {
   }
   
   const oldRole = currentUser.Item.role;
+  const email = currentUser.Item.email;
+  
+  // Track changes for audit log
+  const changes = {};
   
   // If role changed, update Cognito groups
   if (role && role !== oldRole) {
-    const email = currentUser.Item.email;
+    changes.role = { from: oldRole, to: role };
     
     // Remove from old group
     const oldGroup = ROLE_TO_COGNITO_GROUP[oldRole];
     if (oldGroup) {
       try {
-        await cognitoClient.send(new AdminRemoveUserFromGroupCommand({
-          UserPoolId: USER_POOL_ID,
-          Username: email,
-          GroupName: oldGroup,
-        }));
+        await trackCognitoOperation('REMOVE_FROM_GROUP', email, async () => {
+          return await cognitoClient.send(new AdminRemoveUserFromGroupCommand({
+            UserPoolId: USER_POOL_ID,
+            Username: email,
+            GroupName: oldGroup,
+          }));
+        });
       } catch (error) {
         console.warn(`Could not remove from group ${oldGroup}:`, error.message);
       }
@@ -212,26 +342,45 @@ async function updateUser(input, identity) {
     // Add to new group
     const newGroup = ROLE_TO_COGNITO_GROUP[role];
     if (newGroup) {
-      await cognitoClient.send(new AdminAddUserToGroupCommand({
-        UserPoolId: USER_POOL_ID,
-        Username: email,
-        GroupName: newGroup,
-      }));
+      await trackCognitoOperation('ADD_TO_GROUP', email, async () => {
+        return await cognitoClient.send(new AdminAddUserToGroupCommand({
+          UserPoolId: USER_POOL_ID,
+          Username: email,
+          GroupName: newGroup,
+        }));
+      });
     }
   }
   
   // Update Cognito user attributes if name/phone changed
   const cognitoAttributeUpdates = [];
-  if (updates.firstName) cognitoAttributeUpdates.push({ Name: 'given_name', Value: updates.firstName });
-  if (updates.lastName) cognitoAttributeUpdates.push({ Name: 'family_name', Value: updates.lastName });
-  if (updates.phone) cognitoAttributeUpdates.push({ Name: 'phone_number', Value: updates.phone });
+  if (updates.firstName) {
+    cognitoAttributeUpdates.push({ Name: 'given_name', Value: updates.firstName });
+    if (updates.firstName !== currentUser.Item.firstName) {
+      changes.firstName = { from: currentUser.Item.firstName, to: updates.firstName };
+    }
+  }
+  if (updates.lastName) {
+    cognitoAttributeUpdates.push({ Name: 'family_name', Value: updates.lastName });
+    if (updates.lastName !== currentUser.Item.lastName) {
+      changes.lastName = { from: currentUser.Item.lastName, to: updates.lastName };
+    }
+  }
+  if (updates.phone) {
+    cognitoAttributeUpdates.push({ Name: 'phone_number', Value: updates.phone });
+    if (updates.phone !== currentUser.Item.phone) {
+      changes.phone = { from: currentUser.Item.phone, to: updates.phone };
+    }
+  }
   
   if (cognitoAttributeUpdates.length > 0) {
-    await cognitoClient.send(new AdminUpdateUserAttributesCommand({
-      UserPoolId: USER_POOL_ID,
-      Username: currentUser.Item.email,
-      UserAttributes: cognitoAttributeUpdates,
-    }));
+    await trackCognitoOperation('UPDATE_ATTRIBUTES', email, async () => {
+      return await cognitoClient.send(new AdminUpdateUserAttributesCommand({
+        UserPoolId: USER_POOL_ID,
+        Username: email,
+        UserAttributes: cognitoAttributeUpdates,
+      }));
+    });
   }
   
   // Build DynamoDB update expression
@@ -264,10 +413,15 @@ async function updateUser(input, identity) {
       updateExpressionParts.push(`#${field} = :${field}`);
       expressionAttributeNames[`#${field}`] = field;
       expressionAttributeValues[`:${field}`] = updates[field];
+      
+      // Track other changes for audit
+      if (updates[field] !== currentUser.Item[field] && !changes[field]) {
+        changes[field] = { from: currentUser.Item[field], to: updates[field] };
+      }
     }
   }
   
-  const updateResult = await docClient.send(new UpdateCommand({
+  const updateResult = await monitoredDocClient.send(new UpdateCommand({
     TableName: USER_TABLE,
     Key: { id },
     UpdateExpression: `SET ${updateExpressionParts.join(', ')}`,
@@ -277,6 +431,12 @@ async function updateUser(input, identity) {
   }));
   
   console.log(`Updated user: ${id}`);
+  
+  // Create audit log entry with changes
+  await createAuditLog(adminUserId, AuditActions.USER_UPDATE, id, {
+    email,
+    changes,
+  });
   
   return {
     success: true,
@@ -288,11 +448,11 @@ async function updateUser(input, identity) {
 /**
  * Reset a user's password
  */
-async function resetPassword(input, identity) {
+async function resetPassword(input, identity, adminUserId) {
   const { userId, newPassword, permanent = false } = input;
   
   // Get user from DynamoDB
-  const userResult = await docClient.send(new GetCommand({
+  const userResult = await monitoredDocClient.send(new GetCommand({
     TableName: USER_TABLE,
     Key: { id: userId },
   }));
@@ -305,16 +465,18 @@ async function resetPassword(input, identity) {
   const tempPassword = newPassword || generateTempPassword();
   
   // Set the password in Cognito
-  await cognitoClient.send(new AdminSetUserPasswordCommand({
-    UserPoolId: USER_POOL_ID,
-    Username: email,
-    Password: tempPassword,
-    Permanent: permanent,
-  }));
+  await trackCognitoOperation('SET_PASSWORD', email, async () => {
+    return await cognitoClient.send(new AdminSetUserPasswordCommand({
+      UserPoolId: USER_POOL_ID,
+      Username: email,
+      Password: tempPassword,
+      Permanent: permanent,
+    }));
+  });
   
   // Update DynamoDB
   const now = new Date().toISOString();
-  await docClient.send(new UpdateCommand({
+  await monitoredDocClient.send(new UpdateCommand({
     TableName: USER_TABLE,
     Key: { id: userId },
     UpdateExpression: 'SET #pwChanged = :pwChanged, #mustChange = :mustChange, #updatedAt = :updatedAt',
@@ -332,6 +494,12 @@ async function resetPassword(input, identity) {
   
   console.log(`Reset password for user: ${userId}`);
   
+  // Create audit log entry
+  await createAuditLog(adminUserId, AuditActions.USER_PASSWORD_RESET, userId, {
+    email,
+    permanent,
+  });
+  
   return {
     success: true,
     message: permanent 
@@ -344,9 +512,9 @@ async function resetPassword(input, identity) {
 /**
  * Deactivate a user
  */
-async function deactivateUser(userId, identity) {
+async function deactivateUser(userId, identity, adminUserId) {
   // Get user from DynamoDB
-  const userResult = await docClient.send(new GetCommand({
+  const userResult = await monitoredDocClient.send(new GetCommand({
     TableName: USER_TABLE,
     Key: { id: userId },
   }));
@@ -358,14 +526,16 @@ async function deactivateUser(userId, identity) {
   const email = userResult.Item.email;
   
   // Disable in Cognito
-  await cognitoClient.send(new AdminDisableUserCommand({
-    UserPoolId: USER_POOL_ID,
-    Username: email,
-  }));
+  await trackCognitoOperation('DISABLE_USER', email, async () => {
+    return await cognitoClient.send(new AdminDisableUserCommand({
+      UserPoolId: USER_POOL_ID,
+      Username: email,
+    }));
+  });
   
   // Update DynamoDB
   const now = new Date().toISOString();
-  const updateResult = await docClient.send(new UpdateCommand({
+  const updateResult = await monitoredDocClient.send(new UpdateCommand({
     TableName: USER_TABLE,
     Key: { id: userId },
     UpdateExpression: 'SET #isActive = :isActive, #updatedAt = :updatedAt, #updatedBy = :updatedBy',
@@ -384,6 +554,12 @@ async function deactivateUser(userId, identity) {
   
   console.log(`Deactivated user: ${userId}`);
   
+  // Create audit log entry
+  await createAuditLog(adminUserId, AuditActions.USER_DEACTIVATE, userId, {
+    email,
+    previouslyActive: userResult.Item.isActive,
+  });
+  
   return {
     success: true,
     message: 'User deactivated successfully',
@@ -394,9 +570,9 @@ async function deactivateUser(userId, identity) {
 /**
  * Reactivate a user
  */
-async function reactivateUser(userId, identity) {
+async function reactivateUser(userId, identity, adminUserId) {
   // Get user from DynamoDB
-  const userResult = await docClient.send(new GetCommand({
+  const userResult = await monitoredDocClient.send(new GetCommand({
     TableName: USER_TABLE,
     Key: { id: userId },
   }));
@@ -408,14 +584,16 @@ async function reactivateUser(userId, identity) {
   const email = userResult.Item.email;
   
   // Enable in Cognito
-  await cognitoClient.send(new AdminEnableUserCommand({
-    UserPoolId: USER_POOL_ID,
-    Username: email,
-  }));
+  await trackCognitoOperation('ENABLE_USER', email, async () => {
+    return await cognitoClient.send(new AdminEnableUserCommand({
+      UserPoolId: USER_POOL_ID,
+      Username: email,
+    }));
+  });
   
   // Update DynamoDB
   const now = new Date().toISOString();
-  const updateResult = await docClient.send(new UpdateCommand({
+  const updateResult = await monitoredDocClient.send(new UpdateCommand({
     TableName: USER_TABLE,
     Key: { id: userId },
     UpdateExpression: 'SET #isActive = :isActive, #updatedAt = :updatedAt, #updatedBy = :updatedBy, #loginAttempts = :loginAttempts, #lockedUntil = :lockedUntil',
@@ -437,6 +615,11 @@ async function reactivateUser(userId, identity) {
   }));
   
   console.log(`Reactivated user: ${userId}`);
+  
+  // Create audit log entry
+  await createAuditLog(adminUserId, AuditActions.USER_REACTIVATE, userId, {
+    email,
+  });
   
   return {
     success: true,

@@ -1,4 +1,4 @@
-// src/App.tsx - WITH USER MANAGEMENT ROUTE
+// src/App.tsx - WITH USER MANAGEMENT ROUTE AND ACTIVITY LOGGING
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
@@ -6,7 +6,7 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import './authenticator-theme.css';
 import awsExports from './aws-exports.js';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useActivityLogger } from './hooks/useActivityLogger';
 
 // Context Providers
@@ -42,7 +42,7 @@ import { VenueDetails } from './pages/venues/VenueDetails';
 import EntityManagement from './pages/settings/EntityManagement';
 import VenueManagement from './pages/settings/VenueManagement';
 import { SeriesManagementPage } from './pages/settings/SeriesManagement';
-import { UserManagement } from './pages/settings/UserManagement'; // NEW
+import { UserManagement } from './pages/settings/UserManagement';
 
 // Scraper Pages (SuperAdmin)
 import { ScraperAdminPage } from './pages/scraper/ScraperAdmin';
@@ -75,20 +75,93 @@ Amplify.configure(awsExports);
 const PUBLIC_PATHS = ['/privacy-policy', '/privacy', '/terms-of-service', '/terms', '/cookie-policy'];
 
 const isPublicPath = (pathname: string): boolean => {
-    const normalizedPath = pathname.replace(/\/$/, '') || '/'; // Remove trailing slash
+    const normalizedPath = pathname.replace(/\/$/, '') || '/';
     return PUBLIC_PATHS.some(p => normalizedPath === p || normalizedPath.startsWith(p + '/'));
 };
 
+// ============================================
+// ROUTE TRACKER - Logs page views
+// ============================================
 export const RouteTracker = () => {
   const location = useLocation();
-  const { logActivity } = useActivityLogger();
+  const { logPageView } = useActivityLogger();
 
   useEffect(() => {
-    // Log the navigation
-    logActivity('VIEW_PAGE', location.pathname);
-  }, [location.pathname]);
+    logPageView(location.pathname);
+  }, [location.pathname, logPageView]);
 
-  return null; // Renders nothing
+  return null;
+};
+
+// ============================================
+// AUTH EVENT LOGGER - Logs login/logout
+// ============================================
+const AuthEventLogger = () => {
+  const { logAuth } = useActivityLogger();
+  const hasLoggedLogin = useRef(false);
+
+  useEffect(() => {
+    // Log initial login (user just authenticated)
+    if (!hasLoggedLogin.current) {
+      logAuth('LOGIN', { source: 'session_start' });
+      hasLoggedLogin.current = true;
+    }
+  }, [logAuth]);
+
+  useEffect(() => {
+    const unsubscribe = Hub.listen('auth', async (data) => {
+      const { payload } = data;
+      console.log('Auth event:', payload.event);
+
+      switch (payload.event) {
+        case 'signedIn':
+          // User completed sign-in flow
+          logAuth('LOGIN', { 
+            source: 'sign_in_flow',
+            method: 'cognito'
+          });
+          break;
+
+        case 'signedOut':
+          // User signed out
+          logAuth('LOGOUT', { 
+            source: 'user_initiated' 
+          });
+          break;
+
+        case 'tokenRefresh':
+          // Token was refreshed - don't log as it's noisy
+          console.log('Token refreshed');
+          break;
+
+        case 'tokenRefresh_failure':
+          // Token refresh failed - session expired
+          console.error('Token refresh failed');
+          logAuth('SESSION_EXPIRED', {
+            reason: 'token_refresh_failure'
+          });
+          break;
+
+        case 'signInWithRedirect':
+          console.log('Sign in with redirect initiated');
+          break;
+
+        case 'signInWithRedirect_failure':
+          logAuth('LOGIN_FAILED', {
+            reason: 'redirect_failure'
+          });
+          break;
+      }
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [logAuth]);
+
+  return null;
 };
 
 // ============================================
@@ -274,10 +347,6 @@ const PublicRoutes = () => {
             <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/terms" element={<Navigate to="/terms-of-service" replace />} />
-            {/* Add more public routes here as needed */}
-            {/* <Route path="/cookie-policy" element={<CookiePolicy />} /> */}
-            
-            {/* Fallback - shouldn't normally hit this */}
             <Route path="*" element={<Navigate to="/privacy-policy" replace />} />
         </Routes>
     );
@@ -300,7 +369,10 @@ const AuthenticatedRoutes = () => {
                 
                 return (
                     <AuthProvider>
+                        {/* Activity logging components */}
                         <RouteTracker />
+                        <AuthEventLogger />
+                        
                         <Routes>
                             {/* Redirects */}
                             <Route path="/login" element={<Navigate to="/home" replace />} />
@@ -364,19 +436,16 @@ const AuthenticatedRoutes = () => {
 const AppRouter = () => {
     const location = useLocation();
     
-    // Debug logging
     useEffect(() => {
         console.log('🔍 Current path:', location.pathname);
         console.log('🔓 Is public path:', isPublicPath(location.pathname));
     }, [location.pathname]);
 
-    // Render public routes WITHOUT Authenticator
     if (isPublicPath(location.pathname)) {
         console.log('📄 Rendering public route');
         return <PublicRoutes />;
     }
 
-    // All other routes go through Authenticator
     console.log('🔐 Rendering authenticated route');
     return <AuthenticatedRoutes />;
 };
@@ -393,34 +462,6 @@ function App() {
 
     useEffect(() => {
         monitoring.trackMetric('AppStarted', 1, 'Count');
-    }, []);
-
-    useEffect(() => {
-        const unsubscribe = Hub.listen('auth', (data) => {
-            const { payload } = data;
-            console.log('Auth event:', payload.event);
-            
-            switch (payload.event) {
-                case 'signedIn':
-                    console.log('User signed in');
-                    break;
-                case 'signedOut':
-                    console.log('User signed out');
-                    break;
-                case 'tokenRefresh':
-                    console.log('Token refreshed');
-                    break;
-                case 'tokenRefresh_failure':
-                    console.error('Token refresh failed');
-                    break;
-            }
-        });
-
-        return () => {
-            if (typeof unsubscribe === 'function') {
-                unsubscribe();
-            }
-        };
     }, []);
 
     return (

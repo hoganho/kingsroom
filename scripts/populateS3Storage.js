@@ -27,8 +27,8 @@ import crypto from 'crypto';
 const DRY_RUN = false; 
 const S3_BUCKET = 'pokerpro-scraper-storage';
 const S3_PREFIX = 'entities/';
-const S3_STORAGE_TABLE = 'S3Storage-oi5oitkajrgtzm7feellfluriy-dev';
-const SCRAPE_URL_TABLE = 'ScrapeURL-oi5oitkajrgtzm7feellfluriy-dev';
+const S3_STORAGE_TABLE = 'S3Storage-sjyzke3u45golhnttlco6bpcua-dev';
+const SCRAPE_URL_TABLE = 'ScrapeURL-sjyzke3u45golhnttlco6bpcua-dev';
 const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 
 // --- Logger ---

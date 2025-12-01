@@ -555,6 +555,14 @@
         }
       ]
     },
+    "AMPLIFY_function_userManagement_auditLogTable": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "userManagement"
+        }
+      ]
+    },
     "AMPLIFY_function_userManagement_deploymentBucketName": {
       "usedBy": [
         {

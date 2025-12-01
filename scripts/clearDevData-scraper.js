@@ -21,12 +21,12 @@ const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 // --- List of Tables to Clear ---
 // This list is based on the table names you provided.
 const TABLES_TO_CLEAR = [
-    'S3Storage-oi5oitkajrgtzm7feellfluriy-dev',
-    'ScrapeAttempt-oi5oitkajrgtzm7feellfluriy-dev',
-    'ScraperJob-oi5oitkajrgtzm7feellfluriy-dev',
-    'ScraperState-oi5oitkajrgtzm7feellfluriy-dev',
-    'ScrapeStructure-oi5oitkajrgtzm7feellfluriy-dev',
-    'ScrapeURL-oi5oitkajrgtzm7feellfluriy-dev',
+    'S3Storage-sjyzke3u45golhnttlco6bpcua-dev',
+    'ScrapeAttempt-sjyzke3u45golhnttlco6bpcua-dev',
+    'ScraperJob-sjyzke3u45golhnttlco6bpcua-dev',
+    'ScraperState-sjyzke3u45golhnttlco6bpcua-dev',
+    'ScrapeStructure-sjyzke3u45golhnttlco6bpcua-dev',
+    'ScrapeURL-sjyzke3u45golhnttlco6bpcua-dev',
 ];
 
 // --- Logger (copied from your script) ---

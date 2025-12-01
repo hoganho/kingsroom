@@ -1,6 +1,48 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Effect": "Allow",
+    "Action": [
+      "cognito-idp:AdminCreateUser",
+      "cognito-idp:AdminAddUserToGroup",
+      "cognito-idp:AdminRemoveUserFromGroup",
+      "cognito-idp:AdminSetUserPassword",
+      "cognito-idp:AdminGetUser",
+      "cognito-idp:AdminDisableUser",
+      "cognito-idp:AdminEnableUser",
+      "cognito-idp:AdminUpdateUserAttributes",
+      "cognito-idp:ListGroups"
+    ],
+    "Resource": [
+      "arn:aws:cognito-idp:*:*:userpool/*"
+    ]
+  },
+  {
+    "Effect": "Allow",
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/User-*"
+    ]
+  },
+  {
+    "Effect": "Allow",
+    "Action": [
+      "dynamodb:PutItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/UserAuditLog-*"
+    ]
+  },
+  {
+    "Effect": "Allow",
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": [
+      "*"
+    ]
   }
 ]

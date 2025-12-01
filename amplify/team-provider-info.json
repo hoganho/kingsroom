@@ -80,12 +80,13 @@
         },
         "userManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/userManagement-48314c6c573349694742-build.zip"
+          "s3Key": "amplify-builds/userManagement-7444457766716e417466-build.zip",
+          "auditLogTable": "UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev"
         },
         "userLastActiveUpdater": {
           "userTable": "User-sjyzke3u45golhnttlco6bpcua-dev",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/userLastActiveUpdater-77374d676a4b45767372-build.zip"
+          "s3Key": "amplify-builds/userLastActiveUpdater-48642b32676255465743-build.zip"
         }
       },
       "api": {

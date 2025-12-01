@@ -7,7 +7,7 @@ import { DynamoDBDocumentClient, ScanCommand, UpdateCommand } from "@aws-sdk/lib
 
 // ⚠️ UPDATE THESE VALUES FOR YOUR ENVIRONMENT
 const REGION = "ap-southeast-2";  // Your AWS region
-const TABLE_NAME = "ScrapeURL-oi5oitkajrgtzm7feellfluriy-dev";  // Your ScrapeURL table name
+const TABLE_NAME = "ScrapeURL-sjyzke3u45golhnttlco6bpcua-dev";  // Your ScrapeURL table name
 
 const client = new DynamoDBClient({ region: REGION });
 const docClient = DynamoDBDocumentClient.from(client);

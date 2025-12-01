@@ -16,8 +16,8 @@ import {
 
 // --- CONFIGURATION ---
 const DRY_RUN = false; // Set to false to actually update records
-const SCRAPE_URL_TABLE = 'ScrapeURL-oi5oitkajrgtzm7feellfluriy-dev';
-const S3_STORAGE_TABLE = 'S3Storage-oi5oitkajrgtzm7feellfluriy-dev';
+const SCRAPE_URL_TABLE = 'ScrapeURL-sjyzke3u45golhnttlco6bpcua-dev';
+const S3_STORAGE_TABLE = 'S3Storage-sjyzke3u45golhnttlco6bpcua-dev';
 const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 
 // --- Logger ---
