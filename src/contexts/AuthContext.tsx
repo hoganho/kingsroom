@@ -1,10 +1,11 @@
-// src/contexts/AuthContext.tsx - Updated to support new sidebar while maintaining all existing functionality
+// src/contexts/AuthContext.tsx - Updated to fix race conditions and double mounting
 import React, {
   createContext,
   useState,
   useEffect,
   useContext,
   useCallback,
+  useRef, // Added useRef
 } from 'react';
 // Correct Amplify v6 import paths
 import {
@@ -53,6 +54,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Ref to prevent double execution of checkUser on mount (React.StrictMode issue)
+  const checkUserCalled = useRef(false);
 
   // Define handleSignOut useCallback *before* checkUser useCallback
   const handleSignOut = useCallback(async () => {
@@ -90,30 +94,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const result = await client.graphql({
           query: getUser,
           variables: { id: userId },
-          authMode: 'userPool', // Use Cognito auth for private access
+          authMode: 'userPool',
         });
 
         const existingUser = result.data?.getUser;
         if (existingUser) {
-          console.log(`[AuthContext] Found existing user:`, existingUser);
-          if (existingUser._deleted) {
-            console.warn(`[AuthContext] User ${userId} is marked as deleted.`);
-            return null;
-          } else {
-            return existingUser;
-          }
-        } else {
-          console.log(`[AuthContext] User ${userId} not found in DynamoDB (expected for new user).`);
+          if (existingUser._deleted) return null;
+          return existingUser;
         }
       } catch (getError: any) {
-        const isNotFoundError = getError?.errors?.some((e: any) => 
-          e.message?.includes('Cannot return null') || e.errorType?.includes('NotFound')
-        );
-        if (!isNotFoundError) {
-          console.error(`[AuthContext] Unexpected error fetching user ${userId}:`, JSON.stringify(getError, null, 2));
-        } else {
-          console.warn(`[AuthContext] User ${userId} not found (expected).`);
-        }
+        // Log but continue to creation
+        console.warn(`[AuthContext] Initial fetch failed or empty. Proceeding to create.`);
       }
 
       // --- 2. If not found, attempt to create user ---
@@ -123,33 +114,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           id: userId,
           username: username,
           email: email,
-          role: UserRole.VENUE_MANAGER, // Default role
+          role: UserRole.VENUE_MANAGER,
         };
-
-        console.log('[AuthContext] Sending createUser input:', JSON.stringify(newUserInput, null, 2));
 
         const createResult = await client.graphql({
           query: createUserMutation,
           variables: { input: newUserInput },
-          authMode: 'userPool', // Use Cognito auth for private access
+          authMode: 'userPool',
         });
 
-        if (createResult.data?.createUser && !createResult.errors) {
-          console.log(`[AuthContext] Successfully created user:`, createResult.data.createUser);
+        if (createResult.data?.createUser) {
           return createResult.data.createUser;
-        } else {
-          console.error('[AuthContext] Create user mutation failed. Response:', JSON.stringify(createResult, null, 2));
-          if (createResult.errors) {
-            createResult.errors.forEach((err: any) => 
-              console.error(`[AuthContext] GraphQL Error: ${err.message}`, err)
-            );
-          }
-          return null;
         }
       } catch (mutationError: any) {
-        console.error('[AuthContext] Exception during createUser mutation call:', JSON.stringify(mutationError, null, 2));
+        // --- RACE CONDITION HANDLING ---
+        const isConditionalCheckFailed = mutationError?.errors?.some(
+          (e: any) => e.errorType === 'ConditionalCheckFailedException'
+        );
+
+        if (isConditionalCheckFailed) {
+          console.warn('[AuthContext] User already created by another process. Retrying fetch.');
+          
+          try {
+            const retryResult = await client.graphql({
+              query: getUser,
+              variables: { id: userId },
+              authMode: 'userPool',
+            });
+            return retryResult.data?.getUser || null;
+          } catch (retryError: any) {
+             console.error('[AuthContext] Recovery fetch failed:', retryError);
+
+             // === FIX: Handle Schema/Metadata Mismatches ===
+             const isSchemaError = retryError?.errors?.some((e: any) => 
+                e.message?.includes('Cannot return null for non-nullable type')
+             );
+
+             if (isSchemaError) {
+                console.warn('[AuthContext] Schema mismatch detected (missing _version). Returning fallback user object.');
+                // Return a constructed user object to allow login to proceed
+                return {
+                    id: userId,
+                    username: username,
+                    email: email,
+                    role: UserRole.VENUE_MANAGER, // Fallback role
+                    isAuthenticated: true,
+                    // Add any other strictly required fields from your User type here
+                };
+             }
+             return null;
+          }
+        }
+        
+        console.error('[AuthContext] Create mutation failed:', mutationError);
         return null;
       }
+      return null;
     },
     []
   );
@@ -208,8 +228,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   /** Initial auth check */
   useEffect(() => {
-    console.log('[AuthContext] Initial mount: Triggering checkUser.');
-    checkUser();
+    // Only run if we haven't checked yet
+    if (!checkUserCalled.current) {
+        checkUserCalled.current = true;
+        console.log('[AuthContext] Initial mount: Triggering checkUser.');
+        checkUser();
+    } else {
+        console.log('[AuthContext] Initial mount: Skipping duplicate checkUser call.');
+    }
   }, []);
 
   /** Re-check on tab visibility */

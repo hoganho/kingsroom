@@ -147,7 +147,7 @@ const authenticatorComponents = {
     Header() {
         return (
             <View textAlign="center" padding="2rem 2rem 1rem 2rem">
-                <div className="text-4xl mb-2">🎰</div>
+                <div className="text-4xl mb-2"></div>
                 <Heading level={3} style={{ color: '#4f46e5', marginBottom: '0.5rem' }}>
                     PokerPro Live
                 </Heading>
