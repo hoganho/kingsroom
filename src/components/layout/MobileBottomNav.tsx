@@ -10,8 +10,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { useUserPermissions } from '../../hooks/useUserPermissions';
 
-const MobileBottomNav = () => {
-  // FIX: Use permission hook instead of just role
+// CHANGED: Added 'export' keyword here and removed 'export default' at the bottom
+export const MobileBottomNav = () => {
   const { canAccess, isSuperAdmin } = useUserPermissions();
   
   // Base navigation items
@@ -21,12 +21,12 @@ const MobileBottomNav = () => {
     { to: '/games/dashboard', label: 'Games', icon: BeakerIcon },
     { to: '/venues/dashboard', label: 'Venues', icon: BuildingOffice2Icon },
     { to: '/series/dashboard', label: 'Series', icon: TrophyIcon },
-    { to: '/scraper/admin', label: 'Scraper', icon: WrenchIcon }, // Added to base list to be filtered
+    { to: '/scraper/admin', label: 'Scraper', icon: WrenchIcon },
   ];
 
-  // FIX: Filter items based on permissions
+  // Filter items based on permissions
   const navItems = allNavItems.filter(item => {
-    // Special handling for Scraper which is Super Admin only usually
+    // Special handling for Scraper which is Super Admin only
     if (item.to === '/scraper/admin' && !isSuperAdmin) return false;
     return canAccess(item.to);
   });
@@ -55,5 +55,3 @@ const MobileBottomNav = () => {
     </nav>
   );
 };
-
-export default MobileBottomNav;
