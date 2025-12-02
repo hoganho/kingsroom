@@ -246,7 +246,7 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
   });
 
   // API Key Configuration
-  const [scraperApiKey, setScraperApiKey] = useState<string>('62c905a307da2591dc89f94d193caacf');
+  const [scraperApiKey, setScraperApiKey] = useState<string>('62c905a307da2591dc89f94d193caacf--');
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
 
   // Processing State

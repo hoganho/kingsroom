@@ -2125,6 +2125,7 @@ type EagerGame = {
   readonly isRegular?: boolean | null;
   readonly isSatellite?: boolean | null;
   readonly gameTags?: (string | null)[] | null;
+  readonly dealerDealt?: boolean | null;
   readonly isSeries?: boolean | null;
   readonly seriesName?: string | null;
   readonly isMainEvent?: boolean | null;
@@ -2208,6 +2209,7 @@ type LazyGame = {
   readonly isRegular?: boolean | null;
   readonly isSatellite?: boolean | null;
   readonly gameTags?: (string | null)[] | null;
+  readonly dealerDealt?: boolean | null;
   readonly isSeries?: boolean | null;
   readonly seriesName?: string | null;
   readonly isMainEvent?: boolean | null;

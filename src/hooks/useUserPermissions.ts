@@ -12,43 +12,32 @@ import {
 } from '../config/pagePermissions';
 
 export interface UserPermissions {
-  // Check if user can access a specific path
   canAccess: (path: string) => boolean;
-  
-  // Get all pages user can access
   accessiblePages: PageConfig[];
-  
-  // Get accessible pages grouped by category
   accessiblePagesByCategory: Record<PageCategory, PageConfig[]>;
-  
-  // Check if user has a specific role
   hasRole: (roles: UserRole | UserRole[]) => boolean;
-  
-  // Check if user is super admin
   isSuperAdmin: boolean;
-  
-  // User's current role
   userRole: UserRole | null;
-  
-  // User's custom allowed pages (if any)
   customAllowedPages: string[] | null;
 }
 
 export const useUserPermissions = (): UserPermissions => {
-  const { userRole: authRole } = useAuth();
+  // FIX: Destructure 'user' to get access to allowedPages
+  const { user, userRole: authRole } = useAuth();
   
-  // Cognito groups now match GraphQL UserRole enum values (SUPER_ADMIN, ADMIN, etc.)
-  // Just cast to UserRole if valid
   const userRole: UserRole | null = authRole as UserRole | null;
-  
   const isSuperAdmin = userRole === 'SUPER_ADMIN';
   
+  // Extract custom permissions safely
+  // @ts-ignore - allowedPages exists on the backend user object but might be missing from frontend type
+  const customAllowedPages = user?.allowedPages || null;
+
   // Check if user can access a specific path
-  // TODO: Pass customAllowedPages when we have access to currentUser from AuthContext
   const canAccess = useCallback((path: string): boolean => {
     if (!userRole) return false;
-    return hasPageAccess(path, userRole, null);
-  }, [userRole]);
+    // FIX: Pass customAllowedPages instead of null
+    return hasPageAccess(path, userRole, customAllowedPages);
+  }, [userRole, customAllowedPages]);
   
   // Get all accessible pages
   const accessiblePages = useMemo((): PageConfig[] => {
@@ -57,15 +46,21 @@ export const useUserPermissions = (): UserPermissions => {
     // Super admin gets all pages
     if (isSuperAdmin) return ALL_PAGES;
     
-    // TODO: If user has custom permissions from DB, use those
-    // This would require exposing currentUser from AuthContext
-    // For now, fall back to default role permissions
+    // FIX: If custom pages exist, filter strictly by them
+    if (customAllowedPages && customAllowedPages.length > 0) {
+      return ALL_PAGES.filter(page => 
+        page.alwaysAllowed || 
+        customAllowedPages.some((allowed: string) => pathMatchesPage(page.path, allowed))
+      );
+    }
+
+    // Fall back to default role permissions
     const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[userRole] || [];
     return ALL_PAGES.filter(page => 
       page.alwaysAllowed || 
       defaultPermissions.some((allowed: string) => pathMatchesPage(page.path, allowed))
     );
-  }, [userRole, isSuperAdmin]);
+  }, [userRole, isSuperAdmin, customAllowedPages]);
   
   // Get accessible pages grouped by category
   const accessiblePagesByCategory = useMemo(() => {
@@ -105,7 +100,7 @@ export const useUserPermissions = (): UserPermissions => {
     hasRole,
     isSuperAdmin,
     userRole,
-    customAllowedPages: null, // TODO: Get from currentUser when available in AuthContext
+    customAllowedPages,
   };
 };
 

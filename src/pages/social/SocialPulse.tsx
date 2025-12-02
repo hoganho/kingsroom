@@ -486,8 +486,9 @@ export const SocialPulse: React.FC = () => {
     setIsRefreshing(true);
     const enabledAccounts = accounts.filter((a: SocialAccount) => a.isScrapingEnabled && a.status !== 'ERROR');
     
-    // 1. Fire all triggers in parallel using async/await map
-    const scrapePromises = enabledAccounts.map(async (account) => {
+    // We use a for...of loop to process requests SEQUENTIALLY.
+    // This prevents overwhelming the Lambda backend and avoids the 'Lambda:IllegalArgument' error.
+    for (const account of enabledAccounts) {
       try {
         // Explicitly cast to Promise<any> to satisfy TypeScript
         const response = client.graphql({
@@ -496,21 +497,20 @@ export const SocialPulse: React.FC = () => {
         }) as Promise<any>;
         
         await response;
+        console.log(`Successfully triggered scrape for ${account.accountName}`);
+        
+        // Optional: Add a tiny delay between requests to be extra safe
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
       } catch (err: any) {
-        // Explicitly type err as 'any'
         console.error(`Error scraping ${account.accountName}:`, err);
       }
-    });
+    }
 
-    // 2. Wait for all triggers to initiate
-    await Promise.all(scrapePromises);
-
-    // 3. Refresh UI
-    setTimeout(() => {
-        setIsRefreshing(false);
-        fetchAccounts();
-        refreshPosts();
-    }, 2000);
+    // Refresh UI after all are processed
+    fetchAccounts();
+    refreshPosts();
+    setIsRefreshing(false);
   };
 
   const handleLoadHistory = () => {

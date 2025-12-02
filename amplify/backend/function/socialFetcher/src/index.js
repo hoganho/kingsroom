@@ -109,12 +109,15 @@ exports.handler = async (event) => {
 /**
  * Handle GraphQL resolver requests
  */
-async function handleGraphQLRequest(event) {
-  const { fieldName, arguments: args } = event;
+const args = event.arguments || {}; 
+  const fieldName = event.fieldName;
 
   switch (fieldName) {
     case 'triggerSocialScrape':
-      // Standard incremental fetch - only posts since last successful scrape
+      // Safety check: ensure socialAccountId exists before calling triggerScrape
+      if (!args.socialAccountId) {
+        throw new Error('Missing required argument: socialAccountId');
+      }
       return triggerScrape(args.socialAccountId, { fetchAllHistory: false });
     case 'triggerFullSync':
       // Full historical sync - fetches ALL posts

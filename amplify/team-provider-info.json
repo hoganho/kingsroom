@@ -19,7 +19,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/autoScraper-69594235454168643873-build.zip"
+          "s3Key": "amplify-builds/autoScraper-644b574772367332415a-build.zip"
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -39,7 +39,7 @@
         },
         "playerDataProcessor": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/playerDataProcessor-654b4e2b6950442b5547-build.zip"
+          "s3Key": "amplify-builds/playerDataProcessor-467134646c4e49575062-build.zip"
         },
         "publishClientMetrics": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -61,7 +61,7 @@
         "socialFetcher": {
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/socialFetcher-5a53305144474878794c-build.zip"
+          "s3Key": "amplify-builds/socialFetcher-6763615177617a565551-build.zip"
         },
         "tournamentConsolidator": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -76,11 +76,11 @@
           "scraperS3Bucket": "pokerpro-scraper-storage",
           "saveGameFunctionName": "saveGameFunction-dev",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-336233677a4c4b437652-build.zip"
+          "s3Key": "amplify-builds/webScraperFunction-35646b7538657a516666-build.zip"
         },
         "userManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/userManagement-2b36694f39316c6b7a2b-build.zip",
+          "s3Key": "amplify-builds/userManagement-4f5a424c6b41364f7550-build.zip",
           "auditLogTable": "UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev"
         },
         "userLastActiveUpdater": {

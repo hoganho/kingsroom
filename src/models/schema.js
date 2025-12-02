@@ -1251,6 +1251,13 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "dealerDealt": {
+                    "name": "dealerDealt",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "isSeries": {
                     "name": "isSeries",
                     "isArray": false,
@@ -12386,5 +12393,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "5ecb7836962b89039ccaf794afc31ef3"
+    "version": "77e15fcd6465650b75ef60524971e89f"
 };

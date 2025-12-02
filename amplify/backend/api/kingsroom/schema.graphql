@@ -200,6 +200,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   isRegular: Boolean
   isSatellite: Boolean
   gameTags: [String]
+  dealerDealt: Boolean
 
   # --- Series Reference Fields ---
   isSeries: Boolean

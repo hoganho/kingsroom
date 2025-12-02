@@ -75,6 +75,7 @@ export interface AppUser {
   firstName?: string | null;
   lastName?: string | null;
   avatar?: string | null; 
+  allowedPages?: string[] | null;
   _version?: number; // Needed for updates
 }
 

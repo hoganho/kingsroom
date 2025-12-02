@@ -120,6 +120,16 @@
   },
   {
     "Action": [
+      "sqs:ReceiveMessage",
+      "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes"
+    ],
+    "Resource": [
+      "arn:aws:sqs:ap-southeast-2:495599763953:GameProcessingQueue.fifo"
+    ]
+  },
+  {
+    "Action": [
       "cloudwatch:PutMetricData"
     ],
     "Resource": [

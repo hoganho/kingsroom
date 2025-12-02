@@ -542,6 +542,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           isRegular
           isSatellite
           gameTags
+          dealerDealt
           isSeries
           seriesName
           isMainEvent
@@ -583,6 +584,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             isRegular
             isSatellite
             gameTags
+            dealerDealt
             isSeries
             seriesName
             isMainEvent
@@ -1464,6 +1466,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           isRegular
           isSatellite
           gameTags
+          dealerDealt
           isSeries
           seriesName
           isMainEvent
@@ -1505,6 +1508,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             isRegular
             isSatellite
             gameTags
+            dealerDealt
             isSeries
             seriesName
             isMainEvent
@@ -2402,6 +2406,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           isRegular
           isSatellite
           gameTags
+          dealerDealt
           isSeries
           seriesName
           isMainEvent
@@ -2443,6 +2448,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             isRegular
             isSatellite
             gameTags
+            dealerDealt
             isSeries
             seriesName
             isMainEvent
@@ -3327,6 +3333,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           isRegular
           isSatellite
           gameTags
+          dealerDealt
           isSeries
           seriesName
           isMainEvent
@@ -3368,6 +3375,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             isRegular
             isSatellite
             gameTags
+            dealerDealt
             isSeries
             seriesName
             isMainEvent
@@ -4252,6 +4260,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           isRegular
           isSatellite
           gameTags
+          dealerDealt
           isSeries
           seriesName
           isMainEvent
@@ -4293,6 +4302,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             isRegular
             isSatellite
             gameTags
+            dealerDealt
             isSeries
             seriesName
             isMainEvent
@@ -5174,6 +5184,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           isRegular
           isSatellite
           gameTags
+          dealerDealt
           isSeries
           seriesName
           isMainEvent
@@ -5215,6 +5226,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             isRegular
             isSatellite
             gameTags
+            dealerDealt
             isSeries
             seriesName
             isMainEvent
@@ -6109,6 +6121,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           isRegular
           isSatellite
           gameTags
+          dealerDealt
           isSeries
           seriesName
           isMainEvent
@@ -6150,6 +6163,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             isRegular
             isSatellite
             gameTags
+            dealerDealt
             isSeries
             seriesName
             isMainEvent
@@ -7044,6 +7058,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           isRegular
           isSatellite
           gameTags
+          dealerDealt
           isSeries
           seriesName
           isMainEvent
@@ -7085,6 +7100,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             isRegular
             isSatellite
             gameTags
+            dealerDealt
             isSeries
             seriesName
             isMainEvent

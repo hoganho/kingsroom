@@ -1,5 +1,4 @@
-// src/components/layout/MobileBottomNav.tsx - Fixed with correct route paths
-
+// src/components/layout/MobileBottomNav.tsx
 import { NavLink } from 'react-router-dom';
 import {
   HomeIcon,
@@ -9,46 +8,52 @@ import {
   BuildingOffice2Icon,
   WrenchIcon,
 } from '@heroicons/react/24/outline';
-import { useAuth, UserRole } from '../../contexts/AuthContext';
+import { useUserPermissions } from '../../hooks/useUserPermissions';
 
 const MobileBottomNav = () => {
-  const { userRole } = useAuth();
+  // FIX: Use permission hook instead of just role
+  const { canAccess, isSuperAdmin } = useUserPermissions();
   
-  // Define nav items with proper paths matching App.tsx routes
-  const navItems = [
+  // Base navigation items
+  const allNavItems = [
     { to: '/home', label: 'Home', icon: HomeIcon },
     { to: '/players/dashboard', label: 'Players', icon: UserGroupIcon },
     { to: '/games/dashboard', label: 'Games', icon: BeakerIcon },
     { to: '/venues/dashboard', label: 'Venues', icon: BuildingOffice2Icon },
     { to: '/series/dashboard', label: 'Series', icon: TrophyIcon },
+    { to: '/scraper/admin', label: 'Scraper', icon: WrenchIcon }, // Added to base list to be filtered
   ];
 
-  // Add Scraper Admin for SuperAdmin users
-  if (userRole === UserRole.SUPER_ADMIN) {
-    navItems.push({ 
-      to: '/scraper/admin',  // Correct path matching App.tsx route
-      label: 'Scraper', 
-      icon: WrenchIcon 
-    });
-  }
+  // FIX: Filter items based on permissions
+  const navItems = allNavItems.filter(item => {
+    // Special handling for Scraper which is Super Admin only usually
+    if (item.to === '/scraper/admin' && !isSuperAdmin) return false;
+    return canAccess(item.to);
+  });
 
   const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
-    `flex flex-col items-center justify-center pt-2 pb-1 w-full text-xs font-medium transition-colors ${
-      isActive
-        ? 'text-indigo-600'
-        : 'text-gray-500 hover:text-gray-900'
+    `flex flex-col items-center justify-center w-full h-full space-y-1 ${
+      isActive ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'
     }`;
 
+  if (navItems.length === 0) return null;
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-16 items-center justify-around border-t border-gray-200 bg-white md:hidden">
-      {navItems.slice(0, 6).map((item) => (
-        <NavLink to={item.to} className={getLinkClassName} key={item.to}>
-          <item.icon className="h-6 w-6" />
-          <span className="mt-1">{item.label}</span>
-        </NavLink>
-      ))}
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 pb-safe z-50">
+      <div className="flex justify-around items-center h-16">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={getLinkClassName}
+          >
+            <item.icon className="h-6 w-6" />
+            <span className="text-[10px] font-medium">{item.label}</span>
+          </NavLink>
+        ))}
+      </div>
     </nav>
   );
 };
 
-export { MobileBottomNav };
+export default MobileBottomNav;

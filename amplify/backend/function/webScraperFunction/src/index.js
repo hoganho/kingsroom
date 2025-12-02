@@ -727,7 +727,7 @@ exports.handler = async (event) => {
                     const overrideDoNotScrape = args.overrideDoNotScrape || false;
                     
                     // NEW: Extract scraperApiKey from arguments
-                    const scraperApiKey = args.scraperApiKey || process.env.SCRAPERAPI_KEY || "62c905a307da2591dc89f94d193caacf";
+                    const scraperApiKey = args.scraperApiKey || process.env.SCRAPERAPI_KEY;
                     console.log('[HANDLER] ScraperAPI Key:', {
                         hasCustomKey: !!args.scraperApiKey,
                         keyLength: scraperApiKey?.length,
