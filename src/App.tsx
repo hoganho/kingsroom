@@ -1,13 +1,16 @@
-// src/App.tsx - WITH USER MANAGEMENT ROUTE AND ACTIVITY LOGGING
+// src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
-import { Authenticator } from '@aws-amplify/ui-react';
+// Remove Authenticator import, keep UI components for ErrorBoundary
 import '@aws-amplify/ui-react/styles.css';
 import './authenticator-theme.css';
 import awsExports from './aws-exports.js';
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useActivityLogger } from './hooks/useActivityLogger';
+
+// Import your Custom Authenticator
+import { CustomAuthenticator } from './components/auth/CustomAuthenticator';
 
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
@@ -62,10 +65,6 @@ import { PlayersDebug } from './pages/debug/PlayersDebug';
 import { DatabaseMonitorPage } from './pages/debug/DatabaseMonitor';
 import { getMonitoring } from './utils/enhanced-monitoring';
 
-// Error Boundary
-import React from 'react';
-import { Heading, Text, View } from '@aws-amplify/ui-react';
-
 // Configure Amplify
 Amplify.configure(awsExports);
 
@@ -101,10 +100,7 @@ const AuthEventLogger = () => {
   const hasLoggedLogin = useRef(false);
 
   useEffect(() => {
-    // Log initial login (user just authenticated)
     if (!hasLoggedLogin.current) {
-      // Only try to log if we actually have a user loaded, otherwise wait for Hub
-      // This part handles page refresh where user is already logged in
       logAuth('LOGIN', { source: 'session_start' });
       hasLoggedLogin.current = true;
     }
@@ -219,117 +215,6 @@ const ProtectedLayout = () => {
 };
 
 // ============================================
-// AUTHENTICATOR CUSTOMIZATION
-// ============================================
-const authenticatorComponents = {
-    Header() {
-        return (
-            <View textAlign="center" padding="2rem 2rem 1rem 2rem">
-                <div className="text-4xl mb-2"></div>
-                <Heading level={3} style={{ color: '#4f46e5', marginBottom: '0.5rem' }}>
-                    PokerPro Live
-                </Heading>
-                <Text color="neutral.60" fontSize="0.875rem">
-                    Tournament Management System
-                </Text>
-            </View>
-        );
-    },
-    Footer() {
-        return (
-            <View textAlign="center" padding="1.5rem 2rem">
-                <Text color="neutral.60" fontSize="0.75rem">
-                    &copy; {new Date().getFullYear()} KingsRoom. All rights reserved.
-                </Text>
-            </View>
-        );
-    },
-    SignIn: {
-        Header() {
-            return (
-                <Heading 
-                    level={4} 
-                    padding="1.5rem 0 0.5rem 0" 
-                    textAlign="center"
-                    style={{ color: '#1f2937', fontSize: '1.25rem', fontWeight: '600' }}
-                >
-                    Sign in to your account
-                </Heading>
-            );
-        },
-    },
-    SignUp: {
-        Header() {
-            return (
-                <Heading 
-                    level={4} 
-                    padding="1.5rem 0 0.5rem 0" 
-                    textAlign="center"
-                    style={{ color: '#1f2937', fontSize: '1.25rem', fontWeight: '600' }}
-                >
-                    Create a new account
-                </Heading>
-            );
-        },
-    },
-    ResetPassword: {
-        Header() {
-            return (
-                <Heading 
-                    level={4} 
-                    padding="1.5rem 0 0.5rem 0" 
-                    textAlign="center"
-                    style={{ color: '#1f2937', fontSize: '1.25rem', fontWeight: '600' }}
-                >
-                    Reset your password
-                </Heading>
-            );
-        },
-    },
-};
-
-const authenticatorFormFields = {
-    signIn: {
-        username: {
-            placeholder: 'Enter your email',
-            label: 'Email Address',
-            isRequired: true,
-        },
-        password: {
-            placeholder: 'Enter your password',
-            label: 'Password',
-            isRequired: true,
-        },
-    },
-    signUp: {
-        username: {
-            placeholder: 'Enter your email',
-            label: 'Email Address',
-            isRequired: true,
-            order: 1,
-        },
-        email: {
-            placeholder: 'Enter your email',
-            label: 'Email Address',
-            isRequired: true,
-            order: 2,
-        },
-        password: {
-            placeholder: 'Enter your password',
-            label: 'Password',
-            isRequired: true,
-            order: 3,
-        },
-        confirm_password: {
-            placeholder: 'Confirm your password',
-            label: 'Confirm Password',
-            isRequired: true,
-            order: 4,
-        },
-    },
-};
-
-// ============================================
 // PUBLIC ROUTES COMPONENT
 // ============================================
 const PublicRoutes = () => {
@@ -349,76 +234,64 @@ const PublicRoutes = () => {
 // ============================================
 const AuthenticatedRoutes = () => {
     return (
-        <Authenticator
-            components={authenticatorComponents}
-            formFields={authenticatorFormFields}
-            hideSignUp={false}
-        >
-            {({ user }) => {
-                if (user) {
-                    console.log('Authenticated user:', user.username);
-                }
+        <CustomAuthenticator>
+            <AuthProvider>
+                {/* Activity logging components */}
+                <RouteTracker />
+                <AuthEventLogger />
                 
-                return (
-                    <AuthProvider>
-                        {/* Activity logging components */}
-                        <RouteTracker />
-                        <AuthEventLogger />
+                <Routes>
+                    {/* Redirects */}
+                    <Route path="/login" element={<Navigate to="/home" replace />} />
+                    <Route path="/" element={<Navigate to="/home" replace />} />
+
+                    {/* Protected routes with layout */}
+                    <Route element={<ProtectedLayout />}>
+                        {/* Home */}
+                        <Route path="/home" element={<HomePage />} />
                         
-                        <Routes>
-                            {/* Redirects */}
-                            <Route path="/login" element={<Navigate to="/home" replace />} />
-                            <Route path="/" element={<Navigate to="/home" replace />} />
+                        {/* Players */}
+                        <Route path="/players/dashboard" element={<PlayersDashboard />} />
+                        <Route path="/players/search" element={<PlayerSearch />} />
+                        <Route path="/players/profile/:playerId" element={<PlayerProfile />} />
+                        
+                        {/* Series */}
+                        <Route path="/series/dashboard" element={<SeriesDashboard />} />
+                        
+                        {/* Games */}
+                        <Route path="/games/dashboard" element={<GamesDashboard />} />
+                        <Route path="/games/search" element={<GameSearch />} />
+                        <Route path="/games/details/:gameId" element={<GameDetails />} />
+                        
+                        {/* Venues */}
+                        <Route path="/venues/dashboard" element={<VenuesDashboard />} />
+                        <Route path="/venues/details" element={<VenueDetails />} />
+                        
+                        {/* Social Pulse */}
+                        <Route path="/social/pulse" element={<SocialPulse />} />
+                        <Route path="/social/dashboard" element={<SocialDashboard />} />
+                        
+                        {/* Settings (Admin/SuperAdmin) */}
+                        <Route path="/settings/entity-management" element={<EntityManagement />} />
+                        <Route path="/settings/venue-management" element={<VenueManagement />} />
+                        <Route path="/settings/series-management" element={<SeriesManagementPage />} />
+                        <Route path="/settings/social-accounts" element={<SocialAccountManagement />} />
+                        <Route path="/settings/user-management" element={<UserManagement />} />
+                        
+                        {/* Scraper Management (SuperAdmin) */}
+                        <Route path="/scraper/admin" element={<ScraperAdminPage />} />
+                        
+                        {/* Debug Pages (SuperAdmin) */}
+                        <Route path="/debug/games" element={<GamesDebug />} />
+                        <Route path="/debug/players" element={<PlayersDebug />} />
+                        <Route path="/debug/database-monitor" element={<DatabaseMonitorPage />} />
+                    </Route>
 
-                            {/* Protected routes with layout */}
-                            <Route element={<ProtectedLayout />}>
-                                {/* Home */}
-                                <Route path="/home" element={<HomePage />} />
-                                
-                                {/* Players */}
-                                <Route path="/players/dashboard" element={<PlayersDashboard />} />
-                                <Route path="/players/search" element={<PlayerSearch />} />
-                                <Route path="/players/profile/:playerId" element={<PlayerProfile />} />
-                                
-                                {/* Series */}
-                                <Route path="/series/dashboard" element={<SeriesDashboard />} />
-                                
-                                {/* Games */}
-                                <Route path="/games/dashboard" element={<GamesDashboard />} />
-                                <Route path="/games/search" element={<GameSearch />} />
-                                <Route path="/games/details/:gameId" element={<GameDetails />} />
-                                
-                                {/* Venues */}
-                                <Route path="/venues/dashboard" element={<VenuesDashboard />} />
-                                <Route path="/venues/details" element={<VenueDetails />} />
-                                
-                                {/* Social Pulse */}
-                                <Route path="/social/pulse" element={<SocialPulse />} />
-                                <Route path="/social/dashboard" element={<SocialDashboard />} />
-                                
-                                {/* Settings (Admin/SuperAdmin) */}
-                                <Route path="/settings/entity-management" element={<EntityManagement />} />
-                                <Route path="/settings/venue-management" element={<VenueManagement />} />
-                                <Route path="/settings/series-management" element={<SeriesManagementPage />} />
-                                <Route path="/settings/social-accounts" element={<SocialAccountManagement />} />
-                                <Route path="/settings/user-management" element={<UserManagement />} />
-                                
-                                {/* Scraper Management (SuperAdmin) */}
-                                <Route path="/scraper/admin" element={<ScraperAdminPage />} />
-                                
-                                {/* Debug Pages (SuperAdmin) */}
-                                <Route path="/debug/games" element={<GamesDebug />} />
-                                <Route path="/debug/players" element={<PlayersDebug />} />
-                                <Route path="/debug/database-monitor" element={<DatabaseMonitorPage />} />
-                            </Route>
-
-                            {/* Catch all */}
-                            <Route path="*" element={<Navigate to="/home" replace />} />
-                        </Routes>
-                    </AuthProvider>
-                );
-            }}
-        </Authenticator>
+                    {/* Catch all */}
+                    <Route path="*" element={<Navigate to="/home" replace />} />
+                </Routes>
+            </AuthProvider>
+        </CustomAuthenticator>
     );
 };
 
@@ -429,16 +302,16 @@ const AppRouter = () => {
     const location = useLocation();
     
     useEffect(() => {
-        console.log('🔍 Current path:', location.pathname);
-        console.log('🔓 Is public path:', isPublicPath(location.pathname));
+        console.log('剥 Current path:', location.pathname);
+        console.log('箔 Is public path:', isPublicPath(location.pathname));
     }, [location.pathname]);
 
     if (isPublicPath(location.pathname)) {
-        console.log('📄 Rendering public route');
+        console.log('塘 Rendering public route');
         return <PublicRoutes />;
     }
 
-    console.log('🔐 Rendering authenticated route');
+    console.log('柏 Rendering authenticated route');
     return <AuthenticatedRoutes />;
 };
 

@@ -86,7 +86,7 @@
         "userLastActiveUpdater": {
           "userTable": "User-sjyzke3u45golhnttlco6bpcua-dev",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/userLastActiveUpdater-48642b32676255465743-build.zip"
+          "s3Key": "amplify-builds/userLastActiveUpdater-615545415951596d686e-build.zip"
         }
       },
       "api": {
