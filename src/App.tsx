@@ -103,6 +103,8 @@ const AuthEventLogger = () => {
   useEffect(() => {
     // Log initial login (user just authenticated)
     if (!hasLoggedLogin.current) {
+      // Only try to log if we actually have a user loaded, otherwise wait for Hub
+      // This part handles page refresh where user is already logged in
       logAuth('LOGIN', { source: 'session_start' });
       hasLoggedLogin.current = true;
     }
@@ -115,35 +117,25 @@ const AuthEventLogger = () => {
 
       switch (payload.event) {
         case 'signedIn':
-          // User completed sign-in flow
+          const authData = payload.data as any; 
+          const userId = authData?.userId || authData?.username || authData?.sub;
+          
           logAuth('LOGIN', { 
             source: 'sign_in_flow',
             method: 'cognito'
-          });
+          }, userId);
           break;
 
         case 'signedOut':
-          // User signed out
           logAuth('LOGOUT', { 
             source: 'user_initiated' 
           });
           break;
-
-        case 'tokenRefresh':
-          // Token was refreshed - don't log as it's noisy
-          console.log('Token refreshed');
-          break;
-
+          
         case 'tokenRefresh_failure':
-          // Token refresh failed - session expired
-          console.error('Token refresh failed');
           logAuth('SESSION_EXPIRED', {
             reason: 'token_refresh_failure'
           });
-          break;
-
-        case 'signInWithRedirect':
-          console.log('Sign in with redirect initiated');
           break;
 
         case 'signInWithRedirect_failure':

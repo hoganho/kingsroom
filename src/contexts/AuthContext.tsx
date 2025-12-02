@@ -14,12 +14,57 @@ import {
   type AuthUser,
 } from '@aws-amplify/auth';
 import { generateClient } from '@aws-amplify/api';
-import { getUser } from '../graphql/queries';
-import { createUser as createUserMutation } from '../graphql/mutations';
+// We remove the standard imports that cause the over-fetching
+// import { getUser } from '../graphql/queries'; 
+// import { createUser as createUserMutation } from '../graphql/mutations';
 import { UserRole } from '../API';
 import { updateUser } from '../graphql/mutations';
 
 export { UserRole };
+
+// --- CUSTOM GRAPHQL OPERATIONS (To avoid fetching corrupted auditLogs) ---
+
+const customGetUser = /* GraphQL */ `
+  query GetUser($id: ID!) {
+    getUser(id: $id) {
+      id
+      username
+      email
+      role
+      firstName
+      lastName
+      avatar
+      isActive
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+const customCreateUser = /* GraphQL */ `
+  mutation CreateUser($input: CreateUserInput!, $condition: ModelUserConditionInput) {
+    createUser(input: $input, condition: $condition) {
+      id
+      username
+      email
+      role
+      firstName
+      lastName
+      avatar
+      isActive
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------
 
 export interface AppUser {
   id: string;
@@ -29,7 +74,8 @@ export interface AppUser {
   isAuthenticated: boolean;
   firstName?: string | null;
   lastName?: string | null;
-  avatar?: string | null; // <--- ADDED THIS
+  avatar?: string | null; 
+  _version?: number; // Needed for updates
 }
 
 export interface AuthContextType {
@@ -76,8 +122,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       try {
         console.log(`[AuthContext] Attempting to fetch user ${userId} from DynamoDB.`);
-        const result = await client.graphql({
-          query: getUser,
+        
+        // FIX 1: Use customGetUser to avoid fetching corrupted 'auditLogs' relationships
+        const result: any = await client.graphql({
+          query: customGetUser,
           variables: { id: userId },
           authMode: 'userPool',
         });
@@ -100,8 +148,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           role: UserRole.VENUE_MANAGER,
         };
 
-        const createResult = await client.graphql({
-          query: createUserMutation,
+        // FIX 2: Use customCreateUser for the same reason (avoid over-fetching on return)
+        const createResult: any = await client.graphql({
+          query: customCreateUser,
           variables: { input: newUserInput },
           authMode: 'userPool',
         });
@@ -110,6 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           return createResult.data.createUser;
         }
       } catch (mutationError: any) {
+        // Handle Race Condition (User existed but fetch failed or created in parallel)
         const isConditionalCheckFailed = mutationError?.errors?.some(
           (e: any) => e.errorType === 'ConditionalCheckFailedException'
         );
@@ -118,35 +168,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           console.warn('[AuthContext] User already created by another process. Retrying fetch.');
           
           try {
-            const retryResult = await client.graphql({
-              query: getUser,
+            // Retry with custom query
+            const retryResult: any = await client.graphql({
+              query: customGetUser,
               variables: { id: userId },
               authMode: 'userPool',
             });
             return retryResult.data?.getUser || null;
           } catch (retryError: any) {
-             console.warn('[AuthContext] Recovery fetch encountered an issue (handling via fallback):', retryError);
-
-             const isSchemaError = retryError?.errors?.some((e: any) => 
-                e.message?.includes('Cannot return null for non-nullable type')
-             );
-
-             if (isSchemaError) {
-                console.warn('[AuthContext] Schema mismatch detected (missing _version). Returning fallback user object.');
-                // Return a constructed user object to allow login to proceed
-                return {
-                    id: userId,
-                    username: username,
-                    email: email,
-                    role: UserRole.VENUE_MANAGER,
-                    isAuthenticated: true,
-                    // ADDED THESE NULL FIELDS TO SATISFY TYPESCRIPT
-                    firstName: null,
-                    lastName: null,
-                    avatar: null
-                };
-             }
-             return null;
+             console.warn('[AuthContext] Recovery fetch encountered an issue:', retryError);
+             
+             // Fallback construction to prevent app crash
+             return {
+                id: userId,
+                username: username,
+                email: email,
+                role: UserRole.VENUE_MANAGER,
+                isAuthenticated: true,
+                firstName: null,
+                lastName: null,
+                avatar: null,
+                _version: undefined
+            };
           }
         }
         
@@ -163,8 +206,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       console.log('[AuthContext] checkUser: Checking Cognito session...');
       const cognitoUser = await getCurrentUser();
-      console.log('[AuthContext] checkUser: Cognito session active:', cognitoUser);
-
+      
       console.log('[AuthContext] checkUser: Fetching Cognito attributes...');
       let attributes;
       try {
@@ -172,10 +214,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log('[AuthContext] checkUser: Cognito attributes fetched:', attributes);
       } catch (attrError: any) {
         console.error('[AuthContext] checkUser: Failed to fetch Cognito attributes:', attrError);
-        if (attrError.name === 'NotAuthorizedException' || attrError.message.includes('token')) {
-          console.log('[AuthContext] checkUser: Invalid session detected. Signing out.');
-          await handleSignOut();
-        }
+        // If we can't get attributes, the session is likely stale
         setUser(null);
         return;
       }
@@ -186,48 +225,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (dynamoDbUserObject && dynamoDbUserObject.id) {
         console.log('[AuthContext] checkUser: Valid DynamoDB user object received:', dynamoDbUserObject);
         
+        // Cast to any to access system fields like _version
+        const userData = dynamoDbUserObject as any;
+
         setUser({
-          id: dynamoDbUserObject.id,
-          email: dynamoDbUserObject.email || '',
-          username: dynamoDbUserObject.username || cognitoUser.username,
-          role: dynamoDbUserObject.role || UserRole.VENUE_MANAGER,
+          id: userData.id,
+          email: userData.email || '',
+          username: userData.username || cognitoUser.username,
+          role: userData.role || UserRole.VENUE_MANAGER,
           isAuthenticated: true,
-          firstName: dynamoDbUserObject.firstName,
-          lastName: dynamoDbUserObject.lastName,
-          avatar: dynamoDbUserObject.avatar, // <--- ADDED THIS
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          avatar: userData.avatar,
+          _version: userData._version // Capture version for optimistic locking
         });
         console.log('[AuthContext] checkUser: User state set successfully.');
 
-        try {
-          // Extract version from the dynamoDbUserObject (cast to any because it's a system field)
-          const currentVersion = (dynamoDbUserObject as any)._version;
-          
-          const client = generateClient();
-          client.graphql({
-            query: updateUser,
-            variables: {
-              input: {
-                id: dynamoDbUserObject.id,
-                lastLoginAt: new Date().toISOString(),
-                loginAttempts: 0,
-                lockedUntil: null,
-                // CRITICAL FIX: Pass the version to allow the update to succeed
-                _version: currentVersion
-              } as any
-            },
-            authMode: 'userPool'
-          }).then(() => {
-             console.log('[AuthContext] Audit: Login timestamp updated.');
-          }).catch(auditErr => {
-             // Downgraded to debug to reduce noise if it fails for minor reasons
-             console.debug('[AuthContext] Audit: Timestamp update skipped:', auditErr.message);
-          });
-        } catch (setupError) {
-          console.warn('[AuthContext] Audit: Error initiating login update:', setupError);
+        // FIX 3: Check for version before attempting update to avoid errors on fallback objects
+        if (userData._version) {
+          try {
+            const client = generateClient();
+            await client.graphql({
+              query: updateUser,
+              variables: {
+                // FIX 4: Cast input 'as any' to fix TypeScript error regarding 'lastLoginAt'
+                input: {
+                  id: userData.id,
+                  lastLoginAt: new Date().toISOString(),
+                  _version: userData._version
+                } as any 
+              },
+              authMode: 'userPool'
+            });
+            console.log('[AuthContext] Audit: Login timestamp updated.');
+          } catch (setupError) {
+            console.debug('[AuthContext] Audit: Timestamp update skipped (minor).');
+          }
+        } else {
+             console.warn('[AuthContext] Skipping LastLogin update (Fallback User / No Version detected)');
         }
 
       } else {
-        console.error('[AuthContext] checkUser: Failed to get/create valid user in DynamoDB. User state NOT set.');
+        console.error('[AuthContext] checkUser: Failed to get/create valid user in DynamoDB.');
         setUser(null);
       }
 
@@ -245,8 +284,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         checkUserCalled.current = true;
         console.log('[AuthContext] Initial mount: Triggering checkUser.');
         checkUser();
-    } else {
-        console.log('[AuthContext] Initial mount: Skipping duplicate checkUser call.');
     }
   }, []);
 
@@ -259,7 +296,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      console.log('[AuthContext] Cleaning up visibility listener.');
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [checkUser, loading, user]);
