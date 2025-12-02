@@ -5,9 +5,9 @@ import { useEntity } from '../contexts/EntityContext';
 
 // Import generated GraphQL operations
 import { 
-  listSocialPosts, 
   socialPostsBySocialAccountIdAndPostedAt,
   socialPostsByEntityIdAndPostedAt,
+  socialPostsByPostStatus // Ensure you have run 'amplify push' so this exists
 } from '../graphql/queries';
 import { updateSocialPost } from '../graphql/mutations';
 
@@ -16,7 +16,6 @@ import {
   SocialPost,
   UpdateSocialPostInput,
   SocialPostStatus,
-  ModelSocialPostFilterInput,
   ModelSortDirection
 } from '../API';
 
@@ -51,7 +50,9 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
 
   const { filterByEntity = true, daysBack } = options;
   const effectiveEntityId = options.entityId || (filterByEntity ? currentEntity?.id : undefined);
-  const limit = options.limit || 50;
+  
+  // Default limit for standard pagination (Load More)
+  const paginationLimit = options.limit || 50;
 
   // Calculate the date string for filtering
   const minDate = useMemo(() => {
@@ -74,83 +75,110 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
     setError(null);
 
     try {
-      const token = loadMore ? nextToken : null;
-      const activeFilter = { status: { eq: SocialPostStatus.ACTIVE } };
+      // Determine if we are in "Initial Load" mode with a Date Window
+      // In this mode, we want to fetch ALL items in the window, not just the first page.
+      const isInitialWindowFetch = !loadMore && minDate && !ignoreDateLimit;
+
+      let accumulatedItems: SocialPost[] = [];
+      let nextTokenToUse = loadMore ? nextToken : null;
+      let shouldKeepFetching = true;
+      let pageCount = 0;
       
+      // Use a larger batch size for auto-fetching to reduce network requests
+      const currentLimit = isInitialWindowFetch ? 100 : paginationLimit;
+
+      const activeFilter = { status: { eq: SocialPostStatus.ACTIVE } };
       const dateCondition = (minDate && !ignoreDateLimit) ? { gt: minDate } : undefined;
 
-      let response: unknown;
-      let items: SocialPost[] = [];
-      let newNextToken: string | undefined | null = null;
+      // --- FETCH LOOP ---
+      while (shouldKeepFetching) {
+        let response: unknown;
+        let items: SocialPost[] = [];
+        let responseNextToken: string | undefined | null = null;
 
-      if (options.accountId) {
-        response = await client.graphql({
-          query: socialPostsBySocialAccountIdAndPostedAt,
-          variables: { 
-            socialAccountId: options.accountId,
-            postedAt: dateCondition,
-            sortDirection: ModelSortDirection.DESC,
-            filter: activeFilter,
-            limit,
-            nextToken: token
-          },
-        });
-        
-        if (hasGraphQLData<{ socialPostsBySocialAccountIdAndPostedAt: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
-            items = response.data.socialPostsBySocialAccountIdAndPostedAt?.items || [];
-            newNextToken = response.data.socialPostsBySocialAccountIdAndPostedAt?.nextToken;
+        if (options.accountId) {
+          response = await client.graphql({
+            query: socialPostsBySocialAccountIdAndPostedAt,
+            variables: { 
+              socialAccountId: options.accountId,
+              postedAt: dateCondition,
+              sortDirection: ModelSortDirection.DESC,
+              filter: activeFilter,
+              limit: currentLimit,
+              nextToken: nextTokenToUse
+            },
+          });
+          
+          if (hasGraphQLData<{ socialPostsBySocialAccountIdAndPostedAt: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
+              items = response.data.socialPostsBySocialAccountIdAndPostedAt?.items || [];
+              responseNextToken = response.data.socialPostsBySocialAccountIdAndPostedAt?.nextToken;
+          }
+        } 
+        else if (effectiveEntityId) {
+          response = await client.graphql({
+            query: socialPostsByEntityIdAndPostedAt,
+            variables: { 
+              entityId: effectiveEntityId,
+              postedAt: dateCondition,
+              sortDirection: ModelSortDirection.DESC,
+              filter: activeFilter,
+              limit: currentLimit,
+              nextToken: nextTokenToUse
+            },
+          });
+
+          if (hasGraphQLData<{ socialPostsByEntityIdAndPostedAt: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
+              items = response.data.socialPostsByEntityIdAndPostedAt?.items || [];
+              responseNextToken = response.data.socialPostsByEntityIdAndPostedAt?.nextToken;
+          }
+        } 
+        else {
+          // GLOBAL FEED: Use the specific Index Query
+          const dateRange = dateCondition ? { postedAt: dateCondition } : undefined;
+
+          response = await client.graphql({
+            query: socialPostsByPostStatus,
+            variables: { 
+              status: SocialPostStatus.ACTIVE,
+              sortDirection: ModelSortDirection.DESC,
+              limit: currentLimit,
+              nextToken: nextTokenToUse,
+              ...dateRange
+            },
+          });
+
+          if (hasGraphQLData<{ socialPostsByPostStatus: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
+              items = response.data.socialPostsByPostStatus?.items || [];
+              responseNextToken = response.data.socialPostsByPostStatus?.nextToken;
+          }
+        }
+
+        const validItems = items.filter((item): item is SocialPost => item !== null);
+        accumulatedItems = [...accumulatedItems, ...validItems];
+
+        // LOGIC: Should we fetch the next page immediately?
+        if (isInitialWindowFetch && responseNextToken && pageCount < 20) {
+            // Yes: We are auto-filling the 7-day window. 
+            // We have a token, and we haven't hit a safety limit (e.g. 2000 posts).
+            nextTokenToUse = responseNextToken;
+            pageCount++;
+        } else {
+            // No: Either we are done, or we are in manual "Load More" mode.
+            shouldKeepFetching = false;
+            
+            // Set the state for the *next* manual user interaction
+            setNextToken(responseNextToken || null);
+            setHasMore(!!responseNextToken);
         }
       } 
-      else if (effectiveEntityId) {
-        response = await client.graphql({
-          query: socialPostsByEntityIdAndPostedAt,
-          variables: { 
-            entityId: effectiveEntityId,
-            postedAt: dateCondition,
-            sortDirection: ModelSortDirection.DESC,
-            filter: activeFilter,
-            limit,
-            nextToken: token
-          },
-        });
+      // --- END LOOP ---
 
-        if (hasGraphQLData<{ socialPostsByEntityIdAndPostedAt: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
-            items = response.data.socialPostsByEntityIdAndPostedAt?.items || [];
-            newNextToken = response.data.socialPostsByEntityIdAndPostedAt?.nextToken;
-        }
-      } 
-      else {
-        const filter: ModelSocialPostFilterInput = {
-          status: { eq: SocialPostStatus.ACTIVE },
-          ...(dateCondition ? { postedAt: { gt: minDate } } : {}) 
-        };
-
-        response = await client.graphql({
-          query: listSocialPosts,
-          variables: { 
-            limit,
-            nextToken: token,
-            filter,
-          },
-        });
-
-        if (hasGraphQLData<{ listSocialPosts: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
-            items = response.data.listSocialPosts?.items || [];
-            newNextToken = response.data.listSocialPosts?.nextToken;
-            items.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
-        }
-      }
-
-      const validItems = items.filter((item): item is SocialPost => item !== null);
-      
       if (loadMore) {
-        setPosts(prev => [...prev, ...validItems]);
+        setPosts(prev => [...prev, ...accumulatedItems]);
       } else {
-        setPosts(validItems);
+        setPosts(accumulatedItems);
       }
 
-      setNextToken(newNextToken || null);
-      setHasMore(!!newNextToken);
       hasFetchedRef.current = true;
       lastFetchKeyRef.current = currentFetchKey;
 
@@ -160,7 +188,7 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [client, options.accountId, effectiveEntityId, limit, nextToken, filterByEntity, minDate]);
+  }, [client, options.accountId, effectiveEntityId, paginationLimit, nextToken, filterByEntity, minDate]);
 
   const updatePostFn = useCallback(async (input: UpdateSocialPostInput): Promise<SocialPost | null> => {
     try {
@@ -220,7 +248,6 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
     }
   }, [options.accountId, effectiveEntityId, options.autoFetch, fetchPosts, filterByEntity, daysBack]);
 
-  // --- FIX: Restore Engagement Calculations ---
   const totalEngagement = useMemo(() => {
     return posts.reduce(
       (sum, post) => sum + (post.likeCount || 0) + (post.commentCount || 0) + (post.shareCount || 0),
@@ -249,7 +276,6 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
     loadMore,
     refresh,
     postCount: posts.length,
-    // Export metrics
     totalEngagement,
     averageEngagement,
     tournamentPosts,

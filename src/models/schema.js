@@ -7521,6 +7521,21 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "businessLocation": {
+                    "name": "businessLocation",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tags": {
+                    "name": "tags",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
                 "profileImageUrl": {
                     "name": "profileImageUrl",
                     "isArray": false,
@@ -7800,6 +7815,16 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "byAccountLocation",
+                        "queryField": "socialAccountsByLocation",
+                        "fields": [
+                            "businessLocation"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "bySocialAccountEntity",
                         "fields": [
                             "entityId"
@@ -7882,6 +7907,13 @@ export const schema = {
                 },
                 "platform": {
                     "name": "platform",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "businessLocation": {
+                    "name": "businessLocation",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -8175,6 +8207,17 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "byPostLocation",
+                        "queryField": "socialPostsByLocation",
+                        "fields": [
+                            "businessLocation",
+                            "postedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "byPostedAt",
                         "fields": [
                             "postedAt",
@@ -8186,6 +8229,7 @@ export const schema = {
                     "type": "key",
                     "properties": {
                         "name": "byPostStatus",
+                        "queryField": "socialPostsByPostStatus",
                         "fields": [
                             "status",
                             "postedAt"
@@ -9008,6 +9052,7 @@ export const schema = {
         "SocialScrapeStatus": {
             "name": "SocialScrapeStatus",
             "values": [
+                "RUNNING",
                 "SUCCESS",
                 "FAILED",
                 "SKIPPED",
@@ -12341,5 +12386,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "1dbb9eba48198b369cca459fce29cb6e"
+    "version": "5ecb7836962b89039ccaf794afc31ef3"
 };

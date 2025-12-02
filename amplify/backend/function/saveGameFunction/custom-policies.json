@@ -14,6 +14,19 @@
   {
     "Action": [
       "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query",
+      "dynamodb:DeleteItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/GameCost-*",
+      "arn:aws:dynamodb:*:*:table/GameCost-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
       "dynamodb:Query"
     ],
     "Resource": [

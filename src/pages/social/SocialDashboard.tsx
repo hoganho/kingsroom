@@ -163,7 +163,11 @@ export const SocialDashboard: React.FC = () => {
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const { accounts, loading, fetchAccounts, toggleScrapingEnabled } = useSocialAccounts({ filterByEntity: false });
-  const { posts, totalEngagement, refresh: refreshPosts } = useSocialPosts({ filterByEntity: false });
+  const { posts, totalEngagement, refresh: refreshPosts } = useSocialPosts({ 
+    filterByEntity: false,
+    daysBack: 30,  // Limit to last 30 days to prevent payload size issues
+    limit: 100     // Reasonable page size
+  });
 
   const activeAccounts = accounts.filter((a: SocialAccount) => a.status === 'ACTIVE').length;
 

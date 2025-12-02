@@ -48,7 +48,7 @@ enum ScraperOperation { START, STOP, ENABLE, DISABLE, STATUS, RESET }
 enum SocialPlatform { FACEBOOK, INSTAGRAM, TWITTER, LINKEDIN }
 enum SocialAccountStatus { ACTIVE, INACTIVE, PENDING_VERIFICATION, ERROR, RATE_LIMITED }
 enum SocialPostType { TEXT, IMAGE, VIDEO, LINK, EVENT, ALBUM, LIVE }
-enum SocialScrapeStatus { SUCCESS, FAILED, SKIPPED, RATE_LIMITED, NO_NEW_CONTENT }
+enum SocialScrapeStatus { RUNNING, SUCCESS, FAILED, SKIPPED, RATE_LIMITED, NO_NEW_CONTENT }
 enum SocialPostStatus { ACTIVE, HIDDEN, ARCHIVED, DELETED }
 enum ScheduledPostStatus { SCHEDULED, PUBLISHED, FAILED, CANCELLED }
 
@@ -929,6 +929,8 @@ type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]
   accountName: String! @index(name: "byAccountName")
   accountHandle: String
   accountUrl: AWSURL!
+  businessLocation: String @index(name: "byAccountLocation", queryField: "socialAccountsByLocation")
+  tags: [String]
 
   # --- Account Metadata ---
   profileImageUrl: AWSURL
@@ -987,6 +989,7 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   accountName: String
   accountProfileImageUrl: String
   platform: String
+  businessLocation: String @index(name: "byPostLocation", queryField: "socialPostsByLocation", sortKeyFields: ["postedAt"])
 
   # --- Content ---
   content: String
@@ -1017,8 +1020,9 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   lastUpdatedAt: AWSDateTime
 
   # --- Status & Visibility ---
-  status: SocialPostStatus! @default(value: "ACTIVE") @index(name: "byPostStatus", sortKeyFields: ["postedAt"])
-  isPromotional: Boolean @default(value: "false")
+  status: SocialPostStatus! 
+    @default(value: "ACTIVE") 
+    @index(name: "byPostStatus", queryField: "socialPostsByPostStatus", sortKeyFields: ["postedAt"])  isPromotional: Boolean @default(value: "false")
   isPinned: Boolean @default(value: "false")
   isTournamentRelated: Boolean @default(value: "false")
 

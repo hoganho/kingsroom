@@ -335,6 +335,7 @@ export enum SocialPostType {
 }
 
 export enum SocialScrapeStatus {
+  RUNNING = "RUNNING",
   SUCCESS = "SUCCESS",
   FAILED = "FAILED",
   SKIPPED = "SKIPPED",
@@ -3908,6 +3909,8 @@ type EagerSocialAccount = {
   readonly accountName: string;
   readonly accountHandle?: string | null;
   readonly accountUrl: string;
+  readonly businessLocation?: string | null;
+  readonly tags?: (string | null)[] | null;
   readonly profileImageUrl?: string | null;
   readonly coverImageUrl?: string | null;
   readonly bio?: string | null;
@@ -3950,6 +3953,8 @@ type LazySocialAccount = {
   readonly accountName: string;
   readonly accountHandle?: string | null;
   readonly accountUrl: string;
+  readonly businessLocation?: string | null;
+  readonly tags?: (string | null)[] | null;
   readonly profileImageUrl?: string | null;
   readonly coverImageUrl?: string | null;
   readonly bio?: string | null;
@@ -3999,6 +4004,7 @@ type EagerSocialPost = {
   readonly accountName?: string | null;
   readonly accountProfileImageUrl?: string | null;
   readonly platform?: string | null;
+  readonly businessLocation?: string | null;
   readonly content?: string | null;
   readonly contentPreview?: string | null;
   readonly rawContent?: string | null;
@@ -4047,6 +4053,7 @@ type LazySocialPost = {
   readonly accountName?: string | null;
   readonly accountProfileImageUrl?: string | null;
   readonly platform?: string | null;
+  readonly businessLocation?: string | null;
   readonly content?: string | null;
   readonly contentPreview?: string | null;
   readonly rawContent?: string | null;

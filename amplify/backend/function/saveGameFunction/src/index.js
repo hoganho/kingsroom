@@ -968,7 +968,7 @@ const createOrUpdateGameCost = async (gameId, venueId, entityId, gameStartDateTi
     try {
         const existingResult = await monitoredDdbDocClient.send(new QueryCommand({
             TableName: gameCostTable,
-            IndexName: 'byGame',
+            IndexName: 'byGameCost', // CORRECTED: Changed from 'byGame' to 'byGameCost'
             KeyConditionExpression: 'gameId = :gameId',
             ExpressionAttributeValues: {
                 ':gameId': gameId

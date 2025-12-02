@@ -288,6 +288,24 @@
     },
     "userManagement": {
       "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        },
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "kingsroomauth"
+        }
+      ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },

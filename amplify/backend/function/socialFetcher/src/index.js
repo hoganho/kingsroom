@@ -297,11 +297,28 @@ async function scrapeAccount(account, options = {}) {
   // Use lastSuccessfulScrapeAt if available and not doing full sync
   let sinceTimestamp = null;
   if (!fetchAllHistory && account.lastSuccessfulScrapeAt) {
-    // Subtract 1 hour as buffer to avoid missing posts due to timezone issues
-    const since = new Date(account.lastSuccessfulScrapeAt);
-    since.setHours(since.getHours() - 1);
-    sinceTimestamp = Math.floor(since.getTime() / 1000); // Unix timestamp
-    console.log(`Incremental fetch: getting posts since ${since.toISOString()}`);
+    // We need to cover TWO gaps:
+    // 1. Posts created since last scrape (time gap)
+    // 2. Posts created before last scrape but delayed in Facebook API (24h buffer)
+    // Use whichever gives us the EARLIER timestamp (larger coverage)
+    
+    const now = Date.now();
+    const lastScrapeTime = new Date(account.lastSuccessfulScrapeAt).getTime();
+    
+    // Option 1: 24 hours before NOW (catches recent API delays)
+    const option1 = now - (24 * 60 * 60 * 1000);
+    
+    // Option 2: 24 hours before last scrape (catches old API delays + entire gap)
+    const option2 = lastScrapeTime - (24 * 60 * 60 * 1000);
+    
+    // Use the earlier timestamp (minimum value = earlier = larger coverage)
+    const sinceMs = Math.min(option1, option2);
+    sinceTimestamp = Math.floor(sinceMs / 1000); // Unix timestamp in seconds
+    
+    const sinceDate = new Date(sinceMs);
+    const hoursSinceLastScrape = Math.round((now - lastScrapeTime) / (60 * 60 * 1000));
+    console.log(`Incremental fetch: last scrape was ${hoursSinceLastScrape}h ago`);
+    console.log(`Looking back to ${sinceDate.toISOString()} (using ${sinceMs === option1 ? '24h from now' : '24h before last scrape'})`);
   }
 
   try {
@@ -353,6 +370,8 @@ async function scrapeAccount(account, options = {}) {
 
     // Fetch posts from Facebook Graph API
     let posts = [];
+    let isFullSync = fetchAllHistory;
+    
     if (fetchAllHistory) {
       console.log('Fetching ALL historical posts with pagination...');
       posts = await fetchAllFacebookPosts(pageId);
@@ -360,9 +379,11 @@ async function scrapeAccount(account, options = {}) {
       console.log(`Fetching posts since timestamp: ${sinceTimestamp}`);
       posts = await fetchFacebookPostsSince(pageId, sinceTimestamp);
     } else {
-      // First fetch for this account - get recent posts
-      console.log('First fetch - getting recent posts...');
-      posts = await fetchFacebookPosts(pageId, 100);
+      // First fetch for this account - do a FULL sync to get all historical posts
+      // This ensures we don't miss any posts on initial setup
+      console.log('First fetch - getting ALL historical posts with pagination...');
+      posts = await fetchAllFacebookPosts(pageId);
+      isFullSync = true; // Mark as full sync for the hasFullHistory flag
     }
     
     console.log(`Fetched ${posts.length} posts from ${account.accountName}`);
@@ -382,7 +403,7 @@ async function scrapeAccount(account, options = {}) {
       lastErrorMessage: null,
       status: 'ACTIVE',
       postCount: newPostCount,
-      hasFullHistory: fetchAllHistory ? true : (account.hasFullHistory || false),
+      hasFullHistory: isFullSync ? true : (account.hasFullHistory || false),
     });
 
     // Update scrape attempt
@@ -648,7 +669,9 @@ async function fetchFacebookPostsSince(pageId, sinceTimestamp) {
   const allPosts = [];
   let pageCount = 0;
 
-  console.log(`Fetching posts since timestamp ${sinceTimestamp}...`);
+  const sinceDate = new Date(sinceTimestamp * 1000);
+  console.log(`Fetching posts since timestamp ${sinceTimestamp} (${sinceDate.toISOString()})...`);
+  console.log(`API URL (without token): ${FB_API_VERSION}/${pageId}/posts?since=${sinceTimestamp}`);
 
   while (url && pageCount < MAX_PAGES_TO_FETCH) {
     pageCount++;
@@ -665,6 +688,10 @@ async function fetchFacebookPostsSince(pageId, sinceTimestamp) {
     allPosts.push(...posts);
     
     console.log(`Page ${pageCount}: Got ${posts.length} posts since ${sinceTimestamp}`);
+    if (posts.length > 0) {
+      console.log(`  First post: ${posts[0].id} at ${posts[0].created_time}`);
+      console.log(`  Last post: ${posts[posts.length - 1].id} at ${posts[posts.length - 1].created_time}`);
+    }
 
     // Get next page URL if available
     url = data.paging?.next || null;
@@ -676,6 +703,14 @@ async function fetchFacebookPostsSince(pageId, sinceTimestamp) {
   }
 
   console.log(`Incremental fetch complete: ${allPosts.length} posts from ${pageCount} pages`);
+  
+  if (allPosts.length === 0) {
+    console.log('No posts returned from Facebook API. This could mean:');
+    console.log('  1. No new posts since the timestamp');
+    console.log('  2. API caching/delay (try again in a few minutes)');
+    console.log('  3. Access token permission issues');
+  }
+  
   return allPosts;
 }
 
@@ -686,6 +721,8 @@ async function processAndSavePosts(account, posts) {
   const newPosts = [];
   const now = new Date().toISOString();
 
+  console.log(`Processing ${posts.length} posts for account ${account.accountName}`);
+
   for (const fbPost of posts) {
     // Create a deterministic ID from platform + post ID
     const postId = `${account.platform}_${fbPost.id}`;
@@ -693,7 +730,10 @@ async function processAndSavePosts(account, posts) {
     // Check if post already exists
     const existingPost = await getExistingPost(postId);
 
-    if (!existingPost) {
+    if (existingPost) {
+      console.log(`Post ${postId} already exists, skipping (posted: ${fbPost.created_time})`);
+    } else {
+      console.log(`NEW post found: ${postId} (posted: ${fbPost.created_time})`);
       // Convert Facebook datetime format to ISO 8601
       const postedAt = new Date(fbPost.created_time).toISOString();
       

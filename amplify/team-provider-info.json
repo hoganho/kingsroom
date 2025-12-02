@@ -52,7 +52,7 @@
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-4b4e61416f53532f322b-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-37754662763967563036-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -61,7 +61,7 @@
         "socialFetcher": {
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/socialFetcher-4c6d57737a79646d3832-build.zip"
+          "s3Key": "amplify-builds/socialFetcher-5a53305144474878794c-build.zip"
         },
         "tournamentConsolidator": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -80,7 +80,7 @@
         },
         "userManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/userManagement-7444457766716e417466-build.zip",
+          "s3Key": "amplify-builds/userManagement-2b36694f39316c6b7a2b-build.zip",
           "auditLogTable": "UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev"
         },
         "userLastActiveUpdater": {

@@ -268,9 +268,13 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
     }
   };
 
+  // Helper to determine if we should stack images (single) or grid them (multiple)
+  const hasMultipleImages = post.mediaUrls && post.mediaUrls.length > 1;
+
   return (
     <>
-      <div className="flex-shrink-0 w-[380px] bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+      {/* Added 'self-start' so shorter cards don't stretch to match taller ones in the flex row */}
+      <div className="flex-shrink-0 w-[380px] bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow self-start">
         <div className="p-4 flex items-center justify-between border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -365,13 +369,20 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
                 </div>
               </div>
             ) : (
-              <div className={`grid gap-2 ${post.mediaUrls!.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              // IMAGE RENDERING LOGIC UPDATED HERE
+              <div className={`grid gap-2 ${hasMultipleImages ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 {(post.mediaUrls!.filter(Boolean) as string[]).slice(0, 4).map((url, idx) => (
-                  <div key={idx} className={`relative rounded-xl overflow-hidden bg-slate-100 ${post.mediaUrls!.length === 1 ? 'aspect-video' : 'aspect-square'}`}>
+                  <div 
+                    key={idx} 
+                    className={`relative rounded-xl overflow-hidden bg-slate-100 
+                      ${hasMultipleImages ? 'aspect-square' : ''} 
+                    `}
+                  >
                     <img
                       src={url}
                       alt=""
-                      className="w-full h-full object-cover"
+                      // If single image: h-auto (natural height). If multiple: h-full object-cover (cropped square)
+                      className={`w-full ${hasMultipleImages ? 'h-full object-cover' : 'h-auto'}`}
                       loading="lazy"
                     />
                     {idx === 3 && post.mediaUrls!.length > 4 && (
@@ -427,7 +438,6 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
     </>
   );
 };
-
 export const SocialPulse: React.FC = () => {
   const client = generateClient();
   const [searchQuery, setSearchQuery] = useState('');
@@ -447,10 +457,13 @@ export const SocialPulse: React.FC = () => {
     posts, 
     loading: postsLoading, 
     refresh: refreshPosts,
-    fetchFullHistory 
+    fetchFullHistory,
+    hasMore,
+    loadMore
   } = useSocialPosts({ 
     filterByEntity: false, 
-    daysBack: showingHistory ? undefined : 7 
+    daysBack: 7,  // Always fetch last 7 days initially; fetchFullHistory() bypasses this
+    limit: 50
   });
 
   useEffect(() => {
@@ -502,8 +515,15 @@ export const SocialPulse: React.FC = () => {
 
   const handleLoadHistory = () => {
     setShowingHistory(true);
+    // fetchFullHistory bypasses the daysBack filter and loads all posts
     if (fetchFullHistory) {
       fetchFullHistory();
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (hasMore && loadMore) {
+      loadMore();
     }
   };
 
@@ -728,6 +748,19 @@ export const SocialPulse: React.FC = () => {
                       >
                         <Clock className="w-4 h-4 group-hover:text-indigo-600" />
                         Load posts older than 7 days
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Load More button after history is loaded */}
+                  {showingHistory && hasMore && !postsLoading && (
+                    <div className="flex justify-center pt-8 pb-12">
+                      <button 
+                        onClick={handleLoadMore}
+                        className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 shadow-sm text-slate-600 rounded-full hover:bg-slate-50 hover:text-indigo-600 transition-all font-medium group"
+                      >
+                        <RefreshCw className="w-4 h-4 group-hover:text-indigo-600" />
+                        Load more posts
                       </button>
                     </div>
                   )}

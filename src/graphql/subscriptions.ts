@@ -833,6 +833,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           accountName
           accountHandle
           accountUrl
+          businessLocation
+          tags
           profileImageUrl
           coverImageUrl
           bio
@@ -1753,6 +1755,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           accountName
           accountHandle
           accountUrl
+          businessLocation
+          tags
           profileImageUrl
           coverImageUrl
           bio
@@ -2689,6 +2693,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           accountName
           accountHandle
           accountUrl
+          businessLocation
+          tags
           profileImageUrl
           coverImageUrl
           bio
@@ -3612,6 +3618,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           accountName
           accountHandle
           accountUrl
+          businessLocation
+          tags
           profileImageUrl
           coverImageUrl
           bio
@@ -4535,6 +4543,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           accountName
           accountHandle
           accountUrl
+          businessLocation
+          tags
           profileImageUrl
           coverImageUrl
           bio
@@ -5455,6 +5465,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           accountName
           accountHandle
           accountUrl
+          businessLocation
+          tags
           profileImageUrl
           coverImageUrl
           bio
@@ -6388,6 +6400,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           accountName
           accountHandle
           accountUrl
+          businessLocation
+          tags
           profileImageUrl
           coverImageUrl
           bio
@@ -7321,6 +7335,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           accountName
           accountHandle
           accountUrl
+          businessLocation
+          tags
           profileImageUrl
           coverImageUrl
           bio

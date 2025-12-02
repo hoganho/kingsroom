@@ -1,4 +1,20 @@
+/* Amplify Params - DO NOT EDIT
+    API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
+    API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+    API_KINGSROOM_GRAPHQLAPIKEYOUTPUT
+    API_KINGSROOM_USERAUDITLOGTABLE_ARN
+    API_KINGSROOM_USERAUDITLOGTABLE_NAME
+    API_KINGSROOM_USERPREFERENCETABLE_ARN
+    API_KINGSROOM_USERPREFERENCETABLE_NAME
+    API_KINGSROOM_USERTABLE_ARN
+    API_KINGSROOM_USERTABLE_NAME
+    AUTH_KINGSROOMAUTH_USERPOOLID
+    ENV
+    REGION
+Amplify Params - DO NOT EDIT */
+
 // amplify/backend/function/userManagement/src/index.js
+
 const {
   CognitoIdentityProviderClient,
   AdminCreateUserCommand,
@@ -26,10 +42,27 @@ const monitor = new LambdaMonitoring('userManagement');
 // Wrap the DynamoDB client for automatic operation tracking
 const monitoredDocClient = monitor.wrapDynamoDBClient(docClient);
 
-// Environment variables (set these in Lambda configuration)
-const USER_POOL_ID = process.env.USER_POOL_ID;
-const USER_TABLE = process.env.USER_TABLE;
+// =====================================================================
+// ENVIRONMENT VARIABLES & VALIDATION
+// =====================================================================
+
+// We check for the specific Amplify-injected variable names (from the header block above)
+const USER_POOL_ID = process.env.USER_POOL_ID || process.env.AUTH_KINGSROOMAUTH_USERPOOLID;
+const USER_TABLE = process.env.USER_TABLE || process.env.API_KINGSROOM_USERTABLE_NAME;
 const AUDIT_LOG_TABLE = process.env.AUDIT_LOG_TABLE || process.env.API_KINGSROOM_USERAUDITLOGTABLE_NAME;
+
+// Validation: Fail fast if variables are missing to prevent confusing "Parameter cannot be null" errors later
+if (!USER_POOL_ID) {
+  const availableEnv = Object.keys(process.env).filter(k => k.startsWith('AUTH_')).join(', ');
+  throw new Error(`CRITICAL: Function is missing User Pool ID. Looked for AUTH_KINGSROOMAUTH_USERPOOLID. Available AUTH_ vars: [${availableEnv}]`);
+}
+
+if (!USER_TABLE) {
+  const availableEnv = Object.keys(process.env).filter(k => k.startsWith('API_')).join(', ');
+  throw new Error(`CRITICAL: Function is missing User Table Name. Looked for API_KINGSROOM_USERTABLE_NAME. Available API_ vars: [${availableEnv}]`);
+}
+
+// =====================================================================
 
 // Map GraphQL UserRole to Cognito Group names
 const ROLE_TO_COGNITO_GROUP = {

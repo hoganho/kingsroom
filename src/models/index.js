@@ -335,6 +335,7 @@ const SocialPostType = {
 };
 
 const SocialScrapeStatus = {
+  "RUNNING": "RUNNING",
   "SUCCESS": "SUCCESS",
   "FAILED": "FAILED",
   "SKIPPED": "SKIPPED",
