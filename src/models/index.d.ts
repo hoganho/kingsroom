@@ -2163,6 +2163,7 @@ type EagerGame = {
   readonly tournamentSeries?: TournamentSeries | null;
   readonly structure?: TournamentStructure | null;
   readonly gameCost?: GameCost | null;
+  readonly gameFinancialSnapshots?: (GameFinancialSnapshot | null)[] | null;
   readonly playerEntries?: (PlayerEntry | null)[] | null;
   readonly playerResults?: (PlayerResult | null)[] | null;
   readonly linkedSocialPosts?: (SocialPost | null)[] | null;
@@ -2247,6 +2248,7 @@ type LazyGame = {
   readonly tournamentSeries: AsyncItem<TournamentSeries | undefined>;
   readonly structure: AsyncItem<TournamentStructure | undefined>;
   readonly gameCost: AsyncItem<GameCost | undefined>;
+  readonly gameFinancialSnapshots: AsyncCollection<GameFinancialSnapshot>;
   readonly playerEntries: AsyncCollection<PlayerEntry>;
   readonly playerResults: AsyncCollection<PlayerResult>;
   readonly linkedSocialPosts: AsyncCollection<SocialPost>;
@@ -2391,6 +2393,78 @@ export declare type RakeStructure = LazyLoading extends LazyLoadingDisabled ? Ea
 
 export declare const RakeStructure: (new (init: ModelInit<RakeStructure>) => RakeStructure) & {
   copyOf(source: RakeStructure, mutator: (draft: MutableModel<RakeStructure>) => MutableModel<RakeStructure> | void): RakeStructure;
+}
+
+type EagerGameFinancialSnapshot = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<GameFinancialSnapshot, 'id'>;
+  };
+  readonly id: string;
+  readonly gameId: string;
+  readonly game?: Game | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly totalRevenue: number;
+  readonly totalPrizePool?: number | null;
+  readonly totalRake?: number | null;
+  readonly totalFees?: number | null;
+  readonly totalCost: number;
+  readonly totalDealerCost?: number | null;
+  readonly totalTournamentDirectorCost?: number | null;
+  readonly totalPromotionCost?: number | null;
+  readonly totalFloorStaffCost?: number | null;
+  readonly totalOtherCost?: number | null;
+  readonly totalPrizeContribution?: number | null;
+  readonly totalJackpotContribution?: number | null;
+  readonly profit: number;
+  readonly profitMargin?: number | null;
+  readonly revenuePerPlayer?: number | null;
+  readonly costPerPlayer?: number | null;
+  readonly dealerCostPerHour?: number | null;
+  readonly promoSpendPerPlayer?: number | null;
+  readonly notes?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyGameFinancialSnapshot = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<GameFinancialSnapshot, 'id'>;
+  };
+  readonly id: string;
+  readonly gameId: string;
+  readonly game: AsyncItem<Game | undefined>;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly totalRevenue: number;
+  readonly totalPrizePool?: number | null;
+  readonly totalRake?: number | null;
+  readonly totalFees?: number | null;
+  readonly totalCost: number;
+  readonly totalDealerCost?: number | null;
+  readonly totalTournamentDirectorCost?: number | null;
+  readonly totalPromotionCost?: number | null;
+  readonly totalFloorStaffCost?: number | null;
+  readonly totalOtherCost?: number | null;
+  readonly totalPrizeContribution?: number | null;
+  readonly totalJackpotContribution?: number | null;
+  readonly profit: number;
+  readonly profitMargin?: number | null;
+  readonly revenuePerPlayer?: number | null;
+  readonly costPerPlayer?: number | null;
+  readonly dealerCostPerHour?: number | null;
+  readonly promoSpendPerPlayer?: number | null;
+  readonly notes?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type GameFinancialSnapshot = LazyLoading extends LazyLoadingDisabled ? EagerGameFinancialSnapshot : LazyGameFinancialSnapshot
+
+export declare const GameFinancialSnapshot: (new (init: ModelInit<GameFinancialSnapshot>) => GameFinancialSnapshot) & {
+  copyOf(source: GameFinancialSnapshot, mutator: (draft: MutableModel<GameFinancialSnapshot>) => MutableModel<GameFinancialSnapshot> | void): GameFinancialSnapshot;
 }
 
 type EagerGameCost = {

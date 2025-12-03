@@ -729,6 +729,11 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             _lastChangedAt
             __typename
           }
+          gameFinancialSnapshots {
+            nextToken
+            startedAt
+            __typename
+          }
           playerEntries {
             nextToken
             startedAt
@@ -1651,6 +1656,11 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          gameFinancialSnapshots {
+            nextToken
+            startedAt
             __typename
           }
           playerEntries {
@@ -2593,6 +2603,11 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             _lastChangedAt
             __typename
           }
+          gameFinancialSnapshots {
+            nextToken
+            startedAt
+            __typename
+          }
           playerEntries {
             nextToken
             startedAt
@@ -3518,6 +3533,11 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          gameFinancialSnapshots {
+            nextToken
+            startedAt
             __typename
           }
           playerEntries {
@@ -4447,6 +4467,11 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             _lastChangedAt
             __typename
           }
+          gameFinancialSnapshots {
+            nextToken
+            startedAt
+            __typename
+          }
           playerEntries {
             nextToken
             startedAt
@@ -5369,6 +5394,11 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          gameFinancialSnapshots {
+            nextToken
+            startedAt
             __typename
           }
           playerEntries {
@@ -6308,6 +6338,11 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             _lastChangedAt
             __typename
           }
+          gameFinancialSnapshots {
+            nextToken
+            startedAt
+            __typename
+          }
           playerEntries {
             nextToken
             startedAt
@@ -7243,6 +7278,11 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          gameFinancialSnapshots {
+            nextToken
+            startedAt
             __typename
           }
           playerEntries {

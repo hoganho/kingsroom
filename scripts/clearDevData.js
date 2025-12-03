@@ -22,6 +22,7 @@ const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 // This list is based on the table names you provided.
 const TABLES_TO_CLEAR = [
   'Game-sjyzke3u45golhnttlco6bpcua-dev',
+  'GameCost-sjyzke3u45golhnttlco6bpcua-dev',
   'Player-sjyzke3u45golhnttlco6bpcua-dev',
   'PlayerCredits-sjyzke3u45golhnttlco6bpcua-dev',
   'PlayerEntry-sjyzke3u45golhnttlco6bpcua-dev',

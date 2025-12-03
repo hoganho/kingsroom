@@ -959,10 +959,193 @@ const findExistingGame = async (input) => {
 };
 
 /**
+ * Get GameCost row for a given gameId
+ */
+const getGameCostByGameId = async (gameId) => {
+    const gameCostTable = getTableName('GameCost');
+
+    try {
+        const result = await monitoredDdbDocClient.send(new QueryCommand({
+            TableName: gameCostTable,
+            IndexName: 'byGameCost',
+            KeyConditionExpression: 'gameId = :gameId',
+            ExpressionAttributeValues: {
+                ':gameId': gameId
+            }
+        }));
+
+        return (result.Items && result.Items.length > 0) ? result.Items[0] : null;
+    } catch (error) {
+        console.error('[SAVE-GAME] Error fetching GameCost by gameId:', error);
+        return null;
+    }
+};
+
+/**
+ * Create or update GameFinancialSnapshot for a game
+ * Uses Game + GameCost to build a management finance view.
+ */
+const createOrUpdateGameFinancialSnapshot = async (game, entityId, venueId) => {
+    const snapshotTable = getTableName('GameFinancialSnapshot');
+
+    // Fetch cost record
+    const gameCost = await getGameCostByGameId(game.id);
+    const totalCost = gameCost?.totalCost || 0;
+
+    // Revenue side
+    const totalRake = game.totalRake || 0;
+    const totalPrizePool = game.prizepool || 0;
+    const totalRevenue = totalRake; // For now treat rake as revenue
+
+    // Derived metrics
+    const profit = (typeof game.profitLoss === 'number')
+        ? game.profitLoss
+        : (totalRevenue - totalCost);
+
+    const profitMargin = totalRevenue > 0 ? profit / totalRevenue : null;
+    const revenuePerPlayer = game.totalEntries ? totalRevenue / game.totalEntries : null;
+    const costPerPlayer = game.totalEntries ? totalCost / game.totalEntries : null;
+
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+
+    // See if a snapshot already exists for this game
+    let existingSnapshot = null;
+    try {
+        const existingResult = await monitoredDdbDocClient.send(new QueryCommand({
+            TableName: snapshotTable,
+            IndexName: 'byGameFinancialSnapshot',
+            KeyConditionExpression: 'gameId = :gameId',
+            ExpressionAttributeValues: {
+                ':gameId': game.id
+            }
+        }));
+        existingSnapshot = (existingResult.Items && existingResult.Items[0]) || null;
+    } catch (error) {
+        console.error('[SAVE-GAME] Error querying GameFinancialSnapshot:', error);
+    }
+
+    if (existingSnapshot) {
+        // UPDATE existing snapshot
+        const snapshotId = existingSnapshot.id;
+        monitoring.trackOperation('UPDATE', 'GameFinancialSnapshot', snapshotId);
+
+        const updateFields = {
+            // Core
+            entityId,
+            venueId,
+            gameStartDateTime: game.gameStartDateTime,
+
+            // Revenue/Cost
+            totalRevenue,
+            totalPrizePool,
+            totalRake,
+            totalCost,
+
+            // Derived
+            profit,
+            profitMargin,
+            revenuePerPlayer,
+            costPerPlayer,
+
+            // Basic denorm for future metrics
+            totalDealerCost: gameCost?.totalDealerCost || 0,
+            totalPromotionCost: gameCost?.totalPromotionCost || 0,
+            totalFloorStaffCost: gameCost?.totalFloorStaffCost || 0,
+            totalOtherCost: gameCost?.totalOtherCost || 0,
+
+            updatedAt: now,
+            _lastChangedAt: timestamp
+        };
+
+        const updateExpression = 'SET ' + Object.keys(updateFields)
+            .map(key => `#${key} = :${key}`)
+            .join(', ');
+
+        const expressionAttributeNames = {};
+        const expressionAttributeValues = {};
+        Object.keys(updateFields).forEach((key) => {
+            expressionAttributeNames[`#${key}`] = key;
+            expressionAttributeValues[`:${key}`] = updateFields[key];
+        });
+
+        try {
+            await monitoredDdbDocClient.send(new UpdateCommand({
+                TableName: snapshotTable,
+                Key: { id: snapshotId },
+                UpdateExpression: updateExpression,
+                ExpressionAttributeNames: expressionAttributeNames,
+                ExpressionAttributeValues: expressionAttributeValues
+            }));
+            console.log(`[SAVE-GAME] ✅ Updated GameFinancialSnapshot ${snapshotId} for game ${game.id}`);
+        } catch (error) {
+            console.error('[SAVE-GAME] Error updating GameFinancialSnapshot:', error);
+        }
+
+        return snapshotId;
+    }
+
+    // CREATE new snapshot
+    const snapshotId = uuidv4();
+    monitoring.trackOperation('CREATE', 'GameFinancialSnapshot', snapshotId);
+
+    const snapshot = {
+        id: snapshotId,
+
+        // Relationships
+        gameId: game.id,
+        entityId,
+        venueId,
+        gameStartDateTime: game.gameStartDateTime,
+
+        // Revenue & Cost
+        totalRevenue,
+        totalPrizePool,
+        totalRake,
+        totalCost,
+
+        // Derived management metrics
+        profit,
+        profitMargin,
+        revenuePerPlayer,
+        costPerPlayer,
+        totalDealerCost: gameCost?.totalDealerCost || 0,
+        totalPromotionCost: gameCost?.totalPromotionCost || 0,
+        totalFloorStaffCost: gameCost?.totalFloorStaffCost || 0,
+        totalOtherCost: gameCost?.totalOtherCost || 0,
+
+        createdAt: now,
+        updatedAt: now,
+        _version: 1,
+        _lastChangedAt: timestamp,
+        __typename: 'GameFinancialSnapshot'
+    };
+
+    try {
+        await monitoredDdbDocClient.send(new PutCommand({
+            TableName: snapshotTable,
+            Item: snapshot
+        }));
+        console.log(`[SAVE-GAME] ✅ Created GameFinancialSnapshot ${snapshotId} for game ${game.id}`);
+        return snapshotId;
+    } catch (error) {
+        console.error('[SAVE-GAME] Error creating GameFinancialSnapshot:', error);
+        return null;
+    }
+};
+
+/**
  * Create or update GameCost record for a game (NEW)
  */
-const createOrUpdateGameCost = async (gameId, venueId, entityId, gameStartDateTime, venueFee = null) => {
-    const gameCostTable = getTableName('GameCost');
+const createOrUpdateGameCost = async (
+        gameId,
+        venueId,
+        entityId,
+        gameStartDateTime,
+        venueFee = null,
+        totalEntries = 0
+    ) => {
+        const gameCostTable = getTableName('GameCost');
     
     // Check if GameCost already exists for this game
     try {
@@ -1025,31 +1208,39 @@ const createOrUpdateGameCost = async (gameId, venueId, entityId, gameStartDateTi
     const costId = uuidv4();
     const now = new Date().toISOString();
     const timestamp = Date.now();
-    
+
+    // NEW: default dealer cost = #entries * $15.00
+    const dealerRatePerEntry = 15;
+    const computedDealerCost = (totalEntries || 0) * dealerRatePerEntry;
+
     monitoring.trackOperation('CREATE', 'GameCost', costId);
-    
+
     const gameCost = {
         id: costId,
         gameId: gameId,
-        
-        // Venue fee - NEW
+
+        // Venue fee
         venueFee: venueFee || 0,
-        
-        // Initialize all other cost fields to 0
-        totalDealerCost: 0,
+
+        // Dealer cost default: #entries * $15
+        totalDealerCost: computedDealerCost,
+
+        // Initialise all other cost fields to 0
         totalTournamentDirectorCost: 0,
         totalPrizeContribution: 0,
         totalJackpotContribution: 0,
         totalPromotionCost: 0,
         totalFloorStaffCost: 0,
         totalOtherCost: 0,
-        totalCost: venueFee || 0,  // Start with just venue fee
-        
+
+        // Total cost = venue fee + dealer cost (for now)
+        totalCost: (venueFee || 0) + computedDealerCost,
+
         // Denormalized fields for querying
         entityId: entityId,
         venueId: venueId,
         gameDate: gameStartDateTime,
-        
+
         // Timestamps
         createdAt: now,
         updatedAt: now,
@@ -1057,13 +1248,15 @@ const createOrUpdateGameCost = async (gameId, venueId, entityId, gameStartDateTi
         _lastChangedAt: timestamp,
         __typename: 'GameCost'
     };
-    
+
     try {
         await monitoredDdbDocClient.send(new PutCommand({
             TableName: gameCostTable,
             Item: gameCost
         }));
-        console.log(`[SAVE-GAME] ✅ Created GameCost: ${costId} for game: ${gameId} with venue fee: ${venueFee || 0}`);
+        console.log(
+          `[SAVE-GAME] ✅ Created GameCost: ${costId} for game: ${gameId} with venue fee: ${venueFee || 0}, dealer cost: ${computedDealerCost}`
+        );
         return costId;
     } catch (error) {
         console.error(`[SAVE-GAME] ❌ Error creating GameCost:`, error);
@@ -1200,13 +1393,22 @@ const createGame = async (input, venueResolution, seriesResolution) => {
     
     // Create the associated GameCost record with venue fee (NEW)
     await createOrUpdateGameCost(
-        gameId, 
-        venueResolution.venueId, 
-        input.source.entityId, 
+        gameId,
+        venueResolution.venueId,
+        input.source.entityId,
         game.gameStartDateTime,
-        venueResolution.venueFee
+        venueResolution.venueFee,
+        game.totalEntries || 0
     );
     
+
+    // Create initial GameFinancialSnapshot
+    await createOrUpdateGameFinancialSnapshot(
+        game,
+        input.source.entityId,
+        venueResolution.venueId
+    );
+
     return { gameId, game, wasNewGame: true, fieldsUpdated: [] };
 };
 
@@ -1380,18 +1582,25 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
         console.log(`[SAVE-GAME] No changes detected for game ${existingGame.id}`);
     }
     
-    // Update GameCost record with new venue fee (NEW)
+    // Update GameCost record with new venue fee and entries
     await createOrUpdateGameCost(
-        existingGame.id,
+        updatedGame.id,
         venueResolution.venueId,
         input.source.entityId,
-        existingGame.gameStartDateTime,
-        venueResolution.venueFee
+        updatedGame.gameStartDateTime,
+        venueResolution.venueFee,
+        updatedGame.totalEntries || 0
     );
-    
+
+    // Update GameFinancialSnapshot for this game
+    await createOrUpdateGameFinancialSnapshot(
+        updatedGame,
+        input.source.entityId,
+        venueResolution.venueId
+    );
+
     // Return merged game object
-    const updatedGame = { ...existingGame, ...updateFields };
-    return { gameId: existingGame.id, game: updatedGame, wasNewGame: false, fieldsUpdated };
+    return { gameId: updatedGame.id, game: updatedGame, wasNewGame: false, fieldsUpdated };
 };
 
 // ===================================================================

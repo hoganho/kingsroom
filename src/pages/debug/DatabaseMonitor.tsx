@@ -123,7 +123,24 @@ export const DatabaseMonitorPage: React.FC = () => {
     const [isLoadingActivity, setIsLoadingActivity] = useState(false);
     
     // Scanner State
-    const [tableStats, setTableStats] = useState<Record<string, TableScanStats>>({});
+    const [tableStats, setTableStats] = useState<Record<string, TableScanStats>>(() => {
+        try {
+            const saved = sessionStorage.getItem('db_monitor_stats');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                // We must convert the date strings back to Date objects
+                Object.keys(parsed).forEach(key => {
+                    if (parsed[key].lastScan) {
+                        parsed[key].lastScan = new Date(parsed[key].lastScan);
+                    }
+                });
+                return parsed;
+            }
+        } catch (e) {
+            console.warn('Failed to load stats from storage', e);
+        }
+        return {};
+    });
     const [scanLimit, setScanLimit] = useState<number>(1000);
     const [isGlobalScanning, setIsGlobalScanning] = useState(false);
     
@@ -265,6 +282,12 @@ export const DatabaseMonitorPage: React.FC = () => {
     };
 
     useEffect(() => {
+        if (Object.keys(tableStats).length > 0) {
+            sessionStorage.setItem('db_monitor_stats', JSON.stringify(tableStats));
+        }
+    }, [tableStats]);
+
+    useEffect(() => {
         // Only fetch on mount and manual refresh
         setClientOperations(monitoring.getOperations());
         setStats(prev => ({ ...prev, client: { total: monitoring.getOperations().length } }));
@@ -341,6 +364,20 @@ export const DatabaseMonitorPage: React.FC = () => {
                         )}
                         {isGlobalScanning ? 'Scanning All...' : 'Scan All Tables'}
                     </button>
+
+                    {Object.keys(tableStats).length > 0 && (
+                        <button
+                            onClick={() => {
+                                setTableStats({});
+                                sessionStorage.removeItem('db_monitor_stats');
+                            }}
+                            className="px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors text-sm font-medium"
+                            title="Clear cached counts"
+                        >
+                            Clear
+                        </button>
+                    )}
+
                 </div>
             </div>
 

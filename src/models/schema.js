@@ -1576,6 +1576,22 @@ export const schema = {
                         ]
                     }
                 },
+                "gameFinancialSnapshots": {
+                    "name": "gameFinancialSnapshots",
+                    "isArray": true,
+                    "type": {
+                        "model": "GameFinancialSnapshot"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "game"
+                        ]
+                    }
+                },
                 "playerEntries": {
                     "name": "playerEntries",
                     "isArray": true,
@@ -2137,6 +2153,273 @@ export const schema = {
                         "name": "byGame",
                         "fields": [
                             "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "GameFinancialSnapshot": {
+            "name": "GameFinancialSnapshot",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "game": {
+                    "name": "game",
+                    "isArray": false,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "gameId"
+                        ]
+                    }
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalRevenue": {
+                    "name": "totalRevenue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPrizePool": {
+                    "name": "totalPrizePool",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalRake": {
+                    "name": "totalRake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalFees": {
+                    "name": "totalFees",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalDealerCost": {
+                    "name": "totalDealerCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTournamentDirectorCost": {
+                    "name": "totalTournamentDirectorCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPromotionCost": {
+                    "name": "totalPromotionCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalFloorStaffCost": {
+                    "name": "totalFloorStaffCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalOtherCost": {
+                    "name": "totalOtherCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPrizeContribution": {
+                    "name": "totalPrizeContribution",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalJackpotContribution": {
+                    "name": "totalJackpotContribution",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "profit": {
+                    "name": "profit",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "profitMargin": {
+                    "name": "profitMargin",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "revenuePerPlayer": {
+                    "name": "revenuePerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "costPerPlayer": {
+                    "name": "costPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dealerCostPerHour": {
+                    "name": "dealerCostPerHour",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "promoSpendPerPlayer": {
+                    "name": "promoSpendPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "notes": {
+                    "name": "notes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "GameFinancialSnapshots",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameFinancialSnapshot",
+                        "fields": [
+                            "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityGameFinancialSnapshot",
+                        "fields": [
+                            "entityId",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueGameFinancialSnapshot",
+                        "fields": [
+                            "venueId",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameStartDateFinancialSnapshot",
+                        "fields": [
+                            "gameStartDateTime",
+                            "profit"
                         ]
                     }
                 },
@@ -12393,5 +12676,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "77e15fcd6465650b75ef60524971e89f"
+    "version": "538f9a9dae31f4820c7abc88ac39c396"
 };

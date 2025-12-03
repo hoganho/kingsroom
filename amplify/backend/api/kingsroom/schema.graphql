@@ -256,6 +256,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   tournamentSeries: TournamentSeries @belongsTo(fields: ["tournamentSeriesId"])
   structure: TournamentStructure @hasOne
   gameCost: GameCost @hasOne(fields: ["id"])
+  gameFinancialSnapshots: [GameFinancialSnapshot] @hasMany(indexName: "byGameFinancialSnapshot", fields: ["id"])
   playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
 
@@ -297,6 +298,51 @@ type RakeStructure @model(subscriptions: null) @auth(rules: [{ allow: private }]
   rakePercentage: Float
   rakeCap: Float
   gameId: ID! @index(name: "byGame")
+}
+
+type GameFinancialSnapshot
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  id: ID!
+
+  # --- Core Relationships ---
+  gameId: ID! @index(name: "byGameFinancialSnapshot")
+  game: Game @belongsTo(fields: ["gameId"])
+
+  # Mirror common filters from Game / GameCost so dashboards are easy
+  entityId: ID @index(name: "byEntityGameFinancialSnapshot", sortKeyFields: ["gameStartDateTime"])
+  venueId: ID @index(name: "byVenueGameFinancialSnapshot", sortKeyFields: ["gameStartDateTime"])
+  gameStartDateTime: AWSDateTime @index(name: "byGameStartDateFinancialSnapshot", sortKeyFields: ["profit"])
+
+  # --- Revenue Side (from Game) ---
+  totalRevenue: Float! @default(value: "0")        # e.g. rake + fees, or your chosen definition
+  totalPrizePool: Float @default(value: "0")
+  totalRake: Float @default(value: "0")
+  totalFees: Float @default(value: "0")            # venueFee, admin fees, etc.
+
+  # --- Cost Side (from GameCost) ---
+  totalCost: Float! @default(value: "0")
+  totalDealerCost: Float @default(value: "0")
+  totalTournamentDirectorCost: Float @default(value: "0")
+  totalPromotionCost: Float @default(value: "0")
+  totalFloorStaffCost: Float @default(value: "0")
+  totalOtherCost: Float @default(value: "0")
+  totalPrizeContribution: Float @default(value: "0")
+  totalJackpotContribution: Float @default(value: "0")
+
+  # --- Derived Management Metrics ---
+  profit: Float! @default(value: "0")              # totalRevenue - totalCost
+  profitMargin: Float                              # profit / totalRevenue
+  revenuePerPlayer: Float                          # totalRevenue / totalEntries
+  costPerPlayer: Float                             # totalCost / totalEntries
+  dealerCostPerHour: Float
+  promoSpendPerPlayer: Float
+
+  # Optional: used for comments / accounting notes
+  notes: String
+
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }
 
 type GameCost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {

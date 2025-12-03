@@ -27,7 +27,7 @@
         },
         "getDatabaseMetrics": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/getDatabaseMetrics-412b6c4b3953546e3031-build.zip"
+          "s3Key": "amplify-builds/getDatabaseMetrics-7834342f713243346734-build.zip"
         },
         "getModelCount": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -52,7 +52,7 @@
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-37754662763967563036-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-443048685a426f724f61-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
