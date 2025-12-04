@@ -85,6 +85,12 @@ export const validateEditedGameData = (data: GameData): ValidationResult => {
         warnings.push('Rake was negative, set to 0');
     }
     
+    // ✅ Added venueFee validation
+    if (correctedData.venueFee && correctedData.venueFee < 0) {
+        correctedData.venueFee = 0;
+        warnings.push('Venue fee was negative, set to 0');
+    }
+    
     if (correctedData.totalEntries && correctedData.totalEntries < 0) {
         correctedData.totalEntries = 0;
         warnings.push('Total entries was negative, set to 0');
@@ -161,11 +167,12 @@ export const calculateDerivedFields = (data: GameData): Partial<GameData> => {
         }
     }
     
-    // Calculate profit/loss
+    // ✅ Calculate profit/loss (now includes venue fee)
     if (derived.revenueByBuyIns && derived.totalRake) {
         const totalRevenue = (derived.totalRake || 0);
         const overlay = derived.guaranteeOverlay || 0;
-        derived.profitLoss = totalRevenue - overlay;
+        const venueFee = data.venueFee || 0;  // ✅ Include venue fee
+        derived.profitLoss = totalRevenue - overlay - venueFee;
     }
     
     // Calculate average stack if not provided

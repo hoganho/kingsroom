@@ -6,7 +6,6 @@ import { VenueFormData } from '../../types/venue';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 type Venue = APITypes.Venue;
-// ✅ NEW: Define Entity type
 type Entity = Pick<APITypes.Entity, 'id' | 'entityName'>;
 
 interface VenueModalProps {
@@ -14,11 +13,9 @@ interface VenueModalProps {
   onClose: () => void;
   onSave: (venueData: VenueFormData) => void;
   venue: Venue | null;
-  // ✅ NEW: Prop to receive entities
   entities: Entity[];
 }
 
-// ✅ UPDATED: Include entityId in the initial state
 const initialFormState: VenueFormData = {
   name: '',
   address: '',
@@ -26,6 +23,7 @@ const initialFormState: VenueFormData = {
   country: 'Australia',
   aliases: [],
   entityId: null,
+  fee: null,
 };
 
 export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave, venue, entities }) => {
@@ -34,6 +32,8 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
 
   useEffect(() => {
     if (isOpen && venue) {
+      console.log('[VenueModal] Loading venue data:', venue);
+      console.log('[VenueModal] Venue fee value:', venue.fee);
       setFormData({
         name: venue.name,
         address: venue.address || '',
@@ -41,16 +41,34 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
         country: venue.country || 'Australia',
         aliases: venue.aliases?.filter(Boolean) as string[] || [],
         entityId: venue.entityId || null,
+        fee: venue.fee ?? null,
       });
-    } else {
+    } else if (isOpen && !venue) {
+      // Reset to initial state when opening for new venue
       setFormData(initialFormState);
     }
   }, [venue, isOpen]);
 
-  // ✅ UPDATED: Make handleChange generic for Inputs and Selects
+  // Handle text/select input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle fee input changes (convert to number or null)
+  const handleFeeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    console.log('[VenueModal] Fee input value:', value);
+    
+    if (value === '' || value === null || value === undefined) {
+      setFormData(prev => ({ ...prev, fee: null }));
+    } else {
+      const numValue = parseFloat(value);
+      setFormData(prev => ({ 
+        ...prev, 
+        fee: isNaN(numValue) ? null : numValue 
+      }));
+    }
   };
 
   const handleAddAlias = () => {
@@ -70,6 +88,8 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.name) {
+      console.log('[VenueModal] Submitting form data:', formData);
+      console.log('[VenueModal] Fee being saved:', formData.fee);
       onSave(formData);
     }
   };
@@ -86,13 +106,13 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
             <input type="text" name="name" id="name" required value={formData.name} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
           </div>
 
-          {/* ✅ NEW: Entity Selection Dropdown */}
+          {/* Entity Selection Dropdown */}
           <div>
             <label htmlFor="entityId" className="block text-sm font-medium text-gray-700">Entity</label>
             <select
               name="entityId"
               id="entityId"
-              value={formData.entityId || ''} // Use || '' for controlled component
+              value={formData.entityId || ''}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             >
@@ -104,6 +124,35 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
               ))}
             </select>
           </div>
+
+          {/* Fee Input Field */}
+          <div>
+            <label htmlFor="fee" className="block text-sm font-medium text-gray-700">
+              Venue Fee (per game)
+            </label>
+            <div className="relative mt-1 rounded-md shadow-sm">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <span className="text-gray-500 sm:text-sm">$</span>
+              </div>
+              <input
+                type="number"
+                name="fee"
+                id="fee"
+                step="0.01"
+                min="0"
+                value={formData.fee !== null && formData.fee !== undefined ? formData.fee : ''}
+                onChange={handleFeeChange}
+                placeholder="0.00"
+                className="block w-full rounded-md border-gray-300 pl-7 pr-12 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              />
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <span className="text-gray-500 sm:text-sm">AUD</span>
+              </div>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              This fee will be automatically applied to games at this venue.
+            </p>
+          </div>
           
           <div>
             <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
@@ -113,7 +162,7 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
             <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
             <input type="text" name="city" id="city" value={formData.city || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
           </div>
-            <div>
+          <div>
             <label htmlFor="aliases" className="block text-sm font-medium text-gray-700">Aliases</label>
             <div className="mt-1 flex rounded-md shadow-sm">
               <input
@@ -135,7 +184,7 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
               </button>
             </div>
             {formData.aliases.length > 0 && (
-              <div className="mt-2 space-x-2">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {formData.aliases.map(alias => (
                   <span key={alias} className="inline-flex items-center gap-x-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
                     {alias}

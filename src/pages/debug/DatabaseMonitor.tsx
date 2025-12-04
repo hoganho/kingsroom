@@ -64,6 +64,7 @@ const SCHEMA_GROUPS = [
             { name: 'PlayerTicket', plural: 'PlayerTickets' },
             { name: 'TicketTemplate', plural: 'TicketTemplates' },
             { name: 'GameCost', plural: 'GameCosts' },
+            { name: 'GameFinancialSnapshot', plural: 'GameFinancialSnapshots' },
             { name: 'GameCostLineItem', plural: 'GameCostLineItems' },
             { name: 'GameCostItem', plural: 'GameCostItems' }
         ]

@@ -1,5 +1,6 @@
 // services/gameService.ts
 // UPDATED: Added scraperApiKey parameter support
+// UPDATED: Added venueFee support in saveGameInput
 
 import { generateClient } from 'aws-amplify/api';
 import type { GraphQLResult } from '@aws-amplify/api';
@@ -461,6 +462,9 @@ export const saveGameDataToBackend = async (
             guaranteeOverlay: (finalData as any).guaranteeOverlay || null,
             guaranteeSurplus: (finalData as any).guaranteeSurplus || null,
             
+            // ✅ Venue fee (from Venue.fee, editable in SaveConfirmationModal)
+            venueFee: (finalData as any).venueFee ?? null,
+            
             // Game details
             startingStack: finalData.startingStack || 0,
             prizepool: finalData.prizepool || 0,
@@ -543,6 +547,7 @@ export const saveGameDataToBackend = async (
         sourceUrl,
         venueId,
         gameStatus: saveGameInput.game.gameStatus,
+        venueFee: saveGameInput.game.venueFee,  // ✅ Log venueFee
         playerCount: saveGameInput.players?.totalPlayers || 0,
         existingGameId,
         wasEdited: options?.wasEdited,

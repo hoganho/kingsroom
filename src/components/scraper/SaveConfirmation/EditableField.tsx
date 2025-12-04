@@ -18,6 +18,7 @@ const getFieldInputType = (field: keyof GameData): string => {
     const fieldTypes: Partial<Record<keyof GameData, string>> = {
         buyIn: 'number',
         rake: 'number',
+        venueFee: 'number',  // ✅ Added venueFee
         prizepool: 'number',
         totalEntries: 'number',
         totalRebuys: 'number',
@@ -28,12 +29,16 @@ const getFieldInputType = (field: keyof GameData): string => {
         totalChipsInPlay: 'number',
         averagePlayerStack: 'number',
         tournamentId: 'number',
+        eventNumber: 'number',
+        dayNumber: 'number',
         gameStartDateTime: 'datetime-local',
         gameEndDateTime: 'datetime-local',
         hasGuarantee: 'checkbox',
         isSeries: 'checkbox',
         isRegular: 'checkbox',
         isSatellite: 'checkbox',
+        isMainEvent: 'checkbox',
+        finalDay: 'checkbox',
         doNotScrape: 'checkbox',
         gameStatus: 'select',
         registrationStatus: 'select',
@@ -49,12 +54,12 @@ const getFieldInputType = (field: keyof GameData): string => {
 // Get select options for enum fields
 const getSelectOptions = (field: keyof GameData): string[] => {
     const options: Partial<Record<keyof GameData, string[]>> = {
-        gameStatus: ['SCHEDULED', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED'],
-        registrationStatus: ['OPEN', 'CLOSED', 'LATE_REG', 'N_A'],
-        gameVariant: ['NLH', 'PLO', 'PLO5', 'MIXED'],
+        gameStatus: ['SCHEDULED', 'INITIATING', 'REGISTERING', 'RUNNING', 'CLOCK_STOPPED', 'FINISHED', 'CANCELLED', 'NOT_IN_USE', 'NOT_PUBLISHED'],
+        registrationStatus: ['SCHEDULED', 'OPEN', 'FINAL', 'CLOSED', 'N_A'],
+        gameVariant: ['NLHE', 'PLO', 'PLOM', 'PLO5', 'PLO6'],
         gameType: ['TOURNAMENT', 'CASH_GAME'],
-        gameFrequency: ['DAILY', 'WEEKLY', 'MONTHLY', 'SPECIAL'],
-        tournamentType: ['FREEZEOUT', 'REBUY', 'BOUNTY', 'MYSTERY_BOUNTY', 'SATELLITE']
+        gameFrequency: ['DAILY', 'WEEKLY', 'FORTNIGHTLY', 'MONTHLY', 'QUARTERLY', 'YEARLY', 'UNKNOWN'],
+        tournamentType: ['FREEZEOUT', 'REBUY', 'SATELLITE', 'DEEPSTACK']
     };
     
     return options[field] || [];
@@ -83,8 +88,12 @@ const formatDisplayValue = (value: any, field: keyof GameData): string => {
     
     // Handle numbers with formatting
     if (typeof value === 'number') {
-        if (field === 'buyIn' || field === 'rake' || field === 'prizepool' || 
-            field === 'guaranteeAmount' || field === 'totalRake' || field === 'revenueByBuyIns') {
+        // ✅ Added venueFee to currency fields
+        if (field === 'buyIn' || field === 'rake' || field === 'venueFee' || 
+            field === 'prizepool' || field === 'guaranteeAmount' || 
+            field === 'totalRake' || field === 'revenueByBuyIns' ||
+            field === 'guaranteeOverlay' || field === 'guaranteeSurplus' ||
+            field === 'profitLoss') {
             return `$${value.toLocaleString()}`;
         }
         return value.toLocaleString();
@@ -258,7 +267,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
             <input
                 ref={inputRef as React.RefObject<HTMLInputElement>}
                 type={inputType === 'datetime-local' ? 'datetime-local' : inputType}
-                value={localValue || ''}
+                value={localValue ?? ''}
                 onChange={(e) => setLocalValue(e.target.value)}
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}

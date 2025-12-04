@@ -48,8 +48,9 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
                 defaultOpen: true
             },
             {
-                title: '💰 Buy-In & Prize',
-                fields: ['buyIn', 'rake', 'prizepool', 'totalEntries', 'guaranteeAmount', 'hasGuarantee'],
+                // ✅ Added venueFee to this group
+                title: '💰 Buy-In & Costs',
+                fields: ['buyIn', 'rake', 'venueFee', 'prizepool', 'totalEntries', 'guaranteeAmount', 'hasGuarantee'],
                 priority: 'important',
                 defaultOpen: true
             },

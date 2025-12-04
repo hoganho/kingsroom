@@ -54,6 +54,7 @@ export const listVenuesShallow = /* GraphQL */ `
         address
         city
         country
+        fee
         createdAt
         updatedAt
         entityId

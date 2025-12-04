@@ -23,6 +23,7 @@ const TABLES_TO_BACKUP = [
     'GameCost-sjyzke3u45golhnttlco6bpcua-dev',
     'GameCostItem-sjyzke3u45golhnttlco6bpcua-dev',
     'GameCostLineItem-sjyzke3u45golhnttlco6bpcua-dev',
+    'GameFinancialSnapshot-sjyzke3u45golhnttlco6bpcua-dev',
     'KnownPlayerIdentity-sjyzke3u45golhnttlco6bpcua-dev',
     'MarketingMessage-sjyzke3u45golhnttlco6bpcua-dev',
     'Player-sjyzke3u45golhnttlco6bpcua-dev',

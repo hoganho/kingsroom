@@ -397,8 +397,13 @@ const matchVenueByName = async (venueName, entityId) => {
     }
 };
 
+// ===================================================================
+// UPDATED: resolveVenue function
+// Replace the existing resolveVenue function (lines ~403-532) with this:
+// ===================================================================
+
 /**
- * Resolve venue from input - ENHANCED to include fee
+ * Resolve venue from input - ENHANCED to include fee (defaults to 0 if not set)
  */
 const resolveVenue = async (venueRef, entityId) => {
     // Fetch entity to get defaultVenueId
@@ -416,8 +421,8 @@ const resolveVenue = async (venueRef, entityId) => {
                 venueId: defaultVenueId,
                 venueName: defaultVenue?.name || 'Default Venue',
                 status: 'AUTO_ASSIGNED',
-                confidence: 0.5, // Low confidence since no venue info was provided
-                venueFee: defaultVenue?.fee || null
+                confidence: 0.5,
+                venueFee: defaultVenue?.fee ?? 0  // ✅ FIXED: Use 0 if null
             };
         }
         return {
@@ -425,7 +430,7 @@ const resolveVenue = async (venueRef, entityId) => {
             venueName: UNASSIGNED_VENUE_NAME,
             status: 'UNASSIGNED',
             confidence: 0,
-            venueFee: null
+            venueFee: 0  // ✅ FIXED: Use 0 for unassigned
         };
     }
     
@@ -437,7 +442,7 @@ const resolveVenue = async (venueRef, entityId) => {
             venueName: venue?.name || venueRef.venueName || 'Unknown',
             status: 'MANUALLY_ASSIGNED',
             confidence: 1.0,
-            venueFee: venue?.fee || null
+            venueFee: venue?.fee ?? 0  // ✅ FIXED: Use 0 if null
         };
     }
     
@@ -455,7 +460,7 @@ const resolveVenue = async (venueRef, entityId) => {
                 venueName: defaultVenue?.name || 'Default Venue',
                 status: 'AUTO_ASSIGNED',
                 confidence: 0.5,
-                venueFee: defaultVenue?.fee || null,
+                venueFee: defaultVenue?.fee ?? 0,  // ✅ FIXED: Use 0 if null
                 suggestedVenueId: venueRef.suggestedVenueId,
                 suggestedVenueName: venue?.name
             };
@@ -466,7 +471,7 @@ const resolveVenue = async (venueRef, entityId) => {
             venueName: venue?.name || venueRef.venueName,
             status: 'AUTO_ASSIGNED',
             confidence: confidence,
-            venueFee: venue?.fee || null
+            venueFee: venue?.fee ?? 0  // ✅ FIXED: Use 0 if null
         };
     }
     
@@ -481,7 +486,7 @@ const resolveVenue = async (venueRef, entityId) => {
                 venueName: matched.name,
                 status: 'AUTO_ASSIGNED',
                 confidence: matched.confidence,
-                venueFee: venue?.fee || null
+                venueFee: venue?.fee ?? 0  // ✅ FIXED: Use 0 if null
             };
         }
         
@@ -494,18 +499,19 @@ const resolveVenue = async (venueRef, entityId) => {
                 venueName: defaultVenue?.name || 'Default Venue',
                 status: 'AUTO_ASSIGNED',
                 confidence: 0.5,
-                venueFee: defaultVenue?.fee || null,
+                venueFee: defaultVenue?.fee ?? 0,  // ✅ FIXED: Use 0 if null
                 suggestedName: venueRef.venueName
             };
         }
         
+        // No default venue - pending assignment
         return {
             venueId: UNASSIGNED_VENUE_ID,
             venueName: UNASSIGNED_VENUE_NAME,
             status: 'PENDING_ASSIGNMENT',
             confidence: 0,
             suggestedName: venueRef.venueName,
-            venueFee: null
+            venueFee: 0  // ✅ FIXED: Use 0 for pending
         };
     }
     
@@ -518,7 +524,7 @@ const resolveVenue = async (venueRef, entityId) => {
             venueName: defaultVenue?.name || 'Default Venue',
             status: 'AUTO_ASSIGNED',
             confidence: 0.5,
-            venueFee: defaultVenue?.fee || null
+            venueFee: defaultVenue?.fee ?? 0  // ✅ FIXED: Use 0 if null
         };
     }
     
@@ -527,7 +533,7 @@ const resolveVenue = async (venueRef, entityId) => {
         venueName: UNASSIGNED_VENUE_NAME,
         status: 'UNASSIGNED',
         confidence: 0,
-        venueFee: null
+        venueFee: 0  // ✅ FIXED: Use 0 for unassigned
     };
 };
 
@@ -1301,7 +1307,7 @@ const createGame = async (input, venueResolution, seriesResolution) => {
         // Financials - ENHANCED with venue fee
         buyIn: input.game.buyIn || 0,
         rake: input.game.rake || 0,
-        venueFee: venueResolution.venueFee || null,  // NEW
+        venueFee: venueResolution.venueFee ?? 0,  // ✅ FIXED: Use 0 if venue has no fee
         totalRake: financials.totalRake,  // ENHANCED
         revenueByBuyIns: financials.revenueByBuyIns,  // ENHANCED
         profitLoss: financials.profitLoss,  // ENHANCED - includes venue fee deduction
@@ -1449,7 +1455,11 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     
     // Financials - ENHANCED with venue fee
     checkAndUpdate('buyIn', input.game.buyIn, existingGame.buyIn);
-    checkAndUpdate('venueFee', venueResolution.venueFee, existingGame.venueFee);  // NEW
+    const newVenueFee = venueResolution.venueFee ?? 0;
+    if (newVenueFee !== existingGame.venueFee) {
+        updateFields.venueFee = newVenueFee;
+        fieldsUpdated.push('venueFee');
+    }
     checkAndUpdate('rake', input.game.rake, existingGame.rake);
     checkAndUpdate('totalRake', financials.totalRake, existingGame.totalRake);  // ENHANCED
     checkAndUpdate('revenueByBuyIns', financials.revenueByBuyIns, existingGame.revenueByBuyIns);  // ENHANCED
