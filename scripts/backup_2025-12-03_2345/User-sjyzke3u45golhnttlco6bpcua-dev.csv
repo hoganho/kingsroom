@@ -1,3 +1,0 @@
-defaultEntityId,avatar,lastLoginAt,loginAttempts,lastName,updatedBy,email,allowedPages,createdBy,firstName,lastActiveAt,_version,allowedVenueIds,passwordLastChangedAt,id,phone,__typename,_lastChangedAt,allowedEntityIds,lockedUntil,createdAt,isActive,role,updatedAt,username,mustChangePassword
-,,,0,Ho,39ce5458-e0d1-7094-efba-ccb13d75c186,gtomgpoker@gmail.com,,39ce5458-e0d1-7094-efba-ccb13d75c186,Hogan,2025-12-02T07:26:46.646Z,1,,,290eb4b8-0041-7007-a6cb-9ea7a8a1b724,,User,1733126000000,,,2025-12-02T00:04:15.333Z,true,VENUE_MANAGER,2025-12-02T07:26:49.327Z,GTOMG,true
-,,,,Ho,,hogan.ho@gmail.com,,,Hogan,2025-12-03T12:24:18.598Z,1,,,39ce5458-e0d1-7094-efba-ccb13d75c186,,User,1733000000000,,,2025-06-01T00:00:00.000Z,true,SUPER_ADMIN,2025-12-03T12:24:18.816Z,Hogan-user,
