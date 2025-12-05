@@ -52,7 +52,7 @@
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-4a4f697a6e354445682f-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-596d59675a754f754d76-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",

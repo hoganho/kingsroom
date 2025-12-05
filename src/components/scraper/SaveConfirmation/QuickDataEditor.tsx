@@ -48,9 +48,9 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
                 defaultOpen: true
             },
             {
-                // ✅ Added venueFee to this group
+                // Note: venueFee is edited in the modal header, not here
                 title: '💰 Buy-In & Costs',
-                fields: ['buyIn', 'rake', 'venueFee', 'prizepool', 'totalEntries', 'guaranteeAmount', 'hasGuarantee'],
+                fields: ['buyIn', 'rake', 'prizepool', 'totalEntries', 'guaranteeAmount', 'hasGuarantee'],
                 priority: 'important',
                 defaultOpen: true
             },

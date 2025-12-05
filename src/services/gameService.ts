@@ -462,7 +462,7 @@ export const saveGameDataToBackend = async (
             guaranteeOverlay: (finalData as any).guaranteeOverlay || null,
             guaranteeSurplus: (finalData as any).guaranteeSurplus || null,
             
-            // ✅ Venue fee (from Venue.fee, editable in SaveConfirmationModal)
+            // Venue fee - can be edited in SaveConfirmationModal to override venue default
             venueFee: (finalData as any).venueFee ?? null,
             
             // Game details
@@ -547,7 +547,7 @@ export const saveGameDataToBackend = async (
         sourceUrl,
         venueId,
         gameStatus: saveGameInput.game.gameStatus,
-        venueFee: saveGameInput.game.venueFee,  // ✅ Log venueFee
+        venueFee: (saveGameInput.game as any).venueFee,
         playerCount: saveGameInput.players?.totalPlayers || 0,
         existingGameId,
         wasEdited: options?.wasEdited,

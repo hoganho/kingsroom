@@ -1954,6 +1954,7 @@ input SaveGameDataInput {
   isRegular: Boolean
   gameTags: [String]
   levels: AWSJSON
+  venueFee: Float
 }
 
 input SavePlayerDataInput {

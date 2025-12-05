@@ -1287,8 +1287,9 @@ const createGame = async (input, venueResolution, seriesResolution) => {
     });
     
     // Calculate financials including venue fee (NEW)
-    const financials = calculateFinancials(input.game, venueResolution.venueFee);
-    
+    const effectiveVenueFee = input.game.venueFee ?? venueResolution.venueFee ?? 0;
+    const financials = calculateFinancials(input.game, effectiveVenueFee);
+
     const game = {
         id: gameId,
         
@@ -1307,7 +1308,7 @@ const createGame = async (input, venueResolution, seriesResolution) => {
         // Financials - ENHANCED with venue fee
         buyIn: input.game.buyIn || 0,
         rake: input.game.rake || 0,
-        venueFee: venueResolution.venueFee ?? 0,  // ✅ FIXED: Use 0 if venue has no fee
+        venueFee: effectiveVenueFee ?? 0,  // ✅ FIXED: Use 0 if venue has no fee
         totalRake: financials.totalRake,  // ENHANCED
         revenueByBuyIns: financials.revenueByBuyIns,  // ENHANCED
         profitLoss: financials.profitLoss,  // ENHANCED - includes venue fee deduction
@@ -1395,7 +1396,7 @@ const createGame = async (input, venueResolution, seriesResolution) => {
     }));
     
     console.log(`[SAVE-GAME] ✅ Created game: ${gameId}${input.source.wasEdited ? ' (with edits)' : ''}`);
-    console.log(`[SAVE-GAME] Venue fee: ${venueResolution.venueFee || 0}, Profit/Loss: ${financials.profitLoss}`);
+    console.log(`[SAVE-GAME] Venue fee: ${effectiveVenueFee} (override: ${input.game.venueFee ?? 'none'}, venue: ${venueResolution.venueFee ?? 0}), Profit/Loss: ${financials.profitLoss}`);
     
     // Create the associated GameCost record with venue fee (NEW)
     await createOrUpdateGameCost(
@@ -1403,7 +1404,7 @@ const createGame = async (input, venueResolution, seriesResolution) => {
         venueResolution.venueId,
         input.source.entityId,
         game.gameStartDateTime,
-        venueResolution.venueFee,
+        effectiveVenueFee,
         game.totalEntries || 0
     );
     
@@ -1434,8 +1435,11 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
         venueFee: venueResolution.venueFee
     });
     
-    // Recalculate financials with new venue fee (NEW)
-    const financials = calculateFinancials(input.game, venueResolution.venueFee);
+    // ✅ Allow frontend to override venue fee (for manual adjustments)
+    const effectiveVenueFee = input.game.venueFee ?? venueResolution.venueFee ?? 0;
+    
+    // Recalculate financials with venue fee
+    const financials = calculateFinancials(input.game, effectiveVenueFee);
     
     // Build update expression dynamically
     const updateFields = {};
@@ -1455,9 +1459,8 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     
     // Financials - ENHANCED with venue fee
     checkAndUpdate('buyIn', input.game.buyIn, existingGame.buyIn);
-    const newVenueFee = venueResolution.venueFee ?? 0;
-    if (newVenueFee !== existingGame.venueFee) {
-        updateFields.venueFee = newVenueFee;
+    if (effectiveVenueFee !== existingGame.venueFee) {
+        updateFields.venueFee = effectiveVenueFee;
         fieldsUpdated.push('venueFee');
     }
     checkAndUpdate('rake', input.game.rake, existingGame.rake);
@@ -1587,7 +1590,7 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
         }));
         
         console.log(`[SAVE-GAME] ✅ Updated game ${existingGame.id}, fields: ${fieldsUpdated.join(', ')}${input.source.wasEdited ? ' (edited data)' : ''}`);
-        console.log(`[SAVE-GAME] Venue fee: ${venueResolution.venueFee || 0}, Profit/Loss: ${financials.profitLoss}`);
+        console.log(`[SAVE-GAME] Venue fee: ${effectiveVenueFee} (override: ${input.game.venueFee ?? 'none'}, venue: ${venueResolution.venueFee ?? 0}), Profit/Loss: ${financials.profitLoss}`);
     } else {
         console.log(`[SAVE-GAME] No changes detected for game ${existingGame.id}`);
     }
@@ -1598,7 +1601,7 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
         venueResolution.venueId,
         input.source.entityId,
         updatedGame.gameStartDateTime,
-        venueResolution.venueFee,
+        effectiveVenueFee,
         updatedGame.totalEntries || 0
     );
 
