@@ -221,7 +221,7 @@ const calculateFinancials = (game, venueFee = 0) => {
     
     // Calculate profit/loss - NEW: includes venue fee deduction
     // Profit = Rake collected - Venue fee - Overlay
-    let profitLoss = totalRake - (venueFee || 0);
+    let profitLoss = totalRake + (venueFee || 0);
     
     if (guaranteeOverlay > 0) {
         profitLoss -= guaranteeOverlay;
@@ -998,10 +998,11 @@ const createOrUpdateGameFinancialSnapshot = async (game, entityId, venueId) => {
     const gameCost = await getGameCostByGameId(game.id);
     const totalCost = gameCost?.totalCost || 0;
 
-    // Revenue side
+// Revenue side
     const totalRake = game.totalRake || 0;
     const totalPrizePool = game.prizepool || 0;
-    const totalRevenue = totalRake; // For now treat rake as revenue
+    const totalVenueFee = game.venueFee || 0;  // Fee venue pays us to host (REVENUE)
+    const totalRevenue = totalRake + totalVenueFee;  // ✅ Revenue = rake + venue fee
 
     // Derived metrics
     const profit = (typeof game.profitLoss === 'number')
@@ -1046,6 +1047,7 @@ const createOrUpdateGameFinancialSnapshot = async (game, entityId, venueId) => {
             totalRevenue,
             totalPrizePool,
             totalRake,
+            totalVenueFee,
             totalCost,
 
             // Derived
@@ -1108,6 +1110,7 @@ const createOrUpdateGameFinancialSnapshot = async (game, entityId, venueId) => {
         totalRevenue,
         totalPrizePool,
         totalRake,
+        totalVenueFee,
         totalCost,
 
         // Derived management metrics

@@ -2248,8 +2248,8 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "totalFees": {
-                    "name": "totalFees",
+                "totalVenueFee": {
+                    "name": "totalVenueFee",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -12676,5 +12676,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "538f9a9dae31f4820c7abc88ac39c396"
+    "version": "98d30a7a884bd0adcb9165db6483692b"
 };

@@ -315,10 +315,10 @@ type GameFinancialSnapshot
   gameStartDateTime: AWSDateTime @index(name: "byGameStartDateFinancialSnapshot", sortKeyFields: ["profit"])
 
   # --- Revenue Side (from Game) ---
-  totalRevenue: Float! @default(value: "0")        # e.g. rake + fees, or your chosen definition
+  totalRevenue: Float! @default(value: "0")        # totalVenueFee + totalRake
   totalPrizePool: Float @default(value: "0")
   totalRake: Float @default(value: "0")
-  totalFees: Float @default(value: "0")            # venueFee, admin fees, etc.
+  totalVenueFee: Float @default(value: "0")        # Fee venue pays us to host games (REVENUE)
 
   # --- Cost Side (from GameCost) ---
   totalCost: Float! @default(value: "0")

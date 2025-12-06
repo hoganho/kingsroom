@@ -9,6 +9,7 @@ import { SeriesDetailsEditor } from './SaveConfirmation/SeriesDetailsEditor';
 // ✅ NEW: Import consolidation preview components
 import { ConsolidationPreview } from './SaveConfirmation/ConsolidationPreview';
 import { useConsolidationPreview } from '../../hooks/useConsolidationPreview';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 // ===================================================================
 // GRAPHQL OPERATIONS
@@ -733,14 +734,71 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
             case 'quick':
                 return (
                     <div className="p-4">
-                        {venueFee && (
-                            <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded">
-                                <div className="text-sm">
+                        {/* Venue Fee - editable */}
+                        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded">
+                            <div className="text-sm flex items-center justify-between">
+                                <div className="flex items-center">
                                     <span className="font-medium">Venue Fee:</span>
-                                    <span className="ml-2 text-blue-700">${venueFee.toFixed(2)}</span>
+                                    {isEditingVenueFee ? (
+                                        <span className="ml-2 inline-flex items-center gap-1">
+                                            <span>$</span>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                autoFocus
+                                                value={tempVenueFee}
+                                                onChange={(e) => setTempVenueFee(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        const newFee = tempVenueFee === '' ? null : parseFloat(tempVenueFee);
+                                                        updateField('venueFee', newFee);
+                                                        setVenueFee(newFee);
+                                                        setIsEditingVenueFee(false);
+                                                    } else if (e.key === 'Escape') {
+                                                        setIsEditingVenueFee(false);
+                                                    }
+                                                }}
+                                                className="w-24 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    const newFee = tempVenueFee === '' ? null : parseFloat(tempVenueFee);
+                                                    updateField('venueFee', newFee);
+                                                    setVenueFee(newFee);
+                                                    setIsEditingVenueFee(false);
+                                                }}
+                                                className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                                            >
+                                                Save
+                                            </button>
+                                            <button
+                                                onClick={() => setIsEditingVenueFee(false)}
+                                                className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </span>
+                                    ) : (
+                                        <span className="ml-2 text-green-600 font-medium">
+                                            {formatCurrency(editedData.venueFee ?? venueFee ?? 0)}
+                                        </span>
+                                    )}
                                 </div>
+                                {!isEditingVenueFee && (
+                                    <button
+                                        onClick={() => {
+                                            const currentFee = editedData.venueFee ?? venueFee ?? 0;
+                                            setTempVenueFee(currentFee.toString());
+                                            setIsEditingVenueFee(true);
+                                        }}
+                                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                    >
+                                        Edit
+                                    </button>
+                                )}
                             </div>
-                        )}
+                        </div>
                         
                         {/* ✅ NEW: Show compact consolidation preview in quick tab */}
                         {willConsolidate && consolidationInfo.parentName && (
@@ -929,7 +987,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             
                             {venueFee && (
                                 <div className="mt-2 text-xs text-gray-600">
-                                    Selected venue has a fee of ${venueFee.toFixed(2)}
+                                    Selected venue has a fee of {formatCurrency(venueFee ?? 0)}
                                 </div>
                             )}
                         </div>
@@ -1379,118 +1437,15 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     if (!isOpen || !gameData) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
-                {/* Header */}
+        <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center p-4 pb-8">            
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[85vh] sm:max-h-[90vh] flex flex-col">                {/* Header */}
                 <div className="p-4 border-b flex items-center justify-between">
                     <div>
                         <h3 className="text-lg font-semibold">
                             {autoMode ? '⚡ Auto-Save' : '💾 Save'} Tournament Data
                         </h3>
-<div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                            <span>{editedData.name || 'Unnamed Tournament'}</span>
-                            <span>•</span>
-                            <span>{loadingVenue ? 'Loading...' : venueName || 'No venue selected'}</span>
-                            {/* Editable Venue Fee */}
-                            {(venueFee !== null || editedData.venueFee !== null && editedData.venueFee !== undefined) && (
-                                <>
-                                    <span>•</span>
-                                    {isEditingVenueFee ? (
-                                        <span className="inline-flex items-center gap-1">
-                                            <span>Fee: $</span>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                autoFocus
-                                                value={tempVenueFee}
-                                                onChange={(e) => setTempVenueFee(e.target.value)}
-                                                onBlur={() => {
-                                                    const newFee = tempVenueFee === '' ? null : parseFloat(tempVenueFee);
-                                                    updateField('venueFee', newFee);
-                                                    setVenueFee(newFee);
-                                                    setIsEditingVenueFee(false);
-                                                }}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') {
-                                                        const newFee = tempVenueFee === '' ? null : parseFloat(tempVenueFee);
-                                                        updateField('venueFee', newFee);
-                                                        setVenueFee(newFee);
-                                                        setIsEditingVenueFee(false);
-                                                    } else if (e.key === 'Escape') {
-                                                        setIsEditingVenueFee(false);
-                                                    }
-                                                }}
-                                                className="w-20 px-1 py-0.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-green-500"
-                                            />
-                                        </span>
-                                    ) : (
-                                        <span 
-                                            className="text-green-600 font-medium cursor-pointer hover:underline"
-                                            onClick={() => {
-                                                const currentFee = editedData.venueFee ?? venueFee ?? 0;
-                                                setTempVenueFee(currentFee.toString());
-                                                setIsEditingVenueFee(true);
-                                            }}
-                                            title="Click to edit venue fee"
-                                        >
-                                            Venue Fee: ${(editedData.venueFee ?? venueFee ?? 0).toFixed(2)}
-                                        </span>
-                                    )}
-                                </>
-                            )}
-                            {/* Show "Add Fee" if no fee exists yet */}
-                            {venueFee === null && (editedData.venueFee === null || editedData.venueFee === undefined) && (
-                                <>
-                                    <span>•</span>
-                                    {isEditingVenueFee ? (
-                                        <span className="inline-flex items-center gap-1">
-                                            <span>Fee: $</span>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                autoFocus
-                                                value={tempVenueFee}
-                                                onChange={(e) => setTempVenueFee(e.target.value)}
-                                                onBlur={() => {
-                                                    const newFee = tempVenueFee === '' ? null : parseFloat(tempVenueFee);
-                                                    if (newFee !== null) {
-                                                        updateField('venueFee', newFee);
-                                                        setVenueFee(newFee);
-                                                    }
-                                                    setIsEditingVenueFee(false);
-                                                }}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') {
-                                                        const newFee = tempVenueFee === '' ? null : parseFloat(tempVenueFee);
-                                                        if (newFee !== null) {
-                                                            updateField('venueFee', newFee);
-                                                            setVenueFee(newFee);
-                                                        }
-                                                        setIsEditingVenueFee(false);
-                                                    } else if (e.key === 'Escape') {
-                                                        setIsEditingVenueFee(false);
-                                                    }
-                                                }}
-                                                className="w-20 px-1 py-0.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-green-500"
-                                                placeholder="0.00"
-                                            />
-                                        </span>
-                                    ) : (
-                                        <span 
-                                            className="text-gray-400 cursor-pointer hover:text-green-600 hover:underline"
-                                            onClick={() => {
-                                                setTempVenueFee('');
-                                                setIsEditingVenueFee(true);
-                                            }}
-                                            title="Click to add venue fee"
-                                        >
-                                            + Add Fee
-                                        </span>
-                                    )}
-                                </>
-                            )}
+                        <div className="text-xs text-gray-500 mt-1">
+                            {editedData.name || 'Unnamed Tournament'} • {loadingVenue ? 'Loading...' : venueName || 'No venue selected'}
                         </div>
                     </div>
                     <div className="flex items-center gap-2">

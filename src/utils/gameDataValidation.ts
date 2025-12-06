@@ -167,12 +167,13 @@ export const calculateDerivedFields = (data: GameData): Partial<GameData> => {
         }
     }
     
-    // ✅ Calculate profit/loss (now includes venue fee)
-    if (derived.revenueByBuyIns && derived.totalRake) {
-        const totalRevenue = (derived.totalRake || 0);
-        const overlay = derived.guaranteeOverlay || 0;
-        const venueFee = data.venueFee || 0;  // ✅ Include venue fee
-        derived.profitLoss = totalRevenue - overlay - venueFee;
+    // ✅ Calculate profit/loss (venueFee is REVENUE - what venue pays us)
+    if (derived.totalRake !== undefined) {
+        const totalRake = derived.totalRake || 0;
+        const venueFee = data.venueFee || 0;  // Revenue from venue
+        const overlay = derived.guaranteeOverlay || 0;  // Cost if we had to cover guarantee
+        // Profit = rake + venue fee - overlay
+        derived.profitLoss = totalRake + venueFee - overlay;
     }
     
     // Calculate average stack if not provided

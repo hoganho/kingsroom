@@ -2408,7 +2408,7 @@ type EagerGameFinancialSnapshot = {
   readonly totalRevenue: number;
   readonly totalPrizePool?: number | null;
   readonly totalRake?: number | null;
-  readonly totalFees?: number | null;
+  readonly totalVenueFee?: number | null;
   readonly totalCost: number;
   readonly totalDealerCost?: number | null;
   readonly totalTournamentDirectorCost?: number | null;
@@ -2441,7 +2441,7 @@ type LazyGameFinancialSnapshot = {
   readonly totalRevenue: number;
   readonly totalPrizePool?: number | null;
   readonly totalRake?: number | null;
-  readonly totalFees?: number | null;
+  readonly totalVenueFee?: number | null;
   readonly totalCost: number;
   readonly totalDealerCost?: number | null;
   readonly totalTournamentDirectorCost?: number | null;
