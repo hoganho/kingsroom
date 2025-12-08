@@ -122,7 +122,11 @@ const SiblingList: React.FC<{
                             <span className="text-green-600">🏆</span>
                         )}
                     </div>
+
                     <div className="flex items-center gap-3 text-gray-500">
+                        {sibling.totalUniquePlayers !== null && (
+                            <span>{sibling.totalUniquePlayers} unique Players</span>
+                        )}
                         {sibling.totalEntries !== null && (
                             <span>{sibling.totalEntries} entries</span>
                         )}
@@ -155,15 +159,26 @@ const ProjectedTotals: React.FC<{
     return (
         <div className="grid grid-cols-3 gap-3 text-xs">
             <div className="p-2 bg-gray-50 rounded">
+                <div className="text-gray-500">Total Unique Players</div>
+                <div className="text-lg font-bold text-gray-900">
+                    {totals.totalUniquePlayers?.toLocaleString() || '—'}
+                </div>
+            </div>            <div className="p-2 bg-gray-50 rounded">
                 <div className="text-gray-500">Total Entries</div>
                 <div className="text-lg font-bold text-gray-900">
                     {totals.totalEntries?.toLocaleString() || '—'}
                 </div>
             </div>
             <div className="p-2 bg-gray-50 rounded">
-                <div className="text-gray-500">Prizepool</div>
+                <div className="text-gray-500">Prizepool Paid</div>
                 <div className="text-lg font-bold text-gray-900">
-                    {totals.prizepool ? `$${totals.prizepool.toLocaleString()}` : '—'}
+                    {totals.prizepoolPaid ? `$${totals.prizepoolPaid.toLocaleString()}` : '—'}
+                </div>
+            </div>
+            <div className="p-2 bg-gray-50 rounded">
+                <div className="text-gray-500">Prizepool Calculated</div>
+                <div className="text-lg font-bold text-gray-900">
+                    {totals.prizepoolCalculated ? `$${totals.prizepoolCalculated.toLocaleString()}` : '—'}
                 </div>
             </div>
             <div className="p-2 bg-gray-50 rounded">

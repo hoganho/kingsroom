@@ -324,6 +324,22 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "venueDetailsUpdater": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "webScraperFunction": {
       "build": true,
       "dependsOn": [
@@ -610,6 +626,22 @@
         {
           "category": "function",
           "resourceName": "venueAssignmentService"
+        }
+      ]
+    },
+    "AMPLIFY_function_venueDetailsUpdater_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "venueDetailsUpdater"
+        }
+      ]
+    },
+    "AMPLIFY_function_venueDetailsUpdater_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "venueDetailsUpdater"
         }
       ]
     },

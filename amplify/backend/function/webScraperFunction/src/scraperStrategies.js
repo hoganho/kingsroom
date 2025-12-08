@@ -822,28 +822,28 @@ const defaultStrategy = {
         }
     },
 
-    getPrizepool(ctx) {
-        ctx.parseNumeric('prizepool', '#cw_clock_prizepool');
+    getPrizepoolPaid(ctx) {
+        ctx.parseNumeric('prizepoolPaid', '#cw_clock_prizepool');
     },
     
-    getTotalEntries(ctx) {
+    getTotalUniquePlayers(ctx) {
         const selector = '#cw_clock_playersentries';
         const text = ctx.$(selector).first().text().trim();
         if (!text) return;
-        let totalEntries = null;
+        let totalUniquePlayers = null;
         if (text.includes('/')) {
             const parts = text.split('/').map(part => parseInt(part.trim(), 10));
             if (parts.length === 2 && !isNaN(parts[1])) {
-                totalEntries = parts[1];
+                totalUniquePlayers = parts[1];
             }
         } else {
             const num = parseInt(text.replace(/[^0-9.-]+/g, ''), 10);
             if (!isNaN(num)) {
-                totalEntries = num;
+                totalUniquePlayers = num;
             }
         }
-        if (totalEntries !== null) {
-            ctx.add('totalEntries', totalEntries);
+        if (totalUniquePlayers !== null) {
+            ctx.add('totalUniquePlayers', totalUniquePlayers);
         }
     },
 
@@ -853,6 +853,12 @@ const defaultStrategy = {
     
     getTotalAddons(ctx) {
         ctx.parseNumeric('totalAddons', 'div.cw-clock-label:contains("Add-Ons")');
+    },
+
+    getTotalEntries(ctx) {
+        let totalEntries = 0
+        totalEntries = ctx.data.totalUniquePlayers + ctx.data.totalRebuys
+        ctx.add('totalEntries', totalEntries);
     },
 
     getTotalDuration(ctx) {
@@ -912,64 +918,187 @@ const defaultStrategy = {
         }
     },
 
-    calculateRevenueByBuyIns(ctx) {
-        const entries = ctx.data.totalEntries || 0;
+    /**
+     * Calculate total buy-ins collected from all transactions
+     * All entries (initial + rebuys + addons) pay full buy-in amount
+     */
+    calculateBuyInsByEntries(ctx) {
+        const totalEntries = ctx.data.totalEntries || 0;
         const rebuys = ctx.data.totalRebuys || 0;
         const addons = ctx.data.totalAddons || 0;
         const buyIn = ctx.data.buyIn || 0;
+        
         if (buyIn <= 0) {
             return;
         }
-        const totalTransactions = entries + rebuys + addons;
-        const revenue = totalTransactions * buyIn;
-        ctx.add('revenueByBuyIns', revenue);
+        
+        // Total buy-ins = all transactions × buy-in amount
+        const totalTransactions = totalEntries + rebuys + addons;
+        const totalBuyIns = totalTransactions * buyIn;
+        ctx.add('buyInsByTotalEntries', totalBuyIns);
     },
 
     getSeriesName(ctx) {
         // This is now handled by getName with enhanced matching
     },
 
+    /**
+     * Calculate guarantee overlay/surplus based on prizepool contributions
+     * 
+     * POKER ECONOMICS:
+     * - Prizepool contributions = (buyIn - rake) × (entries + rebuys) + buyIn × addons
+     * - Addons go straight to prizepool without rake deduction
+     * - Overlay = out-of-pocket cost when total buy-ins don't cover guarantee
+     * - Surplus = amount prizepool exceeds guarantee
+     */
     calculateGuaranteeMetrics(ctx) {
         if (!ctx.data.hasGuarantee) {
             return; 
         }
-        const prizepool = ctx.data.prizepool || 0;
+        
         const guarantee = ctx.data.guaranteeAmount || 0;
-        if (prizepool <= 0 || guarantee <= 0) {
+        if (guarantee <= 0) {
             return;
         }
-        const difference = prizepool - guarantee;
-        if (difference > 0) {
-            ctx.add('guaranteeSurplus', difference);
-            ctx.add('guaranteeOverlay', 0);
-        } else {
+        
+        const buyIn = ctx.data.buyIn || 0;
+        const rake = ctx.data.rake || 0;
+        const totalEntries = ctx.data.totalEntries || 0;
+        const rebuys = ctx.data.totalRebuys || 0;
+        const addons = ctx.data.totalAddons || 0;
+        
+        // Entries that pay rake (NOT addons - addons go straight to prizepool)
+        const entriesForRake = totalEntries + rebuys;
+        
+        // Calculate prizepool contributions
+        // Entries/rebuys contribute (buyIn - rake), addons contribute full buyIn
+        const prizepoolFromEntriesAndRebuys = (buyIn - rake) * entriesForRake;
+        const prizepoolFromAddons = buyIn * addons;
+        const totalPrizepoolContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
+        
+        // Calculate total buy-ins collected
+        const totalBuyIns = buyIn * (totalEntries + rebuys + addons);
+        
+        // Determine overlay vs surplus
+        if (totalBuyIns < guarantee) {
+            // Total buy-ins don't cover guarantee - out-of-pocket overlay
+            ctx.add('guaranteeOverlay', guarantee - totalBuyIns);
             ctx.add('guaranteeSurplus', 0);
-            ctx.add('guaranteeOverlay', Math.abs(difference));
+        } else if (totalPrizepoolContributions > guarantee) {
+            // Prizepool contributions exceeded guarantee - surplus goes to players
+            ctx.add('guaranteeOverlay', 0);
+            ctx.add('guaranteeSurplus', totalPrizepoolContributions - guarantee);
+        } else {
+            // Met guarantee using some/all rake, no out-of-pocket cost
+            ctx.add('guaranteeOverlay', 0);
+            ctx.add('guaranteeSurplus', 0);
         }
     },
 
+    /**
+     * Calculate total intended rake
+     * 
+     * IMPORTANT: Addons do NOT pay rake - they go straight to prizepool
+     * Only initial entries and rebuys pay rake
+     */
     calculateTotalRake(ctx) {
         const rake = ctx.data.rake;
         if (rake === undefined || rake === null || rake <= 0) {
             return;
         }
-        const entries = ctx.data.totalEntries || 0;
+        
+        const totalEntries = ctx.data.totalEntries || 0;
         const rebuys = ctx.data.totalRebuys || 0;
-        const totalRakedTransactions = entries + rebuys;
-        const totalRake = totalRakedTransactions * rake;
+        // Note: Addons do NOT pay rake - excluded intentionally
+        
+        const entriesForRake = totalEntries + rebuys;
+        const totalRake = entriesForRake * rake;
         ctx.add('totalRake', totalRake);
     },
 
-    calculateProfitLoss(ctx) {
-        const revenue = ctx.data.revenueByBuyIns;
-        const prizepool = ctx.data.prizepool;
-        if (revenue === undefined || revenue === null || prizepool === undefined || prizepool === null) {
+    /**
+     * Calculate game profit/loss with correct poker economics
+     * 
+     * FORMULA:
+     * - Prizepool contributions = (buyIn - rake) × (entries + rebuys) + buyIn × addons
+     * - Shortfall = max(0, guarantee - prizepoolContributions)
+     * - gameProfitLoss = intendedRake - shortfall
+     * - totalRakePerPlayerRealised = true if shortfall === 0
+     * 
+     * Examples ($200 buy-in, $24 rake, $5000 guarantee):
+     * - 20 entries: $3520 contributions, $1480 shortfall, -$1000 profit (loss)
+     * - 25 entries: $4400 contributions, $600 shortfall, $0 profit (broke even)
+     * - 27 entries: $4752 contributions, $248 shortfall, $400 profit (partial rake)
+     * - 30 entries: $5280 contributions, no shortfall, $720 profit (full rake)
+     */
+    calculateGameProfitLoss(ctx) {
+        const buyIn = ctx.data.buyIn || 0;
+        const rake = ctx.data.rake || 0;
+        const totalEntries = ctx.data.totalEntries || 0;
+        const rebuys = ctx.data.totalRebuys || 0;
+        const addons = ctx.data.totalAddons || 0;
+        const guaranteeAmount = ctx.data.guaranteeAmount || 0;
+        const hasGuarantee = ctx.data.hasGuarantee && guaranteeAmount > 0;
+        
+        if (buyIn <= 0) {
             return;
         }
-        const profitLoss = revenue - prizepool;
-        ctx.add('profitLoss', profitLoss);
+        
+        // Entries that pay rake (NOT addons)
+        const entriesForRake = totalEntries + rebuys;
+        
+        // Intended total rake
+        const intendedTotalRake = rake * entriesForRake;
+        
+        // Calculate prizepool contributions
+        const prizepoolFromEntriesAndRebuys = (buyIn - rake) * entriesForRake;
+        const prizepoolFromAddons = buyIn * addons;
+        const totalPrizepoolContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
+        
+        // Calculate profit/loss
+        let gameProfitLoss = intendedTotalRake;
+        let totalRakePerPlayerRealised = true;
+        
+        if (hasGuarantee) {
+            // Shortfall: how much we need to dip into rake to cover guarantee
+            const shortfall = Math.max(0, guaranteeAmount - totalPrizepoolContributions);
+            
+            if (shortfall > 0) {
+                // Profit = intendedRake - shortfall (can be negative)
+                gameProfitLoss = intendedTotalRake - shortfall;
+                totalRakePerPlayerRealised = false;
+            }
+        }
+        
+        ctx.add('gameProfitLoss', gameProfitLoss);
+        ctx.add('totalRakePerPlayerRealised', totalRakePerPlayerRealised);
     },
     
+    /**
+     * Calculate expected prizepool from entries
+     * 
+     * Prizepool = (buyIn - rake) × (entries + rebuys) + buyIn × addons
+     * This is what players contribute to the prize pool before any guarantee adjustments
+     */
+    calculatePrizepoolFromEntries(ctx) {
+        const buyIn = ctx.data.buyIn || 0;
+        const rake = ctx.data.rake || 0;
+        const totalEntries = ctx.data.totalEntries || 0;
+        const rebuys = ctx.data.totalRebuys || 0;
+        const addons = ctx.data.totalAddons || 0;
+        
+        if (buyIn <= 0) {
+            return;
+        }
+        
+        // Entries/rebuys contribute (buyIn - rake), addons contribute full buyIn
+        const prizepoolFromEntriesAndRebuys = (buyIn - rake) * (totalEntries + rebuys);
+        const prizepoolFromAddons = buyIn * addons;
+        const prizepoolCalculated = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
+        
+        ctx.add('prizepoolCalculated', prizepoolCalculated);
+    },
+
     getSeating(ctx) {
         const seating = [];
         const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
@@ -1294,10 +1423,11 @@ const runScraper = (html, ctx = null, venues = [], seriesTitles = [], url = '', 
     defaultStrategy.getStatus(ctx);
     defaultStrategy.getRegistrationStatus(ctx);
     defaultStrategy.getGameVariant(ctx);
-    defaultStrategy.getPrizepool(ctx);
-    defaultStrategy.getTotalEntries(ctx);
+    defaultStrategy.getPrizepoolPaid(ctx);
+    defaultStrategy.getTotalUniquePlayers(ctx);
     defaultStrategy.getTotalRebuys(ctx);
     defaultStrategy.getTotalAddons(ctx);
+    defaultStrategy.getTotalEntries(ctx);
     defaultStrategy.getTotalDuration(ctx);
     defaultStrategy.getBuyIn(ctx);
     defaultStrategy.getRake(ctx);
@@ -1322,10 +1452,11 @@ const runScraper = (html, ctx = null, venues = [], seriesTitles = [], url = '', 
     defaultStrategy.getMatchingVenue(ctx, venues, seriesTitles);
 
     // Calculations (run last)
-    defaultStrategy.calculateRevenueByBuyIns(ctx);
+    defaultStrategy.calculateBuyInsByEntries(ctx);
     defaultStrategy.calculateGuaranteeMetrics(ctx);
     defaultStrategy.calculateTotalRake(ctx);
-    defaultStrategy.calculateProfitLoss(ctx);
+    defaultStrategy.calculateGameProfitLoss(ctx);
+    defaultStrategy.calculatePrizepoolFromEntries(ctx);
 
     // 4. Return results
     console.log(`[runScraper] Completed. Found keys: ${ctx.foundKeys.size}, Status: ${ctx.data.gameStatus}, DoNotScrape: ${ctx.data.doNotScrape}`);

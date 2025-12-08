@@ -39,13 +39,15 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   gameFrequency: { label: 'Game Frequency', group: 'Core Game Details', isBaselineExpected: true },
 
   // Prize & Entry Details
-  prizepool: { label: 'Prizepool', group: 'Prize & Entry Details', isBaselineExpected: true },
+  prizepoolPaid: { label: 'Prizepool Paid', group: 'Prize & Entry Details', isBaselineExpected: true },
+  prizepoolCalculated: { label: 'Prizepool Calculated', group: 'Prize & Entry Details', isBaselineExpected: true },
+  totalUniquePlayers: { label: 'Total Unique Players', group: 'Prize & Entry Details', isBaselineExpected: true },
   totalEntries: { label: 'Total Entries', group: 'Prize & Entry Details', isBaselineExpected: true },
   totalRebuys: { label: 'Total Rebuys', group: 'Prize & Entry Details', isBaselineOptional: true },
   totalAddons: { label: 'Total Add-ons', group: 'Prize & Entry Details', isBaselineOptional: true },
   totalRake: { label: 'Total Rake', group: 'Prize & Entry Details', isBaselineOptional: true },
-  profitLoss: { label: 'Profit/Loss', group: 'Prize & Entry Details', isBaselineOptional: true },
-  revenueByBuyIns: { label: 'Revenue', group: 'Prize & Entry Details', isBaselineOptional: true },
+  gameProfitLoss: { label: 'Game Profit/Loss', group: 'Prize & Entry Details', isBaselineOptional: true },
+  buyInsByTotalEntries: { label: 'Total BuyIn Amt', group: 'Prize & Entry Details', isBaselineOptional: true },
   guaranteeOverlay: { label: 'Overlay', group: 'Prize & Entry Details', isBaselineOptional: true },
   guaranteeSurplus: { label: 'Surplus', group: 'Prize & Entry Details', isBaselineOptional: true },
   totalDuration: { label: 'Total Duration', group: 'Prize & Entry Details', isBaselineOptional: true },

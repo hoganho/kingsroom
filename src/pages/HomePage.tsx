@@ -14,8 +14,10 @@ interface Tournament {
   gameEndDateTime?: string;
   gameStatus: string;
   playersRemaining?: number;
+  totalUniquePlayers?: number;
   totalEntries?: number;
-  prizepool?: number;
+  prizepoolPaid?: number;
+  prizepoolCalculated?: number;
   buyIn?: number;
   venue?: {
     name: string;
@@ -60,6 +62,7 @@ export const HomePage = () => {
                 gameStartDateTime
                 gameStatus
                 playersRemaining
+                totalUniquePlayers
                 totalEntries
                 buyIn
                 sourceUrl
@@ -93,7 +96,9 @@ export const HomePage = () => {
                 gameStartDateTime
                 gameEndDateTime
                 gameStatus
-                prizepool
+                prizepoolPaid
+                prizepoolCalculated
+                totalUniquePlayers
                 totalEntries
                 buyIn
                 sourceUrl
@@ -202,7 +207,12 @@ export const HomePage = () => {
               )}
               {showPrizepool && (
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Prizepool
+                  Prizepool Paid
+                </th>
+              )}
+              {showPrizepool && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Prizepool Calculated
                 </th>
               )}
               {showTotalEntries && (
@@ -254,7 +264,12 @@ export const HomePage = () => {
                   )}
                   {showPrizepool && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {tournament.prizepool ? formatCurrency(tournament.prizepool) : '-'}
+                      {tournament.prizepoolPaid ? formatCurrency(tournament.prizepoolPaid) : '-'}
+                    </td>
+                  )}
+                  {showPrizepool && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {tournament.prizepoolCalculated ? formatCurrency(tournament.prizepoolCalculated) : '-'}
                     </td>
                   )}
                   {showTotalEntries && (

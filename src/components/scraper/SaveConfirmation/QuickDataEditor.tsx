@@ -50,7 +50,7 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
             {
                 // Note: venueFee is edited in the modal header, not here
                 title: '💰 Buy-In & Costs',
-                fields: ['buyIn', 'rake', 'prizepool', 'totalEntries', 'guaranteeAmount', 'hasGuarantee'],
+                fields: ['buyIn', 'rake', 'prizepoolPaid', 'prizepoolCalculated', 'totalUniquePlayers', 'totalEntries', 'guaranteeAmount', 'hasGuarantee'],
                 priority: 'important',
                 defaultOpen: true
             },
@@ -80,7 +80,7 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
             },
             {
                 title: '💼 Revenue & Finance',
-                fields: ['totalRake', 'revenueByBuyIns', 'profitLoss', 'guaranteeOverlay', 'guaranteeSurplus'],
+                fields: ['totalRake', 'buyInsByTotalEntries', 'gameProfitLoss', 'guaranteeOverlay', 'guaranteeSurplus'],
                 priority: 'optional',
                 defaultOpen: false
             },

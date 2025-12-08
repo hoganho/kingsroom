@@ -57,10 +57,14 @@ export const validateEditedGameData = (data: GameData): ValidationResult => {
         warnings.push('Buy-in specified but rake is missing or zero');
     }
     
-    if (data.totalEntries && data.totalEntries > 0 && (!data.prizepool || data.prizepool === 0)) {
-        warnings.push('Total entries specified but prizepool is missing or zero');
+    if (data.totalEntries && data.totalEntries > 0 && (!data.prizepoolPaid || data.prizepoolPaid === 0)) {
+        warnings.push('Total entries specified but prizepoolPaid is missing or zero');
     }
     
+    if (data.totalEntries && data.totalEntries > 0 && (!data.prizepoolCalculated || data.prizepoolCalculated === 0)) {
+        warnings.push('Total entries specified but prizepoolCalculated is missing or zero');
+    }
+
     // Date validations
     if (data.gameStartDateTime && data.gameEndDateTime) {
         const startDate = new Date(data.gameStartDateTime);
@@ -90,17 +94,27 @@ export const validateEditedGameData = (data: GameData): ValidationResult => {
         correctedData.venueFee = 0;
         warnings.push('Venue fee was negative, set to 0');
     }
-    
+
+    if (correctedData.totalUniquePlayers && correctedData.totalUniquePlayers < 0) {
+        correctedData.totalUniquePlayers = 0;
+        warnings.push('Total unique players was negative, set to 0');
+    }
+
     if (correctedData.totalEntries && correctedData.totalEntries < 0) {
         correctedData.totalEntries = 0;
         warnings.push('Total entries was negative, set to 0');
     }
     
-    if (correctedData.prizepool && correctedData.prizepool < 0) {
-        correctedData.prizepool = 0;
-        warnings.push('Prizepool was negative, set to 0');
+    if (correctedData.prizepoolPaid && correctedData.prizepoolPaid < 0) {
+        correctedData.prizepoolPaid = 0;
+        warnings.push('prizepoolPaid was negative, set to 0');
     }
     
+    if (correctedData.prizepoolCalculated && correctedData.prizepoolCalculated < 0) {
+        correctedData.prizepoolCalculated = 0;
+        warnings.push('prizepoolCalculated was negative, set to 0');
+    }
+
     if (correctedData.guaranteeAmount && correctedData.guaranteeAmount < 0) {
         correctedData.guaranteeAmount = 0;
         warnings.push('Guarantee amount was negative, set to 0');
@@ -132,49 +146,89 @@ export const validateEditedGameData = (data: GameData): ValidationResult => {
 
 /**
  * Calculate derived fields from edited data
+ * 
+ * POKER TOURNAMENT ECONOMICS:
+ * - Buy-in = Rake + Prizepool Contribution (per entry)
+ * - Prizepool Contributions = (buyIn - rake) × totalEntries
+ * - If guarantee exists, prizepool must be at least the guarantee amount
+ * - Shortfall = guarantee - prizepool contributions (if positive)
+ * - We cover shortfall first from intended rake, then from pocket (overlay)
+ * 
+ * Examples ($200 buy-in, $24 rake, $5000 guarantee):
+ * - 20 entries: $3520 contributions, $1480 shortfall, -$1000 profit (loss)
+ * - 25 entries: $4400 contributions, $600 shortfall, $0 profit (broke even)
+ * - 27 entries: $4752 contributions, $248 shortfall, $400 profit (partial rake)
+ * - 30 entries: $5280 contributions, no shortfall, $720 profit (full rake)
  */
 export const calculateDerivedFields = (data: GameData): Partial<GameData> => {
     const derived: Partial<GameData> = {};
     
-    // Calculate total rake
-    if (data.rake && data.totalEntries) {
-        derived.totalRake = data.rake * data.totalEntries;
-    }
+    const buyIn = data.buyIn || 0;
+    const rake = data.rake || 0;
+    const totalEntries = data.totalEntries || 0;
+    const totalAddons = data.totalAddons || 0;
+    const totalRebuys = data.totalRebuys || 0;
+    const guaranteeAmount = data.guaranteeAmount || 0;
+    const hasGuarantee = data.hasGuarantee && guaranteeAmount > 0;
     
-    // Calculate revenue by buy-ins
-    if (data.buyIn && data.totalEntries) {
-        derived.revenueByBuyIns = data.buyIn * data.totalEntries;
-        
-        // Add rebuys and addons if present
-        if (data.totalRebuys) {
-            derived.revenueByBuyIns += data.buyIn * data.totalRebuys;
-        }
-        if (data.totalAddons) {
-            derived.revenueByBuyIns += data.buyIn * data.totalAddons;
-        }
-    }
+    // Entries that pay rake (initial entries + rebuys, NOT addons)
+    // Addons typically go straight to prizepool without rake
+    const entriesForRake = totalEntries + totalRebuys;
     
-    // Calculate guarantee overlay/surplus
-    if (data.hasGuarantee && data.guaranteeAmount) {
-        const actualPrizepool = data.prizepool || 0;
+    // Calculate intended total rake
+    const intendedTotalRake = rake * entriesForRake;
+    derived.totalRake = intendedTotalRake;
+    
+    // Calculate total buy-ins collected (all entries including addons)
+    const totalBuyIns = buyIn * (totalEntries + totalRebuys + totalAddons);
+    derived.buyInsByTotalEntries = totalBuyIns;
+    
+    // Calculate prizepool contributions
+    // Entries/rebuys contribute (buyIn - rake), addons contribute full buyIn
+    const prizepoolFromEntriesAndRebuys = (buyIn - rake) * entriesForRake;
+    const prizepoolFromAddons = buyIn * totalAddons;
+    const totalPrizepoolContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
+    
+    // Initialize profit/loss and rake realization flag
+    let gameProfitLoss = intendedTotalRake;
+    let totalRakePerPlayerRealised = true;
+    
+    if (hasGuarantee) {
+        // Calculate shortfall: how much we need to dip into rake to cover guarantee
+        const shortfall = Math.max(0, guaranteeAmount - totalPrizepoolContributions);
         
-        if (actualPrizepool < data.guaranteeAmount) {
-            derived.guaranteeOverlay = data.guaranteeAmount - actualPrizepool;
+        if (shortfall > 0) {
+            // We need to use some/all rake (and possibly pocket money) to cover guarantee
+            // Profit = intendedRake - shortfall (can be negative if shortfall > rake)
+            gameProfitLoss = intendedTotalRake - shortfall;
+            totalRakePerPlayerRealised = false;
+        }
+        // else: No shortfall, we keep full rake, totalRakePerPlayerRealised stays true
+        
+        // Calculate overlay (out-of-pocket cost) and surplus
+        if (totalBuyIns < guaranteeAmount) {
+            // Total buy-ins don't cover guarantee - we have out-of-pocket overlay
+            derived.guaranteeOverlay = guaranteeAmount - totalBuyIns;
             derived.guaranteeSurplus = null;
-        } else {
+        } else if (totalPrizepoolContributions > guaranteeAmount) {
+            // Prizepool contributions exceeded guarantee - surplus goes to players
             derived.guaranteeOverlay = null;
-            derived.guaranteeSurplus = actualPrizepool - data.guaranteeAmount;
+            derived.guaranteeSurplus = totalPrizepoolContributions - guaranteeAmount;
+        } else {
+            // Met guarantee using some/all rake, no out-of-pocket cost
+            derived.guaranteeOverlay = 0;
+            derived.guaranteeSurplus = 0;
         }
+    } else {
+        // No guarantee - we always get full rake
+        derived.guaranteeOverlay = null;
+        derived.guaranteeSurplus = null;
+        // gameProfitLoss stays as intendedTotalRake
+        // totalRakePerPlayerRealised stays true
     }
     
-    // ✅ Calculate profit/loss (venueFee is REVENUE - what venue pays us)
-    if (derived.totalRake !== undefined) {
-        const totalRake = derived.totalRake || 0;
-        const venueFee = data.venueFee || 0;  // Revenue from venue
-        const overlay = derived.guaranteeOverlay || 0;  // Cost if we had to cover guarantee
-        // Profit = rake + venue fee - overlay
-        derived.profitLoss = totalRake + venueFee - overlay;
-    }
+    derived.gameProfitLoss = gameProfitLoss;
+    derived.totalRakePerPlayerRealised = totalRakePerPlayerRealised;
     
     // Calculate average stack if not provided
     if (!data.averagePlayerStack && data.totalChipsInPlay && data.playersRemaining) {

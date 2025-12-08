@@ -19,7 +19,9 @@ const getFieldInputType = (field: keyof GameData): string => {
         buyIn: 'number',
         rake: 'number',
         venueFee: 'number',  // ✅ Added venueFee
-        prizepool: 'number',
+        prizepoolPaid: 'number',
+        prizepoolCalculated: 'number',
+        totalUniquePlayers: 'number',
         totalEntries: 'number',
         totalRebuys: 'number',
         totalAddons: 'number',
@@ -90,10 +92,10 @@ const formatDisplayValue = (value: any, field: keyof GameData): string => {
     if (typeof value === 'number') {
         // ✅ Added venueFee to currency fields
         if (field === 'buyIn' || field === 'rake' || field === 'venueFee' || 
-            field === 'prizepool' || field === 'guaranteeAmount' || 
-            field === 'totalRake' || field === 'revenueByBuyIns' ||
+            field === 'prizepoolPaid' || field === 'prizepoolCalculated' || field === 'guaranteeAmount' || 
+            field === 'totalRake' || field === 'buyInsByTotalEntries' ||
             field === 'guaranteeOverlay' || field === 'guaranteeSurplus' ||
-            field === 'profitLoss') {
+            field === 'gameProfitLoss') {
             return `$${value.toLocaleString()}`;
         }
         return value.toLocaleString();

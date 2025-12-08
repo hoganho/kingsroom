@@ -157,7 +157,7 @@ export const useGameDataEditor = (initialData: GameData): UseGameDataEditorRetur
                 const buyIn = field === 'buyIn' ? value : prev.buyIn;
                 const rake = field === 'rake' ? value : prev.rake;
                 if (buyIn && prev.totalEntries) {
-                    updates.revenueByBuyIns = buyIn * prev.totalEntries;
+                    updates.buyInsByTotalEntries = buyIn * prev.totalEntries;
                 }
                 if (rake && prev.totalEntries) {
                     updates.totalRake = rake * prev.totalEntries;

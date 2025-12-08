@@ -55,8 +55,10 @@ export const GameCard: React.FC<GameCardProps> = ({
     gameStartDateTime,
     gameStatus,
     buyIn,
+    totalUniquePlayers,
     totalEntries,
-    prizepool,
+    prizepoolPaid,
+    prizepoolCalculated,
     venue,
     entity,
   } = game;
@@ -132,6 +134,12 @@ export const GameCard: React.FC<GameCardProps> = ({
             </span>
           </div>
           <div className="flex flex-col items-end">
+            <span className="text-xs text-gray-500">Unique Players</span>
+            <span className="text-sm font-medium text-gray-900 flex items-center">
+              <UserGroupIcon className="h-4 w-4 text-gray-400 mr-1" />
+              {totalUniquePlayers || 'N/A'}
+            </span>
+          </div>          <div className="flex flex-col items-end">
             <span className="text-xs text-gray-500">Entries</span>
             <span className="text-sm font-medium text-gray-900 flex items-center">
               <UserGroupIcon className="h-4 w-4 text-gray-400 mr-1" />
@@ -139,10 +147,17 @@ export const GameCard: React.FC<GameCardProps> = ({
             </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-xs text-gray-500">Prizepool</span>
+            <span className="text-xs text-gray-500">Prizepool Paid</span>
             <span className="text-sm font-medium text-gray-900 flex items-center">
               <CurrencyDollarIcon className="h-4 w-4 text-gray-400 mr-1" />
-              {formatCurrency(prizepool)}
+              {formatCurrency(prizepoolPaid)}
+            </span>
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="text-xs text-gray-500">Prizepool Calculated</span>
+            <span className="text-sm font-medium text-gray-900 flex items-center">
+              <CurrencyDollarIcon className="h-4 w-4 text-gray-400 mr-1" />
+              {formatCurrency(prizepoolCalculated)}
             </span>
           </div>
         </div>

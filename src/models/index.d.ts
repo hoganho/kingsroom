@@ -357,6 +357,88 @@ export enum ScheduledPostStatus {
   CANCELLED = "CANCELLED"
 }
 
+type EagerVenueMetricsResult = {
+  readonly success: boolean;
+  readonly venuesProcessed?: number | null;
+  readonly results?: (VenueMetricsUpdateResult | null)[] | null;
+  readonly error?: string | null;
+}
+
+type LazyVenueMetricsResult = {
+  readonly success: boolean;
+  readonly venuesProcessed?: number | null;
+  readonly results?: (VenueMetricsUpdateResult | null)[] | null;
+  readonly error?: string | null;
+}
+
+export declare type VenueMetricsResult = LazyLoading extends LazyLoadingDisabled ? EagerVenueMetricsResult : LazyVenueMetricsResult
+
+export declare const VenueMetricsResult: (new (init: ModelInit<VenueMetricsResult>) => VenueMetricsResult)
+
+type EagerVenueMetricsUpdateResult = {
+  readonly venueId: string;
+  readonly detailsId?: string | null;
+  readonly success: boolean;
+  readonly error?: string | null;
+}
+
+type LazyVenueMetricsUpdateResult = {
+  readonly venueId: string;
+  readonly detailsId?: string | null;
+  readonly success: boolean;
+  readonly error?: string | null;
+}
+
+export declare type VenueMetricsUpdateResult = LazyLoading extends LazyLoadingDisabled ? EagerVenueMetricsUpdateResult : LazyVenueMetricsUpdateResult
+
+export declare const VenueMetricsUpdateResult: (new (init: ModelInit<VenueMetricsUpdateResult>) => VenueMetricsUpdateResult)
+
+type EagerVenueMetricsPreview = {
+  readonly success: boolean;
+  readonly venueId?: string | null;
+  readonly currentMetrics?: VenueMetricsSnapshot | null;
+  readonly calculatedMetrics?: VenueMetricsSnapshot | null;
+  readonly wouldChange?: boolean | null;
+  readonly error?: string | null;
+}
+
+type LazyVenueMetricsPreview = {
+  readonly success: boolean;
+  readonly venueId?: string | null;
+  readonly currentMetrics?: VenueMetricsSnapshot | null;
+  readonly calculatedMetrics?: VenueMetricsSnapshot | null;
+  readonly wouldChange?: boolean | null;
+  readonly error?: string | null;
+}
+
+export declare type VenueMetricsPreview = LazyLoading extends LazyLoadingDisabled ? EagerVenueMetricsPreview : LazyVenueMetricsPreview
+
+export declare const VenueMetricsPreview: (new (init: ModelInit<VenueMetricsPreview>) => VenueMetricsPreview)
+
+type EagerVenueMetricsSnapshot = {
+  readonly totalGamesHeld?: number | null;
+  readonly averagePlayersPerGame?: number | null;
+  readonly gameNights?: (string | null)[] | null;
+  readonly gamesIncluded?: number | null;
+  readonly gamesExcluded?: number | null;
+  readonly exclusionReasons?: string | null;
+  readonly status?: VenueStatus | keyof typeof VenueStatus | null;
+}
+
+type LazyVenueMetricsSnapshot = {
+  readonly totalGamesHeld?: number | null;
+  readonly averagePlayersPerGame?: number | null;
+  readonly gameNights?: (string | null)[] | null;
+  readonly gamesIncluded?: number | null;
+  readonly gamesExcluded?: number | null;
+  readonly exclusionReasons?: string | null;
+  readonly status?: VenueStatus | keyof typeof VenueStatus | null;
+}
+
+export declare type VenueMetricsSnapshot = LazyLoading extends LazyLoadingDisabled ? EagerVenueMetricsSnapshot : LazyVenueMetricsSnapshot
+
+export declare const VenueMetricsSnapshot: (new (init: ModelInit<VenueMetricsSnapshot>) => VenueMetricsSnapshot)
+
 type EagerConsolidationPreviewResult = {
   readonly willConsolidate: boolean;
   readonly reason: string;
@@ -410,6 +492,7 @@ type EagerConsolidationSibling = {
   readonly flightLetter?: string | null;
   readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
   readonly gameStartDateTime?: string | null;
+  readonly totalUniquePlayers?: number | null;
   readonly totalEntries?: number | null;
   readonly finalDay?: boolean | null;
 }
@@ -421,6 +504,7 @@ type LazyConsolidationSibling = {
   readonly flightLetter?: string | null;
   readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
   readonly gameStartDateTime?: string | null;
+  readonly totalUniquePlayers?: number | null;
   readonly totalEntries?: number | null;
   readonly finalDay?: boolean | null;
 }
@@ -430,10 +514,12 @@ export declare type ConsolidationSibling = LazyLoading extends LazyLoadingDisabl
 export declare const ConsolidationSibling: (new (init: ModelInit<ConsolidationSibling>) => ConsolidationSibling)
 
 type EagerProjectedConsolidationTotals = {
+  readonly totalUniquePlayers?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
-  readonly prizepool?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly prizepoolCalculated?: number | null;
   readonly earliestStart?: string | null;
   readonly latestEnd?: string | null;
   readonly projectedStatus?: GameStatus | keyof typeof GameStatus | null;
@@ -442,10 +528,12 @@ type EagerProjectedConsolidationTotals = {
 }
 
 type LazyProjectedConsolidationTotals = {
+  readonly totalUniquePlayers?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
-  readonly prizepool?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly prizepoolCalculated?: number | null;
   readonly earliestStart?: string | null;
   readonly latestEnd?: string | null;
   readonly projectedStatus?: GameStatus | keyof typeof GameStatus | null;
@@ -774,9 +862,10 @@ type EagerScrapedGameData = {
   readonly gameType?: GameType | keyof typeof GameType | null;
   readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
-  readonly prizepool?: number | null;
-  readonly revenueByBuyIns?: number | null;
-  readonly profitLoss?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly prizepoolCalculated?: number | null;
+  readonly buyInsByTotalEntries?: number | null;
+  readonly gameProfitLoss?: number | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
   readonly totalRake?: number | null;
@@ -785,6 +874,7 @@ type EagerScrapedGameData = {
   readonly guaranteeAmount?: number | null;
   readonly guaranteeOverlay?: number | null;
   readonly guaranteeSurplus?: number | null;
+  readonly totalUniquePlayers?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -841,9 +931,10 @@ type LazyScrapedGameData = {
   readonly gameType?: GameType | keyof typeof GameType | null;
   readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
-  readonly prizepool?: number | null;
-  readonly revenueByBuyIns?: number | null;
-  readonly profitLoss?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly prizepoolCalculated?: number | null;
+  readonly buyInsByTotalEntries?: number | null;
+  readonly gameProfitLoss?: number | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
   readonly totalRake?: number | null;
@@ -852,6 +943,7 @@ type LazyScrapedGameData = {
   readonly guaranteeAmount?: number | null;
   readonly guaranteeOverlay?: number | null;
   readonly guaranteeSurplus?: number | null;
+  readonly totalUniquePlayers?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -1072,12 +1164,14 @@ type EagerReScrapeResult = {
   readonly gameType?: GameType | keyof typeof GameType | null;
   readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
-  readonly prizepool?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly prizepoolCalculated?: number | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
+  readonly totalUniquePlayers?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -1104,12 +1198,14 @@ type LazyReScrapeResult = {
   readonly gameType?: GameType | keyof typeof GameType | null;
   readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
-  readonly prizepool?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly prizepoolCalculated?: number | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
+  readonly totalUniquePlayers?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -2109,15 +2205,18 @@ type EagerGame = {
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
-  readonly prizepool?: number | null;
-  readonly totalEntries?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly prizepoolCalculated?: number | null;
+  readonly totalUniquePlayers?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
-  readonly revenueByBuyIns?: number | null;
+  readonly totalEntries?: number | null;
+  readonly buyInsByTotalEntries?: number | null;
   readonly totalRake?: number | null;
-  readonly profitLoss?: number | null;
+  readonly gameProfitLoss?: number | null;
   readonly guaranteeOverlay?: number | null;
   readonly guaranteeSurplus?: number | null;
+  readonly totalRakePerPlayerRealised?: boolean | null;
   readonly playersRemaining?: number | null;
   readonly totalChipsInPlay?: number | null;
   readonly averagePlayerStack?: number | null;
@@ -2141,7 +2240,7 @@ type EagerGame = {
   readonly isPartialData?: boolean | null;
   readonly missingFlightCount?: number | null;
   readonly expectedTotalEntries?: number | null;
-  readonly actualCalculatedEntries?: number | null;
+  readonly actualCalculatedUniquePlayers?: number | null;
   readonly sourceUrl?: string | null;
   readonly tournamentId?: number | null;
   readonly originalScrapedData?: string | null;
@@ -2194,15 +2293,18 @@ type LazyGame = {
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
-  readonly prizepool?: number | null;
-  readonly totalEntries?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly prizepoolCalculated?: number | null;
+  readonly totalUniquePlayers?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
-  readonly revenueByBuyIns?: number | null;
+  readonly totalEntries?: number | null;
+  readonly buyInsByTotalEntries?: number | null;
   readonly totalRake?: number | null;
-  readonly profitLoss?: number | null;
+  readonly gameProfitLoss?: number | null;
   readonly guaranteeOverlay?: number | null;
   readonly guaranteeSurplus?: number | null;
+  readonly totalRakePerPlayerRealised?: boolean | null;
   readonly playersRemaining?: number | null;
   readonly totalChipsInPlay?: number | null;
   readonly averagePlayerStack?: number | null;
@@ -2226,7 +2328,7 @@ type LazyGame = {
   readonly isPartialData?: boolean | null;
   readonly missingFlightCount?: number | null;
   readonly expectedTotalEntries?: number | null;
-  readonly actualCalculatedEntries?: number | null;
+  readonly actualCalculatedUniquePlayers?: number | null;
   readonly sourceUrl?: string | null;
   readonly tournamentId?: number | null;
   readonly originalScrapedData?: string | null;

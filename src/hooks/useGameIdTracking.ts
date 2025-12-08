@@ -148,6 +148,7 @@ const GET_UNFINISHED_GAMES = /* GraphQL */ `
         registrationStatus
         gameStartDateTime
         tournamentId
+        totalUniquePlayers
         totalEntries
         playersRemaining
       }

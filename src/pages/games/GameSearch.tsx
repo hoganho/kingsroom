@@ -18,9 +18,11 @@ interface Game {
   gameStatus: string;
   gameStartDateTime: string;
   buyIn?: number;
+  totalUniquePlayers?: number;
   totalEntries?: number;
   playersRemaining?: number;
-  prizepool?: number;
+  prizepoolPaid?: number;
+  prizepoolCalculated?: number;
   venue?: {
     name: string;
   };
@@ -72,9 +74,11 @@ export const GameSearch = () => {
                 gameStatus
                 gameStartDateTime
                 buyIn
+                totalUniquePlayers
                 totalEntries
                 playersRemaining
-                prizepool
+                prizepoolPaid
+                prizepoolCalculated
                 sourceUrl
                 venue {
                   name
@@ -131,9 +135,11 @@ export const GameSearch = () => {
                 gameStatus
                 gameStartDateTime
                 buyIn
+                totalUniquePlayers
                 totalEntries
                 playersRemaining
-                prizepool
+                prizepoolPaid
+                prizepoolCalculated
                 sourceUrl
                 venue {
                   name
@@ -263,16 +269,28 @@ export const GameSearch = () => {
                         <span>{game.venue?.name || 'No Venue'}</span>
                         <span className="mx-2">•</span>
                         <span>Buy-in: {formatCurrency(game.buyIn)}</span>
+                        {game.totalUniquePlayers && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span>{game.totalUniquePlayers} unique players</span>
+                          </>
+                        )}
                         {game.totalEntries && (
                           <>
                             <span className="mx-2">•</span>
                             <span>{game.totalEntries} entries</span>
                           </>
                         )}
-                        {game.prizepool && (
+                        {game.prizepoolPaid && (
                           <>
                             <span className="mx-2">•</span>
-                            <span>Prizepool: {formatCurrency(game.prizepool)}</span>
+                            <span>Prizepool Paid: {formatCurrency(game.prizepoolPaid)}</span>
+                          </>
+                        )}
+                        {game.prizepoolCalculated && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span>Prizepool Calculated: {formatCurrency(game.prizepoolCalculated)}</span>
                           </>
                         )}
                       </div>

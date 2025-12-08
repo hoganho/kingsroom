@@ -76,7 +76,9 @@ export const entityQueries = {
           venue {
             name
           }
-          prizepool
+          prizepoolPaid
+          prizepoolCalculated
+          totalUniquePlayers
           totalEntries
         }
         nextToken

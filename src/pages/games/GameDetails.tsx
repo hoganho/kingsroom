@@ -67,15 +67,17 @@ export const GameDetails = () => {
               guaranteeAmount
               guaranteeOverlay
               guaranteeSurplus
+              totalUniquePlayers
               totalEntries
               totalRebuys
               totalAddons
               playersRemaining
               totalChipsInPlay
               averagePlayerStack
-              prizepool
-              revenueByBuyIns
-              profitLoss
+              prizepoolPaid
+              prizepoolCalculated
+              buyInsByTotalEntries
+              gameProfitLoss
               seriesName
               isSeries
               isSatellite
@@ -314,6 +316,13 @@ export const GameDetails = () => {
             <div className="flex items-center">
               <UserGroupIcon className="h-5 w-5 text-gray-400 mr-2" />
               <div>
+                <p className="text-sm text-gray-500">Unique Players</p>
+                <p className="text-sm font-medium">{game.totalUniquePlayers || '-'}</p>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <UserGroupIcon className="h-5 w-5 text-gray-400 mr-2" />
+              <div>
                 <p className="text-sm text-gray-500">Entries</p>
                 <p className="text-sm font-medium">{game.totalEntries || '-'}</p>
               </div>
@@ -328,8 +337,12 @@ export const GameDetails = () => {
           <div className="flex items-center">
             <TrophyIcon className="h-8 w-8 text-yellow-500" />
             <div className="ml-3">
-              <p className="text-sm text-gray-500">Prizepool</p>
-              <p className="text-xl font-bold">{formatCurrency(game.prizepool)}</p>
+              <p className="text-sm text-gray-500">Prizepool Paid</p>
+              <p className="text-xl font-bold">{formatCurrency(game.prizepoolPaid)}</p>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-gray-500">Prizepool Calculated</p>
+              <p className="text-xl font-bold">{formatCurrency(game.prizepoolCalculated)}</p>
             </div>
           </div>
         </div>

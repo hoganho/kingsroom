@@ -192,59 +192,110 @@ const extractYearFromDate = (dateValue) => {
 /**
  * Calculate financial metrics including venue fee impact (NEW/ENHANCED)
  */
+/**
+ * Calculate financial metrics including venue fee impact
+ * 
+ * POKER TOURNAMENT ECONOMICS:
+ * - Buy-in = Rake + Prizepool Contribution (per entry)
+ * - Prizepool Contributions = (buyIn - rake) × totalEntries
+ * - If guarantee exists, prizepool must be at least the guarantee amount
+ * - Shortfall = guarantee - prizepool contributions (if positive)
+ * - We cover shortfall first from intended rake, then from pocket (overlay)
+ * 
+ * Examples ($200 buy-in, $24 rake, $5000 guarantee):
+ * - 20 entries: $3520 contributions, $1480 shortfall, -$1000 profit (loss)
+ * - 25 entries: $4400 contributions, $600 shortfall, $0 profit (broke even)
+ * - 27 entries: $4752 contributions, $248 shortfall, $400 profit (partial rake)
+ * - 30 entries: $5280 contributions, no shortfall, $720 profit (full rake)
+ */
 const calculateFinancials = (game, venueFee = 0) => {
+    const totalUniquePlayers = game.totalUniquePlayers || 0;
     const totalEntries = game.totalEntries || 0;
+    const totalAddons = game.totalAddons || 0;
+    const totalRebuys = game.totalRebuys || 0;
     const buyIn = game.buyIn || 0;
     const rake = game.rake || 0;
     const guaranteeAmount = game.guaranteeAmount || 0;
-    const prizepool = game.prizepool || 0;
+    const hasGuarantee = game.hasGuarantee && guaranteeAmount > 0;
     
-    // Calculate total rake collected
-    const totalRake = totalEntries * rake;
+    // Entries that pay rake (initial entries + rebuys, NOT addons)
+    // Addons typically go straight to prizepool without rake
+    const entriesForRake = totalEntries + totalRebuys;
     
-    // Calculate revenue from buy-ins
-    const revenueByBuyIns = totalEntries * buyIn;
+    // Calculate intended total rake
+    const intendedTotalRake = rake * entriesForRake;
     
-    // Calculate guarantee overlay/surplus
+    // Calculate total buy-ins collected (all entries including addons)
+    const totalBuyIns = buyIn * (totalEntries + totalRebuys + totalAddons);
+    
+    // Calculate prizepool contributions
+    // Entries/rebuys contribute (buyIn - rake), addons contribute full buyIn
+    const prizepoolFromEntriesAndRebuys = (buyIn - rake) * entriesForRake;
+    const prizepoolFromAddons = buyIn * totalAddons;
+    const totalPrizepoolContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
+    
+    // Initialize financial results
+    let gameProfitLoss = intendedTotalRake;
+    let totalRakePerPlayerRealised = true;
     let guaranteeOverlay = 0;
     let guaranteeSurplus = 0;
     
-    if (game.hasGuarantee && guaranteeAmount > 0) {
-        if (prizepool < guaranteeAmount) {
-            // Overlay - we had to add money to reach guarantee
-            guaranteeOverlay = guaranteeAmount - prizepool;
+    if (hasGuarantee) {
+        // Calculate shortfall: how much we need to dip into rake to cover guarantee
+        const shortfall = Math.max(0, guaranteeAmount - totalPrizepoolContributions);
+        
+        if (shortfall > 0) {
+            // We need to use some/all rake (and possibly pocket money) to cover guarantee
+            // Profit = intendedRake - shortfall (can be negative if shortfall > rake)
+            gameProfitLoss = intendedTotalRake - shortfall;
+            totalRakePerPlayerRealised = false;
+        }
+        // else: No shortfall, we keep full rake, totalRakePerPlayerRealised stays true
+        
+        // Calculate overlay (out-of-pocket cost) and surplus
+        if (totalBuyIns < guaranteeAmount) {
+            // Total buy-ins don't cover guarantee - we have out-of-pocket overlay
+            guaranteeOverlay = guaranteeAmount - totalBuyIns;
+            guaranteeSurplus = 0;
+        } else if (totalPrizepoolContributions > guaranteeAmount) {
+            // Prizepool contributions exceeded guarantee - surplus goes to players
+            guaranteeOverlay = 0;
+            guaranteeSurplus = totalPrizepoolContributions - guaranteeAmount;
         } else {
-            // Surplus - prizepool exceeded guarantee
-            guaranteeSurplus = prizepool - guaranteeAmount;
+            // Met guarantee using some/all rake, no out-of-pocket cost
+            guaranteeOverlay = 0;
+            guaranteeSurplus = 0;
         }
     }
-    
-    // Calculate profit/loss - NEW: includes venue fee deduction
-    // Profit = Rake collected - Venue fee - Overlay
-    let profitLoss = totalRake + (venueFee || 0);
-    
-    if (guaranteeOverlay > 0) {
-        profitLoss -= guaranteeOverlay;
-    }
+    // No guarantee: gameProfitLoss stays as intendedTotalRake, totalRakePerPlayerRealised stays true
     
     console.log('[SAVE-GAME] Financial calculations:', {
+        totalUniquePlayers,
         totalEntries,
+        totalRebuys,
+        totalAddons,
+        entriesForRake,
         buyIn,
         rake,
-        totalRake,
-        revenueByBuyIns,
+        intendedTotalRake,
+        totalBuyIns,
+        totalPrizepoolContributions,
+        guaranteeAmount,
+        hasGuarantee,
+        gameProfitLoss,
+        totalRakePerPlayerRealised,
         venueFee,
         guaranteeOverlay,
-        guaranteeSurplus,
-        profitLoss
+        guaranteeSurplus
     });
     
     return {
-        totalRake,
-        revenueByBuyIns,
+        totalRake: intendedTotalRake,
+        buyInsByTotalEntries: totalBuyIns,
+        gameProfitLoss,
+        totalRakePerPlayerRealised,
         guaranteeOverlay,
-        guaranteeSurplus,
-        profitLoss
+        guaranteeSurplus
     };
 };
 
@@ -999,19 +1050,18 @@ const createOrUpdateGameFinancialSnapshot = async (game, entityId, venueId) => {
     const totalCost = gameCost?.totalCost || 0;
 
 // Revenue side
-    const totalRake = game.totalRake || 0;
-    const totalPrizePool = game.prizepool || 0;
+    const gameProfitLoss = game.gameProfitLoss || 0;
+    const totalPrizePool = game.prizepoolPaid || 0;
+    const totalPrizeCalculated = game.prizepoolCalculated || 0;
     const totalVenueFee = game.venueFee || 0;  // Fee venue pays us to host (REVENUE)
-    const totalRevenue = totalRake + totalVenueFee;  // ✅ Revenue = rake + venue fee
+    const totalRevenue = gameProfitLoss + totalVenueFee;  // ✅ Revenue = gameProfitLoss + venue fee
 
     // Derived metrics
-    const profit = (typeof game.profitLoss === 'number')
-        ? game.profitLoss
-        : (totalRevenue - totalCost);
+    const profitLoss = totalRevenue - totalCost;
 
-    const profitMargin = totalRevenue > 0 ? profit / totalRevenue : null;
-    const revenuePerPlayer = game.totalEntries ? totalRevenue / game.totalEntries : null;
-    const costPerPlayer = game.totalEntries ? totalCost / game.totalEntries : null;
+    const profitMargin = totalRevenue > 0 ? profitLoss / totalRevenue : null;
+    const revenuePerPlayer = game.totalUniquePlayers ? totalRevenue / game.totalUniquePlayers : null;
+    const costPerPlayer = game.totalUniquePlayers ? totalCost / game.totalUniquePlayers : null;
 
     const now = new Date().toISOString();
     const timestamp = Date.now();
@@ -1151,7 +1201,6 @@ const createOrUpdateGameCost = async (
         venueId,
         entityId,
         gameStartDateTime,
-        venueFee = null,
         totalEntries = 0
     ) => {
         const gameCostTable = getTableName('GameCost');
@@ -1175,14 +1224,8 @@ const createOrUpdateGameCost = async (
             
             const updateFields = {};
             
-            // Update venue fee if provided and different
-            if (venueFee !== null && venueFee !== existingCost.venueFee) {
-                updateFields.venueFee = venueFee;
-            }
-            
             // Recalculate total cost
-            const totalCost = (updateFields.venueFee !== undefined ? updateFields.venueFee : existingCost.venueFee || 0) +
-                            (existingCost.totalDealerCost || 0) +
+            const totalCost = (existingCost.totalDealerCost || 0) +
                             (existingCost.totalTournamentDirectorCost || 0) +
                             (existingCost.totalPrizeContribution || 0) +
                             (existingCost.totalJackpotContribution || 0) +
@@ -1228,9 +1271,6 @@ const createOrUpdateGameCost = async (
         id: costId,
         gameId: gameId,
 
-        // Venue fee
-        venueFee: venueFee || 0,
-
         // Dealer cost default: #entries * $15
         totalDealerCost: computedDealerCost,
 
@@ -1243,7 +1283,7 @@ const createOrUpdateGameCost = async (
         totalOtherCost: 0,
 
         // Total cost = venue fee + dealer cost (for now)
-        totalCost: (venueFee || 0) + computedDealerCost,
+        totalCost: computedDealerCost,
 
         // Denormalized fields for querying
         entityId: entityId,
@@ -1313,16 +1353,19 @@ const createGame = async (input, venueResolution, seriesResolution) => {
         rake: input.game.rake || 0,
         venueFee: effectiveVenueFee ?? 0,  // ✅ FIXED: Use 0 if venue has no fee
         totalRake: financials.totalRake,  // ENHANCED
-        revenueByBuyIns: financials.revenueByBuyIns,  // ENHANCED
-        profitLoss: financials.profitLoss,  // ENHANCED - includes venue fee deduction
+        buyInsByTotalEntries: financials.buyInsByTotalEntries,  // ENHANCED
         hasGuarantee: input.game.hasGuarantee || false,
         guaranteeAmount: input.game.guaranteeAmount || 0,
         guaranteeOverlay: financials.guaranteeOverlay,
         guaranteeSurplus: financials.guaranteeSurplus,
+        gameProfitLoss: financials.gameProfitLoss,  // ✅ NEW - Actual profit/loss after guarantee
+        totalRakePerPlayerRealised: financials.totalRakePerPlayerRealised,  // ✅ NEW - Full rake collected?
         startingStack: input.game.startingStack || 0,
         
         // Results
-        prizepool: input.game.prizepool || 0,
+        prizepoolPaid: input.game.prizepoolPaid || 0,
+        prizepoolCalculated: input.game.prizepoolCalculated || 0,
+        totalUniquePlayers: input.game.totalUniquePlayers || 0,
         totalEntries: input.game.totalEntries || 0,
         totalRebuys: input.game.totalRebuys || 0,
         totalAddons: input.game.totalAddons || 0,
@@ -1399,7 +1442,6 @@ const createGame = async (input, venueResolution, seriesResolution) => {
     }));
     
     console.log(`[SAVE-GAME] ✅ Created game: ${gameId}${input.source.wasEdited ? ' (with edits)' : ''}`);
-    console.log(`[SAVE-GAME] Venue fee: ${effectiveVenueFee} (override: ${input.game.venueFee ?? 'none'}, venue: ${venueResolution.venueFee ?? 0}), Profit/Loss: ${financials.profitLoss}`);
     
     // Create the associated GameCost record with venue fee (NEW)
     await createOrUpdateGameCost(
@@ -1407,7 +1449,6 @@ const createGame = async (input, venueResolution, seriesResolution) => {
         venueResolution.venueId,
         input.source.entityId,
         game.gameStartDateTime,
-        effectiveVenueFee,
         game.totalEntries || 0
     );
     
@@ -1468,16 +1509,19 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     }
     checkAndUpdate('rake', input.game.rake, existingGame.rake);
     checkAndUpdate('totalRake', financials.totalRake, existingGame.totalRake);  // ENHANCED
-    checkAndUpdate('revenueByBuyIns', financials.revenueByBuyIns, existingGame.revenueByBuyIns);  // ENHANCED
-    checkAndUpdate('profitLoss', financials.profitLoss, existingGame.profitLoss);  // ENHANCED
+    checkAndUpdate('buyInsByTotalEntries', financials.buyInsByTotalEntries, existingGame.buyInsByTotalEntries);  // ENHANCED
     checkAndUpdate('hasGuarantee', input.game.hasGuarantee, existingGame.hasGuarantee);
     checkAndUpdate('guaranteeAmount', input.game.guaranteeAmount, existingGame.guaranteeAmount);
     checkAndUpdate('guaranteeOverlay', financials.guaranteeOverlay, existingGame.guaranteeOverlay);
     checkAndUpdate('guaranteeSurplus', financials.guaranteeSurplus, existingGame.guaranteeSurplus);
+    checkAndUpdate('gameProfitLoss', financials.gameProfitLoss, existingGame.gameProfitLoss);  // ✅ NEW
+    checkAndUpdate('totalRakePerPlayerRealised', financials.totalRakePerPlayerRealised, existingGame.totalRakePerPlayerRealised);  // ✅ NEW
     checkAndUpdate('startingStack', input.game.startingStack, existingGame.startingStack);
     
     // Results
-    checkAndUpdate('prizepool', input.game.prizepool, existingGame.prizepool);
+    checkAndUpdate('prizepoolPaid', input.game.prizepoolPaid, existingGame.prizepoolPaid);
+    checkAndUpdate('prizepoolCalculated', input.game.prizepoolCalculated, existingGame.prizepoolCalculated);
+    checkAndUpdate('totalUniquePlayers', input.game.totalUniquePlayers, existingGame.totalUniquePlayers);
     checkAndUpdate('totalEntries', input.game.totalEntries, existingGame.totalEntries);
     checkAndUpdate('totalRebuys', input.game.totalRebuys, existingGame.totalRebuys);
     checkAndUpdate('totalAddons', input.game.totalAddons, existingGame.totalAddons);
@@ -1593,7 +1637,6 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
         }));
         
         console.log(`[SAVE-GAME] ✅ Updated game ${existingGame.id}, fields: ${fieldsUpdated.join(', ')}${input.source.wasEdited ? ' (edited data)' : ''}`);
-        console.log(`[SAVE-GAME] Venue fee: ${effectiveVenueFee} (override: ${input.game.venueFee ?? 'none'}, venue: ${venueResolution.venueFee ?? 0}), Profit/Loss: ${financials.profitLoss}`);
     } else {
         console.log(`[SAVE-GAME] No changes detected for game ${existingGame.id}`);
     }
@@ -1604,7 +1647,6 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
         venueResolution.venueId,
         input.source.entityId,
         updatedGame.gameStartDateTime,
-        effectiveVenueFee,
         updatedGame.totalEntries || 0
     );
 
@@ -1792,7 +1834,9 @@ const queueForPDP = async (game, input) => {
             gameEndDateTime: game.gameEndDateTime,
             buyIn: game.buyIn,
             rake: game.rake,
-            prizepool: game.prizepool,
+            prizepoolPaid: game.prizepoolPaid,
+            prizepoolCalculated: game.prizepoolCalculated,
+            totalUniquePlayers: game.totalUniquePlayers,
             totalEntries: game.totalEntries,
             totalRebuys: game.totalRebuys,
             totalAddons: game.totalAddons,
@@ -1977,8 +2021,10 @@ exports.handler = async (event) => {
         if (existingGame && !input.options?.forceUpdate) {
             // Check if we should skip or update
             const hasChanges = input.game.gameStatus !== existingGame.gameStatus ||
+                               input.game.totalUniquePlayers !== existingGame.totalUniquePlayers ||
                                input.game.totalEntries !== existingGame.totalEntries ||
-                               input.game.prizepool !== existingGame.prizepool ||
+                               input.game.prizepoolPaid !== existingGame.prizepoolPaid ||
+                               input.game.prizepoolCalculated !== existingGame.prizepoolCalculated ||
                                venueResolution.venueFee !== existingGame.venueFee ||  // NEW - Check venue fee changes
                                input.source.wasEdited; // Always update if edited
             

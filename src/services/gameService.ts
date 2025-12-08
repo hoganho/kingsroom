@@ -162,7 +162,9 @@ const createNotPublishedPlaceholder = (
         buyIn: data.buyIn || 0,
         rake: data.rake || 0,
         startingStack: data.startingStack || 0,
-        prizepool: data.prizepool || 0,
+        prizepoolPaid: data.prizepoolPaid || 0,
+        prizepoolCalculated: data.prizepoolCalculated || 0,
+        totalUniquePlayers: data.totalUniquePlayers || 0,
         totalEntries: data.totalEntries || 0,
         totalRebuys: data.totalRebuys || 0,
         totalAddons: data.totalAddons || 0,
@@ -241,7 +243,8 @@ const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
     
     return {
         allPlayers: allPlayers,  // Will be empty array [] for NOT_PUBLISHED games
-        totalPlayers: data.totalEntries || allPlayers.length || 0,
+        totalUniquePlayers: data.totalUniquePlayers || allPlayers.length || 0,
+        totalEntries: data.totalEntries || allPlayers.length || 0,
         hasCompleteResults: Boolean(hasResults && isFinished),  // Required boolean
         totalPrizesPaid: totalPrizesPaid > 0 ? totalPrizesPaid : null,
         hasEntryList: Boolean(data.entries && data.entries.length > 0),  // Ensure boolean
@@ -467,7 +470,9 @@ export const saveGameDataToBackend = async (
             
             // Game details
             startingStack: finalData.startingStack || 0,
-            prizepool: finalData.prizepool || 0,
+            prizepoolPaid: finalData.prizepoolPaid || 0,
+            prizepoolCalculated: finalData.prizepoolCalculated || 0,
+            totalUniquePlayers: finalData.totalUniquePlayers || 0,
             totalEntries: finalData.totalEntries || 0,
             totalRebuys: finalData.totalRebuys || 0,
             totalAddons: finalData.totalAddons || 0,
@@ -493,8 +498,8 @@ export const saveGameDataToBackend = async (
             // Other
             gameTags: finalData.gameTags?.filter((tag): tag is string => tag !== null) || [],
             totalDuration: (finalData as any).totalDuration || null,
-            revenueByBuyIns: (finalData as any).revenueByBuyIns || null,
-            profitLoss: (finalData as any).profitLoss || null
+            buyInsByTotalEntries: (finalData as any).buyInsByTotalEntries || null,
+            gameProfitLoss: (finalData as any).gameProfitLoss || null
         },
         players: playerData,
         venue: {
@@ -548,7 +553,8 @@ export const saveGameDataToBackend = async (
         venueId,
         gameStatus: saveGameInput.game.gameStatus,
         venueFee: (saveGameInput.game as any).venueFee,
-        playerCount: saveGameInput.players?.totalPlayers || 0,
+        uniquePlayerCount: saveGameInput.players?.totalUniquePlayers || 0,
+        entryCount: saveGameInput.players?.totalEntries || 0,
         existingGameId,
         wasEdited: options?.wasEdited,
         changedFields: auditTrail?.changedFields,

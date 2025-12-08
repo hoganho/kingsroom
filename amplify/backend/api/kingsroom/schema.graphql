@@ -117,6 +117,50 @@ type VenueDetails @model(subscriptions: null) @auth(rules: [{ allow: private }])
   venue: Venue @belongsTo(fields: ["venueId"])
 }
 
+# --- VenueDetails Mutations ---
+type VenueMetricsResult {
+  success: Boolean!
+  venuesProcessed: Int
+  results: [VenueMetricsUpdateResult]
+  error: String
+}
+
+type VenueMetricsUpdateResult {
+  venueId: ID!
+  detailsId: ID
+  success: Boolean!
+  error: String
+}
+
+type VenueMetricsPreview {
+  success: Boolean!
+  venueId: ID
+  currentMetrics: VenueMetricsSnapshot
+  calculatedMetrics: VenueMetricsSnapshot
+  wouldChange: Boolean
+  error: String
+}
+
+type VenueMetricsSnapshot {
+  totalGamesHeld: Int
+  averagePlayersPerGame: Float
+  gameNights: [String]
+  gamesIncluded: Int
+  gamesExcluded: Int
+  exclusionReasons: AWSJSON
+  status: VenueStatus
+}
+
+input RecalculateVenueDetailsInput {
+  venueId: ID
+  entityId: ID
+  forceAll: Boolean
+}
+
+input VenueMetricsPreviewInput {
+  venueId: ID!
+}
+
 type TournamentSeriesTitle @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   title: String!
@@ -178,17 +222,20 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   guaranteeAmount: Float
 
   # --- Aggregates & Results ---
-  prizepool: Float
-  totalEntries: Int
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  totalUniquePlayers: Int
   totalRebuys: Int
   totalAddons: Int
+  totalEntries: Int
 
   # --- Calculated Financial Metrics ---
-  revenueByBuyIns: Float
+  buyInsByTotalEntries: Float
   totalRake: Float
-  profitLoss: Float
+  gameProfitLoss: Float # This is a calculation to determine if rake > guaranteeSurplus (or a loss if there's an guaranteeOverlay)
   guaranteeOverlay: Float
   guaranteeSurplus: Float
+  totalRakePerPlayerRealised: Boolean
 
   # --- Live Game Data ---
   playersRemaining: Int
@@ -223,7 +270,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   isPartialData: Boolean @default(value: "false")
   missingFlightCount: Int
   expectedTotalEntries: Int
-  actualCalculatedEntries: Int
+  actualCalculatedUniquePlayers: Int
 
   # --- Data Source ---
   sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
@@ -333,8 +380,8 @@ type GameFinancialSnapshot
   # --- Derived Management Metrics ---
   profit: Float! @default(value: "0")              # totalRevenue - totalCost
   profitMargin: Float                              # profit / totalRevenue
-  revenuePerPlayer: Float                          # totalRevenue / totalEntries
-  costPerPlayer: Float                             # totalCost / totalEntries
+  revenuePerPlayer: Float                          # totalRevenue / totalUniquePlayers
+  costPerPlayer: Float                             # totalCost / totalUniquePlayers
   dealerCostPerHour: Float
   promoSpendPerPlayer: Float
 
@@ -436,15 +483,18 @@ type ConsolidationSibling {
   flightLetter: String
   gameStatus: GameStatus
   gameStartDateTime: AWSDateTime
+  totalUniquePlayers: Int
   totalEntries: Int
   finalDay: Boolean
 }
 
 type ProjectedConsolidationTotals {
+  totalUniquePlayers: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
-  prizepool: Float
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
   earliestStart: AWSDateTime
   latestEnd: AWSDateTime
   projectedStatus: GameStatus
@@ -1286,9 +1336,10 @@ type ScrapedGameData {
   gameType: GameType
   gameVariant: GameVariant
   tournamentType: TournamentType
-  prizepool: Float
-  revenueByBuyIns: Float
-  profitLoss: Float
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  buyInsByTotalEntries: Float
+  gameProfitLoss: Float
   buyIn: Float
   rake: Float
   totalRake: Float
@@ -1297,6 +1348,7 @@ type ScrapedGameData {
   guaranteeAmount: Float
   guaranteeOverlay: Float
   guaranteeSurplus: Float
+  totalUniquePlayers: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
@@ -1413,12 +1465,14 @@ type ReScrapeResult {
   gameType: GameType
   gameVariant: GameVariant
   tournamentType: TournamentType
-  prizepool: Float
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
   buyIn: Float
   rake: Float
   startingStack: Int
   hasGuarantee: Boolean
   guaranteeAmount: Float
+  totalUniquePlayers: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
@@ -1791,10 +1845,12 @@ input GamePreviewDataInput {
   isSeries: Boolean
   seriesName: String
   isMainEvent: Boolean
+  totalUniquePlayers: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
-  prizepool: Float
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
   gameEndDateTime: AWSDateTime
 }
 
@@ -1857,7 +1913,9 @@ input ScrapedGameDataInput {
   registrationStatus: RegistrationStatus
   gameVariant: GameVariant
   gameType: GameType
-  prizepool: Float
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  totalUniquePlayers: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
@@ -1926,12 +1984,15 @@ input SaveGameDataInput {
   buyIn: Float
   rake: Float
   totalRake: Float
+  totalRakePerPlayerRealised: Boolean
   guaranteeAmount: Float
   guaranteeOverlay: Float
   guaranteeSurplus: Float
   hasGuarantee: Boolean
   startingStack: Int
-  prizepool: Float
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  totalUniquePlayers: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
@@ -1939,8 +2000,8 @@ input SaveGameDataInput {
   totalChipsInPlay: Float
   averagePlayerStack: Float
   totalDuration: String
-  revenueByBuyIns: Float
-  profitLoss: Float
+  buyInsByTotalEntries: Float
+  gameProfitLoss: Float
   tournamentType: TournamentType
   isSeries: Boolean
   seriesName: String
@@ -1959,7 +2020,8 @@ input SaveGameDataInput {
 
 input SavePlayerDataInput {
   allPlayers: [SavePlayerInfoInput!]!
-  totalPlayers: Int!
+  totalEntries: Int!
+  totalUniquePlayers: Int!
   hasCompleteResults: Boolean!
   totalPrizesPaid: Float
   hasEntryList: Boolean
@@ -2124,6 +2186,9 @@ type Query {
   getDatabaseMetrics(timeRange: String): DatabaseMetricsResponse
     @function(name: "getDatabaseMetrics-${env}")
 
+  getVenueMetricsPreview(input: VenueMetricsPreviewInput!): VenueMetricsPreview
+    @function(name: "venueDetailsUpdater-${env}")
+
   # --- Counts ---
   playerCount: Int
     @function(name: "getModelCount-${env}")
@@ -2253,6 +2318,9 @@ type Mutation {
 
   saveGame(input: SaveGameInput!): SaveGameResult!
     @function(name: "saveGameFunction-${env}")
+
+  recalculateVenueDetails(input: RecalculateVenueDetailsInput!): VenueMetricsResult
+    @function(name: "venueDetailsUpdater-${env}")
 
   # --- Venue Assignment ---
   assignVenueToGame(gameId: ID!, venueId: ID!): VenueAssignmentResult

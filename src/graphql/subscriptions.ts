@@ -526,15 +526,18 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           startingStack
           hasGuarantee
           guaranteeAmount
-          prizepool
-          totalEntries
+          prizepoolPaid
+          prizepoolCalculated
+          totalUniquePlayers
           totalRebuys
           totalAddons
-          revenueByBuyIns
+          totalEntries
+          buyInsByTotalEntries
           totalRake
-          profitLoss
+          gameProfitLoss
           guaranteeOverlay
           guaranteeSurplus
+          totalRakePerPlayerRealised
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -568,15 +571,18 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             startingStack
             hasGuarantee
             guaranteeAmount
-            prizepool
-            totalEntries
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
             totalRebuys
             totalAddons
-            revenueByBuyIns
+            totalEntries
+            buyInsByTotalEntries
             totalRake
-            profitLoss
+            gameProfitLoss
             guaranteeOverlay
             guaranteeSurplus
+            totalRakePerPlayerRealised
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -598,7 +604,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedEntries
+            actualCalculatedUniquePlayers
             sourceUrl
             tournamentId
             originalScrapedData
@@ -635,7 +641,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedEntries
+          actualCalculatedUniquePlayers
           sourceUrl
           tournamentId
           originalScrapedData
@@ -1455,15 +1461,18 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           startingStack
           hasGuarantee
           guaranteeAmount
-          prizepool
-          totalEntries
+          prizepoolPaid
+          prizepoolCalculated
+          totalUniquePlayers
           totalRebuys
           totalAddons
-          revenueByBuyIns
+          totalEntries
+          buyInsByTotalEntries
           totalRake
-          profitLoss
+          gameProfitLoss
           guaranteeOverlay
           guaranteeSurplus
+          totalRakePerPlayerRealised
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -1497,15 +1506,18 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             startingStack
             hasGuarantee
             guaranteeAmount
-            prizepool
-            totalEntries
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
             totalRebuys
             totalAddons
-            revenueByBuyIns
+            totalEntries
+            buyInsByTotalEntries
             totalRake
-            profitLoss
+            gameProfitLoss
             guaranteeOverlay
             guaranteeSurplus
+            totalRakePerPlayerRealised
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -1527,7 +1539,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedEntries
+            actualCalculatedUniquePlayers
             sourceUrl
             tournamentId
             originalScrapedData
@@ -1564,7 +1576,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedEntries
+          actualCalculatedUniquePlayers
           sourceUrl
           tournamentId
           originalScrapedData
@@ -2400,15 +2412,18 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           startingStack
           hasGuarantee
           guaranteeAmount
-          prizepool
-          totalEntries
+          prizepoolPaid
+          prizepoolCalculated
+          totalUniquePlayers
           totalRebuys
           totalAddons
-          revenueByBuyIns
+          totalEntries
+          buyInsByTotalEntries
           totalRake
-          profitLoss
+          gameProfitLoss
           guaranteeOverlay
           guaranteeSurplus
+          totalRakePerPlayerRealised
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -2442,15 +2457,18 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             startingStack
             hasGuarantee
             guaranteeAmount
-            prizepool
-            totalEntries
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
             totalRebuys
             totalAddons
-            revenueByBuyIns
+            totalEntries
+            buyInsByTotalEntries
             totalRake
-            profitLoss
+            gameProfitLoss
             guaranteeOverlay
             guaranteeSurplus
+            totalRakePerPlayerRealised
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -2472,7 +2490,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedEntries
+            actualCalculatedUniquePlayers
             sourceUrl
             tournamentId
             originalScrapedData
@@ -2509,7 +2527,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedEntries
+          actualCalculatedUniquePlayers
           sourceUrl
           tournamentId
           originalScrapedData
@@ -3332,15 +3350,18 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           startingStack
           hasGuarantee
           guaranteeAmount
-          prizepool
-          totalEntries
+          prizepoolPaid
+          prizepoolCalculated
+          totalUniquePlayers
           totalRebuys
           totalAddons
-          revenueByBuyIns
+          totalEntries
+          buyInsByTotalEntries
           totalRake
-          profitLoss
+          gameProfitLoss
           guaranteeOverlay
           guaranteeSurplus
+          totalRakePerPlayerRealised
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -3374,15 +3395,18 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             startingStack
             hasGuarantee
             guaranteeAmount
-            prizepool
-            totalEntries
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
             totalRebuys
             totalAddons
-            revenueByBuyIns
+            totalEntries
+            buyInsByTotalEntries
             totalRake
-            profitLoss
+            gameProfitLoss
             guaranteeOverlay
             guaranteeSurplus
+            totalRakePerPlayerRealised
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -3404,7 +3428,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedEntries
+            actualCalculatedUniquePlayers
             sourceUrl
             tournamentId
             originalScrapedData
@@ -3441,7 +3465,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedEntries
+          actualCalculatedUniquePlayers
           sourceUrl
           tournamentId
           originalScrapedData
@@ -4264,15 +4288,18 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           startingStack
           hasGuarantee
           guaranteeAmount
-          prizepool
-          totalEntries
+          prizepoolPaid
+          prizepoolCalculated
+          totalUniquePlayers
           totalRebuys
           totalAddons
-          revenueByBuyIns
+          totalEntries
+          buyInsByTotalEntries
           totalRake
-          profitLoss
+          gameProfitLoss
           guaranteeOverlay
           guaranteeSurplus
+          totalRakePerPlayerRealised
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -4306,15 +4333,18 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             startingStack
             hasGuarantee
             guaranteeAmount
-            prizepool
-            totalEntries
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
             totalRebuys
             totalAddons
-            revenueByBuyIns
+            totalEntries
+            buyInsByTotalEntries
             totalRake
-            profitLoss
+            gameProfitLoss
             guaranteeOverlay
             guaranteeSurplus
+            totalRakePerPlayerRealised
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -4336,7 +4366,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedEntries
+            actualCalculatedUniquePlayers
             sourceUrl
             tournamentId
             originalScrapedData
@@ -4373,7 +4403,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedEntries
+          actualCalculatedUniquePlayers
           sourceUrl
           tournamentId
           originalScrapedData
@@ -5193,15 +5223,18 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           startingStack
           hasGuarantee
           guaranteeAmount
-          prizepool
-          totalEntries
+          prizepoolPaid
+          prizepoolCalculated
+          totalUniquePlayers
           totalRebuys
           totalAddons
-          revenueByBuyIns
+          totalEntries
+          buyInsByTotalEntries
           totalRake
-          profitLoss
+          gameProfitLoss
           guaranteeOverlay
           guaranteeSurplus
+          totalRakePerPlayerRealised
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -5235,15 +5268,18 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             startingStack
             hasGuarantee
             guaranteeAmount
-            prizepool
-            totalEntries
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
             totalRebuys
             totalAddons
-            revenueByBuyIns
+            totalEntries
+            buyInsByTotalEntries
             totalRake
-            profitLoss
+            gameProfitLoss
             guaranteeOverlay
             guaranteeSurplus
+            totalRakePerPlayerRealised
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -5265,7 +5301,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedEntries
+            actualCalculatedUniquePlayers
             sourceUrl
             tournamentId
             originalScrapedData
@@ -5302,7 +5338,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedEntries
+          actualCalculatedUniquePlayers
           sourceUrl
           tournamentId
           originalScrapedData
@@ -6135,15 +6171,18 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           startingStack
           hasGuarantee
           guaranteeAmount
-          prizepool
-          totalEntries
+          prizepoolPaid
+          prizepoolCalculated
+          totalUniquePlayers
           totalRebuys
           totalAddons
-          revenueByBuyIns
+          totalEntries
+          buyInsByTotalEntries
           totalRake
-          profitLoss
+          gameProfitLoss
           guaranteeOverlay
           guaranteeSurplus
+          totalRakePerPlayerRealised
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -6177,15 +6216,18 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             startingStack
             hasGuarantee
             guaranteeAmount
-            prizepool
-            totalEntries
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
             totalRebuys
             totalAddons
-            revenueByBuyIns
+            totalEntries
+            buyInsByTotalEntries
             totalRake
-            profitLoss
+            gameProfitLoss
             guaranteeOverlay
             guaranteeSurplus
+            totalRakePerPlayerRealised
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -6207,7 +6249,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedEntries
+            actualCalculatedUniquePlayers
             sourceUrl
             tournamentId
             originalScrapedData
@@ -6244,7 +6286,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedEntries
+          actualCalculatedUniquePlayers
           sourceUrl
           tournamentId
           originalScrapedData
@@ -7077,15 +7119,18 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           startingStack
           hasGuarantee
           guaranteeAmount
-          prizepool
-          totalEntries
+          prizepoolPaid
+          prizepoolCalculated
+          totalUniquePlayers
           totalRebuys
           totalAddons
-          revenueByBuyIns
+          totalEntries
+          buyInsByTotalEntries
           totalRake
-          profitLoss
+          gameProfitLoss
           guaranteeOverlay
           guaranteeSurplus
+          totalRakePerPlayerRealised
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -7119,15 +7164,18 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             startingStack
             hasGuarantee
             guaranteeAmount
-            prizepool
-            totalEntries
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
             totalRebuys
             totalAddons
-            revenueByBuyIns
+            totalEntries
+            buyInsByTotalEntries
             totalRake
-            profitLoss
+            gameProfitLoss
             guaranteeOverlay
             guaranteeSurplus
+            totalRakePerPlayerRealised
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -7149,7 +7197,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedEntries
+            actualCalculatedUniquePlayers
             sourceUrl
             tournamentId
             originalScrapedData
@@ -7186,7 +7234,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedEntries
+          actualCalculatedUniquePlayers
           sourceUrl
           tournamentId
           originalScrapedData

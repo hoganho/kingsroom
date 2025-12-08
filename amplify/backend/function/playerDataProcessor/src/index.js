@@ -522,7 +522,7 @@ const createPlayerResult = async (playerId, gameData, playerData, entityId) => {
             amountWon: playerData.winnings || 0,
             pointsEarned: playerData.points || 0,
             isMultiDayQualification: playerData.isQualification || false,
-            totalRunners: gameData.game.totalEntries || gameData.players.totalPlayers,
+            totalRunners: gameData.game.totalUniquePlayers || gameData.players.totalUniquePlayers,
             gameStartDateTime: gameData.game.gameStartDateTime || gameData.game.gameEndDateTime || now, // Added for sorting support
             createdAt: now,
             updatedAt: now,

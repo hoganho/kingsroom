@@ -141,10 +141,12 @@ const fetchConsolidationDetails = async (
 ) => {
     // Log what numeric data we received for projection
     console.log('[Consolidator:Preview] Numeric fields for projection:', {
+        totalUniquePlayers: newGameData.totalUniquePlayers,
         totalEntries: newGameData.totalEntries,
         totalRebuys: newGameData.totalRebuys,
         totalAddons: newGameData.totalAddons,
-        prizepool: newGameData.prizepool,
+        prizepoolPaid: newGameData.prizepoolPaid,
+        prizepoolCalculated: newGameData.prizepoolCalculated,
         gameStatus: newGameData.gameStatus
     });
 
@@ -184,10 +186,12 @@ const fetchConsolidationDetails = async (
     // Normalize the new game data to ensure numeric fields are included
     const normalizedNewGame = {
         ...newGameData,
+        totalUniquePlayers: newGameData.totalUniquePlayers || 0,
         totalEntries: newGameData.totalEntries || 0,
         totalRebuys: newGameData.totalRebuys || 0,
         totalAddons: newGameData.totalAddons || 0,
-        prizepool: newGameData.prizepool || 0
+        prizepoolPaid: newGameData.prizepoolPaid || 0,
+        prizepoolCalculated: newGameData.prizepoolCalculated || 0
     };
     
     const allChildren = [...siblings, normalizedNewGame];
@@ -196,8 +200,10 @@ const fetchConsolidationDetails = async (
     console.log('[Consolidator:Preview] Projected totals:', {
         siblingCount,
         totalChildrenForProjection: allChildren.length,
+        projectedUniquePlayers: projectedTotals.totalUniquePlayers,
         projectedEntries: projectedTotals.totalEntries,
-        projectedPrizepool: projectedTotals.prizepool
+        projectedPrizepoolPaid: projectedTotals.prizepoolPaid,
+        projectedPrizepoolCalculated: projectedTotals.prizepoolCalculated
     });
     
     // Build consolidation details
@@ -217,14 +223,17 @@ const fetchConsolidationDetails = async (
             flightLetter: s.flightLetter,
             gameStatus: s.gameStatus,
             gameStartDateTime: s.gameStartDateTime,
+            totalUniquePlayers: s.totalUniquePlayers,
             totalEntries: s.totalEntries,
             finalDay: s.finalDay
         })) : null,
         projectedTotals: {
+            totalUniquePlayers: projectedTotals.totalUniquePlayers,
             totalEntries: projectedTotals.totalEntries,
             totalRebuys: projectedTotals.totalRebuys,
             totalAddons: projectedTotals.totalAddons,
-            prizepool: projectedTotals.prizepool,
+            prizepoolPaid: projectedTotals.prizepoolPaid,
+            prizepoolCalculated: projectedTotals.prizepoolCalculated,
             earliestStart: projectedTotals.earliestStart,
             latestEnd: projectedTotals.latestEnd,
             projectedStatus: projectedTotals.parentStatus,
@@ -470,13 +479,14 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
     // _lastChangedAt will be automatically aliased by the helper
     const updateFields = {
         totalEntries: calculatedTotalEntries,
-        actualCalculatedEntries: uniqueRunners,
+        actualCalculatedUniquePlayers: uniqueRunners,
         totalRebuys: aggregated.totalRebuys || 0,
         totalAddons: aggregated.totalAddons || 0,
-        prizepool: aggregated.prizepool || 0,
+        prizepoolPaid: aggregated.prizepoolPaid || 0,
+        prizepoolCalculated: aggregated.prizepoolCalculated || 0,
         totalRake: aggregated.totalRake || 0,
-        revenueByBuyIns: aggregated.revenueByBuyIns || 0,
-        profitLoss: aggregated.profitLoss || 0,
+        buyInsByTotalEntries: aggregated.buyInsByTotalEntries || 0,
+        gameProfitLoss: aggregated.gameProfitLoss || 0,
         startingStack: aggregated.startingStack || 0,
         playersRemaining: aggregated.playersRemaining,        // May be null - helper handles this
         totalChipsInPlay: aggregated.totalChipsInPlay,        // May be null - helper handles this

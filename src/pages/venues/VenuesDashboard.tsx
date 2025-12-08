@@ -20,8 +20,10 @@ interface Venue {
   aliases?: string[];
   totalGames?: number;
   lastGameDate?: string;
+  totalUniquePlayers?: number;
   totalEntries?: number;
-  totalPrizepool?: number;
+  totalPrizepoolPaid?: number;
+  totalPrizepoolCalculated?: number;
 }
 
 export const VenuesDashboard = () => {
@@ -74,8 +76,10 @@ export const VenuesDashboard = () => {
                       items {
                         id
                         gameStartDateTime
+                        totalUniquePlayers
                         totalEntries
-                        prizepool
+                        prizepoolPaid
+                        prizepoolCalculated
                       }
                     }
                   }
@@ -88,8 +92,10 @@ export const VenuesDashboard = () => {
                 
                 // Calculate stats
                 const totalGames = games.length;
+                const totalUniquePlayers = games.reduce((sum, g) => sum + (g.totalUniquePlayers || 0), 0);
                 const totalEntries = games.reduce((sum, g) => sum + (g.totalEntries || 0), 0);
-                const totalPrizepool = games.reduce((sum, g) => sum + (g.prizepool || 0), 0);
+                const totalPrizepoolPaid = games.reduce((sum, g) => sum + (g.prizepoolPaid || 0), 0);
+                const totalPrizepoolCalculated = games.reduce((sum, g) => sum + (g.prizepoolCalculated || 0), 0);
                 
                 // Find last game date
                 const lastGame = games.sort((a, b) => {
@@ -101,8 +107,10 @@ export const VenuesDashboard = () => {
                 return {
                   ...venue,
                   totalGames,
+                  totalUniquePlayers,
                   totalEntries,
-                  totalPrizepool,
+                  totalPrizepoolPaid,
+                  totalPrizepoolCalculated,
                   lastGameDate: lastGame?.gameStartDateTime
                 };
               }
@@ -180,7 +188,8 @@ export const VenuesDashboard = () => {
     totalVenues: venues.length,
     activeVenues: venues.filter(v => v.lastGameDate && new Date(v.lastGameDate) > subDays(new Date(), 30)).length,
     totalGames: venues.reduce((sum, v) => sum + (v.totalGames || 0), 0),
-    totalPrizepool: venues.reduce((sum, v) => sum + (v.totalPrizepool || 0), 0),
+    totalPrizepoolPaid: venues.reduce((sum, v) => sum + (v.totalPrizepoolPaid || 0), 0),
+    totalPrizepoolCalculated: venues.reduce((sum, v) => sum + (v.totalPrizepoolCalculated || 0), 0),
   };
 
   return (
@@ -241,8 +250,16 @@ export const VenuesDashboard = () => {
         <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center">
             <div className="ml-3">
-              <p className="text-sm text-gray-500">Total Prizepool</p>
-              <p className="text-lg font-bold">{formatCurrency(stats.totalPrizepool)}</p>
+              <p className="text-sm text-gray-500">Total Prizepool Paid</p>
+              <p className="text-lg font-bold">{formatCurrency(stats.totalPrizepoolPaid)}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <div className="ml-3">
+              <p className="text-sm text-gray-500">Total Prizepool Calculated</p>
+              <p className="text-lg font-bold">{formatCurrency(stats.totalPrizepoolCalculated)}</p>
             </div>
           </div>
         </div>
@@ -276,10 +293,16 @@ export const VenuesDashboard = () => {
                     Last Game
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total Unique Players
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Total Entries
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total Prizepool
+                    Total Prizepool Paid
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total Prizepool Calculated
                   </th>
                 </tr>
               </thead>
@@ -317,10 +340,16 @@ export const VenuesDashboard = () => {
                         {formatDate(venue.lastGameDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {venue.totalUniquePlayers?.toLocaleString() || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {venue.totalEntries?.toLocaleString() || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatCurrency(venue.totalPrizepool)}
+                        {formatCurrency(venue.totalPrizepoolPaid)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatCurrency(venue.totalPrizepoolCalculated)}
                       </td>
                     </tr>
                   ))

@@ -23,11 +23,14 @@ interface VenueData {
   topPlayers: any[];
   stats: {
     totalGames: number;
+    totalUniquePlayers: number;
     totalEntries: number;
-    totalPrizepool: number;
+    totalPrizepoolPaid: number;
+    totalPrizepoolCalculated: number;
     avgBuyIn: number;
+    avgUniquePlayers: number;
     avgEntries: number;
-    largestPrizepool: number;
+    largestPrizepoolPaid: number;
     mostPopularGameType: string;
   };
 }
@@ -123,8 +126,10 @@ export const VenueDetails = () => {
                 gameStartDateTime
                 gameEndDateTime
                 buyIn
+                totalUniquePlayers
                 totalEntries
-                prizepool
+                prizepoolPaid
+                prizepoolCalculated
                 playersRemaining
                 sourceUrl
               }
@@ -195,11 +200,15 @@ export const VenueDetails = () => {
         // Calculate stats
         const stats = {
           totalGames: games.length,
+          totalUniquePlayers: games.reduce((sum, g) => sum + (g.totalUniquePlayers || 0), 0),
           totalEntries: games.reduce((sum, g) => sum + (g.totalEntries || 0), 0),
-          totalPrizepool: games.reduce((sum, g) => sum + (g.prizepool || 0), 0),
+          totalPrizepoolPaid: games.reduce((sum, g) => sum + (g.prizepoolPaid || 0), 0),
+          totalPrizepoolCalculated: games.reduce((sum, g) => sum + (g.prizepoolCalculated || 0), 0),
           avgBuyIn: games.reduce((sum, g) => sum + (g.buyIn || 0), 0) / (games.length || 1),
+          avgUniquePlayers: games.reduce((sum, g) => sum + (g.totalUniquePlayers || 0), 0) / (games.length || 1),
           avgEntries: games.reduce((sum, g) => sum + (g.totalEntries || 0), 0) / (games.length || 1),
-          largestPrizepool: Math.max(...games.map(g => g.prizepool || 0)),
+          largestPrizepoolPaid: Math.max(...games.map(g => g.prizepoolPaid || 0)),
+          largestPrizepoolCalculated: Math.max(...games.map(g => g.prizepoolCalculated || 0)),
           mostPopularGameType: getMostPopularGameType(games)
         };
 
@@ -344,6 +353,15 @@ export const VenueDetails = () => {
           <div className="flex items-center">
             <UserGroupIcon className="h-6 w-6 text-blue-600 mr-2" />
             <div>
+              <p className="text-xs text-gray-500">Total Unique Players</p>
+              <p className="text-lg font-bold">{stats.totalUniquePlayers.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <UserGroupIcon className="h-6 w-6 text-blue-600 mr-2" />
+            <div>
               <p className="text-xs text-gray-500">Total Entries</p>
               <p className="text-lg font-bold">{stats.totalEntries.toLocaleString()}</p>
             </div>
@@ -351,14 +369,26 @@ export const VenueDetails = () => {
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <div>
-            <p className="text-xs text-gray-500">Total Prizepool</p>
-            <p className="text-lg font-bold">{formatCurrency(stats.totalPrizepool)}</p>
+            <p className="text-xs text-gray-500">Total Prizepool Paid</p>
+            <p className="text-lg font-bold">{formatCurrency(stats.totalPrizepoolPaid)}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div>
+            <p className="text-xs text-gray-500">Total Prizepool Calculated</p>
+            <p className="text-lg font-bold">{formatCurrency(stats.totalPrizepoolCalculated)}</p>
           </div>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <div>
             <p className="text-xs text-gray-500">Avg Buy-in</p>
             <p className="text-lg font-bold">{formatCurrency(stats.avgBuyIn)}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div>
+            <p className="text-xs text-gray-500">Avg Unique Players</p>
+            <p className="text-lg font-bold">{Math.round(stats.avgUniquePlayers)}</p>
           </div>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
@@ -439,10 +469,16 @@ export const VenueDetails = () => {
                       </p>
                       <div className="mt-2 flex items-center justify-between">
                         <span className="text-xs text-gray-600">
+                          {game.totalUniquePlayers} unique players
+                        </span>
+                        <span className="text-xs text-gray-600">
                           {game.totalEntries} entries
                         </span>
                         <span className="text-xs font-medium">
-                          {formatCurrency(game.prizepool)}
+                          {formatCurrency(game.prizepoolPaid)}
+                        </span>
+                        <span className="text-xs font-medium">
+                          {formatCurrency(game.prizepoolCalculated)}
                         </span>
                       </div>
                     </div>
@@ -463,8 +499,10 @@ export const VenueDetails = () => {
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tournament</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buy-in</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unique Players</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entries</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prizepool</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prizepool Paid</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prizepool Calculated</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -480,8 +518,10 @@ export const VenueDetails = () => {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-sm">{formatCurrency(game.buyIn)}</td>
+                        <td className="px-4 py-3 text-sm">{game.totalUniquePlayers || '-'}</td>
                         <td className="px-4 py-3 text-sm">{game.totalEntries || '-'}</td>
-                        <td className="px-4 py-3 text-sm font-medium">{formatCurrency(game.prizepool)}</td>
+                        <td className="px-4 py-3 text-sm font-medium">{formatCurrency(game.prizepoolPaid)}</td>
+                        <td className="px-4 py-3 text-sm font-medium">{formatCurrency(game.prizepoolCalculated)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -542,7 +582,7 @@ export const VenueDetails = () => {
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h4 className="font-medium mb-3">Prize Statistics</h4>
                   <p className="text-sm text-gray-600">
-                    Largest prizepool: <span className="font-medium">{formatCurrency(stats.largestPrizepool)}</span>
+                    Largest Prizepool Paid: <span className="font-medium">{formatCurrency(stats.largestPrizepoolPaid)}</span>
                   </p>
                 </div>
               </div>

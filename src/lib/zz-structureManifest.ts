@@ -17,7 +17,8 @@ export const baseExpectations: StructureExpectations = {
     "status",
     "registrationStatus", // Added
     "totalEntries",
-    "prizepool",
+    "prizepoolPaid",
+    "prizepoolCalculated",
     "buyIn",
     "startingStack",
     "levels",

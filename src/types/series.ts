@@ -102,7 +102,9 @@ export interface SeriesStatistics {
   seriesId: string;
   totalEvents: number;
   completedEvents: number;
-  totalPrizepool: number;
+  totalPrizepoolPaid: number;
+  totalPrizepoolCalculated: number;
+  totalUniquePlayers: number;
   totalEntries: number;
   averageBuyIn: number;
   venueRevenue: number;  // Based on venue fee

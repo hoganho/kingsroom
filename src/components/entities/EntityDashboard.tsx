@@ -48,7 +48,9 @@ interface ListGamesResponse {
             venue?: {
                 name: string;
             };
-            prizepool?: number;
+            prizepoolPaid?: number;
+            prizepoolCalculated?: number;
+            totalUniquePlayers?: number;
             totalEntries?: number;
         }>;
         nextToken?: string;
@@ -185,7 +187,9 @@ export const EntityDashboard: React.FC<EntityDashboardProps> = ({
                                 venue {
                                     name
                                 }
-                                prizepool
+                                prizepoolPaid
+                                prizepoolCalculated
+                                totalUniquePlayers
                                 totalEntries
                             }
                             nextToken
@@ -504,7 +508,10 @@ export const EntityDashboard: React.FC<EntityDashboardProps> = ({
                                                         Status
                                                     </th>
                                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                                        Prize Pool
+                                                        Prize Pool Paid
+                                                    </th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                                        Prize Pool Calculated
                                                     </th>
                                                 </tr>
                                             </thead>
@@ -529,7 +536,10 @@ export const EntityDashboard: React.FC<EntityDashboardProps> = ({
                                                             </span>
                                                         </td>
                                                         <td className="px-4 py-2 text-sm text-gray-900">
-                                                            ${game.prizepool?.toLocaleString() || 0}
+                                                            ${game.prizepoolPaid?.toLocaleString() || 0}
+                                                        </td>
+                                                        <td className="px-4 py-2 text-sm text-gray-900">
+                                                            ${game.prizepoolCalculated?.toLocaleString() || 0}
                                                         </td>
                                                     </tr>
                                                 ))}

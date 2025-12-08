@@ -378,7 +378,7 @@ const downloadHtmlFromS3 = async (s3Key) => {
 const extractPlayerDataForProcessing = (scrapedData) => {
     if (!scrapedData) return { 
         allPlayers: [], 
-        totalPlayers: 0, 
+        totalUniquePlayers: 0, 
         hasCompleteResults: false 
     };
     
@@ -417,7 +417,7 @@ const extractPlayerDataForProcessing = (scrapedData) => {
     
     return {
         allPlayers,
-        totalPlayers: allPlayers.length,
+        totalUniquePlayers: allPlayers.length,
         hasCompleteResults
     };
 };
@@ -469,7 +469,9 @@ const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape 
             startingStack: parsedData.startingStack || 0,
             hasGuarantee: parsedData.hasGuarantee || false,
             guaranteeAmount: parsedData.guaranteeAmount || 0,
-            prizepool: parsedData.prizepool || 0,
+            prizepoolPaid: parsedData.prizepoolPaid || 0,
+            prizepoolCalculated: parsedData.prizepoolCalculated || 0,
+            totalUniquePlayers: parsedData.totalUniquePlayers || 0,
             totalEntries: parsedData.totalEntries || 0,
             playersRemaining: parsedData.playersRemaining || null,
             totalRebuys: parsedData.totalRebuys || 0,
@@ -482,8 +484,8 @@ const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape 
             gameFrequency: parsedData.gameFrequency || null,
             gameTags: parsedData.gameTags || [],
             levels: parsedData.levels || [],
-            revenueByBuyIns: parsedData.revenueByBuyIns || null,
-            profitLoss: parsedData.profitLoss || null,
+            buyInsByTotalEntries: parsedData.buyInsByTotalEntries || null,
+            gameProfitLoss: parsedData.gameProfitLoss || null,
             guaranteeSurplus: parsedData.guaranteeSurplus || null,
             guaranteeOverlay: parsedData.guaranteeOverlay || null,
             totalRake: parsedData.totalRake || null
@@ -501,9 +503,9 @@ const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape 
             finalDay: parsedData.finalDay || false,
             year: parsedData.seriesYear || new Date(parsedData.gameStartDateTime || new Date()).getFullYear()
         } : null,
-        players: playerData.totalPlayers > 0 ? {
+        players: playerData.totalUniquePlayers > 0 ? {
             allPlayers: playerData.allPlayers,
-            totalPlayers: playerData.totalPlayers,
+            totalUniquePlayers: playerData.totalUniquePlayers,
             hasCompleteResults: playerData.hasCompleteResults
         } : null,
         venue: {

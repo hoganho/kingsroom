@@ -42,8 +42,8 @@ const getDefaultFieldValues = () => ({
     
     // Numeric fields
     totalRake: 0,
-    profitLoss: 0,
-    revenueByBuyIns: 0,
+    gameProfitLoss: 0,
+    buyInsByTotalEntries: 0,
     guaranteeOverlay: 0,
     guaranteeSurplus: 0,
     seriesAssignmentConfidence: 0,

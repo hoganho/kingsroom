@@ -37,14 +37,17 @@ const previewConsolidationQuery = /* GraphQL */ `
                     flightLetter
                     gameStatus
                     gameStartDateTime
+                    totalUniquePlayers
                     totalEntries
                     finalDay
                 }
                 projectedTotals {
+                    totalUniquePlayers
                     totalEntries
                     totalRebuys
                     totalAddons
-                    prizepool
+                    prizepoolPaid
+                    prizepoolCalculated
                     earliestStart
                     latestEnd
                     projectedStatus
@@ -76,15 +79,18 @@ export interface ConsolidationSibling {
     flightLetter: string | null;
     gameStatus: string;
     gameStartDateTime: string;
+    totalUniquePlayers: number | null;
     totalEntries: number | null;
     finalDay: boolean | null;
 }
 
 export interface ProjectedConsolidationTotals {
+    totalUniquePlayers: number | null;
     totalEntries: number | null;
     totalRebuys: number | null;
     totalAddons: number | null;
-    prizepool: number | null;
+    prizepoolPaid: number | null;
+    prizepoolCalculated: number | null;
     earliestStart: string | null;
     latestEnd: string | null;
     projectedStatus: string;
@@ -276,10 +282,12 @@ export const useConsolidationPreview = (
             seriesName: (data as any).seriesName || null,      // Critical for ENTITY_SERIES_EVENT strategy
             isMainEvent: (data as any).isMainEvent || null,    // Used for parent name derivation
             // Numeric fields needed for projected totals calculation
+            totalUniquePlayers: data.totalUniquePlayers || null,
             totalEntries: data.totalEntries || null,
             totalRebuys: data.totalRebuys || null,
             totalAddons: data.totalAddons || null,
-            prizepool: data.prizepool || null,
+            prizepoolPaid: data.prizepoolPaid || null,
+            prizepoolCalculated: data.prizepoolCalculated || null,
             gameEndDateTime: data.gameEndDateTime || null
         };
     }, []);

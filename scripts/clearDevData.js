@@ -33,6 +33,7 @@ const TABLES_TO_CLEAR = [
   'PlayerTicket-sjyzke3u45golhnttlco6bpcua-dev',
   'PlayerTransaction-sjyzke3u45golhnttlco6bpcua-dev',
   'PlayerVenue-sjyzke3u45golhnttlco6bpcua-dev',
+  'VenueDetails-sjyzke3u45golhnttlco6bpcua-dev',
 ];
 
 // --- Logger (copied from your script) ---

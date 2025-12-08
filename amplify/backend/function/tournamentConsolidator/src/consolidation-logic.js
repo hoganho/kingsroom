@@ -440,14 +440,15 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         new Date(a.gameStartDateTime || 0).getTime() - 
         new Date(b.gameStartDateTime || 0).getTime()
     );
-
+    let totalUniquePlayers = 0;
     let totalEntries = 0;
     let totalRebuys = 0;
     let totalAddons = 0;
-    let maxPrizepool = 0;
+    let maxPrizepoolPaid = 0;
+    let maxPrizepoolCalculated = 0;
     let totalRake = 0;
-    let revenueByBuyIns = 0;
-    let profitLoss = 0;
+    let buyInsByTotalEntries = 0;
+    let gameProfitLoss = 0;
     let earliestStart = Number.MAX_SAFE_INTEGER;
     let latestEnd = 0;
     let finalDayChild = null;
@@ -460,18 +461,23 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
 
     for (const child of sortedChildren) {
         // Simple sums
+        totalUniquePlayers += (child.totalUniquePlayers || 0);
         totalEntries += (child.totalEntries || 0);
         totalRebuys += (child.totalRebuys || 0);
         totalAddons += (child.totalAddons || 0);
         totalRake += (child.totalRake || 0);
-        revenueByBuyIns += (child.revenueByBuyIns || 0);
-        profitLoss += (child.profitLoss || 0);
+        buyInsByTotalEntries += (child.buyInsByTotalEntries || 0);
+        gameProfitLoss += (child.gameProfitLoss || 0);
         
         // Prizepool: take the largest (usually final day)
-        if ((child.prizepool || 0) > maxPrizepool) {
-            maxPrizepool = child.prizepool || 0;
+        if ((child.prizepoolPaid || 0) > maxPrizepoolPaid) {
+            maxPrizepoolPaid = child.prizepoolPaid || 0;
         }
-        
+
+        if ((child.prizepoolCalculated || 0) > maxPrizepoolCalculated) {
+            maxPrizepoolCalculated = child.prizepoolCalculated || 0;
+        }
+
         // Starting stack: take from first child (they should be consistent)
         if (!startingStack && child.startingStack) {
             startingStack = child.startingStack;
@@ -549,13 +555,14 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
 
     return {
         totalEntries,
-        uniqueRunners: totalEntries, // Simplified - actual calculation needs player dedup
+        uniqueRunners: totalUniquePlayers, // Simplified - actual calculation needs player dedup
         totalRebuys,
         totalAddons,
-        prizepool: maxPrizepool,
+        prizepoolPaid: maxPrizepoolPaid,
+        prizepoolCalculated: maxPrizepoolCalculated,
         totalRake,
-        revenueByBuyIns,
-        profitLoss,
+        buyInsByTotalEntries,
+        gameProfitLoss,
         startingStack,
         playersRemaining,
         totalChipsInPlay,
@@ -644,14 +651,16 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         missingFlightCount: 0,
         
         // Totals (will be calculated/aggregated)
+        totalUniquePlayers: 0,
         totalEntries: 0,
-        actualCalculatedEntries: 0,
+        actualCalculatedUniquePlayers: 0,
         totalRebuys: 0,
         totalAddons: 0,
-        prizepool: 0,
+        prizepoolPaid: 0,
+        prizepoolCalculated: 0,
         totalRake: 0,
-        profitLoss: 0,
-        revenueByBuyIns: 0,
+        gameProfitLoss: 0,
+        buyInsByTotalEntries: 0,
         
         // Stack/chip tracking
         startingStack: childGame.startingStack || 0,

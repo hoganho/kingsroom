@@ -56,7 +56,9 @@ const convertScrapedToGameData = (scraped: ScrapedGameData): GameData => {
         isRegular: scraped.isRegular || undefined,
         isSatellite: scraped.isSatellite || undefined,
         registrationStatus: (scraped.registrationStatus as RegistrationStatus) || undefined,
-        prizepool: scraped.prizepool || undefined,
+        prizepoolPaid: scraped.prizepoolPaid || undefined,
+        prizepoolCalculated: scraped.prizepoolCalculated || undefined,
+        totalUniquePlayers: scraped.totalUniquePlayers || undefined,
         totalEntries: scraped.totalEntries || undefined,
         playersRemaining: scraped.playersRemaining || undefined,
         totalChipsInPlay: scraped.totalChipsInPlay || undefined,
@@ -66,8 +68,8 @@ const convertScrapedToGameData = (scraped: ScrapedGameData): GameData => {
         totalDuration: scraped.totalDuration || undefined,
         gameTags: scraped.gameTags || undefined,
         seriesName: scraped.seriesName || undefined,
-        revenueByBuyIns: scraped.revenueByBuyIns || undefined,
-        profitLoss: scraped.profitLoss || undefined,
+        buyInsByTotalEntries: scraped.buyInsByTotalEntries || undefined,
+        gameProfitLoss: scraped.gameProfitLoss || undefined,
         tournamentType: scraped.tournamentType || undefined,
         buyIn: scraped.buyIn || undefined,
         rake: scraped.rake || undefined,
@@ -195,12 +197,14 @@ export const useGameTracker = (): UseGameTrackerReturn => {
                         gameType
                         gameVariant
                         tournamentType
-                        prizepool
+                        prizepoolPaid
+                        prizepoolCalculated
                         buyIn
                         rake
                         startingStack
                         hasGuarantee
                         guaranteeAmount
+                        totalUniquePlayers
                         totalEntries
                         totalRebuys
                         totalAddons
@@ -300,9 +304,10 @@ export const useGameTracker = (): UseGameTrackerReturn => {
                                 gameType
                                 gameVariant
                                 tournamentType
-                                prizepool
-                                revenueByBuyIns
-                                profitLoss
+                                prizepoolPaid
+                                prizepoolCalculated
+                                buyInsByTotalEntries
+                                gameProfitLoss
                                 buyIn
                                 rake
                                 totalRake
@@ -311,6 +316,7 @@ export const useGameTracker = (): UseGameTrackerReturn => {
                                 guaranteeAmount
                                 guaranteeOverlay
                                 guaranteeSurplus
+                                totalUniquePlayers
                                 totalEntries
                                 totalRebuys
                                 totalAddons

@@ -22,7 +22,8 @@ const calculateDataHash = (scrapedData) => {
         registrationStatus: scrapedData.registrationStatus,
         buyIn: scrapedData.buyIn,
         rake: scrapedData.rake,
-        prizepool: scrapedData.prizepool,
+        prizepoolPaid: scrapedData.prizepoolPaid,
+        totalUniquePlayers: scrapedData.totalUniquePlayers,
         totalEntries: scrapedData.totalEntries,
         playersRemaining: scrapedData.playersRemaining,
         gameStartDateTime: scrapedData.gameStartDateTime,
@@ -58,7 +59,8 @@ const getExtractedFields = (scrapedData, foundKeys) => {
     if (scrapedData.registrationStatus) fields.push('registrationStatus');
     if (scrapedData.buyIn != null) fields.push('buyIn');
     if (scrapedData.rake != null) fields.push('rake');
-    if (scrapedData.prizepool != null) fields.push('prizepool');
+    if (scrapedData.prizepoolPaid != null) fields.push('prizepoolPaid');
+    if (scrapedData.totalUniquePlayers != null) fields.push('totalUniquePlayers');
     if (scrapedData.totalEntries != null) fields.push('totalEntries');
     if (scrapedData.playersRemaining != null) fields.push('playersRemaining');
     if (scrapedData.gameStartDateTime) fields.push('gameStartDateTime');

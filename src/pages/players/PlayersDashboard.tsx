@@ -181,7 +181,8 @@ export const PlayersDashboard: React.FC = () => {
   
   // Statistics across ALL entities
   const [stats, setStats] = useState({
-    totalPlayers: 0,
+    totalEntries: 0,
+    totalUniquePlayers: 0,
     activePlayers: 0,
     totalGamesPlayed: 0,
     totalNetBalance: 0,
@@ -303,7 +304,7 @@ export const PlayersDashboard: React.FC = () => {
     });
 
     setStats({
-      totalPlayers: playersList.length,
+      totalUniquePlayers: playersList.length,
       activePlayers,
       totalGamesPlayed: totalGames,
       totalNetBalance: totalNet,
@@ -424,7 +425,7 @@ export const PlayersDashboard: React.FC = () => {
                     </dt>
                     <dd className="flex items-baseline">
                       <div className="text-2xl font-semibold text-gray-900">
-                        {stats.totalPlayers}
+                        {stats.totalUniquePlayers}
                       </div>
                       <div className="ml-2 flex items-baseline text-sm font-semibold text-green-600">
                         {stats.activePlayers} active

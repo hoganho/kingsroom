@@ -16,7 +16,9 @@ interface Series {
   endDate?: string;
   totalGames?: number;
   completedGames?: number;
-  totalPrizepool?: number;
+  totalPrizepoolPaid?: number;
+  totalPrizepoolCalculated?: number;
+  totalUniquePlayers?: number;
   totalEntries?: number;
   venues?: Array<{ name: string }>;
 }
@@ -58,7 +60,7 @@ export const SeriesDashboard = () => {
 
                 //totalGames
                 //completedGames
-                //totalPrizepool
+                //totalPrizepoolPaid
                 //totalEntries
 
       if ('data' in response && response.data) {
@@ -123,7 +125,9 @@ export const SeriesDashboard = () => {
   const stats = {
     totalSeries: series.length,
     activeSeries: series.filter(s => s.status === 'Active').length,
-    totalPrizepool: series.reduce((sum, s) => sum + (s.totalPrizepool || 0), 0),
+    totalPrizepoolPaid: series.reduce((sum, s) => sum + (s.totalPrizepoolPaid || 0), 0),
+    totalPrizepoolCalculated: series.reduce((sum, s) => sum + (s.totalPrizepoolCalculated || 0), 0),
+    totalUniquePlayers: series.reduce((sum, s) => sum + (s.totalUniquePlayers || 0), 0),
     totalEntries: series.reduce((sum, s) => sum + (s.totalEntries || 0), 0),
   };
 
@@ -173,6 +177,15 @@ export const SeriesDashboard = () => {
           <div className="flex items-center">
             <CalendarIcon className="h-8 w-8 text-blue-600" />
             <div className="ml-3">
+              <p className="text-sm text-gray-500">Total Unique Players</p>
+              <p className="text-2xl font-bold">{stats.totalUniquePlayers.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>        
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <CalendarIcon className="h-8 w-8 text-blue-600" />
+            <div className="ml-3">
               <p className="text-sm text-gray-500">Total Entries</p>
               <p className="text-2xl font-bold">{stats.totalEntries.toLocaleString()}</p>
             </div>
@@ -181,8 +194,16 @@ export const SeriesDashboard = () => {
         <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center">
             <div className="ml-3">
-              <p className="text-sm text-gray-500">Total Prizepool</p>
-              <p className="text-xl font-bold">{formatCurrency(stats.totalPrizepool)}</p>
+              <p className="text-sm text-gray-500">Total Prizepool Paid</p>
+              <p className="text-xl font-bold">{formatCurrency(stats.totalPrizepoolPaid)}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <div className="ml-3">
+              <p className="text-sm text-gray-500">Total Prizepool Calculated</p>
+              <p className="text-xl font-bold">{formatCurrency(stats.totalPrizepoolCalculated)}</p>
             </div>
           </div>
         </div>
@@ -225,7 +246,10 @@ export const SeriesDashboard = () => {
                     Total Entries
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Prizepool
+                    Total Prizepool Paid
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total Prizepool Calculated
                   </th>
                 </tr>
               </thead>
@@ -257,10 +281,16 @@ export const SeriesDashboard = () => {
                         {s.completedGames || 0} / {s.totalGames || 0}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {s.totalUniquePlayers?.toLocaleString() || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {s.totalEntries?.toLocaleString() || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {s.totalPrizepool ? formatCurrency(s.totalPrizepool) : '-'}
+                        {s.totalPrizepoolPaid ? formatCurrency(s.totalPrizepoolPaid) : '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {s.totalPrizepoolCalculated ? formatCurrency(s.totalPrizepoolCalculated) : '-'}
                       </td>
                     </tr>
                   ))

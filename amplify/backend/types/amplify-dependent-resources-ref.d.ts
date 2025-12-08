@@ -125,6 +125,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
+    "venueDetailsUpdater": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "webScraperFunction": {
       "Arn": "string",
       "LambdaExecutionRole": "string",

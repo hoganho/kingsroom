@@ -88,7 +88,9 @@ export type GameData = {
 
     // Game state and metadata
     registrationStatus?: RegistrationStatus;
-    prizepool?: number | null;
+    prizepoolPaid?: number | null;
+    prizepoolCalculated?: number | null;
+    totalUniquePlayers?: number | null;
     totalEntries?: number | null;
     playersRemaining?: number | null;
     totalChipsInPlay?: number | null;
@@ -98,8 +100,9 @@ export type GameData = {
     totalDuration?: string | null;
     gameTags?: (string | null)[] | null;
     seriesName?: string | null;
-    revenueByBuyIns?: number | null;
-    profitLoss?: number | null;
+    buyInsByTotalEntries?: number | null;
+    gameProfitLoss?: number | null;
+    totalRakePerPlayerRealised?: boolean | null;  // ✅ NEW - True if full rake was collected (no guarantee shortfall)
 
     // Tournament-specific fields (now on Game model)
     tournamentType?: TournamentType | null;
@@ -196,7 +199,9 @@ export interface GameDataInput {
     registrationStatus?: RegistrationStatus;
     gameVariant?: GameVariant;
     gameType?: GameType;
-    prizepool?: number;
+    prizepoolPaid?: number;
+    prizepoolCalculated?: number;
+    totalUniquePlayers?: number;
     totalEntries?: number;
     totalRebuys?: number;
     totalAddons?: number;

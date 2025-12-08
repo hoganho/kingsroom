@@ -33,7 +33,8 @@ export const GamesDashboard: React.FC = () => {
     totalGames: 0,
     activeGames: 0,
     totalPrizePool: 0,
-    totalPlayers: 0,
+    totalEntries: 0,
+    totalUniquePlayers: 0,
     todaysGames: 0,
     upcomingGames: 0
   });
@@ -48,7 +49,8 @@ export const GamesDashboard: React.FC = () => {
         totalGames: 0,
         activeGames: 0,
         totalPrizePool: 0,
-        totalPlayers: 0,
+        totalEntries: 0,
+        totalUniquePlayers: 0,
         todaysGames: 0,
         upcomingGames: 0
       });
@@ -82,8 +84,10 @@ export const GamesDashboard: React.FC = () => {
                 gameStatus
                 gameStartDateTime
                 buyIn
+                totalUniquePlayers
                 totalEntries
-                prizepool
+                prizepoolPaid
+                prizepoolCalculated
                 entityId
                 entity {
                   id
@@ -150,7 +154,8 @@ export const GamesDashboard: React.FC = () => {
           totalGames: 0,
           activeGames: 0,
           totalPrizePool: 0,
-          totalPlayers: 0,
+          totalEntries: 0,
+          totalUniquePlayers: 0,
           todaysGames: 0,
           upcomingGames: 0
         };
@@ -162,12 +167,20 @@ export const GamesDashboard: React.FC = () => {
         entityStats[entityId].activeGames++;
       }
       
-      if (game.prizepool) {
-        entityStats[entityId].totalPrizePool += game.prizepool;
+      if (game.prizepoolPaid) {
+        entityStats[entityId].totalPrizePool += game.prizepoolPaid;
       }
       
+      if (game.prizepoolCalculated) {
+        entityStats[entityId].totalPrizePoolCalculated += game.prizepoolCalculated;
+      }
+
+      if (game.totalUniquePlayers) {
+        entityStats[entityId].totalUniquePlayers += game.totalUniquePlayers;
+      }
+
       if (game.totalEntries) {
-        entityStats[entityId].totalPlayers += game.totalEntries;
+        entityStats[entityId].totalEntries += game.totalEntries;
       }
       
       const gameDate = new Date(game.gameStartDateTime);
@@ -187,14 +200,16 @@ export const GamesDashboard: React.FC = () => {
       totalGames: acc.totalGames + stats.totalGames,
       activeGames: acc.activeGames + stats.activeGames,
       totalPrizePool: acc.totalPrizePool + stats.totalPrizePool,
-      totalPlayers: acc.totalPlayers + stats.totalPlayers,
+      totalUniquePlayers: acc.totalUniquePlayers + stats.totalUniquePlayers,
+      totalEntries: acc.totalEntries + stats.totalEntries,
       todaysGames: acc.todaysGames + stats.todaysGames,
       upcomingGames: acc.upcomingGames + stats.upcomingGames
     }), {
       totalGames: 0,
       activeGames: 0,
       totalPrizePool: 0,
-      totalPlayers: 0,
+      totalEntries: 0,
+      totalUniquePlayers: 0,
       todaysGames: 0,
       upcomingGames: 0
     });
@@ -287,10 +302,30 @@ export const GamesDashboard: React.FC = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Total Players
+                    Total Entries
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {totalStats.totalPlayers.toLocaleString()}
+                    {totalStats.totalEntries.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <UserGroupIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Total Unique Players
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {totalStats.totalUniquePlayers.toLocaleString()}
                   </dd>
                 </dl>
               </div>
@@ -334,7 +369,7 @@ export const GamesDashboard: React.FC = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-900">{stats.entityName}</p>
                     <p className="text-sm text-gray-500">
-                      {stats.totalGames} games • {stats.totalPlayers} players • ${stats.totalPrizePool.toLocaleString()}
+                      {stats.totalGames} games • {stats.totalUniquePlayers} players • {stats.totalEntries} entries • ${stats.totalPrizePool.toLocaleString()}
                     </p>
                   </div>
                   <div className="flex space-x-4 text-sm">
