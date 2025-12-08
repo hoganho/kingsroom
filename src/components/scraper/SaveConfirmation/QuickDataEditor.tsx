@@ -1,4 +1,5 @@
 // src/components/scraper/SaveConfirmation/QuickDataEditor.tsx
+// UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
 
 import { useState, useMemo } from 'react';
 import type { GameData } from '../../../types/game';
@@ -32,7 +33,7 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
     
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
     
-    // Define field groups with priority
+    // Define field groups with priority (simplified financial fields)
     const fieldGroups = useMemo((): FieldGroup[] => {
         const groups: FieldGroup[] = [
             {
@@ -48,9 +49,8 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
                 defaultOpen: true
             },
             {
-                // Note: venueFee is edited in the modal header, not here
                 title: '💰 Buy-In & Costs',
-                fields: ['buyIn', 'rake', 'prizepoolPaid', 'prizepoolCalculated', 'totalUniquePlayers', 'totalEntries', 'guaranteeAmount', 'hasGuarantee'],
+                fields: ['buyIn', 'rake', 'prizepoolPaid', 'prizepoolCalculated', 'totalUniquePlayers', 'totalInitialEntries', 'totalEntries', 'guaranteeAmount', 'hasGuarantee'],
                 priority: 'important',
                 defaultOpen: true
             },
@@ -79,8 +79,17 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
                 defaultOpen: false
             },
             {
+                // Simplified financial metrics
                 title: '💼 Revenue & Finance',
-                fields: ['totalRake', 'buyInsByTotalEntries', 'gameProfitLoss', 'guaranteeOverlay', 'guaranteeSurplus'],
+                fields: [
+                    'totalBuyInsCollected', 
+                    'rakeRevenue',
+                    'prizepoolPlayerContributions',
+                    'prizepoolAddedValue',
+                    'prizepoolSurplus',
+                    'guaranteeOverlayCost', 
+                    'gameProfit'
+                ],
                 priority: 'optional',
                 defaultOpen: false
             },
@@ -92,7 +101,6 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
             }
         ];
         
-        // Only show advanced groups if showAdvanced is true
         if (!showAdvanced) {
             return groups.filter(g => g.priority !== 'optional');
         }
@@ -100,21 +108,17 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
         return groups;
     }, [showAdvanced]);
     
-    // Get fields with issues (missing required or validation errors)
     const fieldsWithIssues = useMemo(() => {
         const issues = new Set<keyof GameData>();
         
-        // Add critical missing fields
         validationStatus.criticalMissing.forEach(field => {
             issues.add(field as keyof GameData);
         });
         
-        // Add all required missing fields
         validationStatus.required.missing.forEach(field => {
             issues.add(field as keyof GameData);
         });
         
-        // Add fields with validation errors
         for (const field in editedData) {
             const validation = getFieldValidation(field as keyof GameData);
             if (!validation.valid) {
@@ -125,7 +129,6 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
         return issues;
     }, [validationStatus, editedData, getFieldValidation]);
     
-    // Toggle group expansion
     const toggleGroup = (groupTitle: string) => {
         setExpandedGroups(prev => {
             const newSet = new Set(prev);
@@ -138,12 +141,10 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
         });
     };
     
-    // Check if group has issues
     const groupHasIssues = (fields: (keyof GameData)[]) => {
         return fields.some(field => fieldsWithIssues.has(field));
     };
     
-    // Get group status icon
     const getGroupStatusIcon = (group: FieldGroup) => {
         const hasIssues = groupHasIssues(group.fields);
         const hasData = group.fields.some(field => {
@@ -154,13 +155,12 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
         if (hasIssues) {
             return <span className="text-red-500">⚠</span>;
         } else if (hasData) {
-            return <span className="text-green-500">✓</span>;
+            return <span className="text-green-500">✔</span>;
         } else {
             return <span className="text-gray-400">○</span>;
         }
     };
     
-    // Count fields with data in group
     const getGroupFieldCount = (fields: (keyof GameData)[]) => {
         const total = fields.length;
         const filled = fields.filter(field => {
@@ -176,7 +176,7 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
             <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-xs">
                 <div className="flex gap-4">
                     <span className="text-green-600">
-                        ✓ {validationStatus.required.present}/{validationStatus.required.total} Required
+                        ✔ {validationStatus.required.present}/{validationStatus.required.total} Required
                     </span>
                     <span className="text-gray-600">
                         ○ {validationStatus.optional.present}/{validationStatus.optional.total} Optional
@@ -276,7 +276,6 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
                                         ))}
                                 </div>
                                 
-                                {/* Show warnings for this group */}
                                 {validationStatus.warnings.some(w => 
                                     group.fields.some(f => w.toLowerCase().includes(f.toLowerCase()))
                                 ) && (
@@ -298,7 +297,7 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
                 );
             })}
             
-            {/* Complex Data Fields (always at bottom) */}
+            {/* Complex Data Fields */}
             {showAdvanced && (
                 <div className="border border-purple-300 rounded-lg overflow-hidden">
                     <div className="px-3 py-2 bg-purple-50 font-medium text-sm text-purple-800">

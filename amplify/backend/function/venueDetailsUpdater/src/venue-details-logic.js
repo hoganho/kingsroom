@@ -11,7 +11,8 @@
  * 
  * Metrics Calculated:
  * - totalGamesHeld: Count of finished, non-multi-day games
- * - averagePlayersPerGame: Total players / total games
+ * - averageUniquePlayersPerGame: Total unique players / total games
+ * - averageEntriesPerGame: Total entries / total games
  * - gameNights: Array of days when games are typically held
  * - startDate: Earliest game date for the venue
  * - status: ACTIVE/INACTIVE based on recent activity
@@ -183,6 +184,7 @@ const calculateVenueMetrics = (games) => {
     if (!games || games.length === 0) {
         return {
             totalGamesHeld: 0,
+            totalInitialEntries: 0,
             totalEntries: 0,
             totalUniquePlayers: 0,
             averageEntriesPerGame: 0,
@@ -198,6 +200,7 @@ const calculateVenueMetrics = (games) => {
     
     let totalGamesHeld = 0;
     let totalUniquePlayers = 0;
+    let totalInitialEntries = 0;
     let totalEntries = 0;
     const gameNightsSet = new Set();
     let earliestGameDate = null;
@@ -217,6 +220,7 @@ const calculateVenueMetrics = (games) => {
         // Count this game
         totalGamesHeld++;
         totalUniquePlayers += game.totalUniquePlayers || 0;
+        totalInitialEntries += game.totalInitialEntries || 0;
         totalEntries += game.totalEntries || 0;
         
         // Track game nights
@@ -241,7 +245,11 @@ const calculateVenueMetrics = (games) => {
     const averageEntriesPerGame = totalGamesHeld > 0 
         ? Math.round((totalEntries / totalGamesHeld) * 100) / 100 
         : 0;
-    
+        
+    const averageInitialEntriesPerGame = totalGamesHeld > 0 
+        ? Math.round((totalInitialEntries / totalGamesHeld) * 100) / 100 
+        : 0;
+
     const averageUniquePlayersPerGame = totalGamesHeld > 0 
         ? Math.round((totalUniquePlayers / totalGamesHeld) * 100) / 100 
         : 0;
@@ -251,6 +259,7 @@ const calculateVenueMetrics = (games) => {
     
     return {
         totalGamesHeld,
+        totalInitialEntries,
         totalEntries,
         totalUniquePlayers,
         averageEntriesPerGame,
@@ -303,6 +312,7 @@ const calculateIncrementalUpdate = (existingMetrics, newGame, previousGameState 
     
     // Start with existing values
     let totalGamesHeld = existingMetrics.totalGamesHeld || 0;
+    let totalInitialEntries = (existingMetrics.averageInitialEntriesPerGame || 0) * totalGamesHeld;
     let totalEntries = (existingMetrics.averageEntriesPerGame || 0) * totalGamesHeld;
     let totalUniquePlayers = (existingMetrics.averageUniquePerGame || 0) * totalGamesHeld;
     const gameNightsSet = new Set(existingMetrics.gameNights || []);
@@ -312,6 +322,7 @@ const calculateIncrementalUpdate = (existingMetrics, newGame, previousGameState 
     if (prevInclusion.shouldInclude) {
         totalGamesHeld--;
         totalUniquePlayers -= previousGameState.totalUniquePlayers || 0;
+        totalInitialEntries -= previousGameState.totalInitialEntries || 0;
         totalEntries -= previousGameState.totalEntries || 0;
         // Note: We can't easily remove a game night without full recalc
     }
@@ -319,6 +330,7 @@ const calculateIncrementalUpdate = (existingMetrics, newGame, previousGameState 
     // Handle new state addition
     if (newInclusion.shouldInclude) {
         totalGamesHeld++;
+        totalInitialEntries += newGame.totalInitialEntries || 0;
         totalEntries += newGame.totalEntries || 0;
         totalUniquePlayers += newGame.totalUniquePlayers || 0;
 
@@ -338,6 +350,10 @@ const calculateIncrementalUpdate = (existingMetrics, newGame, previousGameState 
     }
     
     // Calculate new average
+    const averageInitialEntriesPerGame = totalGamesHeld > 0 
+        ? Math.round((totalInitialEntries / totalGamesHeld) * 100) / 100 
+        : 0;
+        
     const averageEntriesPerGame = totalGamesHeld > 0 
         ? Math.round((totalEntries / totalGamesHeld) * 100) / 100 
         : 0;
@@ -394,7 +410,8 @@ const buildVenueDetailsRecord = (venueId, metrics, existingRecord = null) => {
         
         // Calculated metrics
         totalGamesHeld: metrics.totalGamesHeld,
-        averagePlayersPerGame: metrics.averagePlayersPerGame,
+        averageUniquePlayersPerGame: metrics.averageUniquePlayersPerGame,
+        averageEntriesPerGame: metrics.averageEntriesPerGame,
         gameNights: metrics.gameNights,
         
         // Timestamps
@@ -471,6 +488,7 @@ const analyzeStreamEvent = (streamRecord) => {
     if (newInclusion.shouldInclude && oldInclusion.shouldInclude) {
         const relevantFieldsChanged = 
             newGame.totalUniquePlayers !== oldGame?.totalUniquePlayers ||
+            newGame.totalInitialEntries !== oldGame?.totalInitialEntries ||
             newGame.totalEntries !== oldGame?.totalEntries ||
             newGame.gameStartDateTime !== oldGame?.gameStartDateTime;
         

@@ -1,4 +1,5 @@
 // src/components/scraper/SaveConfirmation/EditableField.tsx
+// UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
 
 import { useState, useEffect, useRef } from 'react';
 import type { GameData } from '../../../types/game';
@@ -18,10 +19,11 @@ const getFieldInputType = (field: keyof GameData): string => {
     const fieldTypes: Partial<Record<keyof GameData, string>> = {
         buyIn: 'number',
         rake: 'number',
-        venueFee: 'number',  // ✅ Added venueFee
+        venueFee: 'number',
         prizepoolPaid: 'number',
         prizepoolCalculated: 'number',
         totalUniquePlayers: 'number',
+        totalInitialEntries: 'number',
         totalEntries: 'number',
         totalRebuys: 'number',
         totalAddons: 'number',
@@ -85,17 +87,18 @@ const formatDisplayValue = (value: any, field: keyof GameData): string => {
     
     // Handle booleans
     if (typeof value === 'boolean') {
-        return value ? '✓' : '✗';
+        return value ? '✔' : '✗';
     }
     
     // Handle numbers with formatting
     if (typeof value === 'number') {
-        // ✅ Added venueFee to currency fields
+        // Currency fields (simplified financial metrics)
         if (field === 'buyIn' || field === 'rake' || field === 'venueFee' || 
             field === 'prizepoolPaid' || field === 'prizepoolCalculated' || field === 'guaranteeAmount' || 
-            field === 'totalRake' || field === 'buyInsByTotalEntries' ||
-            field === 'guaranteeOverlay' || field === 'guaranteeSurplus' ||
-            field === 'gameProfitLoss') {
+            field === 'totalBuyInsCollected' || field === 'rakeRevenue' ||
+            field === 'prizepoolPlayerContributions' || field === 'prizepoolAddedValue' ||
+            field === 'prizepoolSurplus' || field === 'guaranteeOverlayCost' ||
+            field === 'gameProfit') {
             return `$${value.toLocaleString()}`;
         }
         return value.toLocaleString();
@@ -156,7 +159,6 @@ export const EditableField: React.FC<EditableFieldProps> = ({
     }, [isEditing]);
     
     const handleSave = () => {
-        // Convert value based on type
         let finalValue = localValue;
         
         if (inputType === 'number') {
@@ -185,7 +187,6 @@ export const EditableField: React.FC<EditableFieldProps> = ({
         }
     };
     
-    // Determine styling based on status and validation
     const getFieldStyle = () => {
         const base = "transition-colors duration-150";
         
@@ -217,7 +218,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
             case 'changed':
                 return <span className="text-blue-500">✎</span>;
             case 'present':
-                return <span className="text-green-500">✓</span>;
+                return <span className="text-green-500">✔</span>;
             default:
                 return null;
         }
@@ -294,7 +295,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
                             className="px-1 text-green-600 hover:bg-green-50 rounded"
                             title="Save"
                         >
-                            ✓
+                            ✔
                         </button>
                         <button
                             onClick={handleCancel}

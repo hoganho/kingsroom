@@ -1,56 +1,37 @@
 // scraperStrategies.js
-// ENHANCED VERSION: Adds database-aware matching while preserving all existing functionality
+// UPDATED: Simplified financial model (removed rakeSubsidy complexity)
 
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
 
-/**
- * Parses duration strings (e.g., "1h 30m") into milliseconds.
- */
 const parseDurationToMilliseconds = (durationStr) => {
     if (!durationStr) return 0;
-    
     let totalMilliseconds = 0;
     const hourMatch = durationStr.match(/(\d+)\s*h/);
     const minMatch = durationStr.match(/(\d+)\s*m/);
-    
-    if (hourMatch && hourMatch[1]) {
-        totalMilliseconds += parseInt(hourMatch[1], 10) * 60 * 60 * 1000;
-    }
-    if (minMatch && minMatch[1]) {
-        totalMilliseconds += parseInt(minMatch[1], 10) * 60 * 1000;
-    }
-    
+    if (hourMatch && hourMatch[1]) totalMilliseconds += parseInt(hourMatch[1], 10) * 60 * 60 * 1000;
+    if (minMatch && minMatch[1]) totalMilliseconds += parseInt(minMatch[1], 10) * 60 * 1000;
     return totalMilliseconds;
 };
 
-/**
- * Extract tournament ID from URL - centralized function
- */
 const getTournamentId = (url) => {
-    if (!url) return 1; // Default to 1 if no URL
-    
+    if (!url) return 1;
     try {
-        // Handle both full URLs and just the ID parameter
         if (url.includes('?id=')) {
             const match = url.match(/[?&]id=(\d+)/);
-            if (match && match[1]) {
-                return parseInt(match[1], 10);
-            }
+            if (match && match[1]) return parseInt(match[1], 10);
         } else if (/^\d+$/.test(url)) {
-            // If it's just a number, that's the tournament ID
             return parseInt(url, 10);
         }
     } catch (e) {
         console.warn('Could not extract tournament ID from URL:', e.message);
     }
-    
-    return 1; // Default fallback
+    return 1;
 };
 
-const AUTO_ASSIGN_THRESHOLD = 0.90; // 90% similarity - high confidence
-const SUGGEST_THRESHOLD = 0.60;     // 60% similarity - medium confidence, suggest to user
-const SERIES_MATCH_THRESHOLD = 0.80; // 80% similarity
+const AUTO_ASSIGN_THRESHOLD = 0.90;
+const SUGGEST_THRESHOLD = 0.60;
+const SERIES_MATCH_THRESHOLD = 0.80;
 
 const cleanupNameForMatching = (name, context, options = {}) => {
     if (!name) return '';
@@ -60,23 +41,19 @@ const cleanupNameForMatching = (name, context, options = {}) => {
         /\bMain Event\b/gi,
         /\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/gi,
     ];
-    jargonRegexes.forEach(regex => {
-        cleanedName = cleanedName.replace(regex, ' ');
-    });
+    jargonRegexes.forEach(regex => { cleanedName = cleanedName.replace(regex, ' '); });
     if (context === 'venue') {
         (options.seriesTitles || []).forEach(series => {
             [series.title, ...(series.aliases || [])].forEach(seriesName => {
                 const cleanedSeriesName = seriesName.replace(/[^a-zA-Z0-9\s]/g, '');
-                const seriesRegex = new RegExp(`\b${cleanedSeriesName}\b`, 'gi');
-                cleanedName = cleanedName.replace(seriesRegex, ' ');
+                cleanedName = cleanedName.replace(new RegExp(`\b${cleanedSeriesName}\b`, 'gi'), ' ');
             });
         });
     } else if (context === 'series') {
         (options.venues || []).forEach(venue => {
             [venue.name, ...(venue.aliases || [])].forEach(venueName => {
                 const cleanedVenueName = venueName.replace(/[^a-zA-Z0-9\s]/g, '');
-                const venueRegex = new RegExp(`\b${cleanedVenueName}\b`, 'gi');
-                cleanedName = cleanedName.replace(venueRegex, ' ');
+                cleanedName = cleanedName.replace(new RegExp(`\b${cleanedVenueName}\b`, 'gi'), ' ');
             });
         });
     }
@@ -84,355 +61,122 @@ const cleanupNameForMatching = (name, context, options = {}) => {
 };
 
 // ===================================================================
-// ENHANCED SERIES MATCHING FUNCTIONS (NEW)
+// SERIES MATCHING
 // ===================================================================
 
-/**
- * Extract series details from tournament name
- * @param {string} tournamentName - Tournament name
- * @returns {Object} Series details (day, flight, main event, year)
- */
 const extractSeriesDetails = (tournamentName) => {
     const details = {};
-    
-    // Extract year
     const yearMatch = tournamentName.match(/20\d{2}/);
-    if (yearMatch) {
-        details.seriesYear = parseInt(yearMatch[0]);
-    }
-    
-    // Check if main event
+    if (yearMatch) details.seriesYear = parseInt(yearMatch[0]);
     details.isMainEvent = /\bmain\s*event\b/i.test(tournamentName);
     
-    // Extract day number
-    const dayPatterns = [
-        /\bDay\s*(\d+)/i,
-        /\bD(\d+)\b/,
-        /\b(\d+)[A-Z]\b/  // Matches "1A", "2B", etc.
-    ];
-    
-    for (const pattern of dayPatterns) {
+    for (const pattern of [/\bDay\s*(\d+)/i, /\bD(\d+)\b/, /\b(\d+)[A-Z]\b/]) {
         const match = tournamentName.match(pattern);
-        if (match) {
-            details.dayNumber = parseInt(match[1]);
-            break;
-        }
+        if (match) { details.dayNumber = parseInt(match[1]); break; }
     }
-    
-    // Extract flight letter
-    const flightPatterns = [
-        /\bFlight\s*([A-Z])/i,
-        /\b\d+([A-Z])\b/,  // Matches letter part of "1A", "2B"
-        /\b([A-Z])\b(?=\s*(?:Flight|Starting))/i
-    ];
-    
-    for (const pattern of flightPatterns) {
+    for (const pattern of [/\bFlight\s*([A-Z])/i, /\b\d+([A-Z])\b/, /\b([A-Z])\b(?=\s*(?:Flight|Starting))/i]) {
         const match = tournamentName.match(pattern);
-        if (match) {
-            details.flightLetter = match[1];
-            break;
-        }
+        if (match) { details.flightLetter = match[1]; break; }
     }
-    
-    // Extract event number (e.g., "Event 8", "Event #8", "Event #12")
-    const eventPatterns = [
-        /\bEvent\s*#?\s*(\d+)/i,           // "Event 8", "Event #8", "Event  8"
-        /\bEv(?:ent)?\.?\s*#?\s*(\d+)/i,   // "Ev 8", "Ev. #8"
-        /\b#(\d+)\s*[-:]/i                  // "#8 -" or "#8:" at start of name
-    ];
-    
-    for (const pattern of eventPatterns) {
+    for (const pattern of [/\bEvent\s*#?\s*(\d+)/i, /\bEv(?:ent)?\.?\s*#?\s*(\d+)/i, /\b#(\d+)\s*[-:]/i]) {
         const match = tournamentName.match(pattern);
-        if (match) {
-            details.eventNumber = parseInt(match[1]);
-            break;
-        }
+        if (match) { details.eventNumber = parseInt(match[1]); break; }
     }
-    
-    // Handle "Final Day" or "Final Table"
     if (/\bFinal\s*(Day|Table)?\b/i.test(tournamentName)) {
-        details.dayNumber = details.dayNumber || 99;  // Use 99 to indicate final
+        details.dayNumber = details.dayNumber || 99;
         details.isFinalDay = true;
     }
-    
     return details;
 };
 
-/**
- * Enhanced series matching that checks database first, then patterns
- * @param {string} gameName - Tournament name
- * @param {Array} seriesTitles - Database series titles
- * @param {Array} venues - Database venues (for cleanup)
- * @returns {Object|null} Series match info
- */
 const matchSeriesWithDatabase = (gameName, seriesTitles = [], venues = []) => {
     if (!gameName) return null;
     
-    // First, check database series titles
     if (seriesTitles && seriesTitles.length > 0) {
-        // Try exact substring match first
-        let exactMatchFound = null;
         const upperCaseGameName = gameName.toUpperCase();
-        
         for (const series of seriesTitles) {
-            const allSeriesNames = [series.title, ...(series.aliases || [])];
-            for (const seriesName of allSeriesNames) {
+            for (const seriesName of [series.title, ...(series.aliases || [])]) {
                 if (upperCaseGameName.includes(seriesName.toUpperCase())) {
-                    exactMatchFound = series;
-                    break;
+                    console.log(`[Series Match] Database exact match: "${series.title}"`);
+                    return { isSeries: true, seriesName: series.title, seriesTitleId: series.id, tournamentSeriesId: null, isRegular: false, ...extractSeriesDetails(gameName) };
                 }
             }
-            if (exactMatchFound) break;
         }
         
-        if (exactMatchFound) {
-            console.log(`[Series Match] Database exact match: "${exactMatchFound.title}"`);
-            const details = extractSeriesDetails(gameName);
-            return {
-                isSeries: true,
-                seriesName: exactMatchFound.title,
-                seriesTitleId: exactMatchFound.id,    // This is TournamentSeriesTitle.id
-                tournamentSeriesId: null,              // Will be resolved by saveGameFunction
-                isRegular: false,
-                ...details
-            };
-        }
-        
-        // Try fuzzy matching
-        console.log('[Series Match] No exact match, trying fuzzy matching');
         const cleanedGameName = cleanupNameForMatching(gameName, 'series', { venues });
-        
-        const allSeriesNamesToMatch = seriesTitles.flatMap(series => {
-            const names = [series.title, ...(series.aliases || [])];
-            return names.map(name => ({
-                seriesId: series.id,
-                seriesTitle: series.title,
-                matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
-            }));
-        });
-        
-        const { bestMatch } = stringSimilarity.findBestMatch(
-            cleanedGameName,
-            allSeriesNamesToMatch.map(s => s.matchName)
-        );
+        const allSeriesNamesToMatch = seriesTitles.flatMap(series => [series.title, ...(series.aliases || [])].map(name => ({ seriesId: series.id, seriesTitle: series.title, matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim() })));
+        const { bestMatch } = stringSimilarity.findBestMatch(cleanedGameName, allSeriesNamesToMatch.map(s => s.matchName));
         
         if (bestMatch && bestMatch.rating >= SERIES_MATCH_THRESHOLD) {
-            console.log(`[Series Match] Database fuzzy match: "${bestMatch.target}" (score: ${bestMatch.rating})`);
             const matchedSeries = allSeriesNamesToMatch.find(s => s.matchName === bestMatch.target);
-            
             if (matchedSeries) {
-                const details = extractSeriesDetails(gameName);
-                return {
-                    isSeries: true,
-                    seriesName: matchedSeries.seriesTitle,
-                    seriesTitleId: matchedSeries.seriesId,  // This is TournamentSeriesTitle.id
-                    tournamentSeriesId: null,                // Will be resolved by saveGameFunction
-                    isRegular: false,
-                    ...details
-                };
+                console.log(`[Series Match] Database fuzzy match: "${bestMatch.target}" (score: ${bestMatch.rating})`);
+                return { isSeries: true, seriesName: matchedSeries.seriesTitle, seriesTitleId: matchedSeries.seriesId, tournamentSeriesId: null, isRegular: false, ...extractSeriesDetails(gameName) };
             }
         }
     }
     
-    // Fall back to pattern matching
-    console.log('[Series Match] No database match, trying patterns');
-    const seriesPatterns = [
-        /Spring\s+Championship\s+Series/i,
-        /Summer\s+Series/i,
-        /Fall\s+Series/i,
-        /Winter\s+Series/i,
-        /Autumn\s+Series/i,
-        /Championship\s+Series/i,
-        /Festival\s+of\s+Poker/i,
-        /Poker\s+Championships?/i,
-        /\bWSOP\b/i,
-        /\bWPT\b/i,
-        /\bEPT\b/i,
-        /\bAPT\b/i,
-        /\bANZPT\b/i,
-        /\bAPPT\b/i,
-        /\b(Mini|Mega|Grand)\s+Series/i,
-        /Masters\s+Series/i,
-        /High\s+Roller\s+Series/i,
-        /Super\s+Series/i,
-    ];
-    
+    const seriesPatterns = [/Spring\s+Championship\s+Series/i, /Summer\s+Series/i, /Fall\s+Series/i, /Winter\s+Series/i, /Championship\s+Series/i, /Festival\s+of\s+Poker/i, /Poker\s+Championships?/i, /\bWSOP\b/i, /\bWPT\b/i, /\bEPT\b/i, /\bAPT\b/i, /\bANZPT\b/i, /\bAPPT\b/i, /\b(Mini|Mega|Grand)\s+Series/i, /Masters\s+Series/i, /High\s+Roller\s+Series/i, /Super\s+Series/i];
     for (const pattern of seriesPatterns) {
         if (pattern.test(gameName)) {
-            // Extract clean series name
-            let seriesName = gameName
-                .replace(/\s*[-–]\s*Day\s*\d+[A-Z]?/gi, '')
-                .replace(/\s*[-–]\s*Flight\s*[A-Z]/gi, '')
-                .replace(/\s*\bDay\s*\d+[A-Z]?\b/gi, '')
-                .replace(/\s*\bFlight\s*[A-Z]\b/gi, '')
-                .replace(/\s*\b\d+[A-Z]\b/g, '')
-                .replace(/\s*[-–]\s*Final/gi, '')
-                .replace(/\s+/g, ' ')
-                .trim();
-            
             const match = gameName.match(pattern);
-            if (match) {
-                seriesName = match[0];
-            }
-            
+            const seriesName = match ? match[0] : gameName.replace(/\s*[-–]\s*Day\s*\d+[A-Z]?/gi, '').replace(/\s+/g, ' ').trim();
             console.log(`[Series Match] Pattern match: "${seriesName}"`);
-            const details = extractSeriesDetails(gameName);
-            return {
-                isSeries: true,
-                seriesName: seriesName,
-                seriesId: null,
-                isRegular: false,
-                ...details
-            };
+            return { isSeries: true, seriesName, seriesId: null, isRegular: false, ...extractSeriesDetails(gameName) };
         }
     }
-    
     return null;
 };
 
 // ===================================================================
-// ENHANCED VENUE MATCHING (UPDATED)
+// VENUE MATCHING
 // ===================================================================
 
-/**
- * Enhanced venue matching that checks database first
- * @param {Object} ctx - Scraping context
- * @param {Array} venues - Database venues
- * @param {Array} seriesTitles - Series titles for cleanup
- * @returns {Object} Venue match result
- */
 const getMatchingVenueEnhanced = (gameName, venues = [], seriesTitles = []) => {
-    if (!gameName) {
-        return { 
-            autoAssignedVenue: null, 
-            suggestions: [],
-            extractedVenueName: null,
-            matchingFailed: true 
-        };
-    }
+    if (!gameName) return { autoAssignedVenue: null, suggestions: [], extractedVenueName: null, matchingFailed: true };
     
-    // First, try database venues
     if (venues && venues.length > 0) {
-        // Try exact substring match
-        let exactVenueMatch = null;
         const upperCaseGameName = gameName.toUpperCase();
-        
         for (const venue of venues) {
-            const allVenueNames = [venue.name, ...(venue.aliases || [])];
-            for (const venueName of allVenueNames) {
+            for (const venueName of [venue.name, ...(venue.aliases || [])]) {
                 if (upperCaseGameName.includes(venueName.toUpperCase())) {
-                    exactVenueMatch = venue;
-                    break;
+                    console.log(`[Venue Match] Database exact match: "${venue.name}"`);
+                    return { autoAssignedVenue: { id: venue.id, name: venue.name, score: 1.0 }, suggestions: [{ id: venue.id, name: venue.name, score: 1.0 }], extractedVenueName: gameName, matchingFailed: false };
                 }
             }
-            if (exactVenueMatch) break;
         }
         
-        if (exactVenueMatch) {
-            console.log(`[Venue Match] Database exact match: "${exactVenueMatch.name}"`);
-            const matchResult = { 
-                id: exactVenueMatch.id, 
-                name: exactVenueMatch.name, 
-                score: 1.0 
-            };
-            return { 
-                autoAssignedVenue: matchResult, 
-                suggestions: [matchResult],
-                extractedVenueName: gameName,
-                matchingFailed: false
-            };
-        }
-        
-        // Try fuzzy matching with database venues
-        console.log('[Venue Match] No exact match, trying fuzzy matching');
         const cleanedScrapedName = cleanupNameForMatching(gameName, 'venue', { seriesTitles });
-        
-        const allNamesToMatch = venues.flatMap(venue => {
-            const names = [venue.name, ...(venue.aliases || [])];
-            return names.map(name => ({
-                venueId: venue.id,
-                venueName: venue.name,
-                matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
-            }));
-        });
-        
-        const { ratings } = stringSimilarity.findBestMatch(
-            cleanedScrapedName,
-            allNamesToMatch.map(item => item.matchName)
-        );
+        const allNamesToMatch = venues.flatMap(venue => [venue.name, ...(venue.aliases || [])].map(name => ({ venueId: venue.id, venueName: venue.name, matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim() })));
+        const { ratings } = stringSimilarity.findBestMatch(cleanedScrapedName, allNamesToMatch.map(item => item.matchName));
         
         const bestScoresByVenue = new Map();
         ratings.forEach((rating, index) => {
             const { venueId, venueName } = allNamesToMatch[index];
-            const score = rating.rating;
-            if (!bestScoresByVenue.has(venueId) || score > bestScoresByVenue.get(venueId).score) {
-                bestScoresByVenue.set(venueId, { id: venueId, name: venueName, score: score });
-            }
+            if (!bestScoresByVenue.has(venueId) || rating.rating > bestScoresByVenue.get(venueId).score)
+                bestScoresByVenue.set(venueId, { id: venueId, name: venueName, score: rating.rating });
         });
         
-        const sortedSuggestions = Array.from(bestScoresByVenue.values())
-            .sort((a, b) => b.score - a.score)
-            .filter(v => v.score > 0)
-            .slice(0, 3);
-        
+        const sortedSuggestions = Array.from(bestScoresByVenue.values()).sort((a, b) => b.score - a.score).filter(v => v.score > 0).slice(0, 3);
         if (sortedSuggestions.length > 0) {
-            let autoAssignedVenue = null;
-            if (sortedSuggestions[0].score >= AUTO_ASSIGN_THRESHOLD) {
-                autoAssignedVenue = sortedSuggestions[0];
-                console.log(`[Venue Match] Database fuzzy match: "${autoAssignedVenue.name}" (score: ${autoAssignedVenue.score})`);
-            }
-            
-            return { 
-                autoAssignedVenue, 
-                suggestions: sortedSuggestions,
-                extractedVenueName: gameName,
-                matchingFailed: autoAssignedVenue === null
-            };
+            const autoAssignedVenue = sortedSuggestions[0].score >= AUTO_ASSIGN_THRESHOLD ? sortedSuggestions[0] : null;
+            if (autoAssignedVenue) console.log(`[Venue Match] Database fuzzy match: "${autoAssignedVenue.name}" (score: ${autoAssignedVenue.score})`);
+            return { autoAssignedVenue, suggestions: sortedSuggestions, extractedVenueName: gameName, matchingFailed: autoAssignedVenue === null };
         }
     }
     
-    // Fall back to pattern matching
-    console.log('[Venue Match] No database match, trying patterns');
-    const venuePatterns = [
-        { pattern: /The Star/i, venue: 'The Star' },
-        { pattern: /Crown/i, venue: 'Crown' },
-        { pattern: /Sky City/i, venue: 'Sky City' },
-        { pattern: /Treasury/i, venue: 'Treasury' },
-        { pattern: /Reef/i, venue: 'The Reef' },
-        { pattern: /Adelaide Casino/i, venue: 'Adelaide Casino' },
-        { pattern: /Perth Casino/i, venue: 'Perth Casino' },
-        { pattern: /Gold Coast/i, venue: 'Gold Coast Casino' },
-        { pattern: /Townsville/i, venue: 'Townsville Casino' },
-        { pattern: /Darwin/i, venue: 'Darwin Casino' },
-    ];
-    
+    const venuePatterns = [{ pattern: /The Star/i, venue: 'The Star' }, { pattern: /Crown/i, venue: 'Crown' }, { pattern: /Sky City/i, venue: 'Sky City' }, { pattern: /Treasury/i, venue: 'Treasury' }, { pattern: /Reef/i, venue: 'The Reef' }];
     for (const { pattern, venue } of venuePatterns) {
         if (pattern.test(gameName)) {
             console.log(`[Venue Match] Pattern match: "${venue}"`);
-            return {
-                autoAssignedVenue: null,
-                suggestions: [{
-                    id: null,
-                    name: venue,
-                    score: 0.6
-                }],
-                extractedVenueName: gameName,
-                matchingFailed: true  // Pattern matches don't auto-assign
-            };
+            return { autoAssignedVenue: null, suggestions: [{ id: null, name: venue, score: 0.6 }], extractedVenueName: gameName, matchingFailed: true };
         }
     }
-    
-    // No match at all
-    return { 
-        autoAssignedVenue: null,
-        suggestions: [],
-        extractedVenueName: gameName,
-        matchingFailed: true
-    };
+    return { autoAssignedVenue: null, suggestions: [], extractedVenueName: gameName, matchingFailed: true };
 };
 
 // ===================================================================
-// SCRAPE CONTEXT (UNCHANGED)
+// SCRAPE CONTEXT
 // ===================================================================
 
 class ScrapeContext {
@@ -444,265 +188,92 @@ class ScrapeContext {
         this.gameData = null;
         this.levelData = null;
         this.abortScrape = false;
-        
-        // Initialize with tournament ID from URL
-        if (url) {
-            this.data.tournamentId = getTournamentId(url);
-        }
-        
+        if (url) this.data.tournamentId = getTournamentId(url);
         this._parseEmbeddedData();
     }
     
     _parseEmbeddedData() {
         const html = this.$.html();
-        try {
-            const gameDataRegex = /const cw_tt = ({.*?});/;
-            const gameMatch = html.match(gameDataRegex);
-            if (gameMatch && gameMatch[1]) {
-                this.gameData = JSON.parse(gameMatch[1]);
-            }
-        } catch (e) {
-            console.warn('Could not parse embedded game data (cw_tt):', e.message);
-        }
-        try {
-            const levelDataRegex = /const cw_tt_levels = (\[.*?\]);/;
-            const levelMatch = html.match(levelDataRegex);
-            if (levelMatch && levelMatch[1]) {
-                this.levelData = JSON.parse(levelMatch[1]);
-            }
-        } catch (e) {
-            console.warn('Could not parse embedded level data (cw_tt_levels):', e.message);
-        }
+        try { const m = html.match(/const cw_tt = ({.*?});/); if (m && m[1]) this.gameData = JSON.parse(m[1]); } catch (e) {}
+        try { const m = html.match(/const cw_tt_levels = (\[.*?\]);/); if (m && m[1]) this.levelData = JSON.parse(m[1]); } catch (e) {}
     }
     
-    getText(key, selector) {
-        const text = this.$(selector).first().text().trim();
-        if (text) {
-            this.foundKeys.add(key);
-            this.data[key] = text;
-            return text;
-        }
-        return undefined;
-    }
-    
-    parseNumeric(key, selector) {
-        const str = this.$(selector).first().text().trim();
-        if (!str) return undefined;
-        const num = parseInt(str.replace(/[^0-9.-]+/g, ''), 10);
-        if (!isNaN(num)) {
-            this.foundKeys.add(key);
-            this.data[key] = num;
-            return num;
-        }
-        return undefined;
-    }
-    
-    add(key, value) {
-        if (value !== undefined && value !== null) {
-            this.foundKeys.add(key);
-            this.data[key] = value;
-        }
-    }
+    getText(key, selector) { const text = this.$(selector).first().text().trim(); if (text) { this.foundKeys.add(key); this.data[key] = text; return text; } return undefined; }
+    parseNumeric(key, selector) { const str = this.$(selector).first().text().trim(); if (!str) return undefined; const num = parseInt(str.replace(/[^0-9.-]+/g, ''), 10); if (!isNaN(num)) { this.foundKeys.add(key); this.data[key] = num; return num; } return undefined; }
+    add(key, value) { if (value !== undefined && value !== null) { this.foundKeys.add(key); this.data[key] = value; } }
 }
 
 // ===================================================================
-// DEFAULT STRATEGY (ENHANCED WITH DATABASE MATCHING)
+// DEFAULT STRATEGY
 // ===================================================================
 
 const defaultStrategy = {
-    /**
-     * UNCHANGED: Robust page state detection
-     */
     detectPageState(ctx, forceRefresh = false) {
         const tournamentId = ctx.data.tournamentId || getTournamentId(ctx.url) || 1;
-        
-        // Look for the specific warning badge used by the platform for errors
         const warningBadge = ctx.$('.cw-badge.cw-bg-warning').first();
         
         if (warningBadge.length) {
             const warningText = warningBadge.text().trim().toLowerCase();
             console.log(`[Scraper] Warning badge detected: "${warningText}"`);
-
-            // Case 1: Tournament Not Found
-            if (warningText.includes('not found')) {
-                console.log('[Scraper] State detected: Tournament Not Found');
-                ctx.add('tournamentId', tournamentId);
-                ctx.add('gameStatus', 'UNKNOWN');
-                ctx.add('name', 'Tournament Not Found');
-                ctx.add('doNotScrape', true); // Set to true, as "not found" is usually permanent
-                ctx.add('hasGuarantee', false);
-                ctx.add('s3Key', '');
-                ctx.add('registrationStatus', 'N_A');
-                
-                if (!forceRefresh) {
-                    ctx.abortScrape = true;
-                    console.log('[Scraper] Aborting scrape due to UNKNOWN Game status');
-                }
-                return;
-            }
-
-            // Case 2: Tournament Not Published
-            if (warningText.includes('not published')) {
-                console.log('[Scraper] State detected: Tournament Not Published');
-                ctx.add('tournamentId', tournamentId);
-                ctx.add('gameStatus', 'NOT_PUBLISHED');
-                ctx.add('name', 'Tournament Not Published');
-                ctx.add('doNotScrape', true); // Prevent future scrapes
-                ctx.add('hasGuarantee', false);
-                ctx.add('s3Key', '');
-                ctx.add('registrationStatus', 'N_A');
-                if (!forceRefresh) {
-                    ctx.abortScrape = true;
-                    console.log('[Scraper] Aborting scrape due to NOT_PUBLISHED status');
-                }
-                return;
-            }
-
-            // Case 3: Tournament Not In Use
-            if (warningText.includes('not in use') || warningText.includes('not available')) {
-                console.log('[Scraper] State detected: Tournament Not In Use');
-                ctx.add('tournamentId', tournamentId);
-                ctx.add('gameStatus', 'NOT_IN_USE');
-                ctx.add('name', 'Tournament Not In Use');
-                ctx.add('doNotScrape', true);
-                ctx.add('hasGuarantee', false);
-                ctx.add('s3Key', '');
-                ctx.add('registrationStatus', 'N_A');
-                if (!forceRefresh) {
-                    ctx.abortScrape = true;
-                    console.log('[Scraper] Aborting scrape due to NOT_IN_USE status');
-                }
-                return;
-            }
             
-            // Case 4: Any other warning (generic handler)
-            else {
-                console.log(`[Scraper] Unknown warning state: ${warningText}`);
-                ctx.add('tournamentId', tournamentId);
-                ctx.add('gameStatus', 'UNKNOWN');
-                ctx.add('name', warningText || 'Tournament Status Unknown');
-                ctx.add('doNotScrape', true);
-                ctx.add('hasGuarantee', false);
-                ctx.add('s3Key', '');
-                ctx.add('registrationStatus', 'N_A');
-                if (!forceRefresh) {
-                    ctx.abortScrape = true;
-                    console.log('[Scraper] Aborting scrape due to unknown warning status');
-                }
-                return;
-            }
+            let status = 'UNKNOWN', name = 'Tournament Status Unknown';
+            if (warningText.includes('not found')) { status = 'UNKNOWN'; name = 'Tournament Not Found'; }
+            else if (warningText.includes('not published')) { status = 'NOT_PUBLISHED'; name = 'Tournament Not Published'; }
+            else if (warningText.includes('not in use') || warningText.includes('not available')) { status = 'NOT_IN_USE'; name = 'Tournament Not In Use'; }
+            
+            ctx.add('tournamentId', tournamentId);
+            ctx.add('gameStatus', status);
+            ctx.add('name', name);
+            ctx.add('doNotScrape', true);
+            ctx.add('hasGuarantee', false);
+            ctx.add('s3Key', '');
+            ctx.add('registrationStatus', 'N_A');
+            if (!forceRefresh) { ctx.abortScrape = true; console.log(`[Scraper] Aborting scrape due to ${status} status`); }
+            return;
         }
         
-        // Check other indicators if no badge was found
         const pageTitle = ctx.$('title').text().toLowerCase();
         const h1Text = ctx.$('h1').first().text().toLowerCase();
-        
-        if (pageTitle.includes('not found') || h1Text.includes('not found')) {
-            console.log('[Scraper] State detected from page title/h1: Not Found');
+        if (pageTitle.includes('not found') || h1Text.includes('not found') || pageTitle.includes('error') || h1Text.includes('error')) {
             ctx.add('tournamentId', tournamentId);
-            ctx.add('gameStatus', 'UNKNOWN');
-            ctx.add('name', 'Tournament Not Found');
+            ctx.add('gameStatus', pageTitle.includes('error') ? 'ERROR' : 'UNKNOWN');
+            ctx.add('name', pageTitle.includes('error') ? 'Tournament Error' : 'Tournament Not Found');
             ctx.add('doNotScrape', true);
             ctx.add('hasGuarantee', false);
-            ctx.add('s3Key', '');
             ctx.add('registrationStatus', 'N_A');
-            
-            if (!forceRefresh) {
-                ctx.abortScrape = true;
-            }
+            if (!forceRefresh) ctx.abortScrape = true;
             return;
         }
-        
-        if (pageTitle.includes('error') || h1Text.includes('error')) {
-            console.log('[Scraper] State detected: Error Page');
-            ctx.add('tournamentId', tournamentId);
-            ctx.add('gameStatus', 'ERROR');
-            ctx.add('name', 'Tournament Error');
-            ctx.add('doNotScrape', true);
-            ctx.add('hasGuarantee', false);
-            ctx.add('s3Key', '');
-            ctx.add('registrationStatus', 'N_A');
-            
-            if (!forceRefresh) {
-                ctx.abortScrape = true;
-            }
-            return;
-        }
-        
-        // Make sure tournamentId is always set even if no special state
-        if (!ctx.data.tournamentId) {
-            ctx.add('tournamentId', tournamentId);
-        }
+        if (!ctx.data.tournamentId) ctx.add('tournamentId', tournamentId);
     },
 
     initializeDefaultFlags(ctx) {
-        ctx.add('isSeries', false);
-        ctx.add('seriesName', null);
-        ctx.add('isSatellite', false);
-        ctx.add('isRegular', true);
-        ctx.add('hasGuarantee', false); // Default value for required field
-        ctx.add('doNotScrape', false); // Default value for required field
+        ctx.add('isSeries', false); ctx.add('seriesName', null); ctx.add('isSatellite', false);
+        ctx.add('isRegular', true); ctx.add('hasGuarantee', false); ctx.add('doNotScrape', false);
     },
 
-    /**
-     * ENHANCED: getName now also handles series detection using database
-     */
     getName(ctx, seriesTitles = [], venues = []) {
         const mainTitle = ctx.$('.cw-game-title').first().text().trim();
         const subTitle = ctx.$('.cw-game-shortdesc').first().text().trim();
         const gameName = [mainTitle, subTitle].filter(Boolean).join(' ');
         
         if (!gameName || gameName === '') {
-            if (ctx.data.gameStatus === 'UNKNOWN_STATUS' || ctx.data.isInactive) {
-                ctx.add('name', 'Tournament ID Not In Use'); 
-                ctx.add('isInactive', true); 
-                return;
-            } else {
-                ctx.add('name', 'Unnamed Tournament');
-                return;
-            }
+            ctx.add('name', ctx.data.gameStatus === 'UNKNOWN_STATUS' || ctx.data.isInactive ? 'Tournament ID Not In Use' : 'Unnamed Tournament');
+            if (ctx.data.gameStatus === 'UNKNOWN_STATUS' || ctx.data.isInactive) ctx.add('isInactive', true);
+            return;
         }
-        
         ctx.add('name', gameName);
 
-        // ENHANCED: Use database-aware series matching
         const seriesInfo = matchSeriesWithDatabase(gameName, seriesTitles, venues);
-        
         if (seriesInfo) {
             ctx.add('isSeries', seriesInfo.isSeries);
             ctx.add('seriesName', seriesInfo.seriesName);
             ctx.add('isRegular', !seriesInfo.isSeries);
-            
-            // ENHANCE: Add a seriesMatch object similar to venueMatch
-            if (seriesInfo.seriesId) {
-                ctx.add('seriesMatch', {
-                    autoAssignedSeries: {
-                        id: seriesInfo.seriesId,
-                        name: seriesInfo.seriesName,
-                        score: seriesInfo.confidence || 0.85  // Add confidence scoring
-                    },
-                    suggestions: seriesInfo.suggestions || [],  // Add alternative matches
-                    matchedBy: seriesInfo.matchedBy || 'database'  // 'database' or 'pattern'
-                });
-                
-                // Keep individual fields for backward compatibility
-                ctx.add('seriesId', seriesInfo.seriesId);
-                ctx.add('tournamentSeriesId', seriesInfo.seriesId);  // Add this!
-            }
-            
+            if (seriesInfo.seriesId) { ctx.add('seriesId', seriesInfo.seriesId); ctx.add('tournamentSeriesId', seriesInfo.seriesId); }
             if (seriesInfo.seriesTitleId) {
-                ctx.add('seriesMatch', {
-                    seriesTitleId: seriesInfo.seriesTitleId,  // TournamentSeriesTitle.id
-                    seriesName: seriesInfo.seriesName,
-                    score: seriesInfo.confidence || 0.85
-                });
-                
-                // Keep individual fields for backward compatibility
+                ctx.add('seriesMatch', { seriesTitleId: seriesInfo.seriesTitleId, seriesName: seriesInfo.seriesName, score: 0.85 });
                 ctx.add('seriesTitleId', seriesInfo.seriesTitleId);
-                // DO NOT set tournamentSeriesId here - let saveGameFunction resolve it
             }
-
-            // Add series structure fields
             if (seriesInfo.dayNumber) ctx.add('dayNumber', seriesInfo.dayNumber);
             if (seriesInfo.flightLetter) ctx.add('flightLetter', seriesInfo.flightLetter);
             if (seriesInfo.isMainEvent) ctx.add('isMainEvent', seriesInfo.isMainEvent);
@@ -711,398 +282,169 @@ const defaultStrategy = {
         }
     },
     
-    // All other methods remain UNCHANGED
     getGameTags(ctx) {
         const tags = [];
-        const selector = '.cw-game-buyins .cw-badge';
-
-        ctx.$(selector).each((i, el) => {
-            const tagText = ctx.$(el).text().trim();
-            if (tagText) {
-                tags.push(tagText);
-            }
-        });
-
-        if (tags.length > 0) {
-            ctx.add('gameTags', tags);
-        }
+        ctx.$('.cw-game-buyins .cw-badge').each((i, el) => { const t = ctx.$(el).text().trim(); if (t) tags.push(t); });
+        if (tags.length > 0) ctx.add('gameTags', tags);
     },
 
     getTournamentType(ctx) {
         const tags = ctx.data.gameTags || [];
-        let tournamentType = 'FREEZEOUT'; 
-        const rebuyKeywords = ['rebuy', 're-buy', 'reentry', 're-entry'];
-        const satelliteKeywords = ['sat', 'satellite', 'satty'];
-        const rebuyRegex = new RegExp(rebuyKeywords.join('|'), 'i');
-        const satelliteRegex = new RegExp(satelliteKeywords.join('|'), 'i');
-
+        let tournamentType = 'FREEZEOUT';
         for (const tag of tags) {
-            if (rebuyRegex.test(tag)) {
-                tournamentType = 'REBUY';
-                break; 
-            }
-            if (satelliteRegex.test(tag)) {
-                tournamentType = 'SATELLITE';
-                break; 
-            }
+            if (/(rebuy|re-buy|reentry|re-entry)/i.test(tag)) { tournamentType = 'REBUY'; break; }
+            if (/(sat|satellite|satty)/i.test(tag)) { tournamentType = 'SATELLITE'; break; }
         }
         ctx.add('tournamentType', tournamentType);
     },
 
     getGameStartDateTime(ctx) {
-        if (ctx.gameData && ctx.gameData.start_local) {
-            ctx.add('gameStartDateTime', new Date(ctx.gameData.start_local).toISOString());
-        } else {
+        if (ctx.gameData && ctx.gameData.start_local) ctx.add('gameStartDateTime', new Date(ctx.gameData.start_local).toISOString());
+        else {
             const dateText = ctx.getText('gameStartDateTime', '#cw_clock_start_date_time_local');
-            if (dateText) {
-                try {
-                    const date = new Date(dateText);
-                    if (!isNaN(date.getTime())) {
-                        ctx.data.gameStartDateTime = date.toISOString();
-                    }
-                } catch (e) {
-                    console.warn('Could not parse gameStartDateTime:', dateText);
-                }
-            }
+            if (dateText) { try { const d = new Date(dateText); if (!isNaN(d.getTime())) ctx.data.gameStartDateTime = d.toISOString(); } catch (e) {} }
         }
     },
     
     getStatus(ctx) {
-        // If already set by detectPageState, skip
         if (ctx.data.gameStatus) return ctx.data.gameStatus;
-
-        const statusElement = ctx.$('label:contains("Status")').first().next('strong');
-        let gameStatus = statusElement.text().trim().toUpperCase();
-        
-        if (!gameStatus || gameStatus === '') {
-            gameStatus = 'UNKNOWN_STATUS';
-        }
-        
-        let mappedStatus = gameStatus;
-
-        if (gameStatus.includes('CLOCK STOPPED')) {
-            mappedStatus = 'CLOCK_STOPPED';
-        } else if (mappedStatus === 'UNKNOWN_STATUS') {
-            ctx.add('isInactive', true);
-        }
-        
-        ctx.add('gameStatus', mappedStatus);
-        return mappedStatus;
+        let gameStatus = ctx.$('label:contains("Status")').first().next('strong').text().trim().toUpperCase() || 'UNKNOWN_STATUS';
+        if (gameStatus.includes('CLOCK STOPPED')) gameStatus = 'CLOCK_STOPPED';
+        else if (gameStatus === 'UNKNOWN_STATUS') ctx.add('isInactive', true);
+        ctx.add('gameStatus', gameStatus);
+        return gameStatus;
     },
     
     getRegistrationStatus(ctx) {
-        // If already set by detectPageState, skip
         if (ctx.data.registrationStatus) return ctx.data.registrationStatus;
-
-        const registrationDiv = ctx.$('label:contains("Registration")').parent();
-        let registrationStatus = registrationDiv.text().replace(/Registration/gi, '').trim() || 'UNKNOWN_REG_STATUS';
-        
-        if (registrationStatus.toUpperCase().startsWith('OPEN')) {
-            registrationStatus = registrationStatus.replace(/\s*\(.*\)/, '').trim();
-            registrationStatus = 'OPEN'; 
-        }
-        
-        if (registrationStatus !== 'UNKNOWN_REG_STATUS') {
-            ctx.add('registrationStatus', registrationStatus.toUpperCase());
-        }
-        return registrationStatus.toUpperCase();
+        let regStatus = ctx.$('label:contains("Registration")').parent().text().replace(/Registration/gi, '').trim() || 'UNKNOWN_REG_STATUS';
+        if (regStatus.toUpperCase().startsWith('OPEN')) regStatus = 'OPEN';
+        if (regStatus !== 'UNKNOWN_REG_STATUS') ctx.add('registrationStatus', regStatus.toUpperCase());
+        return regStatus.toUpperCase();
     },
     
     getGameVariant(ctx) {
-        let variant = null;
-        if (ctx.gameData && ctx.gameData.shortlimitgame) {
-            variant = ctx.gameData.shortlimitgame;
-        } else {
-            variant = ctx.$('#cw_clock_shortlimitgame').first().text().trim();
-        }
-
-        if (variant) {
-            const cleanedVariant = variant.replace(/\s/g, '');
-            ctx.add('gameVariant', cleanedVariant);
-        }
+        let variant = ctx.gameData?.shortlimitgame || ctx.$('#cw_clock_shortlimitgame').first().text().trim();
+        if (variant) ctx.add('gameVariant', variant.replace(/\s/g, ''));
     },
 
-    getPrizepoolPaid(ctx) {
-        ctx.parseNumeric('prizepoolPaid', '#cw_clock_prizepool');
-    },
+    getPrizepoolPaid(ctx) { ctx.parseNumeric('prizepoolPaid', '#cw_clock_prizepool'); },
     
     getTotalUniquePlayers(ctx) {
-        const selector = '#cw_clock_playersentries';
-        const text = ctx.$(selector).first().text().trim();
+        const text = ctx.$('#cw_clock_playersentries').first().text().trim();
         if (!text) return;
         let totalUniquePlayers = null;
-        if (text.includes('/')) {
-            const parts = text.split('/').map(part => parseInt(part.trim(), 10));
-            if (parts.length === 2 && !isNaN(parts[1])) {
-                totalUniquePlayers = parts[1];
-            }
-        } else {
-            const num = parseInt(text.replace(/[^0-9.-]+/g, ''), 10);
-            if (!isNaN(num)) {
-                totalUniquePlayers = num;
-            }
-        }
-        if (totalUniquePlayers !== null) {
-            ctx.add('totalUniquePlayers', totalUniquePlayers);
-        }
+        if (text.includes('/')) { const parts = text.split('/').map(p => parseInt(p.trim(), 10)); if (parts.length === 2 && !isNaN(parts[1])) totalUniquePlayers = parts[1]; }
+        else { const num = parseInt(text.replace(/[^0-9.-]+/g, ''), 10); if (!isNaN(num)) totalUniquePlayers = num; }
+        if (totalUniquePlayers !== null) ctx.add('totalUniquePlayers', totalUniquePlayers);
     },
 
-    getTotalRebuys(ctx) {
-        ctx.parseNumeric('totalRebuys', '#cw_clock_rebuys');
-    },
+    getTotalRebuys(ctx) { ctx.parseNumeric('totalRebuys', '#cw_clock_rebuys'); },
+    getTotalAddons(ctx) { ctx.parseNumeric('totalAddons', 'div.cw-clock-label:contains("Add-Ons")'); },
+    getTotalInitialEntries(ctx) { ctx.add('totalInitialEntries', ctx.data.totalUniquePlayers || 0); },
     
-    getTotalAddons(ctx) {
-        ctx.parseNumeric('totalAddons', 'div.cw-clock-label:contains("Add-Ons")');
-    },
-
     getTotalEntries(ctx) {
-        let totalEntries = 0
-        totalEntries = ctx.data.totalUniquePlayers + ctx.data.totalRebuys
-        ctx.add('totalEntries', totalEntries);
+        // totalEntries = totalInitialEntries + totalRebuys + totalAddons
+        const totalInitialEntries = ctx.data.totalInitialEntries || 0;
+        const totalRebuys = ctx.data.totalRebuys || 0;
+        const totalAddons = ctx.data.totalAddons || 0;
+        ctx.add('totalEntries', totalInitialEntries + totalRebuys + totalAddons);
     },
 
-    getTotalDuration(ctx) {
-        ctx.getText('totalDuration', 'div.cw-clock-label:contains("Total Time")');
-    },
+    getTotalDuration(ctx) { ctx.getText('totalDuration', 'div.cw-clock-label:contains("Total Time")'); },
     
     getBuyIn(ctx) {
-        if (ctx.gameData && ctx.gameData.costspb0 && ctx.gameData.costspb0.cost) {
-            const buyIn = ctx.gameData.costspb0.cost + (ctx.gameData.costspb0.fee || 0);
-            ctx.add('buyIn', buyIn);
-        } else {
-            ctx.parseNumeric('buyIn', '#cw_clock_buyin');
-        }
+        if (ctx.gameData?.costspb0?.cost) ctx.add('buyIn', ctx.gameData.costspb0.cost + (ctx.gameData.costspb0.fee || 0));
+        else ctx.parseNumeric('buyIn', '#cw_clock_buyin');
     },
     
-    getRake(ctx) {
-        if (ctx.gameData && ctx.gameData.costspb0 && ctx.gameData.costspb0.fee) {
-            ctx.add('rake', ctx.gameData.costspb0.fee);
-        }
-    },
+    getRake(ctx) { if (ctx.gameData?.costspb0?.fee) ctx.add('rake', ctx.gameData.costspb0.fee); },
     
     getStartingStack(ctx) {
-        if (ctx.gameData && ctx.gameData.costspb0 && ctx.gameData.costspb0.chips) {
-            ctx.add('startingStack', ctx.gameData.costspb0.chips);
-        } else {
-            ctx.parseNumeric('startingStack', '#cw_clock_startchips');
-        }
+        if (ctx.gameData?.costspb0?.chips) ctx.add('startingStack', ctx.gameData.costspb0.chips);
+        else ctx.parseNumeric('startingStack', '#cw_clock_startchips');
     },
     
     getGuarantee(ctx) {
         const text = ctx.$('.cw-game-shortdesc').text().trim();
-        if (!text) {
-            ctx.add('hasGuarantee', false);
-            return;
-        }
-        const guaranteeRegex = /(gtd|guaranteed|g'teed)/i;
-        if (guaranteeRegex.test(text)) {
+        if (!text) { ctx.add('hasGuarantee', false); return; }
+        if (/(gtd|guaranteed|g'teed)/i.test(text)) {
             ctx.add('hasGuarantee', true);
             let guaranteeAmount = null;
             const millionMatch = text.match(/\b(\d{1,2})M\b/i);
             const thousandMatch = text.match(/\b(\d{1,3})K\b/i);
-            if (millionMatch && millionMatch[1]) {
-                guaranteeAmount = parseInt(millionMatch[1], 10) * 1000000;
-            } else if (thousandMatch && thousandMatch[1]) {
-                guaranteeAmount = parseInt(thousandMatch[1], 10) * 1000;
-            } else {
-                const num = parseInt(text.replace(/[^0-9.-]+/g, ''), 10);
-                if (!isNaN(num)) {
-                    guaranteeAmount = num;
-                }
-            }
-            if (guaranteeAmount !== null) {
-                ctx.add('guaranteeAmount', guaranteeAmount);
-            }
-        } else {
-            ctx.add('hasGuarantee', false);
-        }
+            if (millionMatch) guaranteeAmount = parseInt(millionMatch[1], 10) * 1000000;
+            else if (thousandMatch) guaranteeAmount = parseInt(thousandMatch[1], 10) * 1000;
+            else { const num = parseInt(text.replace(/[^0-9.-]+/g, ''), 10); if (!isNaN(num)) guaranteeAmount = num; }
+            if (guaranteeAmount !== null) ctx.add('guaranteeAmount', guaranteeAmount);
+        } else ctx.add('hasGuarantee', false);
     },
+
+    getSeriesName(ctx) { /* Handled by getName */ },
 
     /**
-     * Calculate total buy-ins collected from all transactions
-     * All entries (initial + rebuys + addons) pay full buy-in amount
-     */
-    calculateBuyInsByEntries(ctx) {
-        const totalEntries = ctx.data.totalEntries || 0;
-        const rebuys = ctx.data.totalRebuys || 0;
-        const addons = ctx.data.totalAddons || 0;
-        const buyIn = ctx.data.buyIn || 0;
-        
-        if (buyIn <= 0) {
-            return;
-        }
-        
-        // Total buy-ins = all transactions × buy-in amount
-        const totalTransactions = totalEntries + rebuys + addons;
-        const totalBuyIns = totalTransactions * buyIn;
-        ctx.add('buyInsByTotalEntries', totalBuyIns);
-    },
-
-    getSeriesName(ctx) {
-        // This is now handled by getName with enhanced matching
-    },
-
-    /**
-     * Calculate guarantee overlay/surplus based on prizepool contributions
+     * SIMPLIFIED POKER ECONOMICS
      * 
-     * POKER ECONOMICS:
-     * - Prizepool contributions = (buyIn - rake) × (entries + rebuys) + buyIn × addons
-     * - Addons go straight to prizepool without rake deduction
-     * - Overlay = out-of-pocket cost when total buy-ins don't cover guarantee
-     * - Surplus = amount prizepool exceeds guarantee
+     * Revenue: rakeRevenue = rake × entriesForRake
+     * Cost: guaranteeOverlayCost = max(0, guarantee - playerContributions)
+     * Profit: gameProfit = rakeRevenue - guaranteeOverlayCost
      */
-    calculateGuaranteeMetrics(ctx) {
-        if (!ctx.data.hasGuarantee) {
-            return; 
-        }
-        
-        const guarantee = ctx.data.guaranteeAmount || 0;
-        if (guarantee <= 0) {
-            return;
-        }
-        
+    calculatePokerEconomics(ctx) {
         const buyIn = ctx.data.buyIn || 0;
         const rake = ctx.data.rake || 0;
-        const totalEntries = ctx.data.totalEntries || 0;
-        const rebuys = ctx.data.totalRebuys || 0;
-        const addons = ctx.data.totalAddons || 0;
-        
-        // Entries that pay rake (NOT addons - addons go straight to prizepool)
-        const entriesForRake = totalEntries + rebuys;
-        
-        // Calculate prizepool contributions
-        // Entries/rebuys contribute (buyIn - rake), addons contribute full buyIn
-        const prizepoolFromEntriesAndRebuys = (buyIn - rake) * entriesForRake;
-        const prizepoolFromAddons = buyIn * addons;
-        const totalPrizepoolContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
-        
-        // Calculate total buy-ins collected
-        const totalBuyIns = buyIn * (totalEntries + rebuys + addons);
-        
-        // Determine overlay vs surplus
-        if (totalBuyIns < guarantee) {
-            // Total buy-ins don't cover guarantee - out-of-pocket overlay
-            ctx.add('guaranteeOverlay', guarantee - totalBuyIns);
-            ctx.add('guaranteeSurplus', 0);
-        } else if (totalPrizepoolContributions > guarantee) {
-            // Prizepool contributions exceeded guarantee - surplus goes to players
-            ctx.add('guaranteeOverlay', 0);
-            ctx.add('guaranteeSurplus', totalPrizepoolContributions - guarantee);
-        } else {
-            // Met guarantee using some/all rake, no out-of-pocket cost
-            ctx.add('guaranteeOverlay', 0);
-            ctx.add('guaranteeSurplus', 0);
-        }
-    },
-
-    /**
-     * Calculate total intended rake
-     * 
-     * IMPORTANT: Addons do NOT pay rake - they go straight to prizepool
-     * Only initial entries and rebuys pay rake
-     */
-    calculateTotalRake(ctx) {
-        const rake = ctx.data.rake;
-        if (rake === undefined || rake === null || rake <= 0) {
-            return;
-        }
-        
-        const totalEntries = ctx.data.totalEntries || 0;
-        const rebuys = ctx.data.totalRebuys || 0;
-        // Note: Addons do NOT pay rake - excluded intentionally
-        
-        const entriesForRake = totalEntries + rebuys;
-        const totalRake = entriesForRake * rake;
-        ctx.add('totalRake', totalRake);
-    },
-
-    /**
-     * Calculate game profit/loss with correct poker economics
-     * 
-     * FORMULA:
-     * - Prizepool contributions = (buyIn - rake) × (entries + rebuys) + buyIn × addons
-     * - Shortfall = max(0, guarantee - prizepoolContributions)
-     * - gameProfitLoss = intendedRake - shortfall
-     * - totalRakePerPlayerRealised = true if shortfall === 0
-     * 
-     * Examples ($200 buy-in, $24 rake, $5000 guarantee):
-     * - 20 entries: $3520 contributions, $1480 shortfall, -$1000 profit (loss)
-     * - 25 entries: $4400 contributions, $600 shortfall, $0 profit (broke even)
-     * - 27 entries: $4752 contributions, $248 shortfall, $400 profit (partial rake)
-     * - 30 entries: $5280 contributions, no shortfall, $720 profit (full rake)
-     */
-    calculateGameProfitLoss(ctx) {
-        const buyIn = ctx.data.buyIn || 0;
-        const rake = ctx.data.rake || 0;
-        const totalEntries = ctx.data.totalEntries || 0;
-        const rebuys = ctx.data.totalRebuys || 0;
-        const addons = ctx.data.totalAddons || 0;
+        const totalInitialEntries = ctx.data.totalInitialEntries || 0;
+        const totalRebuys = ctx.data.totalRebuys || 0;
+        const totalAddons = ctx.data.totalAddons || 0;
         const guaranteeAmount = ctx.data.guaranteeAmount || 0;
         const hasGuarantee = ctx.data.hasGuarantee && guaranteeAmount > 0;
         
-        if (buyIn <= 0) {
-            return;
-        }
+        if (buyIn <= 0) return;
         
-        // Entries that pay rake (NOT addons)
-        const entriesForRake = totalEntries + rebuys;
+        // Entries that pay rake (initial + rebuys, NOT addons)
+        const entriesForRake = totalInitialEntries + totalRebuys;
+        const totalEntries = totalInitialEntries + totalRebuys + totalAddons;
         
-        // Intended total rake
-        const intendedTotalRake = rake * entriesForRake;
+        // REVENUE
+        const rakeRevenue = rake * entriesForRake;
+        const totalBuyInsCollected = buyIn * totalEntries;
         
-        // Calculate prizepool contributions
+        // PRIZEPOOL
         const prizepoolFromEntriesAndRebuys = (buyIn - rake) * entriesForRake;
-        const prizepoolFromAddons = buyIn * addons;
-        const totalPrizepoolContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
+        const prizepoolFromAddons = buyIn * totalAddons;
+        const prizepoolPlayerContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
         
-        // Calculate profit/loss
-        let gameProfitLoss = intendedTotalRake;
-        let totalRakePerPlayerRealised = true;
+        // GUARANTEE IMPACT
+        let guaranteeOverlayCost = 0;
+        let prizepoolSurplus = null;
+        let prizepoolAddedValue = 0;
         
         if (hasGuarantee) {
-            // Shortfall: how much we need to dip into rake to cover guarantee
-            const shortfall = Math.max(0, guaranteeAmount - totalPrizepoolContributions);
-            
+            const shortfall = guaranteeAmount - prizepoolPlayerContributions;
             if (shortfall > 0) {
-                // Profit = intendedRake - shortfall (can be negative)
-                gameProfitLoss = intendedTotalRake - shortfall;
-                totalRakePerPlayerRealised = false;
+                guaranteeOverlayCost = shortfall;
+                prizepoolAddedValue = shortfall;
+            } else {
+                prizepoolSurplus = -shortfall;
             }
         }
         
-        ctx.add('gameProfitLoss', gameProfitLoss);
-        ctx.add('totalRakePerPlayerRealised', totalRakePerPlayerRealised);
-    },
-    
-    /**
-     * Calculate expected prizepool from entries
-     * 
-     * Prizepool = (buyIn - rake) × (entries + rebuys) + buyIn × addons
-     * This is what players contribute to the prize pool before any guarantee adjustments
-     */
-    calculatePrizepoolFromEntries(ctx) {
-        const buyIn = ctx.data.buyIn || 0;
-        const rake = ctx.data.rake || 0;
-        const totalEntries = ctx.data.totalEntries || 0;
-        const rebuys = ctx.data.totalRebuys || 0;
-        const addons = ctx.data.totalAddons || 0;
+        // PROFIT
+        const gameProfit = rakeRevenue - guaranteeOverlayCost;
         
-        if (buyIn <= 0) {
-            return;
-        }
-        
-        // Entries/rebuys contribute (buyIn - rake), addons contribute full buyIn
-        const prizepoolFromEntriesAndRebuys = (buyIn - rake) * (totalEntries + rebuys);
-        const prizepoolFromAddons = buyIn * addons;
-        const prizepoolCalculated = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
-        
-        ctx.add('prizepoolCalculated', prizepoolCalculated);
+        // SET VALUES
+        ctx.add('totalBuyInsCollected', totalBuyInsCollected);
+        ctx.add('rakeRevenue', rakeRevenue);
+        ctx.add('prizepoolPlayerContributions', prizepoolPlayerContributions);
+        ctx.add('prizepoolCalculated', prizepoolPlayerContributions);
+        ctx.add('prizepoolAddedValue', prizepoolAddedValue);
+        ctx.add('prizepoolSurplus', prizepoolSurplus);
+        ctx.add('guaranteeOverlayCost', guaranteeOverlayCost);
+        ctx.add('gameProfit', gameProfit);
     },
 
     getSeating(ctx) {
         const seating = [];
-        const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
-        entriesTable.each((i, el) => {
+        ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr').each((i, el) => {
             const $row = ctx.$(el);
             const $tds = $row.find('td');
             if ($tds.length < 4 || $row.find('th').length > 0) return;
@@ -1110,21 +452,14 @@ const defaultStrategy = {
             const tableSeatInfo = $tds.eq(2).text().trim();
             const chipsStr = $tds.eq(3).text().trim();
             if (chipsStr && tableSeatInfo.includes('Table')) {
-                const tableSeatMatch = tableSeatInfo.match(/Table(\d+)\s*\/\s*(\d+)/);
-                if (name && tableSeatMatch) {
+                const match = tableSeatInfo.match(/Table(\d+)\s*\/\s*(\d+)/);
+                if (name && match) {
                     const stack = parseInt(chipsStr.replace(/,/g, ''), 10);
-                    seating.push({
-                        name: name,
-                        table: parseInt(tableSeatMatch[1], 10),
-                        seat: parseInt(tableSeatMatch[2], 10),
-                        playerStack: !isNaN(stack) ? stack : null
-                    });
+                    seating.push({ name, table: parseInt(match[1], 10), seat: parseInt(match[2], 10), playerStack: !isNaN(stack) ? stack : null });
                 }
             }
         });
-        if (seating.length > 0) {
-            ctx.add('seating', seating);
-        }
+        if (seating.length > 0) ctx.add('seating', seating);
     },
 
     getEntries(ctx) {
@@ -1133,136 +468,81 @@ const defaultStrategy = {
         if (entriesTable.length > 0) {
             entriesTable.each((i, el) => {
                 const $row = ctx.$(el);
-                if ($row.find('th').length > 0) return; 
+                if ($row.find('th').length > 0) return;
                 const name = $row.find('td').eq(1).text().trim();
-                if (name) {
-                    entries.push({ name: name });
-                }
+                if (name) entries.push({ name });
             });
         }
         if (entries.length === 0) {
-            const resultTable = ctx.$('h4.cw-text-center:contains("Result")').next('table').find('tbody tr');
-            if (resultTable.length > 0) {
-                resultTable.each((i, el) => {
-                    const $row = ctx.$(el);
-                    if ($row.find('th').length > 0) return;
-                    const name = $row.find('td').eq(2).text().trim();
-                    if (name) {
-                        entries.push({ name: name });
-                    }
-                });
-            }
+            ctx.$('h4.cw-text-center:contains("Result")').next('table').find('tbody tr').each((i, el) => {
+                const $row = ctx.$(el);
+                if ($row.find('th').length > 0) return;
+                const name = $row.find('td').eq(2).text().trim();
+                if (name) entries.push({ name });
+            });
         }
-        if (entries.length > 0) {
-            ctx.add('entries', entries);
-        }
+        if (entries.length > 0) ctx.add('entries', entries);
     },
 
     getLiveData(ctx) {
-        const currentStatus = ctx.data.gameStatus;
-        if (currentStatus === 'FINISHED' || currentStatus === 'CANCELLED') {
-            return;
-        }
+        if (ctx.data.gameStatus === 'FINISHED' || ctx.data.gameStatus === 'CANCELLED') return;
         
-        let playersRemaining = 0;
-        
-        if (ctx.data.seating && ctx.data.seating.length > 0) {
-            playersRemaining = ctx.data.seating.length;
-        }
-        
+        let playersRemaining = ctx.data.seating?.length || 0;
         if (playersRemaining === 0) {
-            const selector = '#cw_clock_playersentries';
-            const entriesText = ctx.$(selector).first().text().trim();
-            
+            const entriesText = ctx.$('#cw_clock_playersentries').first().text().trim();
             if (entriesText && entriesText.includes('/')) {
-                const parts = entriesText.split('/');
-                const remaining = parseInt(parts[0].trim(), 10);
-                if (!isNaN(remaining)) {
-                    playersRemaining = remaining;
-                }
+                const remaining = parseInt(entriesText.split('/')[0].trim(), 10);
+                if (!isNaN(remaining)) playersRemaining = remaining;
             }
         }
-        
-        if (playersRemaining === 0 && ctx.gameData) {
-            if (ctx.gameData.players_remaining !== undefined) {
-                playersRemaining = ctx.gameData.players_remaining;
-            }
-        }
+        if (playersRemaining === 0 && ctx.gameData?.players_remaining !== undefined) playersRemaining = ctx.gameData.players_remaining;
         
         ctx.add('playersRemaining', playersRemaining);
-        
         ctx.parseNumeric('totalChipsInPlay', '#cw_clock_entire_stack');
         ctx.parseNumeric('averagePlayerStack', '#cw_clock_avg_stack');
     },
 
     getResults(ctx) {
         const results = [];
-        const resultTable = ctx.$('h4.cw-text-center:contains("Result")').next('table').find('tbody tr');
-        if (resultTable.length > 0) {
-            resultTable.each((i, el) => {
-                const $row = ctx.$(el);
-                const parsedRank = parseInt($row.find('td').eq(0).text().trim(), 10);
-                const name = $row.find('td').eq(2).text().trim();
-                const winningsCellHtml = $row.find('td').eq(3).html();
-                let winnings = 0;
-                let points = 0;
-                let isQualification = false;
-                if (winningsCellHtml && winningsCellHtml.toUpperCase().includes('QUALIFIED')) {
-                    isQualification = true;
-                    winnings = 0;
-                    points = 0;
+        ctx.$('h4.cw-text-center:contains("Result")').next('table').find('tbody tr').each((i, el) => {
+            const $row = ctx.$(el);
+            const parsedRank = parseInt($row.find('td').eq(0).text().trim(), 10);
+            const name = $row.find('td').eq(2).text().trim();
+            const winningsCellHtml = $row.find('td').eq(3).html();
+            let winnings = 0, points = 0, isQualification = false;
+            
+            if (winningsCellHtml?.toUpperCase().includes('QUALIFIED')) {
+                isQualification = true;
+            } else {
+                let winningsStr = '', pointsStr = '';
+                if (winningsCellHtml?.includes('<br>')) {
+                    const parts = winningsCellHtml.split('<br>');
+                    winningsStr = parts[0]?.trim() || '';
+                    pointsStr = parts[1]?.trim() || '';
                 } else {
-                    let winningsStr = '';
-                    let pointsStr = '';
-                    if (winningsCellHtml && winningsCellHtml.includes('<br>')) {
-                        const parts = winningsCellHtml.split('<br>');
-                        winningsStr = parts[0] ? parts[0].trim() : '';
-                        pointsStr = parts[1] ? parts[1].trim() : '';
-                    } else {
-                        winningsStr = winningsCellHtml ? winningsCellHtml.trim() : '';
-                    }
-                    const parsedWinnings = winningsStr ? parseInt(winningsStr.replace(/[^0-9.-]+/g, ''), 10) : NaN;
-                    const parsedPoints = pointsStr ? parseInt(pointsStr.replace(/[^0-9.-]+/g, ''), 10) : NaN;
-                    winnings = isNaN(parsedWinnings) ? 0 : parsedWinnings;
-                    points = isNaN(parsedPoints) ? 0 : parsedPoints;
+                    winningsStr = winningsCellHtml?.trim() || '';
                 }
-                let finalRank;
-                if (!isNaN(parsedRank)) {
-                    finalRank = parsedRank;
-                } else {
-                    if (isQualification) {
-                        finalRank = 1;
-                    } else {
-                        finalRank = 0;
-                    }
-                }
-                if (name) {
-                    results.push({
-                        rank: finalRank,
-                        name: name,
-                        winnings: winnings,
-                        points: points,
-                        isQualification: isQualification,
-                    });
-                }
-            });
-        }
-        if (results.length > 0) {
-            ctx.add('results', results);
-        }
+                const parsedWinnings = winningsStr ? parseInt(winningsStr.replace(/[^0-9.-]+/g, ''), 10) : NaN;
+                const parsedPoints = pointsStr ? parseInt(pointsStr.replace(/[^0-9.-]+/g, ''), 10) : NaN;
+                winnings = isNaN(parsedWinnings) ? 0 : parsedWinnings;
+                points = isNaN(parsedPoints) ? 0 : parsedPoints;
+            }
+            
+            const finalRank = !isNaN(parsedRank) ? parsedRank : (isQualification ? 1 : 0);
+            if (name) results.push({ rank: finalRank, name, winnings, points, isQualification });
+        });
+        if (results.length > 0) ctx.add('results', results);
     },
 
     getTables(ctx) {
         const tables = [];
         const tablesContainer = ctx.$('h4.cw-text-center:contains("Tables")').next('table').find('tbody');
-        let currentTableName = null;
-        let currentSeats = [];
+        let currentTableName = null, currentSeats = [];
+        
         tablesContainer.find('tr.cw-tr').each((i, el) => {
             const $row = ctx.$(el);
             if ($row.find('td[colspan="4"]').length > 0) {
-                if (currentTableName && currentSeats.length > 0) {
-                    tables.push({ tableName: currentTableName, seats: currentSeats });
-                }
+                if (currentTableName && currentSeats.length > 0) tables.push({ tableName: currentTableName, seats: currentSeats });
                 currentTableName = $row.find('td').text().trim();
                 currentSeats = [];
             } else {
@@ -1270,33 +550,16 @@ const defaultStrategy = {
                 const playerName = $row.find('td').eq(2).text().trim();
                 const playerStackStr = $row.find('td').eq(3).text().trim().replace(/,/g, '');
                 const playerStack = playerStackStr ? parseInt(playerStackStr, 10) : null;
-                if (!isNaN(seatNumber)) {
-                    currentSeats.push({
-                        seat: seatNumber,
-                        isOccupied: !!playerName,
-                        playerName: playerName || null,
-                        playerStack: isNaN(playerStack) ? null : playerStack,
-                    });
-                }
+                if (!isNaN(seatNumber)) currentSeats.push({ seat: seatNumber, isOccupied: !!playerName, playerName: playerName || null, playerStack: isNaN(playerStack) ? null : playerStack });
             }
         });
-        if (currentTableName && currentSeats.length > 0) {
-            tables.push({ tableName: currentTableName, seats: currentSeats });
-        }
-        if (tables.length > 0) {
-            ctx.add('tables', tables);
-        }
+        if (currentTableName && currentSeats.length > 0) tables.push({ tableName: currentTableName, seats: currentSeats });
+        if (tables.length > 0) ctx.add('tables', tables);
     },
     
     getLevels(ctx) {
         if (!ctx.levelData) return;
-        const levels = ctx.levelData.map(level => ({
-            levelNumber: level.ID || 0,
-            durationMinutes: level.duration || 0,
-            smallBlind: level.smallblind || 0,
-            bigBlind: level.bigblind || 0,
-            ante: level.ante || 0,
-        }));
+        const levels = ctx.levelData.map(level => ({ levelNumber: level.ID || 0, durationMinutes: level.duration || 0, smallBlind: level.smallblind || 0, bigBlind: level.bigblind || 0, ante: level.ante || 0 }));
         if (levels.length > 0) ctx.add('levels', levels);
     },
 
@@ -1307,116 +570,56 @@ const defaultStrategy = {
             const currentLevel = ctx.levelData[i];
             if (currentLevel.breakduration > 0) {
                 const levelBefore = currentLevel.ID || 0;
-                let levelAfter = 0;
-                if (i + 1 < ctx.levelData.length) {
-                    levelAfter = ctx.levelData[i + 1].ID || 0;
-                } else {
-                    levelAfter = levelBefore + 1;
-                }
-                breaks.push({
-                    levelNumberBeforeBreak: levelBefore,
-                    levelNumberAfterBreak: levelAfter,
-                    durationMinutes: currentLevel.breakduration || 0,
-                });
+                const levelAfter = (i + 1 < ctx.levelData.length) ? (ctx.levelData[i + 1].ID || 0) : levelBefore + 1;
+                breaks.push({ levelNumberBeforeBreak: levelBefore, levelNumberAfterBreak: levelAfter, durationMinutes: currentLevel.breakduration || 0 });
             }
         }
         if (breaks.length > 0) ctx.add('breaks', breaks);
     },
 
-    /**
-     * ENHANCED: Now uses database venues first, then falls back to fuzzy/pattern matching
-     */
     getMatchingVenue(ctx, venues, seriesTitles = []) {
         const gameName = ctx.data.name;
-        
-        if (!gameName) {
-            ctx.add('venueMatch', { 
-                autoAssignedVenue: null, 
-                suggestions: [],
-                extractedVenueName: null,
-                matchingFailed: true 
-            });
-            return;
-        }
-        
-        // Use enhanced venue matching
+        if (!gameName) { ctx.add('venueMatch', { autoAssignedVenue: null, suggestions: [], extractedVenueName: null, matchingFailed: true }); return; }
         const venueMatch = getMatchingVenueEnhanced(gameName, venues, seriesTitles);
         ctx.add('venueMatch', venueMatch);
-        
-        // Also set venueName if we have an auto-assigned venue
-        if (venueMatch && venueMatch.autoAssignedVenue) {
-            ctx.add('venueName', venueMatch.autoAssignedVenue.name);
-        }
+        if (venueMatch?.autoAssignedVenue) ctx.add('venueName', venueMatch.autoAssignedVenue.name);
     },
 
     getTournamentFlags(ctx) {
         const name = ctx.data.name || '';
-        const satelliteKeywords = ['satellite', 'satty'];
-        const satelliteRegex = new RegExp(`\\b(${satelliteKeywords.join('|')})\\b`, 'i');
-
-        if (satelliteRegex.test(name)) {
-            ctx.add('isSatellite', true); 
-        }
+        if (/(satellite|satty)/i.test(name)) ctx.add('isSatellite', true);
     },
 
     getGameFrequency(ctx) {
         const name = (ctx.data.name || '').toUpperCase();
         const weekdays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
         const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER', 'JAN', 'FEB', 'MAR', 'APR', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-        const quarterly = ['QUARTERLY', 'QTR', 'Q1', 'Q2', 'Q3', 'Q4'];
-        const yearly = ['YEARLY'];
-
-        if (weekdays.some(day => name.includes(day))) {
-            ctx.add('gameFrequency', 'WEEKLY');
-        } else if (months.some(month => name.includes(month))) {
-            ctx.add('gameFrequency', 'MONTHLY');
-        } else if (quarterly.some(term => name.includes(term))) {
-            ctx.add('gameFrequency', 'QUARTERLY');
-        } else if (yearly.some(term => name.includes(term))) {
-            ctx.add('gameFrequency', 'YEARLY');
-        } else {
-            ctx.add('gameFrequency', 'UNKNOWN');
-        }
-    },
-
-    // This is redundant now since we set tournamentId in context constructor
-    // but keeping for backward compatibility
-    getTournamentId(ctx, url) {
-        if (ctx.data.tournamentId) return; // Already set
         
-        const tournamentId = getTournamentId(url || ctx.url);
-        ctx.add('tournamentId', tournamentId);
+        if (weekdays.some(day => name.includes(day))) ctx.add('gameFrequency', 'WEEKLY');
+        else if (months.some(month => name.includes(month))) ctx.add('gameFrequency', 'MONTHLY');
+        else if (['QUARTERLY', 'QTR', 'Q1', 'Q2', 'Q3', 'Q4'].some(term => name.includes(term))) ctx.add('gameFrequency', 'QUARTERLY');
+        else if (['YEARLY'].some(term => name.includes(term))) ctx.add('gameFrequency', 'YEARLY');
+        else ctx.add('gameFrequency', 'UNKNOWN');
     },
+
+    getTournamentId(ctx, url) { if (!ctx.data.tournamentId) ctx.add('tournamentId', getTournamentId(url || ctx.url)); },
 };
 
 // ===================================================================
-// MAIN SCRAPER FUNCTION (UNCHANGED EXCEPT PARAMETERS)
+// MAIN SCRAPER FUNCTION
 // ===================================================================
 
 const runScraper = (html, ctx = null, venues = [], seriesTitles = [], url = '', forceRefresh = false) => {
-    
-    // 1. Initialize context if not provided
-    if (!ctx) {
-        ctx = new ScrapeContext(html, url); 
-    }
+    if (!ctx) ctx = new ScrapeContext(html, url);
     
     console.log(`[runScraper] Starting run for tournament ${ctx.data.tournamentId}, forceRefresh: ${forceRefresh}`);
     console.log(`[runScraper] Database data: ${venues.length} venues, ${seriesTitles.length} series titles`);
 
-    // 2. Run the strategy steps
-    // Pass forceRefresh to detectPageState
     defaultStrategy.detectPageState(ctx, forceRefresh);
-    
-    // If state detection aborts (e.g., "Not Found"), return immediately
-    // We check forceRefresh here, as a forced scrape should ignore aborts
-    if (ctx.abortScrape) {
-         console.log(`[runScraper] Aborting scrape due to page state: ${ctx.data.gameStatus}`);
-         return { data: ctx.data, foundKeys: Array.from(ctx.foundKeys) };
-    }
+    if (ctx.abortScrape) { console.log(`[runScraper] Aborting scrape due to page state: ${ctx.data.gameStatus}`); return { data: ctx.data, foundKeys: Array.from(ctx.foundKeys) }; }
 
-    // 3. Run all other parsers from the strategy
     defaultStrategy.initializeDefaultFlags(ctx);
-    defaultStrategy.getName(ctx, seriesTitles, venues);  // Enhanced with database series matching
+    defaultStrategy.getName(ctx, seriesTitles, venues);
     defaultStrategy.getGameTags(ctx);
     defaultStrategy.getTournamentType(ctx);
     defaultStrategy.getGameStartDateTime(ctx);
@@ -1425,6 +628,7 @@ const runScraper = (html, ctx = null, venues = [], seriesTitles = [], url = '', 
     defaultStrategy.getGameVariant(ctx);
     defaultStrategy.getPrizepoolPaid(ctx);
     defaultStrategy.getTotalUniquePlayers(ctx);
+    defaultStrategy.getTotalInitialEntries(ctx);
     defaultStrategy.getTotalRebuys(ctx);
     defaultStrategy.getTotalAddons(ctx);
     defaultStrategy.getTotalEntries(ctx);
@@ -1436,52 +640,27 @@ const runScraper = (html, ctx = null, venues = [], seriesTitles = [], url = '', 
     defaultStrategy.getSeriesName(ctx);
     defaultStrategy.getTournamentFlags(ctx);
     defaultStrategy.getGameFrequency(ctx);
-
-    // Live Data & Results
     defaultStrategy.getSeating(ctx);
     defaultStrategy.getEntries(ctx);
     defaultStrategy.getLiveData(ctx);
     defaultStrategy.getResults(ctx);
     defaultStrategy.getTables(ctx);
-    
-    // Structure
     defaultStrategy.getLevels(ctx);
     defaultStrategy.getBreaks(ctx);
-
-    // Venue Matching - Enhanced with database matching
     defaultStrategy.getMatchingVenue(ctx, venues, seriesTitles);
+    defaultStrategy.calculatePokerEconomics(ctx);
 
-    // Calculations (run last)
-    defaultStrategy.calculateBuyInsByEntries(ctx);
-    defaultStrategy.calculateGuaranteeMetrics(ctx);
-    defaultStrategy.calculateTotalRake(ctx);
-    defaultStrategy.calculateGameProfitLoss(ctx);
-    defaultStrategy.calculatePrizepoolFromEntries(ctx);
-
-    // 4. Return results
     console.log(`[runScraper] Completed. Found keys: ${ctx.foundKeys.size}, Status: ${ctx.data.gameStatus}, DoNotScrape: ${ctx.data.doNotScrape}`);
-    
-    return { 
-        data: ctx.data, 
-        foundKeys: Array.from(ctx.foundKeys) // Convert Set to Array
-    };
+    return { data: ctx.data, foundKeys: Array.from(ctx.foundKeys) };
 };
 
 module.exports = {
     runScraper,
-    getTournamentId, // Export for use in other modules
+    getTournamentId,
     getStatusAndReg: (html) => {
         const ctx = new ScrapeContext(html);
-        // Pass a default forceRefresh=false
-        defaultStrategy.detectPageState(ctx, false); 
-        if (!ctx.abortScrape) {
-            defaultStrategy.getStatus(ctx);
-            defaultStrategy.getRegistrationStatus(ctx);
-        }
-        return { 
-            gameStatus: ctx.data.gameStatus, 
-            registrationStatus: ctx.data.registrationStatus,
-            tournamentId: ctx.data.tournamentId
-        };
+        defaultStrategy.detectPageState(ctx, false);
+        if (!ctx.abortScrape) { defaultStrategy.getStatus(ctx); defaultStrategy.getRegistrationStatus(ctx); }
+        return { gameStatus: ctx.data.gameStatus, registrationStatus: ctx.data.registrationStatus, tournamentId: ctx.data.tournamentId };
     }
 };

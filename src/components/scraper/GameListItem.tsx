@@ -691,6 +691,20 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                             </div>
                         )}
 
+                        {data.totalInitialEntries !== undefined && (
+                            <div className="flex items-center">
+                                <Users className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+                                <span className="truncate">{data.totalInitialEntries}</span>
+                            </div>
+                        )}
+
+                        {data.totalInitialEntries !== undefined && (
+                            <div className="flex items-center">
+                                <Users className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+                                <span className="truncate">{data.totalInitialEntries}</span>
+                            </div>
+                        )}
+
                         {data.totalEntries !== undefined && (
                             <div className="flex items-center">
                                 <Users className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />

@@ -105,6 +105,7 @@ export interface SeriesStatistics {
   totalPrizepoolPaid: number;
   totalPrizepoolCalculated: number;
   totalUniquePlayers: number;
+  totalInitialEntries: number;
   totalEntries: number;
   averageBuyIn: number;
   venueRevenue: number;  // Based on venue fee

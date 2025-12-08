@@ -472,6 +472,7 @@ const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape 
             prizepoolPaid: parsedData.prizepoolPaid || 0,
             prizepoolCalculated: parsedData.prizepoolCalculated || 0,
             totalUniquePlayers: parsedData.totalUniquePlayers || 0,
+            totalInitialEntries: parsedData.totalInitialEntries || 0,
             totalEntries: parsedData.totalEntries || 0,
             playersRemaining: parsedData.playersRemaining || null,
             totalRebuys: parsedData.totalRebuys || 0,
@@ -484,11 +485,14 @@ const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape 
             gameFrequency: parsedData.gameFrequency || null,
             gameTags: parsedData.gameTags || [],
             levels: parsedData.levels || [],
-            buyInsByTotalEntries: parsedData.buyInsByTotalEntries || null,
-            gameProfitLoss: parsedData.gameProfitLoss || null,
-            guaranteeSurplus: parsedData.guaranteeSurplus || null,
-            guaranteeOverlay: parsedData.guaranteeOverlay || null,
-            totalRake: parsedData.totalRake || null
+            // Financial metrics (simplified model)
+            totalBuyInsCollected: parsedData.totalBuyInsCollected || null,
+            rakeRevenue: parsedData.rakeRevenue || null,
+            prizepoolPlayerContributions: parsedData.prizepoolPlayerContributions || null,
+            prizepoolAddedValue: parsedData.prizepoolAddedValue || null,
+            prizepoolSurplus: parsedData.prizepoolSurplus || null,
+            guaranteeOverlayCost: parsedData.guaranteeOverlayCost || null,
+            gameProfit: parsedData.gameProfit || null
         },
         series: parsedData.isSeries ? {
             seriesId: parsedData.tournamentSeriesId || null,  // Manual override

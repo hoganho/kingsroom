@@ -1,5 +1,5 @@
 // types/game.ts
-// Enhanced type definitions with Entity ID support and Venue Fee tracking
+// UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
 
 import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant, GameFrequency, VenueAssignmentStatus } from '../API';
 
@@ -68,29 +68,30 @@ export type GameData = {
     gameStatus: GameStatus;
     gameType?: GameType;
     venueId?: string | null;
-    entityId?: string | null; // ✅ Added entity ID
+    entityId?: string | null;
     gameVariant?: GameVariant;
     gameFrequency?: GameFrequency;
     isRegular?: boolean;
     isSatellite?: boolean;
     
     // Venue fee (populated from venue.fee when game is created)
-    venueFee?: number | null;  // ✅ NEW - Fee charged by venue per game
+    venueFee?: number | null;
     
     // Series state and metadata
     isSeries?: boolean;
     tournamentSeriesId?: string | null;
     isMainEvent?: boolean;
-    eventNumber?: number | null;     // Links all flights/days (e.g., Event 8)
-    dayNumber?: number | null;       // Day 1, Day 2, etc.
-    flightLetter?: string | null;    // A, B, C...
-    finalDay?: boolean;              // Final day has prize results
+    eventNumber?: number | null;
+    dayNumber?: number | null;
+    flightLetter?: string | null;
+    finalDay?: boolean;
 
     // Game state and metadata
     registrationStatus?: RegistrationStatus;
     prizepoolPaid?: number | null;
     prizepoolCalculated?: number | null;
     totalUniquePlayers?: number | null;
+    totalInitialEntries?: number | null;
     totalEntries?: number | null;
     playersRemaining?: number | null;
     totalChipsInPlay?: number | null;
@@ -100,20 +101,48 @@ export type GameData = {
     totalDuration?: string | null;
     gameTags?: (string | null)[] | null;
     seriesName?: string | null;
-    buyInsByTotalEntries?: number | null;
-    gameProfitLoss?: number | null;
-    totalRakePerPlayerRealised?: boolean | null;  // ✅ NEW - True if full rake was collected (no guarantee shortfall)
+    
+    // =========================================================================
+    // SIMPLIFIED FINANCIAL METRICS
+    // =========================================================================
+    // 
+    // Revenue (what we collect):
+    //   rakeRevenue = rake × entriesForRake (we collect this, period)
+    // 
+    // Prizepool (what players receive):
+    //   prizepoolPlayerContributions = (buyIn - rake) × entries
+    //   prizepoolAddedValue = guaranteeOverlayCost (when we add money)
+    //   prizepoolSurplus = excess above guarantee (bonus to players)
+    // 
+    // Cost:
+    //   guaranteeOverlayCost = max(0, guarantee - playerContributions)
+    // 
+    // Profit:
+    //   gameProfit = rakeRevenue - guaranteeOverlayCost
+    // =========================================================================
+    
+    // Revenue
+    totalBuyInsCollected?: number | null;         // Total money from players: buyIn × totalEntries
+    rakeRevenue?: number | null;                  // Rake we collect: rake × entriesForRake
+    
+    // Prizepool
+    prizepoolPlayerContributions?: number | null; // From players: (buyIn - rake) × entries
+    prizepoolAddedValue?: number | null;          // From house: guaranteeOverlayCost
+    prizepoolSurplus?: number | null;             // Excess above guarantee (bonus to players)
+    
+    // Cost
+    guaranteeOverlayCost?: number | null;         // Shortfall we pay: max(0, guarantee - playerContributions)
+    
+    // Profit
+    gameProfit?: number | null;                   // Simple: rakeRevenue - guaranteeOverlayCost
 
     // Tournament-specific fields (now on Game model)
     tournamentType?: TournamentType | null;
     buyIn?: number | null;
     rake?: number | null;
-    totalRake?: number | null;
     startingStack?: number | null;
     hasGuarantee: boolean;
     guaranteeAmount?: number | null;
-    guaranteeOverlay?: number | null;
-    guaranteeSurplus?: number | null;
 
     // Blind structure (embedded)
     levels: TournamentLevelData[];
@@ -144,16 +173,16 @@ export type MissingField = {
     reason: string;
 };
 
-// Job/Scraping status - what's happening with our data fetching process
+// Job/Scraping status
 export type JobStatus = 
-    | 'IDLE'           // Not doing anything
-    | 'FETCHING'       // Initial request to backend
-    | 'SCRAPING'       // Axios is fetching the HTML
-    | 'PARSING'        // Cheerio is parsing the HTML
-    | 'READY_TO_SAVE'  // Data is ready, user can save
-    | 'SAVING'         // Currently saving to database
-    | 'DONE'           // Successfully saved
-    | 'ERROR';         // Something went wrong
+    | 'IDLE'
+    | 'FETCHING'
+    | 'SCRAPING'
+    | 'PARSING'
+    | 'READY_TO_SAVE'
+    | 'SAVING'
+    | 'DONE'
+    | 'ERROR';
 
 export interface GameState {
     id: string;
@@ -171,19 +200,15 @@ export interface GameState {
     entityId?: string | null;
 }
 
-// Note: TrackOptions interface should be exported from useGameTracker hook
-// to avoid type conflicts. The hook defines its own TrackOptions type.
-
-// Enhanced input types with entity ID
 export interface SaveTournamentInput {
     id?: string;
     sourceUrl: string;
     venueId?: string | null;
-    entityId?: string | null; // ✅ Added entity ID
+    entityId?: string | null;
     data: GameDataInput;
     existingGameId?: string | null;
     doNotScrape?: boolean;
-    originalScrapedData?: any; // Changed to any to handle AWSJSON type
+    originalScrapedData?: any;
     venueAssignmentStatus?: VenueAssignmentStatus | null;
     requiresVenueAssignment?: boolean | null;
     suggestedVenueName?: string | null;
@@ -202,14 +227,15 @@ export interface GameDataInput {
     prizepoolPaid?: number;
     prizepoolCalculated?: number;
     totalUniquePlayers?: number;
+    totalInitialEntries?: number;
     totalEntries?: number;
     totalRebuys?: number;
     totalAddons?: number;
     totalDuration?: string;
     gameTags?: string[];
-    venueFee?: number;  // ✅ NEW - Include venue fee in input
+    venueFee?: number;
     
-    // Tournament-specific fields (now directly in game input)
+    // Tournament-specific fields
     tournamentType?: TournamentType;
     buyIn?: number;
     rake?: number;
@@ -230,20 +256,17 @@ export interface TournamentLevelInput {
     breakMinutes?: number;
 }
 
-// Defines the shape of a single venue suggestion
 export type ScrapedVenueMatchDetails = {
   id: string;
   name: string;
   score: number;
 };
 
-// Venue match type aligned with backend response
 export type ScrapedVenueMatch = {
   autoAssignedVenue?: ScrapedVenueMatchDetails | null;
   suggestions?: ScrapedVenueMatchDetails[] | null;
 };
 
-// ✅ NEW: Entity configuration type
 export interface EntityConfig {
     id: string;
     entityName: string;
@@ -253,20 +276,17 @@ export interface EntityConfig {
     isActive: boolean;
 }
 
-// Series reference fields - these describe how a Game relates to a Series
-// These should be added to the Game model in schema.graphql
 export interface SeriesReferenceData {
   tournamentSeriesId?: string | null;
   seriesName?: string | null;
   isSeries?: boolean;
   isMainEvent?: boolean;
-  eventNumber?: number | null;    // Links all flights/days for this event (e.g., Event 8)
-  dayNumber?: number | null;      // Which day of the event (1, 2, 3...)
-  flightLetter?: string | null;   // Flight designation (A, B, C...)
-  finalDay?: boolean;             // Is this the final day with prize payouts?
+  eventNumber?: number | null;
+  dayNumber?: number | null;
+  flightLetter?: string | null;
+  finalDay?: boolean;
 }
 
-// ✅ NEW: Save Game Input matching backend expectations
 export interface SaveGameInput {
   source: {
     type: 'SCRAPE' | 'MANUAL';

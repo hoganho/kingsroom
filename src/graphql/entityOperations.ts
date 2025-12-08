@@ -79,6 +79,7 @@ export const entityQueries = {
           prizepoolPaid
           prizepoolCalculated
           totalUniquePlayers
+          totalInitialEntries
           totalEntries
         }
         nextToken

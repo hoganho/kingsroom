@@ -1,5 +1,6 @@
 // src/hooks/useGameTracker.ts
 // REFACTORED: Uses unified ScrapeURL knowledge base before fetching.
+// UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -14,9 +15,9 @@ interface TrackedGame extends GameState {
     s3Key?: string;
     fromS3?: boolean;
     lastCheckedForUpdates?: Date;
-    knowledgeBaseId?: string; // ID from ScrapeURL
-    lastScrapeStatus?: ScrapeAttemptStatus; // metadata from ScrapeURL
-    lastScrapedAt?: string; // metadata from ScrapeURL
+    knowledgeBaseId?: string;
+    lastScrapeStatus?: ScrapeAttemptStatus;
+    lastScrapedAt?: string;
 }
 
 interface TrackOptions {
@@ -38,7 +39,7 @@ interface UseGameTrackerReturn {
     modalGameInfo: { url: string; source: DataSource; entityId: string } | null;
 }
 
-// Helper to convert ScrapedGameData to GameData (same as before)
+// Helper to convert ScrapedGameData to GameData
 const convertScrapedToGameData = (scraped: ScrapedGameData): GameData => {
     const gameStatus = scraped.gameStatus || 'SCHEDULED' as GameStatus;
     return {
@@ -59,6 +60,7 @@ const convertScrapedToGameData = (scraped: ScrapedGameData): GameData => {
         prizepoolPaid: scraped.prizepoolPaid || undefined,
         prizepoolCalculated: scraped.prizepoolCalculated || undefined,
         totalUniquePlayers: scraped.totalUniquePlayers || undefined,
+        totalInitialEntries: scraped.totalInitialEntries || undefined,
         totalEntries: scraped.totalEntries || undefined,
         playersRemaining: scraped.playersRemaining || undefined,
         totalChipsInPlay: scraped.totalChipsInPlay || undefined,
@@ -68,17 +70,20 @@ const convertScrapedToGameData = (scraped: ScrapedGameData): GameData => {
         totalDuration: scraped.totalDuration || undefined,
         gameTags: scraped.gameTags || undefined,
         seriesName: scraped.seriesName || undefined,
-        buyInsByTotalEntries: scraped.buyInsByTotalEntries || undefined,
-        gameProfitLoss: scraped.gameProfitLoss || undefined,
+        // Simplified financial metrics
+        totalBuyInsCollected: scraped.totalBuyInsCollected || undefined,
+        rakeRevenue: scraped.rakeRevenue || undefined,
+        prizepoolPlayerContributions: scraped.prizepoolPlayerContributions || undefined,
+        prizepoolAddedValue: scraped.prizepoolAddedValue || undefined,
+        prizepoolSurplus: scraped.prizepoolSurplus || undefined,
+        guaranteeOverlayCost: scraped.guaranteeOverlayCost || undefined,
+        gameProfit: scraped.gameProfit || undefined,
         tournamentType: scraped.tournamentType || undefined,
         buyIn: scraped.buyIn || undefined,
         rake: scraped.rake || undefined,
-        totalRake: scraped.totalRake || undefined,
         startingStack: scraped.startingStack || undefined,
         hasGuarantee: scraped.hasGuarantee || false,
         guaranteeAmount: scraped.guaranteeAmount || undefined,
-        guaranteeOverlay: scraped.guaranteeOverlay || undefined,
-        guaranteeSurplus: scraped.guaranteeSurplus || undefined,
         levels: scraped.levels?.map(level => ({
             levelNumber: level.levelNumber || 0,
             durationMinutes: level.durationMinutes || 0,
@@ -152,9 +157,6 @@ export const useGameTracker = (): UseGameTrackerReturn => {
         };
     }, []);
 
-    /**
-     * Checks the ScrapeURL knowledge base first
-     */
     const checkKnowledgeBase = async (url: string) => {
         try {
             const response = await clientRef.current.graphql({
@@ -205,256 +207,215 @@ export const useGameTracker = (): UseGameTrackerReturn => {
                         hasGuarantee
                         guaranteeAmount
                         totalUniquePlayers
+                        totalInitialEntries
                         totalEntries
                         totalRebuys
                         totalAddons
                         totalDuration
                         playersRemaining
+                        totalChipsInPlay
+                        averagePlayerStack
                         seriesName
+                        isRegular
+                        isSeries
+                        isSatellite
+                        isMainEvent
+                        eventNumber
+                        dayNumber
+                        flightLetter
+                        finalDay
+                        gameFrequency
                         gameTags
-                        venueMatch {
-                            autoAssignedVenue { id name score }
-                            suggestions { id name score }
-                        }
-                        existingGameId
+                        levels { levelNumber durationMinutes smallBlind bigBlind ante }
+                        breaks { levelNumberBeforeBreak durationMinutes }
+                        entries { name }
+                        seating { name table seat playerStack }
+                        results { rank name winnings points isQualification }
+                        tables { tableName seats { seat isOccupied playerName playerStack } }
+                        rawHtml
+                        structureLabel
+                        foundKeys
+                        venueMatch { autoAssignedVenue { id name score } suggestions { id name score } }
                         doNotScrape
-                        sourceUrl
-                        s3Key
-                        reScrapedAt
                         entityId
+                        s3Key
+                        contentHash
                     }
                 }
             `,
-            variables: { 
-                input: { s3Key: s3Key, saveToDatabase: false }
-            }
+            variables: { input: { s3Key } }
         });
+
+        return response.data.reScrapeFromCache as ScrapedGameData;
+    };
+
+    const fetchFromLive = async (url: string): Promise<ScrapedGameData> => {
+        console.log(`[useGameTracker] Fetching LIVE for ${url}`);
         
-        if ('data' in response && response.data?.reScrapeFromCache) {
-            return response.data.reScrapeFromCache as ScrapedGameData;
-        }
-        throw new Error('Fetch from S3 failed');
+        const response = await clientRef.current.graphql({
+            query: /* GraphQL */ `
+                mutation FetchTournamentData($url: AWSURL!, $forceRefresh: Boolean) {
+                    fetchTournamentData(url: $url, forceRefresh: $forceRefresh) {
+                        name
+                        tournamentId
+                        gameStartDateTime
+                        gameEndDateTime
+                        gameStatus
+                        registrationStatus
+                        gameType
+                        gameVariant
+                        tournamentType
+                        prizepoolPaid
+                        prizepoolCalculated
+                        buyIn
+                        rake
+                        startingStack
+                        hasGuarantee
+                        guaranteeAmount
+                        totalUniquePlayers
+                        totalInitialEntries
+                        totalEntries
+                        totalRebuys
+                        totalAddons
+                        totalDuration
+                        playersRemaining
+                        totalChipsInPlay
+                        averagePlayerStack
+                        seriesName
+                        isRegular
+                        isSeries
+                        isSatellite
+                        isMainEvent
+                        eventNumber
+                        dayNumber
+                        flightLetter
+                        finalDay
+                        gameFrequency
+                        gameTags
+                        levels { levelNumber durationMinutes smallBlind bigBlind ante }
+                        breaks { levelNumberBeforeBreak durationMinutes }
+                        entries { name }
+                        seating { name table seat playerStack }
+                        results { rank name winnings points isQualification }
+                        tables { tableName seats { seat isOccupied playerName playerStack } }
+                        rawHtml
+                        structureLabel
+                        foundKeys
+                        venueMatch { autoAssignedVenue { id name score } suggestions { id name score } }
+                        doNotScrape
+                        entityId
+                        s3Key
+                        contentHash
+                    }
+                }
+            `,
+            variables: { url, forceRefresh: true }
+        });
+
+        return response.data.fetchTournamentData as ScrapedGameData;
     };
 
     const trackGameCore = useCallback(async (
-        url: string, 
-        source: DataSource, 
+        url: string,
+        source: DataSource,
         entityId: string,
         options?: TrackOptions
     ) => {
-        // ============================================
-        // ✅ ADD ONLY THESE 5 LINES:
-        // ============================================
-        const reqKey = `${url}-${options?.forceSource || 'auto'}`;
-        if (activeRequests.current.has(reqKey)) return;
-        activeRequests.current.add(reqKey);
-        const cleanup = () => activeRequests.current.delete(reqKey);
+        const gameId = url;
         
+        if (activeRequests.current.has(gameId)) {
+            console.log(`[useGameTracker] Skipping duplicate request for ${gameId}`);
+            return;
+        }
+        
+        activeRequests.current.add(gameId);
+        
+        setGames(prev => ({
+            ...prev,
+            [gameId]: {
+                ...prev[gameId],
+                id: gameId,
+                source,
+                jobStatus: 'FETCHING',
+                fetchCount: (prev[gameId]?.fetchCount || 0) + 1,
+                entityId
+            }
+        }));
+
         try {
-            // ============================================
-            // ✅ KEEP ALL YOUR EXISTING CODE BELOW:
-            // ============================================
-            console.log(`[useGameTracker] Tracking: ${url}, source: ${options?.forceSource || 'AUTO'}`);
-            
-            setGames(prev => ({
-                ...prev,
-                [url]: {
-                    id: url,
-                    source,
-                    jobStatus: 'FETCHING',
-                    fetchCount: (prev[url]?.fetchCount || 0) + 1,
-                    entityId,
-                    existingGameId: prev[url]?.existingGameId || null,
-                    autoRefresh: false
-                }
-            }));
-
             let scrapedData: ScrapedGameData;
-            let knowledgeInfo: { id: string; lastScrapeStatus: ScrapeAttemptStatus; lastScrapedAt: string; [key: string]: any; } | null = null;
+            let fromS3 = false;
 
-            if (!options?.s3Key && options?.forceSource !== 'LIVE') {
-                knowledgeInfo = await checkKnowledgeBase(url);
-                if (knowledgeInfo) {
-                    console.log('[useGameTracker] Found in knowledge base:', knowledgeInfo);
-                    setGames(prev => ({
-                        ...prev,
-                        [url]: {
-                            ...prev[url],
-                            knowledgeBaseId: knowledgeInfo?.id,
-                            lastScrapeStatus: knowledgeInfo?.lastScrapeStatus,
-                            lastScrapedAt: knowledgeInfo?.lastScrapedAt
-                        }
-                    }));
-                }
-            }
+            const kbResult = await checkKnowledgeBase(url);
+            const s3Key = options?.s3Key || kbResult?.latestS3Key;
+            const forceSource = options?.forceSource;
 
-            if (options?.forceSource === 'S3' && options.s3Key) {
-                scrapedData = await fetchFromS3(url, options.s3Key);
+            if (forceSource === 'LIVE' || options?.forceRefresh) {
+                scrapedData = await fetchFromLive(url);
+            } else if (forceSource === 'S3' && s3Key) {
+                scrapedData = await fetchFromS3(url, s3Key);
+                fromS3 = true;
+            } else if (s3Key) {
+                scrapedData = await fetchFromS3(url, s3Key);
+                fromS3 = true;
             } else {
-                const response = await clientRef.current.graphql({
-                    query: /* GraphQL */ `
-                        mutation FetchTournamentData($url: AWSURL!, $forceRefresh: Boolean) {
-                            fetchTournamentData(url: $url, forceRefresh: $forceRefresh) {
-                                name
-                                tournamentId
-                                gameStatus
-                                registrationStatus
-                                gameStartDateTime
-                                gameEndDateTime
-                                gameType
-                                gameVariant
-                                tournamentType
-                                prizepoolPaid
-                                prizepoolCalculated
-                                buyInsByTotalEntries
-                                gameProfitLoss
-                                buyIn
-                                rake
-                                totalRake
-                                startingStack
-                                hasGuarantee
-                                guaranteeAmount
-                                guaranteeOverlay
-                                guaranteeSurplus
-                                totalUniquePlayers
-                                totalEntries
-                                totalRebuys
-                                totalAddons
-                                totalDuration
-                                playersRemaining
-                                totalChipsInPlay
-                                averagePlayerStack
-                                seriesName
-                                isRegular
-                                isSeries
-                                isSatellite
-                                gameFrequency
-                                gameTags
-                                levels {
-                                    levelNumber
-                                    durationMinutes
-                                    smallBlind
-                                    bigBlind
-                                    ante
-                                }
-                                breaks {
-                                    levelNumberBeforeBreak
-                                    durationMinutes
-                                }
-                                entries {
-                                    name
-                                }
-                                seating {
-                                    name
-                                    table
-                                    seat
-                                    playerStack
-                                }
-                                results {
-                                    rank
-                                    name
-                                    winnings
-                                    points
-                                    isQualification
-                                }
-                                tables {
-                                    tableName
-                                    seats {
-                                        seat
-                                        isOccupied
-                                        playerName
-                                        playerStack
-                                    }
-                                }
-                                rawHtml
-                                isNewStructure
-                                structureLabel
-                                foundKeys
-                                venueMatch {
-                                    autoAssignedVenue {
-                                        id
-                                        name
-                                        score
-                                    }
-                                    suggestions {
-                                        id
-                                        name
-                                        score
-                                    }
-                                }
-                                existingGameId
-                                doNotScrape
-                                tournamentId
-                                entityId
-                            }
-                        }
-                    `,
-                    variables: { 
-                        url: url,
-                        forceRefresh: options?.forceRefresh || options?.forceSource === 'LIVE' || false
-                    }
-                });
-                
-                scrapedData = response.data?.fetchTournamentData;
+                scrapedData = await fetchFromLive(url);
             }
 
-            const data = convertScrapedToGameData(scrapedData);
-            const existingGameId = scrapedData.existingGameId || null;
-            const s3Key = (scrapedData as any).s3Key || options?.s3Key || undefined;
-            const fromS3 = (scrapedData as any).source === 'S3_CACHE' || !!options?.s3Key;
+            const gameData = convertScrapedToGameData(scrapedData);
+            
+            const shouldAutoRefresh = shouldAutoRefreshTournament(gameData);
 
             setGames(prev => ({
                 ...prev,
-                [url]: {
-                    ...prev[url],
+                [gameId]: {
+                    ...prev[gameId],
+                    id: gameId,
+                    source,
                     jobStatus: 'READY_TO_SAVE',
-                    data,
-                    existingGameId,
-                    s3Key,
+                    data: gameData,
+                    lastFetched: new Date().toISOString(),
+                    fetchCount: prev[gameId]?.fetchCount || 1,
+                    entityId,
+                    s3Key: s3Key || (scrapedData as any).s3Key,
                     fromS3,
-                    lastFetched: new Date().toISOString()
+                    knowledgeBaseId: kbResult?.id,
+                    lastScrapeStatus: kbResult?.lastScrapeStatus,
+                    lastScrapedAt: kbResult?.lastScrapedAt,
+                    autoRefresh: shouldAutoRefresh
                 }
             }));
 
-            if (options?.forceSource !== 'S3' && shouldAutoRefreshTournament(data.gameStatus)) {
-                setGames(prev => ({ ...prev, [url]: { ...prev[url], autoRefresh: true } }));
-                if (autoRefreshTimers.current[url]) clearInterval(autoRefreshTimers.current[url]);
-                autoRefreshTimers.current[url] = setInterval(() => {
-                    refreshGame(url, { forceSource: 'LIVE' });
+            if (shouldAutoRefresh && !autoRefreshTimers.current[gameId]) {
+                console.log(`[useGameTracker] Setting up auto-refresh for ${gameId}`);
+                autoRefreshTimers.current[gameId] = setInterval(() => {
+                    trackGameCore(url, source, entityId, { forceSource: 'LIVE' });
                 }, POLLING_INTERVAL);
             }
-            
-            // ============================================
-            // ✅ ADD CLEANUP at the end of try block:
-            // ============================================
-            cleanup();
-            
+
         } catch (error) {
-            console.error('[useGameTracker] Error:', error);
+            console.error(`[useGameTracker] Error tracking game:`, error);
             setGames(prev => ({
                 ...prev,
-                [url]: {
-                    ...prev[url],
+                [gameId]: {
+                    ...prev[gameId],
                     jobStatus: 'ERROR',
                     errorMessage: error instanceof Error ? error.message : 'Failed to fetch game data'
                 }
             }));
-            
-            // ============================================
-            // ✅ ADD CLEANUP in catch block too:
-            // ============================================
-            cleanup();
+        } finally {
+            activeRequests.current.delete(gameId);
         }
-    }, []); // Keep your existing dependency array
-
-    const trackGameWithModal = useCallback((url: string, source: DataSource, entityId: string) => {
-        setModalGameInfo({ url, source, entityId });
-        setIsModalOpen(true);
     }, []);
 
     const trackGame = useCallback((url: string, source: DataSource, entityId: string, options?: TrackOptions) => {
         trackGameCore(url, source, entityId, options);
     }, [trackGameCore]);
+
+    const trackGameWithModal = useCallback((url: string, source: DataSource, entityId: string) => {
+        setModalGameInfo({ url, source, entityId });
+        setIsModalOpen(true);
+    }, []);
 
     const saveGame = useCallback(async (gameId: string, venueId: string, entityId: string) => {
         const game = games[gameId];
@@ -495,8 +456,9 @@ export const useGameTracker = (): UseGameTrackerReturn => {
 
     const refreshGame = useCallback((gameId: string, options?: TrackOptions) => {
         const game = games[gameId];
-        if (!game) return;
-        trackGameCore(gameId, game.source, game.entityId || '', options);
+        if (game) {
+            trackGameCore(gameId, game.source, game.entityId || '', options);
+        }
     }, [games, trackGameCore]);
 
     const removeGame = useCallback((gameId: string) => {
@@ -511,7 +473,10 @@ export const useGameTracker = (): UseGameTrackerReturn => {
     }, []);
 
     const updateGameStatus = useCallback((gameId: string, status: JobStatus) => {
-        setGames(prev => ({ ...prev, [gameId]: { ...prev[gameId], jobStatus: status } }));
+        setGames(prev => ({
+            ...prev,
+            [gameId]: { ...prev[gameId], jobStatus: status }
+        }));
     }, []);
 
     return {

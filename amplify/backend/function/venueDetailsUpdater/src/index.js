@@ -120,6 +120,7 @@ const getFinishedGamesForVenue = async (venueId) => {
                 name: g.name,
                 gameStatus: g.gameStatus,
                 totalUniquePlayers: g.totalUniquePlayers,
+                totalInitialEntries: g.totalInitialEntries,
                 totalEntries: g.totalEntries,
                 consolidationType: g.consolidationType,
                 parentGameId: g.parentGameId
@@ -194,7 +195,8 @@ const updateVenueDetails = async (existingRecord, updates) => {
     // Build update expression
     const updateFields = {
         totalGamesHeld: updates.totalGamesHeld,
-        averagePlayersPerGame: updates.averagePlayersPerGame,
+        averageUniquePlayersPerGame: updates.averageUniquePlayersPerGame,
+        averageEntriesPerGame: updates.averageEntriesPerGame,
         gameNights: updates.gameNights,
         status: updates.status || existingRecord.status,
         updatedAt: now,
@@ -232,8 +234,8 @@ const updateVenueDetails = async (existingRecord, updates) => {
         }));
         
         console.log(`[VenueDetails:DB] ✅ Updated VenueDetails ${existingRecord.id}: ` +
-            `games=${updates.totalGamesHeld}, avg=${updates.averagePlayersPerGame}, ` +
-            `nights=[${updates.gameNights?.join(', ')}]`);
+            `games=${updates.totalGamesHeld}, avgUniquePlayers=${updates.averageUniquePlayersPerGame}, ` +
+            `avgEntries=${updates.averageEntriesPerGame}, nights=[${updates.gameNights?.join(', ')}]`);
         
         return existingRecord.id;
     } catch (error) {
@@ -271,7 +273,8 @@ const performFullRecalculation = async (venueId, entityId = null) => {
     
     console.log(`[VenueDetails:RECALC] Calculated metrics:`, JSON.stringify({
         totalGamesHeld: metrics.totalGamesHeld,
-        averagePlayersPerGame: metrics.averagePlayersPerGame,
+        averageUniquePlayersPerGame: metrics.averageUniquePlayersPerGame,
+        averageEntriesPerGame: metrics.averageEntriesPerGame,
         gameNights: metrics.gameNights,
         gamesIncluded: metrics.gamesIncluded,
         gamesExcluded: metrics.gamesExcluded,
@@ -342,6 +345,7 @@ const processStreamRecord = async (record) => {
         gameStatus: newImage.gameStatus,
         venueId: newImage.venueId,
         totalUniquePlayers: newImage.totalUniquePlayers,
+        totalInitialEntries: newImage.totalInitialEntries,
         totalEntries: newImage.totalEntries,
         consolidationType: newImage.consolidationType,
         parentGameId: newImage.parentGameId,
@@ -519,7 +523,8 @@ const handleGetVenueMetricsPreview = async (input) => {
         gamesIncluded: metrics.gamesIncluded,
         wouldChange: existingRecord ? (
             existingRecord.totalGamesHeld !== metrics.totalGamesHeld ||
-            existingRecord.averagePlayersPerGame !== metrics.averagePlayersPerGame
+            existingRecord.averageUniquePlayersPerGame !== metrics.averageUniquePlayersPerGame ||
+            existingRecord.averageEntriesPerGame !== metrics.averageEntriesPerGame
         ) : true
     });
     
@@ -528,13 +533,15 @@ const handleGetVenueMetricsPreview = async (input) => {
         venueId,
         currentMetrics: existingRecord ? {
             totalGamesHeld: existingRecord.totalGamesHeld,
-            averagePlayersPerGame: existingRecord.averagePlayersPerGame,
+            averageUniquePlayersPerGame: existingRecord.averageUniquePlayersPerGame,
+            averageEntriesPerGame: existingRecord.averageEntriesPerGame,
             gameNights: existingRecord.gameNights,
             status: existingRecord.status
         } : null,
         calculatedMetrics: {
             totalGamesHeld: metrics.totalGamesHeld,
-            averagePlayersPerGame: metrics.averagePlayersPerGame,
+            averageUniquePlayersPerGame: metrics.averageUniquePlayersPerGame,
+            averageEntriesPerGame: metrics.averageEntriesPerGame,
             gameNights: metrics.gameNights,
             gamesIncluded: metrics.gamesIncluded,
             gamesExcluded: metrics.gamesExcluded,
@@ -542,7 +549,8 @@ const handleGetVenueMetricsPreview = async (input) => {
         },
         wouldChange: existingRecord ? (
             existingRecord.totalGamesHeld !== metrics.totalGamesHeld ||
-            existingRecord.averagePlayersPerGame !== metrics.averagePlayersPerGame ||
+            existingRecord.averageUniquePlayersPerGame !== metrics.averageUniquePlayersPerGame ||
+            existingRecord.averageEntriesPerGame !== metrics.averageEntriesPerGame ||
             JSON.stringify(existingRecord.gameNights) !== JSON.stringify(metrics.gameNights)
         ) : true
     };

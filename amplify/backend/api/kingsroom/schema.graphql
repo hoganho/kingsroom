@@ -34,8 +34,37 @@ enum SeriesCategory { REGULAR, SPECIAL, PROMOTIONAL, CHAMPIONSHIP, SEASONAL }
 enum HolidayType { NEW_YEAR, AUSTRALIA_DAY, EASTER, ANZAC_DAY, QUEENS_BIRTHDAY, CHRISTMAS, BOXING_DAY, OTHER }
 enum VenueAssignmentStatus { AUTO_ASSIGNED, MANUALLY_ASSIGNED, PENDING_ASSIGNMENT, UNASSIGNED, RETROACTIVE_ASSIGNED }
 enum SeriesAssignmentStatus { AUTO_ASSIGNED, MANUALLY_ASSIGNED, PENDING_ASSIGNMENT, UNASSIGNED, NOT_SERIES }
-enum CostItemType { DEALER, TOURNAMENT_DIRECTOR, PRIZE_CONTRIBUTION, JACKPOT_CONTRIBUTION, PROMOTION, FLOOR_STAFF, SECURITY, EQUIPMENT_RENTAL, VENUE_RENTAL, INSURANCE, OTHER }
-enum CostItemRateType { STANDARD, PENALTY, OVERTIME, HOLIDAY, SPECIAL }
+enum CostItemType {
+  # Staff wages
+  DEALER
+  TOURNAMENT_DIRECTOR
+  FLOOR_STAFF
+  SECURITY
+  # Direct game costs (actual cash/value out)
+  PRIZE_CONTRIBUTION          # Cash added to prizepool
+  JACKPOT_CONTRIBUTION        # Jackpot seed money
+  GUARANTEE_OVERLAY           # Cash to cover guarantee shortfall
+  ADDED_VALUE                 # Non-cash additions (merch, satellite seats)
+  BOUNTY                      # Bounty prizes
+  # Operations
+  VENUE_RENTAL                # Fee paid TO venue for space
+  EQUIPMENT_RENTAL            # Tables, chips, cards
+  FOOD_BEVERAGE               # Complimentary F&B
+  MARKETING                   # Advertising
+  STREAMING                   # Production costs
+  # Compliance
+  INSURANCE
+  LICENSING
+  # Travel
+  STAFF_TRAVEL
+  PLAYER_ACCOMMODATION
+  # Other
+  PROMOTION
+  OTHER
+}
+enum CostItemRateType { STANDARD, OVERTIME, DOUBLE_TIME, PENALTY, HOLIDAY, SPECIAL, FLAT }
+enum CostStatus { PENDING, PARTIAL, COMPLETE, ESTIMATED }
+enum SnapshotType { AUTO, MANUAL, RECONCILED }
 enum EntryType { INITIAL, REENTRY, DIRECT_BUYIN, QUALIFIED_CONTINUATION, AGGREGATE_LISTING }
 enum ScraperJobTriggerSource { SCHEDULED, MANUAL, API, CONTROL, BULK, ADMIN }
 enum ScraperJobStatus { QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED, TIMEOUT }
@@ -111,7 +140,8 @@ type VenueDetails @model(subscriptions: null) @auth(rules: [{ allow: private }])
   status: VenueStatus!
   lastCustomerSuccessVisit: AWSDateTime
   totalGamesHeld: Int
-  averagePlayersPerGame: Float
+  averageUniquePlayersPerGame: Float
+  averageEntriesPerGame: Float
   gameNights: [String]
   venueId: ID! @index(name: "byVenue")
   venue: Venue @belongsTo(fields: ["venueId"])
@@ -143,7 +173,8 @@ type VenueMetricsPreview {
 
 type VenueMetricsSnapshot {
   totalGamesHeld: Int
-  averagePlayersPerGame: Float
+  averageUniquePlayersPerGame: Float
+  averageEntriesPerGame: Float
   gameNights: [String]
   gamesIncluded: Int
   gamesExcluded: Int
@@ -227,15 +258,25 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   totalUniquePlayers: Int
   totalRebuys: Int
   totalAddons: Int
+  totalInitialEntries: Int
   totalEntries: Int
 
-  # --- Calculated Financial Metrics ---
-  buyInsByTotalEntries: Float
-  totalRake: Float
-  gameProfitLoss: Float # This is a calculation to determine if rake > guaranteeSurplus (or a loss if there's an guaranteeOverlay)
-  guaranteeOverlay: Float
-  guaranteeSurplus: Float
-  totalRakePerPlayerRealised: Boolean
+  # --- Calculated Financial Metrics (Simplified) ---
+  
+  # Revenue (what we collect)
+  totalBuyInsCollected: Float          # Total money from players: buyIn × totalEntries
+  rakeRevenue: Float                   # Rake we collect: rake × entriesForRake
+  
+  # Prizepool (what players receive)
+  prizepoolPlayerContributions: Float  # From players: (buyIn - rake) × entries
+  prizepoolAddedValue: Float           # From house: guaranteeOverlayCost (when guarantee not met)
+  prizepoolSurplus: Float              # Excess above guarantee (bonus to players)
+  
+  # Costs
+  guaranteeOverlayCost: Float          # Shortfall we pay: max(0, guarantee - playerContributions)
+  
+  # Profit
+  gameProfit: Float                    # Simple: rakeRevenue - guaranteeOverlayCost
 
   # --- Live Game Data ---
   playersRemaining: Int
@@ -352,41 +393,111 @@ type GameFinancialSnapshot
   @auth(rules: [{ allow: private }]) {
   id: ID!
 
-  # --- Core Relationships ---
+  # === CORE RELATIONSHIPS ===
   gameId: ID! @index(name: "byGameFinancialSnapshot")
   game: Game @belongsTo(fields: ["gameId"])
+  gameCostId: ID
 
-  # Mirror common filters from Game / GameCost so dashboards are easy
+  # === DENORMALIZED FILTERS ===
   entityId: ID @index(name: "byEntityGameFinancialSnapshot", sortKeyFields: ["gameStartDateTime"])
   venueId: ID @index(name: "byVenueGameFinancialSnapshot", sortKeyFields: ["gameStartDateTime"])
-  gameStartDateTime: AWSDateTime @index(name: "byGameStartDateFinancialSnapshot", sortKeyFields: ["profit"])
+  gameStartDateTime: AWSDateTime @index(name: "byGameStartDateFinancialSnapshot", sortKeyFields: ["netProfit"])
 
-  # --- Revenue Side (from Game) ---
-  totalRevenue: Float! @default(value: "0")        # totalVenueFee + totalRake
-  totalPrizePool: Float @default(value: "0")
-  totalRake: Float @default(value: "0")
-  totalVenueFee: Float @default(value: "0")        # Fee venue pays us to host games (REVENUE)
+  # === REVENUE SIDE (from Game model) ===
+  
+  # Entry Revenue
+  totalBuyInsCollected: Float @default(value: "0")         # Total cash from players: buyIn × totalEntries
+  
+  # Rake Revenue (simplified - we collect it all)
+  rakeRevenue: Float @default(value: "0")                  # Rake collected: rake × entriesForRake
+  
+  # Venue Revenue
+  venueFee: Float @default(value: "0")                     # Fee venue pays US to host (REVENUE)
+  
+  # Total Revenue
+  totalRevenue: Float! @default(value: "0")                # rakeRevenue + venueFee
+  
+  # === PRIZEPOOL BREAKDOWN (from Game model) ===
+  prizepoolPlayerContributions: Float @default(value: "0") # (buyIn - rake) × entries
+  prizepoolAddedValue: Float @default(value: "0")          # guaranteeOverlayCost (money house adds)
+  prizepoolTotal: Float @default(value: "0")               # Total prizepool paid
+  prizepoolSurplus: Float @default(value: "0")             # When contributions > guarantee (bonus to players)
 
-  # --- Cost Side (from GameCost) ---
-  totalCost: Float! @default(value: "0")
+  # === COST SIDE (from GameCost model) ===
+  
+  # Staff Costs
   totalDealerCost: Float @default(value: "0")
   totalTournamentDirectorCost: Float @default(value: "0")
-  totalPromotionCost: Float @default(value: "0")
   totalFloorStaffCost: Float @default(value: "0")
+  totalSecurityCost: Float @default(value: "0")
+  totalStaffCost: Float @default(value: "0")               # Aggregate
+  
+  # Direct Game Costs (actual cash/value out of pocket)
+  totalPrizeContribution: Float @default(value: "0")       # Cash house adds to prize pool
+  totalJackpotContribution: Float @default(value: "0")     # Jackpot seed
+  totalGuaranteeOverlayCost: Float @default(value: "0")    # Guarantee shortfall
+  totalAddedValueCost: Float @default(value: "0")          # Non-cash additions (merch, seats)
+  totalBountyCost: Float @default(value: "0")              # Bounties paid
+  totalDirectGameCost: Float @default(value: "0")          # Aggregate
+  
+  # Operations Costs
+  totalVenueRentalCost: Float @default(value: "0")         # Rent paid TO venue
+  totalEquipmentRentalCost: Float @default(value: "0")
+  totalFoodBeverageCost: Float @default(value: "0")
+  totalMarketingCost: Float @default(value: "0")
+  totalStreamingCost: Float @default(value: "0")
+  totalOperationsCost: Float @default(value: "0")          # Aggregate
+  
+  # Compliance Costs
+  totalInsuranceCost: Float @default(value: "0")
+  totalLicensingCost: Float @default(value: "0")
+  totalComplianceCost: Float @default(value: "0")          # Aggregate
+  
+  # Other Costs
+  totalStaffTravelCost: Float @default(value: "0")
+  totalPlayerAccommodationCost: Float @default(value: "0")
+  totalPromotionCost: Float @default(value: "0")
   totalOtherCost: Float @default(value: "0")
-  totalPrizeContribution: Float @default(value: "0")
-  totalJackpotContribution: Float @default(value: "0")
+  
+  # Total Costs
+  totalCost: Float! @default(value: "0")                   # Sum of all costs
 
-  # --- Derived Management Metrics ---
-  profit: Float! @default(value: "0")              # totalRevenue - totalCost
-  profitMargin: Float                              # profit / totalRevenue
-  revenuePerPlayer: Float                          # totalRevenue / totalUniquePlayers
-  costPerPlayer: Float                             # totalCost / totalUniquePlayers
+  # === PROFIT & DERIVED METRICS ===
+  
+  # Primary Metrics
+  gameProfit: Float @default(value: "0")                   # Simple: rakeRevenue - guaranteeOverlayCost
+  netProfit: Float! @default(value: "0")                   # Comprehensive: totalRevenue - totalCost
+  profitMargin: Float                                      # netProfit / totalRevenue (%)
+  
+  # Per-Player Metrics
+  revenuePerPlayer: Float
+  costPerPlayer: Float
+  profitPerPlayer: Float
+  rakePerEntry: Float
+  
+  # Efficiency Metrics
   dealerCostPerHour: Float
+  staffCostPerPlayer: Float
   promoSpendPerPlayer: Float
+  
+  # Game Health Indicators
+  guaranteeCoverageRate: Float                             # prizepoolPlayerContributions / guaranteeAmount (%)
+  guaranteeMet: Boolean                                    # True if no overlay needed
+  
+  # Denormalized Game Data for Reporting
+  totalUniquePlayers: Int
+  totalEntries: Int
+  guaranteeAmount: Float
+  gameDurationMinutes: Int
+  gameType: GameType
+  tournamentType: TournamentType
 
-  # Optional: used for comments / accounting notes
+  # === METADATA ===
   notes: String
+  snapshotType: SnapshotType @default(value: "AUTO")
+  isReconciled: Boolean @default(value: "false")
+  reconciledAt: AWSDateTime
+  reconciledBy: String
 
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
@@ -397,22 +508,60 @@ type GameCost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   gameId: ID! @index(name: "byGameCost")
   game: Game @belongsTo(fields: ["gameId"])
 
+  # --- Staff Costs ---
   totalDealerCost: Float @default(value: "0")
   totalTournamentDirectorCost: Float @default(value: "0")
-  totalPrizeContribution: Float @default(value: "0")
-  totalJackpotContribution: Float @default(value: "0")
-  totalPromotionCost: Float @default(value: "0")
   totalFloorStaffCost: Float @default(value: "0")
+  totalSecurityCost: Float @default(value: "0")
+  
+  # --- Direct Game Costs (actual cash/value out of pocket) ---
+  totalPrizeContribution: Float @default(value: "0")       # Cash added to prize pool
+  totalJackpotContribution: Float @default(value: "0")     # Jackpot seed money
+  totalGuaranteeOverlayCost: Float @default(value: "0")    # When guarantee > buy-ins
+  totalAddedValueCost: Float @default(value: "0")          # Non-cash value added (merch, seats)
+  totalBountyCost: Float @default(value: "0")              # Bounty prizes paid
+  
+  # --- Venue & Equipment ---
+  totalVenueRentalCost: Float @default(value: "0")         # Fee paid TO venue
+  totalEquipmentRentalCost: Float @default(value: "0")     # Table/chip rentals
+  
+  # --- Operations ---
+  totalFoodBeverageCost: Float @default(value: "0")        # Complimentary F&B
+  totalMarketingCost: Float @default(value: "0")           # Advertising spend
+  totalStreamingCost: Float @default(value: "0")           # Production costs
+  
+  # --- Compliance ---
+  totalInsuranceCost: Float @default(value: "0")
+  totalLicensingCost: Float @default(value: "0")
+  
+  # --- Travel ---
+  totalStaffTravelCost: Float @default(value: "0")
+  totalPlayerAccommodationCost: Float @default(value: "0")
+  
+  # --- Promotions & Other ---
+  totalPromotionCost: Float @default(value: "0")
   totalOtherCost: Float @default(value: "0")
-  totalCost: Float! @default(value: "0")
+  
+  # --- Aggregates ---
+  totalStaffCost: Float @default(value: "0")               # Sum of all staff costs
+  totalDirectGameCost: Float @default(value: "0")          # Prize + jackpot + overlay + added + bounty
+  totalOperationsCost: Float @default(value: "0")          # Venue + equipment + F&B + marketing + streaming
+  totalComplianceCost: Float @default(value: "0")          # Insurance + licensing
+  totalCost: Float! @default(value: "0")                   # Grand total
 
+  # --- Line Items ---
   lineItems: [GameCostLineItem] @hasMany(indexName: "byGameCost", fields: ["id"])
 
+  # --- Denormalized for Queries ---
   entityId: ID @index(name: "byEntityCost", sortKeyFields: ["gameDate"])
   venueId: ID @index(name: "byVenueCost", sortKeyFields: ["gameDate"])
   gameDate: AWSDateTime @index(name: "byGameDateCost", sortKeyFields: ["totalCost"])
 
+  # --- Metadata ---
   notes: String
+  isEstimate: Boolean @default(value: "false")             # True if costs are estimated
+  costStatus: CostStatus @default(value: "PENDING")
+
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -425,13 +574,23 @@ type GameCostLineItem @model(subscriptions: null) @auth(rules: [{ allow: private
   costItemId: ID! @index(name: "byCostItem")
   costItem: GameCostItem @belongsTo(fields: ["costItemId"])
   costType: CostItemType! @index(name: "byCostTypeLine", sortKeyFields: ["gameDate"])
+  rateType: CostItemRateType @default(value: "STANDARD")
 
-  amount: Float!
-  quantity: Float @default(value: "1")
-  rate: Float
-  hours: Float
+  # --- Amount Calculation ---
+  amount: Float!                                            # Final amount
+  quantity: Float @default(value: "1")                      # Number of units (e.g., 3 dealers)
+  rate: Float                                               # Rate per unit
+  hours: Float                                              # Hours worked (if hourly)
+  
+  # --- Staff-Specific ---
+  staffMemberId: ID                                         # Link to staff member if applicable
+  staffMemberName: String                                   # Denormalized name
+  
+  # --- Description ---
+  description: String
   notes: String
 
+  # --- Denormalized for Queries ---
   gameId: ID @index(name: "byGameLineItem")
   entityId: ID @index(name: "byEntityLineItem", sortKeyFields: ["gameDate"])
   venueId: ID @index(name: "byVenueLineItem", sortKeyFields: ["gameDate"])
@@ -484,12 +643,14 @@ type ConsolidationSibling {
   gameStatus: GameStatus
   gameStartDateTime: AWSDateTime
   totalUniquePlayers: Int
+  totalInitialEntries: Int
   totalEntries: Int
   finalDay: Boolean
 }
 
 type ProjectedConsolidationTotals {
   totalUniquePlayers: Int
+  totalInitialEntries: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
@@ -1338,17 +1499,13 @@ type ScrapedGameData {
   tournamentType: TournamentType
   prizepoolPaid: Float
   prizepoolCalculated: Float
-  buyInsByTotalEntries: Float
-  gameProfitLoss: Float
   buyIn: Float
   rake: Float
-  totalRake: Float
   startingStack: Int
   hasGuarantee: Boolean
   guaranteeAmount: Float
-  guaranteeOverlay: Float
-  guaranteeSurplus: Float
   totalUniquePlayers: Int
+  totalInitialEntries: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
@@ -1394,6 +1551,14 @@ type ScrapedGameData {
   fetchedAt: AWSDateTime
   reScrapedAt: AWSDateTime
   wasForced: Boolean
+  # Financial metrics (simplified)
+  totalBuyInsCollected: Float
+  rakeRevenue: Float
+  prizepoolPlayerContributions: Float
+  prizepoolAddedValue: Float
+  prizepoolSurplus: Float
+  guaranteeOverlayCost: Float
+  gameProfit: Float
 }
 
 type ScrapedTournamentLevel {
@@ -1473,6 +1638,7 @@ type ReScrapeResult {
   hasGuarantee: Boolean
   guaranteeAmount: Float
   totalUniquePlayers: Int
+  totalInitialEntries: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
@@ -1846,6 +2012,7 @@ input GamePreviewDataInput {
   seriesName: String
   isMainEvent: Boolean
   totalUniquePlayers: Int
+  totalInitialEntries: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
@@ -1916,6 +2083,7 @@ input ScrapedGameDataInput {
   prizepoolPaid: Float
   prizepoolCalculated: Float
   totalUniquePlayers: Int
+  totalInitialEntries: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
@@ -1983,16 +2151,13 @@ input SaveGameDataInput {
   gameFrequency: GameFrequency
   buyIn: Float
   rake: Float
-  totalRake: Float
-  totalRakePerPlayerRealised: Boolean
   guaranteeAmount: Float
-  guaranteeOverlay: Float
-  guaranteeSurplus: Float
   hasGuarantee: Boolean
   startingStack: Int
   prizepoolPaid: Float
   prizepoolCalculated: Float
   totalUniquePlayers: Int
+  totalInitialEntries: Int
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
@@ -2000,8 +2165,16 @@ input SaveGameDataInput {
   totalChipsInPlay: Float
   averagePlayerStack: Float
   totalDuration: String
-  buyInsByTotalEntries: Float
-  gameProfitLoss: Float
+  
+  # Calculated financial metrics (simplified)
+  totalBuyInsCollected: Float
+  rakeRevenue: Float
+  prizepoolPlayerContributions: Float
+  prizepoolAddedValue: Float
+  prizepoolSurplus: Float
+  guaranteeOverlayCost: Float
+  gameProfit: Float
+  
   tournamentType: TournamentType
   isSeries: Boolean
   seriesName: String
@@ -2020,6 +2193,7 @@ input SaveGameDataInput {
 
 input SavePlayerDataInput {
   allPlayers: [SavePlayerInfoInput!]!
+  totalInitialEntries: Int!
   totalEntries: Int!
   totalUniquePlayers: Int!
   hasCompleteResults: Boolean!

@@ -19,6 +19,7 @@ interface Series {
   totalPrizepoolPaid?: number;
   totalPrizepoolCalculated?: number;
   totalUniquePlayers?: number;
+  totalInitialEntries?: number;
   totalEntries?: number;
   venues?: Array<{ name: string }>;
 }
@@ -128,6 +129,7 @@ export const SeriesDashboard = () => {
     totalPrizepoolPaid: series.reduce((sum, s) => sum + (s.totalPrizepoolPaid || 0), 0),
     totalPrizepoolCalculated: series.reduce((sum, s) => sum + (s.totalPrizepoolCalculated || 0), 0),
     totalUniquePlayers: series.reduce((sum, s) => sum + (s.totalUniquePlayers || 0), 0),
+    totalInitialEntries: series.reduce((sum, s) => sum + (s.totalInitialEntries || 0), 0),
     totalEntries: series.reduce((sum, s) => sum + (s.totalEntries || 0), 0),
   };
 
@@ -182,6 +184,15 @@ export const SeriesDashboard = () => {
             </div>
           </div>
         </div>        
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <CalendarIcon className="h-8 w-8 text-blue-600" />
+            <div className="ml-3">
+              <p className="text-sm text-gray-500">Total Initial Entries</p>
+              <p className="text-2xl font-bold">{stats.totalInitialEntries.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
         <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center">
             <CalendarIcon className="h-8 w-8 text-blue-600" />
@@ -243,6 +254,9 @@ export const SeriesDashboard = () => {
                     Games
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total Initial Entries
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Total Entries
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -283,6 +297,9 @@ export const SeriesDashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {s.totalUniquePlayers?.toLocaleString() || '-'}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {s.totalInitialEntries?.toLocaleString() || '-'}
+                      </td>                      
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {s.totalEntries?.toLocaleString() || '-'}
                       </td>

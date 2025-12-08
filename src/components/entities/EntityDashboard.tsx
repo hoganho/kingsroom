@@ -51,6 +51,7 @@ interface ListGamesResponse {
             prizepoolPaid?: number;
             prizepoolCalculated?: number;
             totalUniquePlayers?: number;
+            totalInitialEntries?: number;
             totalEntries?: number;
         }>;
         nextToken?: string;
@@ -190,6 +191,7 @@ export const EntityDashboard: React.FC<EntityDashboardProps> = ({
                                 prizepoolPaid
                                 prizepoolCalculated
                                 totalUniquePlayers
+                                totalInitialEntries
                                 totalEntries
                             }
                             nextToken

@@ -38,11 +38,13 @@ const previewConsolidationQuery = /* GraphQL */ `
                     gameStatus
                     gameStartDateTime
                     totalUniquePlayers
+                    totalInitialEntries
                     totalEntries
                     finalDay
                 }
                 projectedTotals {
                     totalUniquePlayers
+                    totalInitialEntries
                     totalEntries
                     totalRebuys
                     totalAddons
@@ -80,12 +82,14 @@ export interface ConsolidationSibling {
     gameStatus: string;
     gameStartDateTime: string;
     totalUniquePlayers: number | null;
+    totalInitialEntries: number | null;
     totalEntries: number | null;
     finalDay: boolean | null;
 }
 
 export interface ProjectedConsolidationTotals {
     totalUniquePlayers: number | null;
+    totalInitialEntries: number | null;
     totalEntries: number | null;
     totalRebuys: number | null;
     totalAddons: number | null;
@@ -283,6 +287,7 @@ export const useConsolidationPreview = (
             isMainEvent: (data as any).isMainEvent || null,    // Used for parent name derivation
             // Numeric fields needed for projected totals calculation
             totalUniquePlayers: data.totalUniquePlayers || null,
+            totalInitialEntries: data.totalInitialEntries || null,
             totalEntries: data.totalEntries || null,
             totalRebuys: data.totalRebuys || null,
             totalAddons: data.totalAddons || null,

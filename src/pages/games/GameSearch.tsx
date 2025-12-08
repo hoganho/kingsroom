@@ -19,6 +19,7 @@ interface Game {
   gameStartDateTime: string;
   buyIn?: number;
   totalUniquePlayers?: number;
+  totalInitialEntries?: number;
   totalEntries?: number;
   playersRemaining?: number;
   prizepoolPaid?: number;
@@ -74,7 +75,8 @@ export const GameSearch = () => {
                 gameStatus
                 gameStartDateTime
                 buyIn
-                totalUniquePlayers
+                totalUniquePlayers  
+                totalInitialEntries
                 totalEntries
                 playersRemaining
                 prizepoolPaid
@@ -273,6 +275,12 @@ export const GameSearch = () => {
                           <>
                             <span className="mx-2">•</span>
                             <span>{game.totalUniquePlayers} unique players</span>
+                          </>
+                        )}
+                        {game.totalInitialEntries && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span>{game.totalInitialEntries} initial entries</span>
                           </>
                         )}
                         {game.totalEntries && (

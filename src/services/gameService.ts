@@ -1,11 +1,10 @@
 // services/gameService.ts
-// UPDATED: Added scraperApiKey parameter support
-// UPDATED: Added venueFee support in saveGameInput
+// UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
 
 import { generateClient } from 'aws-amplify/api';
 import type { GraphQLResult } from '@aws-amplify/api';
 import { fetchTournamentData } from '../graphql/mutations';
-import { fetchTournamentDataRange, listEntities } from '../graphql/queries';
+import { listEntities } from '../graphql/queries';
 import type { GameData } from '../types/game';
 import type { Entity } from '../API';
 import { 
@@ -16,7 +15,6 @@ import {
 } from '../utils/gameDataValidation';
 import { 
     ScrapedGameData, 
-    DataSource,
     GameType,
     GameVariant,
     GameStatus,
@@ -26,10 +24,10 @@ import {
     SaveGameResult
 } from '../API';
 
-// Default entity ID - should be fetched from Entity table or configured
+// Default entity ID
 const DEFAULT_ENTITY_ID = '42101695-1332-48e3-963b-3c6ad4e909a0';
 
-// GraphQL mutation for saving game data via saveGameFunction
+// GraphQL mutation for saving game data
 const saveGameMutation = /* GraphQL */ `
     mutation SaveGame($input: SaveGameInput!) {
         saveGame(input: $input) {
@@ -56,10 +54,7 @@ const saveGameMutation = /* GraphQL */ `
  */
 export const getCurrentEntityId = (): string => {
     const storedEntityId = localStorage.getItem('currentEntityId');
-    if (storedEntityId) {
-        return storedEntityId;
-    }
-    return DEFAULT_ENTITY_ID;
+    return storedEntityId || DEFAULT_ENTITY_ID;
 };
 
 /**
@@ -77,9 +72,7 @@ export const fetchEntities = async (): Promise<Entity[]> => {
     try {
         const response = await client.graphql({
             query: listEntities,
-            variables: {
-                limit: 100
-            }
+            variables: { limit: 100 }
         }) as any;
         
         return response.data.listEntities.items.filter((item: any) => item !== null);
@@ -89,7 +82,7 @@ export const fetchEntities = async (): Promise<Entity[]> => {
     }
 };
 
-// Helper function to map string values to enum types
+// Helper functions for enum mapping
 const mapToGameType = (value: any): GameType | null => {
     if (!value) return null;
     const map: Record<string, GameType> = {
@@ -113,69 +106,54 @@ const mapToGameVariant = (value: any): GameVariant | null => {
 };
 
 const mapToGameStatus = (value: any): GameStatus | null => {
-    if (!value) return null;
-    return value as GameStatus;
+    return value ? value as GameStatus : null;
 };
 
 const mapToRegistrationStatus = (value: any): RegistrationStatus | null => {
-    if (!value) return null;
-    return value as RegistrationStatus;
+    return value ? value as RegistrationStatus : null;
 };
 
 const mapToGameFrequency = (value: any): GameFrequency | null => {
-    if (!value) return null;
-    return value as GameFrequency;
+    return value ? value as GameFrequency : null;
 };
 
 const mapToTournamentType = (value: any): TournamentType | null => {
-    if (!value) return null;
-    return value as TournamentType;
+    return value ? value as TournamentType : null;
 };
 
 /**
  * Create placeholder data for NOT_PUBLISHED games
- * These games need to be saved to track the tournament ID but have minimal actual data
  */
 const createNotPublishedPlaceholder = (
     data: GameData | ScrapedGameData,
     sourceUrl: string,
     entityId: string
 ): GameData | ScrapedGameData => {
-    // Build the placeholder object - we use 'any' cast because some fields
-    // will be mapped to Game model fields by saveGameDataToBackend
-    const placeholder: any = {
+    return {
         ...data,
-        // Required fields with placeholders
         name: data.name || `Tournament ${data.tournamentId} - Not Published`,
         gameType: data.gameType || 'TOURNAMENT',
         gameVariant: data.gameVariant || 'NLHE',
         gameStatus: 'NOT_PUBLISHED',
         gameStartDateTime: data.gameStartDateTime || new Date().toISOString(),
         registrationStatus: data.registrationStatus || 'N_A',
-        
-        // Tracking fields
         tournamentId: data.tournamentId,
         sourceUrl: sourceUrl,
         entityId: entityId,
-        
-        // Set defaults for numeric fields
         buyIn: data.buyIn || 0,
         rake: data.rake || 0,
         startingStack: data.startingStack || 0,
         prizepoolPaid: data.prizepoolPaid || 0,
         prizepoolCalculated: data.prizepoolCalculated || 0,
         totalUniquePlayers: data.totalUniquePlayers || 0,
+        totalInitialEntries: data.totalInitialEntries || 0,
         totalEntries: data.totalEntries || 0,
         totalRebuys: data.totalRebuys || 0,
         totalAddons: data.totalAddons || 0,
         guaranteeAmount: data.guaranteeAmount || 0,
         hasGuarantee: data.hasGuarantee || false,
-        
-        // Series not applicable
         isSeries: false,
-    };
-    
-    return placeholder as GameData | ScrapedGameData;
+    } as GameData | ScrapedGameData;
 };
 
 // Extract player data for save input
@@ -183,7 +161,6 @@ const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
     const allPlayers: any[] = [];
     let totalPrizesPaid = 0;
     
-    // Add results (players with rankings/winnings)
     if (data.results && data.results.length > 0) {
         data.results.forEach(r => {
             allPlayers.push({
@@ -201,7 +178,6 @@ const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
         });
     }
     
-    // Add entries (players without results yet) - avoid duplicates
     if (data.entries && data.entries.length > 0) {
         const existingNames = new Set(allPlayers.map(p => p.name.toLowerCase()));
         data.entries.forEach(e => {
@@ -219,126 +195,48 @@ const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
         });
     }
     
-    // Add seating data - merge with existing or add new
-    if (data.seating && data.seating.length > 0) {
-        const existingNames = new Set(allPlayers.map(p => p.name.toLowerCase()));
-        data.seating.forEach(s => {
-            if (!existingNames.has(s.name.toLowerCase())) {
-                allPlayers.push({
-                    name: s.name,
-                    rank: null,
-                    winnings: null,
-                    points: null,
-                    isQualification: null,
-                    rebuys: null,
-                    addons: null
-                });
-            }
-        });
-    }
-    
-    // Determine hasCompleteResults - must be a boolean
-    const hasResults = data.results && data.results.length > 0;
-    const isFinished = data.gameStatus === 'FINISHED';
-    
     return {
-        allPlayers: allPlayers,  // Will be empty array [] for NOT_PUBLISHED games
-        totalUniquePlayers: data.totalUniquePlayers || allPlayers.length || 0,
-        totalEntries: data.totalEntries || allPlayers.length || 0,
-        hasCompleteResults: Boolean(hasResults && isFinished),  // Required boolean
-        totalPrizesPaid: totalPrizesPaid > 0 ? totalPrizesPaid : null,
-        hasEntryList: Boolean(data.entries && data.entries.length > 0),  // Ensure boolean
-        hasSeatingData: Boolean(data.seating && data.seating.length > 0)  // Ensure boolean
+        allPlayers,
+        totalInitialEntries: data.totalInitialEntries || allPlayers.length,
+        totalEntries: data.totalEntries || allPlayers.length,
+        totalUniquePlayers: data.totalUniquePlayers || allPlayers.length,
+        hasCompleteResults: data.results && data.results.length > 0 && data.results.some(r => r.winnings && r.winnings > 0)
     };
 };
 
-// Get entity ID from URL (placeholder implementation)
-const getEntityIdFromUrl = async (_url: string): Promise<string | null> => {
-    // This should match your entity URL patterns
-    // For now, return null and let it be set explicitly
-    return null;
-};
-
 /**
- * Fetch game data from backend (single game)
- * ✅ UPDATED: Added scraperApiKey parameter
+ * Fetch game data from backend (S3-first architecture)
  */
 export const fetchGameDataFromBackend = async (
     url: string,
     forceRefresh: boolean = false,
-    scraperApiKey?: string
+    scraperApiKey?: string | null
 ): Promise<ScrapedGameData> => {
     const client = generateClient();
-    console.log(`[GameService] Fetching tournament data for ${url}...`, {
-        forceRefresh,
-        hasApiKey: !!scraperApiKey
-    });
     
     try {
+        console.log(`[GameService] Fetching game data`, { url, forceRefresh, hasApiKey: !!scraperApiKey });
+        
         const response = await client.graphql({
             query: fetchTournamentData,
-            variables: { 
-                url, 
-                forceRefresh,
-                scraperApiKey: scraperApiKey || ''
-            }
-        }) as GraphQLResult<any>;
-        
-        if (response.errors) {
-            throw new Error(response.errors[0]?.message || 'Failed to fetch tournament data');
-        }
-        
-        const data = response.data.fetchTournamentData;
-
-        // 👇👇👇 ADD THIS DEBUG BLOCK 👇👇👇
-        console.group(`[DEBUG] Fetch Result for ID: ${data?.tournamentId}`);
-        console.log('1. Raw "source" field:', data?.source);
-        console.log('2. Raw "s3Key" field:', data?.s3Key);
-        console.log('3. All received keys:', Object.keys(data || {}));
-        
-        // Check if the fields are totally missing (undefined) or just empty strings
-        if (data?.source === undefined) {
-            console.error('❌ CRITICAL: "source" field is MISSING from GraphQL response. Check your query definition!');
-        } else {
-            console.log('✅ "source" field exists:', data.source);
-        }
-        console.groupEnd();
-        // 👆👆👆 END DEBUG BLOCK 👆👆👆
-        
-        return data;
-    } catch (error) {
-        console.error('[GameService] Error fetching tournament data:', error);
-        throw error;
-    }
-};
-
-/**
- * Fetch multiple games in a range
- */
-export const fetchGameDataRangeFromBackend = async (
-    baseUrl: string,
-    startId: number,
-    endId: number
-): Promise<any> => {
-    const client = generateClient();
-    console.log(`[GameService] Fetching range ${startId}-${endId} from ${baseUrl}`);
-    
-    try {
-        const response = await client.graphql({
-            query: fetchTournamentDataRange,
             variables: {
-                startId,
-                endId
+                url,
+                forceRefresh,
+                scraperApiKey: scraperApiKey || null
             }
-        }) as GraphQLResult<any>;
+        }) as any;
         
-        if (response.errors) {
-            throw new Error(response.errors[0]?.message || 'Failed to fetch tournament data range');
-        }
+        const result = response.data.fetchTournamentData;
         
-        return response.data.fetchTournamentDataRange;
-    } catch (error) {
-        console.error('[GameService] Error fetching tournament data range:', error);
+        console.log(`[GameService] Received data`, {
+            hasData: !!result,
+            s3Key: result?.s3Key,
+            wasForced: result?.wasForced
+        });
+        
+        return result as ScrapedGameData;
+    } catch (error: any) {
+        console.error('[GameService] Error fetching game data:', error);
         throw error;
     }
 };
@@ -346,100 +244,82 @@ export const fetchGameDataRangeFromBackend = async (
 /**
  * Determine if a tournament should auto-refresh based on its status
  */
-export const shouldAutoRefreshTournament = (gameStatus: string | null | undefined): boolean => {
-    if (!gameStatus) return false;
+export const shouldAutoRefreshTournament = (data: ScrapedGameData | GameData | null): boolean => {
+    if (!data) return false;
     
-    const autoRefreshStatuses = [
-        'SCHEDULED',
-        'REGISTERING', 
-        'RUNNING',
-        'INITIATING'
-    ];
+    const status = data.gameStatus;
     
-    return autoRefreshStatuses.includes(gameStatus);
+    // Auto-refresh for active/in-progress games
+    // GameStatus enum: INITIATING, SCHEDULED, RUNNING, CANCELLED, FINISHED, NOT_IN_USE, NOT_PUBLISHED, CLOCK_STOPPED, UNKNOWN
+    if (status === 'RUNNING' || status === 'INITIATING' || status === 'CLOCK_STOPPED') {
+        return true;
+    }
+    
+    // Don't auto-refresh completed or cancelled games
+    if (status === 'FINISHED' || status === 'CANCELLED' || status === 'NOT_PUBLISHED' || status === 'NOT_IN_USE') {
+        return false;
+    }
+    
+    // For scheduled games, check if start time is near
+    if (status === 'SCHEDULED' && data.gameStartDateTime) {
+        const startTime = new Date(data.gameStartDateTime);
+        const now = new Date();
+        const hoursUntilStart = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+        return hoursUntilStart <= 2 && hoursUntilStart >= -1;
+    }
+    
+    return false;
 };
 
 /**
- * Enhanced save function that properly handles edited data from Enhanced SaveConfirmationModal
+ * Save game data to backend via unified saveGame mutation
+ * 
+ * @param sourceUrl - The source URL of the game
+ * @param venueId - The venue ID to assign
+ * @param data - The game data to save
+ * @param existingGameId - Optional existing game ID for updates
+ * @param entityId - Optional entity ID (defaults to current entity)
+ * @param options - Optional { wasEdited, originalData }
  */
 export const saveGameDataToBackend = async (
-    sourceUrl: string, 
-    venueId: string | null | undefined, 
+    sourceUrl: string,
+    venueId: string | null,
     data: GameData | ScrapedGameData,
-    existingGameId: string | null | undefined,
-    entityId?: string | null,
+    existingGameId?: string | null,
+    entityId?: string,
     options?: {
         wasEdited?: boolean;
-        originalData?: GameData | ScrapedGameData;
-        userId?: string;
-        skipValidation?: boolean;
+        originalData?: any;
     }
 ): Promise<SaveGameResult> => {
     const client = generateClient();
+    const effectiveEntityId = entityId || getCurrentEntityId();
     
-    console.log(`[GameService] Saving ${data.gameStatus} tournament data for ${sourceUrl}...`, {
-        wasEdited: options?.wasEdited,
-        existingGameId
-    });
+    // If game is NOT_PUBLISHED, create placeholder
+    let finalData: GameData | ScrapedGameData = data;
+    if (data.gameStatus === 'NOT_PUBLISHED') {
+        console.log('[GameService] Creating NOT_PUBLISHED placeholder for tournament', data.tournamentId);
+        finalData = createNotPublishedPlaceholder(data, sourceUrl, effectiveEntityId);
+    }
     
-    // Validate and prepare data if it was edited
-    let finalData = data;
-    let auditTrail = null;
+    // Validate and prepare data
     let validationWarnings: string[] = [];
     
-    // Determine entity ID early for NOT_PUBLISHED placeholder
-    const finalEntityId = entityId || (data as any).entityId || await getEntityIdFromUrl(sourceUrl) || getCurrentEntityId();
-    
-    // Handle NOT_PUBLISHED games - populate with placeholder values
-    if (data.gameStatus === 'NOT_PUBLISHED') {
-        console.log('[GameService] NOT_PUBLISHED game detected, applying placeholder values');
-        finalData = createNotPublishedPlaceholder(data, sourceUrl, finalEntityId);
-        
-        // Skip validation for placeholder data
-        options = { ...options, skipValidation: true };
-    }
-    
-    if (options?.wasEdited && !options.skipValidation) {
-        const preparation = prepareGameDataForSave(
-            data as GameData,
-            options.originalData as GameData,
-            options.userId
-        );
-        
-        // Check for validation errors
-        if (!preparation.validation.isValid) {
-            console.error('[GameService] Validation errors:', preparation.validation.errors);
-            throw new Error(`Validation failed: ${preparation.validation.errors.join(', ')}`);
-        }
-        
-        // Use validated and corrected data
-        finalData = preparation.validatedData;
-        auditTrail = preparation.auditTrail;
-        validationWarnings = preparation.validation.warnings;
-        
-        console.log('[GameService] Data validated and corrected', {
-            warnings: validationWarnings,
-            changedFields: auditTrail?.changedFields
-        });
-    } else if (!options?.wasEdited && data.gameStatus !== 'NOT_PUBLISHED') {
-        // For non-edited data (ScrapedGameData), don't calculate derived fields
-        // to avoid type incompatibility issues
-        finalData = data;
-    }
-    
-    if (!finalEntityId) {
-        console.warn('[GameService] No entity ID provided or detected, using default');
+    if (options?.wasEdited) {
+        const prepared = prepareGameDataForSave(finalData as GameData);
+        finalData = prepared.data as any;
+        validationWarnings = prepared.warnings;
     }
     
     // Extract player data
     const playerData = extractPlayersForSaveInput(finalData);
     
-    // Build SaveGameInput
+    // Build the save input
     const saveGameInput = {
         source: {
-            type: DataSource.SCRAPE,
+            type: 'SCRAPE' as const,
             sourceId: sourceUrl,
-            entityId: finalEntityId || getCurrentEntityId(),
+            entityId: effectiveEntityId,
             fetchedAt: new Date().toISOString(),
             contentHash: (finalData as any).contentHash || null,
             wasEdited: options?.wasEdited || false
@@ -456,16 +336,22 @@ export const saveGameDataToBackend = async (
             registrationStatus: mapToRegistrationStatus(finalData.registrationStatus),
             gameFrequency: mapToGameFrequency((finalData as any).gameFrequency),
             
-            // Financial fields
+            // Financial fields (base data)
             buyIn: finalData.buyIn || 0,
             rake: finalData.rake || 0,
-            totalRake: (finalData as any).totalRake || 0,
             guaranteeAmount: finalData.guaranteeAmount || 0,
             hasGuarantee: finalData.hasGuarantee || false,
-            guaranteeOverlay: (finalData as any).guaranteeOverlay || null,
-            guaranteeSurplus: (finalData as any).guaranteeSurplus || null,
             
-            // Venue fee - can be edited in SaveConfirmationModal to override venue default
+            // Simplified financial metrics
+            totalBuyInsCollected: (finalData as any).totalBuyInsCollected || null,
+            rakeRevenue: (finalData as any).rakeRevenue || null,
+            prizepoolPlayerContributions: (finalData as any).prizepoolPlayerContributions || null,
+            prizepoolAddedValue: (finalData as any).prizepoolAddedValue || null,
+            prizepoolSurplus: (finalData as any).prizepoolSurplus || null,
+            guaranteeOverlayCost: (finalData as any).guaranteeOverlayCost || null,
+            gameProfit: (finalData as any).gameProfit || null,
+            
+            // Venue fee
             venueFee: (finalData as any).venueFee ?? null,
             
             // Game details
@@ -473,6 +359,7 @@ export const saveGameDataToBackend = async (
             prizepoolPaid: finalData.prizepoolPaid || 0,
             prizepoolCalculated: finalData.prizepoolCalculated || 0,
             totalUniquePlayers: finalData.totalUniquePlayers || 0,
+            totalInitialEntries: finalData.totalInitialEntries || 0,
             totalEntries: finalData.totalEntries || 0,
             totalRebuys: finalData.totalRebuys || 0,
             totalAddons: finalData.totalAddons || 0,
@@ -497,9 +384,7 @@ export const saveGameDataToBackend = async (
             
             // Other
             gameTags: finalData.gameTags?.filter((tag): tag is string => tag !== null) || [],
-            totalDuration: (finalData as any).totalDuration || null,
-            buyInsByTotalEntries: (finalData as any).buyInsByTotalEntries || null,
-            gameProfitLoss: (finalData as any).gameProfitLoss || null
+            totalDuration: (finalData as any).totalDuration || null
         },
         players: playerData,
         venue: {
@@ -510,11 +395,9 @@ export const saveGameDataToBackend = async (
         },
         series: (finalData as any).isSeries && (finalData as any).seriesName ? {
             seriesId: null,
-            suggestedSeriesId: (finalData as any).seriesMatch?.seriesTitleId ||
-                        (finalData as any).seriesTitleId || null,
+            suggestedSeriesId: (finalData as any).seriesMatch?.seriesTitleId || (finalData as any).seriesTitleId || null,
             seriesName: (finalData as any).seriesName,
-            year: (finalData as any).seriesYear || 
-                new Date(finalData.gameStartDateTime || new Date()).getFullYear(),
+            year: (finalData as any).seriesYear || new Date(finalData.gameStartDateTime || new Date()).getFullYear(),
             isMainEvent: (finalData as any).isMainEvent || false,
             eventNumber: (finalData as any).eventNumber || null,
             dayNumber: (finalData as any).dayNumber || null,
@@ -523,7 +406,7 @@ export const saveGameDataToBackend = async (
             confidence: (finalData as any).seriesMatch?.score || 0.8
         } : null,
         options: {
-            skipPlayerProcessing: data.gameStatus === 'NOT_PUBLISHED' ? true : false,
+            skipPlayerProcessing: data.gameStatus === 'NOT_PUBLISHED',
             forceUpdate: !!existingGameId || options?.wasEdited,
             validateOnly: false,
             doNotScrape: (finalData as any).doNotScrape || false
@@ -542,23 +425,17 @@ export const saveGameDataToBackend = async (
                 ante: level.ante != null ? parseInt(level.ante) : null
             }));
         
-        // Only add to input if we have valid levels
         if (validLevels.length > 0) {
-            (saveGameInput.game as any).levels = JSON.stringify(validLevels);  // <-- STRINGIFY IT
+            (saveGameInput.game as any).levels = JSON.stringify(validLevels);
         }
     }
     
-    console.log('[GameService] Calling saveGame mutation with input:', {
+    console.log('[GameService] Calling saveGame mutation:', {
         sourceUrl,
         venueId,
         gameStatus: saveGameInput.game.gameStatus,
-        venueFee: (saveGameInput.game as any).venueFee,
-        uniquePlayerCount: saveGameInput.players?.totalUniquePlayers || 0,
-        entryCount: saveGameInput.players?.totalEntries || 0,
         existingGameId,
-        wasEdited: options?.wasEdited,
-        changedFields: auditTrail?.changedFields,
-        isNotPublished: data.gameStatus === 'NOT_PUBLISHED'
+        wasEdited: options?.wasEdited
     });
     
     try {
@@ -574,7 +451,6 @@ export const saveGameDataToBackend = async (
         
         const result = response.data.saveGame as SaveGameResult;
         
-        // Add validation warnings to result if any
         if (validationWarnings.length > 0) {
             result.warnings = [...(result.warnings || []), ...validationWarnings];
         }
@@ -582,10 +458,7 @@ export const saveGameDataToBackend = async (
         console.log('[GameService] Save result:', {
             success: result.success,
             action: result.action,
-            gameId: result.gameId,
-            playerProcessingQueued: result.playerProcessingQueued,
-            warnings: result.warnings,
-            fieldsUpdated: result.fieldsUpdated
+            gameId: result.gameId
         });
         
         if (!result.success) {
@@ -646,4 +519,68 @@ export const getChangeSummary = (
         changes: auditTrail.changes,
         summary
     };
+};
+
+/**
+ * Fetch game data for a range of tournament IDs
+ * Used by bulk operations to fetch multiple games at once
+ */
+export const fetchGameDataRangeFromBackend = async (
+    baseUrl: string,
+    startId: number,
+    endId: number
+): Promise<any[]> => {
+    const client = generateClient();
+    const results: any[] = [];
+    
+    try {
+        console.log(`[GameService] Fetching game range ${startId}-${endId} from ${baseUrl}`);
+        
+        // Fetch each game in the range
+        for (let id = startId; id <= endId; id++) {
+            const url = `${baseUrl}${id}`;
+            try {
+                const response = await client.graphql({
+                    query: /* GraphQL */ `
+                        mutation FetchTournamentData($url: AWSURL!, $forceRefresh: Boolean) {
+                            fetchTournamentData(url: $url, forceRefresh: $forceRefresh) {
+                                tournamentId
+                                name
+                                gameStatus
+                                registrationStatus
+                                gameStartDateTime
+                                doNotScrape
+                            }
+                        }
+                    `,
+                    variables: { url, forceRefresh: false }
+                }) as any;
+                
+                const data = response.data?.fetchTournamentData;
+                if (data) {
+                    results.push({
+                        id: String(data.tournamentId || id),
+                        name: data.name,
+                        gameStatus: data.gameStatus,
+                        registrationStatus: data.registrationStatus,
+                        gameStartDateTime: data.gameStartDateTime,
+                        doNotScrape: data.doNotScrape,
+                        inDatabase: true
+                    });
+                }
+            } catch (error) {
+                // Individual fetch failed, add error entry
+                results.push({
+                    id: String(id),
+                    error: error instanceof Error ? error.message : 'Failed to fetch',
+                    inDatabase: false
+                });
+            }
+        }
+        
+        return results;
+    } catch (error) {
+        console.error('[GameService] Error fetching game range:', error);
+        throw error;
+    }
 };

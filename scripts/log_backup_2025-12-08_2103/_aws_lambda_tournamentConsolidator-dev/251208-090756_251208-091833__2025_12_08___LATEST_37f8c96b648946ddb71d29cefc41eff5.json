@@ -1,0 +1,267 @@
+[
+  {
+    "timestamp": 1765184876032,
+    "message": "INIT_START Runtime Version: nodejs:22.v68\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:685b5bdd1a5972cbde591187200f592fbd417cd448d71e500b10e41759692493\n",
+    "ingestionTime": 1765184883516
+  },
+  {
+    "timestamp": 1765184876407,
+    "message": "START RequestId: 045827e0-3fb0-4fa2-8ec7-d2e1467f8081 Version: $LATEST\n",
+    "ingestionTime": 1765184883516
+  },
+  {
+    "timestamp": 1765184876409,
+    "message": "2025-12-08T09:07:56.409Z\t045827e0-3fb0-4fa2-8ec7-d2e1467f8081\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1765184883516
+  },
+  {
+    "timestamp": 1765184876431,
+    "message": "2025-12-08T09:07:56.431Z\t045827e0-3fb0-4fa2-8ec7-d2e1467f8081\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1765184883516
+  },
+  {
+    "timestamp": 1765184876452,
+    "message": "END RequestId: 045827e0-3fb0-4fa2-8ec7-d2e1467f8081\n",
+    "ingestionTime": 1765184883516
+  },
+  {
+    "timestamp": 1765184876452,
+    "message": "REPORT RequestId: 045827e0-3fb0-4fa2-8ec7-d2e1467f8081\tDuration: 44.88 ms\tBilled Duration: 417 ms\tMemory Size: 128 MB\tMax Memory Used: 94 MB\tInit Duration: 371.31 ms\t\n",
+    "ingestionTime": 1765184883516
+  },
+  {
+    "timestamp": 1765184929827,
+    "message": "START RequestId: b9963857-4900-4437-a67b-a229c2ec8b27 Version: $LATEST\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184930011,
+    "message": "2025-12-08T09:08:50.011Z\tb9963857-4900-4437-a67b-a229c2ec8b27\tINFO\t[Consolidator] Handling previewConsolidation query\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184930011,
+    "message": "2025-12-08T09:08:50.011Z\tb9963857-4900-4437-a67b-a229c2ec8b27\tINFO\t[Consolidator:Preview] Analyzing: {\n  name: 'Thursday St. George Leagues Club $5000 GTD',\n  venueId: 'fd4f7fb1-67fd-4398-b4b4-d85722256d45',\n  buyIn: 200,\n  tournamentSeriesId: null,\n  eventNumber: null,\n  seriesName: '❌ MISSING',\n  isMainEvent: false,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  dayNumber: null,\n  flightLetter: null\n}\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184930050,
+    "message": "2025-12-08T09:08:50.050Z\tb9963857-4900-4437-a67b-a229c2ec8b27\tINFO\t[Consolidator:Preview] Strategy selected: {\n  willConsolidate: false,\n  strategy: null,\n  confidence: 0,\n  consolidationKey: null,\n  derivedParentName: 'Thursday St. George Leagues Club $5000 GTD'\n}\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184930211,
+    "message": "END RequestId: b9963857-4900-4437-a67b-a229c2ec8b27\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184930211,
+    "message": "REPORT RequestId: b9963857-4900-4437-a67b-a229c2ec8b27\tDuration: 384.04 ms\tBilled Duration: 385 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184931004,
+    "message": "2025-12-08T09:08:51.004Z\t2a637a3f-1274-4b50-abd6-d411b3572abb\tINFO\t[Consolidator] Handling previewConsolidation query\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184931004,
+    "message": "2025-12-08T09:08:51.004Z\t2a637a3f-1274-4b50-abd6-d411b3572abb\tINFO\t[Consolidator:Preview] Analyzing: {\n  name: 'Thursday St. George Leagues Club $5000 GTD',\n  venueId: 'fd4f7fb1-67fd-4398-b4b4-d85722256d45',\n  buyIn: 200,\n  tournamentSeriesId: null,\n  eventNumber: null,\n  seriesName: '❌ MISSING',\n  isMainEvent: false,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  dayNumber: null,\n  flightLetter: null\n}\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184931004,
+    "message": "START RequestId: 2a637a3f-1274-4b50-abd6-d411b3572abb Version: $LATEST\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184931005,
+    "message": "2025-12-08T09:08:51.005Z\t2a637a3f-1274-4b50-abd6-d411b3572abb\tINFO\t[Consolidator:Preview] Strategy selected: {\n  willConsolidate: false,\n  strategy: null,\n  confidence: 0,\n  consolidationKey: null,\n  derivedParentName: 'Thursday St. George Leagues Club $5000 GTD'\n}\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184931012,
+    "message": "END RequestId: 2a637a3f-1274-4b50-abd6-d411b3572abb\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184931012,
+    "message": "REPORT RequestId: 2a637a3f-1274-4b50-abd6-d411b3572abb\tDuration: 7.43 ms\tBilled Duration: 8 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184935849,
+    "message": "2025-12-08T09:08:55.849Z\t4231e2fc-c3c6-4fc6-878b-a705fa96ce7d\tINFO\t[Consolidator] Handling previewConsolidation query\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184935849,
+    "message": "2025-12-08T09:08:55.849Z\t4231e2fc-c3c6-4fc6-878b-a705fa96ce7d\tINFO\t[Consolidator:Preview] Analyzing: {\n  name: 'Thursday St. George Leagues Club $5000 GTD',\n  venueId: 'fd4f7fb1-67fd-4398-b4b4-d85722256d45',\n  buyIn: 200,\n  tournamentSeriesId: null,\n  eventNumber: null,\n  seriesName: '❌ MISSING',\n  isMainEvent: false,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  dayNumber: null,\n  flightLetter: null\n}\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184935849,
+    "message": "START RequestId: 4231e2fc-c3c6-4fc6-878b-a705fa96ce7d Version: $LATEST\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184935850,
+    "message": "2025-12-08T09:08:55.850Z\t4231e2fc-c3c6-4fc6-878b-a705fa96ce7d\tINFO\t[Consolidator:Preview] Strategy selected: {\n  willConsolidate: false,\n  strategy: null,\n  confidence: 0,\n  consolidationKey: null,\n  derivedParentName: 'Thursday St. George Leagues Club $5000 GTD'\n}\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184935851,
+    "message": "END RequestId: 4231e2fc-c3c6-4fc6-878b-a705fa96ce7d\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184935851,
+    "message": "REPORT RequestId: 4231e2fc-c3c6-4fc6-878b-a705fa96ce7d\tDuration: 2.05 ms\tBilled Duration: 3 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1765184938847
+  },
+  {
+    "timestamp": 1765184943214,
+    "message": "START RequestId: 83d4eda6-10fb-4740-a9a1-a36149eff27f Version: $LATEST\n",
+    "ingestionTime": 1765184952229
+  },
+  {
+    "timestamp": 1765184943216,
+    "message": "2025-12-08T09:09:03.216Z\t83d4eda6-10fb-4740-a9a1-a36149eff27f\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1765184952229
+  },
+  {
+    "timestamp": 1765184943217,
+    "message": "2025-12-08T09:09:03.217Z\t83d4eda6-10fb-4740-a9a1-a36149eff27f\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1765184952229
+  },
+  {
+    "timestamp": 1765184943217,
+    "message": "2025-12-08T09:09:03.217Z\t83d4eda6-10fb-4740-a9a1-a36149eff27f\tINFO\t[Consolidator] Skipping non-multi-day: Thursday St. George Leagues Club $5000 GTD (fabb5426-87be-4f69-b07f-0aa8f421c5d1)\n",
+    "ingestionTime": 1765184952229
+  },
+  {
+    "timestamp": 1765184943252,
+    "message": "END RequestId: 83d4eda6-10fb-4740-a9a1-a36149eff27f\n",
+    "ingestionTime": 1765184952229
+  },
+  {
+    "timestamp": 1765184943252,
+    "message": "REPORT RequestId: 83d4eda6-10fb-4740-a9a1-a36149eff27f\tDuration: 36.87 ms\tBilled Duration: 37 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1765184952229
+  },
+  {
+    "timestamp": 1765185240764,
+    "message": "START RequestId: 19aedf65-d166-4575-b990-1137f1fb3a60 Version: $LATEST\n",
+    "ingestionTime": 1765185249781
+  },
+  {
+    "timestamp": 1765185240992,
+    "message": "2025-12-08T09:14:00.992Z\t19aedf65-d166-4575-b990-1137f1fb3a60\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1765185249781
+  },
+  {
+    "timestamp": 1765185240993,
+    "message": "2025-12-08T09:14:00.993Z\t19aedf65-d166-4575-b990-1137f1fb3a60\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1765185249781
+  },
+  {
+    "timestamp": 1765185241072,
+    "message": "END RequestId: 19aedf65-d166-4575-b990-1137f1fb3a60\n",
+    "ingestionTime": 1765185249781
+  },
+  {
+    "timestamp": 1765185241073,
+    "message": "REPORT RequestId: 19aedf65-d166-4575-b990-1137f1fb3a60\tDuration: 308.39 ms\tBilled Duration: 309 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1765185249781
+  },
+  {
+    "timestamp": 1765185505508,
+    "message": "START RequestId: 19790902-03a7-4af2-8158-23585c0e13f3 Version: $LATEST\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185505593,
+    "message": "2025-12-08T09:18:25.593Z\t19790902-03a7-4af2-8158-23585c0e13f3\tINFO\t[Consolidator] Handling previewConsolidation query\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185505593,
+    "message": "2025-12-08T09:18:25.593Z\t19790902-03a7-4af2-8158-23585c0e13f3\tINFO\t[Consolidator:Preview] Analyzing: {\n  name: 'Thursday St. George Leagues Club $5000 GTD',\n  venueId: 'fd4f7fb1-67fd-4398-b4b4-d85722256d45',\n  buyIn: 200,\n  tournamentSeriesId: null,\n  eventNumber: null,\n  seriesName: '❌ MISSING',\n  isMainEvent: false,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  dayNumber: null,\n  flightLetter: null\n}\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185505634,
+    "message": "2025-12-08T09:18:25.634Z\t19790902-03a7-4af2-8158-23585c0e13f3\tINFO\t[Consolidator:Preview] Strategy selected: {\n  willConsolidate: false,\n  strategy: null,\n  confidence: 0,\n  consolidationKey: null,\n  derivedParentName: 'Thursday St. George Leagues Club $5000 GTD'\n}\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185505674,
+    "message": "END RequestId: 19790902-03a7-4af2-8158-23585c0e13f3\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185505674,
+    "message": "REPORT RequestId: 19790902-03a7-4af2-8158-23585c0e13f3\tDuration: 165.03 ms\tBilled Duration: 166 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185506784,
+    "message": "START RequestId: 8e5cc46e-6eed-4ec5-a39f-6e94e1d237b7 Version: $LATEST\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185506785,
+    "message": "2025-12-08T09:18:26.785Z\t8e5cc46e-6eed-4ec5-a39f-6e94e1d237b7\tINFO\t[Consolidator] Handling previewConsolidation query\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185506785,
+    "message": "2025-12-08T09:18:26.785Z\t8e5cc46e-6eed-4ec5-a39f-6e94e1d237b7\tINFO\t[Consolidator:Preview] Analyzing: {\n  name: 'Thursday St. George Leagues Club $5000 GTD',\n  venueId: 'fd4f7fb1-67fd-4398-b4b4-d85722256d45',\n  buyIn: 200,\n  tournamentSeriesId: null,\n  eventNumber: null,\n  seriesName: '❌ MISSING',\n  isMainEvent: false,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  dayNumber: null,\n  flightLetter: null\n}\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185506785,
+    "message": "2025-12-08T09:18:26.785Z\t8e5cc46e-6eed-4ec5-a39f-6e94e1d237b7\tINFO\t[Consolidator:Preview] Strategy selected: {\n  willConsolidate: false,\n  strategy: null,\n  confidence: 0,\n  consolidationKey: null,\n  derivedParentName: 'Thursday St. George Leagues Club $5000 GTD'\n}\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185506793,
+    "message": "END RequestId: 8e5cc46e-6eed-4ec5-a39f-6e94e1d237b7\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185506793,
+    "message": "REPORT RequestId: 8e5cc46e-6eed-4ec5-a39f-6e94e1d237b7\tDuration: 8.80 ms\tBilled Duration: 9 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185513687,
+    "message": "START RequestId: 610a5cf6-2ad7-4f2f-b5c9-bffeb4cfc37d Version: $LATEST\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185513688,
+    "message": "2025-12-08T09:18:33.688Z\t610a5cf6-2ad7-4f2f-b5c9-bffeb4cfc37d\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185513688,
+    "message": "2025-12-08T09:18:33.688Z\t610a5cf6-2ad7-4f2f-b5c9-bffeb4cfc37d\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185513688,
+    "message": "2025-12-08T09:18:33.688Z\t610a5cf6-2ad7-4f2f-b5c9-bffeb4cfc37d\tINFO\t[Consolidator] Skipping non-multi-day: Thursday St. George Leagues Club $5000 GTD (6004087e-1f48-410f-b672-249f937b22ca)\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185513693,
+    "message": "END RequestId: 610a5cf6-2ad7-4f2f-b5c9-bffeb4cfc37d\n",
+    "ingestionTime": 1765185514524
+  },
+  {
+    "timestamp": 1765185513693,
+    "message": "REPORT RequestId: 610a5cf6-2ad7-4f2f-b5c9-bffeb4cfc37d\tDuration: 5.97 ms\tBilled Duration: 6 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1765185514524
+  }
+]

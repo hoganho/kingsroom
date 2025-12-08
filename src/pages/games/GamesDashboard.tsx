@@ -33,6 +33,7 @@ export const GamesDashboard: React.FC = () => {
     totalGames: 0,
     activeGames: 0,
     totalPrizePool: 0,
+    totalInitialEntries: 0,
     totalEntries: 0,
     totalUniquePlayers: 0,
     todaysGames: 0,
@@ -49,6 +50,7 @@ export const GamesDashboard: React.FC = () => {
         totalGames: 0,
         activeGames: 0,
         totalPrizePool: 0,
+        totalInitialEntries: 0,
         totalEntries: 0,
         totalUniquePlayers: 0,
         todaysGames: 0,
@@ -85,6 +87,7 @@ export const GamesDashboard: React.FC = () => {
                 gameStartDateTime
                 buyIn
                 totalUniquePlayers
+                totalInitialEntries
                 totalEntries
                 prizepoolPaid
                 prizepoolCalculated
@@ -154,6 +157,7 @@ export const GamesDashboard: React.FC = () => {
           totalGames: 0,
           activeGames: 0,
           totalPrizePool: 0,
+          totalInitialEntries: 0,
           totalEntries: 0,
           totalUniquePlayers: 0,
           todaysGames: 0,
@@ -183,6 +187,10 @@ export const GamesDashboard: React.FC = () => {
         entityStats[entityId].totalEntries += game.totalEntries;
       }
       
+      if (game.totalInitialEntries) {
+        entityStats[entityId].totalInitialEntries += game.totalInitialEntries;
+      }
+
       const gameDate = new Date(game.gameStartDateTime);
       if (gameDate.toDateString() === today.toDateString()) {
         entityStats[entityId].todaysGames++;
@@ -201,6 +209,7 @@ export const GamesDashboard: React.FC = () => {
       activeGames: acc.activeGames + stats.activeGames,
       totalPrizePool: acc.totalPrizePool + stats.totalPrizePool,
       totalUniquePlayers: acc.totalUniquePlayers + stats.totalUniquePlayers,
+      totalInitialEntries: acc.totalInitialEntries + stats.totalInitialEntries,
       totalEntries: acc.totalEntries + stats.totalEntries,
       todaysGames: acc.todaysGames + stats.todaysGames,
       upcomingGames: acc.upcomingGames + stats.upcomingGames
@@ -208,6 +217,7 @@ export const GamesDashboard: React.FC = () => {
       totalGames: 0,
       activeGames: 0,
       totalPrizePool: 0,
+      totalInitialEntries: 0,
       totalEntries: 0,
       totalUniquePlayers: 0,
       todaysGames: 0,
@@ -302,6 +312,26 @@ export const GamesDashboard: React.FC = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
+                    Total Initial Entries
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {totalStats.totalInitialEntries.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <UserGroupIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
                     Total Entries
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
@@ -369,7 +399,7 @@ export const GamesDashboard: React.FC = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-900">{stats.entityName}</p>
                     <p className="text-sm text-gray-500">
-                      {stats.totalGames} games • {stats.totalUniquePlayers} players • {stats.totalEntries} entries • ${stats.totalPrizePool.toLocaleString()}
+                      {stats.totalGames} games • {stats.totalUniquePlayers} players • {stats.totalInitialEntries} initial entries • {stats.totalEntries} entries • ${stats.totalPrizePool.toLocaleString()}
                     </p>
                   </div>
                   <div className="flex space-x-4 text-sm">

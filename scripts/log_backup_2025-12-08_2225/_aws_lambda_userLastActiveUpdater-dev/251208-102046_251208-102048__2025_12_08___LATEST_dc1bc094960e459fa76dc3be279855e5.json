@@ -1,0 +1,67 @@
+[
+  {
+    "timestamp": 1765189246247,
+    "message": "INIT_START Runtime Version: nodejs:22.v68\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:685b5bdd1a5972cbde591187200f592fbd417cd448d71e500b10e41759692493\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189246728,
+    "message": "START RequestId: 43901127-e084-427b-b413-6aa8c43cef43 Version: $LATEST\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189246740,
+    "message": "2025-12-08T10:20:46.740Z\t43901127-e084-427b-b413-6aa8c43cef43\tINFO\tReceived event: {\n  \"Records\": [\n    {\n      \"eventID\": \"e2b23c7c8d2c93c54dea1760bf92cadb\",\n      \"eventName\": \"INSERT\",\n      \"eventVersion\": \"1.1\",\n      \"eventSource\": \"aws:dynamodb\",\n      \"awsRegion\": \"ap-southeast-2\",\n      \"dynamodb\": {\n        \"ApproximateCreationDateTime\": 1765189245,\n        \"Keys\": {\n          \"id\": {\n            \"S\": \"44b702d8-ca23-40e6-ba3a-feac6fdfc30f\"\n          }\n        },\n        \"NewImage\": {\n          \"createdAt\": {\n            \"S\": \"2025-12-08T10:20:45.880Z\"\n          },\n          \"_lastChangedAt\": {\n            \"N\": \"1765189245908\"\n          },\n          \"resource\": {\n            \"S\": \"/scraper/admin\"\n          },\n          \"__typename\": {\n            \"S\": \"UserAuditLog\"\n          },\n          \"action\": {\n            \"S\": \"VIEW_PAGE\"\n          },\n          \"details\": {\n            \"NULL\": true\n          },\n          \"userAgent\": {\n            \"S\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\"\n          },\n          \"id\": {\n            \"S\": \"44b702d8-ca23-40e6-ba3a-feac6fdfc30f\"\n          },\n          \"_version\": {\n            \"N\": \"1\"\n          },\n          \"userId\": {\n            \"S\": \"39ce5458-e0d1-7094-efba-ccb13d75c186\"\n          },\n          \"updatedAt\": {\n            \"S\": \"2025-12-08T10:20:45.880Z\"\n          }\n        },\n        \"SequenceNumber\": \"33483800003988082349626057\",\n        \"SizeBytes\": 409,\n        \"StreamViewType\": \"NEW_AND_OLD_IMAGES\"\n      },\n      \"eventSourceARN\": \"arn:aws:dynamodb:ap-southeast-2:495599763953:table/UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev/stream/2025-12-01T06:31:14.413\"\n    }\n  ]\n}\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189248061,
+    "message": "2025-12-08T10:20:48.061Z\t43901127-e084-427b-b413-6aa8c43cef43\tINFO\tUpdated lastActiveAt for user 39ce5458-e0d1-7094-efba-ccb13d75c186\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189248061,
+    "message": "2025-12-08T10:20:48.061Z\t43901127-e084-427b-b413-6aa8c43cef43\tINFO\tUpdate summary: 1 updated, 0 throttled, 0 failed\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189248462,
+    "message": "END RequestId: 43901127-e084-427b-b413-6aa8c43cef43\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189248462,
+    "message": "REPORT RequestId: 43901127-e084-427b-b413-6aa8c43cef43\tDuration: 1733.28 ms\tBilled Duration: 2211 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\tInit Duration: 477.43 ms\t\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189248480,
+    "message": "2025-12-08T10:20:48.480Z\t1c7fd5a7-ed4b-49f8-aca5-fbd9a6e8bd12\tINFO\tReceived event: {\n  \"Records\": [\n    {\n      \"eventID\": \"a8746a28751f9ede7f04e3bffaba8e8c\",\n      \"eventName\": \"INSERT\",\n      \"eventVersion\": \"1.1\",\n      \"eventSource\": \"aws:dynamodb\",\n      \"awsRegion\": \"ap-southeast-2\",\n      \"dynamodb\": {\n        \"ApproximateCreationDateTime\": 1765189248,\n        \"Keys\": {\n          \"id\": {\n            \"S\": \"5cef0bc6-90dc-4f58-8170-23799d7f0faf\"\n          }\n        },\n        \"NewImage\": {\n          \"createdAt\": {\n            \"S\": \"2025-12-08T10:20:48.049Z\"\n          },\n          \"_lastChangedAt\": {\n            \"N\": \"1765189248074\"\n          },\n          \"resource\": {\n            \"S\": \"/debug/database-monitor\"\n          },\n          \"__typename\": {\n            \"S\": \"UserAuditLog\"\n          },\n          \"action\": {\n            \"S\": \"VIEW_PAGE\"\n          },\n          \"details\": {\n            \"NULL\": true\n          },\n          \"userAgent\": {\n            \"S\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"\n          },\n          \"id\": {\n            \"S\": \"5cef0bc6-90dc-4f58-8170-23799d7f0faf\"\n          },\n          \"_version\": {\n            \"N\": \"1\"\n          },\n          \"userId\": {\n            \"S\": \"39ce5458-e0d1-7094-efba-ccb13d75c186\"\n          },\n          \"updatedAt\": {\n            \"S\": \"2025-12-08T10:20:48.049Z\"\n          }\n        },\n        \"SequenceNumber\": \"33484000002963487211344377\",\n        \"SizeBytes\": 418,\n        \"StreamViewType\": \"NEW_AND_OLD_IMAGES\"\n      },\n      \"eventSourceARN\": \"arn:aws:dynamodb:ap-southeast-2:495599763953:table/UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev/stream/2025-12-01T06:31:14.413\"\n    }\n  ]\n}\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189248480,
+    "message": "START RequestId: 1c7fd5a7-ed4b-49f8-aca5-fbd9a6e8bd12 Version: $LATEST\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189248521,
+    "message": "2025-12-08T10:20:48.521Z\t1c7fd5a7-ed4b-49f8-aca5-fbd9a6e8bd12\tINFO\tThrottled update for user 39ce5458-e0d1-7094-efba-ccb13d75c186\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189248521,
+    "message": "2025-12-08T10:20:48.521Z\t1c7fd5a7-ed4b-49f8-aca5-fbd9a6e8bd12\tINFO\tUpdate summary: 0 updated, 1 throttled, 0 failed\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189248583,
+    "message": "END RequestId: 1c7fd5a7-ed4b-49f8-aca5-fbd9a6e8bd12\n",
+    "ingestionTime": 1765189250629
+  },
+  {
+    "timestamp": 1765189248583,
+    "message": "REPORT RequestId: 1c7fd5a7-ed4b-49f8-aca5-fbd9a6e8bd12\tDuration: 102.22 ms\tBilled Duration: 103 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765189250629
+  }
+]

@@ -130,6 +130,9 @@ const SiblingList: React.FC<{
                         {sibling.totalEntries !== null && (
                             <span>{sibling.totalEntries} entries</span>
                         )}
+                        {sibling.totalInitialEntries !== null && (
+                            <span>{sibling.totalInitialEntries} entries</span>
+                        )}
                         <span className={`px-1.5 py-0.5 rounded text-xs ${
                             sibling.gameStatus === 'FINISHED' ? 'bg-green-100 text-green-700' :
                             sibling.gameStatus === 'RUNNING' ? 'bg-blue-100 text-blue-700' :
@@ -163,7 +166,14 @@ const ProjectedTotals: React.FC<{
                 <div className="text-lg font-bold text-gray-900">
                     {totals.totalUniquePlayers?.toLocaleString() || '—'}
                 </div>
-            </div>            <div className="p-2 bg-gray-50 rounded">
+            </div>            
+                <div className="p-2 bg-gray-50 rounded">
+                <div className="text-gray-500">Total Initial Entries</div>
+                <div className="text-lg font-bold text-gray-900">
+                    {totals.totalInitialEntries?.toLocaleString() || '—'}
+                </div>
+            </div>            
+                <div className="p-2 bg-gray-50 rounded">
                 <div className="text-gray-500">Total Entries</div>
                 <div className="text-lg font-bold text-gray-900">
                     {totals.totalEntries?.toLocaleString() || '—'}

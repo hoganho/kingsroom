@@ -150,17 +150,23 @@ const FETCH_TOURNAMENT_DATA = /* GraphQL */ `
             tournamentType
             prizepoolPaid
             prizepoolCalculated
-            buyInsByTotalEntries
-            gameProfitLoss
+            totalBuyInsCollected
+            projectedRakeRevenue
+            rakeSubsidy
+            actualRakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
+            fullRakeRealized
             buyIn
             rake
-            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
             totalUniquePlayers
+            totalInitialEntries
             totalEntries
             totalRebuys
             totalAddons
@@ -469,6 +475,7 @@ function mapToSaveDataInput(data) {
         prizepoolPaid: data.prizepoolPaid,
         prizepoolCalculated: data.prizepoolCalculated,
         totalUniquePlayers: data.totalUniquePlayers,
+        totalInitialEntries: data.totalInitialEntries,
         totalEntries: data.totalEntries,
         totalRebuys: data.totalRebuys,
         totalAddons: data.totalAddons,

@@ -61,13 +61,11 @@ export const GameDetails = () => {
               gameEndDateTime
               buyIn
               rake
-              totalRake
               startingStack
               hasGuarantee
               guaranteeAmount
-              guaranteeOverlay
-              guaranteeSurplus
               totalUniquePlayers
+              totalInitialEntries
               totalEntries
               totalRebuys
               totalAddons
@@ -76,8 +74,17 @@ export const GameDetails = () => {
               averagePlayerStack
               prizepoolPaid
               prizepoolCalculated
-              buyInsByTotalEntries
-              gameProfitLoss
+              # Financial metrics (new naming)
+              totalBuyInsCollected
+              projectedRakeRevenue
+              rakeSubsidy
+              actualRakeRevenue
+              prizepoolPlayerContributions
+              prizepoolAddedValue
+              prizepoolSurplus
+              guaranteeOverlayCost
+              gameProfit
+              fullRakeRealized
               seriesName
               isSeries
               isSatellite
@@ -324,7 +331,11 @@ export const GameDetails = () => {
               <UserGroupIcon className="h-5 w-5 text-gray-400 mr-2" />
               <div>
                 <p className="text-sm text-gray-500">Entries</p>
-                <p className="text-sm font-medium">{game.totalEntries || '-'}</p>
+                <p className="text-sm font-medium">{game.initialEntries || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Entries</p>
+                <p className="text-sm font-medium">{game.initialEntries || '-'}</p>
               </div>
             </div>
           </div>

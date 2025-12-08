@@ -142,6 +142,7 @@ const fetchConsolidationDetails = async (
     // Log what numeric data we received for projection
     console.log('[Consolidator:Preview] Numeric fields for projection:', {
         totalUniquePlayers: newGameData.totalUniquePlayers,
+        totalInitialEntries: newGameData.totalInitialEntries,
         totalEntries: newGameData.totalEntries,
         totalRebuys: newGameData.totalRebuys,
         totalAddons: newGameData.totalAddons,
@@ -187,6 +188,7 @@ const fetchConsolidationDetails = async (
     const normalizedNewGame = {
         ...newGameData,
         totalUniquePlayers: newGameData.totalUniquePlayers || 0,
+        totalInitialEntries: newGameData.totalInitialEntries || 0,
         totalEntries: newGameData.totalEntries || 0,
         totalRebuys: newGameData.totalRebuys || 0,
         totalAddons: newGameData.totalAddons || 0,
@@ -201,6 +203,7 @@ const fetchConsolidationDetails = async (
         siblingCount,
         totalChildrenForProjection: allChildren.length,
         projectedUniquePlayers: projectedTotals.totalUniquePlayers,
+        projectedInitialEntries: projectedTotals.projectedInitialEntries,
         projectedEntries: projectedTotals.totalEntries,
         projectedPrizepoolPaid: projectedTotals.prizepoolPaid,
         projectedPrizepoolCalculated: projectedTotals.prizepoolCalculated
@@ -224,11 +227,13 @@ const fetchConsolidationDetails = async (
             gameStatus: s.gameStatus,
             gameStartDateTime: s.gameStartDateTime,
             totalUniquePlayers: s.totalUniquePlayers,
+            totalInitialEntries: s.totalInitialEntries,
             totalEntries: s.totalEntries,
             finalDay: s.finalDay
         })) : null,
         projectedTotals: {
             totalUniquePlayers: projectedTotals.totalUniquePlayers,
+            totalInitialEntries: projectedTotals.totalInitialEntries,
             totalEntries: projectedTotals.totalEntries,
             totalRebuys: projectedTotals.totalRebuys,
             totalAddons: projectedTotals.totalAddons,
@@ -374,10 +379,12 @@ const consolidateEntries = async (parentId, children) => {
     }
 
     let uniqueRunners = 0;
+    let totalInitialEntries = 0;
     let totalEntries = 0;
     
     playerHistory.forEach(p => {
         uniqueRunners++;
+        totalInitialEntries++;
         totalEntries += p.totalBuyIns;
     });
 
@@ -478,21 +485,28 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
     // Build the update fields - the helper will handle nulls properly
     // _lastChangedAt will be automatically aliased by the helper
     const updateFields = {
+        totalInitialEntries: aggregated.totalInitialEntries,
         totalEntries: calculatedTotalEntries,
         actualCalculatedUniquePlayers: uniqueRunners,
         totalRebuys: aggregated.totalRebuys || 0,
         totalAddons: aggregated.totalAddons || 0,
         prizepoolPaid: aggregated.prizepoolPaid || 0,
         prizepoolCalculated: aggregated.prizepoolCalculated || 0,
-        totalRake: aggregated.totalRake || 0,
-        buyInsByTotalEntries: aggregated.buyInsByTotalEntries || 0,
-        gameProfitLoss: aggregated.gameProfitLoss || 0,
+        // Financial metrics (new naming)
+        totalBuyInsCollected: aggregated.totalBuyInsCollected || 0,
+        projectedRakeRevenue: aggregated.projectedRakeRevenue || 0,
+        rakeSubsidy: aggregated.rakeSubsidy || 0,
+        actualRakeRevenue: aggregated.actualRakeRevenue || 0,
+        prizepoolPlayerContributions: aggregated.prizepoolPlayerContributions || 0,
+        prizepoolAddedValue: aggregated.prizepoolAddedValue || 0,
+        prizepoolSurplus: aggregated.prizepoolSurplus || 0,
+        guaranteeOverlayCost: aggregated.guaranteeOverlayCost || 0,
+        gameProfit: aggregated.gameProfit || 0,
+        fullRakeRealized: aggregated.fullRakeRealized,
         startingStack: aggregated.startingStack || 0,
         playersRemaining: aggregated.playersRemaining,        // May be null - helper handles this
         totalChipsInPlay: aggregated.totalChipsInPlay,        // May be null - helper handles this
         averagePlayerStack: aggregated.averagePlayerStack,    // May be null - helper handles this
-        guaranteeOverlay: aggregated.guaranteeOverlay || 0,
-        guaranteeSurplus: aggregated.guaranteeSurplus || 0,
         gameStartDateTime: safeStart,
         gameEndDateTime: aggregated.latestEnd,                // May be null - helper handles this
         totalDuration: aggregated.totalDuration,              // May be null - helper handles this

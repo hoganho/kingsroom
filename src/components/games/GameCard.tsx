@@ -56,6 +56,7 @@ export const GameCard: React.FC<GameCardProps> = ({
     gameStatus,
     buyIn,
     totalUniquePlayers,
+    totalInitialEntries,
     totalEntries,
     prizepoolPaid,
     prizepoolCalculated,
@@ -139,11 +140,19 @@ export const GameCard: React.FC<GameCardProps> = ({
               <UserGroupIcon className="h-4 w-4 text-gray-400 mr-1" />
               {totalUniquePlayers || 'N/A'}
             </span>
-          </div>          <div className="flex flex-col items-end">
+          </div>          
+          <div className="flex flex-col items-end">
             <span className="text-xs text-gray-500">Entries</span>
             <span className="text-sm font-medium text-gray-900 flex items-center">
               <UserGroupIcon className="h-4 w-4 text-gray-400 mr-1" />
               {totalEntries || 'N/A'}
+            </span>
+          </div>
+            <div className="flex flex-col items-end">
+            <span className="text-xs text-gray-500">Initial Entries</span>
+            <span className="text-sm font-medium text-gray-900 flex items-center">
+              <UserGroupIcon className="h-4 w-4 text-gray-400 mr-1" />
+              {totalInitialEntries || 'N/A'}
             </span>
           </div>
           <div className="flex flex-col items-end">

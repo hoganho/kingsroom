@@ -15,6 +15,7 @@ interface Tournament {
   gameStatus: string;
   playersRemaining?: number;
   totalUniquePlayers?: number;
+  totalInitialEntries?: number;
   totalEntries?: number;
   prizepoolPaid?: number;
   prizepoolCalculated?: number;
@@ -63,6 +64,7 @@ export const HomePage = () => {
                 gameStatus
                 playersRemaining
                 totalUniquePlayers
+                totalInitialEntries
                 totalEntries
                 buyIn
                 sourceUrl
@@ -99,6 +101,7 @@ export const HomePage = () => {
                 prizepoolPaid
                 prizepoolCalculated
                 totalUniquePlayers
+                totalInitialEntries
                 totalEntries
                 buyIn
                 sourceUrl
@@ -172,13 +175,15 @@ export const HomePage = () => {
     title, 
     showPlayersRemaining = false,
     showPrizepool = false,
-    showTotalEntries = true 
+    showTotalEntries = true, 
+    showTotalInitialEntries = true 
   }: {
     tournaments: Tournament[];
     title: string;
     showPlayersRemaining?: boolean;
     showPrizepool?: boolean;
     showTotalEntries?: boolean;
+    showTotalInitialEntries?: boolean;
   }) => (
     <div className="bg-white shadow rounded-lg">
       <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
@@ -272,6 +277,16 @@ export const HomePage = () => {
                       {tournament.prizepoolCalculated ? formatCurrency(tournament.prizepoolCalculated) : '-'}
                     </td>
                   )}
+                    {showTotalInitialEntries && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {tournament.totalInitialEntries || '-'}
+                    </td>
+                  )}
+                  {showTotalInitialEntries && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {tournament.totalInitialEntries || '-'}
+                    </td>
+                  )}
                   {showTotalEntries && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {tournament.totalEntries || '-'}
@@ -305,6 +320,7 @@ export const HomePage = () => {
           title="Running Tournaments"
           showPlayersRemaining={true}
           showTotalEntries={true}
+          showTotalInitialEntries={true}
         />
       </div>
 
@@ -316,6 +332,7 @@ export const HomePage = () => {
           title="Recently Finished Tournaments"
           showPrizepool={true}
           showTotalEntries={true}
+          showTotalInitialEntries={true}
         />
       </div>
 
@@ -326,6 +343,7 @@ export const HomePage = () => {
           title="Upcoming Tournaments"
           showPlayersRemaining={false}
           showTotalEntries={false}
+          showTotalInitialEntries={false}
         />
       </div>
     </PageWrapper>

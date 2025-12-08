@@ -21,6 +21,7 @@ interface Venue {
   totalGames?: number;
   lastGameDate?: string;
   totalUniquePlayers?: number;
+  totalInitialEntries?: number;
   totalEntries?: number;
   totalPrizepoolPaid?: number;
   totalPrizepoolCalculated?: number;
@@ -77,6 +78,7 @@ export const VenuesDashboard = () => {
                         id
                         gameStartDateTime
                         totalUniquePlayers
+                        totalInitialEntries
                         totalEntries
                         prizepoolPaid
                         prizepoolCalculated
@@ -93,6 +95,7 @@ export const VenuesDashboard = () => {
                 // Calculate stats
                 const totalGames = games.length;
                 const totalUniquePlayers = games.reduce((sum, g) => sum + (g.totalUniquePlayers || 0), 0);
+                const totalInitialEntries = games.reduce((sum, g) => sum + (g.totalInitialEntries || 0), 0);
                 const totalEntries = games.reduce((sum, g) => sum + (g.totalEntries || 0), 0);
                 const totalPrizepoolPaid = games.reduce((sum, g) => sum + (g.prizepoolPaid || 0), 0);
                 const totalPrizepoolCalculated = games.reduce((sum, g) => sum + (g.prizepoolCalculated || 0), 0);
@@ -108,6 +111,7 @@ export const VenuesDashboard = () => {
                   ...venue,
                   totalGames,
                   totalUniquePlayers,
+                  totalInitialEntries,
                   totalEntries,
                   totalPrizepoolPaid,
                   totalPrizepoolCalculated,
@@ -296,6 +300,9 @@ export const VenuesDashboard = () => {
                     Total Unique Players
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total Initial Entries
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Total Entries
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -341,6 +348,9 @@ export const VenuesDashboard = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {venue.totalUniquePlayers?.toLocaleString() || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {venue.totalInitialEntries?.toLocaleString() || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {venue.totalEntries?.toLocaleString() || '-'}

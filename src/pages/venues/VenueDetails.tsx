@@ -24,6 +24,7 @@ interface VenueData {
   stats: {
     totalGames: number;
     totalUniquePlayers: number;
+    totalInitialEntries: number;
     totalEntries: number;
     totalPrizepoolPaid: number;
     totalPrizepoolCalculated: number;
@@ -127,6 +128,7 @@ export const VenueDetails = () => {
                 gameEndDateTime
                 buyIn
                 totalUniquePlayers
+                totalInitialEntries
                 totalEntries
                 prizepoolPaid
                 prizepoolCalculated
@@ -201,6 +203,7 @@ export const VenueDetails = () => {
         const stats = {
           totalGames: games.length,
           totalUniquePlayers: games.reduce((sum, g) => sum + (g.totalUniquePlayers || 0), 0),
+          totalInitialEntries: games.reduce((sum, g) => sum + (g.totalInitialEntries || 0), 0),
           totalEntries: games.reduce((sum, g) => sum + (g.totalEntries || 0), 0),
           totalPrizepoolPaid: games.reduce((sum, g) => sum + (g.prizepoolPaid || 0), 0),
           totalPrizepoolCalculated: games.reduce((sum, g) => sum + (g.prizepoolCalculated || 0), 0),
@@ -362,6 +365,15 @@ export const VenueDetails = () => {
           <div className="flex items-center">
             <UserGroupIcon className="h-6 w-6 text-blue-600 mr-2" />
             <div>
+              <p className="text-xs text-gray-500">Total Initial Entries</p>
+              <p className="text-lg font-bold">{stats.totalInitialEntries.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <UserGroupIcon className="h-6 w-6 text-blue-600 mr-2" />
+            <div>
               <p className="text-xs text-gray-500">Total Entries</p>
               <p className="text-lg font-bold">{stats.totalEntries.toLocaleString()}</p>
             </div>
@@ -472,6 +484,9 @@ export const VenueDetails = () => {
                           {game.totalUniquePlayers} unique players
                         </span>
                         <span className="text-xs text-gray-600">
+                          {game.totalInitialEntries} entries
+                        </span>
+                        <span className="text-xs text-gray-600">
                           {game.totalEntries} entries
                         </span>
                         <span className="text-xs font-medium">
@@ -500,6 +515,7 @@ export const VenueDetails = () => {
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buy-in</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unique Players</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">InitialEntries</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entries</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prizepool Paid</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prizepool Calculated</th>
@@ -519,6 +535,7 @@ export const VenueDetails = () => {
                         </td>
                         <td className="px-4 py-3 text-sm">{formatCurrency(game.buyIn)}</td>
                         <td className="px-4 py-3 text-sm">{game.totalUniquePlayers || '-'}</td>
+                        <td className="px-4 py-3 text-sm">{game.totalInitialEntries || '-'}</td>
                         <td className="px-4 py-3 text-sm">{game.totalEntries || '-'}</td>
                         <td className="px-4 py-3 text-sm font-medium">{formatCurrency(game.prizepoolPaid)}</td>
                         <td className="px-4 py-3 text-sm font-medium">{formatCurrency(game.prizepoolCalculated)}</td>

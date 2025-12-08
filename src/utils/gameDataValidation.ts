@@ -1,8 +1,7 @@
-// src/utils/gameDataValidation.ts
-// Validation utilities for edited game data from Enhanced SaveConfirmationModal
+// utils/gameDataValidation.ts
+// UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
 
-import type { GameData } from '../types/game';
-import { GameStatus } from '../API';
+import type { GameData, TournamentLevelData } from '../types/game';
 
 export interface ValidationResult {
     isValid: boolean;
@@ -12,130 +11,129 @@ export interface ValidationResult {
 }
 
 /**
- * Validate edited game data from the Enhanced SaveConfirmationModal
+ * Validate required fields for a game
  */
-export const validateEditedGameData = (data: GameData): ValidationResult => {
+export const validateRequiredFields = (data: GameData): { errors: string[]; warnings: string[] } => {
     const errors: string[] = [];
     const warnings: string[] = [];
-    
-    // Required fields validation
+
     if (!data.name || data.name.trim() === '') {
         errors.push('Game name is required');
     }
-    
+
+    if (!data.gameStartDateTime) {
+        errors.push('Game start date/time is required');
+    }
+
     if (!data.gameStatus) {
-        errors.push('Game status is required');
-    }
-    
-    if (!data.tournamentId || data.tournamentId <= 0) {
-        errors.push('Valid tournament ID is required (must be positive)');
-    }
-    
-    if (!data.registrationStatus) {
-        errors.push('Registration status is required');
-    }
-    
-    // Logical validations that generate warnings
-    if (data.guaranteeAmount && data.guaranteeAmount > 0 && !data.hasGuarantee) {
-        warnings.push('Guarantee amount is set but hasGuarantee is false - auto-correcting');
-    }
-    
-    if (data.gameStatus === GameStatus.FINISHED) {
-        if (!data.gameEndDateTime) {
-            warnings.push('Finished game should have an end date/time');
-        }
-        if (!data.results || data.results.length === 0) {
-            warnings.push('Finished game should have player results');
-        }
-    }
-    
-    if (data.gameStatus === GameStatus.RUNNING && (!data.playersRemaining || data.playersRemaining === 0)) {
-        warnings.push('Running game should have players remaining count');
-    }
-    
-    if (data.buyIn && data.buyIn > 0 && (!data.rake || data.rake === 0)) {
-        warnings.push('Buy-in specified but rake is missing or zero');
-    }
-    
-    if (data.totalEntries && data.totalEntries > 0 && (!data.prizepoolPaid || data.prizepoolPaid === 0)) {
-        warnings.push('Total entries specified but prizepoolPaid is missing or zero');
-    }
-    
-    if (data.totalEntries && data.totalEntries > 0 && (!data.prizepoolCalculated || data.prizepoolCalculated === 0)) {
-        warnings.push('Total entries specified but prizepoolCalculated is missing or zero');
+        warnings.push('Game status not set, defaulting to SCHEDULED');
     }
 
-    // Date validations
-    if (data.gameStartDateTime && data.gameEndDateTime) {
-        const startDate = new Date(data.gameStartDateTime);
-        const endDate = new Date(data.gameEndDateTime);
-        
-        if (endDate < startDate) {
-            errors.push('End date cannot be before start date');
+    if (data.buyIn !== undefined && data.buyIn !== null && data.buyIn < 0) {
+        errors.push('Buy-in cannot be negative');
+    }
+
+    if (data.rake !== undefined && data.rake !== null && data.rake < 0) {
+        errors.push('Rake cannot be negative');
+    }
+
+    if (data.totalEntries !== undefined && data.totalEntries !== null && data.totalEntries < 0) {
+        errors.push('Total entries cannot be negative');
+    }
+
+    if (data.buyIn && data.rake && data.rake > data.buyIn) {
+        warnings.push('Rake is greater than buy-in - please verify');
+    }
+
+    if (data.hasGuarantee && (!data.guaranteeAmount || data.guaranteeAmount <= 0)) {
+        warnings.push('Game has guarantee flag but no guarantee amount set');
+    }
+
+    return { errors, warnings };
+};
+
+/**
+ * Validate tournament levels structure
+ */
+export const validateLevels = (levels: TournamentLevelData[] | undefined): { errors: string[]; warnings: string[] } => {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    if (!levels || levels.length === 0) {
+        return { errors, warnings };
+    }
+
+    const levelNumbers = levels.map(l => l.levelNumber);
+    const uniqueNumbers = new Set(levelNumbers);
+    if (uniqueNumbers.size !== levelNumbers.length) {
+        warnings.push('Duplicate level numbers detected');
+    }
+
+    let prevBigBlind = 0;
+    for (const level of levels.sort((a, b) => a.levelNumber - b.levelNumber)) {
+        if (level.bigBlind < prevBigBlind) {
+            warnings.push(`Level ${level.levelNumber} has lower big blind than previous level`);
+        }
+        prevBigBlind = level.bigBlind;
+
+        if (level.smallBlind >= level.bigBlind) {
+            warnings.push(`Level ${level.levelNumber}: small blind should be less than big blind`);
         }
     }
-    
-    // Auto-corrections (create a corrected copy)
+
+    return { errors, warnings };
+};
+
+/**
+ * Auto-correct common data issues
+ */
+export const autoCorrectData = (data: GameData): { correctedData: GameData; corrections: string[] } => {
+    const corrections: string[] = [];
     const correctedData = { ...data };
-    
-    // Ensure non-negative numeric values
-    if (correctedData.buyIn && correctedData.buyIn < 0) {
-        correctedData.buyIn = 0;
-        warnings.push('Buy-in was negative, set to 0');
-    }
-    
-    if (correctedData.rake && correctedData.rake < 0) {
-        correctedData.rake = 0;
-        warnings.push('Rake was negative, set to 0');
-    }
-    
-    // ✅ Added venueFee validation
-    if (correctedData.venueFee && correctedData.venueFee < 0) {
-        correctedData.venueFee = 0;
-        warnings.push('Venue fee was negative, set to 0');
+
+    if (typeof correctedData.buyIn === 'string') {
+        correctedData.buyIn = parseFloat(correctedData.buyIn) || 0;
+        corrections.push('Converted buyIn from string to number');
     }
 
-    if (correctedData.totalUniquePlayers && correctedData.totalUniquePlayers < 0) {
-        correctedData.totalUniquePlayers = 0;
-        warnings.push('Total unique players was negative, set to 0');
+    if (typeof correctedData.rake === 'string') {
+        correctedData.rake = parseFloat(correctedData.rake) || 0;
+        corrections.push('Converted rake from string to number');
     }
 
-    if (correctedData.totalEntries && correctedData.totalEntries < 0) {
-        correctedData.totalEntries = 0;
-        warnings.push('Total entries was negative, set to 0');
-    }
-    
-    if (correctedData.prizepoolPaid && correctedData.prizepoolPaid < 0) {
-        correctedData.prizepoolPaid = 0;
-        warnings.push('prizepoolPaid was negative, set to 0');
-    }
-    
-    if (correctedData.prizepoolCalculated && correctedData.prizepoolCalculated < 0) {
-        correctedData.prizepoolCalculated = 0;
-        warnings.push('prizepoolCalculated was negative, set to 0');
+    if (typeof correctedData.totalEntries === 'string') {
+        correctedData.totalEntries = parseInt(correctedData.totalEntries) || 0;
+        corrections.push('Converted totalEntries from string to number');
     }
 
-    if (correctedData.guaranteeAmount && correctedData.guaranteeAmount < 0) {
-        correctedData.guaranteeAmount = 0;
-        warnings.push('Guarantee amount was negative, set to 0');
+    if (!correctedData.gameStatus) {
+        correctedData.gameStatus = 'SCHEDULED' as any;
+        corrections.push('Set default game status to SCHEDULED');
     }
-    
-    // Auto-fix guarantee flag
-    if (correctedData.guaranteeAmount && correctedData.guaranteeAmount > 0) {
+
+    if (correctedData.guaranteeAmount && correctedData.guaranteeAmount > 0 && !correctedData.hasGuarantee) {
         correctedData.hasGuarantee = true;
+        corrections.push('Set hasGuarantee to true based on guaranteeAmount');
     }
+
+    return { correctedData, corrections };
+};
+
+/**
+ * Validate edited game data before saving
+ */
+export const validateEditedGameData = (data: GameData): ValidationResult => {
+    const { correctedData, corrections } = autoCorrectData(data);
+    const { errors: requiredErrors, warnings: requiredWarnings } = validateRequiredFields(correctedData);
+    const { errors: levelErrors, warnings: levelWarnings } = validateLevels(correctedData.levels);
     
-    // Validate and fix levels
-    if (correctedData.levels && correctedData.levels.length > 0) {
-        correctedData.levels = correctedData.levels.map(level => ({
-            levelNumber: Math.max(1, level.levelNumber),
-            smallBlind: Math.max(0, level.smallBlind),
-            bigBlind: Math.max(0, level.bigBlind),
-            ante: level.ante ? Math.max(0, level.ante) : null,
-            durationMinutes: Math.max(0, level.durationMinutes)
-        }));
+    const errors = [...requiredErrors, ...levelErrors];
+    const warnings = [...requiredWarnings, ...levelWarnings];
+    
+    if (corrections.length > 0) {
+        warnings.push(`Auto-corrected: ${corrections.join(', ')}`);
     }
-    
+
     return {
         isValid: errors.length === 0,
         errors,
@@ -145,178 +143,140 @@ export const validateEditedGameData = (data: GameData): ValidationResult => {
 };
 
 /**
- * Calculate derived fields from edited data
- * 
- * POKER TOURNAMENT ECONOMICS:
- * - Buy-in = Rake + Prizepool Contribution (per entry)
- * - Prizepool Contributions = (buyIn - rake) × totalEntries
- * - If guarantee exists, prizepool must be at least the guarantee amount
- * - Shortfall = guarantee - prizepool contributions (if positive)
- * - We cover shortfall first from intended rake, then from pocket (overlay)
- * 
- * Examples ($200 buy-in, $24 rake, $5000 guarantee):
- * - 20 entries: $3520 contributions, $1480 shortfall, -$1000 profit (loss)
- * - 25 entries: $4400 contributions, $600 shortfall, $0 profit (broke even)
- * - 27 entries: $4752 contributions, $248 shortfall, $400 profit (partial rake)
- * - 30 entries: $5280 contributions, no shortfall, $720 profit (full rake)
+ * Calculate derived financial fields based on game data
+ * SIMPLIFIED MODEL:
+ *   Revenue: rakeRevenue = rake × entriesForRake
+ *   Cost: guaranteeOverlayCost = max(0, guarantee - playerContributions)
+ *   Profit: gameProfit = rakeRevenue - guaranteeOverlayCost
  */
 export const calculateDerivedFields = (data: GameData): Partial<GameData> => {
     const derived: Partial<GameData> = {};
     
     const buyIn = data.buyIn || 0;
     const rake = data.rake || 0;
-    const totalEntries = data.totalEntries || 0;
-    const totalAddons = data.totalAddons || 0;
+    const totalInitialEntries = data.totalInitialEntries || 0;
     const totalRebuys = data.totalRebuys || 0;
+    const totalAddons = data.totalAddons || 0;
     const guaranteeAmount = data.guaranteeAmount || 0;
     const hasGuarantee = data.hasGuarantee && guaranteeAmount > 0;
     
+    // Derive totalEntries if not set
+    const totalEntries = data.totalEntries || (totalInitialEntries + totalRebuys + totalAddons);
+    derived.totalEntries = totalEntries;
+    
     // Entries that pay rake (initial entries + rebuys, NOT addons)
-    // Addons typically go straight to prizepool without rake
-    const entriesForRake = totalEntries + totalRebuys;
+    // Addons go 100% to prizepool - no rake on addons
+    const entriesForRake = totalInitialEntries + totalRebuys;
     
-    // Calculate intended total rake
-    const intendedTotalRake = rake * entriesForRake;
-    derived.totalRake = intendedTotalRake;
+    // REVENUE - What we collect
+    const rakeRevenue = rake * entriesForRake;
+    derived.rakeRevenue = rakeRevenue;
     
-    // Calculate total buy-ins collected (all entries including addons)
-    const totalBuyIns = buyIn * (totalEntries + totalRebuys + totalAddons);
-    derived.buyInsByTotalEntries = totalBuyIns;
+    // Total buy-ins collected (all money from players)
+    const totalBuyInsCollected = buyIn * totalEntries;
+    derived.totalBuyInsCollected = totalBuyInsCollected;
     
-    // Calculate prizepool contributions
-    // Entries/rebuys contribute (buyIn - rake), addons contribute full buyIn
+    // PRIZEPOOL - What players receive
     const prizepoolFromEntriesAndRebuys = (buyIn - rake) * entriesForRake;
     const prizepoolFromAddons = buyIn * totalAddons;
-    const totalPrizepoolContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
+    const prizepoolPlayerContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
+    derived.prizepoolPlayerContributions = prizepoolPlayerContributions;
     
-    // Initialize profit/loss and rake realization flag
-    let gameProfitLoss = intendedTotalRake;
-    let totalRakePerPlayerRealised = true;
+    // GUARANTEE IMPACT
+    let guaranteeOverlayCost = 0;
+    let prizepoolSurplus: number | null = null;
+    let prizepoolAddedValue = 0;
     
     if (hasGuarantee) {
-        // Calculate shortfall: how much we need to dip into rake to cover guarantee
-        const shortfall = Math.max(0, guaranteeAmount - totalPrizepoolContributions);
+        const shortfall = guaranteeAmount - prizepoolPlayerContributions;
         
         if (shortfall > 0) {
-            // We need to use some/all rake (and possibly pocket money) to cover guarantee
-            // Profit = intendedRake - shortfall (can be negative if shortfall > rake)
-            gameProfitLoss = intendedTotalRake - shortfall;
-            totalRakePerPlayerRealised = false;
-        }
-        // else: No shortfall, we keep full rake, totalRakePerPlayerRealised stays true
-        
-        // Calculate overlay (out-of-pocket cost) and surplus
-        if (totalBuyIns < guaranteeAmount) {
-            // Total buy-ins don't cover guarantee - we have out-of-pocket overlay
-            derived.guaranteeOverlay = guaranteeAmount - totalBuyIns;
-            derived.guaranteeSurplus = null;
-        } else if (totalPrizepoolContributions > guaranteeAmount) {
-            // Prizepool contributions exceeded guarantee - surplus goes to players
-            derived.guaranteeOverlay = null;
-            derived.guaranteeSurplus = totalPrizepoolContributions - guaranteeAmount;
+            guaranteeOverlayCost = shortfall;
+            prizepoolAddedValue = shortfall;
+            prizepoolSurplus = null;
         } else {
-            // Met guarantee using some/all rake, no out-of-pocket cost
-            derived.guaranteeOverlay = 0;
-            derived.guaranteeSurplus = 0;
+            prizepoolSurplus = -shortfall;
+            prizepoolAddedValue = 0;
         }
-    } else {
-        // No guarantee - we always get full rake
-        derived.guaranteeOverlay = null;
-        derived.guaranteeSurplus = null;
-        // gameProfitLoss stays as intendedTotalRake
-        // totalRakePerPlayerRealised stays true
     }
     
-    derived.gameProfitLoss = gameProfitLoss;
-    derived.totalRakePerPlayerRealised = totalRakePerPlayerRealised;
+    derived.guaranteeOverlayCost = guaranteeOverlayCost;
+    derived.prizepoolAddedValue = prizepoolAddedValue;
+    derived.prizepoolSurplus = prizepoolSurplus;
     
-    // Calculate average stack if not provided
-    if (!data.averagePlayerStack && data.totalChipsInPlay && data.playersRemaining) {
-        derived.averagePlayerStack = data.totalChipsInPlay / data.playersRemaining;
+    // PROFIT
+    const gameProfit = rakeRevenue - guaranteeOverlayCost;
+    derived.gameProfit = gameProfit;
+    
+    // Calculate prizepool if not set
+    if (!data.prizepoolCalculated && prizepoolPlayerContributions > 0) {
+        derived.prizepoolCalculated = prizepoolPlayerContributions + prizepoolAddedValue;
     }
     
     return derived;
 };
 
 /**
- * Detect which fields were changed compared to original
+ * Prepare game data for saving
  */
-export const detectChangedFields = (original: GameData, edited: GameData): string[] => {
-    const changedFields: string[] = [];
-    
-    for (const key in edited) {
-        const field = key as keyof GameData;
-        const originalValue = JSON.stringify(original[field]);
-        const editedValue = JSON.stringify(edited[field]);
-        
-        if (originalValue !== editedValue) {
-            changedFields.push(field);
-        }
-    }
-    
-    return changedFields;
-};
-
-/**
- * Create audit trail entry for edited data
- */
-export const createAuditTrail = (
-    original: GameData,
-    edited: GameData,
-    userId?: string
-): any => {
-    const changedFields = detectChangedFields(original, edited);
-    const changes: Record<string, { from: any; to: any }> = {};
-    
-    changedFields.forEach(field => {
-        changes[field] = {
-            from: original[field as keyof GameData],
-            to: edited[field as keyof GameData]
-        };
-    });
-    
-    return {
-        editedAt: new Date().toISOString(),
-        editedBy: userId || 'manual_edit',
-        changedFields,
-        changes,
-        source: 'enhanced_save_modal',
-        version: '1.0.0'
-    };
-};
-
-/**
- * Prepare game data for saving (with validation and corrections)
- */
-export const prepareGameDataForSave = (
-    data: GameData,
-    original?: GameData,
-    userId?: string
-): {
-    validatedData: GameData;
-    derivedFields: Partial<GameData>;
-    auditTrail?: any;
+export const prepareGameDataForSave = (data: GameData): {
+    data: GameData;
+    warnings: string[];
     validation: ValidationResult;
 } => {
-    // Validate the data
     const validation = validateEditedGameData(data);
-    
-    // Calculate derived fields from the corrected data
     const derivedFields = calculateDerivedFields(validation.correctedData);
     
-    // Merge derived fields into the corrected data
     const validatedData = {
         ...validation.correctedData,
         ...derivedFields
     };
     
-    // Create audit trail if we have original data
-    const auditTrail = original ? createAuditTrail(original, validatedData, userId) : undefined;
+    return {
+        data: validatedData,
+        warnings: validation.warnings,
+        validation
+    };
+};
+
+/**
+ * Create audit trail for changes between original and edited data
+ */
+export const createAuditTrail = (
+    original: GameData,
+    edited: GameData
+): {
+    changedFields: string[];
+    changes: Record<string, { from: any; to: any }>;
+    reason: string;
+} => {
+    const changedFields: string[] = [];
+    const changes: Record<string, { from: any; to: any }> = {};
+    
+    const fieldsToCheck: (keyof GameData)[] = [
+        'name', 'gameStartDateTime', 'gameEndDateTime', 'gameStatus',
+        'buyIn', 'rake', 'startingStack', 'hasGuarantee', 'guaranteeAmount',
+        'totalInitialEntries', 'totalEntries', 'totalRebuys', 'totalAddons', 'totalUniquePlayers',
+        'prizepoolPaid', 'prizepoolCalculated', 'tournamentType',
+        'isSeries', 'seriesName', 'venueFee'
+    ];
+    
+    for (const field of fieldsToCheck) {
+        const originalValue = original[field];
+        const editedValue = edited[field];
+        
+        if (JSON.stringify(originalValue) !== JSON.stringify(editedValue)) {
+            changedFields.push(field);
+            changes[field] = {
+                from: originalValue,
+                to: editedValue
+            };
+        }
+    }
     
     return {
-        validatedData,
-        derivedFields,
-        auditTrail,
-        validation
+        changedFields,
+        changes,
+        reason: 'manual_edit'
     };
 };

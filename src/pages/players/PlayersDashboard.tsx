@@ -182,6 +182,7 @@ export const PlayersDashboard: React.FC = () => {
   // Statistics across ALL entities
   const [stats, setStats] = useState({
     totalEntries: 0,
+    totalInitialEntries: 0,
     totalUniquePlayers: 0,
     activePlayers: 0,
     totalGamesPlayed: 0,
@@ -304,6 +305,8 @@ export const PlayersDashboard: React.FC = () => {
     });
 
     setStats({
+      totalEntries: 0,
+      totalInitialEntries: 0,
       totalUniquePlayers: playersList.length,
       activePlayers,
       totalGamesPlayed: totalGames,

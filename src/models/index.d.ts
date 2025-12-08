@@ -225,23 +225,47 @@ export enum SeriesAssignmentStatus {
 export enum CostItemType {
   DEALER = "DEALER",
   TOURNAMENT_DIRECTOR = "TOURNAMENT_DIRECTOR",
-  PRIZE_CONTRIBUTION = "PRIZE_CONTRIBUTION",
-  JACKPOT_CONTRIBUTION = "JACKPOT_CONTRIBUTION",
-  PROMOTION = "PROMOTION",
   FLOOR_STAFF = "FLOOR_STAFF",
   SECURITY = "SECURITY",
-  EQUIPMENT_RENTAL = "EQUIPMENT_RENTAL",
+  PRIZE_CONTRIBUTION = "PRIZE_CONTRIBUTION",
+  JACKPOT_CONTRIBUTION = "JACKPOT_CONTRIBUTION",
+  GUARANTEE_OVERLAY = "GUARANTEE_OVERLAY",
+  ADDED_VALUE = "ADDED_VALUE",
+  BOUNTY = "BOUNTY",
   VENUE_RENTAL = "VENUE_RENTAL",
+  EQUIPMENT_RENTAL = "EQUIPMENT_RENTAL",
+  FOOD_BEVERAGE = "FOOD_BEVERAGE",
+  MARKETING = "MARKETING",
+  STREAMING = "STREAMING",
   INSURANCE = "INSURANCE",
+  LICENSING = "LICENSING",
+  STAFF_TRAVEL = "STAFF_TRAVEL",
+  PLAYER_ACCOMMODATION = "PLAYER_ACCOMMODATION",
+  PROMOTION = "PROMOTION",
   OTHER = "OTHER"
 }
 
 export enum CostItemRateType {
   STANDARD = "STANDARD",
-  PENALTY = "PENALTY",
   OVERTIME = "OVERTIME",
+  DOUBLE_TIME = "DOUBLE_TIME",
+  PENALTY = "PENALTY",
   HOLIDAY = "HOLIDAY",
-  SPECIAL = "SPECIAL"
+  SPECIAL = "SPECIAL",
+  FLAT = "FLAT"
+}
+
+export enum CostStatus {
+  PENDING = "PENDING",
+  PARTIAL = "PARTIAL",
+  COMPLETE = "COMPLETE",
+  ESTIMATED = "ESTIMATED"
+}
+
+export enum SnapshotType {
+  AUTO = "AUTO",
+  MANUAL = "MANUAL",
+  RECONCILED = "RECONCILED"
 }
 
 export enum EntryType {
@@ -417,7 +441,8 @@ export declare const VenueMetricsPreview: (new (init: ModelInit<VenueMetricsPrev
 
 type EagerVenueMetricsSnapshot = {
   readonly totalGamesHeld?: number | null;
-  readonly averagePlayersPerGame?: number | null;
+  readonly averageUniquePlayersPerGame?: number | null;
+  readonly averageEntriesPerGame?: number | null;
   readonly gameNights?: (string | null)[] | null;
   readonly gamesIncluded?: number | null;
   readonly gamesExcluded?: number | null;
@@ -427,7 +452,8 @@ type EagerVenueMetricsSnapshot = {
 
 type LazyVenueMetricsSnapshot = {
   readonly totalGamesHeld?: number | null;
-  readonly averagePlayersPerGame?: number | null;
+  readonly averageUniquePlayersPerGame?: number | null;
+  readonly averageEntriesPerGame?: number | null;
   readonly gameNights?: (string | null)[] | null;
   readonly gamesIncluded?: number | null;
   readonly gamesExcluded?: number | null;
@@ -493,6 +519,7 @@ type EagerConsolidationSibling = {
   readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
   readonly gameStartDateTime?: string | null;
   readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
   readonly totalEntries?: number | null;
   readonly finalDay?: boolean | null;
 }
@@ -505,6 +532,7 @@ type LazyConsolidationSibling = {
   readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
   readonly gameStartDateTime?: string | null;
   readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
   readonly totalEntries?: number | null;
   readonly finalDay?: boolean | null;
 }
@@ -515,6 +543,7 @@ export declare const ConsolidationSibling: (new (init: ModelInit<ConsolidationSi
 
 type EagerProjectedConsolidationTotals = {
   readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -529,6 +558,7 @@ type EagerProjectedConsolidationTotals = {
 
 type LazyProjectedConsolidationTotals = {
   readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -864,17 +894,13 @@ type EagerScrapedGameData = {
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly prizepoolPaid?: number | null;
   readonly prizepoolCalculated?: number | null;
-  readonly buyInsByTotalEntries?: number | null;
-  readonly gameProfitLoss?: number | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
-  readonly totalRake?: number | null;
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
-  readonly guaranteeOverlay?: number | null;
-  readonly guaranteeSurplus?: number | null;
   readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -920,6 +946,13 @@ type EagerScrapedGameData = {
   readonly fetchedAt?: string | null;
   readonly reScrapedAt?: string | null;
   readonly wasForced?: boolean | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly prizepoolSurplus?: number | null;
+  readonly guaranteeOverlayCost?: number | null;
+  readonly gameProfit?: number | null;
 }
 
 type LazyScrapedGameData = {
@@ -933,17 +966,13 @@ type LazyScrapedGameData = {
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly prizepoolPaid?: number | null;
   readonly prizepoolCalculated?: number | null;
-  readonly buyInsByTotalEntries?: number | null;
-  readonly gameProfitLoss?: number | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
-  readonly totalRake?: number | null;
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
-  readonly guaranteeOverlay?: number | null;
-  readonly guaranteeSurplus?: number | null;
   readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -989,6 +1018,13 @@ type LazyScrapedGameData = {
   readonly fetchedAt?: string | null;
   readonly reScrapedAt?: string | null;
   readonly wasForced?: boolean | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly prizepoolSurplus?: number | null;
+  readonly guaranteeOverlayCost?: number | null;
+  readonly gameProfit?: number | null;
 }
 
 export declare type ScrapedGameData = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameData : LazyScrapedGameData
@@ -1172,6 +1208,7 @@ type EagerReScrapeResult = {
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
   readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -1206,6 +1243,7 @@ type LazyReScrapeResult = {
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
   readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -2055,7 +2093,8 @@ type EagerVenueDetails = {
   readonly status: VenueStatus | keyof typeof VenueStatus;
   readonly lastCustomerSuccessVisit?: string | null;
   readonly totalGamesHeld?: number | null;
-  readonly averagePlayersPerGame?: number | null;
+  readonly averageUniquePlayersPerGame?: number | null;
+  readonly averageEntriesPerGame?: number | null;
   readonly gameNights?: (string | null)[] | null;
   readonly venueId: string;
   readonly venue?: Venue | null;
@@ -2073,7 +2112,8 @@ type LazyVenueDetails = {
   readonly status: VenueStatus | keyof typeof VenueStatus;
   readonly lastCustomerSuccessVisit?: string | null;
   readonly totalGamesHeld?: number | null;
-  readonly averagePlayersPerGame?: number | null;
+  readonly averageUniquePlayersPerGame?: number | null;
+  readonly averageEntriesPerGame?: number | null;
   readonly gameNights?: (string | null)[] | null;
   readonly venueId: string;
   readonly venue: AsyncItem<Venue | undefined>;
@@ -2210,13 +2250,15 @@ type EagerGame = {
   readonly totalUniquePlayers?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
+  readonly totalInitialEntries?: number | null;
   readonly totalEntries?: number | null;
-  readonly buyInsByTotalEntries?: number | null;
-  readonly totalRake?: number | null;
-  readonly gameProfitLoss?: number | null;
-  readonly guaranteeOverlay?: number | null;
-  readonly guaranteeSurplus?: number | null;
-  readonly totalRakePerPlayerRealised?: boolean | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly prizepoolSurplus?: number | null;
+  readonly guaranteeOverlayCost?: number | null;
+  readonly gameProfit?: number | null;
   readonly playersRemaining?: number | null;
   readonly totalChipsInPlay?: number | null;
   readonly averagePlayerStack?: number | null;
@@ -2298,13 +2340,15 @@ type LazyGame = {
   readonly totalUniquePlayers?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
+  readonly totalInitialEntries?: number | null;
   readonly totalEntries?: number | null;
-  readonly buyInsByTotalEntries?: number | null;
-  readonly totalRake?: number | null;
-  readonly gameProfitLoss?: number | null;
-  readonly guaranteeOverlay?: number | null;
-  readonly guaranteeSurplus?: number | null;
-  readonly totalRakePerPlayerRealised?: boolean | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly prizepoolSurplus?: number | null;
+  readonly guaranteeOverlayCost?: number | null;
+  readonly gameProfit?: number | null;
   readonly playersRemaining?: number | null;
   readonly totalChipsInPlay?: number | null;
   readonly averagePlayerStack?: number | null;
@@ -2504,28 +2548,66 @@ type EagerGameFinancialSnapshot = {
   readonly id: string;
   readonly gameId: string;
   readonly game?: Game | null;
+  readonly gameCostId?: string | null;
   readonly entityId?: string | null;
   readonly venueId?: string | null;
   readonly gameStartDateTime?: string | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly venueFee?: number | null;
   readonly totalRevenue: number;
-  readonly totalPrizePool?: number | null;
-  readonly totalRake?: number | null;
-  readonly totalVenueFee?: number | null;
-  readonly totalCost: number;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly prizepoolTotal?: number | null;
+  readonly prizepoolSurplus?: number | null;
   readonly totalDealerCost?: number | null;
   readonly totalTournamentDirectorCost?: number | null;
-  readonly totalPromotionCost?: number | null;
   readonly totalFloorStaffCost?: number | null;
-  readonly totalOtherCost?: number | null;
+  readonly totalSecurityCost?: number | null;
+  readonly totalStaffCost?: number | null;
   readonly totalPrizeContribution?: number | null;
   readonly totalJackpotContribution?: number | null;
-  readonly profit: number;
+  readonly totalGuaranteeOverlayCost?: number | null;
+  readonly totalAddedValueCost?: number | null;
+  readonly totalBountyCost?: number | null;
+  readonly totalDirectGameCost?: number | null;
+  readonly totalVenueRentalCost?: number | null;
+  readonly totalEquipmentRentalCost?: number | null;
+  readonly totalFoodBeverageCost?: number | null;
+  readonly totalMarketingCost?: number | null;
+  readonly totalStreamingCost?: number | null;
+  readonly totalOperationsCost?: number | null;
+  readonly totalInsuranceCost?: number | null;
+  readonly totalLicensingCost?: number | null;
+  readonly totalComplianceCost?: number | null;
+  readonly totalStaffTravelCost?: number | null;
+  readonly totalPlayerAccommodationCost?: number | null;
+  readonly totalPromotionCost?: number | null;
+  readonly totalOtherCost?: number | null;
+  readonly totalCost: number;
+  readonly gameProfit?: number | null;
+  readonly netProfit: number;
   readonly profitMargin?: number | null;
   readonly revenuePerPlayer?: number | null;
   readonly costPerPlayer?: number | null;
+  readonly profitPerPlayer?: number | null;
+  readonly rakePerEntry?: number | null;
   readonly dealerCostPerHour?: number | null;
+  readonly staffCostPerPlayer?: number | null;
   readonly promoSpendPerPlayer?: number | null;
+  readonly guaranteeCoverageRate?: number | null;
+  readonly guaranteeMet?: boolean | null;
+  readonly totalUniquePlayers?: number | null;
+  readonly totalEntries?: number | null;
+  readonly guaranteeAmount?: number | null;
+  readonly gameDurationMinutes?: number | null;
+  readonly gameType?: GameType | keyof typeof GameType | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly notes?: string | null;
+  readonly snapshotType?: SnapshotType | keyof typeof SnapshotType | null;
+  readonly isReconciled?: boolean | null;
+  readonly reconciledAt?: string | null;
+  readonly reconciledBy?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -2537,28 +2619,66 @@ type LazyGameFinancialSnapshot = {
   readonly id: string;
   readonly gameId: string;
   readonly game: AsyncItem<Game | undefined>;
+  readonly gameCostId?: string | null;
   readonly entityId?: string | null;
   readonly venueId?: string | null;
   readonly gameStartDateTime?: string | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly venueFee?: number | null;
   readonly totalRevenue: number;
-  readonly totalPrizePool?: number | null;
-  readonly totalRake?: number | null;
-  readonly totalVenueFee?: number | null;
-  readonly totalCost: number;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly prizepoolTotal?: number | null;
+  readonly prizepoolSurplus?: number | null;
   readonly totalDealerCost?: number | null;
   readonly totalTournamentDirectorCost?: number | null;
-  readonly totalPromotionCost?: number | null;
   readonly totalFloorStaffCost?: number | null;
-  readonly totalOtherCost?: number | null;
+  readonly totalSecurityCost?: number | null;
+  readonly totalStaffCost?: number | null;
   readonly totalPrizeContribution?: number | null;
   readonly totalJackpotContribution?: number | null;
-  readonly profit: number;
+  readonly totalGuaranteeOverlayCost?: number | null;
+  readonly totalAddedValueCost?: number | null;
+  readonly totalBountyCost?: number | null;
+  readonly totalDirectGameCost?: number | null;
+  readonly totalVenueRentalCost?: number | null;
+  readonly totalEquipmentRentalCost?: number | null;
+  readonly totalFoodBeverageCost?: number | null;
+  readonly totalMarketingCost?: number | null;
+  readonly totalStreamingCost?: number | null;
+  readonly totalOperationsCost?: number | null;
+  readonly totalInsuranceCost?: number | null;
+  readonly totalLicensingCost?: number | null;
+  readonly totalComplianceCost?: number | null;
+  readonly totalStaffTravelCost?: number | null;
+  readonly totalPlayerAccommodationCost?: number | null;
+  readonly totalPromotionCost?: number | null;
+  readonly totalOtherCost?: number | null;
+  readonly totalCost: number;
+  readonly gameProfit?: number | null;
+  readonly netProfit: number;
   readonly profitMargin?: number | null;
   readonly revenuePerPlayer?: number | null;
   readonly costPerPlayer?: number | null;
+  readonly profitPerPlayer?: number | null;
+  readonly rakePerEntry?: number | null;
   readonly dealerCostPerHour?: number | null;
+  readonly staffCostPerPlayer?: number | null;
   readonly promoSpendPerPlayer?: number | null;
+  readonly guaranteeCoverageRate?: number | null;
+  readonly guaranteeMet?: boolean | null;
+  readonly totalUniquePlayers?: number | null;
+  readonly totalEntries?: number | null;
+  readonly guaranteeAmount?: number | null;
+  readonly gameDurationMinutes?: number | null;
+  readonly gameType?: GameType | keyof typeof GameType | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly notes?: string | null;
+  readonly snapshotType?: SnapshotType | keyof typeof SnapshotType | null;
+  readonly isReconciled?: boolean | null;
+  readonly reconciledAt?: string | null;
+  readonly reconciledBy?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -2578,17 +2698,36 @@ type EagerGameCost = {
   readonly game?: Game | null;
   readonly totalDealerCost?: number | null;
   readonly totalTournamentDirectorCost?: number | null;
+  readonly totalFloorStaffCost?: number | null;
+  readonly totalSecurityCost?: number | null;
   readonly totalPrizeContribution?: number | null;
   readonly totalJackpotContribution?: number | null;
+  readonly totalGuaranteeOverlayCost?: number | null;
+  readonly totalAddedValueCost?: number | null;
+  readonly totalBountyCost?: number | null;
+  readonly totalVenueRentalCost?: number | null;
+  readonly totalEquipmentRentalCost?: number | null;
+  readonly totalFoodBeverageCost?: number | null;
+  readonly totalMarketingCost?: number | null;
+  readonly totalStreamingCost?: number | null;
+  readonly totalInsuranceCost?: number | null;
+  readonly totalLicensingCost?: number | null;
+  readonly totalStaffTravelCost?: number | null;
+  readonly totalPlayerAccommodationCost?: number | null;
   readonly totalPromotionCost?: number | null;
-  readonly totalFloorStaffCost?: number | null;
   readonly totalOtherCost?: number | null;
+  readonly totalStaffCost?: number | null;
+  readonly totalDirectGameCost?: number | null;
+  readonly totalOperationsCost?: number | null;
+  readonly totalComplianceCost?: number | null;
   readonly totalCost: number;
   readonly lineItems?: (GameCostLineItem | null)[] | null;
   readonly entityId?: string | null;
   readonly venueId?: string | null;
   readonly gameDate?: string | null;
   readonly notes?: string | null;
+  readonly isEstimate?: boolean | null;
+  readonly costStatus?: CostStatus | keyof typeof CostStatus | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -2602,17 +2741,36 @@ type LazyGameCost = {
   readonly game: AsyncItem<Game | undefined>;
   readonly totalDealerCost?: number | null;
   readonly totalTournamentDirectorCost?: number | null;
+  readonly totalFloorStaffCost?: number | null;
+  readonly totalSecurityCost?: number | null;
   readonly totalPrizeContribution?: number | null;
   readonly totalJackpotContribution?: number | null;
+  readonly totalGuaranteeOverlayCost?: number | null;
+  readonly totalAddedValueCost?: number | null;
+  readonly totalBountyCost?: number | null;
+  readonly totalVenueRentalCost?: number | null;
+  readonly totalEquipmentRentalCost?: number | null;
+  readonly totalFoodBeverageCost?: number | null;
+  readonly totalMarketingCost?: number | null;
+  readonly totalStreamingCost?: number | null;
+  readonly totalInsuranceCost?: number | null;
+  readonly totalLicensingCost?: number | null;
+  readonly totalStaffTravelCost?: number | null;
+  readonly totalPlayerAccommodationCost?: number | null;
   readonly totalPromotionCost?: number | null;
-  readonly totalFloorStaffCost?: number | null;
   readonly totalOtherCost?: number | null;
+  readonly totalStaffCost?: number | null;
+  readonly totalDirectGameCost?: number | null;
+  readonly totalOperationsCost?: number | null;
+  readonly totalComplianceCost?: number | null;
   readonly totalCost: number;
   readonly lineItems: AsyncCollection<GameCostLineItem>;
   readonly entityId?: string | null;
   readonly venueId?: string | null;
   readonly gameDate?: string | null;
   readonly notes?: string | null;
+  readonly isEstimate?: boolean | null;
+  readonly costStatus?: CostStatus | keyof typeof CostStatus | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -2633,10 +2791,14 @@ type EagerGameCostLineItem = {
   readonly costItemId: string;
   readonly costItem?: GameCostItem | null;
   readonly costType: CostItemType | keyof typeof CostItemType;
+  readonly rateType?: CostItemRateType | keyof typeof CostItemRateType | null;
   readonly amount: number;
   readonly quantity?: number | null;
   readonly rate?: number | null;
   readonly hours?: number | null;
+  readonly staffMemberId?: string | null;
+  readonly staffMemberName?: string | null;
+  readonly description?: string | null;
   readonly notes?: string | null;
   readonly gameId?: string | null;
   readonly entityId?: string | null;
@@ -2656,10 +2818,14 @@ type LazyGameCostLineItem = {
   readonly costItemId: string;
   readonly costItem: AsyncItem<GameCostItem | undefined>;
   readonly costType: CostItemType | keyof typeof CostItemType;
+  readonly rateType?: CostItemRateType | keyof typeof CostItemRateType | null;
   readonly amount: number;
   readonly quantity?: number | null;
   readonly rate?: number | null;
   readonly hours?: number | null;
+  readonly staffMemberId?: string | null;
+  readonly staffMemberName?: string | null;
+  readonly description?: string | null;
   readonly notes?: string | null;
   readonly gameId?: string | null;
   readonly entityId?: string | null;

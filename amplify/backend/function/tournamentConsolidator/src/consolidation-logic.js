@@ -441,14 +441,20 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         new Date(b.gameStartDateTime || 0).getTime()
     );
     let totalUniquePlayers = 0;
+    let totalInitialEntries = 0;
     let totalEntries = 0;
     let totalRebuys = 0;
     let totalAddons = 0;
     let maxPrizepoolPaid = 0;
     let maxPrizepoolCalculated = 0;
-    let totalRake = 0;
-    let buyInsByTotalEntries = 0;
-    let gameProfitLoss = 0;
+    let projectedRakeRevenue = 0;
+    let rakeSubsidy = 0;
+    let actualRakeRevenue = 0;
+    let totalBuyInsCollected = 0;
+    let prizepoolPlayerContributions = 0;
+    let prizepoolAddedValue = 0;
+    let gameProfit = 0;
+    let fullRakeRealized = true; // Starts true, becomes false if any child has false
     let earliestStart = Number.MAX_SAFE_INTEGER;
     let latestEnd = 0;
     let finalDayChild = null;
@@ -456,18 +462,30 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     let totalChipsInPlay = null;
     let averagePlayerStack = null;
     let startingStack = 0;
-    let guaranteeOverlay = 0;
-    let guaranteeSurplus = 0;
+    let guaranteeOverlayCost = 0;
+    let prizepoolSurplus = 0;
 
     for (const child of sortedChildren) {
         // Simple sums
         totalUniquePlayers += (child.totalUniquePlayers || 0);
+        totalInitialEntries += (child.totalInitialEntries || 0);
         totalEntries += (child.totalEntries || 0);
         totalRebuys += (child.totalRebuys || 0);
         totalAddons += (child.totalAddons || 0);
-        totalRake += (child.totalRake || 0);
-        buyInsByTotalEntries += (child.buyInsByTotalEntries || 0);
-        gameProfitLoss += (child.gameProfitLoss || 0);
+        
+        // Financial aggregations (new naming)
+        projectedRakeRevenue += (child.projectedRakeRevenue || 0);
+        rakeSubsidy += (child.rakeSubsidy || 0);
+        actualRakeRevenue += (child.actualRakeRevenue || 0);
+        totalBuyInsCollected += (child.totalBuyInsCollected || 0);
+        prizepoolPlayerContributions += (child.prizepoolPlayerContributions || 0);
+        prizepoolAddedValue += (child.prizepoolAddedValue || 0);
+        gameProfit += (child.gameProfit || 0);
+        
+        // fullRakeRealized is true only if ALL children have it true
+        if (child.fullRakeRealized === false) {
+            fullRakeRealized = false;
+        }
         
         // Prizepool: take the largest (usually final day)
         if ((child.prizepoolPaid || 0) > maxPrizepoolPaid) {
@@ -507,8 +525,8 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         playersRemaining = finalDayChild.playersRemaining ?? null;
         totalChipsInPlay = finalDayChild.totalChipsInPlay ?? null;
         averagePlayerStack = finalDayChild.averagePlayerStack ?? null;
-        guaranteeOverlay = finalDayChild.guaranteeOverlay ?? 0;
-        guaranteeSurplus = finalDayChild.guaranteeSurplus ?? 0;
+        guaranteeOverlayCost = finalDayChild.guaranteeOverlayCost ?? 0;
+        prizepoolSurplus = finalDayChild.prizepoolSurplus ?? 0;
     }
 
     // Determine parent status
@@ -554,21 +572,28 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     }
 
     return {
+        totalInitialEntries,
         totalEntries,
         uniqueRunners: totalUniquePlayers, // Simplified - actual calculation needs player dedup
         totalRebuys,
         totalAddons,
         prizepoolPaid: maxPrizepoolPaid,
         prizepoolCalculated: maxPrizepoolCalculated,
-        totalRake,
-        buyInsByTotalEntries,
-        gameProfitLoss,
+        // Financial metrics (new naming)
+        totalBuyInsCollected,
+        projectedRakeRevenue,
+        rakeSubsidy,
+        actualRakeRevenue,
+        prizepoolPlayerContributions,
+        prizepoolAddedValue,
+        prizepoolSurplus,
+        guaranteeOverlayCost,
+        gameProfit,
+        fullRakeRealized,
         startingStack,
         playersRemaining,
         totalChipsInPlay,
         averagePlayerStack,
-        guaranteeOverlay,
-        guaranteeSurplus,
         earliestStart: earliestStart < Number.MAX_SAFE_INTEGER 
             ? new Date(earliestStart).toISOString() 
             : null,
@@ -621,8 +646,8 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         // Guarantee fields
         hasGuarantee: childGame.hasGuarantee || false,
         guaranteeAmount: childGame.guaranteeAmount || 0,
-        guaranteeOverlay: 0,
-        guaranteeSurplus: 0,
+        guaranteeOverlayCost: 0,
+        prizepoolSurplus: 0,
         
         // Series fields
         tournamentSeriesId: childGame.tournamentSeriesId || null,
@@ -652,15 +677,22 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         
         // Totals (will be calculated/aggregated)
         totalUniquePlayers: 0,
+        totalInitialEntries: 0,
         totalEntries: 0,
         actualCalculatedUniquePlayers: 0,
         totalRebuys: 0,
         totalAddons: 0,
         prizepoolPaid: 0,
         prizepoolCalculated: 0,
-        totalRake: 0,
-        gameProfitLoss: 0,
-        buyInsByTotalEntries: 0,
+        // Financial metrics (new naming)
+        totalBuyInsCollected: 0,
+        projectedRakeRevenue: 0,
+        rakeSubsidy: 0,
+        actualRakeRevenue: 0,
+        prizepoolPlayerContributions: 0,
+        prizepoolAddedValue: 0,
+        gameProfit: 0,
+        fullRakeRealized: true,
         
         // Stack/chip tracking
         startingStack: childGame.startingStack || 0,

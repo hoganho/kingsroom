@@ -440,7 +440,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
-            averagePlayersPerGame
+            averageUniquePlayersPerGame
+            averageEntriesPerGame
             gameNights
             venueId
             createdAt
@@ -531,13 +532,15 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           totalUniquePlayers
           totalRebuys
           totalAddons
+          totalInitialEntries
           totalEntries
-          buyInsByTotalEntries
-          totalRake
-          gameProfitLoss
-          guaranteeOverlay
-          guaranteeSurplus
-          totalRakePerPlayerRealised
+          totalBuyInsCollected
+          rakeRevenue
+          prizepoolPlayerContributions
+          prizepoolAddedValue
+          prizepoolSurplus
+          guaranteeOverlayCost
+          gameProfit
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -576,13 +579,15 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             totalUniquePlayers
             totalRebuys
             totalAddons
+            totalInitialEntries
             totalEntries
-            buyInsByTotalEntries
-            totalRake
-            gameProfitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            totalRakePerPlayerRealised
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -718,16 +723,35 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameId
             totalDealerCost
             totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
             totalPrizeContribution
             totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
             totalPromotionCost
-            totalFloorStaffCost
             totalOtherCost
+            totalStaffCost
+            totalDirectGameCost
+            totalOperationsCost
+            totalComplianceCost
             totalCost
             entityId
             venueId
             gameDate
             notes
+            isEstimate
+            costStatus
             createdAt
             updatedAt
             _version
@@ -1375,7 +1399,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             status
             lastCustomerSuccessVisit
             totalGamesHeld
-            averagePlayersPerGame
+            averageUniquePlayersPerGame
+            averageEntriesPerGame
             gameNights
             venueId
             createdAt
@@ -1466,13 +1491,15 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           totalUniquePlayers
           totalRebuys
           totalAddons
+          totalInitialEntries
           totalEntries
-          buyInsByTotalEntries
-          totalRake
-          gameProfitLoss
-          guaranteeOverlay
-          guaranteeSurplus
-          totalRakePerPlayerRealised
+          totalBuyInsCollected
+          rakeRevenue
+          prizepoolPlayerContributions
+          prizepoolAddedValue
+          prizepoolSurplus
+          guaranteeOverlayCost
+          gameProfit
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -1511,13 +1538,15 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             totalUniquePlayers
             totalRebuys
             totalAddons
+            totalInitialEntries
             totalEntries
-            buyInsByTotalEntries
-            totalRake
-            gameProfitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            totalRakePerPlayerRealised
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -1653,16 +1682,35 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameId
             totalDealerCost
             totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
             totalPrizeContribution
             totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
             totalPromotionCost
-            totalFloorStaffCost
             totalOtherCost
+            totalStaffCost
+            totalDirectGameCost
+            totalOperationsCost
+            totalComplianceCost
             totalCost
             entityId
             venueId
             gameDate
             notes
+            isEstimate
+            costStatus
             createdAt
             updatedAt
             _version
@@ -2326,7 +2374,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             status
             lastCustomerSuccessVisit
             totalGamesHeld
-            averagePlayersPerGame
+            averageUniquePlayersPerGame
+            averageEntriesPerGame
             gameNights
             venueId
             createdAt
@@ -2417,13 +2466,15 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           totalUniquePlayers
           totalRebuys
           totalAddons
+          totalInitialEntries
           totalEntries
-          buyInsByTotalEntries
-          totalRake
-          gameProfitLoss
-          guaranteeOverlay
-          guaranteeSurplus
-          totalRakePerPlayerRealised
+          totalBuyInsCollected
+          rakeRevenue
+          prizepoolPlayerContributions
+          prizepoolAddedValue
+          prizepoolSurplus
+          guaranteeOverlayCost
+          gameProfit
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -2462,13 +2513,15 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             totalUniquePlayers
             totalRebuys
             totalAddons
+            totalInitialEntries
             totalEntries
-            buyInsByTotalEntries
-            totalRake
-            gameProfitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            totalRakePerPlayerRealised
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -2604,16 +2657,35 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameId
             totalDealerCost
             totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
             totalPrizeContribution
             totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
             totalPromotionCost
-            totalFloorStaffCost
             totalOtherCost
+            totalStaffCost
+            totalDirectGameCost
+            totalOperationsCost
+            totalComplianceCost
             totalCost
             entityId
             venueId
             gameDate
             notes
+            isEstimate
+            costStatus
             createdAt
             updatedAt
             _version
@@ -3264,7 +3336,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             status
             lastCustomerSuccessVisit
             totalGamesHeld
-            averagePlayersPerGame
+            averageUniquePlayersPerGame
+            averageEntriesPerGame
             gameNights
             venueId
             createdAt
@@ -3355,13 +3428,15 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           totalUniquePlayers
           totalRebuys
           totalAddons
+          totalInitialEntries
           totalEntries
-          buyInsByTotalEntries
-          totalRake
-          gameProfitLoss
-          guaranteeOverlay
-          guaranteeSurplus
-          totalRakePerPlayerRealised
+          totalBuyInsCollected
+          rakeRevenue
+          prizepoolPlayerContributions
+          prizepoolAddedValue
+          prizepoolSurplus
+          guaranteeOverlayCost
+          gameProfit
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -3400,13 +3475,15 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             totalUniquePlayers
             totalRebuys
             totalAddons
+            totalInitialEntries
             totalEntries
-            buyInsByTotalEntries
-            totalRake
-            gameProfitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            totalRakePerPlayerRealised
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -3542,16 +3619,35 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameId
             totalDealerCost
             totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
             totalPrizeContribution
             totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
             totalPromotionCost
-            totalFloorStaffCost
             totalOtherCost
+            totalStaffCost
+            totalDirectGameCost
+            totalOperationsCost
+            totalComplianceCost
             totalCost
             entityId
             venueId
             gameDate
             notes
+            isEstimate
+            costStatus
             createdAt
             updatedAt
             _version
@@ -4202,7 +4298,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             status
             lastCustomerSuccessVisit
             totalGamesHeld
-            averagePlayersPerGame
+            averageUniquePlayersPerGame
+            averageEntriesPerGame
             gameNights
             venueId
             createdAt
@@ -4293,13 +4390,15 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           totalUniquePlayers
           totalRebuys
           totalAddons
+          totalInitialEntries
           totalEntries
-          buyInsByTotalEntries
-          totalRake
-          gameProfitLoss
-          guaranteeOverlay
-          guaranteeSurplus
-          totalRakePerPlayerRealised
+          totalBuyInsCollected
+          rakeRevenue
+          prizepoolPlayerContributions
+          prizepoolAddedValue
+          prizepoolSurplus
+          guaranteeOverlayCost
+          gameProfit
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -4338,13 +4437,15 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             totalUniquePlayers
             totalRebuys
             totalAddons
+            totalInitialEntries
             totalEntries
-            buyInsByTotalEntries
-            totalRake
-            gameProfitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            totalRakePerPlayerRealised
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -4480,16 +4581,35 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameId
             totalDealerCost
             totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
             totalPrizeContribution
             totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
             totalPromotionCost
-            totalFloorStaffCost
             totalOtherCost
+            totalStaffCost
+            totalDirectGameCost
+            totalOperationsCost
+            totalComplianceCost
             totalCost
             entityId
             venueId
             gameDate
             notes
+            isEstimate
+            costStatus
             createdAt
             updatedAt
             _version
@@ -5137,7 +5257,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             status
             lastCustomerSuccessVisit
             totalGamesHeld
-            averagePlayersPerGame
+            averageUniquePlayersPerGame
+            averageEntriesPerGame
             gameNights
             venueId
             createdAt
@@ -5228,13 +5349,15 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           totalUniquePlayers
           totalRebuys
           totalAddons
+          totalInitialEntries
           totalEntries
-          buyInsByTotalEntries
-          totalRake
-          gameProfitLoss
-          guaranteeOverlay
-          guaranteeSurplus
-          totalRakePerPlayerRealised
+          totalBuyInsCollected
+          rakeRevenue
+          prizepoolPlayerContributions
+          prizepoolAddedValue
+          prizepoolSurplus
+          guaranteeOverlayCost
+          gameProfit
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -5273,13 +5396,15 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             totalUniquePlayers
             totalRebuys
             totalAddons
+            totalInitialEntries
             totalEntries
-            buyInsByTotalEntries
-            totalRake
-            gameProfitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            totalRakePerPlayerRealised
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -5415,16 +5540,35 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameId
             totalDealerCost
             totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
             totalPrizeContribution
             totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
             totalPromotionCost
-            totalFloorStaffCost
             totalOtherCost
+            totalStaffCost
+            totalDirectGameCost
+            totalOperationsCost
+            totalComplianceCost
             totalCost
             entityId
             venueId
             gameDate
             notes
+            isEstimate
+            costStatus
             createdAt
             updatedAt
             _version
@@ -6085,7 +6229,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             status
             lastCustomerSuccessVisit
             totalGamesHeld
-            averagePlayersPerGame
+            averageUniquePlayersPerGame
+            averageEntriesPerGame
             gameNights
             venueId
             createdAt
@@ -6176,13 +6321,15 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           totalUniquePlayers
           totalRebuys
           totalAddons
+          totalInitialEntries
           totalEntries
-          buyInsByTotalEntries
-          totalRake
-          gameProfitLoss
-          guaranteeOverlay
-          guaranteeSurplus
-          totalRakePerPlayerRealised
+          totalBuyInsCollected
+          rakeRevenue
+          prizepoolPlayerContributions
+          prizepoolAddedValue
+          prizepoolSurplus
+          guaranteeOverlayCost
+          gameProfit
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -6221,13 +6368,15 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             totalUniquePlayers
             totalRebuys
             totalAddons
+            totalInitialEntries
             totalEntries
-            buyInsByTotalEntries
-            totalRake
-            gameProfitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            totalRakePerPlayerRealised
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -6363,16 +6512,35 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameId
             totalDealerCost
             totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
             totalPrizeContribution
             totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
             totalPromotionCost
-            totalFloorStaffCost
             totalOtherCost
+            totalStaffCost
+            totalDirectGameCost
+            totalOperationsCost
+            totalComplianceCost
             totalCost
             entityId
             venueId
             gameDate
             notes
+            isEstimate
+            costStatus
             createdAt
             updatedAt
             _version
@@ -7033,7 +7201,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             status
             lastCustomerSuccessVisit
             totalGamesHeld
-            averagePlayersPerGame
+            averageUniquePlayersPerGame
+            averageEntriesPerGame
             gameNights
             venueId
             createdAt
@@ -7124,13 +7293,15 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           totalUniquePlayers
           totalRebuys
           totalAddons
+          totalInitialEntries
           totalEntries
-          buyInsByTotalEntries
-          totalRake
-          gameProfitLoss
-          guaranteeOverlay
-          guaranteeSurplus
-          totalRakePerPlayerRealised
+          totalBuyInsCollected
+          rakeRevenue
+          prizepoolPlayerContributions
+          prizepoolAddedValue
+          prizepoolSurplus
+          guaranteeOverlayCost
+          gameProfit
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -7169,13 +7340,15 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             totalUniquePlayers
             totalRebuys
             totalAddons
+            totalInitialEntries
             totalEntries
-            buyInsByTotalEntries
-            totalRake
-            gameProfitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            totalRakePerPlayerRealised
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -7311,16 +7484,35 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameId
             totalDealerCost
             totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
             totalPrizeContribution
             totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
             totalPromotionCost
-            totalFloorStaffCost
             totalOtherCost
+            totalStaffCost
+            totalDirectGameCost
+            totalOperationsCost
+            totalComplianceCost
             totalCost
             entityId
             venueId
             gameDate
             notes
+            isEstimate
+            costStatus
             createdAt
             updatedAt
             _version

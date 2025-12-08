@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp": 1765188182933,
+    "message": "INIT_START Runtime Version: nodejs:22.v68\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:685b5bdd1a5972cbde591187200f592fbd417cd448d71e500b10e41759692493\n",
+    "ingestionTime": 1765188185721
+  },
+  {
+    "timestamp": 1765188183325,
+    "message": "START RequestId: a3a94cfe-3558-44f3-9112-8750332abd2e Version: $LATEST\n",
+    "ingestionTime": 1765188185721
+  },
+  {
+    "timestamp": 1765188183327,
+    "message": "2025-12-08T10:03:03.327Z\ta3a94cfe-3558-44f3-9112-8750332abd2e\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1765188185721
+  },
+  {
+    "timestamp": 1765188183363,
+    "message": "2025-12-08T10:03:03.363Z\ta3a94cfe-3558-44f3-9112-8750332abd2e\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1765188185721
+  },
+  {
+    "timestamp": 1765188183383,
+    "message": "END RequestId: a3a94cfe-3558-44f3-9112-8750332abd2e\n",
+    "ingestionTime": 1765188185721
+  },
+  {
+    "timestamp": 1765188183383,
+    "message": "REPORT RequestId: a3a94cfe-3558-44f3-9112-8750332abd2e\tDuration: 57.74 ms\tBilled Duration: 446 ms\tMemory Size: 128 MB\tMax Memory Used: 94 MB\tInit Duration: 388.18 ms\t\n",
+    "ingestionTime": 1765188185721
+  }
+]
