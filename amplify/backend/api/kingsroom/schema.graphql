@@ -313,6 +313,24 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   expectedTotalEntries: Int
   actualCalculatedUniquePlayers: Int
 
+  # --- Query Optimisation Keys ---
+  # Day of week for the game (MONDAY, TUESDAY, etc.)
+  gameDayOfWeek: String @index(name: "byDayOfWeek", sortKeyFields: ["gameStartDateTime"])
+
+  # Buy-in bucket for range queries (zero-padded for string sorting)
+  # Values: "0000-0025", "0026-0050", "0051-0100", "0101-0200", "0201-0500", "0501-PLUS"
+  buyInBucket: String @index(name: "byBuyInBucket", sortKeyFields: ["gameStartDateTime"])
+  
+  # Composite key: venue + day + variant
+  # Enables: "All Monday NLHE games at Venue X"
+  # Format: "{venueId}#{dayOfWeek}#{variant}"
+  venueScheduleKey: String @index(name: "byVenueSchedule", sortKeyFields: ["gameStartDateTime"])
+  
+  # Composite key: entity + day + variant + buyInBucket
+  # Enables: "All Monday NLHE $50 games across my entity"
+  # Format: "{entityId}#{dayOfWeek}#{variant}#{buyInBucket}"
+  entityQueryKey: String @index(name: "byEntityQuery", sortKeyFields: ["gameStartDateTime"])
+
   # --- Data Source ---
   sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
   tournamentId: Int
@@ -770,6 +788,7 @@ type PlayerResult @model(subscriptions: null) @auth(rules: [{ allow: private }])
   gameId: ID! @index(name: "byGame")
   game: Game @belongsTo(fields: ["gameId"])
   recordType: String @default(value: "ORIGINAL") @index(name: "byRecordTypeResult", sortKeyFields: ["gameStartDateTime"])
+  venueId: ID @index(name: "byVenueResult", sortKeyFields: ["gameStartDateTime"])
 }
 
 type PlayerVenue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
@@ -796,6 +815,7 @@ type PlayerTransaction @model(subscriptions: null) @auth(rules: [{ allow: privat
   playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
   player: Player @belongsTo(fields: ["playerId"])
   gameId: ID @index(name: "byGame")
+  venueId: ID @index(name: "byVenueTransaction", sortKeyFields: ["transactionDate"])
 }
 
 type PlayerCredits @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
