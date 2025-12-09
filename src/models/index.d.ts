@@ -3184,11 +3184,11 @@ type EagerPlayerEntry = {
   readonly tableNumber?: number | null;
   readonly seatNumber?: number | null;
   readonly numberOfReEntries?: number | null;
-  readonly isMultiDayTournament?: boolean | null;
   readonly player?: Player | null;
   readonly game?: Game | null;
-  readonly entryType?: EntryType | keyof typeof EntryType | null;
+  readonly isMultiDayTournament?: boolean | null;
   readonly qualifyingGameId?: string | null;
+  readonly entryType?: EntryType | keyof typeof EntryType | null;
   readonly recordType?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -3212,11 +3212,11 @@ type LazyPlayerEntry = {
   readonly tableNumber?: number | null;
   readonly seatNumber?: number | null;
   readonly numberOfReEntries?: number | null;
-  readonly isMultiDayTournament?: boolean | null;
   readonly player: AsyncItem<Player | undefined>;
   readonly game: AsyncItem<Game | undefined>;
-  readonly entryType?: EntryType | keyof typeof EntryType | null;
+  readonly isMultiDayTournament?: boolean | null;
   readonly qualifyingGameId?: string | null;
+  readonly entryType?: EntryType | keyof typeof EntryType | null;
   readonly recordType?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -3248,6 +3248,12 @@ type EagerPlayerResult = {
   readonly recordType?: string | null;
   readonly venueId?: string | null;
   readonly entityId?: string | null;
+  readonly isConsolidatedRecord?: boolean | null;
+  readonly sourceEntryCount?: number | null;
+  readonly sourceBuyInCount?: number | null;
+  readonly totalBuyInsPaid?: number | null;
+  readonly netProfitLoss?: number | null;
+  readonly consolidatedIntoGameId?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -3272,6 +3278,12 @@ type LazyPlayerResult = {
   readonly recordType?: string | null;
   readonly venueId?: string | null;
   readonly entityId?: string | null;
+  readonly isConsolidatedRecord?: boolean | null;
+  readonly sourceEntryCount?: number | null;
+  readonly sourceBuyInCount?: number | null;
+  readonly totalBuyInsPaid?: number | null;
+  readonly netProfitLoss?: number | null;
+  readonly consolidatedIntoGameId?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }

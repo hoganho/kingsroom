@@ -470,6 +470,18 @@
           "Statement": [
             {
               "Action": [
+                "dynamodb:DescribeStream",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:ListStreams"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/stream/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
                 "dynamodb:Query",
                 "dynamodb:PutItem",
                 "dynamodb:UpdateItem"
@@ -484,6 +496,7 @@
             {
               "Action": [
                 "dynamodb:Query",
+                "dynamodb:PutItem",
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
@@ -494,22 +507,43 @@
             },
             {
               "Action": [
-                "dynamodb:PutItem"
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-dev/index/byGame"
               ],
               "Effect": "Allow"
             },
             {
               "Action": [
-                "dynamodb:DescribeStream",
-                "dynamodb:GetRecords",
-                "dynamodb:GetShardIterator",
-                "dynamodb:ListStreams"
+                "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/stream/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:UpdateItem",
+                "dynamodb:PutItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-dev/index/byVisitKey"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev"
               ],
               "Effect": "Allow"
             },

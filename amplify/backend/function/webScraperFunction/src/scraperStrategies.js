@@ -1,5 +1,6 @@
 // scraperStrategies.js
 // UPDATED: Simplified financial model (removed rakeSubsidy complexity)
+// VERSION: 1.1.0 - Fixed finalDay detection (isFinalDay -> finalDay)
 
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
@@ -82,10 +83,29 @@ const extractSeriesDetails = (tournamentName) => {
         const match = tournamentName.match(pattern);
         if (match) { details.eventNumber = parseInt(match[1]); break; }
     }
+    
+    // *** FIX: Changed isFinalDay to finalDay to match downstream expectations ***
+    // Method 1: Explicit "Final Day" or "Final Table" in name
     if (/\bFinal\s*(Day|Table)?\b/i.test(tournamentName)) {
         details.dayNumber = details.dayNumber || 99;
-        details.isFinalDay = true;
+        details.finalDay = true;
     }
+    
+    // Method 2: "FT" abbreviation for Final Table
+    if (/\bFT\b/.test(tournamentName)) {
+        details.finalDay = true;
+    }
+    
+    // Method 3: Day 2+ without flight letter typically indicates final day
+    // (Day 2A would have flight letter, Day 2 alone is usually final)
+    if (details.dayNumber && details.dayNumber >= 2 && !details.flightLetter) {
+        // If it's Day 2+ without a flight letter, it's likely the final day
+        if (!/Flight/i.test(tournamentName)) {
+            details.finalDay = true;
+            console.log(`[Series] Detected finalDay from Day ${details.dayNumber} without flight letter`);
+        }
+    }
+    
     return details;
 };
 

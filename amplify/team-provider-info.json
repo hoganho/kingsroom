@@ -39,7 +39,7 @@
         },
         "playerDataProcessor": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/playerDataProcessor-4650664f6b6a44636939-build.zip"
+          "s3Key": "amplify-builds/playerDataProcessor-6c4c66446d4443317942-build.zip"
         },
         "publishClientMetrics": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -52,7 +52,7 @@
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-6a764461684355585073-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-63594156417659654a42-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -65,7 +65,7 @@
         },
         "tournamentConsolidator": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/tournamentConsolidator-4e30543737434b35437a-build.zip"
+          "s3Key": "amplify-builds/tournamentConsolidator-6538497463364d683235-build.zip"
         },
         "venueAssignmentService": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -77,7 +77,7 @@
           "scraperS3Bucket": "pokerpro-scraper-storage",
           "saveGameFunctionName": "saveGameFunction-dev",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-4972313666422b50537a-build.zip"
+          "s3Key": "amplify-builds/webScraperFunction-5830516177704e6b3234-build.zip"
         },
         "userManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",

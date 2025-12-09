@@ -750,12 +750,13 @@ type PlayerEntry @model(subscriptions: null) @auth(rules: [{ allow: private }]) 
   tableNumber: Int
   seatNumber: Int
   numberOfReEntries: Int
-  isMultiDayTournament: Boolean
   player: Player @belongsTo(fields: ["playerId"])
   game: Game @belongsTo(fields: ["gameId"])
 
+  # Multi-day tournament tracking
+  isMultiDayTournament: Boolean
+  qualifyingGameId: ID  # The child game they qualified from
   entryType: EntryType @default(value: "INITIAL")
-  qualifyingGameId: ID
   recordType: String @default(value: "ORIGINAL") @index(name: "byRecordType", sortKeyFields: ["gameStartDateTime"])
 }
 
@@ -777,6 +778,14 @@ type PlayerResult @model(subscriptions: null) @auth(rules: [{ allow: private }])
   
   # NEW: Entity that ran the game (for entity-level analytics)
   entityId: ID @index(name: "byEntityResult", sortKeyFields: ["gameStartDateTime"])
+
+  # Consolidation tracking
+  isConsolidatedRecord: Boolean
+  sourceEntryCount: Int        # How many flights this represents
+  sourceBuyInCount: Int        # How many buy-ins this represents
+  totalBuyInsPaid: Float       # Actual amount player paid
+  netProfitLoss: Float         # amountWon - totalBuyInsPaid
+  consolidatedIntoGameId: ID   # Points to parent game (for child results)
 }
 
 type PlayerVenue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {

@@ -25,11 +25,11 @@ Amplify Params - DO NOT EDIT */
  * ===================================================================
  * SAVEGAME LAMBDA FUNCTION - WITH SERIES RESOLUTION & QUERY KEYS
  * 
- * VERSION: 2.0.0 (with comprehensive series resolution)
+ * VERSION: 2.1.0 (with totalRebuys calculation fix)
  * 
  * ENTRY FIELD DEFINITIONS:
  * - totalInitialEntries: Number of unique initial buy-ins (no rebuys/addons)
- * - totalRebuys: Number of rebuy entries
+ * - totalRebuys: Number of rebuy entries (calculated: totalEntries - totalUniquePlayers)
  * - totalAddons: Number of addon entries  
  * - totalEntries: Total entries = totalInitialEntries + totalRebuys + totalAddons
  * - totalUniquePlayers: Unique players (may differ from totalInitialEntries in multi-flight)
@@ -188,6 +188,82 @@ const extractYearFromDate = (dateValue) => {
         console.error('[SAVE-GAME] Error extracting year from date:', error);
     }
     return null;
+};
+
+/**
+ * *** FIX: Calculate unique players from player list ***
+ * 
+ * Counts unique players by normalizing names and deduplicating.
+ * Falls back to scraped value if no player list is provided.
+ * 
+ * @param {Object} input - The full input object
+ * @returns {number} Count of unique players
+ */
+const calculateUniquePlayersFromList = (input) => {
+    // If we have a player list, count unique names
+    if (input.players?.allPlayers && Array.isArray(input.players.allPlayers) && input.players.allPlayers.length > 0) {
+        const uniqueNames = new Set();
+        
+        for (const player of input.players.allPlayers) {
+            if (player.name) {
+                // Normalize: lowercase and trim whitespace
+                const normalizedName = player.name.toLowerCase().trim();
+                uniqueNames.add(normalizedName);
+            }
+        }
+        
+        const uniqueCount = uniqueNames.size;
+        
+        // Log if there's a discrepancy with scraped value
+        const scrapedCount = input.game.totalUniquePlayers || 0;
+        if (scrapedCount > 0 && scrapedCount !== uniqueCount) {
+            console.log(`[SAVE-GAME] totalUniquePlayers: scraped=${scrapedCount}, calculated from list=${uniqueCount}`);
+        }
+        
+        return uniqueCount;
+    }
+    
+    // Fall back to scraped value if no player list
+    return input.game.totalUniquePlayers || 0;
+};
+
+/**
+ * *** FIX: Calculate totalRebuys from entry data ***
+ * 
+ * Formula: totalRebuys = totalEntries - totalUniquePlayers
+ * 
+ * This represents the number of re-entries/rebuys players made beyond their initial entry.
+ * For example: 118 totalEntries with 78 unique players = 40 rebuys
+ * 
+ * @param {number} totalEntries - Total entries (initial + rebuys + addons)
+ * @param {number} totalUniquePlayers - Count of unique players
+ * @param {number} scrapedRebuys - Value from scraper (may be 0 or null)
+ * @param {string} consolidationType - Type of record (PARENT, CHILD, null)
+ * @returns {number} Calculated or scraped rebuy count
+ */
+const calculateTotalRebuys = (totalEntries, totalUniquePlayers, scrapedRebuys, consolidationType) => {
+    // For PARENT records, let Tournament Consolidator handle it
+    if (consolidationType === 'PARENT') {
+        return scrapedRebuys || 0;
+    }
+    
+    // If scraped value exists and is positive, trust it
+    if (scrapedRebuys && scrapedRebuys > 0) {
+        return scrapedRebuys;
+    }
+    
+    // Calculate: totalRebuys = totalEntries - totalUniquePlayers
+    // This works because:
+    // - totalEntries = number of total entries (including rebuys)
+    // - totalUniquePlayers = number of distinct people
+    // - The difference = how many extra entries (rebuys) were made
+    if (totalEntries > 0 && totalUniquePlayers > 0 && totalEntries > totalUniquePlayers) {
+        const calculated = totalEntries - totalUniquePlayers;
+        console.log(`[SAVE-GAME] Calculated totalRebuys: ${totalEntries} - ${totalUniquePlayers} = ${calculated}`);
+        return calculated;
+    }
+    
+    return 0;
 };
 
 /**
@@ -797,8 +873,15 @@ const createGame = async (input, venueResolution, seriesResolution) => {
         prizepoolPlayerContributions: financials.prizepoolPlayerContributions, prizepoolAddedValue: financials.prizepoolAddedValue,
         prizepoolSurplus: financials.prizepoolSurplus, guaranteeOverlayCost: financials.guaranteeOverlayCost, gameProfit: financials.gameProfit,
         // Entry counts
-        totalUniquePlayers: input.game.totalUniquePlayers || 0, totalInitialEntries: input.game.totalInitialEntries || 0,
-        totalEntries: financials.totalEntries, totalRebuys: input.game.totalRebuys || 0, totalAddons: input.game.totalAddons || 0,
+        totalUniquePlayers: calculateUniquePlayersFromList(input), totalInitialEntries: input.game.totalInitialEntries || 0,
+        totalEntries: financials.totalEntries, 
+        totalRebuys: calculateTotalRebuys(
+            financials.totalEntries, 
+            calculateUniquePlayersFromList(input), 
+            input.game.totalRebuys, 
+            input.game.consolidationType
+        ), 
+        totalAddons: input.game.totalAddons || 0,
         // Results
         prizepoolPaid: input.game.prizepoolPaid || 0, prizepoolCalculated: input.game.prizepoolCalculated || 0,
         playersRemaining: input.game.playersRemaining || null, totalChipsInPlay: input.game.totalChipsInPlay || null, averagePlayerStack: input.game.averagePlayerStack || null,
@@ -896,10 +979,21 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     checkAndUpdate('gameProfit', financials.gameProfit, existingGame.gameProfit);
 
     // Entry counts
-    checkAndUpdate('totalUniquePlayers', input.game.totalUniquePlayers, existingGame.totalUniquePlayers);
+    const calculatedUniquePlayers = calculateUniquePlayersFromList(input);
+    checkAndUpdate('totalUniquePlayers', calculatedUniquePlayers, existingGame.totalUniquePlayers);
     checkAndUpdate('totalInitialEntries', input.game.totalInitialEntries, existingGame.totalInitialEntries);
     checkAndUpdate('totalEntries', financials.totalEntries, existingGame.totalEntries);
-    checkAndUpdate('totalRebuys', input.game.totalRebuys, existingGame.totalRebuys);
+    
+    // Calculate totalRebuys from entry data
+    const effectiveTotalEntries = financials.totalEntries || existingGame.totalEntries || 0;
+    const effectiveUniquePlayers = calculatedUniquePlayers || existingGame.totalUniquePlayers || 0;
+    const calculatedRebuys = calculateTotalRebuys(
+        effectiveTotalEntries, 
+        effectiveUniquePlayers, 
+        input.game.totalRebuys, 
+        input.game.consolidationType || existingGame.consolidationType
+    );
+    checkAndUpdate('totalRebuys', calculatedRebuys, existingGame.totalRebuys);
     checkAndUpdate('totalAddons', input.game.totalAddons, existingGame.totalAddons);
 
     checkAndUpdate('prizepoolPaid', input.game.prizepoolPaid, existingGame.prizepoolPaid);
@@ -1112,40 +1206,94 @@ const shouldQueueForPDP = (input, game) => {
     return { shouldQueue: false, reason: 'UNKNOWN_STATUS' };
 };
 
-const queueForPDP = async (game, input) => {
-    monitoring.trackOperation('QUEUE_PDP', 'SQS', game.id);
+/**
+ * Queue game for Player Data Processor with BATCHED player messages
+ * 
+ * Splits players into batches of PLAYER_BATCH_SIZE to prevent Lambda timeouts.
+ * Each batch is sent as a separate SQS message for parallel processing.
+ */
+const PLAYER_BATCH_SIZE = 25;
 
-    const message = {
-        game: {
-            id: game.id, name: game.name, gameType: game.gameType, gameVariant: game.gameVariant, gameStatus: game.gameStatus,
-            gameStartDateTime: game.gameStartDateTime, gameEndDateTime: game.gameEndDateTime,
-            buyIn: game.buyIn, rake: game.rake, prizepoolPaid: game.prizepoolPaid, prizepoolCalculated: game.prizepoolCalculated,
-            totalUniquePlayers: game.totalUniquePlayers, totalInitialEntries: game.totalInitialEntries, totalEntries: game.totalEntries,
-            totalRebuys: game.totalRebuys, totalAddons: game.totalAddons,
-            venueId: game.venueId, entityId: game.entityId, isSeries: game.isSeries, seriesName: game.seriesName,
-            tournamentSeriesId: game.tournamentSeriesId, isSatellite: game.isSatellite, gameFrequency: game.gameFrequency, wasEdited: game.wasEdited || false
-        },
-        players: input.players,
-        metadata: {
-            processedAt: new Date().toISOString(), sourceUrl: input.source.sourceId, venueId: game.venueId, entityId: game.entityId,
-            hasCompleteResults: input.players.hasCompleteResults, totalPlayersProcessed: input.players.allPlayers.length,
-            totalPrizesPaid: input.players.totalPrizesPaid || 0, wasEdited: input.source.wasEdited || false
-        }
+const queueForPDP = async (game, input) => {
+    const allPlayers = input.players.allPlayers || [];
+    
+    if (allPlayers.length === 0) {
+        console.log(`[SAVE-GAME] No players to queue for game ${game.id}`);
+        return true;
+    }
+    
+    // Split players into batches
+    const batches = [];
+    for (let i = 0; i < allPlayers.length; i += PLAYER_BATCH_SIZE) {
+        batches.push(allPlayers.slice(i, i + PLAYER_BATCH_SIZE));
+    }
+    
+    console.log(`[SAVE-GAME] Splitting ${allPlayers.length} players into ${batches.length} batches for game ${game.id}`);
+    
+    monitoring.trackOperation('QUEUE_PDP', 'SQS', game.id, {
+        totalPlayers: allPlayers.length,
+        batchCount: batches.length,
+        batchSize: PLAYER_BATCH_SIZE
+    });
+
+    const gamePayload = {
+        id: game.id, name: game.name, gameType: game.gameType, gameVariant: game.gameVariant, gameStatus: game.gameStatus,
+        gameStartDateTime: game.gameStartDateTime, gameEndDateTime: game.gameEndDateTime,
+        buyIn: game.buyIn, rake: game.rake, prizepoolPaid: game.prizepoolPaid, prizepoolCalculated: game.prizepoolCalculated,
+        totalUniquePlayers: game.totalUniquePlayers, totalInitialEntries: game.totalInitialEntries, totalEntries: game.totalEntries,
+        totalRebuys: game.totalRebuys, totalAddons: game.totalAddons,
+        venueId: game.venueId, entityId: game.entityId, isSeries: game.isSeries, seriesName: game.seriesName,
+        tournamentSeriesId: game.tournamentSeriesId, isSatellite: game.isSatellite, gameFrequency: game.gameFrequency, wasEdited: game.wasEdited || false
     };
 
-    try {
-        await sqsClient.send(new SendMessageCommand({
-            QueueUrl: PLAYER_PROCESSOR_QUEUE_URL,
-            MessageBody: JSON.stringify(message),
-            MessageGroupId: String(input.game.tournamentId || game.id),
-            MessageDeduplicationId: `${game.id}-${Date.now()}`
-        }));
-        console.log(`[SAVE-GAME] Queued game ${game.id} for PDP (${input.players.allPlayers.length} players)`);
-        return true;
-    } catch (error) {
-        console.error(`[SAVE-GAME] Error queueing for PDP:`, error);
-        throw error;
+    const sendPromises = batches.map(async (batchPlayers, batchIndex) => {
+        const message = {
+            game: gamePayload,
+            players: {
+                allPlayers: batchPlayers,
+                totalUniquePlayers: input.players.totalUniquePlayers,
+                hasCompleteResults: input.players.hasCompleteResults,
+                totalPrizesPaid: input.players.totalPrizesPaid || 0
+            },
+            metadata: {
+                processedAt: new Date().toISOString(),
+                sourceUrl: input.source.sourceId,
+                venueId: game.venueId,
+                entityId: game.entityId,
+                hasCompleteResults: input.players.hasCompleteResults,
+                totalPlayersProcessed: batchPlayers.length,
+                totalPrizesPaid: input.players.totalPrizesPaid || 0,
+                wasEdited: input.source.wasEdited || false,
+                batchIndex: batchIndex,
+                batchCount: batches.length,
+                totalPlayersInGame: allPlayers.length
+            }
+        };
+
+        try {
+            await sqsClient.send(new SendMessageCommand({
+                QueueUrl: PLAYER_PROCESSOR_QUEUE_URL,
+                MessageBody: JSON.stringify(message),
+                MessageGroupId: String(input.game.tournamentId || game.id),
+                MessageDeduplicationId: `${game.id}-batch${batchIndex}-${Date.now()}`
+            }));
+            return { success: true, batchIndex };
+        } catch (error) {
+            console.error(`[SAVE-GAME] Error queueing batch ${batchIndex} for game ${game.id}:`, error);
+            return { success: false, batchIndex, error: error.message };
+        }
+    });
+
+    const results = await Promise.all(sendPromises);
+    
+    const failed = results.filter(r => !r.success);
+    if (failed.length > 0) {
+        console.error(`[SAVE-GAME] Failed to queue ${failed.length}/${batches.length} batches for game ${game.id}`);
+        throw new Error(`Failed to queue ${failed.length} player batches`);
     }
+    
+    console.log(`[SAVE-GAME] Queued game ${game.id} for PDP (${allPlayers.length} players in ${batches.length} batches)`);
+    return true;
 };
 
 const updatePlayerEntries = async (game, input) => {

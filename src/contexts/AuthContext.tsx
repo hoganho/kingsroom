@@ -35,6 +35,9 @@ const customGetUser = /* GraphQL */ `
       lastName
       avatar
       isActive
+      allowedEntityIds
+      defaultEntityId
+      allowedPages
       _version
       _deleted
       _lastChangedAt
@@ -55,6 +58,9 @@ const customCreateUser = /* GraphQL */ `
       lastName
       avatar
       isActive
+      allowedEntityIds
+      defaultEntityId
+      allowedPages
       _version
       _deleted
       _lastChangedAt
@@ -76,6 +82,8 @@ export interface AppUser {
   lastName?: string | null;
   avatar?: string | null; 
   allowedPages?: string[] | null;
+  allowedEntityIds?: string[] | null; // Added field
+  defaultEntityId?: string | null;    // Added field
   _version?: number; // Needed for updates
 }
 
@@ -238,6 +246,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           firstName: userData.firstName,
           lastName: userData.lastName,
           avatar: userData.avatar,
+          allowedPages: userData.allowedPages,
+          allowedEntityIds: userData.allowedEntityIds, // Mapped field
+          defaultEntityId: userData.defaultEntityId,   // Mapped field
           _version: userData._version // Capture version for optimistic locking
         });
         console.log('[AuthContext] checkUser: User state set successfully.');

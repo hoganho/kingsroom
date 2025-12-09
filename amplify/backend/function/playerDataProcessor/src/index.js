@@ -659,7 +659,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
     // Use gameStartDateTime as the authoritative timestamp
     const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
 
-    const buyInAmount = (gameData.game.buyIn || 0) + (gameData.game.rake || 0);
+    const buyInAmount = gameData.game.buyIn || 0;
     const winningsAmount = playerData.winnings || 0;
     const isITM = playerData.winnings > 0 || playerData.isQualification;
     const isCash = playerData.winnings > 0;
@@ -818,7 +818,7 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
     const gameDate = gameDateTime ? (gameDateTime.includes('T') ? gameDateTime : `${gameDateTime}T00:00:00.000Z`) : now;
     const gameDateObj = new Date(gameDate);
     
-    const currentGameBuyIn = (gameData.game.buyIn || 0) + (gameData.game.rake || 0);
+    const currentGameBuyIn = (gameData.game.buyIn || 0);
     
     try {
         // Look up existing record by visityKey (entity-aware) with legacy fallback
@@ -989,7 +989,7 @@ const createPlayerTransactions = async (playerId, gameData, playerData, entityId
     const transactionsToCreate = [];
     
     // Always create BUY_IN transaction
-    const buyInAmount = (gameData.game.buyIn || 0) + (gameData.game.rake || 0);
+    const buyInAmount = (gameData.game.buyIn || 0);
     transactionsToCreate.push({
         type: 'BUY_IN',
         amount: buyInAmount,

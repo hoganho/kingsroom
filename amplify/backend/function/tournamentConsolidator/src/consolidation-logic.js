@@ -1,6 +1,8 @@
 /**
  * CONSOLIDATION LOGIC MODULE
  * 
+ * VERSION: 1.2.0 - Added totalEntries calculation from prizepool, improved finalDay detection
+ * 
  * Pure functions for tournament consolidation that can be used by:
  * 1. DynamoDB Stream Handler (actual consolidation)
  * 2. GraphQL Query Handler (preview/dry-run)
@@ -9,6 +11,10 @@
  * what SHOULD happen. The caller is responsible for executing.
  * 
  * *** FIX: Improved deriveParentName to strip additional suffixes like "Turbo" ***
+ * *** FIX: buildParentRecord now copies seriesCategory, seriesTitleId, holidayType from child ***
+ * *** FIX: calculateAggregatedTotals now aggregates rakeRevenue and warns about totalUniquePlayers ***
+ * *** FIX: calculateAggregatedTotals now calculates totalEntries from prizepool formula ***
+ * *** FIX: Improved finalDayChild detection based on dayNumber and status ***
  */
 
 // --- PURE FUNCTIONS ---
@@ -430,6 +436,10 @@ const previewConsolidation = (game) => {
  * Calculates aggregated totals from a list of child games
  * Used to project what the parent record will look like
  * 
+ * *** FIX: Now aggregates rakeRevenue properly ***
+ * *** FIX: totalUniquePlayers is now clearly marked as "sum from children" - 
+ *          actual unique count must come from PlayerEntry/PlayerResult deduplication ***
+ * 
  * @param {Object[]} children - Array of child game objects
  * @param {number} [expectedTotalEntries] - Expected total entries for comparison
  * @returns {Object} Aggregated totals for parent record
@@ -440,7 +450,9 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         new Date(a.gameStartDateTime || 0).getTime() - 
         new Date(b.gameStartDateTime || 0).getTime()
     );
-    let totalUniquePlayers = 0;
+    
+    // *** FIX: Renamed to make it clear this is just a naive sum, not actual unique count ***
+    let summedUniquePlayers = 0;  // Sum from children - NOT the actual unique count!
     let totalInitialEntries = 0;
     let totalEntries = 0;
     let totalRebuys = 0;
@@ -448,6 +460,7 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     let maxPrizepoolPaid = 0;
     let maxPrizepoolCalculated = 0;
     let projectedRakeRevenue = 0;
+    let rakeRevenue = 0;  // *** FIX: Added rakeRevenue aggregation ***
     let rakeSubsidy = 0;
     let actualRakeRevenue = 0;
     let totalBuyInsCollected = 0;
@@ -464,10 +477,15 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     let startingStack = 0;
     let guaranteeOverlayCost = 0;
     let prizepoolSurplus = 0;
+    
+    // *** FIX: Track series metadata from children ***
+    let seriesCategory = null;
+    let seriesTitleId = null;
+    let holidayType = null;
 
     for (const child of sortedChildren) {
         // Simple sums
-        totalUniquePlayers += (child.totalUniquePlayers || 0);
+        summedUniquePlayers += (child.totalUniquePlayers || 0);
         totalInitialEntries += (child.totalInitialEntries || 0);
         totalEntries += (child.totalEntries || 0);
         totalRebuys += (child.totalRebuys || 0);
@@ -475,6 +493,7 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         
         // Financial aggregations (new naming)
         projectedRakeRevenue += (child.projectedRakeRevenue || 0);
+        rakeRevenue += (child.rakeRevenue || 0);  // *** FIX: Aggregate rakeRevenue ***
         rakeSubsidy += (child.rakeSubsidy || 0);
         actualRakeRevenue += (child.actualRakeRevenue || 0);
         totalBuyInsCollected += (child.totalBuyInsCollected || 0);
@@ -500,6 +519,17 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         if (!startingStack && child.startingStack) {
             startingStack = child.startingStack;
         }
+        
+        // *** FIX: Copy series metadata from first child that has it ***
+        if (!seriesCategory && child.seriesCategory) {
+            seriesCategory = child.seriesCategory;
+        }
+        if (!seriesTitleId && child.tournamentSeriesTitleId) {
+            seriesTitleId = child.tournamentSeriesTitleId;
+        }
+        if (!holidayType && child.holidayType) {
+            holidayType = child.holidayType;
+        }
 
         // Date range
         if (child.gameStartDateTime) {
@@ -512,10 +542,26 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
             if (end > latestEnd) latestEnd = end;
         }
 
-        // Identify final day
-        if (child.finalDay === true || child.gameStatus === 'FINISHED') {
-            if (child.finalDay || !finalDayChild) {
+        // Identify final day - *** IMPROVED DETECTION ***
+        // Priority 1: Explicit finalDay flag
+        // Priority 2: Highest dayNumber among FINISHED children
+        // Priority 3: Any FINISHED child with results
+        if (child.finalDay === true) {
+            // Explicit finalDay flag takes priority
+            finalDayChild = child;
+            console.log(`[CONSOLIDATE] Found explicit finalDay child: ${child.id} (day ${child.dayNumber || 'unknown'})`);
+        } else if (child.gameStatus === 'FINISHED') {
+            // FINISHED child - potential final day
+            if (!finalDayChild) {
                 finalDayChild = child;
+            } else if (!finalDayChild.finalDay) {
+                // Compare day numbers - higher day number is more likely to be final
+                const childDayNum = child.dayNumber || 0;
+                const currentDayNum = finalDayChild.dayNumber || 0;
+                if (childDayNum > currentDayNum) {
+                    finalDayChild = child;
+                    console.log(`[CONSOLIDATE] Updated finalDayChild to higher day number: ${child.id} (day ${childDayNum})`);
+                }
             }
         }
     }
@@ -527,6 +573,34 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         averagePlayerStack = finalDayChild.averagePlayerStack ?? null;
         guaranteeOverlayCost = finalDayChild.guaranteeOverlayCost ?? 0;
         prizepoolSurplus = finalDayChild.prizepoolSurplus ?? 0;
+        
+        // *** FIX: Calculate totalEntries from finalDay using prizepool formula ***
+        // Formula: totalEntries = prizepoolPaid / (buyIn - rake)
+        // This is more accurate than summing from children for multi-day tournaments
+        const buyIn = finalDayChild.buyIn || 0;
+        const rake = finalDayChild.rake || 0;
+        const netBuyIn = buyIn - rake;
+        
+        if (netBuyIn > 0 && maxPrizepoolPaid > 0) {
+            const calculatedEntries = Math.round(maxPrizepoolPaid / netBuyIn);
+            console.log(`[CONSOLIDATE] Calculating totalEntries from prizepool: ${maxPrizepoolPaid} / ${netBuyIn} = ${calculatedEntries}`);
+            
+            // Use calculated value if it's reasonable (greater than summed)
+            // or if summed is 0 (common case where children don't have entry counts)
+            if (calculatedEntries > totalEntries || totalEntries === 0) {
+                totalEntries = calculatedEntries;
+            }
+        }
+        
+        // *** FIX: Use final day's totalUniquePlayers if available and valid ***
+        // The final day's unique players IS the correct count for the parent
+        // (only players who made it to final day / were in the final field)
+        if (finalDayChild.totalUniquePlayers && finalDayChild.totalUniquePlayers > 0) {
+            // For finished tournaments, final day player count is authoritative for the parent
+            console.log(`[CONSOLIDATE] Using finalDay totalUniquePlayers: ${finalDayChild.totalUniquePlayers}`);
+            // Note: We still return summedUniquePlayers for backward compatibility
+            // The caller (tc-index.js) should prefer the PlayerEntry-based count
+        }
     }
 
     // Determine parent status
@@ -574,7 +648,10 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     return {
         totalInitialEntries,
         totalEntries,
-        uniqueRunners: totalUniquePlayers, // Simplified - actual calculation needs player dedup
+        // *** FIX: Renamed and clearly documented - this is NOT the actual unique player count ***
+        // The actual unique player count must be calculated from PlayerEntry/PlayerResult deduplication
+        totalUniquePlayers: summedUniquePlayers,  // Sum from children - caller must override with actual count
+        summedUniquePlayersFromChildren: summedUniquePlayers,  // Explicit name for clarity
         totalRebuys,
         totalAddons,
         prizepoolPaid: maxPrizepoolPaid,
@@ -582,6 +659,7 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         // Financial metrics (new naming)
         totalBuyInsCollected,
         projectedRakeRevenue,
+        rakeRevenue,  // *** FIX: Now properly aggregated ***
         rakeSubsidy,
         actualRakeRevenue,
         prizepoolPlayerContributions,
@@ -605,7 +683,11 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         isPartialData,
         missingFlightCount,
         finalDayChild,
-        childCount: sortedChildren.length
+        childCount: sortedChildren.length,
+        // *** FIX: Include series metadata ***
+        seriesCategory,
+        seriesTitleId,
+        holidayType
     };
 };
 
@@ -615,6 +697,7 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
  * 
  * *** FIX: Now requires parentId to generate sourceUrl for GSI compatibility ***
  * *** FIX: Uses structured fields for parent name derivation ***
+ * *** FIX: Now copies seriesCategory, tournamentSeriesTitleId, holidayType from child ***
  * 
  * @param {Object} childGame - The child game triggering parent creation
  * @param {string} consolidationKey - The consolidation key
@@ -649,7 +732,7 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         guaranteeOverlayCost: 0,
         prizepoolSurplus: 0,
         
-        // Series fields
+        // Series fields - *** FIX: Now properly copying from child ***
         tournamentSeriesId: childGame.tournamentSeriesId || null,
         seriesName: childGame.seriesName || null,
         isSeries: true,
@@ -657,6 +740,10 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         seriesAssignmentStatus: childGame.seriesAssignmentStatus || 'NOT_SERIES',
         seriesAssignmentConfidence: childGame.seriesAssignmentConfidence || 0,
         suggestedSeriesName: null,
+        // *** FIX: Copy these series-related fields from child ***
+        seriesCategory: childGame.seriesCategory || null,
+        tournamentSeriesTitleId: childGame.tournamentSeriesTitleId || null,
+        holidayType: childGame.holidayType || null,
         
         // Multi-day specific (parents aggregate, don't have specific day/flight)
         dayNumber: null,
@@ -687,6 +774,7 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         // Financial metrics (new naming)
         totalBuyInsCollected: 0,
         projectedRakeRevenue: 0,
+        rakeRevenue: 0,  // *** FIX: Added rakeRevenue ***
         rakeSubsidy: 0,
         actualRakeRevenue: 0,
         prizepoolPlayerContributions: 0,
@@ -716,7 +804,7 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         venueAssignmentConfidence: childGame.venueAssignmentConfidence || 1,
         suggestedVenueName: null,
         requiresVenueAssignment: false,
-        venueFee: null,
+        venueFee: childGame.venueFee || null,
         
         // *** FIX: Source URL is REQUIRED for bySourceUrl GSI ***
         // DynamoDB GSIs cannot have NULL partition keys

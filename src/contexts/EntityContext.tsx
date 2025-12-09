@@ -1,6 +1,6 @@
 // src/contexts/EntityContext.tsx
 // Enhanced Entity Context with user-based entity filtering
-// UPDATED: Filters entities based on User.allowedEntityIds and User.defaultEntityId
+// UPDATED: Correctly prioritizes User.defaultEntityId for both Single and Multi selectors
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -147,48 +147,71 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     const savedSelectedIds = JSON.parse(localStorage.getItem('selectedEntityIds') || '[]');
     
     // === SINGLE ENTITY (currentEntity) ===
+    // Priority:
+    // 1. LocalStorage (User's last session choice preserved on refresh)
+    // 2. User Default (Database setting for fresh session)
+    // 3. First Available (Fallback)
+
     let entityToSet: Entity | null = null;
 
-    // 1. Priority: User's defaultEntityId (if set and user has access)
-    if (userDefaultEntityId) {
-      entityToSet = entities.find((e: Entity) => e.id === userDefaultEntityId) || null;
-    }
-
-    // 2. Fall back to localStorage (if user has access to it)
-    if (!entityToSet && savedEntityId) {
+    if (savedEntityId) {
       entityToSet = entities.find((e: Entity) => e.id === savedEntityId) || null;
     }
+
+    if (!entityToSet && userDefaultEntityId) {
+      entityToSet = entities.find((e: Entity) => e.id === userDefaultEntityId) || null;
+    }
     
-    // 3. Fall back to first available entity
     if (!entityToSet && entities.length > 0) {
       entityToSet = entities[0];
     }
 
-    // 4. Set the state and localStorage
+    // Set the state
     if (entityToSet) {
       setCurrentEntityState(entityToSet);
-      localStorage.setItem('selectedEntityId', entityToSet.id);
+      // Only write to localStorage if it wasn't there already (avoid overwriting if we fell back to default)
+      if (!savedEntityId) {
+        localStorage.setItem('selectedEntityId', entityToSet.id);
+      }
     } else {
       setCurrentEntityState(null);
       localStorage.removeItem('selectedEntityId');
     }
     
     // === MULTI-ENTITY (selectedEntities) ===
-    // Filter saved selections to only include entities user has access to
+    // Priority:
+    // 1. LocalStorage (User's last session choice)
+    // 2. User Default (If set, start with ONLY this entity)
+    // 3. All Entities (If no default, start with ALL)
+
     const validSavedIds = savedSelectedIds.filter((id: string) => 
       entities.some(e => e.id === id)
     );
 
     if (validSavedIds.length > 0) {
-      // Restore valid saved selections
+      // Case 1: Restore valid saved selections
       const savedSelected = entities.filter((e: Entity) => 
         validSavedIds.includes(e.id)
       );
       setSelectedEntitiesState(savedSelected);
     } else {
-      // Default to all available entities
-      setSelectedEntitiesState(entities);
-      localStorage.setItem('selectedEntityIds', JSON.stringify(entities.map((e: Entity) => e.id)));
+      // No valid saved selection found
+      if (userDefaultEntityId) {
+        // Case 2: Use default entity if available
+        const defaultEntity = entities.find(e => e.id === userDefaultEntityId);
+        if (defaultEntity) {
+          setSelectedEntitiesState([defaultEntity]);
+          localStorage.setItem('selectedEntityIds', JSON.stringify([defaultEntity.id]));
+        } else {
+          // Default entity ID was invalid or not found, fallback to ALL
+          setSelectedEntitiesState(entities);
+          localStorage.setItem('selectedEntityIds', JSON.stringify(entities.map((e: Entity) => e.id)));
+        }
+      } else {
+        // Case 3: No default entity, default to ALL available
+        setSelectedEntitiesState(entities);
+        localStorage.setItem('selectedEntityIds', JSON.stringify(entities.map((e: Entity) => e.id)));
+      }
     }
   }, [loading, entities, userDefaultEntityId]);
 
@@ -218,6 +241,9 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
         entities.some(e => e.id === se.id)
       );
       if (validSelected.length !== selectedEntities.length) {
+        // If some selected entities became invalid, update selection
+        // If ALL became invalid (empty list), default to All Available (or User Default logic again if desired)
+        // Here we default to all available valid entities if selection becomes empty
         const newSelection = validSelected.length > 0 ? validSelected : entities;
         setSelectedEntitiesState(newSelection);
         localStorage.setItem('selectedEntityIds', JSON.stringify(newSelection.map(e => e.id)));

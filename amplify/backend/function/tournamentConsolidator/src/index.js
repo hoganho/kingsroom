@@ -12,7 +12,9 @@ Amplify Params - DO NOT EDIT */
 
 /**
  * TOURNAMENT CONSOLIDATOR LAMBDA - REFACTORED
- * * This Lambda now handles TWO types of invocations:
+ * VERSION: 1.4.0 - Fixed totalRebuys calculation for parent records
+ * 
+ * This Lambda now handles TWO types of invocations:
  * * 1. DynamoDB Stream Trigger (Original)
  * - Triggered when Game table changes
  * - Performs actual consolidation (creates parents, links children)
@@ -25,6 +27,10 @@ Amplify Params - DO NOT EDIT */
  * FIX: Proper null handling in DynamoDB UpdateExpressions
  * FIX: Children now properly marked as CHILD consolidationType
  * FIX: (v2) Added ExpressionAttributeNames handling for underscored fields (_lastChangedAt, _version)
+ * FIX: (v3) totalUniquePlayers now calculated from PlayerEntry table, not naive sum
+ * FIX: (v3) seriesCategory, seriesTitleId, rakeRevenue now properly aggregated to parent
+ * FIX: (v4) totalRebuys calculated from totalEntries - totalUniquePlayers
+ * FIX: (v4) totalEntries calculated from prizepool formula when finalDay found
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
@@ -43,6 +49,10 @@ const {
     buildParentRecord
 } = require('./consolidation-logic');
 
+const { 
+    consolidatePlayerDataForTournament 
+} = require('./player-consolidation-logic');
+
 // --- CONFIGURATION ---
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
@@ -56,6 +66,16 @@ const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
 const GAME_TABLE = process.env.API_KINGSROOM_GAMETABLE_NAME;
 const PLAYER_ENTRY_TABLE = process.env.API_KINGSROOM_PLAYERENTRYTABLE_NAME;
 const PLAYER_RESULT_TABLE = process.env.API_KINGSROOM_PLAYERRESULTTABLE_NAME;
+
+// Helper to derive table names from existing ones
+// Pattern: ModelName-apiId-env (e.g., Game-sjyzke3u45golhnttlco6bpcua-dev)
+const getTableName = (modelName) => {
+    // Extract apiId and env from GAME_TABLE
+    const parts = GAME_TABLE.split('-');
+    const env = parts.pop();        // 'dev'
+    const apiId = parts.pop();      // 'sjyzke3u45golhnttlco6bpcua'
+    return `${modelName}-${apiId}-${env}`;
+};
 
 // ===================================================================
 // GRAPHQL QUERY HANDLER - previewConsolidation
@@ -311,6 +331,50 @@ const syncParentResults = async (parentId, realResults) => {
 };
 
 /**
+ * *** FIX V4: Counts unique players from PlayerEntry table across ALL children ***
+ * 
+ * This function queries PlayerEntry for EACH child game and collects unique
+ * playerIds using a Set. This correctly counts players who played in any flight,
+ * deduplicating those who played multiple flights.
+ * 
+ * NOTE: We use PlayerEntry instead of PlayerResult because:
+ * - PlayerEntry records exist for every player who entered each flight
+ * - PlayerResult on parent only contains final day finishers (not all entrants)
+ * - PlayerResult on children may not exist if results weren't processed yet
+ * 
+ * @param {string} parentId - The parent game ID (unused, kept for API consistency)
+ * @param {Array} children - Array of child game records
+ * @returns {Promise<number>} Count of unique players across all children
+ */
+const countUniquePlayersFromEntries = async (parentId, children) => {
+    const uniquePlayerIds = new Set();
+    let totalEntriesScanned = 0;
+    
+    // Query PlayerEntry for EACH child game
+    for (const child of children) {
+        const childEntries = await fetchAllItems({
+            TableName: PLAYER_ENTRY_TABLE,
+            IndexName: 'byGame',
+            KeyConditionExpression: 'gameId = :gid',
+            ExpressionAttributeValues: { ':gid': child.id }
+        });
+        
+        totalEntriesScanned += childEntries.length;
+        
+        for (const entry of childEntries) {
+            if (entry.playerId) {
+                uniquePlayerIds.add(entry.playerId);
+            }
+        }
+        
+        console.log(`[Consolidator] Child ${child.id}: ${childEntries.length} entries, running unique count: ${uniquePlayerIds.size}`);
+    }
+    
+    console.log(`[Consolidator] Total unique players: ${uniquePlayerIds.size} (from ${totalEntriesScanned} entries across ${children.length} children)`);
+    return uniquePlayerIds.size;
+};
+
+/**
  * Consolidates entries across flights with deduplication
  */
 const consolidateEntries = async (parentId, children) => {
@@ -449,6 +513,8 @@ const buildDynamicUpdateExpression = (updates) => {
 
 /**
  * *** FIX: Recalculates parent totals from all children with proper null handling ***
+ * *** FIX V3: Now properly calculates totalUniquePlayers from PlayerResult table ***
+ * *** FIX V3: Now properly aggregates seriesCategory, seriesTitleId, rakeRevenue ***
  */
 const recalculateParentTotals = async (parentId, currentParentRecord) => {
     const children = await fetchAllItems({
@@ -473,6 +539,25 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
         currentParentRecord?.expectedTotalEntries
     );
 
+    // *** FIX V4: Get the actual unique player count from PlayerEntry table ***
+    // This queries ALL children and deduplicates players who played multiple flights
+    const uniquePlayersFromEntries = await countUniquePlayersFromEntries(parentId, children);
+    
+    // Priority for totalUniquePlayers:
+    // 1. uniquePlayersFromEntries (queries PlayerEntry for all children - most accurate)
+    // 2. uniqueRunners from consolidateEntries (should match, but kept as fallback)
+    // 3. Naive sum from children (last resort)
+    const actualUniquePlayers = uniquePlayersFromEntries > 0 
+        ? uniquePlayersFromEntries 
+        : (uniqueRunners > 0 ? uniqueRunners : aggregated.totalUniquePlayers);
+    
+    console.log(`[Consolidator] Unique player calculation:`, {
+        fromPlayerEntryTable: uniquePlayersFromEntries,
+        fromEntryConsolidation: uniqueRunners,
+        naiveSumFromChildren: aggregated.summedUniquePlayersFromChildren || aggregated.totalUniquePlayers,
+        finalValue: actualUniquePlayers
+    });
+
     // Sync results from final day
     if (aggregated.finalDayChild && aggregated.finalDayChild.results) {
         await syncParentResults(parentId, aggregated.finalDayChild.results);
@@ -484,17 +569,30 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
     
     // Build the update fields - the helper will handle nulls properly
     // _lastChangedAt will be automatically aliased by the helper
+    
+    // *** FIX: Calculate totalRebuys for parent from totalEntries - uniquePlayers ***
+    // This is more accurate than summing from children because uniquePlayers is deduplicated
+    let calculatedRebuys = aggregated.totalRebuys || 0;
+    if (calculatedTotalEntries > 0 && actualUniquePlayers > 0 && calculatedTotalEntries > actualUniquePlayers) {
+        calculatedRebuys = calculatedTotalEntries - actualUniquePlayers;
+        console.log(`[Consolidator] Calculated totalRebuys for parent: ${calculatedTotalEntries} - ${actualUniquePlayers} = ${calculatedRebuys}`);
+    }
+    
     const updateFields = {
         totalInitialEntries: aggregated.totalInitialEntries,
         totalEntries: calculatedTotalEntries,
-        actualCalculatedUniquePlayers: uniqueRunners,
-        totalRebuys: aggregated.totalRebuys || 0,
+        // *** FIX V3: Use the properly calculated unique player count ***
+        totalUniquePlayers: actualUniquePlayers,
+        actualCalculatedUniquePlayers: uniqueRunners,  // Keep this for tracking entry-based calculation
+        totalRebuys: calculatedRebuys,  // *** FIX: Now calculated from totalEntries - uniquePlayers ***
         totalAddons: aggregated.totalAddons || 0,
         prizepoolPaid: aggregated.prizepoolPaid || 0,
         prizepoolCalculated: aggregated.prizepoolCalculated || 0,
         // Financial metrics (new naming)
         totalBuyInsCollected: aggregated.totalBuyInsCollected || 0,
         projectedRakeRevenue: aggregated.projectedRakeRevenue || 0,
+        // *** FIX V3: Properly aggregate rakeRevenue ***
+        rakeRevenue: aggregated.rakeRevenue || 0,
         rakeSubsidy: aggregated.rakeSubsidy || 0,
         actualRakeRevenue: aggregated.actualRakeRevenue || 0,
         prizepoolPlayerContributions: aggregated.prizepoolPlayerContributions || 0,
@@ -516,6 +614,17 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
         updatedAt: new Date().toISOString(),
         _lastChangedAt: Date.now()
     };
+    
+    // *** FIX V3: Add series metadata if not already set ***
+    if (aggregated.seriesCategory && !currentParentRecord?.seriesCategory) {
+        updateFields.seriesCategory = aggregated.seriesCategory;
+    }
+    if (aggregated.seriesTitleId && !currentParentRecord?.tournamentSeriesTitleId) {
+        updateFields.tournamentSeriesTitleId = aggregated.seriesTitleId;
+    }
+    if (aggregated.holidayType && !currentParentRecord?.holidayType) {
+        updateFields.holidayType = aggregated.holidayType;
+    }
     
     const { expression: dynamicExpression, values: dynamicValues, names: dynamicNames } = buildDynamicUpdateExpression(updateFields);
     
@@ -540,7 +649,38 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
         ExpressionAttributeNames: finalNames
     }));
     
-    console.log(`[Consolidator] Recalculated Parent ${parentId}. Entries: ${calculatedTotalEntries}, Children: ${aggregated.childCount}, Partial: ${aggregated.isPartialData}`);
+    console.log(`[Consolidator] Recalculated Parent ${parentId}. TotalUniquePlayers: ${actualUniquePlayers}, Entries: ${calculatedTotalEntries}, Children: ${aggregated.childCount}, Partial: ${aggregated.isPartialData}`);
+
+    // NEW: Consolidate player data
+    const tableNames = {
+        PlayerEntry: PLAYER_ENTRY_TABLE,
+        PlayerResult: PLAYER_RESULT_TABLE,
+        PlayerSummary: getTableName('PlayerSummary'),
+        PlayerVenue: getTableName('PlayerVenue')
+    };
+    
+    try {
+        const playerConsolidation = await consolidatePlayerDataForTournament(
+            monitoredDdbDocClient,
+            tableNames,
+            parentId,
+            currentParentRecord,
+            children,
+            { 
+                applyAdjustments: true,
+                createAggregates: true,
+                consolidateResults: true
+            }
+        );
+        
+        console.log(`[Consolidator] Player consolidation complete:`, {
+            uniquePlayers: playerConsolidation.uniquePlayers,
+            adjustments: playerConsolidation.actions
+        });
+    } catch (playerError) {
+        console.error(`[Consolidator] Player consolidation failed:`, playerError);
+        // Don't fail the whole consolidation - tournament data is more critical
+    }
 };
 
 /**

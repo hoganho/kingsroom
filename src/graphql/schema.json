@@ -30421,17 +30421,6 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "isMultiDayTournament",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "Boolean",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "player",
           "description" : null,
           "args" : [ ],
@@ -30454,12 +30443,12 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "entryType",
+          "name" : "isMultiDayTournament",
           "description" : null,
           "args" : [ ],
           "type" : {
-            "kind" : "ENUM",
-            "name" : "EntryType",
+            "kind" : "SCALAR",
+            "name" : "Boolean",
             "ofType" : null
           },
           "isDeprecated" : false,
@@ -30471,6 +30460,17 @@
           "type" : {
             "kind" : "SCALAR",
             "name" : "ID",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "entryType",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "ENUM",
+            "name" : "EntryType",
             "ofType" : null
           },
           "isDeprecated" : false,
@@ -33417,20 +33417,20 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "entryType",
-          "description" : null,
-          "type" : {
-            "kind" : "INPUT_OBJECT",
-            "name" : "ModelEntryTypeInput",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
           "name" : "qualifyingGameId",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
             "name" : "ModelIDInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "entryType",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelEntryTypeInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -33833,6 +33833,72 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "isConsolidatedRecord",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Boolean",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "sourceEntryCount",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Int",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "sourceBuyInCount",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Int",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "totalBuyInsPaid",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "netProfitLoss",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "consolidatedIntoGameId",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "ID",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "createdAt",
           "description" : null,
           "args" : [ ],
@@ -34023,6 +34089,60 @@
           "defaultValue" : null
         }, {
           "name" : "entityId",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelIDInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "isConsolidatedRecord",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelBooleanInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "sourceEntryCount",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelIntInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "sourceBuyInCount",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelIntInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "totalBuyInsPaid",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelFloatInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "netProfitLoss",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelFloatInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "consolidatedIntoGameId",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -69542,20 +69662,20 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "entryType",
-          "description" : null,
-          "type" : {
-            "kind" : "ENUM",
-            "name" : "EntryType",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
           "name" : "qualifyingGameId",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
             "name" : "ID",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "entryType",
+          "description" : null,
+          "type" : {
+            "kind" : "ENUM",
+            "name" : "EntryType",
             "ofType" : null
           },
           "defaultValue" : null
@@ -69704,20 +69824,20 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "entryType",
-          "description" : null,
-          "type" : {
-            "kind" : "INPUT_OBJECT",
-            "name" : "ModelEntryTypeInput",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
           "name" : "qualifyingGameId",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
             "name" : "ModelIDInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "entryType",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelEntryTypeInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -69932,20 +70052,20 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "entryType",
-          "description" : null,
-          "type" : {
-            "kind" : "ENUM",
-            "name" : "EntryType",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
           "name" : "qualifyingGameId",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
             "name" : "ID",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "entryType",
+          "description" : null,
+          "type" : {
+            "kind" : "ENUM",
+            "name" : "EntryType",
             "ofType" : null
           },
           "defaultValue" : null
@@ -70137,6 +70257,60 @@
           },
           "defaultValue" : null
         }, {
+          "name" : "isConsolidatedRecord",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Boolean",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "sourceEntryCount",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Int",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "sourceBuyInCount",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Int",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "totalBuyInsPaid",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "netProfitLoss",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "consolidatedIntoGameId",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "ID",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
           "name" : "_version",
           "description" : null,
           "type" : {
@@ -70255,6 +70429,60 @@
           "defaultValue" : null
         }, {
           "name" : "entityId",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelIDInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "isConsolidatedRecord",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelBooleanInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "sourceEntryCount",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelIntInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "sourceBuyInCount",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelIntInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "totalBuyInsPaid",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelFloatInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "netProfitLoss",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelFloatInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "consolidatedIntoGameId",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -70447,6 +70675,60 @@
           "defaultValue" : null
         }, {
           "name" : "entityId",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "ID",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "isConsolidatedRecord",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Boolean",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "sourceEntryCount",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Int",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "sourceBuyInCount",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Int",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "totalBuyInsPaid",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "netProfitLoss",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "consolidatedIntoGameId",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
@@ -86109,7 +86391,50 @@
         "possibleTypes" : null
       }, {
         "kind" : "OBJECT",
-        "name" : "SocialFeedConnection",
+        "name" : "SocialAccountConnection",
+        "description" : null,
+        "fields" : [ {
+          "name" : "items",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "LIST",
+              "name" : null,
+              "ofType" : {
+                "kind" : "NON_NULL",
+                "name" : null,
+                "ofType" : {
+                  "kind" : "OBJECT",
+                  "name" : "SocialAccount",
+                  "ofType" : null
+                }
+              }
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "nextToken",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        } ],
+        "inputFields" : null,
+        "interfaces" : [ ],
+        "enumValues" : null,
+        "possibleTypes" : null
+      }, {
+        "kind" : "OBJECT",
+        "name" : "SocialPostConnection",
         "description" : null,
         "fields" : [ {
           "name" : "items",
@@ -86145,13 +86470,37 @@
           },
           "isDeprecated" : false,
           "deprecationReason" : null
+        } ],
+        "inputFields" : null,
+        "interfaces" : [ ],
+        "enumValues" : null,
+        "possibleTypes" : null
+      }, {
+        "kind" : "OBJECT",
+        "name" : "S3StorageHistoryResponse",
+        "description" : null,
+        "fields" : [ {
+          "name" : "items",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "LIST",
+            "name" : null,
+            "ofType" : {
+              "kind" : "OBJECT",
+              "name" : "S3Storage",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
         }, {
-          "name" : "totalCount",
+          "name" : "nextToken",
           "description" : null,
           "args" : [ ],
           "type" : {
             "kind" : "SCALAR",
-            "name" : "Int",
+            "name" : "String",
             "ofType" : null
           },
           "isDeprecated" : false,
@@ -86163,37 +86512,11 @@
         "possibleTypes" : null
       }, {
         "kind" : "INPUT_OBJECT",
-        "name" : "AddSocialAccountInput",
+        "name" : "SchedulePostInput",
         "description" : null,
         "fields" : null,
         "inputFields" : [ {
-          "name" : "platform",
-          "description" : null,
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "ENUM",
-              "name" : "SocialPlatform",
-              "ofType" : null
-            }
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "accountUrl",
-          "description" : null,
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "AWSURL",
-              "ofType" : null
-            }
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "accountName",
+          "name" : "content",
           "description" : null,
           "type" : {
             "kind" : "NON_NULL",
@@ -86206,34 +86529,76 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "accountHandle",
+          "name" : "mediaUrls",
+          "description" : null,
+          "type" : {
+            "kind" : "LIST",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "AWSURL",
+              "ofType" : null
+            }
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "linkUrl",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
-            "name" : "String",
+            "name" : "AWSURL",
             "ofType" : null
           },
           "defaultValue" : null
         }, {
-          "name" : "platformAccountId",
+          "name" : "scheduledFor",
           "description" : null,
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "AWSDateTime",
+              "ofType" : null
+            }
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "targetAccountIds",
+          "description" : null,
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "LIST",
+              "name" : null,
+              "ofType" : {
+                "kind" : "NON_NULL",
+                "name" : null,
+                "ofType" : {
+                  "kind" : "SCALAR",
+                  "name" : "ID",
+                  "ofType" : null
+                }
+              }
+            }
           },
           "defaultValue" : null
         }, {
           "name" : "entityId",
           "description" : null,
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "ID",
-            "ofType" : null
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "ID",
+              "ofType" : null
+            }
           },
           "defaultValue" : null
         }, {
-          "name" : "venueId",
+          "name" : "linkedGameId",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
@@ -86242,16 +86607,55 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "scrapeFrequencyMinutes",
+          "name" : "templateType",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
-            "name" : "Int",
+            "name" : "String",
             "ofType" : null
           },
           "defaultValue" : null
         } ],
         "interfaces" : null,
+        "enumValues" : null,
+        "possibleTypes" : null
+      }, {
+        "kind" : "OBJECT",
+        "name" : "RefreshResponse",
+        "description" : null,
+        "fields" : [ {
+          "name" : "message",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "status",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        } ],
+        "inputFields" : null,
+        "interfaces" : [ ],
         "enumValues" : null,
         "possibleTypes" : null
       }, {
@@ -86383,38 +86787,96 @@
         "enumValues" : null,
         "possibleTypes" : null
       }, {
-        "kind" : "OBJECT",
-        "name" : "S3StorageHistoryResponse",
+        "kind" : "INPUT_OBJECT",
+        "name" : "AddSocialAccountInput",
         "description" : null,
-        "fields" : [ {
-          "name" : "items",
+        "fields" : null,
+        "inputFields" : [ {
+          "name" : "platform",
           "description" : null,
-          "args" : [ ],
           "type" : {
-            "kind" : "LIST",
+            "kind" : "NON_NULL",
             "name" : null,
             "ofType" : {
-              "kind" : "OBJECT",
-              "name" : "S3Storage",
+              "kind" : "ENUM",
+              "name" : "SocialPlatform",
               "ofType" : null
             }
           },
-          "isDeprecated" : false,
-          "deprecationReason" : null
+          "defaultValue" : null
         }, {
-          "name" : "nextToken",
+          "name" : "accountUrl",
           "description" : null,
-          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "AWSURL",
+              "ofType" : null
+            }
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "accountName",
+          "description" : null,
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "accountHandle",
+          "description" : null,
           "type" : {
             "kind" : "SCALAR",
             "name" : "String",
             "ofType" : null
           },
-          "isDeprecated" : false,
-          "deprecationReason" : null
+          "defaultValue" : null
+        }, {
+          "name" : "platformAccountId",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "entityId",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "ID",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "venueId",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "ID",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "scrapeFrequencyMinutes",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Int",
+            "ofType" : null
+          },
+          "defaultValue" : null
         } ],
-        "inputFields" : null,
-        "interfaces" : [ ],
+        "interfaces" : null,
         "enumValues" : null,
         "possibleTypes" : null
       }, {
@@ -86819,7 +87281,7 @@
         "possibleTypes" : null
       }, {
         "kind" : "OBJECT",
-        "name" : "SocialAccountConnection",
+        "name" : "SocialFeedConnection",
         "description" : null,
         "fields" : [ {
           "name" : "items",
@@ -86836,7 +87298,7 @@
                 "name" : null,
                 "ofType" : {
                   "kind" : "OBJECT",
-                  "name" : "SocialAccount",
+                  "name" : "SocialPost",
                   "ofType" : null
                 }
               }
@@ -86851,6 +87313,17 @@
           "type" : {
             "kind" : "SCALAR",
             "name" : "String",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "totalCount",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Int",
             "ofType" : null
           },
           "isDeprecated" : false,
@@ -86963,197 +87436,6 @@
           "defaultValue" : null
         }, {
           "name" : "uploadedBy",
-          "description" : null,
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        } ],
-        "interfaces" : null,
-        "enumValues" : null,
-        "possibleTypes" : null
-      }, {
-        "kind" : "OBJECT",
-        "name" : "SocialPostConnection",
-        "description" : null,
-        "fields" : [ {
-          "name" : "items",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "LIST",
-              "name" : null,
-              "ofType" : {
-                "kind" : "NON_NULL",
-                "name" : null,
-                "ofType" : {
-                  "kind" : "OBJECT",
-                  "name" : "SocialPost",
-                  "ofType" : null
-                }
-              }
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "nextToken",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        } ],
-        "inputFields" : null,
-        "interfaces" : [ ],
-        "enumValues" : null,
-        "possibleTypes" : null
-      }, {
-        "kind" : "OBJECT",
-        "name" : "RefreshResponse",
-        "description" : null,
-        "fields" : [ {
-          "name" : "message",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "status",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        } ],
-        "inputFields" : null,
-        "interfaces" : [ ],
-        "enumValues" : null,
-        "possibleTypes" : null
-      }, {
-        "kind" : "INPUT_OBJECT",
-        "name" : "SchedulePostInput",
-        "description" : null,
-        "fields" : null,
-        "inputFields" : [ {
-          "name" : "content",
-          "description" : null,
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            }
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "mediaUrls",
-          "description" : null,
-          "type" : {
-            "kind" : "LIST",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "AWSURL",
-              "ofType" : null
-            }
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "linkUrl",
-          "description" : null,
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "AWSURL",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "scheduledFor",
-          "description" : null,
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "AWSDateTime",
-              "ofType" : null
-            }
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "targetAccountIds",
-          "description" : null,
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "LIST",
-              "name" : null,
-              "ofType" : {
-                "kind" : "NON_NULL",
-                "name" : null,
-                "ofType" : {
-                  "kind" : "SCALAR",
-                  "name" : "ID",
-                  "ofType" : null
-                }
-              }
-            }
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "entityId",
-          "description" : null,
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "ID",
-              "ofType" : null
-            }
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "linkedGameId",
-          "description" : null,
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "ID",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "templateType",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
@@ -87949,20 +88231,36 @@
         "onFragment" : false,
         "onField" : true
       }, {
-        "name" : "aws_lambda",
-        "description" : "Tells the service this field/object has access authorized by a Lambda Authorizer.",
+        "name" : "aws_iam",
+        "description" : "Tells the service this field/object has access authorized by sigv4 signing.",
         "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
         "args" : [ ],
         "onOperation" : false,
         "onFragment" : false,
         "onField" : false
       }, {
-        "name" : "aws_publish",
-        "description" : "Tells the service which subscriptions will be published to when this mutation is called. This directive is deprecated use @aws_susbscribe directive instead.",
+        "name" : "aws_oidc",
+        "description" : "Tells the service this field/object has access authorized by an OIDC token.",
+        "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
+        "args" : [ ],
+        "onOperation" : false,
+        "onFragment" : false,
+        "onField" : false
+      }, {
+        "name" : "aws_api_key",
+        "description" : "Tells the service this field/object has access authorized by an API key.",
+        "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
+        "args" : [ ],
+        "onOperation" : false,
+        "onFragment" : false,
+        "onField" : false
+      }, {
+        "name" : "aws_subscribe",
+        "description" : "Tells the service which mutation triggers this subscription.",
         "locations" : [ "FIELD_DEFINITION" ],
         "args" : [ {
-          "name" : "subscriptions",
-          "description" : "List of subscriptions which will be published to when this mutation is called.",
+          "name" : "mutations",
+          "description" : "List of mutations which will trigger this subscription when they are called.",
           "type" : {
             "kind" : "LIST",
             "name" : null,
@@ -87999,68 +88297,6 @@
         "onFragment" : false,
         "onField" : false
       }, {
-        "name" : "deprecated",
-        "description" : null,
-        "locations" : [ "FIELD_DEFINITION", "ENUM_VALUE" ],
-        "args" : [ {
-          "name" : "reason",
-          "description" : null,
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
-          },
-          "defaultValue" : "\"No longer supported\""
-        } ],
-        "onOperation" : false,
-        "onFragment" : false,
-        "onField" : false
-      }, {
-        "name" : "aws_iam",
-        "description" : "Tells the service this field/object has access authorized by sigv4 signing.",
-        "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
-        "args" : [ ],
-        "onOperation" : false,
-        "onFragment" : false,
-        "onField" : false
-      }, {
-        "name" : "aws_subscribe",
-        "description" : "Tells the service which mutation triggers this subscription.",
-        "locations" : [ "FIELD_DEFINITION" ],
-        "args" : [ {
-          "name" : "mutations",
-          "description" : "List of mutations which will trigger this subscription when they are called.",
-          "type" : {
-            "kind" : "LIST",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            }
-          },
-          "defaultValue" : null
-        } ],
-        "onOperation" : false,
-        "onFragment" : false,
-        "onField" : false
-      }, {
-        "name" : "aws_oidc",
-        "description" : "Tells the service this field/object has access authorized by an OIDC token.",
-        "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
-        "args" : [ ],
-        "onOperation" : false,
-        "onFragment" : false,
-        "onField" : false
-      }, {
-        "name" : "aws_api_key",
-        "description" : "Tells the service this field/object has access authorized by an API key.",
-        "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
-        "args" : [ ],
-        "onOperation" : false,
-        "onFragment" : false,
-        "onField" : false
-      }, {
         "name" : "aws_auth",
         "description" : "Directs the schema to enforce authorization on a field",
         "locations" : [ "FIELD_DEFINITION" ],
@@ -88078,6 +88314,52 @@
           },
           "defaultValue" : null
         } ],
+        "onOperation" : false,
+        "onFragment" : false,
+        "onField" : false
+      }, {
+        "name" : "deprecated",
+        "description" : null,
+        "locations" : [ "FIELD_DEFINITION", "ENUM_VALUE" ],
+        "args" : [ {
+          "name" : "reason",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "defaultValue" : "\"No longer supported\""
+        } ],
+        "onOperation" : false,
+        "onFragment" : false,
+        "onField" : false
+      }, {
+        "name" : "aws_publish",
+        "description" : "Tells the service which subscriptions will be published to when this mutation is called. This directive is deprecated use @aws_susbscribe directive instead.",
+        "locations" : [ "FIELD_DEFINITION" ],
+        "args" : [ {
+          "name" : "subscriptions",
+          "description" : "List of subscriptions which will be published to when this mutation is called.",
+          "type" : {
+            "kind" : "LIST",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
+          },
+          "defaultValue" : null
+        } ],
+        "onOperation" : false,
+        "onFragment" : false,
+        "onField" : false
+      }, {
+        "name" : "aws_lambda",
+        "description" : "Tells the service this field/object has access authorized by a Lambda Authorizer.",
+        "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
+        "args" : [ ],
         "onOperation" : false,
         "onFragment" : false,
         "onField" : false

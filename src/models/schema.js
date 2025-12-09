@@ -4305,13 +4305,6 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "isMultiDayTournament": {
-                    "name": "isMultiDayTournament",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "player": {
                     "name": "player",
                     "isArray": false,
@@ -4342,12 +4335,10 @@ export const schema = {
                         ]
                     }
                 },
-                "entryType": {
-                    "name": "entryType",
+                "isMultiDayTournament": {
+                    "name": "isMultiDayTournament",
                     "isArray": false,
-                    "type": {
-                        "enum": "EntryType"
-                    },
+                    "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -4355,6 +4346,15 @@ export const schema = {
                     "name": "qualifyingGameId",
                     "isArray": false,
                     "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entryType": {
+                    "name": "entryType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "EntryType"
+                    },
                     "isRequired": false,
                     "attributes": []
                 },
@@ -4576,6 +4576,48 @@ export const schema = {
                 },
                 "entityId": {
                     "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isConsolidatedRecord": {
+                    "name": "isConsolidatedRecord",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sourceEntryCount": {
+                    "name": "sourceEntryCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sourceBuyInCount": {
+                    "name": "sourceBuyInCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalBuyInsPaid": {
+                    "name": "totalBuyInsPaid",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "netProfitLoss": {
+                    "name": "netProfitLoss",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consolidatedIntoGameId": {
+                    "name": "consolidatedIntoGameId",
                     "isArray": false,
                     "type": "ID",
                     "isRequired": false,
@@ -14181,5 +14223,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "6c5e44aacf8ee9973c5035b411d57b4e"
+    "version": "3cd93b274d9e366bb507e64802e0a390"
 };
