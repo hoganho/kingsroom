@@ -80,6 +80,7 @@ export type GameData = {
     // Series state and metadata
     isSeries?: boolean;
     tournamentSeriesId?: string | null;
+    seriesTitleId?: string | null;  // Direct link to TournamentSeriesTitle for queries
     isMainEvent?: boolean;
     eventNumber?: number | null;
     dayNumber?: number | null;

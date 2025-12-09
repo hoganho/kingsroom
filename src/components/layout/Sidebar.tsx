@@ -103,6 +103,12 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
       requiredPaths: ['/settings/venue-management'],
     },
     {
+      to: '/settings/game-management',
+      label: 'Game Management',
+      icon: BeakerIcon,
+      requiredPaths: ['/settings/game-management'],
+    },
+    {
       to: '/settings/series-management',
       label: 'Series Management',
       icon: TrophyIcon,

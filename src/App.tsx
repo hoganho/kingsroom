@@ -44,6 +44,7 @@ import { VenueDetails } from './pages/venues/VenueDetails';
 // Settings Pages (Admin/SuperAdmin)
 import EntityManagement from './pages/settings/EntityManagement';
 import VenueManagement from './pages/settings/VenueManagement';
+import GameManagement from './pages/settings/GameManagement';
 import { SeriesManagementPage } from './pages/settings/SeriesManagement';
 import { UserManagement } from './pages/settings/UserManagement';
 
@@ -274,6 +275,7 @@ const AuthenticatedRoutes = () => {
                         {/* Settings (Admin/SuperAdmin) */}
                         <Route path="/settings/entity-management" element={<EntityManagement />} />
                         <Route path="/settings/venue-management" element={<VenueManagement />} />
+                        <Route path="/settings/game-management" element={<GameManagement />} />
                         <Route path="/settings/series-management" element={<SeriesManagementPage />} />
                         <Route path="/settings/social-accounts" element={<SocialAccountManagement />} />
                         <Route path="/settings/user-management" element={<UserManagement />} />

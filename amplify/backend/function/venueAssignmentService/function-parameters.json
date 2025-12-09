@@ -49,5 +49,11 @@
       ]
     }
   },
-  "lambdaLayers": []
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "venueReassignmentQueueUrl",
+      "environmentVariableName": "VENUE_REASSIGNMENT_QUEUE_URL"
+    }
+  ]
 }

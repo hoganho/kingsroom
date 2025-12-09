@@ -1,0 +1,97 @@
+[
+  {
+    "timestamp": 1765263956838,
+    "message": "INIT_START Runtime Version: nodejs:22.v68\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:685b5bdd1a5972cbde591187200f592fbd417cd448d71e500b10e41759692493\n",
+    "ingestionTime": 1765263963284
+  },
+  {
+    "timestamp": 1765263957335,
+    "message": "START RequestId: 099acd8d-fc23-48da-89fb-ecb87b13bcf8 Version: $LATEST\n",
+    "ingestionTime": 1765263963284
+  },
+  {
+    "timestamp": 1765263957346,
+    "message": "2025-12-09T07:05:57.346Z\t099acd8d-fc23-48da-89fb-ecb87b13bcf8\tINFO\tReceived event: {\n  \"Records\": [\n    {\n      \"eventID\": \"5da004b112583639db83c55f6337ce8c\",\n      \"eventName\": \"INSERT\",\n      \"eventVersion\": \"1.1\",\n      \"eventSource\": \"aws:dynamodb\",\n      \"awsRegion\": \"ap-southeast-2\",\n      \"dynamodb\": {\n        \"ApproximateCreationDateTime\": 1765263956,\n        \"Keys\": {\n          \"id\": {\n            \"S\": \"9bb18892-fef1-4008-a817-a61501010951\"\n          }\n        },\n        \"NewImage\": {\n          \"createdAt\": {\n            \"S\": \"2025-12-09T07:05:56.300Z\"\n          },\n          \"_lastChangedAt\": {\n            \"N\": \"1765263956323\"\n          },\n          \"resource\": {\n            \"S\": \"/settings/venue-management\"\n          },\n          \"__typename\": {\n            \"S\": \"UserAuditLog\"\n          },\n          \"action\": {\n            \"S\": \"VIEW_PAGE\"\n          },\n          \"details\": {\n            \"NULL\": true\n          },\n          \"userAgent\": {\n            \"S\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\"\n          },\n          \"id\": {\n            \"S\": \"9bb18892-fef1-4008-a817-a61501010951\"\n          },\n          \"_version\": {\n            \"N\": \"1\"\n          },\n          \"userId\": {\n            \"S\": \"39ce5458-e0d1-7094-efba-ccb13d75c186\"\n          },\n          \"updatedAt\": {\n            \"S\": \"2025-12-09T07:05:56.300Z\"\n          }\n        },\n        \"SequenceNumber\": \"37531000001647069677823363\",\n        \"SizeBytes\": 421,\n        \"StreamViewType\": \"NEW_AND_OLD_IMAGES\"\n      },\n      \"eventSourceARN\": \"arn:aws:dynamodb:ap-southeast-2:495599763953:table/UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev/stream/2025-12-01T06:31:14.413\"\n    }\n  ]\n}\n",
+    "ingestionTime": 1765263963284
+  },
+  {
+    "timestamp": 1765263958990,
+    "message": "2025-12-09T07:05:58.990Z\t099acd8d-fc23-48da-89fb-ecb87b13bcf8\tINFO\tUpdated lastActiveAt for user 39ce5458-e0d1-7094-efba-ccb13d75c186\n",
+    "ingestionTime": 1765263963284
+  },
+  {
+    "timestamp": 1765263958990,
+    "message": "2025-12-09T07:05:58.990Z\t099acd8d-fc23-48da-89fb-ecb87b13bcf8\tINFO\tUpdate summary: 1 updated, 0 throttled, 0 failed\n",
+    "ingestionTime": 1765263963284
+  },
+  {
+    "timestamp": 1765263959108,
+    "message": "END RequestId: 099acd8d-fc23-48da-89fb-ecb87b13bcf8\n",
+    "ingestionTime": 1765263963284
+  },
+  {
+    "timestamp": 1765263959108,
+    "message": "REPORT RequestId: 099acd8d-fc23-48da-89fb-ecb87b13bcf8\tDuration: 1772.60 ms\tBilled Duration: 2267 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\tInit Duration: 494.02 ms\t\n",
+    "ingestionTime": 1765263963284
+  },
+  {
+    "timestamp": 1765263965915,
+    "message": "START RequestId: 5c40fce2-24f1-4239-b91d-f8da55aa458c Version: $LATEST\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263965916,
+    "message": "2025-12-09T07:06:05.916Z\t5c40fce2-24f1-4239-b91d-f8da55aa458c\tINFO\tReceived event: {\n  \"Records\": [\n    {\n      \"eventID\": \"65ccae9ed45953732400e5a6e04ddef7\",\n      \"eventName\": \"INSERT\",\n      \"eventVersion\": \"1.1\",\n      \"eventSource\": \"aws:dynamodb\",\n      \"awsRegion\": \"ap-southeast-2\",\n      \"dynamodb\": {\n        \"ApproximateCreationDateTime\": 1765263965,\n        \"Keys\": {\n          \"id\": {\n            \"S\": \"604b5969-c1c7-4119-896b-b4bf748db881\"\n          }\n        },\n        \"NewImage\": {\n          \"createdAt\": {\n            \"S\": \"2025-12-09T07:06:05.388Z\"\n          },\n          \"_lastChangedAt\": {\n            \"N\": \"1765263965415\"\n          },\n          \"resource\": {\n            \"S\": \"/settings/game-management\"\n          },\n          \"__typename\": {\n            \"S\": \"UserAuditLog\"\n          },\n          \"action\": {\n            \"S\": \"VIEW_PAGE\"\n          },\n          \"details\": {\n            \"NULL\": true\n          },\n          \"userAgent\": {\n            \"S\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"\n          },\n          \"id\": {\n            \"S\": \"604b5969-c1c7-4119-896b-b4bf748db881\"\n          },\n          \"_version\": {\n            \"N\": \"1\"\n          },\n          \"userId\": {\n            \"S\": \"39ce5458-e0d1-7094-efba-ccb13d75c186\"\n          },\n          \"updatedAt\": {\n            \"S\": \"2025-12-09T07:06:05.388Z\"\n          }\n        },\n        \"SequenceNumber\": \"37537600001790876438054293\",\n        \"SizeBytes\": 420,\n        \"StreamViewType\": \"NEW_AND_OLD_IMAGES\"\n      },\n      \"eventSourceARN\": \"arn:aws:dynamodb:ap-southeast-2:495599763953:table/UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev/stream/2025-12-01T06:31:14.413\"\n    }\n  ]\n}\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263965968,
+    "message": "2025-12-09T07:06:05.968Z\t5c40fce2-24f1-4239-b91d-f8da55aa458c\tINFO\tThrottled update for user 39ce5458-e0d1-7094-efba-ccb13d75c186\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263965968,
+    "message": "2025-12-09T07:06:05.968Z\t5c40fce2-24f1-4239-b91d-f8da55aa458c\tINFO\tUpdate summary: 0 updated, 1 throttled, 0 failed\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263966127,
+    "message": "END RequestId: 5c40fce2-24f1-4239-b91d-f8da55aa458c\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263966127,
+    "message": "REPORT RequestId: 5c40fce2-24f1-4239-b91d-f8da55aa458c\tDuration: 211.58 ms\tBilled Duration: 212 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263970907,
+    "message": "2025-12-09T07:06:10.907Z\t60f54bb0-c678-4a8f-bf12-229401866238\tINFO\tReceived event: {\n  \"Records\": [\n    {\n      \"eventID\": \"fe43a992bb8f0d986a6ed4ad280c28f4\",\n      \"eventName\": \"INSERT\",\n      \"eventVersion\": \"1.1\",\n      \"eventSource\": \"aws:dynamodb\",\n      \"awsRegion\": \"ap-southeast-2\",\n      \"dynamodb\": {\n        \"ApproximateCreationDateTime\": 1765263970,\n        \"Keys\": {\n          \"id\": {\n            \"S\": \"eeb82922-29a1-42d8-a1ec-a11203ea933d\"\n          }\n        },\n        \"NewImage\": {\n          \"createdAt\": {\n            \"S\": \"2025-12-09T07:06:10.466Z\"\n          },\n          \"_lastChangedAt\": {\n            \"N\": \"1765263970469\"\n          },\n          \"resource\": {\n            \"S\": \"/scraper/admin\"\n          },\n          \"__typename\": {\n            \"S\": \"UserAuditLog\"\n          },\n          \"action\": {\n            \"S\": \"VIEW_PAGE\"\n          },\n          \"details\": {\n            \"NULL\": true\n          },\n          \"userAgent\": {\n            \"S\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"\n          },\n          \"id\": {\n            \"S\": \"eeb82922-29a1-42d8-a1ec-a11203ea933d\"\n          },\n          \"_version\": {\n            \"N\": \"1\"\n          },\n          \"userId\": {\n            \"S\": \"39ce5458-e0d1-7094-efba-ccb13d75c186\"\n          },\n          \"updatedAt\": {\n            \"S\": \"2025-12-09T07:06:10.466Z\"\n          }\n        },\n        \"SequenceNumber\": \"37534100004473064979675376\",\n        \"SizeBytes\": 409,\n        \"StreamViewType\": \"NEW_AND_OLD_IMAGES\"\n      },\n      \"eventSourceARN\": \"arn:aws:dynamodb:ap-southeast-2:495599763953:table/UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev/stream/2025-12-01T06:31:14.413\"\n    }\n  ]\n}\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263970907,
+    "message": "START RequestId: 60f54bb0-c678-4a8f-bf12-229401866238 Version: $LATEST\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263970928,
+    "message": "2025-12-09T07:06:10.928Z\t60f54bb0-c678-4a8f-bf12-229401866238\tINFO\tThrottled update for user 39ce5458-e0d1-7094-efba-ccb13d75c186\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263970928,
+    "message": "2025-12-09T07:06:10.928Z\t60f54bb0-c678-4a8f-bf12-229401866238\tINFO\tUpdate summary: 0 updated, 1 throttled, 0 failed\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263971008,
+    "message": "END RequestId: 60f54bb0-c678-4a8f-bf12-229401866238\n",
+    "ingestionTime": 1765263974934
+  },
+  {
+    "timestamp": 1765263971008,
+    "message": "REPORT RequestId: 60f54bb0-c678-4a8f-bf12-229401866238\tDuration: 100.79 ms\tBilled Duration: 101 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765263974934
+  }
+]

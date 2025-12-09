@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query"
+      ]
+    },
+    "storage": {
+      "ScrapeURL:@model(appsync)": [
+        "read"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

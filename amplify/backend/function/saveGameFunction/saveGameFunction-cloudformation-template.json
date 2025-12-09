@@ -995,14 +995,11 @@
             {
               "Action": [
                 "dynamodb:GetItem",
-                "dynamodb:PutItem",
-                "dynamodb:UpdateItem",
-                "dynamodb:Query",
-                "dynamodb:DeleteItem"
+                "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:*:*:table/GameCost-*",
-                "arn:aws:dynamodb:*:*:table/GameCost-*/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1019,43 +1016,43 @@
             {
               "Action": [
                 "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev/index/byEntityVenue"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byTournamentSeriesTitle",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byYear",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byName",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byMonth",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byQuarter"
               ],
               "Effect": "Allow"
             },
             {
               "Action": [
                 "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
                 "dynamodb:Query",
                 "dynamodb:Scan"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byTournamentSeriesTitle",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byYear"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev"
               ],
               "Effect": "Allow"
             },
             {
               "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev/index/*"
-              ],
-              "Effect": "Allow"
-            },
-            {
-              "Action": [
-                "dynamodb:UpdateItem"
-              ],
-              "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1080,19 +1077,14 @@
             },
             {
               "Action": [
-                "sqs:SendMessage"
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:sqs:ap-southeast-2:*:GameProcessingQueue.fifo"
-              ],
-              "Effect": "Allow"
-            },
-            {
-              "Action": [
-                "cloudwatch:PutMetricData"
-              ],
-              "Resource": [
-                "*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-dev/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1104,8 +1096,28 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-dev/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "sqs:SendMessage"
+              ],
+              "Resource": [
+                "arn:aws:sqs:ap-southeast-2:*:GameProcessingQueue.fifo",
+                "arn:aws:sqs:ap-southeast-2:*:VenueReassignmentQueue.fifo",
+                "arn:aws:sqs:ap-southeast-2:*:PlayerProcessorQueue.fifo"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "cloudwatch:PutMetricData"
+              ],
+              "Resource": [
+                "*"
               ],
               "Effect": "Allow"
             }

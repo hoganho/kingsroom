@@ -300,6 +300,13 @@ export const schema = {
                         ]
                     }
                 },
+                "canonicalVenueId": {
+                    "name": "canonicalVenueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "assets": {
                     "name": "assets",
                     "isArray": true,
@@ -458,6 +465,15 @@ export const schema = {
                         "fields": [
                             "venueNumber",
                             "name"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byCanonicalVenue",
+                        "fields": [
+                            "canonicalVenueId"
                         ]
                     }
                 },
@@ -798,14 +814,6 @@ export const schema = {
                     "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
-                },
-                "events": {
-                    "name": "events",
-                    "isArray": true,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
                 },
                 "numberOfEvents": {
                     "name": "numberOfEvents",
@@ -1429,6 +1437,48 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "gameDayOfWeek": {
+                    "name": "gameDayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "buyInBucket": {
+                    "name": "buyInBucket",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueScheduleKey": {
+                    "name": "venueScheduleKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueGameTypeKey": {
+                    "name": "venueGameTypeKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityQueryKey": {
+                    "name": "entityQueryKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityGameTypeKey": {
+                    "name": "entityGameTypeKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "sourceUrl": {
                     "name": "sourceUrl",
                     "isArray": false,
@@ -1784,6 +1834,66 @@ export const schema = {
                         "queryField": "gamesByConsolidationKey",
                         "fields": [
                             "consolidationKey"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byDayOfWeek",
+                        "fields": [
+                            "gameDayOfWeek",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byBuyInBucket",
+                        "fields": [
+                            "buyInBucket",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueSchedule",
+                        "fields": [
+                            "venueScheduleKey",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueGameType",
+                        "fields": [
+                            "venueGameTypeKey",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityQuery",
+                        "fields": [
+                            "entityQueryKey",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityGameType",
+                        "fields": [
+                            "entityGameTypeKey",
+                            "gameStartDateTime"
                         ]
                     }
                 },
@@ -3676,7 +3786,7 @@ export const schema = {
                     "association": {
                         "connectionType": "HAS_MANY",
                         "associatedWith": [
-                            "venueId"
+                            "player"
                         ]
                     }
                 },
@@ -4130,6 +4240,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "status": {
                     "name": "status",
                     "isArray": false,
@@ -4305,6 +4422,16 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "byEntityEntry",
+                        "fields": [
+                            "entityId",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "byRecordType",
                         "fields": [
                             "recordType",
@@ -4440,6 +4567,20 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -4496,6 +4637,26 @@ export const schema = {
                     }
                 },
                 {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueResult",
+                        "fields": [
+                            "venueId",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityResult",
+                        "fields": [
+                            "entityId",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
                     "type": "auth",
                     "properties": {
                         "rules": [
@@ -4520,43 +4681,6 @@ export const schema = {
                     "name": "id",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalGamesPlayed": {
-                    "name": "totalGamesPlayed",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "averageBuyIn": {
-                    "name": "averageBuyIn",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "firstPlayedDate": {
-                    "name": "firstPlayedDate",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "lastPlayedDate": {
-                    "name": "lastPlayedDate",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "targetingClassification": {
-                    "name": "targetingClassification",
-                    "isArray": false,
-                    "type": {
-                        "enum": "PlayerVenueTargetingClassification"
-                    },
                     "isRequired": true,
                     "attributes": []
                 },
@@ -4604,6 +4728,85 @@ export const schema = {
                         ]
                     }
                 },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "visityKey": {
+                    "name": "visityKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "canonicalVenueId": {
+                    "name": "canonicalVenueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalGamesPlayed": {
+                    "name": "totalGamesPlayed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "averageBuyIn": {
+                    "name": "averageBuyIn",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalBuyIns": {
+                    "name": "totalBuyIns",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalWinnings": {
+                    "name": "totalWinnings",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "netProfit": {
+                    "name": "netProfit",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "firstPlayedDate": {
+                    "name": "firstPlayedDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastPlayedDate": {
+                    "name": "lastPlayedDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "targetingClassification": {
+                    "name": "targetingClassification",
+                    "isArray": false,
+                    "type": {
+                        "enum": "PlayerVenueTargetingClassification"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -4636,7 +4839,7 @@ export const schema = {
                         "name": "byPlayer",
                         "fields": [
                             "playerId",
-                            "venueId"
+                            "visityKey"
                         ]
                     }
                 },
@@ -4646,6 +4849,36 @@ export const schema = {
                         "name": "byVenue",
                         "fields": [
                             "venueId",
+                            "playerId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityPlayerVenue",
+                        "fields": [
+                            "entityId",
+                            "venueId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVisitKey",
+                        "queryField": "playerVenueByVisitKey",
+                        "fields": [
+                            "visityKey"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byCanonicalVenuePlayer",
+                        "fields": [
+                            "canonicalVenueId",
                             "playerId"
                         ]
                     }
@@ -4753,6 +4986,20 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -4795,6 +5042,26 @@ export const schema = {
                         "name": "byGame",
                         "fields": [
                             "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueTransaction",
+                        "fields": [
+                            "venueId",
+                            "transactionDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityTransaction",
+                        "fields": [
+                            "entityId",
+                            "transactionDate"
                         ]
                     }
                 },
@@ -8243,6 +8510,180 @@ export const schema = {
                 }
             ]
         },
+        "BackgroundTask": {
+            "name": "BackgroundTask",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "taskType": {
+                    "name": "taskType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "BackgroundTaskType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "BackgroundTaskStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "targetType": {
+                    "name": "targetType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "targetId": {
+                    "name": "targetId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "targetIds": {
+                    "name": "targetIds",
+                    "isArray": true,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "targetCount": {
+                    "name": "targetCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "payload": {
+                    "name": "payload",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "processedCount": {
+                    "name": "processedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "progressPercent": {
+                    "name": "progressPercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "result": {
+                    "name": "result",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "errorMessage": {
+                    "name": "errorMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "startedAt": {
+                    "name": "startedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "completedAt": {
+                    "name": "completedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "initiatedBy": {
+                    "name": "initiatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "BackgroundTasks",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityTask",
+                        "queryField": "tasksByEntity",
+                        "fields": [
+                            "entityId",
+                            "createdAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "SocialAccount": {
             "name": "SocialAccount",
             "fields": {
@@ -9659,6 +10100,8 @@ export const schema = {
                 "QUEENS_BIRTHDAY",
                 "CHRISTMAS",
                 "BOXING_DAY",
+                "MELBOURNE_CUP",
+                "LABOUR_DAY",
                 "OTHER"
             ]
         },
@@ -9871,6 +10314,29 @@ export const schema = {
             "values": [
                 "SCHEDULED",
                 "PUBLISHED",
+                "FAILED",
+                "CANCELLED"
+            ]
+        },
+        "BackgroundTaskType": {
+            "name": "BackgroundTaskType",
+            "values": [
+                "VENUE_REASSIGNMENT",
+                "BULK_VENUE_REASSIGNMENT",
+                "ENTITY_REASSIGNMENT",
+                "VENUE_CLONE",
+                "BULK_IMPORT",
+                "DATA_MIGRATION",
+                "REPORT_GENERATION",
+                "VENUE_DETAILS_RECALC"
+            ]
+        },
+        "BackgroundTaskStatus": {
+            "name": "BackgroundTaskStatus",
+            "values": [
+                "QUEUED",
+                "PROCESSING",
+                "COMPLETED",
                 "FAILED",
                 "CANCELLED"
             ]
@@ -12981,6 +13447,263 @@ export const schema = {
                 }
             }
         },
+        "ReassignGameVenueResult": {
+            "name": "ReassignGameVenueResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "taskId": {
+                    "name": "taskId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "oldVenueId": {
+                    "name": "oldVenueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newVenueId": {
+                    "name": "newVenueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "oldEntityId": {
+                    "name": "oldEntityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newEntityId": {
+                    "name": "newEntityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueCloned": {
+                    "name": "venueCloned",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "clonedVenueId": {
+                    "name": "clonedVenueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recordsUpdated": {
+                    "name": "recordsUpdated",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "BulkReassignGameVenuesResult": {
+            "name": "BulkReassignGameVenuesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "taskId": {
+                    "name": "taskId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameCount": {
+                    "name": "gameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newVenueId": {
+                    "name": "newVenueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reassignEntity": {
+                    "name": "reassignEntity",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GetReassignmentStatusResult": {
+            "name": "GetReassignmentStatusResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "task": {
+                    "name": "task",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "BackgroundTaskInfo"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "BackgroundTaskInfo": {
+            "name": "BackgroundTaskInfo",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "BackgroundTaskStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "taskType": {
+                    "name": "taskType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "BackgroundTaskType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "targetCount": {
+                    "name": "targetCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "processedCount": {
+                    "name": "processedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "progressPercent": {
+                    "name": "progressPercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "result": {
+                    "name": "result",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "errorMessage": {
+                    "name": "errorMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "startedAt": {
+                    "name": "startedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "completedAt": {
+                    "name": "completedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "SocialFeedConnection": {
             "name": "SocialFeedConnection",
             "fields": {
@@ -13458,5 +14181,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "6b69c7644a5101d377c0fda4e46a2bae"
+    "version": "6c5e44aacf8ee9973c5035b411d57b4e"
 };

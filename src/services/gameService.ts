@@ -1,4 +1,5 @@
 // services/gameService.ts
+// COMPLETE: Entity-aware game service with venue reassignment operations
 // UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
 
 import { generateClient } from 'aws-amplify/api';
@@ -24,8 +25,19 @@ import {
     SaveGameResult
 } from '../API';
 
+// ===================================================================
+// CONSTANTS
+// ===================================================================
+
 // Default entity ID
 const DEFAULT_ENTITY_ID = '42101695-1332-48e3-963b-3c6ad4e909a0';
+
+// Unassigned venue placeholder
+const UNASSIGNED_VENUE_ID = '00000000-0000-0000-0000-000000000000';
+
+// ===================================================================
+// GRAPHQL MUTATIONS
+// ===================================================================
 
 // GraphQL mutation for saving game data
 const saveGameMutation = /* GraphQL */ `
@@ -49,6 +61,158 @@ const saveGameMutation = /* GraphQL */ `
     }
 `;
 
+// GraphQL mutation for single game venue reassignment
+const reassignGameVenueMutation = /* GraphQL */ `
+    mutation ReassignGameVenue($input: ReassignGameVenueInput!) {
+        reassignGameVenue(input: $input) {
+            success
+            status
+            message
+            taskId
+            gameId
+            oldVenueId
+            newVenueId
+            oldEntityId
+            newEntityId
+            venueCloned
+            clonedVenueId
+            recordsUpdated
+        }
+    }
+`;
+
+// GraphQL mutation for bulk venue reassignment
+const bulkReassignGameVenuesMutation = /* GraphQL */ `
+    mutation BulkReassignGameVenues($input: BulkReassignGameVenuesInput!) {
+        bulkReassignGameVenues(input: $input) {
+            success
+            status
+            message
+            taskId
+            gameCount
+            newVenueId
+            reassignEntity
+        }
+    }
+`;
+
+// GraphQL query for reassignment task status
+const getReassignmentStatusQuery = /* GraphQL */ `
+    query GetReassignmentStatus($taskId: ID!) {
+        getReassignmentStatus(taskId: $taskId) {
+            success
+            message
+            task {
+                id
+                status
+                taskType
+                targetCount
+                processedCount
+                progressPercent
+                result
+                errorMessage
+                createdAt
+                startedAt
+                completedAt
+            }
+        }
+    }
+`;
+
+// GraphQL query for venue clones
+const getVenueClonesQuery = /* GraphQL */ `
+    query GetVenueClones($canonicalVenueId: ID!) {
+        getVenueClones(canonicalVenueId: $canonicalVenueId) {
+            id
+            name
+            entityId
+            canonicalVenueId
+        }
+    }
+`;
+
+// GraphQL query to find venue for entity
+const findVenueForEntityQuery = /* GraphQL */ `
+    query FindVenueForEntity($canonicalVenueId: ID!, $entityId: ID!) {
+        findVenueForEntity(canonicalVenueId: $canonicalVenueId, entityId: $entityId) {
+            id
+            name
+            entityId
+            canonicalVenueId
+        }
+    }
+`;
+
+// ===================================================================
+// TYPES - VENUE REASSIGNMENT
+// ===================================================================
+
+export interface ReassignGameVenueInput {
+    gameId: string;
+    newVenueId: string;
+    entityId?: string;
+    reassignEntity: boolean;  // true = move game to venue's entity, false = clone venue to game's entity
+    initiatedBy?: string;
+}
+
+export interface BulkReassignGameVenuesInput {
+    gameIds: string[];
+    newVenueId: string;
+    entityId: string;
+    reassignEntity: boolean;
+    initiatedBy?: string;
+}
+
+export interface ReassignmentResult {
+    success: boolean;
+    status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'NO_CHANGE';
+    message: string;
+    taskId?: string;
+    gameId?: string;
+    oldVenueId?: string;
+    newVenueId?: string;
+    oldEntityId?: string;
+    newEntityId?: string;
+    venueCloned?: boolean;
+    clonedVenueId?: string;
+    recordsUpdated?: any;
+}
+
+export interface BulkReassignmentResult {
+    success: boolean;
+    status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+    message: string;
+    taskId?: string;
+    gameCount?: number;
+    newVenueId?: string;
+    reassignEntity?: boolean;
+}
+
+export interface BackgroundTask {
+    id: string;
+    status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+    taskType: string;
+    targetCount?: number;
+    processedCount?: number;
+    progressPercent?: number;
+    result?: any;
+    errorMessage?: string;
+    createdAt: string;
+    startedAt?: string;
+    completedAt?: string;
+}
+
+export interface VenueClone {
+    id: string;
+    name: string;
+    entityId: string;
+    canonicalVenueId: string;
+}
+
+// ===================================================================
+// ENTITY MANAGEMENT
+// ===================================================================
+
 /**
  * Get the current active entity from local storage or use default
  */
@@ -62,6 +226,20 @@ export const getCurrentEntityId = (): string => {
  */
 export const setCurrentEntityId = (entityId: string): void => {
     localStorage.setItem('currentEntityId', entityId);
+};
+
+/**
+ * Get the default entity ID constant
+ */
+export const getDefaultEntityId = (): string => {
+    return DEFAULT_ENTITY_ID;
+};
+
+/**
+ * Get the unassigned venue ID constant
+ */
+export const getUnassignedVenueId = (): string => {
+    return UNASSIGNED_VENUE_ID;
 };
 
 /**
@@ -82,7 +260,10 @@ export const fetchEntities = async (): Promise<Entity[]> => {
     }
 };
 
-// Helper functions for enum mapping
+// ===================================================================
+// ENUM MAPPING HELPERS
+// ===================================================================
+
 const mapToGameType = (value: any): GameType | null => {
     if (!value) return null;
     const map: Record<string, GameType> = {
@@ -121,6 +302,10 @@ const mapToTournamentType = (value: any): TournamentType | null => {
     return value ? value as TournamentType : null;
 };
 
+// ===================================================================
+// DATA HELPERS
+// ===================================================================
+
 /**
  * Create placeholder data for NOT_PUBLISHED games
  */
@@ -156,7 +341,9 @@ const createNotPublishedPlaceholder = (
     } as GameData | ScrapedGameData;
 };
 
-// Extract player data for save input
+/**
+ * Extract player data for save input
+ */
 const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
     const allPlayers: any[] = [];
     let totalPrizesPaid = 0;
@@ -203,6 +390,10 @@ const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
         hasCompleteResults: data.results && data.results.length > 0 && data.results.some(r => r.winnings && r.winnings > 0)
     };
 };
+
+// ===================================================================
+// GAME DATA FETCHING
+// ===================================================================
 
 /**
  * Fetch game data from backend (S3-first architecture)
@@ -270,6 +461,10 @@ export const shouldAutoRefreshTournament = (data: ScrapedGameData | GameData | n
     
     return false;
 };
+
+// ===================================================================
+// GAME DATA SAVING
+// ===================================================================
 
 /**
  * Save game data to backend via unified saveGame mutation
@@ -472,6 +667,226 @@ export const saveGameDataToBackend = async (
     }
 };
 
+// ===================================================================
+// VENUE REASSIGNMENT OPERATIONS
+// ===================================================================
+
+/**
+ * Reassign a single game to a different venue
+ * 
+ * @param input - Reassignment parameters
+ * @returns Result with new venue/entity IDs and any cloned venue info
+ * 
+ * @example
+ * // Move game to new entity (follow the venue)
+ * await reassignGameVenue({ gameId: '123', newVenueId: '456', reassignEntity: true });
+ * 
+ * // Keep game in current entity (clone venue if needed)
+ * await reassignGameVenue({ gameId: '123', newVenueId: '456', reassignEntity: false });
+ */
+export const reassignGameVenue = async (
+    input: ReassignGameVenueInput
+): Promise<ReassignmentResult> => {
+    const client = generateClient();
+    
+    try {
+        console.log('[GameService] Reassigning game venue:', input);
+        
+        const response = await client.graphql({
+            query: reassignGameVenueMutation,
+            variables: { input }
+        }) as GraphQLResult<any>;
+        
+        if (response.errors) {
+            console.error('[GameService] GraphQL errors:', response.errors);
+            throw new Error(response.errors[0]?.message || 'Failed to reassign venue');
+        }
+        
+        const result = response.data.reassignGameVenue;
+        
+        console.log('[GameService] Reassignment result:', {
+            success: result.success,
+            status: result.status,
+            venueCloned: result.venueCloned,
+            clonedVenueId: result.clonedVenueId
+        });
+        
+        return result;
+    } catch (error) {
+        console.error('[GameService] Error reassigning venue:', error);
+        throw error;
+    }
+};
+
+/**
+ * Bulk reassign multiple games to a different venue
+ * Always queues as async job for tracking progress
+ * 
+ * @param input - Bulk reassignment parameters
+ * @returns Task ID for tracking progress
+ */
+export const bulkReassignGameVenues = async (
+    input: BulkReassignGameVenuesInput
+): Promise<BulkReassignmentResult> => {
+    const client = generateClient();
+    
+    try {
+        console.log('[GameService] Bulk reassigning venues:', {
+            gameCount: input.gameIds.length,
+            newVenueId: input.newVenueId,
+            reassignEntity: input.reassignEntity
+        });
+        
+        const response = await client.graphql({
+            query: bulkReassignGameVenuesMutation,
+            variables: { input }
+        }) as GraphQLResult<any>;
+        
+        if (response.errors) {
+            console.error('[GameService] GraphQL errors:', response.errors);
+            throw new Error(response.errors[0]?.message || 'Failed to bulk reassign venues');
+        }
+        
+        return response.data.bulkReassignGameVenues;
+    } catch (error) {
+        console.error('[GameService] Error bulk reassigning venues:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get the status of a background reassignment task
+ * Use for polling progress on bulk operations
+ * 
+ * @param taskId - Background task ID
+ * @returns Task status with progress info
+ */
+export const getReassignmentStatus = async (
+    taskId: string
+): Promise<{ success: boolean; message: string; task?: BackgroundTask }> => {
+    const client = generateClient();
+    
+    try {
+        const response = await client.graphql({
+            query: getReassignmentStatusQuery,
+            variables: { taskId }
+        }) as GraphQLResult<any>;
+        
+        if (response.errors) {
+            throw new Error(response.errors[0]?.message || 'Failed to get status');
+        }
+        
+        return response.data.getReassignmentStatus;
+    } catch (error) {
+        console.error('[GameService] Error getting reassignment status:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get all clones of a canonical venue across entities
+ * Useful for showing which entities have this physical venue
+ * 
+ * @param canonicalVenueId - The canonical (original) venue ID
+ * @returns List of venue clones in different entities
+ */
+export const getVenueClones = async (
+    canonicalVenueId: string
+): Promise<VenueClone[]> => {
+    const client = generateClient();
+    
+    try {
+        const response = await client.graphql({
+            query: getVenueClonesQuery,
+            variables: { canonicalVenueId }
+        }) as GraphQLResult<any>;
+        
+        if (response.errors) {
+            throw new Error(response.errors[0]?.message || 'Failed to get venue clones');
+        }
+        
+        return response.data.getVenueClones || [];
+    } catch (error) {
+        console.error('[GameService] Error getting venue clones:', error);
+        throw error;
+    }
+};
+
+/**
+ * Find if a specific entity already has a clone of a canonical venue
+ * 
+ * @param canonicalVenueId - The canonical venue ID
+ * @param entityId - The entity to check
+ * @returns The existing venue clone or null
+ */
+export const findVenueForEntity = async (
+    canonicalVenueId: string,
+    entityId: string
+): Promise<VenueClone | null> => {
+    const client = generateClient();
+    
+    try {
+        const response = await client.graphql({
+            query: findVenueForEntityQuery,
+            variables: { canonicalVenueId, entityId }
+        }) as GraphQLResult<any>;
+        
+        if (response.errors) {
+            throw new Error(response.errors[0]?.message || 'Failed to find venue');
+        }
+        
+        return response.data.findVenueForEntity;
+    } catch (error) {
+        console.error('[GameService] Error finding venue for entity:', error);
+        throw error;
+    }
+};
+
+/**
+ * Poll for task completion with progress callback
+ * 
+ * @param taskId - Background task ID
+ * @param onProgress - Callback for progress updates
+ * @param pollInterval - Interval in ms (default 2000)
+ * @param maxAttempts - Max poll attempts (default 150 = 5 min)
+ * @returns Final task result
+ */
+export const pollTaskCompletion = async (
+    taskId: string,
+    onProgress?: (task: BackgroundTask) => void,
+    pollInterval: number = 2000,
+    maxAttempts: number = 150
+): Promise<BackgroundTask> => {
+    let attempts = 0;
+    
+    while (attempts < maxAttempts) {
+        const response = await getReassignmentStatus(taskId);
+        
+        if (!response.success || !response.task) {
+            throw new Error(response.message || 'Task not found');
+        }
+        
+        const task = response.task;
+        
+        if (onProgress) {
+            onProgress(task);
+        }
+        
+        if (task.status === 'COMPLETED' || task.status === 'FAILED' || task.status === 'CANCELLED') {
+            return task;
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+        attempts++;
+    }
+    
+    throw new Error('Task polling timed out');
+};
+
+// ===================================================================
+// VALIDATION & UTILITIES
+// ===================================================================
+
 /**
  * Validate game data without saving (for preview)
  */
@@ -583,4 +998,19 @@ export const fetchGameDataRangeFromBackend = async (
         console.error('[GameService] Error fetching game range:', error);
         throw error;
     }
+};
+
+/**
+ * Check if a venue is the unassigned placeholder
+ */
+export const isUnassignedVenue = (venueId: string | null | undefined): boolean => {
+    return !venueId || venueId === UNASSIGNED_VENUE_ID;
+};
+
+/**
+ * Get entity name from entity ID using cached entities
+ */
+export const getEntityName = (entityId: string, entities: Entity[]): string => {
+    const entity = entities.find(e => e.id === entityId);
+    return entity?.entityName || 'Unknown';
 };

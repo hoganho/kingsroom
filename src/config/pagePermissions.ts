@@ -144,6 +144,14 @@ export const ALL_PAGES: PageConfig[] = [
     icon: 'BuildingOffice2Icon',
   },
   {
+    path: '/settings/game-management',
+    label: 'Game Management',
+    description: 'Manage game venue assignments and entity reassignments',
+    category: 'settings',
+    requiredBaseRoles: ['ADMIN', 'SUPER_ADMIN'],
+    icon: 'BeakerIcon',
+  },
+  {
     path: '/settings/series-management',
     label: 'Series Management',
     description: 'Manage tournament series',

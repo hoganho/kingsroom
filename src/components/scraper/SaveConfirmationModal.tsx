@@ -1,12 +1,14 @@
+// src/components/scraper/SaveConfirmation/SaveConfirmationModal.tsx
+// OPTION B VERSION - Series management delegated to enhanced SeriesDetailsEditor
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import type { GameData, EntityConfig } from '../../types/game';
 import type { TournamentSeries, TournamentSeriesTitle } from '../../types/series';
-import type { ScrapedGameData, SeriesStatus, SeriesCategory, HolidayType } from '../../API';
+import type { ScrapedGameData } from '../../API';
 import { useGameDataEditor } from '../../hooks/useGameDataEditor';
 import { QuickDataEditor } from './SaveConfirmation/QuickDataEditor';
 import { SeriesDetailsEditor } from './SaveConfirmation/SeriesDetailsEditor';
-// ✅ NEW: Import consolidation preview components
 import { ConsolidationPreview } from './SaveConfirmation/ConsolidationPreview';
 import { useConsolidationPreview } from '../../hooks/useConsolidationPreview';
 import { formatCurrency } from '../../utils/generalHelpers';
@@ -73,6 +75,10 @@ const listSeriesForDropdown = /* GraphQL */ `
                     title
                     seriesCategory
                 }
+                venue {
+                    id
+                    name
+                }
             }
             nextToken
         }
@@ -118,33 +124,7 @@ const createVenueMutation = /* GraphQL */ `
     }
 `;
 
-const createSeriesTitleMutation = /* GraphQL */ `
-    mutation CreateTournamentSeriesTitle($input: CreateTournamentSeriesTitleInput!) {
-        createTournamentSeriesTitle(input: $input) {
-            id
-            title
-            aliases
-            seriesCategory
-        }
-    }
-`;
-
-const createSeriesMutation = /* GraphQL */ `
-    mutation CreateTournamentSeries($input: CreateTournamentSeriesInput!) {
-        createTournamentSeries(input: $input) {
-            id
-            name
-            year
-            status
-            venueId
-            tournamentSeriesTitleId
-            seriesCategory
-            holidayType
-            quarter
-            month
-        }
-    }
-`;
+// Note: Series mutations moved to SeriesDetailsEditor-enhanced.tsx
 
 // ===================================================================
 // TYPES & INTERFACES
@@ -188,68 +168,10 @@ interface VenueOption {
 // UTILITY FUNCTIONS
 // ===================================================================
 
-const detectSeriesCategory = (seriesName: string): SeriesCategory => {
-    const name = seriesName.toLowerCase();
-    
-    if (name.includes('christmas') || name.includes('easter') || 
-        name.includes('anzac') || name.includes('holiday')) {
-        return 'SPECIAL' as SeriesCategory;
-    }
-    if (name.includes('championship') || name.includes('champs')) {
-        return 'CHAMPIONSHIP' as SeriesCategory;
-    }
-    if (name.includes('promo') || name.includes('special offer')) {
-        return 'PROMOTIONAL' as SeriesCategory;
-    }
-    if (name.includes('summer') || name.includes('winter') || 
-        name.includes('spring') || name.includes('autumn')) {
-        return 'SEASONAL' as SeriesCategory;
-    }
-    return 'REGULAR' as SeriesCategory;
-};
-
-const detectHolidayType = (date: string, name: string): HolidayType | null => {
-    if (!date) return null;
-    const gameDate = new Date(date);
-    const month = gameDate.getMonth() + 1;
-    const day = gameDate.getDate();
-    const nameLower = name.toLowerCase();
-    
-    if (month === 12 && day >= 20) return 'CHRISTMAS' as HolidayType;
-    if ((month === 12 && day >= 26) || (month === 1 && day <= 2)) {
-        return 'BOXING_DAY' as HolidayType;
-    }
-    if ((month === 12 && day === 31) || (month === 1 && day <= 7)) {
-        return 'NEW_YEAR' as HolidayType;
-    }
-    if (month === 1 && day >= 24 && day <= 28) {
-        return 'AUSTRALIA_DAY' as HolidayType;
-    }
-    if (nameLower.includes('easter')) return 'EASTER' as HolidayType;
-    if (month === 4 && day >= 23 && day <= 27) {
-        return 'ANZAC_DAY' as HolidayType;
-    }
-    if (month === 6 && nameLower.includes('queen')) {
-        return 'QUEENS_BIRTHDAY' as HolidayType;
-    }
-    
-    return 'OTHER' as HolidayType;
-};
-
-const getQuarterFromDate = (date: string): number => {
-    const month = new Date(date).getMonth() + 1;
-    return Math.ceil(month / 3);
-};
-
-const getMonthFromDate = (date: string): number => {
-    return new Date(date).getMonth() + 1;
-};
-
-// ✅ UPDATED: Added 'grouping' tab for consolidation preview
 const tabs: ModalTab[] = [
     { id: 'quick', label: 'Quick Edit', icon: '⚡' },
     { id: 'relationships', label: 'Entity/Venue/Series', icon: '🔗' },
-    { id: 'grouping', label: 'Grouping', icon: '📦' },  // NEW TAB
+    { id: 'grouping', label: 'Grouping', icon: '📦' },
     { id: 'advanced', label: 'Advanced', icon: '⚙️' },
     { id: 'validation', label: 'Validation', icon: '✓' },
     { id: 'diff', label: 'Changes', icon: '📝' }
@@ -259,8 +181,6 @@ const tabs: ModalTab[] = [
 // LAZY CLIENT INITIALIZATION
 // ===================================================================
 
-// Lazy initialization pattern to avoid calling generateClient() before Amplify.configure()
-// Using 'any' to avoid TypeScript excessive stack depth error with Amplify's complex generics
 let clientInstance: any = null;
 
 const getClient = () => {
@@ -308,23 +228,19 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     const [selectedSeriesId, setSelectedSeriesId] = useState<string>('');
     const [selectedSeriesTitleId, setSelectedSeriesTitleId] = useState<string>('');
     
-    // Creation state
-    const [activeEntityCard, setActiveEntityCard] = useState<'entity' | 'venue' | 'series' | null>(null);
+    // Creation state (for Entity/Venue only - Series handled by SeriesDetailsEditor)
+    const [activeEntityCard, setActiveEntityCard] = useState<'entity' | 'venue' | null>(null);
     const [showCreateCard, setShowCreateCard] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [createError, setCreateError] = useState('');
     
-    // New entity/venue/series creation state
+    // New entity/venue creation state
     const [newEntityName, setNewEntityName] = useState('');
     const [newEntityDomain, setNewEntityDomain] = useState('');
     const [newVenueName, setNewVenueName] = useState('');
     const [newVenueFee, setNewVenueFee] = useState<number | null>(null);
-    const [newSeriesName, setNewSeriesName] = useState('');
-    const [newSeriesYear, setNewSeriesYear] = useState(new Date().getFullYear());
-    const [newSeriesStatus, setNewSeriesStatus] = useState<string>('SCHEDULED');
-    const [newSeriesTitleName, setNewSeriesTitleName] = useState('');
     
-    // ✅ NEW: Consolidation tracking state
+    // Consolidation tracking state
     const [consolidationInfo, setConsolidationInfo] = useState<{
         willConsolidate: boolean;
         parentName: string | null;
@@ -359,7 +275,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         getChangedFields
     } = editor;
     
-    // ✅ NEW: Use consolidation preview hook for header badge
+    // Use consolidation preview hook for header badge
     const { 
         preview: consolidationPreview, 
         isLoading: consolidationLoading,
@@ -367,7 +283,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     } = useConsolidationPreview(editedData, {
         debounceMs: 300,
         includeSiblingDetails: false,
-        onPreviewComplete: (result) => {
+        onPreviewComplete: (result: { willConsolidate: boolean; consolidation?: { parentName: string } | null }) => {
             setConsolidationInfo({
                 willConsolidate: result.willConsolidate,
                 parentName: result.consolidation?.parentName || null
@@ -396,7 +312,6 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 if (venue) {
                     setVenueName(venue.name);
                     setVenueFee(venue.fee || null);
-                    // Sync to editedData so it gets saved
                     if (venue.fee !== null && venue.fee !== undefined) {
                         updateField('venueFee', venue.fee);
                     }
@@ -492,7 +407,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         }
     }, [autoMode, skipConfirmation, isOpen]);
     
-    // ✅ NEW: Auto-apply detected pattern suggestions
+    // Auto-apply detected pattern suggestions
     const handleApplyDetectedPattern = useCallback(() => {
         if (!consolidationPreview?.detectedPattern) return;
         
@@ -516,7 +431,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         }
     }, [consolidationPreview, editedData, updateMultipleFields]);
     
-    // Creation handlers
+    // Creation handlers for Entity and Venue
     const handleCreateEntity = async () => {
         try {
             setIsCreating(true);
@@ -594,103 +509,28 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         }
     };
     
-    const handleCreateSeriesTitle = async () => {
-        try {
-            setIsCreating(true);
-            setCreateError('');
-            
-            if (!newSeriesTitleName.trim()) {
-                setCreateError('Series title is required');
-                return;
-            }
-            
-            const detectedCategory = detectSeriesCategory(newSeriesTitleName);
-            
-            const input = {
-                title: newSeriesTitleName.trim(),
-                aliases: [newSeriesTitleName.trim()],
-                seriesCategory: detectedCategory
-            };
-            
-            const result = await getClient().graphql({
-                query: createSeriesTitleMutation,
-                variables: { input }
-            }) as { data: { createTournamentSeriesTitle: TournamentSeriesTitle } };
-            
-            const newTitle = result.data.createTournamentSeriesTitle;
-            if (newTitle) {
-                setSeriesTitles(prev => [...prev, newTitle as TournamentSeriesTitle]);
-                setSelectedSeriesTitleId(newTitle.id);
-                setNewSeriesTitleName('');
-                setShowCreateCard(false);
-            }
-        } catch (error: any) {
-            setCreateError(error.message || 'Failed to create series title');
-        } finally {
-            setIsCreating(false);
-        }
-    };
+    // Callbacks for SeriesDetailsEditor (enhanced version)
+    const handleSeriesTitleCreated = useCallback((newTitle: TournamentSeriesTitle) => {
+        setSeriesTitles(prev => [...prev, newTitle]);
+        setSelectedSeriesTitleId(newTitle.id);
+    }, []);
     
-    const handleCreateSeries = async () => {
-        try {
-            setIsCreating(true);
-            setCreateError('');
-            
-            if (!newSeriesName.trim() || !newSeriesYear) {
-                setCreateError('Series name and year are required');
-                return;
-            }
-            
-            const gameDate = editedData.gameStartDateTime || new Date().toISOString();
-            const selectedTitle = seriesTitles.find(t => t.id === selectedSeriesTitleId);
-            const category = selectedTitle?.seriesCategory || 'REGULAR' as SeriesCategory;
-            const holidayType = category === 'SPECIAL'
-                ? detectHolidayType(gameDate, newSeriesName)
-                : null;
-            
-            const input = {
-                name: newSeriesName.trim(),
-                year: newSeriesYear,
-                status: newSeriesStatus as SeriesStatus,
-                venueId: selectedVenueId || null,
-                tournamentSeriesTitleId: selectedSeriesTitleId || null,
-                seriesCategory: category,
-                holidayType: holidayType,
-                quarter: getQuarterFromDate(gameDate),
-                month: getMonthFromDate(gameDate),
-                startDate: gameDate,
-                endDate: null
-            };
-            
-            const result = await getClient().graphql({
-                query: createSeriesMutation,
-                variables: { input }
-            }) as { data: { createTournamentSeries: TournamentSeries } };
-            
-            const newSeries = result.data.createTournamentSeries;
-            if (newSeries) {
-                setSeries(prev => [...prev, newSeries as TournamentSeries]);
-                setSelectedSeriesId(newSeries.id);
-                updateField('tournamentSeriesId', newSeries.id);
-                updateField('seriesName', newSeries.name);
-                setNewSeriesName('');
-                setNewSeriesYear(new Date().getFullYear());
-                setNewSeriesStatus('SCHEDULED');
-                setShowCreateCard(false);
-            }
-        } catch (error: any) {
-            setCreateError(error.message || 'Failed to create series');
-        } finally {
-            setIsCreating(false);
-        }
-    };
+    const handleSeriesInstanceCreated = useCallback((newInstance: TournamentSeries) => {
+        setSeries(prev => [...prev, newInstance]);
+        setSelectedSeriesId(newInstance.id);
+    }, []);
     
     const handleConfirm = async () => {
         setIsSaving(true);
         try {
-            const saveData = {
+            // Build the save data with all series information
+            const saveData: GameData = {
                 ...editedData,
-                tournamentSeriesId: selectedSeriesId || editedData.tournamentSeriesId,
+                // Series fields
+                tournamentSeriesId: selectedSeriesId || editedData.tournamentSeriesId || null,
+                seriesTitleId: selectedSeriesTitleId || editedData.seriesTitleId || null,
+                seriesName: editedData.seriesName || null,
+                // Entity/venue fields
                 entityId: selectedEntityId || editedData.entityId,
                 venueId: selectedVenueId || editedData.venueId
             };
@@ -800,7 +640,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             </div>
                         </div>
                         
-                        {/* ✅ NEW: Show compact consolidation preview in quick tab */}
+                        {/* Show compact consolidation preview in quick tab */}
                         {willConsolidate && consolidationInfo.parentName && (
                             <div className="mb-3 p-2 bg-purple-50 border border-purple-200 rounded">
                                 <div className="text-sm flex items-center gap-2">
@@ -985,184 +825,46 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                                 </div>
                             )}
                             
-                            {venueFee && (
+                            {venueFee !== null && venueFee !== undefined && (
                                 <div className="mt-2 text-xs text-gray-600">
-                                    Selected venue has a fee of {formatCurrency(venueFee ?? 0)}
+                                    Selected venue has a fee of {formatCurrency(venueFee)}
                                 </div>
                             )}
                         </div>
                         
-                        {/* Series Management */}
+                        {/* Series Management - Delegated to Enhanced SeriesDetailsEditor */}
                         <div className="border rounded-lg p-4">
                             <div className="flex justify-between items-center mb-3">
                                 <h3 className="font-semibold text-sm">🎯 Tournament Series</h3>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setActiveEntityCard('series');
-                                            setShowCreateCard(!showCreateCard || activeEntityCard !== 'series');
-                                        }}
-                                        className="text-xs text-blue-600 hover:text-blue-700"
-                                    >
-                                        + Create Series
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            {/* Series Title Selection */}
-                            <div className="mb-3">
-                                <label className="text-xs font-medium text-gray-700">Series Template</label>
-                                <select
-                                    value={selectedSeriesTitleId}
-                                    onChange={(e) => setSelectedSeriesTitleId(e.target.value)}
-                                    className="w-full px-2 py-1.5 text-sm border rounded mt-1"
-                                >
-                                    <option value="">-- Select Template --</option>
-                                    {seriesTitles.map(title => (
-                                        <option key={title.id} value={title.id}>
-                                            {title.title} {title.seriesCategory && `[${title.seriesCategory}]`}
-                                        </option>
-                                    ))}
-                                </select>
-                                <button
-                                    onClick={() => {
-                                        const titleName = prompt('Enter new series title:');
-                                        if (titleName) {
-                                            setNewSeriesTitleName(titleName);
-                                            handleCreateSeriesTitle();
-                                        }
-                                    }}
-                                    className="text-xs text-blue-600 hover:text-blue-700 mt-1"
-                                >
-                                    + Create New Template
-                                </button>
-                            </div>
-                            
-                            {/* Series Instance Selection */}
-                            <div className="mb-3">
-                                <label className="text-xs font-medium text-gray-700">Series Instance</label>
-                                <select
-                                    value={selectedSeriesId}
-                                    onChange={(e) => {
-                                        const seriesIdVal = e.target.value;
-                                        setSelectedSeriesId(seriesIdVal);
-                                        updateField('tournamentSeriesId', seriesIdVal);
-                                        
-                                        const selectedSeriesItem = series.find(s => s.id === seriesIdVal);
-                                        if (selectedSeriesItem) {
-                                            updateField('seriesName', selectedSeriesItem.name);
-                                            updateField('isSeries', true);
-                                        }
-                                    }}
-                                    className="w-full px-2 py-1.5 text-sm border rounded mt-1"
-                                >
-                                    <option value="">-- Select Series --</option>
-                                    {filteredSeries.map(s => (
-                                        <option key={s.id} value={s.id}>
-                                            {s.name} ({s.year}) - {s.status}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            
-                            {/* Show selected series info */}
-                            {(() => {
-                                const selectedSeries = series.find(s => s.id === selectedSeriesId);
-                                return selectedSeries ? (
-                                    <div className="p-2 bg-green-50 border border-green-200 rounded text-xs mt-2">
-                                        <div className="font-medium text-green-800 mb-1">Selected Series:</div>
-                                        <div><span className="font-medium">Name:</span> {selectedSeries.name}</div>
-                                        <div><span className="font-medium">Year:</span> {selectedSeries.year}</div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">Category:</span> 
-                                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
-                                                {selectedSeries.seriesCategory}
-                                            </span>
-                                            {selectedSeries.holidayType && (
-                                                <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded">
-                                                    {selectedSeries.holidayType.replace(/_/g, ' ')}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                ) : null;
-                            })()}
-                            
-                            {activeEntityCard === 'series' && showCreateCard && (
-                                <div className="mt-3 border rounded-lg p-3 bg-blue-50">
-                                    <h4 className="font-semibold text-sm mb-2">Create New Series Instance</h4>
-                                    {!selectedSeriesTitleId && (
-                                        <div className="text-yellow-600 text-xs mb-2">
-                                            ⚠ Select a series template first
-                                        </div>
-                                    )}
+                                <div className="flex items-center gap-2">
                                     <input
-                                        type="text"
-                                        value={newSeriesName}
-                                        onChange={(e) => setNewSeriesName(e.target.value)}
-                                        placeholder="Series Name (e.g., Summer Championship 2024)"
-                                        className="w-full px-2 py-1.5 text-sm border rounded mb-2"
+                                        type="checkbox"
+                                        id="isSeries"
+                                        checked={editedData.isSeries || false}
+                                        onChange={(e) => updateField('isSeries', e.target.checked)}
+                                        className="h-4 w-4"
                                     />
-                                    <div className="grid grid-cols-2 gap-2 mb-2">
-                                        <input
-                                            type="number"
-                                            value={newSeriesYear}
-                                            onChange={(e) => setNewSeriesYear(parseInt(e.target.value))}
-                                            placeholder="Year"
-                                            className="px-2 py-1.5 text-sm border rounded"
-                                        />
-                                        <select
-                                            value={newSeriesStatus}
-                                            onChange={(e) => setNewSeriesStatus(e.target.value)}
-                                            className="px-2 py-1.5 text-sm border rounded"
-                                        >
-                                            <option value="SCHEDULED">Scheduled</option>
-                                            <option value="ACTIVE">Active</option>
-                                            <option value="COMPLETED">Completed</option>
-                                            <option value="CANCELLED">Cancelled</option>
-                                        </select>
-                                    </div>
-                                    {newSeriesName && (
-                                        <div className="text-xs text-gray-600 mb-2">
-                                            Detected category: <span className="font-medium">
-                                                {detectSeriesCategory(newSeriesName)}
-                                            </span>
-                                        </div>
-                                    )}
-                                    {createError && (
-                                        <div className="text-red-600 text-xs mb-2">{createError}</div>
-                                    )}
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={handleCreateSeries}
-                                            disabled={isCreating || !selectedSeriesTitleId}
-                                            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-                                        >
-                                            {isCreating ? 'Creating...' : 'Create'}
-                                        </button>
-                                        <button
-                                            onClick={() => setShowCreateCard(false)}
-                                            className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
+                                    <label htmlFor="isSeries" className="text-xs text-gray-700">
+                                        Is Series Event
+                                    </label>
                                 </div>
-                            )}
-                        </div>
-                        
-                        {/* Series Details Editor */}
-                        {editedData.isSeries && (
+                            </div>
+                            
+                            {/* Enhanced SeriesDetailsEditor handles all series management */}
                             <SeriesDetailsEditor 
                                 editor={editor} 
                                 series={filteredSeries}
-                                onSeriesChange={(seriesId) => setSelectedSeriesId(seriesId || '')}
+                                seriesTitles={seriesTitles}
+                                venueId={selectedVenueId}
+                                onSeriesChange={(seriesId: string | null) => setSelectedSeriesId(seriesId || '')}
+                                onSeriesTitleChange={(titleId: string | null) => setSelectedSeriesTitleId(titleId || '')}
+                                onSeriesTitleCreated={handleSeriesTitleCreated}
+                                onSeriesInstanceCreated={handleSeriesInstanceCreated}
                             />
-                        )}
+                        </div>
                     </div>
                 );
             
-            // ✅ NEW: Grouping/Consolidation Tab
             case 'grouping':
                 return (
                     <div className="p-4 space-y-4">
@@ -1178,7 +880,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                         <ConsolidationPreview
                             gameData={editedData}
                             showSiblingDetails={true}
-                            onConsolidationChange={(willConsolidateVal, parentName) => {
+                            onConsolidationChange={(willConsolidateVal: boolean, parentName: string | null) => {
                                 setConsolidationInfo({ 
                                     willConsolidate: willConsolidateVal, 
                                     parentName 
@@ -1258,7 +960,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                                             type="number"
                                             value={editedData.dayNumber || ''}
                                             onChange={(e) => updateField('dayNumber', e.target.value ? parseInt(e.target.value) : null)}
-                                            placeholder="e.g., 1"
+                                            placeholder="e.g., 1, 2"
                                             className="w-full px-2 py-1 text-sm border rounded mt-1"
                                         />
                                     </div>
@@ -1275,15 +977,16 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="flex items-end gap-2">
-                                        <label className="flex items-center gap-2 text-sm">
-                                            <input
-                                                type="checkbox"
-                                                checked={editedData.finalDay || false}
-                                                onChange={(e) => updateField('finalDay', e.target.checked)}
-                                                className="h-4 w-4"
-                                            />
-                                            Final Day
+                                    <div className="flex items-center gap-2 pt-5">
+                                        <input
+                                            type="checkbox"
+                                            id="finalDayGrouping"
+                                            checked={editedData.finalDay || false}
+                                            onChange={(e) => updateField('finalDay', e.target.checked)}
+                                            className="h-4 w-4"
+                                        />
+                                        <label htmlFor="finalDayGrouping" className="text-sm">
+                                            🏁 Final Day
                                         </label>
                                     </div>
                                 </div>
@@ -1297,69 +1000,54 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                     <div className="p-4">
                         <QuickDataEditor 
                             editor={editor} 
-                            showAdvanced={true}
+                            showAdvanced={true} 
                         />
                     </div>
                 );
                 
             case 'validation':
                 return (
-                    <div className="p-4 space-y-4">
-                        <div className={`border rounded-lg p-4 ${validationStatus.isValid ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
-                            <h3 className="font-semibold text-sm mb-3">
-                                {validationStatus.isValid ? '✓ Validation Passed' : '⚠ Validation Issues'}
-                            </h3>
-                            
-                            {validationStatus.criticalMissing.length > 0 && (
-                                <div className="mb-3">
-                                    <div className="text-sm font-medium text-red-700 mb-1">Critical Missing Fields:</div>
-                                    <div className="flex flex-wrap gap-1">
-                                        {validationStatus.criticalMissing.map(field => (
-                                            <span key={field} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">
-                                                {field}
-                                            </span>
-                                        ))}
-                                    </div>
+                    <div className="p-4">
+                        {/* Critical Issues */}
+                        {validationStatus.criticalMissing.length > 0 && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h4 className="font-semibold text-red-800">
+                                        ⚠ Critical Issues ({validationStatus.criticalMissing.length})
+                                    </h4>
+                                    <button
+                                        onClick={handleQuickFix}
+                                        className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                                    >
+                                        Auto-Fix
+                                    </button>
                                 </div>
-                            )}
-                            
-                            {validationStatus.required.missing.length > 0 && (
-                                <div className="mb-3">
-                                    <div className="text-sm font-medium text-orange-700 mb-1">Required Missing Fields:</div>
-                                    <div className="flex flex-wrap gap-1">
-                                        {validationStatus.required.missing.map(field => (
-                                            <span key={field} className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">
-                                                {field}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            
-                            {validationStatus.warnings.length > 0 && (
-                                <div className="mb-3">
-                                    <div className="text-sm font-medium text-yellow-700 mb-1">Warnings:</div>
-                                    <ul className="text-sm text-yellow-700 list-disc list-inside">
-                                        {validationStatus.warnings.map((warning, idx) => (
-                                            <li key={idx}>{warning}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                            
-                            {!validationStatus.isValid && (
-                                <button
-                                    onClick={handleQuickFix}
-                                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-                                >
-                                    🔧 Apply Quick Fixes
-                                </button>
-                            )}
-                        </div>
+                                <ul className="text-sm text-red-700 list-disc list-inside">
+                                    {validationStatus.criticalMissing.map((field: string) => (
+                                        <li key={field}>{field} is required</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                         
-                        <div className="bg-gray-50 border rounded-lg p-4">
-                            <h3 className="font-semibold text-sm mb-3">Field Statistics</h3>
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                        {/* Warnings */}
+                        {validationStatus.warnings.length > 0 && (
+                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <h4 className="font-semibold text-yellow-800 mb-2">
+                                    ⚠ Warnings ({validationStatus.warnings.length})
+                                </h4>
+                                <ul className="text-sm text-yellow-700 list-disc list-inside">
+                                    {validationStatus.warnings.map((warning: string, idx: number) => (
+                                        <li key={idx}>{warning}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        
+                        {/* Validation Status */}
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                            <h4 className="font-semibold text-gray-800 mb-3">Field Status</h4>
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <div className="text-gray-600">Required Fields</div>
                                     <div className="text-2xl font-bold text-green-600">
@@ -1399,7 +1087,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                                     </button>
                                 </div>
                                 
-                                {changedFields.map(field => {
+                                {changedFields.map((field: keyof GameData) => {
                                     const fieldKey = String(field);
                                     const oldValue = originalData[field];
                                     const newValue = editedData[field];
@@ -1437,8 +1125,9 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     if (!isOpen || !gameData) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center p-4 pb-8">            
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[85vh] sm:max-h-[90vh] flex flex-col">                {/* Header */}
+        <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center p-4 pb-8">
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[85vh] sm:max-h-[90vh] flex flex-col">
+                {/* Header */}
                 <div className="p-4 border-b flex items-center justify-between">
                     <div>
                         <h3 className="text-lg font-semibold">
@@ -1467,7 +1156,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             </span>
                         )}
                         
-                        {/* ✅ NEW: Consolidation badge */}
+                        {/* Consolidation badge */}
                         {consolidationLoading ? (
                             <span className="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs font-medium">
                                 <span className="animate-pulse">Checking...</span>
@@ -1501,7 +1190,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             <span className="mr-1">{tab.icon}</span>
                             <span className="hidden sm:inline">{tab.label}</span>
                             <span className="sm:hidden">{tab.label.split('/')[0]}</span>
-                            {/* ✅ NEW: Indicator dot on grouping tab when consolidation active */}
+                            {/* Indicator dot on grouping tab when consolidation active */}
                             {tab.id === 'grouping' && willConsolidate && (
                                 <span className="ml-1 w-2 h-2 bg-purple-500 rounded-full inline-block" />
                             )}
@@ -1560,3 +1249,5 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         </div>
     );
 };
+
+export default SaveConfirmationModal;

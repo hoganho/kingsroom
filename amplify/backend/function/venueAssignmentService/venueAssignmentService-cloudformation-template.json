@@ -23,6 +23,9 @@
     "apikingsroomGraphQLAPIEndpointOutput": {
       "Type": "String",
       "Default": "apikingsroomGraphQLAPIEndpointOutput"
+    },
+    "venueReassignmentQueueUrl": {
+      "Type": "String"
     }
   },
   "Conditions": {
@@ -291,6 +294,9 @@
                   }
                 ]
               ]
+            },
+            "VENUE_REASSIGNMENT_QUEUE_URL": {
+              "Ref": "venueReassignmentQueueUrl"
             }
           }
         },
@@ -981,18 +987,33 @@
               ],
               "Resource": [
                 "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/byVenue"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:Query",
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev/index/*"
               ],
               "Effect": "Allow"
             },
             {
               "Action": [
                 "dynamodb:Query",
-                "dynamodb:UpdateItem"
+                "dynamodb:UpdateItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem"
               ],
               "Resource": [
                 "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev/index/byGame"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1010,10 +1031,13 @@
               "Action": [
                 "dynamodb:GetItem",
                 "dynamodb:PutItem",
-                "dynamodb:UpdateItem"
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-dev/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1028,10 +1052,61 @@
             },
             {
               "Action": [
+                "dynamodb:Query",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*-dev/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-dev",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-dev/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/BackgroundTask-*-dev"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
                 "cloudwatch:PutMetricData"
               ],
               "Resource": [
                 "*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:SendMessage",
+                "sqs:GetQueueUrl"
+              ],
+              "Resource": [
+                "arn:aws:sqs:ap-southeast-2:495599763953:VenueReassignmentQueue.fifo",
+                "arn:aws:sqs:ap-southeast-2:495599763953:VenueReassignmentQueue-DeadLetter.fifo"
               ],
               "Effect": "Allow"
             }

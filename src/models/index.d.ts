@@ -203,6 +203,8 @@ export enum HolidayType {
   QUEENS_BIRTHDAY = "QUEENS_BIRTHDAY",
   CHRISTMAS = "CHRISTMAS",
   BOXING_DAY = "BOXING_DAY",
+  MELBOURNE_CUP = "MELBOURNE_CUP",
+  LABOUR_DAY = "LABOUR_DAY",
   OTHER = "OTHER"
 }
 
@@ -377,6 +379,25 @@ export enum SocialPostStatus {
 export enum ScheduledPostStatus {
   SCHEDULED = "SCHEDULED",
   PUBLISHED = "PUBLISHED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED"
+}
+
+export enum BackgroundTaskType {
+  VENUE_REASSIGNMENT = "VENUE_REASSIGNMENT",
+  BULK_VENUE_REASSIGNMENT = "BULK_VENUE_REASSIGNMENT",
+  ENTITY_REASSIGNMENT = "ENTITY_REASSIGNMENT",
+  VENUE_CLONE = "VENUE_CLONE",
+  BULK_IMPORT = "BULK_IMPORT",
+  DATA_MIGRATION = "DATA_MIGRATION",
+  REPORT_GENERATION = "REPORT_GENERATION",
+  VENUE_DETAILS_RECALC = "VENUE_DETAILS_RECALC"
+}
+
+export enum BackgroundTaskStatus {
+  QUEUED = "QUEUED",
+  PROCESSING = "PROCESSING",
+  COMPLETED = "COMPLETED",
   FAILED = "FAILED",
   CANCELLED = "CANCELLED"
 }
@@ -1725,6 +1746,112 @@ export declare type GamesNeedingVenueResponse = LazyLoading extends LazyLoadingD
 
 export declare const GamesNeedingVenueResponse: (new (init: ModelInit<GamesNeedingVenueResponse>) => GamesNeedingVenueResponse)
 
+type EagerReassignGameVenueResult = {
+  readonly success: boolean;
+  readonly status: string;
+  readonly message?: string | null;
+  readonly gameId?: string | null;
+  readonly taskId?: string | null;
+  readonly oldVenueId?: string | null;
+  readonly newVenueId?: string | null;
+  readonly oldEntityId?: string | null;
+  readonly newEntityId?: string | null;
+  readonly venueCloned?: boolean | null;
+  readonly clonedVenueId?: string | null;
+  readonly recordsUpdated?: string | null;
+}
+
+type LazyReassignGameVenueResult = {
+  readonly success: boolean;
+  readonly status: string;
+  readonly message?: string | null;
+  readonly gameId?: string | null;
+  readonly taskId?: string | null;
+  readonly oldVenueId?: string | null;
+  readonly newVenueId?: string | null;
+  readonly oldEntityId?: string | null;
+  readonly newEntityId?: string | null;
+  readonly venueCloned?: boolean | null;
+  readonly clonedVenueId?: string | null;
+  readonly recordsUpdated?: string | null;
+}
+
+export declare type ReassignGameVenueResult = LazyLoading extends LazyLoadingDisabled ? EagerReassignGameVenueResult : LazyReassignGameVenueResult
+
+export declare const ReassignGameVenueResult: (new (init: ModelInit<ReassignGameVenueResult>) => ReassignGameVenueResult)
+
+type EagerBulkReassignGameVenuesResult = {
+  readonly success: boolean;
+  readonly status: string;
+  readonly message?: string | null;
+  readonly taskId?: string | null;
+  readonly gameCount?: number | null;
+  readonly newVenueId?: string | null;
+  readonly reassignEntity?: boolean | null;
+}
+
+type LazyBulkReassignGameVenuesResult = {
+  readonly success: boolean;
+  readonly status: string;
+  readonly message?: string | null;
+  readonly taskId?: string | null;
+  readonly gameCount?: number | null;
+  readonly newVenueId?: string | null;
+  readonly reassignEntity?: boolean | null;
+}
+
+export declare type BulkReassignGameVenuesResult = LazyLoading extends LazyLoadingDisabled ? EagerBulkReassignGameVenuesResult : LazyBulkReassignGameVenuesResult
+
+export declare const BulkReassignGameVenuesResult: (new (init: ModelInit<BulkReassignGameVenuesResult>) => BulkReassignGameVenuesResult)
+
+type EagerGetReassignmentStatusResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly task?: BackgroundTaskInfo | null;
+}
+
+type LazyGetReassignmentStatusResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly task?: BackgroundTaskInfo | null;
+}
+
+export declare type GetReassignmentStatusResult = LazyLoading extends LazyLoadingDisabled ? EagerGetReassignmentStatusResult : LazyGetReassignmentStatusResult
+
+export declare const GetReassignmentStatusResult: (new (init: ModelInit<GetReassignmentStatusResult>) => GetReassignmentStatusResult)
+
+type EagerBackgroundTaskInfo = {
+  readonly id: string;
+  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
+  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
+  readonly targetCount?: number | null;
+  readonly processedCount?: number | null;
+  readonly progressPercent?: number | null;
+  readonly result?: string | null;
+  readonly errorMessage?: string | null;
+  readonly createdAt: string;
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+}
+
+type LazyBackgroundTaskInfo = {
+  readonly id: string;
+  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
+  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
+  readonly targetCount?: number | null;
+  readonly processedCount?: number | null;
+  readonly progressPercent?: number | null;
+  readonly result?: string | null;
+  readonly errorMessage?: string | null;
+  readonly createdAt: string;
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+}
+
+export declare type BackgroundTaskInfo = LazyLoading extends LazyLoadingDisabled ? EagerBackgroundTaskInfo : LazyBackgroundTaskInfo
+
+export declare const BackgroundTaskInfo: (new (init: ModelInit<BackgroundTaskInfo>) => BackgroundTaskInfo)
+
 type EagerSocialFeedConnection = {
   readonly items: SocialPost[];
   readonly nextToken?: string | null;
@@ -2036,6 +2163,7 @@ type EagerVenue = {
   readonly fee?: number | null;
   readonly isSpecial?: boolean | null;
   readonly details?: VenueDetails | null;
+  readonly canonicalVenueId?: string | null;
   readonly assets?: (Asset | null)[] | null;
   readonly games?: (Game | null)[] | null;
   readonly series?: (TournamentSeries | null)[] | null;
@@ -2064,6 +2192,7 @@ type LazyVenue = {
   readonly fee?: number | null;
   readonly isSpecial?: boolean | null;
   readonly details: AsyncItem<VenueDetails | undefined>;
+  readonly canonicalVenueId?: string | null;
   readonly assets: AsyncCollection<Asset>;
   readonly games: AsyncCollection<Game>;
   readonly series: AsyncCollection<TournamentSeries>;
@@ -2176,7 +2305,6 @@ type EagerTournamentSeries = {
   readonly status: SeriesStatus | keyof typeof SeriesStatus;
   readonly startDate?: string | null;
   readonly endDate?: string | null;
-  readonly events?: (string | null)[] | null;
   readonly numberOfEvents?: number | null;
   readonly guaranteedPrizepool?: number | null;
   readonly estimatedPrizepool?: number | null;
@@ -2205,7 +2333,6 @@ type LazyTournamentSeries = {
   readonly status: SeriesStatus | keyof typeof SeriesStatus;
   readonly startDate?: string | null;
   readonly endDate?: string | null;
-  readonly events?: (string | null)[] | null;
   readonly numberOfEvents?: number | null;
   readonly guaranteedPrizepool?: number | null;
   readonly estimatedPrizepool?: number | null;
@@ -2283,6 +2410,12 @@ type EagerGame = {
   readonly missingFlightCount?: number | null;
   readonly expectedTotalEntries?: number | null;
   readonly actualCalculatedUniquePlayers?: number | null;
+  readonly gameDayOfWeek?: string | null;
+  readonly buyInBucket?: string | null;
+  readonly venueScheduleKey?: string | null;
+  readonly venueGameTypeKey?: string | null;
+  readonly entityQueryKey?: string | null;
+  readonly entityGameTypeKey?: string | null;
   readonly sourceUrl?: string | null;
   readonly tournamentId?: number | null;
   readonly originalScrapedData?: string | null;
@@ -2373,6 +2506,12 @@ type LazyGame = {
   readonly missingFlightCount?: number | null;
   readonly expectedTotalEntries?: number | null;
   readonly actualCalculatedUniquePlayers?: number | null;
+  readonly gameDayOfWeek?: string | null;
+  readonly buyInBucket?: string | null;
+  readonly venueScheduleKey?: string | null;
+  readonly venueGameTypeKey?: string | null;
+  readonly entityQueryKey?: string | null;
+  readonly entityGameTypeKey?: string | null;
   readonly sourceUrl?: string | null;
   readonly tournamentId?: number | null;
   readonly originalScrapedData?: string | null;
@@ -3036,6 +3175,7 @@ type EagerPlayerEntry = {
   readonly playerId: string;
   readonly gameId: string;
   readonly venueId?: string | null;
+  readonly entityId?: string | null;
   readonly status: PlayerEntryStatus | keyof typeof PlayerEntryStatus;
   readonly registrationTime: string;
   readonly eliminationTime?: string | null;
@@ -3063,6 +3203,7 @@ type LazyPlayerEntry = {
   readonly playerId: string;
   readonly gameId: string;
   readonly venueId?: string | null;
+  readonly entityId?: string | null;
   readonly status: PlayerEntryStatus | keyof typeof PlayerEntryStatus;
   readonly registrationTime: string;
   readonly eliminationTime?: string | null;
@@ -3105,6 +3246,8 @@ type EagerPlayerResult = {
   readonly gameId: string;
   readonly game?: Game | null;
   readonly recordType?: string | null;
+  readonly venueId?: string | null;
+  readonly entityId?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -3127,6 +3270,8 @@ type LazyPlayerResult = {
   readonly gameId: string;
   readonly game: AsyncItem<Game | undefined>;
   readonly recordType?: string | null;
+  readonly venueId?: string | null;
+  readonly entityId?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -3143,15 +3288,21 @@ type EagerPlayerVenue = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly totalGamesPlayed?: number | null;
-  readonly averageBuyIn?: number | null;
-  readonly firstPlayedDate?: string | null;
-  readonly lastPlayedDate?: string | null;
-  readonly targetingClassification: PlayerVenueTargetingClassification | keyof typeof PlayerVenueTargetingClassification;
   readonly playerId: string;
   readonly player?: Player | null;
   readonly venueId: string;
   readonly venue?: Venue | null;
+  readonly entityId: string;
+  readonly visityKey?: string | null;
+  readonly canonicalVenueId?: string | null;
+  readonly totalGamesPlayed?: number | null;
+  readonly averageBuyIn?: number | null;
+  readonly totalBuyIns?: number | null;
+  readonly totalWinnings?: number | null;
+  readonly netProfit?: number | null;
+  readonly firstPlayedDate?: string | null;
+  readonly lastPlayedDate?: string | null;
+  readonly targetingClassification: PlayerVenueTargetingClassification | keyof typeof PlayerVenueTargetingClassification;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -3162,15 +3313,21 @@ type LazyPlayerVenue = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly totalGamesPlayed?: number | null;
-  readonly averageBuyIn?: number | null;
-  readonly firstPlayedDate?: string | null;
-  readonly lastPlayedDate?: string | null;
-  readonly targetingClassification: PlayerVenueTargetingClassification | keyof typeof PlayerVenueTargetingClassification;
   readonly playerId: string;
   readonly player: AsyncItem<Player | undefined>;
   readonly venueId: string;
   readonly venue: AsyncItem<Venue | undefined>;
+  readonly entityId: string;
+  readonly visityKey?: string | null;
+  readonly canonicalVenueId?: string | null;
+  readonly totalGamesPlayed?: number | null;
+  readonly averageBuyIn?: number | null;
+  readonly totalBuyIns?: number | null;
+  readonly totalWinnings?: number | null;
+  readonly netProfit?: number | null;
+  readonly firstPlayedDate?: string | null;
+  readonly lastPlayedDate?: string | null;
+  readonly targetingClassification: PlayerVenueTargetingClassification | keyof typeof PlayerVenueTargetingClassification;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -3196,6 +3353,8 @@ type EagerPlayerTransaction = {
   readonly playerId: string;
   readonly player?: Player | null;
   readonly gameId?: string | null;
+  readonly venueId?: string | null;
+  readonly entityId?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -3215,6 +3374,8 @@ type LazyPlayerTransaction = {
   readonly playerId: string;
   readonly player: AsyncItem<Player | undefined>;
   readonly gameId?: string | null;
+  readonly venueId?: string | null;
+  readonly entityId?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -4241,6 +4402,62 @@ export declare type PlayerMarketingPreferences = LazyLoading extends LazyLoading
 
 export declare const PlayerMarketingPreferences: (new (init: ModelInit<PlayerMarketingPreferences>) => PlayerMarketingPreferences) & {
   copyOf(source: PlayerMarketingPreferences, mutator: (draft: MutableModel<PlayerMarketingPreferences>) => MutableModel<PlayerMarketingPreferences> | void): PlayerMarketingPreferences;
+}
+
+type EagerBackgroundTask = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<BackgroundTask, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
+  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
+  readonly targetType: string;
+  readonly targetId?: string | null;
+  readonly targetIds?: (string | null)[] | null;
+  readonly targetCount?: number | null;
+  readonly payload?: string | null;
+  readonly processedCount?: number | null;
+  readonly progressPercent?: number | null;
+  readonly result?: string | null;
+  readonly errorMessage?: string | null;
+  readonly createdAt: string;
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+  readonly initiatedBy?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyBackgroundTask = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<BackgroundTask, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
+  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
+  readonly targetType: string;
+  readonly targetId?: string | null;
+  readonly targetIds?: (string | null)[] | null;
+  readonly targetCount?: number | null;
+  readonly payload?: string | null;
+  readonly processedCount?: number | null;
+  readonly progressPercent?: number | null;
+  readonly result?: string | null;
+  readonly errorMessage?: string | null;
+  readonly createdAt: string;
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+  readonly initiatedBy?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type BackgroundTask = LazyLoading extends LazyLoadingDisabled ? EagerBackgroundTask : LazyBackgroundTask
+
+export declare const BackgroundTask: (new (init: ModelInit<BackgroundTask>) => BackgroundTask) & {
+  copyOf(source: BackgroundTask, mutator: (draft: MutableModel<BackgroundTask>) => MutableModel<BackgroundTask> | void): BackgroundTask;
 }
 
 type EagerSocialAccount = {

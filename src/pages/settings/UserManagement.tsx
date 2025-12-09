@@ -1,4 +1,6 @@
 // src/pages/settings/UserManagement.tsx
+// UPDATED: Added Entity Permissions management for SUPER_ADMINs
+
 import { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { 
@@ -9,14 +11,15 @@ import {
   ShieldCheckIcon,
   ShieldExclamationIcon,
   UserCircleIcon,
-  FunnelIcon,
   XMarkIcon,
   CheckIcon,
   ExclamationTriangleIcon,
+  BuildingOffice2Icon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
+import { useEntity } from '../../contexts/EntityContext';
 import { 
-  adminUpdateUserMutation, // Use Admin mutation for updates
+  adminUpdateUserMutation,
   User,
   UserRole,
   ListUsersResponse,
@@ -26,6 +29,7 @@ import { UserEditModal } from '../../components/users/UserEditModal';
 import { UserCreateModal } from '../../components/users/UserCreateModal';
 import { ResetPasswordModal } from '../../components/users/ResetPasswordModal';
 import { PagePermissionsModal } from '../../components/users/PagePermissionsModal';
+import { EntityPermissionsModal } from '../../components/users/EntityPermissionsModal';
 
 const ROLE_COLORS: Record<UserRole, string> = {
   SUPER_ADMIN: 'bg-purple-100 text-purple-800 border-purple-200',
@@ -46,6 +50,8 @@ const ROLE_LABELS: Record<UserRole, string> = {
 export const UserManagement = () => {
   const client = generateClient();
   const { userRole: authRole } = useAuth();
+  const { allEntities } = useEntity();
+  
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +64,7 @@ export const UserManagement = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null);
   const [permissionsUser, setPermissionsUser] = useState<User | null>(null);
+  const [entityPermissionsUser, setEntityPermissionsUser] = useState<User | null>(null);
   
   // Action states
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -164,6 +171,31 @@ export const UserManagement = () => {
     showSuccess('Permissions updated successfully');
   };
 
+  const handleEntityPermissionsUpdated = (updatedUser: User) => {
+    setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+    showSuccess('Entity permissions updated successfully');
+  };
+
+  // Helper to get entity count text
+  const getEntityAccessText = (user: User): { text: string; color: string } => {
+    // SUPER_ADMIN and ADMIN always have full access
+    if (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN') {
+      return { text: 'All (Role)', color: 'text-purple-600' };
+    }
+    
+    const allowedIds = user.allowedEntityIds as string[] | null;
+    if (!allowedIds || allowedIds.length === 0) {
+      return { text: 'All', color: 'text-green-600' };
+    }
+    
+    if (allowedIds.length === 1) {
+      const entity = allEntities.find(e => e.id === allowedIds[0]);
+      return { text: entity?.entityName || '1 entity', color: 'text-indigo-600' };
+    }
+    
+    return { text: `${allowedIds.length} entities`, color: 'text-indigo-600' };
+  };
+
   // Access denied for non-super admins
   if (!isSuperAdmin) {
     return (
@@ -189,38 +221,37 @@ export const UserManagement = () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
               <p className="text-sm text-gray-500 mt-1">
-                Manage user accounts, roles, and page permissions
+                Manage user accounts, roles, and permissions
               </p>
             </div>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
             >
-              <PlusIcon className="h-5 w-5 mr-2" />
+              <PlusIcon className="h-5 w-5" />
               Add User
             </button>
           </div>
         </div>
       </div>
 
-      {/* Success Message */}
+      {/* Success/Error Messages */}
       {successMessage && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
-            <CheckIcon className="h-5 w-5 text-green-500 mr-3" />
-            <span className="text-green-800">{successMessage}</span>
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+            <CheckIcon className="h-5 w-5 text-green-500" />
+            <p className="text-sm text-green-700">{successMessage}</p>
           </div>
         </div>
       )}
-
-      {/* Error Message */}
+      
       {error && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
-            <ExclamationTriangleIcon className="h-5 w-5 text-red-500 mr-3" />
-            <span className="text-red-800">{error}</span>
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+            <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+            <p className="text-sm text-red-700">{error}</p>
             <button onClick={() => setError(null)} className="ml-auto">
-              <XMarkIcon className="h-5 w-5 text-red-500" />
+              <XMarkIcon className="h-4 w-4 text-red-500" />
             </button>
           </div>
         </div>
@@ -231,11 +262,11 @@ export const UserManagement = () => {
         <div className="bg-white rounded-lg shadow-sm border p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
-            <div className="flex-1 relative">
-              <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="relative flex-1">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by name, email, or username..."
+                placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -243,19 +274,16 @@ export const UserManagement = () => {
             </div>
             
             {/* Role Filter */}
-            <div className="flex items-center gap-2">
-              <FunnelIcon className="h-5 w-5 text-gray-400" />
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value as UserRole | 'ALL')}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="ALL">All Roles</option>
-                {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value as UserRole | 'ALL')}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="ALL">All Roles</option>
+              {Object.entries(ROLE_LABELS).map(([role, label]) => (
+                <option key={role} value={role}>{label}</option>
+              ))}
+            </select>
             
             {/* Status Filter */}
             <select
@@ -299,7 +327,10 @@ export const UserManagement = () => {
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Permissions
+                      Pages
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Entities
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Last Login
@@ -310,103 +341,119 @@ export const UserManagement = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="h-10 w-10 flex-shrink-0">
-                            {user.avatar ? (
-                              <img
-                                className="h-10 w-10 rounded-full object-cover"
-                                src={user.avatar}
-                                alt=""
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                <span className="text-indigo-600 font-medium text-sm">
-                                  {(user.firstName?.[0] || user.username[0]).toUpperCase()}
-                                  {(user.lastName?.[0] || '').toUpperCase()}
-                                </span>
+                  {filteredUsers.map((user) => {
+                    const entityAccess = getEntityAccessText(user);
+                    
+                    return (
+                      <tr key={user.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="h-10 w-10 flex-shrink-0">
+                              {user.avatar ? (
+                                <img
+                                  className="h-10 w-10 rounded-full object-cover"
+                                  src={user.avatar}
+                                  alt=""
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                  <span className="text-indigo-600 font-medium text-sm">
+                                    {(user.firstName?.[0] || user.username[0]).toUpperCase()}
+                                    {(user.lastName?.[0] || '').toUpperCase()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {user.firstName && user.lastName 
+                                  ? `${user.firstName} ${user.lastName}`
+                                  : user.username}
                               </div>
+                              <div className="text-sm text-gray-500">{user.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${ROLE_COLORS[user.role]}`}>
+                            {ROLE_LABELS[user.role]}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => toggleUserStatus(user)}
+                            disabled={actionLoading === user.id}
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
+                              user.isActive !== false
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                : 'bg-red-100 text-red-800 hover:bg-red-200'
+                            }`}
+                          >
+                            {actionLoading === user.id ? (
+                              <span className="animate-pulse">...</span>
+                            ) : user.isActive !== false ? (
+                              'Active'
+                            ) : (
+                              'Inactive'
+                            )}
+                          </button>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {user.allowedPages && user.allowedPages.length > 0 ? (
+                              <span className="text-indigo-600 font-medium">
+                                {user.allowedPages.length} pages
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">Default</span>
                             )}
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {user.firstName && user.lastName 
-                                ? `${user.firstName} ${user.lastName}`
-                                : user.username}
-                            </div>
-                            <div className="text-sm text-gray-500">{user.email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`text-sm font-medium ${entityAccess.color}`}>
+                            {entityAccess.text}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {user.lastLoginAt 
+                            ? new Date(user.lastLoginAt).toLocaleDateString()
+                            : 'Never'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => setEditingUser(user)}
+                              className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              title="Edit User"
+                            >
+                              <PencilSquareIcon className="h-5 w-5" />
+                            </button>
+                            <button
+                              onClick={() => setPermissionsUser(user)}
+                              className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                              title="Edit Page Permissions"
+                            >
+                              <ShieldCheckIcon className="h-5 w-5" />
+                            </button>
+                            <button
+                              onClick={() => setEntityPermissionsUser(user)}
+                              className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              title="Edit Entity Permissions"
+                            >
+                              <BuildingOffice2Icon className="h-5 w-5" />
+                            </button>
+                            <button
+                              onClick={() => setResetPasswordUser(user)}
+                              className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                              title="Reset Password"
+                            >
+                              <KeyIcon className="h-5 w-5" />
+                            </button>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${ROLE_COLORS[user.role]}`}>
-                          {ROLE_LABELS[user.role]}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => toggleUserStatus(user)}
-                          disabled={actionLoading === user.id}
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
-                            user.isActive !== false
-                              ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                              : 'bg-red-100 text-red-800 hover:bg-red-200'
-                          }`}
-                        >
-                          {actionLoading === user.id ? (
-                            <span className="animate-pulse">...</span>
-                          ) : user.isActive !== false ? (
-                            'Active'
-                          ) : (
-                            'Inactive'
-                          )}
-                        </button>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {user.allowedPages && user.allowedPages.length > 0 ? (
-                            <span className="text-indigo-600 font-medium">
-                              {user.allowedPages.length} pages
-                            </span>
-                          ) : (
-                            <span className="text-gray-400">Default</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.lastLoginAt 
-                          ? new Date(user.lastLoginAt).toLocaleDateString()
-                          : 'Never'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => setEditingUser(user)}
-                            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                            title="Edit User"
-                          >
-                            <PencilSquareIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => setPermissionsUser(user)}
-                            className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            title="Edit Permissions"
-                          >
-                            <ShieldCheckIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => setResetPasswordUser(user)}
-                            className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                            title="Reset Password"
-                          >
-                            <KeyIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -447,6 +494,14 @@ export const UserManagement = () => {
           user={permissionsUser}
           onClose={() => setPermissionsUser(null)}
           onPermissionsUpdated={handlePermissionsUpdated}
+        />
+      )}
+
+      {entityPermissionsUser && (
+        <EntityPermissionsModal
+          user={entityPermissionsUser}
+          onClose={() => setEntityPermissionsUser(null)}
+          onPermissionsUpdated={handleEntityPermissionsUpdated}
         />
       )}
     </div>

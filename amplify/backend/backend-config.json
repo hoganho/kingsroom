@@ -224,6 +224,38 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "scrapeURLQuery": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "scraperJobQuery": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "scraperManagement": {
       "build": true,
       "dependsOn": [
@@ -509,6 +541,38 @@
         }
       ]
     },
+    "AMPLIFY_function_scrapeURLQuery_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "scrapeURLQuery"
+        }
+      ]
+    },
+    "AMPLIFY_function_scrapeURLQuery_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "scrapeURLQuery"
+        }
+      ]
+    },
+    "AMPLIFY_function_scraperJobQuery_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "scraperJobQuery"
+        }
+      ]
+    },
+    "AMPLIFY_function_scraperJobQuery_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "scraperJobQuery"
+        }
+      ]
+    },
     "AMPLIFY_function_scraperManagement_deploymentBucketName": {
       "usedBy": [
         {
@@ -622,6 +686,14 @@
       ]
     },
     "AMPLIFY_function_venueAssignmentService_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "venueAssignmentService"
+        }
+      ]
+    },
+    "AMPLIFY_function_venueAssignmentService_venueReassignmentQueueUrl": {
       "usedBy": [
         {
           "category": "function",

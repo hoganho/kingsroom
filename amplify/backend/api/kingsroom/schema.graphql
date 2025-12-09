@@ -1,6 +1,15 @@
 # ===================================================================
-# KINGSROOM SCHEMA (MERGED)
-# Version: 1.3.0 (Includes User Management & Page Permissions)
+# KINGSROOM SCHEMA (MERGED WITH ENTITY-AWARE UPDATES)
+# Version: 1.4.0
+# ===================================================================
+# 
+# Changes in this version:
+# - Added canonicalVenueId to Venue model
+# - Added entityId, visityKey, canonicalVenueId to PlayerVenue model
+# - Added entityId to PlayerEntry, PlayerResult, PlayerTransaction
+# - Added BackgroundTask model
+# - Added BackgroundTaskType, BackgroundTaskStatus enums
+# - Added reassignment mutations and types
 # ===================================================================
 
 # ===================================================================
@@ -31,34 +40,28 @@ enum PlayerEntryStatus { REGISTERED, VOIDED, PLAYING, ELIMINATED, COMPLETED }
 enum CreditTransactionType { AWARD_PROMOTION, AWARD_REFUND, AWARD_MANUAL, REDEEM_GAME_BUY_IN, EXPIRED }
 enum PointsTransactionType { EARN_FROM_PLAY, EARN_FROM_PROMOTION, REDEEM_FOR_BUY_IN, REDEEM_FOR_MERCH, ADJUSTMENT_MANUAL, EXPIRED }
 enum SeriesCategory { REGULAR, SPECIAL, PROMOTIONAL, CHAMPIONSHIP, SEASONAL }
-enum HolidayType { NEW_YEAR, AUSTRALIA_DAY, EASTER, ANZAC_DAY, QUEENS_BIRTHDAY, CHRISTMAS, BOXING_DAY, OTHER }
+enum HolidayType { NEW_YEAR, AUSTRALIA_DAY, EASTER, ANZAC_DAY, QUEENS_BIRTHDAY, CHRISTMAS, BOXING_DAY, MELBOURNE_CUP, LABOUR_DAY, OTHER }
 enum VenueAssignmentStatus { AUTO_ASSIGNED, MANUALLY_ASSIGNED, PENDING_ASSIGNMENT, UNASSIGNED, RETROACTIVE_ASSIGNED }
 enum SeriesAssignmentStatus { AUTO_ASSIGNED, MANUALLY_ASSIGNED, PENDING_ASSIGNMENT, UNASSIGNED, NOT_SERIES }
 enum CostItemType {
-  # Staff wages
   DEALER
   TOURNAMENT_DIRECTOR
   FLOOR_STAFF
   SECURITY
-  # Direct game costs (actual cash/value out)
-  PRIZE_CONTRIBUTION          # Cash added to prizepool
-  JACKPOT_CONTRIBUTION        # Jackpot seed money
-  GUARANTEE_OVERLAY           # Cash to cover guarantee shortfall
-  ADDED_VALUE                 # Non-cash additions (merch, satellite seats)
-  BOUNTY                      # Bounty prizes
-  # Operations
-  VENUE_RENTAL                # Fee paid TO venue for space
-  EQUIPMENT_RENTAL            # Tables, chips, cards
-  FOOD_BEVERAGE               # Complimentary F&B
-  MARKETING                   # Advertising
-  STREAMING                   # Production costs
-  # Compliance
+  PRIZE_CONTRIBUTION
+  JACKPOT_CONTRIBUTION
+  GUARANTEE_OVERLAY
+  ADDED_VALUE
+  BOUNTY
+  VENUE_RENTAL
+  EQUIPMENT_RENTAL
+  FOOD_BEVERAGE
+  MARKETING
+  STREAMING
   INSURANCE
   LICENSING
-  # Travel
   STAFF_TRAVEL
   PLAYER_ACCOMMODATION
-  # Other
   PROMOTION
   OTHER
 }
@@ -80,6 +83,26 @@ enum SocialPostType { TEXT, IMAGE, VIDEO, LINK, EVENT, ALBUM, LIVE }
 enum SocialScrapeStatus { RUNNING, SUCCESS, FAILED, SKIPPED, RATE_LIMITED, NO_NEW_CONTENT }
 enum SocialPostStatus { ACTIVE, HIDDEN, ARCHIVED, DELETED }
 enum ScheduledPostStatus { SCHEDULED, PUBLISHED, FAILED, CANCELLED }
+
+# --- Background Task Enums (NEW) ---
+enum BackgroundTaskType {
+  VENUE_REASSIGNMENT
+  BULK_VENUE_REASSIGNMENT
+  ENTITY_REASSIGNMENT
+  VENUE_CLONE
+  BULK_IMPORT
+  DATA_MIGRATION
+  REPORT_GENERATION
+  VENUE_DETAILS_RECALC
+}
+
+enum BackgroundTaskStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
 
 # ===================================================================
 # 2. CORE DOMAIN (Entities, Venues, Series)
@@ -119,6 +142,11 @@ type Venue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   fee: Float
   isSpecial: Boolean @default(value: "false")
   details: VenueDetails @hasOne
+
+  # NEW: Links venue "clones" across entities to the same physical location
+  # If null, this IS the canonical (original) venue
+  # If set, points to the canonical venue ID for cross-entity analytics
+  canonicalVenueId: ID @index(name: "byCanonicalVenue")
 
   # Relationships
   assets: [Asset] @hasMany(indexName: "byVenue", fields: ["id"])
@@ -211,7 +239,6 @@ type TournamentSeries @model(subscriptions: null) @auth(rules: [{ allow: private
   status: SeriesStatus!
   startDate: AWSDateTime
   endDate: AWSDateTime
-  events: [String]
   numberOfEvents: Int
   guaranteedPrizepool: Float
   estimatedPrizepool: Float
@@ -262,21 +289,13 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   totalEntries: Int
 
   # --- Calculated Financial Metrics (Simplified) ---
-  
-  # Revenue (what we collect)
-  totalBuyInsCollected: Float          # Total money from players: buyIn × totalEntries
-  rakeRevenue: Float                   # Rake we collect: rake × entriesForRake
-  
-  # Prizepool (what players receive)
-  prizepoolPlayerContributions: Float  # From players: (buyIn - rake) × entries
-  prizepoolAddedValue: Float           # From house: guaranteeOverlayCost (when guarantee not met)
-  prizepoolSurplus: Float              # Excess above guarantee (bonus to players)
-  
-  # Costs
-  guaranteeOverlayCost: Float          # Shortfall we pay: max(0, guarantee - playerContributions)
-  
-  # Profit
-  gameProfit: Float                    # Simple: rakeRevenue - guaranteeOverlayCost
+  totalBuyInsCollected: Float
+  rakeRevenue: Float
+  prizepoolPlayerContributions: Float
+  prizepoolAddedValue: Float
+  prizepoolSurplus: Float
+  guaranteeOverlayCost: Float
+  gameProfit: Float
 
   # --- Live Game Data ---
   playersRemaining: Int
@@ -314,22 +333,12 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   actualCalculatedUniquePlayers: Int
 
   # --- Query Optimisation Keys ---
-  # Day of week for the game (MONDAY, TUESDAY, etc.)
   gameDayOfWeek: String @index(name: "byDayOfWeek", sortKeyFields: ["gameStartDateTime"])
-
-  # Buy-in bucket for range queries (zero-padded for string sorting)
-  # Values: "0000-0025", "0026-0050", "0051-0100", "0101-0200", "0201-0500", "0501-PLUS"
   buyInBucket: String @index(name: "byBuyInBucket", sortKeyFields: ["gameStartDateTime"])
-  
-  # Composite key: venue + day + variant
-  # Enables: "All Monday NLHE games at Venue X"
-  # Format: "{venueId}#{dayOfWeek}#{variant}"
   venueScheduleKey: String @index(name: "byVenueSchedule", sortKeyFields: ["gameStartDateTime"])
-  
-  # Composite key: entity + day + variant + buyInBucket
-  # Enables: "All Monday NLHE $50 games across my entity"
-  # Format: "{entityId}#{dayOfWeek}#{variant}#{buyInBucket}"
+  venueGameTypeKey: String @index(name: "byVenueGameType", sortKeyFields: ["gameStartDateTime"])
   entityQueryKey: String @index(name: "byEntityQuery", sortKeyFields: ["gameStartDateTime"])
+  entityGameTypeKey: String @index(name: "byEntityGameType", sortKeyFields: ["gameStartDateTime"])
 
   # --- Data Source ---
   sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
@@ -422,85 +431,57 @@ type GameFinancialSnapshot
   gameStartDateTime: AWSDateTime @index(name: "byGameStartDateFinancialSnapshot", sortKeyFields: ["netProfit"])
 
   # === REVENUE SIDE (from Game model) ===
-  
-  # Entry Revenue
-  totalBuyInsCollected: Float @default(value: "0")         # Total cash from players: buyIn × totalEntries
-  
-  # Rake Revenue (simplified - we collect it all)
-  rakeRevenue: Float @default(value: "0")                  # Rake collected: rake × entriesForRake
-  
-  # Venue Revenue
-  venueFee: Float @default(value: "0")                     # Fee venue pays US to host (REVENUE)
-  
-  # Total Revenue
-  totalRevenue: Float! @default(value: "0")                # rakeRevenue + venueFee
+  totalBuyInsCollected: Float @default(value: "0")
+  rakeRevenue: Float @default(value: "0")
+  venueFee: Float @default(value: "0")
+  totalRevenue: Float! @default(value: "0")
   
   # === PRIZEPOOL BREAKDOWN (from Game model) ===
-  prizepoolPlayerContributions: Float @default(value: "0") # (buyIn - rake) × entries
-  prizepoolAddedValue: Float @default(value: "0")          # guaranteeOverlayCost (money house adds)
-  prizepoolTotal: Float @default(value: "0")               # Total prizepool paid
-  prizepoolSurplus: Float @default(value: "0")             # When contributions > guarantee (bonus to players)
+  prizepoolPlayerContributions: Float @default(value: "0")
+  prizepoolAddedValue: Float @default(value: "0")
+  prizepoolTotal: Float @default(value: "0")
+  prizepoolSurplus: Float @default(value: "0")
 
   # === COST SIDE (from GameCost model) ===
-  
-  # Staff Costs
   totalDealerCost: Float @default(value: "0")
   totalTournamentDirectorCost: Float @default(value: "0")
   totalFloorStaffCost: Float @default(value: "0")
   totalSecurityCost: Float @default(value: "0")
-  totalStaffCost: Float @default(value: "0")               # Aggregate
-  
-  # Direct Game Costs (actual cash/value out of pocket)
-  totalPrizeContribution: Float @default(value: "0")       # Cash house adds to prize pool
-  totalJackpotContribution: Float @default(value: "0")     # Jackpot seed
-  totalGuaranteeOverlayCost: Float @default(value: "0")    # Guarantee shortfall
-  totalAddedValueCost: Float @default(value: "0")          # Non-cash additions (merch, seats)
-  totalBountyCost: Float @default(value: "0")              # Bounties paid
-  totalDirectGameCost: Float @default(value: "0")          # Aggregate
-  
-  # Operations Costs
-  totalVenueRentalCost: Float @default(value: "0")         # Rent paid TO venue
+  totalStaffCost: Float @default(value: "0")
+  totalPrizeContribution: Float @default(value: "0")
+  totalJackpotContribution: Float @default(value: "0")
+  totalGuaranteeOverlayCost: Float @default(value: "0")
+  totalAddedValueCost: Float @default(value: "0")
+  totalBountyCost: Float @default(value: "0")
+  totalDirectGameCost: Float @default(value: "0")
+  totalVenueRentalCost: Float @default(value: "0")
   totalEquipmentRentalCost: Float @default(value: "0")
   totalFoodBeverageCost: Float @default(value: "0")
   totalMarketingCost: Float @default(value: "0")
   totalStreamingCost: Float @default(value: "0")
-  totalOperationsCost: Float @default(value: "0")          # Aggregate
-  
-  # Compliance Costs
+  totalOperationsCost: Float @default(value: "0")
   totalInsuranceCost: Float @default(value: "0")
   totalLicensingCost: Float @default(value: "0")
-  totalComplianceCost: Float @default(value: "0")          # Aggregate
-  
-  # Other Costs
+  totalComplianceCost: Float @default(value: "0")
   totalStaffTravelCost: Float @default(value: "0")
   totalPlayerAccommodationCost: Float @default(value: "0")
   totalPromotionCost: Float @default(value: "0")
   totalOtherCost: Float @default(value: "0")
-  
-  # Total Costs
-  totalCost: Float! @default(value: "0")                   # Sum of all costs
+  totalCost: Float! @default(value: "0")
 
   # === PROFIT & DERIVED METRICS ===
-  
-  # Primary Metrics
-  gameProfit: Float @default(value: "0")                   # Simple: rakeRevenue - guaranteeOverlayCost
-  netProfit: Float! @default(value: "0")                   # Comprehensive: totalRevenue - totalCost
-  profitMargin: Float                                      # netProfit / totalRevenue (%)
-  
-  # Per-Player Metrics
+  gameProfit: Float @default(value: "0")
+  netProfit: Float! @default(value: "0")
+  profitMargin: Float
   revenuePerPlayer: Float
   costPerPlayer: Float
   profitPerPlayer: Float
   rakePerEntry: Float
-  
-  # Efficiency Metrics
   dealerCostPerHour: Float
   staffCostPerPlayer: Float
   promoSpendPerPlayer: Float
-  
-  # Game Health Indicators
-  guaranteeCoverageRate: Float                             # prizepoolPlayerContributions / guaranteeAmount (%)
-  guaranteeMet: Boolean                                    # True if no overlay needed
+  guaranteeCoverageRate: Float
+  guaranteeMet: Boolean
   
   # Denormalized Game Data for Reporting
   totalUniquePlayers: Int
@@ -532,21 +513,21 @@ type GameCost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   totalFloorStaffCost: Float @default(value: "0")
   totalSecurityCost: Float @default(value: "0")
   
-  # --- Direct Game Costs (actual cash/value out of pocket) ---
-  totalPrizeContribution: Float @default(value: "0")       # Cash added to prize pool
-  totalJackpotContribution: Float @default(value: "0")     # Jackpot seed money
-  totalGuaranteeOverlayCost: Float @default(value: "0")    # When guarantee > buy-ins
-  totalAddedValueCost: Float @default(value: "0")          # Non-cash value added (merch, seats)
-  totalBountyCost: Float @default(value: "0")              # Bounty prizes paid
+  # --- Direct Game Costs ---
+  totalPrizeContribution: Float @default(value: "0")
+  totalJackpotContribution: Float @default(value: "0")
+  totalGuaranteeOverlayCost: Float @default(value: "0")
+  totalAddedValueCost: Float @default(value: "0")
+  totalBountyCost: Float @default(value: "0")
   
   # --- Venue & Equipment ---
-  totalVenueRentalCost: Float @default(value: "0")         # Fee paid TO venue
-  totalEquipmentRentalCost: Float @default(value: "0")     # Table/chip rentals
+  totalVenueRentalCost: Float @default(value: "0")
+  totalEquipmentRentalCost: Float @default(value: "0")
   
   # --- Operations ---
-  totalFoodBeverageCost: Float @default(value: "0")        # Complimentary F&B
-  totalMarketingCost: Float @default(value: "0")           # Advertising spend
-  totalStreamingCost: Float @default(value: "0")           # Production costs
+  totalFoodBeverageCost: Float @default(value: "0")
+  totalMarketingCost: Float @default(value: "0")
+  totalStreamingCost: Float @default(value: "0")
   
   # --- Compliance ---
   totalInsuranceCost: Float @default(value: "0")
@@ -561,11 +542,11 @@ type GameCost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   totalOtherCost: Float @default(value: "0")
   
   # --- Aggregates ---
-  totalStaffCost: Float @default(value: "0")               # Sum of all staff costs
-  totalDirectGameCost: Float @default(value: "0")          # Prize + jackpot + overlay + added + bounty
-  totalOperationsCost: Float @default(value: "0")          # Venue + equipment + F&B + marketing + streaming
-  totalComplianceCost: Float @default(value: "0")          # Insurance + licensing
-  totalCost: Float! @default(value: "0")                   # Grand total
+  totalStaffCost: Float @default(value: "0")
+  totalDirectGameCost: Float @default(value: "0")
+  totalOperationsCost: Float @default(value: "0")
+  totalComplianceCost: Float @default(value: "0")
+  totalCost: Float! @default(value: "0")
 
   # --- Line Items ---
   lineItems: [GameCostLineItem] @hasMany(indexName: "byGameCost", fields: ["id"])
@@ -577,7 +558,7 @@ type GameCost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
 
   # --- Metadata ---
   notes: String
-  isEstimate: Boolean @default(value: "false")             # True if costs are estimated
+  isEstimate: Boolean @default(value: "false")
   costStatus: CostStatus @default(value: "PENDING")
 
   createdAt: AWSDateTime!
@@ -595,14 +576,14 @@ type GameCostLineItem @model(subscriptions: null) @auth(rules: [{ allow: private
   rateType: CostItemRateType @default(value: "STANDARD")
 
   # --- Amount Calculation ---
-  amount: Float!                                            # Final amount
-  quantity: Float @default(value: "1")                      # Number of units (e.g., 3 dealers)
-  rate: Float                                               # Rate per unit
-  hours: Float                                              # Hours worked (if hourly)
+  amount: Float!
+  quantity: Float @default(value: "1")
+  rate: Float
+  hours: Float
   
   # --- Staff-Specific ---
-  staffMemberId: ID                                         # Link to staff member if applicable
-  staffMemberName: String                                   # Denormalized name
+  staffMemberId: ID
+  staffMemberName: String
   
   # --- Description ---
   description: String
@@ -714,7 +695,7 @@ type Player @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   knownIdentities: [KnownPlayerIdentity] @hasMany(indexName: "byPlayer", fields: ["id"])
   marketingPreferences: PlayerMarketingPreferences @hasOne(fields: ["id"])
   marketingMessages: [PlayerMarketingMessage] @hasMany(indexName: "byPlayer", fields: ["id"])
-  playerVenues: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
+  playerVenues: [PlayerVenue] @hasMany(indexName: "byPlayer", fields: ["id"])
   playerEntries: [PlayerEntry] @hasMany(indexName: "byPlayer", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"])
   playerTickets: [PlayerTicket] @hasMany(indexName: "byPlayer", fields: ["id"])
@@ -757,6 +738,10 @@ type PlayerEntry @model(subscriptions: null) @auth(rules: [{ allow: private }]) 
   playerId: ID! @index(name: "byPlayer", sortKeyFields: ["gameStartDateTime"])
   gameId: ID! @index(name: "byGame")
   venueId: ID @index(name: "byVenue")
+  
+  # NEW: Entity that ran the game (for entity-level analytics)
+  entityId: ID @index(name: "byEntityEntry", sortKeyFields: ["gameStartDateTime"])
+  
   status: PlayerEntryStatus!
   registrationTime: AWSDateTime!
   eliminationTime: AWSDateTime
@@ -789,19 +774,42 @@ type PlayerResult @model(subscriptions: null) @auth(rules: [{ allow: private }])
   game: Game @belongsTo(fields: ["gameId"])
   recordType: String @default(value: "ORIGINAL") @index(name: "byRecordTypeResult", sortKeyFields: ["gameStartDateTime"])
   venueId: ID @index(name: "byVenueResult", sortKeyFields: ["gameStartDateTime"])
+  
+  # NEW: Entity that ran the game (for entity-level analytics)
+  entityId: ID @index(name: "byEntityResult", sortKeyFields: ["gameStartDateTime"])
 }
 
 type PlayerVenue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
-  totalGamesPlayed: Int
-  averageBuyIn: Float
-  firstPlayedDate: AWSDateTime
-  lastPlayedDate: AWSDateTime
-  targetingClassification: PlayerVenueTargetingClassification!
-  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["venueId"])
+  
+  # Core relationships
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["visityKey"])
   player: Player @belongsTo(fields: ["playerId"])
+  
   venueId: ID! @index(name: "byVenue", sortKeyFields: ["playerId"])
   venue: Venue @belongsTo(fields: ["venueId"])
+  
+  # NEW: Entity that ran the games (enables entity+venue analytics)
+  entityId: ID! @index(name: "byEntityPlayerVenue", sortKeyFields: ["venueId"])
+  
+  # NEW: Composite key for unique constraint and fast lookups
+  # Format: "{playerId}#{entityId}#{venueId}"
+  visityKey: String @index(name: "byVisitKey", queryField: "playerVenueByVisitKey")
+  
+  # NEW: Link to canonical venue for cross-entity aggregation
+  canonicalVenueId: ID @index(name: "byCanonicalVenuePlayer", sortKeyFields: ["playerId"])
+  
+  # Stats for this player at this venue FOR THIS ENTITY
+  totalGamesPlayed: Int
+  averageBuyIn: Float
+  totalBuyIns: Float
+  totalWinnings: Float
+  netProfit: Float
+  firstPlayedDate: AWSDateTime
+  lastPlayedDate: AWSDateTime
+  
+  # Targeting
+  targetingClassification: PlayerVenueTargetingClassification!
 }
 
 type PlayerTransaction @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
@@ -816,6 +824,9 @@ type PlayerTransaction @model(subscriptions: null) @auth(rules: [{ allow: privat
   player: Player @belongsTo(fields: ["playerId"])
   gameId: ID @index(name: "byGame")
   venueId: ID @index(name: "byVenueTransaction", sortKeyFields: ["transactionDate"])
+  
+  # NEW: Entity that ran the game/transaction (for entity-level analytics)
+  entityId: ID @index(name: "byEntityTransaction", sortKeyFields: ["transactionDate"])
 }
 
 type PlayerCredits @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
@@ -1056,7 +1067,6 @@ type S3Storage @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
 # 6. SYSTEM, ADMIN & ASSETS
 # ===================================================================
 
-# --- Updated User Model with Page Permissions ---
 type User @model(subscriptions: null) @auth(rules: [
   { allow: private, operations: [create, read, update] },
   { allow: groups, groups: ["SUPER_ADMIN"], operations: [create, read, update, delete] }
@@ -1066,38 +1076,25 @@ type User @model(subscriptions: null) @auth(rules: [
   email: String! @index(name: "byEmail", queryField: "userByEmail")
   role: UserRole!
   isActive: Boolean @default(value: "true")
-
-  # Page/Feature Access Permissions (stored as JSON array of route paths)
   allowedPages: [String]
-
-  # Profile Information
   firstName: String
   lastName: String
   phone: String
   avatar: AWSURL
-
-  # Entity/Venue Access
   allowedEntityIds: [ID]
   allowedVenueIds: [ID]
   defaultEntityId: ID
-
-  # Metadata
   lastLoginAt: AWSDateTime
   lastActiveAt: AWSDateTime
   passwordLastChangedAt: AWSDateTime
   mustChangePassword: Boolean @default(value: "false")
   loginAttempts: Int @default(value: "0")
   lockedUntil: AWSDateTime
-
-  # Audit
   createdBy: String
   updatedBy: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
-
   preferences: [UserPreference] @hasMany(indexName: "byUser", fields: ["id"])
-  
-  # Relationship to the log
   auditLogs: [UserAuditLog] @hasMany(indexName: "byUser", fields: ["id"])
 }
 
@@ -1109,19 +1106,15 @@ type UserPreference @model(subscriptions: null) @auth(rules: [{ allow: owner, ow
   userId: ID! @index(name: "byUser")
 }
 
-# NEW: Dedicated table for audit history
-type UserAuditLog @model(subscriptions: null) 
-@auth(rules: [{ allow: private }]) {
+type UserAuditLog @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   userId: ID! @index(name: "byUser", sortKeyFields: ["createdAt"])
   user: User @belongsTo(fields: ["userId"])
-  
-  action: String!      # e.g., "LOGIN", "VIEW_PAGE", "UPDATE_GAME", "EXPORT_DATA"
-  resource: String     # e.g., "/games/123" or "GameID: 123"
-  details: AWSJSON     # e.g., { "oldStatus": "PENDING", "newStatus": "RUNNING" }
+  action: String!
+  resource: String
+  details: AWSJSON
   ipAddress: String
   userAgent: String
-  
   createdAt: AWSDateTime!
 }
 
@@ -1195,13 +1188,51 @@ type PlayerMarketingPreferences @model(subscriptions: null) @auth(rules: [{ allo
 }
 
 # ===================================================================
-# 6.5 SOCIAL PULSE
+# 6.5 BACKGROUND TASK (NEW)
+# ===================================================================
+
+type BackgroundTask @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  
+  # Who owns this task
+  entityId: ID! @index(name: "byEntityTask", sortKeyFields: ["createdAt"], queryField: "tasksByEntity")
+  
+  # Task classification
+  taskType: BackgroundTaskType!
+  status: BackgroundTaskStatus!
+  
+  # What this task operates on
+  targetType: String!
+  targetId: ID
+  targetIds: [ID]
+  targetCount: Int
+  
+  # Task-specific data
+  payload: AWSJSON
+  
+  # Progress tracking
+  processedCount: Int
+  progressPercent: Float
+  
+  # Results
+  result: AWSJSON
+  errorMessage: String
+  
+  # Timestamps
+  createdAt: AWSDateTime!
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+  
+  # User who initiated
+  initiatedBy: String
+}
+
+# ===================================================================
+# 6.6 SOCIAL PULSE
 # ===================================================================
 
 type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
-
-  # --- Platform Identification ---
   platform: SocialPlatform!
   platformAccountId: String! @index(name: "byPlatformAccountId", queryField: "socialAccountByPlatformId")
   accountName: String! @index(name: "byAccountName")
@@ -1209,22 +1240,16 @@ type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]
   accountUrl: AWSURL!
   businessLocation: String @index(name: "byAccountLocation", queryField: "socialAccountsByLocation")
   tags: [String]
-
-  # --- Account Metadata ---
   profileImageUrl: AWSURL
   coverImageUrl: AWSURL
   bio: String
   followerCount: Int
   followingCount: Int
   postCount: Int
-
-  # --- Page Info (from Facebook API) ---
   hasFullHistory: Boolean @default(value: "false")
   pageDescription: String
   category: String
   website: String
-
-  # --- Scraping Configuration ---
   status: SocialAccountStatus! @default(value: "PENDING_VERIFICATION")
   isScrapingEnabled: Boolean! @default(value: "true")
   scrapeFrequencyMinutes: Int @default(value: "60")
@@ -1233,23 +1258,15 @@ type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]
   nextScheduledScrapeAt: AWSDateTime
   consecutiveFailures: Int @default(value: "0")
   lastErrorMessage: String
-
-  # --- Access Configuration (for future automated posting) ---
   hasPostAccess: Boolean @default(value: "false")
   accessTokenExpiry: AWSDateTime
   permissionsGranted: [String]
-
-  # --- Relationships ---
   entityId: ID @index(name: "bySocialAccountEntity")
   entity: Entity @belongsTo(fields: ["entityId"])
-
   venueId: ID @index(name: "bySocialAccountVenue")
   venue: Venue @belongsTo(fields: ["venueId"])
-
   posts: [SocialPost] @hasMany(indexName: "bySocialAccount", fields: ["id"])
   scrapeAttempts: [SocialScrapeAttempt] @hasMany(indexName: "bySocialAccountAttempt", fields: ["id"])
-
-  # --- Timestamps ---
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
   createdBy: String
@@ -1257,24 +1274,16 @@ type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]
 
 type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
-
-  # --- Post Identification ---
   platformPostId: String! @index(name: "byPlatformPostId", queryField: "socialPostByPlatformId")
   postUrl: AWSURL
   postType: SocialPostType!
-
-  # --- Denormalized Account Info (for fast display without joins) ---
   accountName: String
   accountProfileImageUrl: String
   platform: String
   businessLocation: String @index(name: "byPostLocation", queryField: "socialPostsByLocation", sortKeyFields: ["postedAt"])
-
-  # --- Content ---
   content: String
   contentPreview: String
   rawContent: AWSJSON
-
-  # --- Media ---
   mediaUrls: [AWSURL]
   thumbnailUrl: AWSURL
   mediaType: String
@@ -1284,105 +1293,63 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   videoHeight: Int
   videoTitle: String
   videoDescription: String
-
-  # --- Engagement Metrics ---
   likeCount: Int @default(value: "0")
   commentCount: Int @default(value: "0")
   shareCount: Int @default(value: "0")
   reactionCount: Int @default(value: "0")
   viewCount: Int
-
-  # --- Temporal Data ---
   postedAt: AWSDateTime! @index(name: "byPostedAt", sortKeyFields: ["likeCount"])
   scrapedAt: AWSDateTime!
   lastUpdatedAt: AWSDateTime
-
-  # --- Status & Visibility ---
-  status: SocialPostStatus! 
-    @default(value: "ACTIVE") 
-    @index(name: "byPostStatus", queryField: "socialPostsByPostStatus", sortKeyFields: ["postedAt"])  isPromotional: Boolean @default(value: "false")
+  status: SocialPostStatus! @default(value: "ACTIVE") @index(name: "byPostStatus", queryField: "socialPostsByPostStatus", sortKeyFields: ["postedAt"])
+  isPromotional: Boolean @default(value: "false")
   isPinned: Boolean @default(value: "false")
   isTournamentRelated: Boolean @default(value: "false")
-
-  # --- Content Classification (for filtering) ---
   tags: [String]
   sentiment: String
   contentCategory: String
-
-  # --- Linked Tournament (if post is about a specific game) ---
   linkedGameId: ID @index(name: "bySocialPostGame")
   linkedGame: Game @belongsTo(fields: ["linkedGameId"])
-
-  # --- Relationships ---
   socialAccountId: ID! @index(name: "bySocialAccount", sortKeyFields: ["postedAt"])
   socialAccount: SocialAccount @belongsTo(fields: ["socialAccountId"])
-
   entityId: ID @index(name: "bySocialPostEntity", sortKeyFields: ["postedAt"])
   venueId: ID @index(name: "bySocialPostVenue", sortKeyFields: ["postedAt"])
-
-  # --- Timestamps ---
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
 
 type SocialScrapeAttempt @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
-
-  # --- Attempt Details ---
   status: SocialScrapeStatus!
   startedAt: AWSDateTime!
   completedAt: AWSDateTime
   durationMs: Int
-
-  # --- Sync Type ---
   syncType: String
-
-  # --- Results ---
   postsFound: Int @default(value: "0")
   newPostsAdded: Int @default(value: "0")
   postsUpdated: Int @default(value: "0")
-
-  # --- Error Tracking ---
   errorMessage: String
   errorCode: String
-
-  # --- Trigger Information ---
   triggerSource: ScraperJobTriggerSource
   triggeredBy: String
-
-  # --- Relationships ---
   socialAccountId: ID! @index(name: "bySocialAccountAttempt", sortKeyFields: ["startedAt"])
   socialAccount: SocialAccount @belongsTo(fields: ["socialAccountId"])
-
-  # --- Timestamps ---
   createdAt: AWSDateTime!
 }
 
 type SocialScheduledPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
-
-  # --- Post Content ---
   content: String!
   mediaUrls: [AWSURL]
   linkUrl: AWSURL
-
-  # --- Scheduling ---
   scheduledFor: AWSDateTime! @index(name: "byScheduledTime")
   publishedAt: AWSDateTime
   status: ScheduledPostStatus! @default(value: "SCHEDULED") @index(name: "byScheduledPostStatus", sortKeyFields: ["scheduledFor"])
-
-  # --- Target Accounts ---
   targetAccountIds: [ID!]!
-
-  # --- Related Game (for tournament results posts) ---
   linkedGameId: ID @index(name: "byScheduledPostGame")
   templateType: String
-
-  # --- Relationships ---
   entityId: ID! @index(name: "byScheduledPostEntity", sortKeyFields: ["scheduledFor"])
   createdBy: String!
-
-  # --- Timestamps ---
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -1571,7 +1538,6 @@ type ScrapedGameData {
   fetchedAt: AWSDateTime
   reScrapedAt: AWSDateTime
   wasForced: Boolean
-  # Financial metrics (simplified)
   totalBuyInsCollected: Float
   rakeRevenue: Float
   prizepoolPlayerContributions: Float
@@ -1865,6 +1831,52 @@ type GamesNeedingVenueResponse {
   totalCount: Int
 }
 
+# --- Venue Reassignment Types (NEW) ---
+type ReassignGameVenueResult {
+  success: Boolean!
+  status: String!
+  message: String
+  gameId: ID
+  taskId: ID
+  oldVenueId: ID
+  newVenueId: ID
+  oldEntityId: ID
+  newEntityId: ID
+  venueCloned: Boolean
+  clonedVenueId: ID
+  recordsUpdated: AWSJSON
+}
+
+type BulkReassignGameVenuesResult {
+  success: Boolean!
+  status: String!
+  message: String
+  taskId: ID
+  gameCount: Int
+  newVenueId: ID
+  reassignEntity: Boolean
+}
+
+type GetReassignmentStatusResult {
+  success: Boolean!
+  message: String
+  task: BackgroundTaskInfo
+}
+
+type BackgroundTaskInfo {
+  id: ID!
+  status: BackgroundTaskStatus!
+  taskType: BackgroundTaskType!
+  targetCount: Int
+  processedCount: Int
+  progressPercent: Float
+  result: AWSJSON
+  errorMessage: String
+  createdAt: AWSDateTime!
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+}
+
 # --- Social Pulse Response Types ---
 type SocialFeedConnection {
   items: [SocialPost!]!
@@ -2005,6 +2017,24 @@ input ResetUserPasswordInput {
   userId: ID!
   temporaryPassword: String
   sendEmail: Boolean
+}
+
+# --- Venue Reassignment Input Types (NEW) ---
+
+input ReassignGameVenueInput {
+  gameId: ID!
+  newVenueId: ID!
+  entityId: ID!
+  reassignEntity: Boolean!
+  initiatedBy: String
+}
+
+input BulkReassignGameVenuesInput {
+  gameIds: [ID!]!
+  newVenueId: ID!
+  entityId: ID!
+  reassignEntity: Boolean!
+  initiatedBy: String
 }
 
 # --- Existing Input Types ---
@@ -2185,8 +2215,6 @@ input SaveGameDataInput {
   totalChipsInPlay: Float
   averagePlayerStack: Float
   totalDuration: String
-  
-  # Calculated financial metrics (simplified)
   totalBuyInsCollected: Float
   rakeRevenue: Float
   prizepoolPlayerContributions: Float
@@ -2194,7 +2222,6 @@ input SaveGameDataInput {
   prizepoolSurplus: Float
   guaranteeOverlayCost: Float
   gameProfit: Float
-  
   tournamentType: TournamentType
   isSeries: Boolean
   seriesName: String
@@ -2368,6 +2395,16 @@ type Query {
   getVenueAssignmentSummary(entityId: ID): VenueAssignmentSummary
     @function(name: "venueAssignmentService-${env}")
 
+  # --- Venue Reassignment Queries (NEW) ---
+  getReassignmentStatus(taskId: ID!): GetReassignmentStatusResult
+    @function(name: "venueAssignmentService-${env}")
+
+  getVenueClones(canonicalVenueId: ID!): [Venue]
+    @function(name: "venueAssignmentService-${env}")
+
+  findVenueForEntity(canonicalVenueId: ID!, entityId: ID!): Venue
+    @function(name: "venueAssignmentService-${env}")
+
   # --- Metrics ---
   getMyMetrics(timeRange: String): UserMetricsSummary
     @function(name: "getUserMetrics-${env}")
@@ -2521,6 +2558,13 @@ type Mutation {
     @function(name: "venueAssignmentService-${env}")
 
   batchAssignVenues(assignments: [VenueAssignment!]!): BatchVenueAssignmentResult
+    @function(name: "venueAssignmentService-${env}")
+
+  # --- Venue Reassignment (NEW) ---
+  reassignGameVenue(input: ReassignGameVenueInput!): ReassignGameVenueResult
+    @function(name: "venueAssignmentService-${env}")
+
+  bulkReassignGameVenues(input: BulkReassignGameVenuesInput!): BulkReassignGameVenuesResult
     @function(name: "venueAssignmentService-${env}")
 
   # --- Misc & S3 ---

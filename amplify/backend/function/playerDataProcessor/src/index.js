@@ -51,6 +51,98 @@ const UNASSIGNED_VENUE_NAME = "Unassigned";
 // --- MERGE ---: Added from PDP-index-enhanced.js
 const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0";
 
+// ===================================================================
+// ENTITY-AWARE HELPERS
+// ===================================================================
+
+/**
+ * Generate entity-aware visityKey for PlayerVenue lookups
+ * Format: {playerId}#{entityId}#{venueId}
+ */
+const generateVisitKey = (playerId, entityId, venueId) => {
+    return `${playerId}#${entityId}#${venueId}`;
+};
+
+/**
+ * Get venue details including canonicalVenueId
+ * @param {string} venueId - Venue ID to lookup
+ * @returns {Promise<{canonicalVenueId: string|null}>} Venue info
+ */
+const getVenueInfo = async (venueId) => {
+    if (!venueId || venueId === UNASSIGNED_VENUE_ID) {
+        return { canonicalVenueId: null };
+    }
+    
+    try {
+        const venueTable = getTableName('Venue');
+        const result = await ddbDocClient.send(new GetCommand({
+            TableName: venueTable,
+            Key: { id: venueId },
+            ProjectionExpression: 'id, canonicalVenueId'
+        }));
+        
+        if (result.Item) {
+            // If venue has a canonicalVenueId, use it; otherwise the venue IS the canonical
+            return { 
+                canonicalVenueId: result.Item.canonicalVenueId || result.Item.id 
+            };
+        }
+        
+        return { canonicalVenueId: venueId };
+    } catch (error) {
+        console.warn(`[VENUE-INFO] Error fetching venue ${venueId}:`, error.message);
+        return { canonicalVenueId: venueId };
+    }
+};
+
+/**
+ * Find existing PlayerVenue by visityKey index
+ * Falls back to legacy ID format for backward compatibility
+ * @param {string} visityKey - The composite lookup key
+ * @param {string} playerId - Player ID for legacy fallback
+ * @param {string} venueId - Venue ID for legacy fallback
+ * @returns {Promise<Object|null>} Existing record or null
+ */
+const findPlayerVenueByVisitKey = async (visityKey, playerId = null, venueId = null) => {
+    const playerVenueTable = getTableName('PlayerVenue');
+    
+    // Try visityKey index first (new schema)
+    try {
+        const result = await ddbDocClient.send(new QueryCommand({
+            TableName: playerVenueTable,
+            IndexName: 'byVisitKey',
+            KeyConditionExpression: 'visityKey = :vk',
+            ExpressionAttributeValues: { ':vk': visityKey }
+        }));
+        
+        if (result.Items && result.Items.length > 0) {
+            return result.Items[0];
+        }
+    } catch (error) {
+        console.warn(`[PLAYERVENUE-LOOKUP] Error querying by visityKey:`, error.message);
+    }
+    
+    // Fallback: Try legacy ID format (playerId#venueId) for backward compatibility
+    if (playerId && venueId) {
+        try {
+            const legacyId = `${playerId}#${venueId}`;
+            const legacyResult = await ddbDocClient.send(new GetCommand({
+                TableName: playerVenueTable,
+                Key: { id: legacyId }
+            }));
+            
+            if (legacyResult.Item) {
+                console.log(`[PLAYERVENUE-LOOKUP] Found legacy record with id: ${legacyId}`);
+                return legacyResult.Item;
+            }
+        } catch (error) {
+            console.warn(`[PLAYERVENUE-LOOKUP] Error fetching legacy record:`, error.message);
+        }
+    }
+    
+    return null;
+};
+
 // === DATABASE MONITORING ===
 const { LambdaMonitoring } = require('./lambda-monitoring');
 const monitoring = new LambdaMonitoring('playerDataProcessor', DEFAULT_ENTITY_ID);
@@ -696,10 +788,15 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
  * 1. Adds conditional logic for date fields based on Game.gameStartDateTime.
  * 2. Only updates lastPlayedDate/targetingClassification if the new game is the LATEST for this venue.
  * 3. Back-fills firstPlayedDate if the new game is the EARLIEST for this venue.
+ * 
+ * ENTITY-AWARE UPDATE (Dec 2025):
+ * 4. Uses visityKey (playerId#entityId#venueId) for lookups via byVisitKey index.
+ * 5. Adds canonicalVenueId for cross-entity venue linking.
+ * 6. Uses uuid for new record IDs.
  * ===================================================================
  */
 const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
-    console.log(`[VENUE-UPSERT] Starting upsert for player ${playerId} at venue ${gameData.game.venueId}.`);
+    console.log(`[VENUE-UPSERT] Starting upsert for player ${playerId} at venue ${gameData.game.venueId} with entity ${entityId}.`);
     
     // This logic is correct and preserved
     if (!gameData.game.venueId || gameData.game.venueId === UNASSIGNED_VENUE_ID) {
@@ -708,7 +805,12 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
     }
     
     const playerVenueTable = getTableName('PlayerVenue');
-    const playerVenueId = `${playerId}#${gameData.game.venueId}`;
+    const effectiveEntityId = entityId || DEFAULT_ENTITY_ID;
+    
+    // Generate entity-aware visityKey for lookup
+    const visityKey = generateVisitKey(playerId, effectiveEntityId, gameData.game.venueId);
+    console.log(`[VENUE-UPSERT] Looking up by visityKey: ${visityKey}`);
+    
     const now = new Date().toISOString();
     
     // Use gameStartDateTime as the authoritative timestamp
@@ -719,57 +821,75 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
     const currentGameBuyIn = (gameData.game.buyIn || 0) + (gameData.game.rake || 0);
     
     try {
-        const existingRecord = await ddbDocClient.send(new GetCommand({
-            TableName: playerVenueTable,
-            Key: { id: playerVenueId }
-        }));
+        // Look up existing record by visityKey (entity-aware) with legacy fallback
+        const existingRecord = await findPlayerVenueByVisitKey(visityKey, playerId, gameData.game.venueId);
         
-        if (existingRecord.Item) {
+        if (existingRecord) {
             // PlayerVenue exists. Apply conditional updates.
+            console.log(`[VENUE-UPSERT] Found existing record with id: ${existingRecord.id}`);
             
-            monitoring.trackOperation('PLAYERVENUE_UPDATE', 'PlayerVenue', playerVenueId, {
+            monitoring.trackOperation('PLAYERVENUE_UPDATE', 'PlayerVenue', existingRecord.id, {
                 playerId,
                 venueId: gameData.game.venueId,
-                entityId
+                entityId: effectiveEntityId
             });
             
-            const currentFirstPlayed = new Date(existingRecord.Item.firstPlayedDate);
-            const currentLastPlayed = new Date(existingRecord.Item.lastPlayedDate);
+            const currentFirstPlayed = new Date(existingRecord.firstPlayedDate);
+            const currentLastPlayed = new Date(existingRecord.lastPlayedDate);
 
             // Calculate metrics that are always updated
-            const oldGamesPlayed = existingRecord.Item.totalGamesPlayed || 0;
-            const oldAverageBuyIn = existingRecord.Item.averageBuyIn || 0;
+            const oldGamesPlayed = existingRecord.totalGamesPlayed || 0;
+            const oldAverageBuyIn = existingRecord.averageBuyIn || 0;
             const newTotalGames = oldGamesPlayed + 1;
             const newAverageBuyIn = newTotalGames > 0
                 ? ((oldAverageBuyIn * oldGamesPlayed) + currentGameBuyIn) / newTotalGames
                 : currentGameBuyIn;
 
             // Build dynamic update expression
-            let updateExpression = 'SET #version = #version + :inc, #ent = :entityId, updatedAt = :updatedAt, totalGamesPlayed = totalGamesPlayed + :inc, averageBuyIn = :newAverageBuyIn';
+            let updateExpression = 'SET #version = #version + :inc, updatedAt = :updatedAt, totalGamesPlayed = totalGamesPlayed + :inc, averageBuyIn = :newAverageBuyIn';
             let expressionNames = {
-                '#version': '_version',
-                '#ent': 'entityId'
+                '#version': '_version'
             };
             let expressionValues = {
                 ':inc': 1,
-                ':entityId': entityId || existingRecord.Item.entityId || DEFAULT_ENTITY_ID,
                 ':updatedAt': now,
                 ':newAverageBuyIn': newAverageBuyIn
             };
 
+            // Migrate entityId if not set (backward compat)
+            if (!existingRecord.entityId) {
+                updateExpression += ', entityId = :entityId';
+                expressionValues[':entityId'] = effectiveEntityId;
+            }
+            
+            // Migrate visityKey if not set (backward compat)
+            if (!existingRecord.visityKey) {
+                updateExpression += ', visityKey = :visityKey';
+                expressionValues[':visityKey'] = visityKey;
+            }
+            
+            // Migrate canonicalVenueId if not set
+            if (!existingRecord.canonicalVenueId) {
+                const venueInfo = await getVenueInfo(gameData.game.venueId);
+                if (venueInfo.canonicalVenueId) {
+                    updateExpression += ', canonicalVenueId = :canonicalVenueId';
+                    expressionValues[':canonicalVenueId'] = venueInfo.canonicalVenueId;
+                }
+            }
+
             // REFACTOR RULE 1: Game is EARLIER than first played date
             if (gameDateObj < currentFirstPlayed) {
-                console.log(`[VENUE-UPSERT] Game date ${gameDate} is earlier than first played ${existingRecord.Item.firstPlayedDate}. Back-filling.`);
+                console.log(`[VENUE-UPSERT] Game date ${gameDate} is earlier than first played ${existingRecord.firstPlayedDate}. Back-filling.`);
                 updateExpression += ', firstPlayedDate = :firstPlayed';
                 expressionValues[':firstPlayed'] = gameDate;
             }
 
             // REFACTOR RULE 2: Game is LATER than last played date
             if (gameDateObj > currentLastPlayed) {
-                console.log(`[VENUE-UPSERT] Game date ${gameDate} is later than last played ${existingRecord.Item.lastPlayedDate}. Updating.`);
+                console.log(`[VENUE-UPSERT] Game date ${gameDate} is later than last played ${existingRecord.lastPlayedDate}. Updating.`);
                 const targetingClassification = calculatePlayerVenueTargetingClassification(
                     gameDate, // Use new game date as last activity
-                    existingRecord.Item.membershipCreatedDate
+                    existingRecord.membershipCreatedDate
                 );
                 
                 updateExpression += ', lastPlayedDate = :lastPlayed, targetingClassification = :targeting';
@@ -779,7 +899,7 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
 
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerVenueTable,
-                Key: { id: playerVenueId },
+                Key: { id: existingRecord.id },
                 UpdateExpression: updateExpression,
                 ExpressionAttributeNames: expressionNames,
                 ExpressionAttributeValues: expressionValues
@@ -789,14 +909,20 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
             return { wasNewVenue: false };
 
         } else {
-            // PlayerVenue does NOT exist. Create new.
+            // PlayerVenue does NOT exist. Create new with uuid ID.
             // This game is by definition the first and last.
             
-            monitoring.trackOperation('PLAYERVENUE_CREATE', 'PlayerVenue', playerVenueId, {
+            const newPlayerVenueId = uuidv4();
+            
+            monitoring.trackOperation('PLAYERVENUE_CREATE', 'PlayerVenue', newPlayerVenueId, {
                 playerId,
                 venueId: gameData.game.venueId,
-                entityId
+                entityId: effectiveEntityId,
+                visityKey
             });
+            
+            // Get canonical venue info
+            const venueInfo = await getVenueInfo(gameData.game.venueId);
             
             const targetingClassification = calculatePlayerVenueTargetingClassification(
                 gameDate, // lastActivityDate
@@ -804,16 +930,20 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
             );
             
             const newPlayerVenue = {
-                id: playerVenueId,
+                id: newPlayerVenueId,
                 playerId: playerId,
                 venueId: gameData.game.venueId,
-                // --- MERGE ---: Added entityId
-                entityId: entityId || DEFAULT_ENTITY_ID,
+                entityId: effectiveEntityId,
+                visityKey: visityKey,
+                canonicalVenueId: venueInfo.canonicalVenueId,
                 membershipCreatedDate: gameDate,
                 firstPlayedDate: gameDate,
                 lastPlayedDate: gameDate,
                 totalGamesPlayed: 1,
                 averageBuyIn: currentGameBuyIn,
+                totalBuyIns: currentGameBuyIn,
+                totalWinnings: 0,
+                netProfit: 0,
                 targetingClassification: targetingClassification,
                 createdAt: now,
                 updatedAt: now,
@@ -826,15 +956,15 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
                 TableName: playerVenueTable,
                 Item: newPlayerVenue
             }));
-            console.log(`[VENUE-UPSERT] Created new PlayerVenue record.`);
+            console.log(`[VENUE-UPSERT] Created new PlayerVenue record with id ${newPlayerVenueId}.`);
             return { wasNewVenue: true }; // Preserved from index.js
         }
         
     } catch (error) {
         console.error(`[VENUE-UPSERT] CRITICAL ERROR:`, error);
-        monitoring.trackOperation('PLAYERVENUE_ERROR', 'PlayerVenue', playerVenueId, {
+        monitoring.trackOperation('PLAYERVENUE_ERROR', 'PlayerVenue', visityKey, {
             error: error.message,
-            entityId
+            entityId: effectiveEntityId
         });
         throw error;
     }

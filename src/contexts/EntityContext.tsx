@@ -1,10 +1,10 @@
 // src/contexts/EntityContext.tsx
-// Enhanced Entity Context with multi-select support
+// Enhanced Entity Context with user-based entity filtering
+// UPDATED: Filters entities based on User.allowedEntityIds and User.defaultEntityId
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-// FIX: Attempting to resolve import error by changing to the v5 package name
-import { generateClient } from '@aws-amplify/api'; 
-// Removed the problematic auto-generated query
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import { useAuth } from './AuthContext';
 import { Entity } from '../types/entity';
 
 // Custom shallow query to avoid nested relationship issues
@@ -35,8 +35,11 @@ const listEntitiesShallow = /* GraphQL */ `
 `;
 
 interface EntityContextType {
-  // All available entities
+  // All entities (filtered by user permissions)
   entities: Entity[];
+  
+  // All entities before filtering (for admin purposes)
+  allEntities: Entity[];
   
   // Single entity selection (for scraping/input)
   currentEntity: Entity | null;
@@ -48,6 +51,11 @@ interface EntityContextType {
   toggleEntitySelection: (entity: Entity) => void;
   selectAllEntities: () => void;
   clearEntitySelection: () => void;
+  
+  // User's entity permissions
+  userAllowedEntityIds: string[] | null;
+  userDefaultEntityId: string | null;
+  hasEntityRestrictions: boolean;
   
   // State
   loading: boolean;
@@ -71,11 +79,38 @@ interface EntityProviderProps {
 
 export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
   const client = generateClient();
-  const [entities, setEntities] = useState<Entity[]>([]);
+  
+  // Get user from AuthContext
+  const { user, userRole } = useAuth();
+  
+  const [allEntities, setAllEntities] = useState<Entity[]>([]);
   const [currentEntity, setCurrentEntityState] = useState<Entity | null>(null);
   const [selectedEntities, setSelectedEntitiesState] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Extract user's entity permissions
+  // @ts-ignore - these fields exist on the user object from the backend
+  const userAllowedEntityIds: string[] | null = user?.allowedEntityIds || null;
+  // @ts-ignore
+  const userDefaultEntityId: string | null = user?.defaultEntityId || null;
+  
+  // SUPER_ADMIN and ADMIN have no restrictions
+  const isSuperUser = userRole === 'SUPER_ADMIN' || userRole === 'ADMIN';
+  const hasEntityRestrictions = !isSuperUser && userAllowedEntityIds !== null && userAllowedEntityIds.length > 0;
+
+  // Filter entities based on user permissions
+  const entities = useMemo(() => {
+    if (!hasEntityRestrictions) {
+      // No restrictions - return all entities
+      return allEntities;
+    }
+    
+    // Filter to only allowed entities
+    return allEntities.filter(entity => 
+      userAllowedEntityIds!.includes(entity.id)
+    );
+  }, [allEntities, hasEntityRestrictions, userAllowedEntityIds]);
 
   const refreshEntities = async () => {
     try {
@@ -83,7 +118,7 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
       setError(null);
       
       const response = await client.graphql({
-        query: listEntitiesShallow,  // Using custom shallow query
+        query: listEntitiesShallow,
         variables: {
           filter: { isActive: { eq: true } }
         }
@@ -94,52 +129,7 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
           .filter((e: Entity) => e && !e._deleted)
           .sort((a: Entity, b: Entity) => a.entityName.localeCompare(b.entityName));
         
-        setEntities(activeEntities);
-
-        // === MODIFICATION FOR DEFAULT ENTITY ID START ===
-        const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0";
-        const savedEntityId = localStorage.getItem('selectedEntityId');
-        const savedSelectedIds = JSON.parse(localStorage.getItem('selectedEntityIds') || '[]');
-        
-        let entityToSet: Entity | null = null;
-
-        // 1. Try to load from localStorage
-        if (savedEntityId) {
-          entityToSet = activeEntities.find((e: Entity) => e.id === savedEntityId) || null;
-        }
-
-        // 2. If not in localStorage, try to set default entity
-        if (!entityToSet) {
-          entityToSet = activeEntities.find((e: Entity) => e.id === DEFAULT_ENTITY_ID) || null;
-        }
-        
-        // 3. If default not found (or list is empty), fall back to first entity
-        if (!entityToSet && activeEntities.length > 0) {
-          entityToSet = activeEntities[0];
-        }
-
-        // 4. Set the state and localStorage
-        if (entityToSet) {
-          setCurrentEntityState(entityToSet);
-          localStorage.setItem('selectedEntityId', entityToSet.id);
-        } else {
-          // No active entities found
-          setCurrentEntityState(null);
-          localStorage.removeItem('selectedEntityId');
-        }
-        // === MODIFICATION FOR DEFAULT ENTITY ID END ===
-        
-        // Restore multi-entity selection
-        if (savedSelectedIds.length > 0) {
-          const savedSelected = activeEntities.filter((e: Entity) => 
-            savedSelectedIds.includes(e.id)
-          );
-          setSelectedEntitiesState(savedSelected);
-        } else {
-          // Default to all entities selected
-          setSelectedEntitiesState(activeEntities);
-          localStorage.setItem('selectedEntityIds', JSON.stringify(activeEntities.map((e: Entity) => e.id)));
-        }
+        setAllEntities(activeEntities);
       }
     } catch (err) {
       console.error('Error fetching entities:', err);
@@ -149,12 +139,100 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     }
   };
 
+  // Initialize entity selection when entities or user permissions change
+  useEffect(() => {
+    if (loading || entities.length === 0) return;
+
+    const savedEntityId = localStorage.getItem('selectedEntityId');
+    const savedSelectedIds = JSON.parse(localStorage.getItem('selectedEntityIds') || '[]');
+    
+    // === SINGLE ENTITY (currentEntity) ===
+    let entityToSet: Entity | null = null;
+
+    // 1. Priority: User's defaultEntityId (if set and user has access)
+    if (userDefaultEntityId) {
+      entityToSet = entities.find((e: Entity) => e.id === userDefaultEntityId) || null;
+    }
+
+    // 2. Fall back to localStorage (if user has access to it)
+    if (!entityToSet && savedEntityId) {
+      entityToSet = entities.find((e: Entity) => e.id === savedEntityId) || null;
+    }
+    
+    // 3. Fall back to first available entity
+    if (!entityToSet && entities.length > 0) {
+      entityToSet = entities[0];
+    }
+
+    // 4. Set the state and localStorage
+    if (entityToSet) {
+      setCurrentEntityState(entityToSet);
+      localStorage.setItem('selectedEntityId', entityToSet.id);
+    } else {
+      setCurrentEntityState(null);
+      localStorage.removeItem('selectedEntityId');
+    }
+    
+    // === MULTI-ENTITY (selectedEntities) ===
+    // Filter saved selections to only include entities user has access to
+    const validSavedIds = savedSelectedIds.filter((id: string) => 
+      entities.some(e => e.id === id)
+    );
+
+    if (validSavedIds.length > 0) {
+      // Restore valid saved selections
+      const savedSelected = entities.filter((e: Entity) => 
+        validSavedIds.includes(e.id)
+      );
+      setSelectedEntitiesState(savedSelected);
+    } else {
+      // Default to all available entities
+      setSelectedEntitiesState(entities);
+      localStorage.setItem('selectedEntityIds', JSON.stringify(entities.map((e: Entity) => e.id)));
+    }
+  }, [loading, entities, userDefaultEntityId]);
+
+  // Fetch entities on mount
   useEffect(() => {
     refreshEntities();
   }, []);
 
-  // Set single entity (for scraping)
+  // Re-filter when user changes (e.g., login/logout)
+  useEffect(() => {
+    if (user && allEntities.length > 0) {
+      // Entities list changed due to user permissions - reset selections if needed
+      const stillValidCurrent = currentEntity && entities.some(e => e.id === currentEntity.id);
+      if (!stillValidCurrent && entities.length > 0) {
+        // Current entity no longer valid - reset to default
+        const defaultEntity = userDefaultEntityId 
+          ? entities.find(e => e.id === userDefaultEntityId) 
+          : entities[0];
+        if (defaultEntity) {
+          setCurrentEntityState(defaultEntity);
+          localStorage.setItem('selectedEntityId', defaultEntity.id);
+        }
+      }
+
+      // Filter selected entities to only valid ones
+      const validSelected = selectedEntities.filter(se => 
+        entities.some(e => e.id === se.id)
+      );
+      if (validSelected.length !== selectedEntities.length) {
+        const newSelection = validSelected.length > 0 ? validSelected : entities;
+        setSelectedEntitiesState(newSelection);
+        localStorage.setItem('selectedEntityIds', JSON.stringify(newSelection.map(e => e.id)));
+      }
+    }
+  }, [user, entities.length]);
+
+  // Set single entity (for scraping/input pages)
   const setCurrentEntity = (entity: Entity) => {
+    // Verify user has access to this entity
+    if (hasEntityRestrictions && !userAllowedEntityIds!.includes(entity.id)) {
+      console.warn('User does not have access to entity:', entity.id);
+      return;
+    }
+    
     setCurrentEntityState(entity);
     localStorage.setItem('selectedEntityId', entity.id);
     
@@ -164,19 +242,29 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     }));
   };
 
-  // Set multiple entities (for viewing)
-  const setSelectedEntities = (entities: Entity[]) => {
-    setSelectedEntitiesState(entities);
-    localStorage.setItem('selectedEntityIds', JSON.stringify(entities.map(e => e.id)));
+  // Set multiple entities (for viewing pages)
+  const setSelectedEntities = (entitiesToSelect: Entity[]) => {
+    // Filter to only entities user has access to
+    const validEntities = hasEntityRestrictions
+      ? entitiesToSelect.filter(e => userAllowedEntityIds!.includes(e.id))
+      : entitiesToSelect;
+    
+    setSelectedEntitiesState(validEntities);
+    localStorage.setItem('selectedEntityIds', JSON.stringify(validEntities.map(e => e.id)));
     
     // Dispatch event for components that need to react
     window.dispatchEvent(new CustomEvent('selectedEntitiesChanged', { 
-      detail: entities 
+      detail: validEntities 
     }));
   };
 
   // Toggle entity in selection
   const toggleEntitySelection = (entity: Entity) => {
+    // Verify user has access
+    if (hasEntityRestrictions && !userAllowedEntityIds!.includes(entity.id)) {
+      return;
+    }
+    
     setSelectedEntitiesState(prev => {
       const isSelected = prev.some(e => e.id === entity.id);
       const newSelection = isSelected
@@ -194,7 +282,7 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     });
   };
 
-  // Select all entities
+  // Select all entities (that user has access to)
   const selectAllEntities = () => {
     setSelectedEntities(entities);
   };
@@ -206,6 +294,7 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
 
   const contextValue: EntityContextType = {
     entities,
+    allEntities,
     currentEntity,
     setCurrentEntity,
     selectedEntities,
@@ -213,6 +302,9 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     toggleEntitySelection,
     selectAllEntities,
     clearEntitySelection,
+    userAllowedEntityIds,
+    userDefaultEntityId,
+    hasEntityRestrictions,
     loading,
     error,
     refreshEntities,

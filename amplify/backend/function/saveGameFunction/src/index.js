@@ -23,7 +23,9 @@ Amplify Params - DO NOT EDIT */
 
 /**
  * ===================================================================
- * SAVEGAME LAMBDA FUNCTION - SIMPLIFIED FINANCIAL MODEL
+ * SAVEGAME LAMBDA FUNCTION - WITH SERIES RESOLUTION & QUERY KEYS
+ * 
+ * VERSION: 2.0.0 (with comprehensive series resolution)
  * 
  * ENTRY FIELD DEFINITIONS:
  * - totalInitialEntries: Number of unique initial buy-ins (no rebuys/addons)
@@ -31,6 +33,17 @@ Amplify Params - DO NOT EDIT */
  * - totalAddons: Number of addon entries  
  * - totalEntries: Total entries = totalInitialEntries + totalRebuys + totalAddons
  * - totalUniquePlayers: Unique players (may differ from totalInitialEntries in multi-flight)
+ * 
+ * QUERY OPTIMIZATION KEYS (computed on save):
+ * - gameDayOfWeek: Day of week for day-based queries
+ * - buyInBucket: Buy-in range for price-based queries
+ * - venueScheduleKey: Composite key for venue + day + variant
+ * - entityQueryKey: Composite key for entity-wide multi-dimension queries
+ * 
+ * SERIES RESOLUTION:
+ * - Uses TournamentSeriesTitle for template matching
+ * - Temporal matching: month → quarter → year
+ * - Auto-creates TournamentSeries when needed
  * 
  * SIMPLIFIED FINANCIAL MODEL:
  * ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -50,11 +63,6 @@ Amplify Params - DO NOT EDIT */
  * │ PROFIT (simple)                                                             │
  * │   gameProfit = rakeRevenue - guaranteeOverlayCost                          │
  * └─────────────────────────────────────────────────────────────────────────────┘
- * 
- * Examples ($200 buy-in, $24 rake, $5000 guarantee):
- * - 20 entries: $480 rake, $1480 shortfall → -$1000 profit (loss)
- * - 25 entries: $600 rake, $600 shortfall → $0 profit (breakeven)
- * - 30 entries: $720 rake, $0 shortfall → $720 profit
  * ===================================================================
  */
 
@@ -63,10 +71,23 @@ const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, QueryComm
 const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
 const { v4: uuidv4 } = require('uuid');
 
-// --- Lambda Monitoring ---
+// Series Resolution Module
+const {
+    resolveSeriesComprehensive,
+    updateSeriesDateRange,
+    incrementSeriesEventCount
+} = require('./series-resolution');
+
+// Lambda Monitoring
 const { LambdaMonitoring } = require('./lambda-monitoring');
 
-// Constants
+// Query Key Computation
+const { computeGameQueryKeys, shouldRecomputeQueryKeys } = require('./game-query-keys');
+
+// ===================================================================
+// CONSTANTS
+// ===================================================================
+
 const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
 const UNASSIGNED_VENUE_NAME = "Unassigned";
 const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0";
@@ -77,12 +98,15 @@ const LIVE_STATUSES = ['RUNNING', 'REGISTERING', 'CLOCK_STOPPED'];
 const SCHEDULED_STATUSES = ['SCHEDULED', 'INITIATING'];
 const INACTIVE_STATUSES = ['CANCELLED', 'NOT_IN_USE', 'NOT_PUBLISHED'];
 
-// Initialize clients
+// ===================================================================
+// CLIENT INITIALIZATION
+// ===================================================================
+
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 const sqsClient = new SQSClient({});
 
-// --- Lambda Monitoring Initialization ---
+// Lambda Monitoring Initialization
 const monitoring = new LambdaMonitoring('saveGameFunction', DEFAULT_ENTITY_ID);
 const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
 
@@ -447,7 +471,7 @@ const resolveVenue = async (venueRef, entityId) => {
 };
 
 // ===================================================================
-// SERIES RESOLUTION (condensed - same logic)
+// SERIES RESOLUTION
 // ===================================================================
 
 const getSeriesById = async (seriesId) => {
@@ -463,121 +487,70 @@ const getSeriesById = async (seriesId) => {
     }
 };
 
-const matchSeriesByTitleAndYear = async (seriesTitleId, year, venueId = null) => {
-    if (!seriesTitleId || !year) return null;
-    
-    try {
-        const result = await monitoredDdbDocClient.send(new QueryCommand({
-            TableName: getTableName('TournamentSeries'),
-            IndexName: 'byTournamentSeriesTitle',
-            KeyConditionExpression: 'tournamentSeriesTitleId = :titleId AND #year = :year',
-            ExpressionAttributeNames: { '#year': 'year' },
-            ExpressionAttributeValues: { ':titleId': seriesTitleId, ':year': year }
-        }));
-        
-        if (!result.Items || result.Items.length === 0) return null;
-        
-        if (venueId && result.Items.length > 1) {
-            const venueMatch = result.Items.find(s => s.venueId === venueId);
-            if (venueMatch) {
-                return { id: venueMatch.id, name: venueMatch.name, seriesCategory: venueMatch.seriesCategory, holidayType: venueMatch.holidayType, confidence: 1.0 };
-            }
-        }
-        
-        const series = result.Items[0];
-        return { id: series.id, name: series.name, seriesCategory: series.seriesCategory, holidayType: series.holidayType, confidence: result.Items.length === 1 ? 0.95 : 0.85 };
-    } catch (error) {
-        console.error('[SAVE-GAME] Error matching series:', error);
-        return null;
-    }
-};
-
-const matchSeriesByNameAndYear = async (seriesName, year, entityId) => {
-    if (!seriesName || !year) return null;
-    const normalizedName = seriesName.toLowerCase().trim();
-    
-    try {
-        let result = await monitoredDdbDocClient.send(new QueryCommand({
-            TableName: getTableName('TournamentSeries'),
-            IndexName: 'byYear',
-            KeyConditionExpression: '#year = :year',
-            ExpressionAttributeNames: { '#year': 'year' },
-            ExpressionAttributeValues: { ':year': year }
-        }));
-        
-        if (!result.Items || result.Items.length === 0) {
-            const scanResult = await monitoredDdbDocClient.send(new ScanCommand({
-                TableName: getTableName('TournamentSeries'),
-                FilterExpression: '#year = :year',
-                ExpressionAttributeNames: { '#year': 'year' },
-                ExpressionAttributeValues: { ':year': year }
-            }));
-            result.Items = scanResult.Items || [];
-        }
-        
-        let bestMatch = null;
-        let bestConfidence = 0;
-        
-        for (const series of result.Items) {
-            const seriesNameLower = series.name.toLowerCase().trim();
-            if (seriesNameLower === normalizedName) {
-                return { id: series.id, name: series.name, seriesCategory: series.seriesCategory, holidayType: series.holidayType, confidence: 1.0 };
-            }
-            if (seriesNameLower.includes(normalizedName) || normalizedName.includes(seriesNameLower)) {
-                if (0.85 > bestConfidence) { bestMatch = series; bestConfidence = 0.85; }
-            }
-            if (series.aliases && Array.isArray(series.aliases)) {
-                for (const alias of series.aliases) {
-                    if (alias.toLowerCase().trim() === normalizedName) {
-                        return { id: series.id, name: series.name, seriesCategory: series.seriesCategory, holidayType: series.holidayType, confidence: 0.95 };
-                    }
-                }
-            }
-        }
-        
-        if (bestMatch) {
-            return { id: bestMatch.id, name: bestMatch.name, seriesCategory: bestMatch.seriesCategory, holidayType: bestMatch.holidayType, confidence: bestConfidence };
-        }
-        return null;
-    } catch (error) {
-        console.error('[SAVE-GAME] Error matching series by name:', error);
-        return null;
-    }
-};
-
+/**
+ * Resolve series for a game - uses comprehensive resolution with auto-creation
+ */
 const resolveSeries = async (seriesRef, entityId, gameStartDateTime, venueId = null) => {
-    if (!seriesRef || !seriesRef.seriesName) {
-        return { tournamentSeriesId: null, seriesName: null, seriesCategory: null, holidayType: null, status: 'NOT_SERIES', confidence: 0 };
+    // Handle non-series case
+    if (!seriesRef || (!seriesRef.seriesName && !seriesRef.seriesTitleId)) {
+        return {
+            tournamentSeriesId: null,
+            seriesName: null,
+            seriesCategory: null,
+            holidayType: null,
+            status: 'NOT_SERIES',
+            confidence: 0,
+            wasCreated: false
+        };
     }
     
+    // If seriesId is directly provided (manual assignment), use it
     if (seriesRef.seriesId) {
         const series = await getSeriesById(seriesRef.seriesId);
         if (series) {
-            return { tournamentSeriesId: seriesRef.seriesId, seriesName: series.name, seriesCategory: series.seriesCategory, holidayType: series.holidayType, status: 'MANUALLY_ASSIGNED', confidence: 1.0 };
+            return {
+                tournamentSeriesId: seriesRef.seriesId,
+                seriesName: series.name,
+                seriesCategory: series.seriesCategory,
+                holidayType: series.holidayType,
+                status: 'MANUALLY_ASSIGNED',
+                confidence: 1.0,
+                wasCreated: false
+            };
         }
     }
     
-    const year = seriesRef.year || extractYearFromDate(gameStartDateTime);
-    if (!year) {
-        return { tournamentSeriesId: null, seriesName: seriesRef.seriesName, seriesCategory: null, holidayType: null, status: 'PENDING_ASSIGNMENT', confidence: 0, suggestedName: seriesRef.seriesName };
+    // Use comprehensive resolution with temporal matching and auto-creation
+    try {
+        const result = await resolveSeriesComprehensive(
+            seriesRef,
+            entityId,
+            gameStartDateTime,
+            venueId,
+            monitoredDdbDocClient,
+            getTableName,
+            monitoring,
+            {
+                autoCreate: true  // Enable auto-creation of TournamentSeries
+            }
+        );
+        
+        return result;
+    } catch (error) {
+        console.error('[SAVE-GAME] Error in comprehensive series resolution:', error);
+        
+        // Fallback to basic resolution
+        return {
+            tournamentSeriesId: null,
+            seriesName: seriesRef.seriesName,
+            seriesCategory: null,
+            holidayType: null,
+            status: 'PENDING_ASSIGNMENT',
+            confidence: 0,
+            wasCreated: false,
+            error: error.message
+        };
     }
-    
-    if (seriesRef.seriesTitleId) {
-        const matched = await matchSeriesByTitleAndYear(seriesRef.seriesTitleId, year, venueId);
-        if (matched) {
-            return { tournamentSeriesId: matched.id, seriesName: matched.name, seriesCategory: matched.seriesCategory, holidayType: matched.holidayType, status: 'AUTO_ASSIGNED', confidence: matched.confidence };
-        }
-    }
-    
-    if (seriesRef.seriesName) {
-        const matched = await matchSeriesByNameAndYear(seriesRef.seriesName, year, entityId);
-        if (matched) {
-            return { tournamentSeriesId: matched.id, seriesName: matched.name, seriesCategory: matched.seriesCategory, holidayType: matched.holidayType, status: 'AUTO_ASSIGNED', confidence: matched.confidence };
-        }
-        return { tournamentSeriesId: null, seriesName: seriesRef.seriesName, seriesCategory: null, holidayType: null, status: 'PENDING_ASSIGNMENT', confidence: 0, suggestedName: seriesRef.seriesName, year };
-    }
-    
-    return { tournamentSeriesId: null, seriesName: seriesRef.seriesName || 'Unknown Series', seriesCategory: null, holidayType: null, status: 'UNASSIGNED', confidence: 0 };
 };
 
 // ===================================================================
@@ -777,6 +750,10 @@ const createOrUpdateGameCost = async (gameId, venueId, entityId, gameStartDateTi
     }
 };
 
+// ===================================================================
+// CREATE GAME (WITH QUERY KEYS)
+// ===================================================================
+
 const createGame = async (input, venueResolution, seriesResolution) => {
     const gameId = uuidv4();
     const now = new Date().toISOString();
@@ -787,10 +764,31 @@ const createGame = async (input, venueResolution, seriesResolution) => {
     const effectiveVenueFee = input.game.venueFee ?? venueResolution.venueFee ?? 0;
     const financials = calculateFinancials(input.game, effectiveVenueFee);
 
+    // Prepare game start date
+    const gameStartDateTime = ensureISODate(input.game.gameStartDateTime);
+
+    // Compute query optimization keys
+    const isRegular = input.game.isRegular || false;
+    const isSeries = input.game.isSeries || false;
+    const isSatellite = input.game.isSatellite || false;
+    
+    const queryKeys = computeGameQueryKeys({
+        gameStartDateTime: gameStartDateTime,
+        buyIn: input.game.buyIn || 0,
+        gameVariant: input.game.gameVariant || 'NLHE',
+        venueId: venueResolution.venueId,
+        entityId: input.source.entityId,
+        isRegular,
+        isSeries,
+        isSatellite
+    });
+
+    console.log(`[SAVE-GAME] Computed query keys:`, queryKeys);
+
     const game = {
         id: gameId,
         name: input.game.name, gameType: input.game.gameType, gameVariant: input.game.gameVariant || 'NLHE', gameStatus: input.game.gameStatus,
-        gameStartDateTime: ensureISODate(input.game.gameStartDateTime), gameEndDateTime: input.game.gameEndDateTime ? ensureISODate(input.game.gameEndDateTime) : null,
+        gameStartDateTime: gameStartDateTime, gameEndDateTime: input.game.gameEndDateTime ? ensureISODate(input.game.gameEndDateTime) : null,
         registrationStatus: input.game.registrationStatus || 'N_A', gameFrequency: input.game.gameFrequency || 'UNKNOWN',
         buyIn: input.game.buyIn || 0, rake: input.game.rake || 0, venueFee: effectiveVenueFee,
         hasGuarantee: input.game.hasGuarantee || false, guaranteeAmount: input.game.guaranteeAmount || 0, startingStack: input.game.startingStack || 0,
@@ -805,20 +803,36 @@ const createGame = async (input, venueResolution, seriesResolution) => {
         prizepoolPaid: input.game.prizepoolPaid || 0, prizepoolCalculated: input.game.prizepoolCalculated || 0,
         playersRemaining: input.game.playersRemaining || null, totalChipsInPlay: input.game.totalChipsInPlay || null, averagePlayerStack: input.game.averagePlayerStack || null,
         // Categorization
-        tournamentType: input.game.tournamentType, isSeries: input.game.isSeries || false, isSatellite: input.game.isSatellite || false, isRegular: input.game.isRegular || false,
+        tournamentType: input.game.tournamentType, isSeries: isSeries, isSatellite: isSatellite, isRegular: isRegular,
         gameTags: input.game.gameTags || [], totalDuration: input.game.totalDuration || null, levels: input.game.levels || [],
         // Source
         sourceUrl: input.source.type === 'SCRAPE' ? input.source.sourceId : null, tournamentId: input.game.tournamentId, wasEdited: input.source.wasEdited || false,
         // Venue
         venueId: venueResolution.venueId, venueAssignmentStatus: venueResolution.status, suggestedVenueName: venueResolution.suggestedName || null,
         venueAssignmentConfidence: venueResolution.confidence, requiresVenueAssignment: venueResolution.venueId === UNASSIGNED_VENUE_ID,
-        // Series
-        ...(seriesResolution.tournamentSeriesId ? { tournamentSeriesId: seriesResolution.tournamentSeriesId, seriesCategory: seriesResolution.seriesCategory, holidayType: seriesResolution.holidayType } : {}),
+        // Series (comprehensive)
+        ...(seriesResolution.tournamentSeriesId ? { 
+            tournamentSeriesId: seriesResolution.tournamentSeriesId, 
+            seriesCategory: seriesResolution.seriesCategory, 
+            holidayType: seriesResolution.holidayType,
+            seriesTitleId: seriesResolution.seriesTitleId 
+        } : {}),
         seriesName: seriesResolution.seriesName || input.game.seriesName, seriesAssignmentStatus: seriesResolution.status,
         seriesAssignmentConfidence: seriesResolution.confidence, suggestedSeriesName: seriesResolution.suggestedName,
+        seriesWasAutoCreated: seriesResolution.wasCreated || false,
         isMainEvent: input.series?.isMainEvent || input.game.isMainEvent || false, eventNumber: input.series?.eventNumber || input.game.eventNumber || null,
         dayNumber: input.series?.dayNumber || input.game.dayNumber || null, flightLetter: input.series?.flightLetter || input.game.flightLetter || null,
         finalDay: input.series?.finalDay || input.game.finalDay || false,
+        
+        // Query optimization keys
+        gameDayOfWeek: queryKeys.gameDayOfWeek,
+        buyInBucket: queryKeys.buyInBucket,
+        venueScheduleKey: queryKeys.venueScheduleKey,
+        entityQueryKey: queryKeys.entityQueryKey,
+        // Game-type-aware keys (for filtered queries by game type)
+        venueGameTypeKey: queryKeys.venueGameTypeKey,
+        entityGameTypeKey: queryKeys.entityGameTypeKey,
+        
         // Entity & timestamps
         entityId: input.source.entityId, createdAt: now, updatedAt: now, _version: 1, _lastChangedAt: timestamp, __typename: 'Game'
     };
@@ -831,11 +845,20 @@ const createGame = async (input, venueResolution, seriesResolution) => {
     await monitoredDdbDocClient.send(new PutCommand({ TableName: getTableName('Game'), Item: game }));
     console.log(`[SAVE-GAME] ✅ Created game: ${gameId}${input.source.wasEdited ? ' (with edits)' : ''}`);
 
+    // Log if series was auto-created
+    if (seriesResolution.wasCreated) {
+        console.log(`[SAVE-GAME] 📦 Auto-created series: ${seriesResolution.seriesName} (${seriesResolution.tournamentSeriesId})`);
+    }
+
     await createOrUpdateGameCost(gameId, venueResolution.venueId, input.source.entityId, game.gameStartDateTime, game.totalInitialEntries || 0, game.totalEntries || 0);
     await createOrUpdateGameFinancialSnapshot(game, input.source.entityId, venueResolution.venueId);
 
-    return { gameId, game, wasNewGame: true, fieldsUpdated: [] };
+    return { gameId, game, wasNewGame: true, fieldsUpdated: [], seriesWasCreated: seriesResolution.wasCreated || false };
 };
+
+// ===================================================================
+// UPDATE GAME (WITH QUERY KEYS)
+// ===================================================================
 
 const updateGame = async (existingGame, input, venueResolution, seriesResolution) => {
     const now = new Date().toISOString();
@@ -860,6 +883,7 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     checkAndUpdate('hasGuarantee', input.game.hasGuarantee, existingGame.hasGuarantee);
     checkAndUpdate('guaranteeAmount', input.game.guaranteeAmount, existingGame.guaranteeAmount);
     checkAndUpdate('startingStack', input.game.startingStack, existingGame.startingStack);
+    checkAndUpdate('gameVariant', input.game.gameVariant, existingGame.gameVariant);
     if (effectiveVenueFee !== existingGame.venueFee) { updateFields.venueFee = effectiveVenueFee; fieldsUpdated.push('venueFee'); }
 
     // Simplified financials
@@ -900,13 +924,15 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     }
 
     // Series
-    if (seriesResolution.confidence > (existingGame.seriesAssignmentConfidence || 0) || seriesResolution.status === 'MANUALLY_ASSIGNED') {
+    if (seriesResolution.confidence > (existingGame.seriesAssignmentConfidence || 0) || seriesResolution.status === 'MANUALLY_ASSIGNED' || seriesResolution.status === 'AUTO_CREATED') {
         checkAndUpdate('tournamentSeriesId', seriesResolution.tournamentSeriesId, existingGame.tournamentSeriesId);
         checkAndUpdate('seriesName', seriesResolution.seriesName, existingGame.seriesName);
         checkAndUpdate('seriesCategory', seriesResolution.seriesCategory, existingGame.seriesCategory);
         checkAndUpdate('holidayType', seriesResolution.holidayType, existingGame.holidayType);
         checkAndUpdate('seriesAssignmentStatus', seriesResolution.status, existingGame.seriesAssignmentStatus);
         checkAndUpdate('seriesAssignmentConfidence', seriesResolution.confidence, existingGame.seriesAssignmentConfidence);
+        if (seriesResolution.seriesTitleId) checkAndUpdate('seriesTitleId', seriesResolution.seriesTitleId, existingGame.seriesTitleId);
+        if (seriesResolution.wasCreated) checkAndUpdate('seriesWasAutoCreated', true, existingGame.seriesWasAutoCreated);
         if (seriesResolution.suggestedName) checkAndUpdate('suggestedSeriesName', seriesResolution.suggestedName, existingGame.suggestedSeriesName);
     }
 
@@ -915,6 +941,64 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     checkAndUpdate('dayNumber', input.series?.dayNumber || input.game.dayNumber, existingGame.dayNumber);
     checkAndUpdate('flightLetter', input.series?.flightLetter || input.game.flightLetter, existingGame.flightLetter);
     checkAndUpdate('finalDay', input.series?.finalDay || input.game.finalDay, existingGame.finalDay);
+
+    // Determine current game type flags
+    const currentIsRegular = updateFields.isRegular ?? existingGame.isRegular ?? false;
+    const currentIsSeries = updateFields.isSeries ?? existingGame.isSeries ?? false;
+    const currentIsSatellite = updateFields.isSatellite ?? existingGame.isSatellite ?? false;
+
+    // Check if query keys are missing (legacy records) or need recomputation
+    const queryKeysMissing = !existingGame.venueScheduleKey || !existingGame.entityQueryKey || 
+                             !existingGame.gameDayOfWeek || !existingGame.buyInBucket;
+    const gameTypeKeysMissing = !existingGame.venueGameTypeKey || !existingGame.entityGameTypeKey;
+    
+    // Recompute query keys if relevant fields changed OR if keys are missing
+    if (shouldRecomputeQueryKeys(fieldsUpdated) || queryKeysMissing || gameTypeKeysMissing) {
+        const reason = queryKeysMissing ? 'missing query keys (legacy record)' : 
+            gameTypeKeysMissing ? 'missing game type keys' :
+            `changes in: ${fieldsUpdated.filter(f => ['gameStartDateTime', 'buyIn', 'gameVariant', 'venueId', 'entityId', 'isRegular', 'isSeries', 'isSatellite'].includes(f)).join(', ')}`;
+        console.log(`[SAVE-GAME] Computing query keys - ${reason}`);
+        
+        const queryKeys = computeGameQueryKeys({
+            gameStartDateTime: updateFields.gameStartDateTime || existingGame.gameStartDateTime,
+            buyIn: updateFields.buyIn ?? existingGame.buyIn ?? 0,
+            gameVariant: updateFields.gameVariant || existingGame.gameVariant || 'NLHE',
+            venueId: updateFields.venueId || existingGame.venueId,
+            entityId: input.source.entityId || existingGame.entityId,
+            isRegular: currentIsRegular,
+            isSeries: currentIsSeries,
+            isSatellite: currentIsSatellite
+        });
+
+        console.log(`[SAVE-GAME] Computed query keys:`, queryKeys);
+
+        if (queryKeys.gameDayOfWeek !== existingGame.gameDayOfWeek) {
+            updateFields.gameDayOfWeek = queryKeys.gameDayOfWeek;
+            fieldsUpdated.push('gameDayOfWeek');
+        }
+        if (queryKeys.buyInBucket !== existingGame.buyInBucket) {
+            updateFields.buyInBucket = queryKeys.buyInBucket;
+            fieldsUpdated.push('buyInBucket');
+        }
+        if (queryKeys.venueScheduleKey !== existingGame.venueScheduleKey) {
+            updateFields.venueScheduleKey = queryKeys.venueScheduleKey;
+            fieldsUpdated.push('venueScheduleKey');
+        }
+        if (queryKeys.entityQueryKey !== existingGame.entityQueryKey) {
+            updateFields.entityQueryKey = queryKeys.entityQueryKey;
+            fieldsUpdated.push('entityQueryKey');
+        }
+        
+        // Game-type-aware keys
+        if (queryKeys.venueGameTypeKey !== existingGame.venueGameTypeKey) {
+            updateFields.venueGameTypeKey = queryKeys.venueGameTypeKey;
+            fieldsUpdated.push('venueGameTypeKey');
+        }
+        if (queryKeys.entityGameTypeKey !== existingGame.entityGameTypeKey) {
+            updateFields.entityGameTypeKey = queryKeys.entityGameTypeKey;
+            fieldsUpdated.push('entityGameTypeKey');
+        }
+    }
 
     if (input.source.wasEdited) {
         updateFields.wasEdited = true;
@@ -957,7 +1041,7 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     await createOrUpdateGameCost(updatedGame.id, venueResolution.venueId, input.source.entityId, updatedGame.gameStartDateTime, updatedGame.totalInitialEntries || 0, updatedGame.totalEntries || 0);
     await createOrUpdateGameFinancialSnapshot(updatedGame, input.source.entityId, venueResolution.venueId);
 
-    return { gameId: updatedGame.id, game: updatedGame, wasNewGame: false, fieldsUpdated };
+    return { gameId: updatedGame.id, game: updatedGame, wasNewGame: false, fieldsUpdated, seriesWasCreated: seriesResolution.wasCreated || false };
 };
 
 // ===================================================================
@@ -1080,7 +1164,7 @@ const updatePlayerEntries = async (game, input) => {
         return {
             PutRequest: {
                 Item: {
-                    id: entryId, playerId, gameId: game.id, venueId: game.venueId, status: 'PLAYING',
+                    id: entryId, playerId, gameId: game.id, venueId: game.venueId, entityId: game.entityId, status: 'PLAYING',
                     registrationTime: now, gameStartDateTime: game.gameStartDateTime,
                     createdAt: now, updatedAt: now, _version: 1, _lastChangedAt: timestamp, __typename: 'PlayerEntry'
                 }
@@ -1124,10 +1208,17 @@ exports.handler = async (event) => {
         const venueResolution = await resolveVenue(input.venue, input.source.entityId);
         console.log(`[SAVE-GAME] Venue resolved:`, venueResolution);
 
+        // Series resolution - now with comprehensive matching and auto-creation
         const seriesResolution = input.game.isSeries && input.series
             ? await resolveSeries(input.series, input.source.entityId, input.game.gameStartDateTime, venueResolution.venueId)
-            : { tournamentSeriesId: null, seriesName: null, seriesCategory: null, holidayType: null, status: 'NOT_SERIES', confidence: 0 };
+            : { tournamentSeriesId: null, seriesName: null, seriesCategory: null, holidayType: null, status: 'NOT_SERIES', confidence: 0, wasCreated: false };
+        
         console.log(`[SAVE-GAME] Series resolved:`, seriesResolution);
+        
+        // Log if a new series was created
+        if (seriesResolution.wasCreated) {
+            console.log(`[SAVE-GAME] 📦 New TournamentSeries created: ${seriesResolution.seriesName} (${seriesResolution.tournamentSeriesId})`);
+        }
 
         const existingGame = await findExistingGame(input);
 
@@ -1140,11 +1231,13 @@ exports.handler = async (event) => {
                                input.game.prizepoolPaid !== existingGame.prizepoolPaid ||
                                input.game.prizepoolCalculated !== existingGame.prizepoolCalculated ||
                                venueResolution.venueFee !== existingGame.venueFee ||
-                               input.source.wasEdited;
+                               input.source.wasEdited ||
+                               // Also check for series changes
+                               seriesResolution.tournamentSeriesId !== existingGame.tournamentSeriesId;
 
             if (!hasChanges) {
                 console.log(`[SAVE-GAME] Game exists with no changes, skipping`);
-                saveResult = { gameId: existingGame.id, game: existingGame, wasNewGame: false, fieldsUpdated: [] };
+                saveResult = { gameId: existingGame.id, game: existingGame, wasNewGame: false, fieldsUpdated: [], seriesWasCreated: false };
             } else {
                 saveResult = await updateGame(existingGame, input, venueResolution, seriesResolution);
             }
@@ -1154,7 +1247,30 @@ exports.handler = async (event) => {
             saveResult = await createGame(input, venueResolution, seriesResolution);
         }
 
-        const { gameId, game, wasNewGame, fieldsUpdated } = saveResult;
+        const { gameId, game, wasNewGame, fieldsUpdated, seriesWasCreated } = saveResult;
+
+        // Update series metadata (date range, event count)
+        if (seriesResolution.tournamentSeriesId) {
+            try {
+                await updateSeriesDateRange(
+                    monitoredDdbDocClient,
+                    getTableName('TournamentSeries'),
+                    seriesResolution.tournamentSeriesId,
+                    game.gameStartDateTime
+                );
+                
+                // Increment event count only for new games
+                if (wasNewGame) {
+                    await incrementSeriesEventCount(
+                        monitoredDdbDocClient,
+                        getTableName('TournamentSeries'),
+                        seriesResolution.tournamentSeriesId
+                    );
+                }
+            } catch (seriesUpdateError) {
+                console.warn('[SAVE-GAME] Non-critical: Failed to update series metadata:', seriesUpdateError.message);
+            }
+        }
 
         if (input.source.type === 'SCRAPE') {
             await updateScrapeURL(input.source.sourceId, gameId, game.gameStatus, input.options?.doNotScrape, input.source.wasEdited);
@@ -1170,13 +1286,22 @@ exports.handler = async (event) => {
         const action = wasNewGame ? 'CREATED' : fieldsUpdated.length > 0 ? 'UPDATED' : 'SKIPPED';
         const messageDetail = input.source.wasEdited ? ' (with edited data)' : '';
 
-        monitoring.trackOperation('HANDLER_COMPLETE', 'Handler', action, { gameId, entityId: input.source.entityId, wasEdited: input.source.wasEdited, fieldsUpdated: fieldsUpdated.length, venueFee: venueResolution.venueFee });
+        monitoring.trackOperation('HANDLER_COMPLETE', 'Handler', action, { gameId, entityId: input.source.entityId, wasEdited: input.source.wasEdited, fieldsUpdated: fieldsUpdated.length, venueFee: venueResolution.venueFee, seriesWasCreated });
 
         return {
             success: true, gameId, action, message: `Game ${action.toLowerCase()} successfully${messageDetail}`,
             warnings: validation.warnings, playerProcessingQueued, playerProcessingReason: pdpDecision.reason,
             venueAssignment: { venueId: venueResolution.venueId, venueName: venueResolution.venueName, venueFee: venueResolution.venueFee, status: venueResolution.status, confidence: venueResolution.confidence },
-            seriesAssignment: { tournamentSeriesId: seriesResolution.tournamentSeriesId, seriesName: seriesResolution.seriesName, seriesCategory: seriesResolution.seriesCategory, holidayType: seriesResolution.holidayType, status: seriesResolution.status, confidence: seriesResolution.confidence },
+            seriesAssignment: { 
+                tournamentSeriesId: seriesResolution.tournamentSeriesId, 
+                seriesName: seriesResolution.seriesName, 
+                seriesCategory: seriesResolution.seriesCategory, 
+                holidayType: seriesResolution.holidayType, 
+                status: seriesResolution.status, 
+                confidence: seriesResolution.confidence,
+                wasCreated: seriesWasCreated,
+                seriesTitleId: seriesResolution.seriesTitleId
+            },
             fieldsUpdated, wasEdited: input.source.wasEdited || false
         };
 

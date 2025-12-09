@@ -12,9 +12,29 @@ import { SeriesInstanceManager } from '../components/series/SeriesInstanceManage
 import { PageWrapper, PageGrid, PageCard } from '../components/layout/PageWrapper';
 import { useEntity } from '../contexts/EntityContext';
 
+// Custom query that only fetches venue fields we need (no nested games)
+const listVenuesSimple = /* GraphQL */ `
+    query ListVenuesSimple(
+        $filter: ModelVenueFilterInput
+        $limit: Int
+        $nextToken: String
+    ) {
+        listVenues(filter: $filter, limit: $limit, nextToken: $nextToken) {
+            items {
+                id
+                name
+                entityId
+                _version
+                _deleted
+            }
+            nextToken
+        }
+    }
+`;
+
 export const SeriesManagementPage = () => {
     const client = generateClient();
-    const { selectedEntities } = useEntity(); // ✅ Add entity context
+    const { selectedEntities } = useEntity();
     
     const [seriesTitles, setSeriesTitles] = useState<APITypes.TournamentSeriesTitle[]>([]);
     const [seriesInstances, setSeriesInstances] = useState<APITypes.TournamentSeries[]>([]);
@@ -29,7 +49,7 @@ export const SeriesManagementPage = () => {
                 _deleted: { ne: true }
             };
 
-            // ✅ ALWAYS fetch ALL series titles (they're global templates)
+            // ALWAYS fetch ALL series titles (they're global templates)
             const titlesData = await client.graphql({
                 query: queries.listTournamentSeriesTitles,
                 variables: { filter: baseFilter }
@@ -54,12 +74,13 @@ export const SeriesManagementPage = () => {
                 or: entityIds.map(id => ({ entityId: { eq: id } }))
             };
 
-            // Fetch venues (filtered by entity)
+            // Fetch venues using simple query (no nested games)
             const venuesData = await client.graphql({
-                query: queries.listVenues,
-                variables: { filter: venueFilter }
-            });
-            const venueItems = (venuesData.data.listVenues?.items || []) as APITypes.Venue[];
+                query: listVenuesSimple,
+                variables: { filter: venueFilter, limit: 500 }
+            }) as { data: { listVenues: { items: APITypes.Venue[] } } };
+            
+            const venueItems = (venuesData.data.listVenues?.items || []).filter(v => !v._deleted) as APITypes.Venue[];
             const venueIds = venueItems.map(v => v.id);
             setVenues(venueItems);
 
@@ -238,7 +259,7 @@ export const SeriesManagementPage = () => {
         );
     }
 
-    // ✅ Show message if no entities selected
+    // Show message if no entities selected
     if (selectedEntities.length === 0) {
         return (
             <PageWrapper title="Series Management" maxWidth="7xl">

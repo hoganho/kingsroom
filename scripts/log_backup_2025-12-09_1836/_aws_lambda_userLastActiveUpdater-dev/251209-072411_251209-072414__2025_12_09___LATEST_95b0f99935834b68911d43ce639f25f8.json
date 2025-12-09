@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": 1765265051700,
+    "message": "INIT_START Runtime Version: nodejs:22.v68\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:685b5bdd1a5972cbde591187200f592fbd417cd448d71e500b10e41759692493\n",
+    "ingestionTime": 1765265057684
+  },
+  {
+    "timestamp": 1765265052189,
+    "message": "START RequestId: abc18c9b-804a-4623-8371-fd9742aa6953 Version: $LATEST\n",
+    "ingestionTime": 1765265057684
+  },
+  {
+    "timestamp": 1765265052198,
+    "message": "2025-12-09T07:24:12.198Z\tabc18c9b-804a-4623-8371-fd9742aa6953\tINFO\tReceived event: {\n  \"Records\": [\n    {\n      \"eventID\": \"3f8f49af18b045d80fe363a57f8001e2\",\n      \"eventName\": \"INSERT\",\n      \"eventVersion\": \"1.1\",\n      \"eventSource\": \"aws:dynamodb\",\n      \"awsRegion\": \"ap-southeast-2\",\n      \"dynamodb\": {\n        \"ApproximateCreationDateTime\": 1765265051,\n        \"Keys\": {\n          \"id\": {\n            \"S\": \"e6f1fe5c-3987-4de9-a9e0-f4debbe386d0\"\n          }\n        },\n        \"NewImage\": {\n          \"createdAt\": {\n            \"S\": \"2025-12-09T07:24:10.998Z\"\n          },\n          \"_lastChangedAt\": {\n            \"N\": \"1765265051026\"\n          },\n          \"resource\": {\n            \"S\": \"/settings/game-management\"\n          },\n          \"__typename\": {\n            \"S\": \"UserAuditLog\"\n          },\n          \"action\": {\n            \"S\": \"VIEW_PAGE\"\n          },\n          \"details\": {\n            \"NULL\": true\n          },\n          \"userAgent\": {\n            \"S\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"\n          },\n          \"id\": {\n            \"S\": \"e6f1fe5c-3987-4de9-a9e0-f4debbe386d0\"\n          },\n          \"_version\": {\n            \"N\": \"1\"\n          },\n          \"userId\": {\n            \"S\": \"39ce5458-e0d1-7094-efba-ccb13d75c186\"\n          },\n          \"updatedAt\": {\n            \"S\": \"2025-12-09T07:24:10.998Z\"\n          }\n        },\n        \"SequenceNumber\": \"37589700001118154385361668\",\n        \"SizeBytes\": 420,\n        \"StreamViewType\": \"NEW_AND_OLD_IMAGES\"\n      },\n      \"eventSourceARN\": \"arn:aws:dynamodb:ap-southeast-2:495599763953:table/UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev/stream/2025-12-01T06:31:14.413\"\n    }\n  ]\n}\n",
+    "ingestionTime": 1765265057684
+  },
+  {
+    "timestamp": 1765265053821,
+    "message": "2025-12-09T07:24:13.821Z\tabc18c9b-804a-4623-8371-fd9742aa6953\tINFO\tUpdated lastActiveAt for user 39ce5458-e0d1-7094-efba-ccb13d75c186\n",
+    "ingestionTime": 1765265057684
+  },
+  {
+    "timestamp": 1765265053821,
+    "message": "2025-12-09T07:24:13.821Z\tabc18c9b-804a-4623-8371-fd9742aa6953\tINFO\tUpdate summary: 1 updated, 0 throttled, 0 failed\n",
+    "ingestionTime": 1765265057684
+  },
+  {
+    "timestamp": 1765265054040,
+    "message": "END RequestId: abc18c9b-804a-4623-8371-fd9742aa6953\n",
+    "ingestionTime": 1765265057684
+  },
+  {
+    "timestamp": 1765265054040,
+    "message": "REPORT RequestId: abc18c9b-804a-4623-8371-fd9742aa6953\tDuration: 1850.89 ms\tBilled Duration: 2336 ms\tMemory Size: 128 MB\tMax Memory Used: 100 MB\tInit Duration: 484.92 ms\t\n",
+    "ingestionTime": 1765265057684
+  }
+]

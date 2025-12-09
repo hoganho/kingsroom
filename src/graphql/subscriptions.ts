@@ -451,6 +451,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             _lastChangedAt
             __typename
           }
+          canonicalVenueId
           assets {
             nextToken
             startedAt
@@ -610,6 +611,12 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             missingFlightCount
             expectedTotalEntries
             actualCalculatedUniquePlayers
+            gameDayOfWeek
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
             sourceUrl
             tournamentId
             originalScrapedData
@@ -647,6 +654,12 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           missingFlightCount
           expectedTotalEntries
           actualCalculatedUniquePlayers
+          gameDayOfWeek
+          buyInBucket
+          venueScheduleKey
+          venueGameTypeKey
+          entityQueryKey
+          entityGameTypeKey
           sourceUrl
           tournamentId
           originalScrapedData
@@ -673,6 +686,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -694,7 +708,6 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             status
             startDate
             endDate
-            events
             numberOfEvents
             guaranteedPrizepool
             estimatedPrizepool
@@ -826,6 +839,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -920,6 +934,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -1410,6 +1425,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             _lastChangedAt
             __typename
           }
+          canonicalVenueId
           assets {
             nextToken
             startedAt
@@ -1569,6 +1585,12 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             missingFlightCount
             expectedTotalEntries
             actualCalculatedUniquePlayers
+            gameDayOfWeek
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
             sourceUrl
             tournamentId
             originalScrapedData
@@ -1606,6 +1628,12 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           missingFlightCount
           expectedTotalEntries
           actualCalculatedUniquePlayers
+          gameDayOfWeek
+          buyInBucket
+          venueScheduleKey
+          venueGameTypeKey
+          entityQueryKey
+          entityGameTypeKey
           sourceUrl
           tournamentId
           originalScrapedData
@@ -1632,6 +1660,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -1653,7 +1682,6 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             status
             startDate
             endDate
-            events
             numberOfEvents
             guaranteedPrizepool
             estimatedPrizepool
@@ -1785,6 +1813,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -1879,6 +1908,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -2385,6 +2415,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             _lastChangedAt
             __typename
           }
+          canonicalVenueId
           assets {
             nextToken
             startedAt
@@ -2544,6 +2575,12 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             missingFlightCount
             expectedTotalEntries
             actualCalculatedUniquePlayers
+            gameDayOfWeek
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
             sourceUrl
             tournamentId
             originalScrapedData
@@ -2581,6 +2618,12 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           missingFlightCount
           expectedTotalEntries
           actualCalculatedUniquePlayers
+          gameDayOfWeek
+          buyInBucket
+          venueScheduleKey
+          venueGameTypeKey
+          entityQueryKey
+          entityGameTypeKey
           sourceUrl
           tournamentId
           originalScrapedData
@@ -2607,6 +2650,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -2628,7 +2672,6 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             status
             startDate
             endDate
-            events
             numberOfEvents
             guaranteedPrizepool
             estimatedPrizepool
@@ -2760,6 +2803,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -2854,6 +2898,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -3347,6 +3392,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             _lastChangedAt
             __typename
           }
+          canonicalVenueId
           assets {
             nextToken
             startedAt
@@ -3506,6 +3552,12 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             missingFlightCount
             expectedTotalEntries
             actualCalculatedUniquePlayers
+            gameDayOfWeek
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
             sourceUrl
             tournamentId
             originalScrapedData
@@ -3543,6 +3595,12 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           missingFlightCount
           expectedTotalEntries
           actualCalculatedUniquePlayers
+          gameDayOfWeek
+          buyInBucket
+          venueScheduleKey
+          venueGameTypeKey
+          entityQueryKey
+          entityGameTypeKey
           sourceUrl
           tournamentId
           originalScrapedData
@@ -3569,6 +3627,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -3590,7 +3649,6 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             status
             startDate
             endDate
-            events
             numberOfEvents
             guaranteedPrizepool
             estimatedPrizepool
@@ -3722,6 +3780,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -3816,6 +3875,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -4309,6 +4369,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             _lastChangedAt
             __typename
           }
+          canonicalVenueId
           assets {
             nextToken
             startedAt
@@ -4468,6 +4529,12 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             missingFlightCount
             expectedTotalEntries
             actualCalculatedUniquePlayers
+            gameDayOfWeek
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
             sourceUrl
             tournamentId
             originalScrapedData
@@ -4505,6 +4572,12 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           missingFlightCount
           expectedTotalEntries
           actualCalculatedUniquePlayers
+          gameDayOfWeek
+          buyInBucket
+          venueScheduleKey
+          venueGameTypeKey
+          entityQueryKey
+          entityGameTypeKey
           sourceUrl
           tournamentId
           originalScrapedData
@@ -4531,6 +4604,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -4552,7 +4626,6 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             status
             startDate
             endDate
-            events
             numberOfEvents
             guaranteedPrizepool
             estimatedPrizepool
@@ -4684,6 +4757,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -4778,6 +4852,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -5268,6 +5343,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             _lastChangedAt
             __typename
           }
+          canonicalVenueId
           assets {
             nextToken
             startedAt
@@ -5427,6 +5503,12 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             missingFlightCount
             expectedTotalEntries
             actualCalculatedUniquePlayers
+            gameDayOfWeek
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
             sourceUrl
             tournamentId
             originalScrapedData
@@ -5464,6 +5546,12 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           missingFlightCount
           expectedTotalEntries
           actualCalculatedUniquePlayers
+          gameDayOfWeek
+          buyInBucket
+          venueScheduleKey
+          venueGameTypeKey
+          entityQueryKey
+          entityGameTypeKey
           sourceUrl
           tournamentId
           originalScrapedData
@@ -5490,6 +5578,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -5511,7 +5600,6 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             status
             startDate
             endDate
-            events
             numberOfEvents
             guaranteedPrizepool
             estimatedPrizepool
@@ -5643,6 +5731,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -5737,6 +5826,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -6240,6 +6330,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             _lastChangedAt
             __typename
           }
+          canonicalVenueId
           assets {
             nextToken
             startedAt
@@ -6399,6 +6490,12 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             missingFlightCount
             expectedTotalEntries
             actualCalculatedUniquePlayers
+            gameDayOfWeek
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
             sourceUrl
             tournamentId
             originalScrapedData
@@ -6436,6 +6533,12 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           missingFlightCount
           expectedTotalEntries
           actualCalculatedUniquePlayers
+          gameDayOfWeek
+          buyInBucket
+          venueScheduleKey
+          venueGameTypeKey
+          entityQueryKey
+          entityGameTypeKey
           sourceUrl
           tournamentId
           originalScrapedData
@@ -6462,6 +6565,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -6483,7 +6587,6 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             status
             startDate
             endDate
-            events
             numberOfEvents
             guaranteedPrizepool
             estimatedPrizepool
@@ -6615,6 +6718,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -6709,6 +6813,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -7212,6 +7317,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             _lastChangedAt
             __typename
           }
+          canonicalVenueId
           assets {
             nextToken
             startedAt
@@ -7371,6 +7477,12 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             missingFlightCount
             expectedTotalEntries
             actualCalculatedUniquePlayers
+            gameDayOfWeek
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
             sourceUrl
             tournamentId
             originalScrapedData
@@ -7408,6 +7520,12 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           missingFlightCount
           expectedTotalEntries
           actualCalculatedUniquePlayers
+          gameDayOfWeek
+          buyInBucket
+          venueScheduleKey
+          venueGameTypeKey
+          entityQueryKey
+          entityGameTypeKey
           sourceUrl
           tournamentId
           originalScrapedData
@@ -7434,6 +7552,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -7455,7 +7574,6 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             status
             startDate
             endDate
-            events
             numberOfEvents
             guaranteedPrizepool
             estimatedPrizepool
@@ -7587,6 +7705,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
@@ -7681,6 +7800,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             country
             fee
             isSpecial
+            canonicalVenueId
             entityId
             createdAt
             updatedAt
