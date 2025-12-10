@@ -19,7 +19,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/autoScraper-396c45686876306e787a-build.zip"
+          "s3Key": "amplify-builds/autoScraper-45706b766c47696c7a50-build.zip"
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",

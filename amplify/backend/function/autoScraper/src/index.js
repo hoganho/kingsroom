@@ -59,10 +59,25 @@ const { LambdaMonitoring } = require('./lambda-monitoring');
 // Environment variables and constants
 const LAMBDA_TIMEOUT = parseInt(process.env.AWS_LAMBDA_TIMEOUT || '270', 10) * 1000; // Convert to milliseconds
 const LAMBDA_TIMEOUT_BUFFER = 45000; // 45 seconds buffer
-const MAX_CONSECUTIVE_BLANKS = parseInt(process.env.MAX_CONSECUTIVE_BLANKS || '50', 10);
 const UPDATE_CHECK_INTERVAL_MS = parseInt(process.env.UPDATE_CHECK_INTERVAL_MS || '3600000', 10); // 1 hour
 const MAX_LOG_SIZE = 25;
 const MAX_GAME_LIST_SIZE = 10;
+
+// UPDATED: Strict error thresholds for EventBridge-triggered auto mode
+// When triggered by EventBridge (scheduled), we want to STOP (not pause) on errors
+// This prevents runaway scraping when something is wrong
+const MAX_CONSECUTIVE_BLANKS = parseInt(process.env.MAX_CONSECUTIVE_BLANKS || '2', 10);  // Stop after 2 consecutive blanks
+const MAX_CONSECUTIVE_ERRORS = parseInt(process.env.MAX_CONSECUTIVE_ERRORS || '1', 10);  // Stop after ANY error
+
+// Stop reason enum for job status tracking
+const STOP_REASON = {
+    COMPLETED: 'COMPLETED',           // Normal completion
+    TIMEOUT: 'STOPPED_TIMEOUT',       // Lambda timeout approaching
+    BLANKS: 'STOPPED_BLANKS',         // Hit consecutive blank threshold
+    ERROR: 'STOPPED_ERROR',           // Hit error threshold
+    MANUAL: 'STOPPED_MANUAL',         // User stopped via UI
+    NO_VENUE: 'STOPPED_NO_VENUE'      // Too many games without venue match
+};
 
 // REMOVED: Hardcoded DEFAULT_ENTITY_ID
 // Entity ID must now be provided via:
@@ -701,12 +716,16 @@ async function performScrapingEnhanced(entityId, scraperState, scraperJob, optio
         blanks: 0,
         s3CacheHits: 0,
         consecutiveBlanks: 0,
-        lastProcessedId: scraperState.lastScannedId
+        consecutiveErrors: 0,
+        lastProcessedId: scraperState.lastScannedId,
+        stopReason: STOP_REASON.COMPLETED,  // Default to normal completion
+        lastErrorMessage: null              // Track last error for logging
     };
     
     let currentId = options.startId || scraperState.lastScannedId;
     const endId = options.endId || currentId + (options.maxGames || 1000);
     let consecutiveBlanks = scraperState.consecutiveBlankCount || 0;
+    let consecutiveErrors = 0;
     
     console.log(`[ScrapingEngine] Starting from ID ${currentId} to ${endId}`);
     
@@ -716,6 +735,7 @@ async function performScrapingEnhanced(entityId, scraperState, scraperJob, optio
         const elapsedTime = Date.now() - startTime;
         if (elapsedTime > (LAMBDA_TIMEOUT - LAMBDA_TIMEOUT_BUFFER)) {
             console.log(`[ScrapingEngine] Approaching timeout, stopping at ID ${currentId}`);
+            results.stopReason = STOP_REASON.TIMEOUT;
             break;
         }
         
@@ -746,12 +766,17 @@ async function performScrapingEnhanced(entityId, scraperState, scraperJob, optio
                     results.blanks++;
                 }
                 
+                // Check consecutive blanks threshold
                 if (consecutiveBlanks >= MAX_CONSECUTIVE_BLANKS && !options.isFullScan) {
-                    console.log(`[ScrapingEngine] Hit ${consecutiveBlanks} consecutive blanks, stopping`);
+                    console.log(`[ScrapingEngine] Hit ${consecutiveBlanks} consecutive blanks (threshold: ${MAX_CONSECUTIVE_BLANKS}), stopping`);
+                    await logStatus(entityId, 'WARN', 'Auto-scraper stopped: consecutive blanks threshold', 
+                        `Hit ${consecutiveBlanks} consecutive blanks at ID ${currentId}. May have reached end of published tournaments.`);
+                    results.stopReason = STOP_REASON.BLANKS;
                     break; // Exit loop
                 }
             } else {
-                consecutiveBlanks = 0; // Reset
+                consecutiveBlanks = 0; // Reset blanks on successful scrape
+                consecutiveErrors = 0; // Reset errors on successful scrape
             }
 
             // --- STEP 2: "SAVE" (Call AppSync) ---
@@ -790,7 +815,18 @@ async function performScrapingEnhanced(entityId, scraperState, scraperJob, optio
         } catch (error) {
             console.error(`[ScrapingEngine] Failed to process ${url}:`, error);
             results.errors++;
+            consecutiveErrors++;
             consecutiveBlanks++; // Count errors as blanks for stopping
+            results.lastErrorMessage = error.message || 'Unknown error';
+            
+            // Check consecutive errors threshold (stop on ANY error when threshold is 1)
+            if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS && !options.isFullScan) {
+                console.log(`[ScrapingEngine] Hit ${consecutiveErrors} consecutive errors (threshold: ${MAX_CONSECUTIVE_ERRORS}), stopping`);
+                await logStatus(entityId, 'ERROR', 'Auto-scraper stopped: error threshold', 
+                    `Error at ID ${currentId}: ${results.lastErrorMessage}`);
+                results.stopReason = STOP_REASON.ERROR;
+                break; // Exit loop - stop on error
+            }
         }
 
         // Update scraper state periodically
@@ -821,6 +857,7 @@ async function performScrapingEnhanced(entityId, scraperState, scraperJob, optio
     }
     
     results.consecutiveBlanks = consecutiveBlanks;
+    results.consecutiveErrors = consecutiveErrors;
     
     // Final state update
     await updateScraperState(scraperState.id, {
@@ -1018,22 +1055,44 @@ exports.handler = async (event) => {
                 s3CacheHits: scrapeResults.s3CacheHits + updateResults.s3CacheHits
             };
             
+            // Determine final job status based on stopReason
+            const jobStatus = scrapeResults.stopReason || STOP_REASON.COMPLETED;
+            const wasStoppedEarly = jobStatus !== STOP_REASON.COMPLETED;
+            
             // Update job with final results
             await updateScraperJob(job.id, {
                 ...totalResults,
-                status: 'COMPLETED',
+                status: jobStatus,
                 endTime: new Date().toISOString(),
                 durationSeconds: Math.floor((Date.now() - new Date(job.startTime).getTime()) / 1000)
             });
 
-            await logStatus(entityId, 'INFO', 'Scraper job finished', `New: ${totalResults.newGamesScraped}, Updated: ${totalResults.gamesUpdated}, Blanks: ${totalResults.blanks}`);
+            // Log appropriate message based on how the job ended
+            if (wasStoppedEarly) {
+                const stopMessage = jobStatus === STOP_REASON.ERROR 
+                    ? `Stopped due to error: ${scrapeResults.lastErrorMessage || 'Unknown error'}`
+                    : jobStatus === STOP_REASON.BLANKS
+                    ? `Stopped after ${scrapeResults.consecutiveBlanks} consecutive blanks (may have reached end of published tournaments)`
+                    : jobStatus === STOP_REASON.TIMEOUT
+                    ? `Stopped due to Lambda timeout approaching`
+                    : `Stopped: ${jobStatus}`;
+                    
+                await logStatus(entityId, 'WARN', `Scraper job stopped early: ${jobStatus}`, 
+                    `${stopMessage}. Processed: ${totalResults.totalProcessed}, New: ${totalResults.newGamesScraped}, Errors: ${totalResults.errors}`);
+            } else {
+                await logStatus(entityId, 'INFO', 'Scraper job finished', 
+                    `New: ${totalResults.newGamesScraped}, Updated: ${totalResults.gamesUpdated}, Blanks: ${totalResults.blanks}`);
+            }
             
             return {
-                success: true,
-                message: `Scraped ${totalResults.totalProcessed} tournaments`,
+                success: !wasStoppedEarly || jobStatus === STOP_REASON.BLANKS, // Blanks is often expected at end
+                message: wasStoppedEarly 
+                    ? `Scraper stopped: ${jobStatus}. Processed ${totalResults.totalProcessed} tournaments`
+                    : `Scraped ${totalResults.totalProcessed} tournaments`,
                 state: await getOrCreateScraperState(entityId), // Return fresh state
                 results: totalResults,
-                job
+                job,
+                stopReason: jobStatus
             };
         }
         
