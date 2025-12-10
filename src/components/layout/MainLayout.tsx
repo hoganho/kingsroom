@@ -3,7 +3,6 @@ import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Sidebar } from './Sidebar';
-import { MobileBottomNav } from './MobileBottomNav';
 import { useAuth, UserRole } from '../../contexts/AuthContext';
 import { DatabaseChangeMonitor } from '../monitoring/DatabaseChangeMonitor';
 import logo from '../../assets/Kings-Room-Logo_web.png';
@@ -150,11 +149,10 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
         {/* Content Body */}
         <main className="flex-1 overflow-y-auto">
-          <div className="pb-20 md:pb-6">{children}</div>
+          <div className="pb-6">{children}</div>
         </main>
       </div>
 
-      <MobileBottomNav />
       {canShowMonitor && showMonitor && <DatabaseChangeMonitor />}
     </div>
   );

@@ -72,9 +72,10 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
     {
       label: 'Venues',
       icon: BuildingOffice2Icon,
-      requiredPaths: ['/venues/dashboard', '/venues/details'],
+      to: '/venues', // parent is now the dashboard
+      requiredPaths: ['/venues', '/venues/details'],
       children: [
-        { to: '/venues/dashboard', label: 'Dashboard', requiredPaths: ['/venues/dashboard'] },
+        // no explicit "Dashboard" item anymore – clicking the parent goes to the dashboard
         { to: '/venues/details', label: 'Venue Details', requiredPaths: ['/venues/details'] },
       ],
     },
@@ -224,12 +225,14 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
       const isActive = location.pathname.startsWith(item.to);
       return (
         <div key={item.label}>
-          <div className="flex items-center w-full pr-4">
+          <div className={`flex items-stretch w-full rounded-lg overflow-hidden ${
+            isActive ? 'bg-indigo-600' : ''
+          }`}>
             <NavLink
               to={item.to}
               onClick={onClose}
-              className={`flex-1 flex items-center px-4 py-2.5 text-sm font-medium rounded-l-lg transition-colors ${
-                isActive ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+              className={`flex-1 flex items-center px-4 py-2.5 text-sm font-medium transition-colors ${
+                isActive ? 'text-white' : 'text-gray-600 hover:bg-gray-100'
               }`}
               style={{ paddingLeft: `${paddingLeft}px` }}
             >
@@ -237,8 +240,12 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
               {item.label}
             </NavLink>
             <button
-              onClick={(e) => toggleExpanded(item.label, e)}
-              className={`p-2.5 rounded-r-lg hover:bg-gray-100 ${isActive ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'text-gray-600'}`}
+                onClick={(e) => toggleExpanded(item.label, e)}
+                className={`px-3 flex items-center ${
+                    isActive
+                    ? 'text-white hover:bg-indigo-700'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
             >
               {isExpanded ? <ChevronDownIcon className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
             </button>

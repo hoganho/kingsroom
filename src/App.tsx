@@ -38,7 +38,7 @@ import { GameSearch } from './pages/games/GameSearch';
 import { GameDetails } from './pages/games/GameDetails';
 
 // Venues Pages
-import { VenuesDashboard } from './pages/venues/VenuesDashboard';
+import VenuesDashboard from './pages/venues/VenuesDashboard';
 import { VenueDetails } from './pages/venues/VenueDetails';
 
 // Settings Pages (Admin/SuperAdmin)
@@ -265,7 +265,7 @@ const AuthenticatedRoutes = () => {
                         <Route path="/games/details/:gameId" element={<GameDetails />} />
                         
                         {/* Venues */}
-                        <Route path="/venues/dashboard" element={<VenuesDashboard />} />
+                        <Route path="/venues" element={<VenuesDashboard />} />
                         <Route path="/venues/details" element={<VenueDetails />} />
                         
                         {/* Social Pulse */}

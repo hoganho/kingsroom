@@ -1554,6 +1554,15 @@ type ScrapedGameData {
   guaranteeOverlayCost: Float
   gameProfit: Float
   venueAssignmentStatus: VenueAssignmentStatus
+
+  # Primary error message from Lambda
+  error: String
+  # Alternative error message field (some responses use this)
+  errorMessage: String
+  # Status indicator: 'SUCCESS', 'ERROR', 'SKIPPED', etc.
+  status: String
+  # HTTP status code from scraper (200, 401, 403, 404, 429, 500, etc.)
+  httpStatus: Int
 }
 
 type ScrapedTournamentLevel {

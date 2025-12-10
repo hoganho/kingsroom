@@ -466,11 +466,47 @@ interface ProgressSummaryProps {
   consecutiveErrors: number;
   consecutiveBlanks: number;
   onStop: () => void;
+  startTime: number | null;
 }
 
 const ProgressSummary: React.FC<ProgressSummaryProps> = ({
-  results, isProcessing, isPaused, mode, flow, consecutiveErrors, consecutiveBlanks, onStop
+  results, isProcessing, isPaused, mode, flow, consecutiveErrors, consecutiveBlanks, onStop, startTime
 }) => {
+  const [elapsedTime, setElapsedTime] = useState(0);
+  
+  // Update elapsed time every second while processing
+  useEffect(() => {
+    if (!startTime) {
+      return;
+    }
+    
+    // Always calculate current elapsed time
+    setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+    
+    // Only run interval while processing
+    if (!isProcessing) {
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [startTime, isProcessing]);
+  
+  // Format elapsed time as MM:SS or HH:MM:SS
+  const formatElapsedTime = (seconds: number): string => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hrs > 0) {
+      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const total = results.length;
   const completed = results.filter(r => ['success', 'error', 'skipped'].includes(r.status)).length;
   const successful = results.filter(r => r.status === 'success').length;
@@ -560,6 +596,14 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
           {mode === 'auto' ? `${completed} processed` : `${completed} / ${total} processed`}
           {mode === 'auto' && isProcessing && <span className="ml-1 text-blue-500">(continuous)</span>}
         </span>
+        
+        {/* Timer */}
+        {startTime && (
+          <span className="text-gray-500 font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">
+            ⏱ {formatElapsedTime(elapsedTime)}
+          </span>
+        )}
+        
         <div className="flex items-center gap-3">
           {successful > 0 && (
             <span className="text-green-600 font-medium">✓ {successful}</span>
@@ -657,6 +701,7 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
 
   // Processing State
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStartTime, setProcessingStartTime] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [processingResults, setProcessingResults] = useState<ProcessingResult[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -856,6 +901,7 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
     setConfigSectionOpen(false);
     setApiKeyError(null);
     setIsProcessing(true);
+    setProcessingStartTime(Date.now());
     setIsPaused(false);
     setProcessingResults([]);
     
@@ -1947,6 +1993,7 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
           consecutiveErrors={consecutiveErrors}
           consecutiveBlanks={consecutiveBlanks}
           onStop={handleStopProcessing}
+          startTime={processingStartTime}
         />
       )}
 

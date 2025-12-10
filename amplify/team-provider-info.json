@@ -19,7 +19,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/autoScraper-45706b766c47696c7a50-build.zip"
+          "s3Key": "amplify-builds/autoScraper-63765538354d67656775-build.zip"
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -52,7 +52,7 @@
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-31617a67542b332b3762-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-394a454a565a47597749-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",

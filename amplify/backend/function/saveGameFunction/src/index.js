@@ -704,10 +704,12 @@ const createOrUpdateGameFinancialSnapshot = async (game, entityId, venueId) => {
     const venueFee = game.venueFee || 0;
     const totalRevenue = rakeRevenue + venueFee;
     const prizepoolPlayerContributions = game.prizepoolPlayerContributions || 0;
+    const prizepoolAddedValue = game.prizepoolAddedValue || 0;
+    const prizepoolTotal = game.prizepoolPaid || game.prizepoolCalculated || (prizepoolPlayerContributions + prizepoolAddedValue);
     const guaranteeAmount = game.guaranteeAmount || 0;
 
-    const profitLoss = totalRevenue - totalCost - (game.guaranteeOverlayCost || 0);
-    const profitMargin = totalRevenue > 0 ? profitLoss / totalRevenue : null;
+    const netProfit = totalRevenue - totalCost - (game.guaranteeOverlayCost || 0);
+    const profitMargin = totalRevenue > 0 ? netProfit / totalRevenue : null;
     const revenuePerPlayer = game.totalUniquePlayers ? totalRevenue / game.totalUniquePlayers : null;
     const costPerPlayer = game.totalUniquePlayers ? totalCost / game.totalUniquePlayers : null;
     const guaranteeCoverageRate = guaranteeAmount > 0 ? prizepoolPlayerContributions / guaranteeAmount : null;
@@ -731,10 +733,18 @@ const createOrUpdateGameFinancialSnapshot = async (game, entityId, venueId) => {
 
     const snapshotFields = {
         entityId, venueId, gameStartDateTime: game.gameStartDateTime,
+        // Denormalized game data for reporting
+        totalEntries: game.totalEntries || 0,
+        totalUniquePlayers: game.totalUniquePlayers || 0,
+        // Revenue fields
         rakeRevenue, totalRevenue, totalVenueFee: venueFee,
-        prizepoolPlayerContributions, prizepoolAddedValue: game.prizepoolAddedValue || 0, prizepoolSurplus: game.prizepoolSurplus || null,
+        // Prizepool fields
+        prizepoolPlayerContributions, prizepoolAddedValue, prizepoolTotal, prizepoolSurplus: game.prizepoolSurplus || null,
+        // Guarantee fields
         guaranteeAmount, guaranteeOverlayCost: game.guaranteeOverlayCost || 0, guaranteeCoverageRate, guaranteeMet,
-        gameProfit: game.gameProfit || 0, totalCost, profitLoss, profitMargin, revenuePerPlayer, costPerPlayer,
+        // Profit fields
+        gameProfit: game.gameProfit || 0, totalCost, netProfit, profitMargin, revenuePerPlayer, costPerPlayer,
+        // Cost breakdown
         totalDealerCost: gameCost?.totalDealerCost || 0, totalPromotionCost: gameCost?.totalPromotionCost || 0,
         totalFloorStaffCost: gameCost?.totalFloorStaffCost || 0, totalOtherCost: gameCost?.totalOtherCost || 0,
         updatedAt: now, _lastChangedAt: timestamp
