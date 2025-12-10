@@ -31,7 +31,8 @@ const BUY_IN_BUCKETS = [
     { max: 100, label: '0051-0100' },
     { max: 200, label: '0101-0200' },
     { max: 500, label: '0201-0500' },
-    { max: Infinity, label: '0501-PLUS' }
+    { max: 1000, label: '0501-1000' },
+    { max: Infinity, label: '1001-PLUS' }
 ];
 
 /**

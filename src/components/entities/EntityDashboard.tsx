@@ -8,8 +8,8 @@ import { generateClient, GraphQLResult } from 'aws-amplify/api';
 import { entityHelpers, EntityWithStats } from '../../graphql/entityOperations'; 
 // FIX: Reverting to original import path (no extension)
 import { EntitySelector, EntityManager } from './EntitySelector'; 
-// FIX: Reverting to original import path (no extension)
-import { getCurrentEntityId } from '../../services/gameService'; 
+// REFACTORED: Use EntityContext hook instead of deprecated getCurrentEntityId
+import { useEntity } from '../../contexts/EntityContext'; 
 
 // Type definitions for GraphQL responses
 interface GetEntityResponse {
@@ -90,6 +90,9 @@ export const EntityDashboard: React.FC<EntityDashboardProps> = ({
     className, 
     onEntityChange 
 }) => {
+    // REFACTORED: Use EntityContext hook instead of deprecated getCurrentEntityId
+    const { currentEntity } = useEntity();
+    
     const [currentEntityId, setCurrentEntityId] = useState<string>('');
     const [entityData, setEntityData] = useState<EntityWithStats | null>(null);
     const [metrics, setMetrics] = useState<DashboardMetric[]>([]);
@@ -309,10 +312,11 @@ export const EntityDashboard: React.FC<EntityDashboardProps> = ({
         }
     }, [client]);
 
-    // Initialize entity on mount
+    // Initialize entity on mount - REFACTORED: Uses currentEntity from EntityContext
     const initEntity = async () => {
         try {
-            const entityId = await getCurrentEntityId();
+            // REFACTORED: Get entityId from EntityContext hook instead of getCurrentEntityId()
+            const entityId = currentEntity?.id || '';
             
             // FIXED: Check if entityId is valid before setting state
             if (entityId && entityId.trim() !== '') {
@@ -331,10 +335,10 @@ export const EntityDashboard: React.FC<EntityDashboardProps> = ({
         }
     };
 
-    // Effect to initialize entity
+    // Effect to initialize entity - REFACTORED: Re-run when currentEntity changes
     useEffect(() => {
         initEntity();
-    }, []);
+    }, [currentEntity?.id]);
 
     // Handle entity change
     const handleEntityChange = useCallback(async (newEntityId: string) => {

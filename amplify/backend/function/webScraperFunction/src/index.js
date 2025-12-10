@@ -44,6 +44,12 @@ Amplify Params - DO NOT EDIT */
  * - Venue resolution
  * - ScrapeAttempt tracking
  * - PDP queueing
+ * 
+ * REFACTORED (Dec 2025): Removed hardcoded DEFAULT_ENTITY_ID
+ * - entityId should be provided by frontend caller (from EntityContext)
+ * - Falls back to URL domain matching (getEntityIdFromUrl)
+ * - Falls back to process.env.DEFAULT_ENTITY_ID if not provided
+ * - Logs warnings when entityId is missing (indicates frontend issue)
  * ===================================================================
  */
 
@@ -67,8 +73,9 @@ const { updateS3StorageWithParsedData } = require('./update-s3storage-with-parse
 const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
 const UNASSIGNED_VENUE_NAME = "Unassigned";
 
-// DEFAULT ENTITY
-const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0"; 
+// REMOVED: Hardcoded DEFAULT_ENTITY_ID
+// Entity ID should come from frontend (via EntityContext) or URL domain matching
+// Falls back to process.env.DEFAULT_ENTITY_ID if not provided
 
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
@@ -79,63 +86,116 @@ const S3_BUCKET = process.env.S3_BUCKET || 'pokerpro-scraper-storage';
 const SAVE_GAME_FUNCTION_NAME = process.env.SAVE_GAME_FUNCTION_NAME || `saveGameFunction-${process.env.ENV}`;
 
 // --- Lambda Monitoring Initialization ---
-const monitoring = new LambdaMonitoring('webScraperFunction', DEFAULT_ENTITY_ID);
+// Initialize with placeholder - will be set per request
+const monitoring = new LambdaMonitoring('webScraperFunction', 'pending-entity');
 const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
 
-// --- Entity Helper Functions ---
+// ===================================================================
+// ENTITY ID RESOLUTION HELPERS
+// ===================================================================
+
+/**
+ * Resolves entityId with proper fallback chain and warning logging
+ * 
+ * Priority order:
+ * 1. Explicitly provided entityId (from args/frontend)
+ * 2. URL domain matching (getEntityIdFromUrl)
+ * 3. Existing record's entityId (for updates)
+ * 4. Environment variable fallback (process.env.DEFAULT_ENTITY_ID)
+ * 
+ * @param {string|null} providedEntityId - entityId from args/frontend
+ * @param {string|null} urlEntityId - entityId resolved from URL domain
+ * @param {string|null} existingEntityId - entityId from existing record
+ * @param {string} context - Description for logging
+ * @returns {string} resolved entityId
+ * @throws {Error} if no entityId can be resolved
+ */
+const resolveEntityId = (providedEntityId, urlEntityId = null, existingEntityId = null, context = 'unknown') => {
+    // Priority 1: Explicitly provided entityId (from frontend/args)
+    if (providedEntityId) {
+        return providedEntityId;
+    }
+    
+    // Priority 2: URL domain matching
+    if (urlEntityId) {
+        console.log(`[ENTITY-RESOLVE] ${context}: Using entityId from URL domain matching`);
+        return urlEntityId;
+    }
+    
+    // Priority 3: Existing record's entityId (for updates)
+    if (existingEntityId) {
+        console.warn(`[ENTITY-RESOLVE] ${context}: Using existing record entityId (frontend should pass entityId)`);
+        return existingEntityId;
+    }
+    
+    // Priority 4: Environment variable fallback
+    if (process.env.DEFAULT_ENTITY_ID) {
+        console.warn(
+            `[ENTITY-RESOLVE] ${context}: entityId missing from request, using DEFAULT_ENTITY_ID env var. ` +
+            `Frontend should pass entityId from EntityContext.`
+        );
+        return process.env.DEFAULT_ENTITY_ID;
+    }
+    
+    // No entityId available - throw error
+    throw new Error(
+        `[webScraperFunction] ${context}: entityId is required but was not provided. ` +
+        `Frontend must pass entityId from EntityContext, or set DEFAULT_ENTITY_ID environment variable.`
+    );
+};
+
+/**
+ * Get entityId by matching URL domain against Entity table
+ * Returns null if no match found (instead of hardcoded fallback)
+ */
 const getEntityIdFromUrl = async (url) => {
+    if (!url) return null;
+    
     try {
         const urlObj = new URL(url);
         const domain = urlObj.hostname;
         const entityTable = getTableName('Entity');
+        
         const scanResult = await monitoredDdbDocClient.send(new ScanCommand({
             TableName: entityTable,
             FilterExpression: 'gameUrlDomain = :domain',
             ExpressionAttributeValues: { ':domain': domain }
         }));
+        
         if (scanResult.Items && scanResult.Items.length > 0) {
+            console.log(`[Entity] Found entity ${scanResult.Items[0].id} for domain ${domain}`);
             return scanResult.Items[0].id;
         }
-        return DEFAULT_ENTITY_ID;
+        
+        console.log(`[Entity] No entity found for domain ${domain}`);
+        return null; // CHANGED: Return null instead of DEFAULT_ENTITY_ID
+        
     } catch (error) {
         console.error('[Entity] Error determining entity from URL:', error);
-        return DEFAULT_ENTITY_ID;
+        return null; // CHANGED: Return null instead of DEFAULT_ENTITY_ID
     }
 };
 
+/**
+ * DEPRECATED: ensureDefaultEntity
+ * 
+ * This function auto-created a default entity if none existed.
+ * With the new entity-aware architecture, entities should be created
+ * explicitly through the admin interface, not auto-created.
+ * 
+ * Keeping as no-op for backward compatibility but logging warning.
+ */
 const ensureDefaultEntity = async () => {
-    const entityTable = getTableName('Entity');
-    const entityId = DEFAULT_ENTITY_ID;
-    try {
-        const getResult = await monitoredDdbDocClient.send(new GetCommand({
-            TableName: entityTable, Key: { id: entityId }
-        }));
-        if (!getResult.Item) {
-            monitoring.trackOperation('DEFAULT_ENTITY_CREATE', 'Entity', entityId);
-            const now = new Date().toISOString();
-            const timestamp = Date.now();
-            await monitoredDdbDocClient.send(new PutCommand({
-                TableName: entityTable,
-                Item: {
-                    id: entityId, 
-                    entityName: 'Default Entity', 
-                    gameUrlDomain: 'default.com',
-                    gameUrlPath: '/', 
-                    isActive: true, 
-                    createdAt: now, 
-                    updatedAt: now,
-                    _version: 1, 
-                    _lastChangedAt: timestamp,
-                    __typename: 'Entity'
-                }
-            }));
-            console.log('[Entity] Created default entity');
-        }
-        return entityId;
-    } catch (error) {
-        console.error('[Entity] Error ensuring default entity:', error);
-        return DEFAULT_ENTITY_ID;
+    // DEPRECATED: No longer auto-creates entities
+    // Entities should be created explicitly through admin interface
+    if (!process.env.DEFAULT_ENTITY_ID) {
+        console.warn(
+            '[Entity] DEPRECATED: ensureDefaultEntity called but DEFAULT_ENTITY_ID not set. ' +
+            'Entities should be created through admin interface. ' +
+            'Set DEFAULT_ENTITY_ID env var for fallback support.'
+        );
     }
+    return process.env.DEFAULT_ENTITY_ID || null;
 };
 
 // --- Date Helper Functions ---
@@ -220,6 +280,7 @@ const getAllSeriesTitles = async () => {
 
 /**
  * Get or create ScrapeURL record
+ * UPDATED: Uses resolveEntityId helper
  */
 const getOrCreateScrapeURL = async (url, tournamentId, entityId) => {
     const scrapeURLTable = getTableName('ScrapeURL');
@@ -234,6 +295,9 @@ const getOrCreateScrapeURL = async (url, tournamentId, entityId) => {
         }
         
         // Create new record if doesn't exist
+        // UPDATED: Use resolveEntityId for new records
+        const effectiveEntityId = resolveEntityId(entityId, null, null, `getOrCreateScrapeURL(${url})`);
+        
         const now = new Date().toISOString();
         const timestamp = Date.now();
         
@@ -241,7 +305,7 @@ const getOrCreateScrapeURL = async (url, tournamentId, entityId) => {
             id: url, 
             url, 
             tournamentId: parseInt(tournamentId, 10), 
-            entityId: entityId || DEFAULT_ENTITY_ID,
+            entityId: effectiveEntityId,
             status: 'ACTIVE', 
             doNotScrape: false,
             placedIntoDatabase: false, 
@@ -425,10 +489,12 @@ const extractPlayerDataForProcessing = (scrapedData) => {
 /**
  * ===================================================================
  * REFACTORED: handleSave now invokes saveGameFunction Lambda
+ * UPDATED: Uses resolveEntityId helper
  * ===================================================================
  */
 const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape = false, entityId, scraperJobId = null) => {
-    const effectiveEntityId = entityId || DEFAULT_ENTITY_ID;
+    // UPDATED: Use resolveEntityId helper
+    const effectiveEntityId = resolveEntityId(entityId, null, null, `handleSave(${sourceUrl})`);
     
     console.log(`[handleSave] Delegating save to saveGameFunction for ${sourceUrl}`);
     
@@ -632,6 +698,7 @@ const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape 
 
 /**
  * Handle Fetch Range
+ * UPDATED: Uses resolveEntityId helper
  */
 const handleFetchRange = async (startId, endId, entityId) => {
     monitoring.trackOperation('FETCH_RANGE_START', 'Game', `${startId}-${endId}`, { entityId });
@@ -640,7 +707,9 @@ const handleFetchRange = async (startId, endId, entityId) => {
 
     const allResults = [];
     const chunkSize = 10;
-    const effectiveEntityId = entityId || DEFAULT_ENTITY_ID;
+    
+    // UPDATED: Use resolveEntityId helper
+    const effectiveEntityId = resolveEntityId(entityId, null, null, `handleFetchRange(${startId}-${endId})`);
 
     for (let i = startId; i <= endId; i += chunkSize) {
         const chunkEnd = Math.min(i + chunkSize - 1, endId);
@@ -666,7 +735,7 @@ const handleFetchRange = async (startId, endId, entityId) => {
         allResults.push(...settled.map(r => r.status === 'fulfilled' ? r.value : { error: r.reason }));
     }
     
-    monitoring.trackOperation('FETCH_RANGE_COMPLETE', 'Game', `${startId}-${endId}`, { resultsCount: allResults.length, entityId });
+    monitoring.trackOperation('FETCH_RANGE_COMPLETE', 'Game', `${startId}-${endId}`, { resultsCount: allResults.length, entityId: effectiveEntityId });
     return allResults;
 };
 
@@ -851,7 +920,9 @@ const createScrapeAttempt = async (params) => {
 exports.handler = async (event) => {
     console.log('[HANDLER] Incoming event:', JSON.stringify(event, null, 2));
     
-    let entityId = DEFAULT_ENTITY_ID;
+    // UPDATED: Initialize entityId as null, will be resolved below
+    let entityId = null;
+    let urlEntityId = null;
     let jobId = null;
     let triggerSource = 'MANUAL';
     const handlerStartTime = Date.now();  // For error tracking when attemptStartTime not available
@@ -862,18 +933,25 @@ exports.handler = async (event) => {
     if (args.jobId) jobId = args.jobId;
     if (args.triggerSource) triggerSource = args.triggerSource;
     
+    // DEPRECATED: Still call for backward compatibility but it's now a no-op
     await ensureDefaultEntity();
     
     try {
+        // Try to resolve entityId from URL domain
         if (operationName === 'fetchTournamentData' || operationName === 'FETCH') {
             const url = args.url;
             if (url) {
-                const urlEntityId = await getEntityIdFromUrl(url);
-                if (urlEntityId) entityId = urlEntityId;
+                urlEntityId = await getEntityIdFromUrl(url);
             }
         }
         
-        entityId = args.entityId || DEFAULT_ENTITY_ID;
+        // UPDATED: Use resolveEntityId with all fallback options
+        entityId = resolveEntityId(
+            args.entityId,           // Priority 1: Explicitly passed
+            urlEntityId,             // Priority 2: From URL domain matching
+            null,                    // Priority 3: No existing record at handler level
+            `handler(${operationName})`
+        );
         
         monitoring.entityId = entityId; 
         
@@ -949,6 +1027,14 @@ exports.handler = async (event) => {
                                 console.warn('[FETCH] Could not fetch S3Storage metadata:', metadataError.message);
                             }
                             
+                            // UPDATED: Use resolveEntityId for cache response
+                            const cacheEntityId = resolveEntityId(
+                                entityId,
+                                null,
+                                s3StorageRecord?.entityId,
+                                `fetchFromCache(${s3KeyParam})`
+                            );
+                            
                             // Build response with S3_CACHE source
                             const result = {
                                 tournamentId: scrapedData.tournamentId || s3StorageRecord?.tournamentId || 1,
@@ -962,7 +1048,7 @@ exports.handler = async (event) => {
                                 sourceUrl: s3StorageRecord?.url || fetchUrl || null,
                                 reScrapedAt: new Date().toISOString(),
                                 contentHash: s3StorageRecord?.contentHash || null,
-                                entityId: entityId || s3StorageRecord?.entityId || DEFAULT_ENTITY_ID
+                                entityId: cacheEntityId
                             };
                             
                             // ✅ Update S3Storage with parsed data (even if HTML unchanged)
@@ -978,7 +1064,7 @@ exports.handler = async (event) => {
                                     true, // isRescrape = true (from cache)
                                     s3StorageRecord?.url || fetchUrl, // URL for fallback lookup
                                     scrapedData.tournamentId || s3StorageRecord?.tournamentId, // tournamentId for primary lookup
-                                    entityId || s3StorageRecord?.entityId // entityId for primary lookup
+                                    cacheEntityId // entityId for primary lookup
                                 );
                                 
                                 console.log(`[FETCH] S3Storage update result:`, {
@@ -1241,7 +1327,8 @@ exports.handler = async (event) => {
                         fieldName: 'fetchTournamentData',
                         arguments: {
                             s3Key: input.s3Key,
-                            url: input.url || null
+                            url: input.url || null,
+                            entityId: entityId // Pass through entityId
                         },
                         identity: event.identity
                     });

@@ -25,7 +25,16 @@ Amplify Params - DO NOT EDIT */
  * ===================================================================
  * SAVEGAME LAMBDA FUNCTION - WITH SERIES RESOLUTION & QUERY KEYS
  * 
- * VERSION: 2.1.0 (with totalRebuys calculation fix)
+ * VERSION: 2.2.0 (entity ID refactoring)
+ * 
+ * ENTITY ID REQUIREMENT:
+ * This Lambda REQUIRES source.entityId to be provided in the input.
+ * Unlike other Lambdas that have fallback logic, saveGameFunction 
+ * enforces entityId as a required field in validation. The caller
+ * (webScraperFunction or frontend) must provide this value.
+ * 
+ * REFACTORED (Dec 2025): Removed hardcoded DEFAULT_ENTITY_ID constant.
+ * The entityId must be explicitly provided by the caller.
  * 
  * ENTRY FIELD DEFINITIONS:
  * - totalInitialEntries: Number of unique initial buy-ins (no rebuys/addons)
@@ -90,7 +99,10 @@ const { computeGameQueryKeys, shouldRecomputeQueryKeys } = require('./game-query
 
 const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
 const UNASSIGNED_VENUE_NAME = "Unassigned";
-const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0";
+
+// REMOVED: Hardcoded DEFAULT_ENTITY_ID
+// This Lambda REQUIRES source.entityId in the input (enforced in validation).
+// Unlike other Lambdas, there is no fallback - the caller must provide entityId.
 
 // Game status classifications
 const FINISHED_STATUSES = ['FINISHED', 'COMPLETED'];
@@ -107,7 +119,8 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 const sqsClient = new SQSClient({});
 
 // Lambda Monitoring Initialization
-const monitoring = new LambdaMonitoring('saveGameFunction', DEFAULT_ENTITY_ID);
+// Initialize with placeholder - will be set per request from input.source.entityId
+const monitoring = new LambdaMonitoring('saveGameFunction', 'pending-entity');
 const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
 
 // Environment variables

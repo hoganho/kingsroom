@@ -249,13 +249,13 @@ export const useGameTracker = (): UseGameTrackerReturn => {
         return response.data.reScrapeFromCache as ScrapedGameData;
     };
 
-    const fetchFromLive = async (url: string): Promise<ScrapedGameData> => {
-        console.log(`[useGameTracker] Fetching LIVE for ${url}`);
+    const fetchFromLive = async (url: string, entityId?: string): Promise<ScrapedGameData> => {
+        console.log(`[useGameTracker] Fetching LIVE for ${url}`, { entityId });
         
         const response = await clientRef.current.graphql({
             query: /* GraphQL */ `
-                mutation FetchTournamentData($url: AWSURL!, $forceRefresh: Boolean) {
-                    fetchTournamentData(url: $url, forceRefresh: $forceRefresh) {
+                mutation FetchTournamentData($url: AWSURL!, $forceRefresh: Boolean, $entityId: ID) {
+                    fetchTournamentData(url: $url, forceRefresh: $forceRefresh, entityId: $entityId) {
                         name
                         tournamentId
                         gameStartDateTime
@@ -309,7 +309,7 @@ export const useGameTracker = (): UseGameTrackerReturn => {
                     }
                 }
             `,
-            variables: { url, forceRefresh: true }
+            variables: { url, forceRefresh: true, entityId: entityId || null }
         });
 
         return response.data.fetchTournamentData as ScrapedGameData;
@@ -351,7 +351,7 @@ export const useGameTracker = (): UseGameTrackerReturn => {
             const forceSource = options?.forceSource;
 
             if (forceSource === 'LIVE' || options?.forceRefresh) {
-                scrapedData = await fetchFromLive(url);
+                scrapedData = await fetchFromLive(url, entityId);
             } else if (forceSource === 'S3' && s3Key) {
                 scrapedData = await fetchFromS3(url, s3Key);
                 fromS3 = true;
@@ -359,7 +359,7 @@ export const useGameTracker = (): UseGameTrackerReturn => {
                 scrapedData = await fetchFromS3(url, s3Key);
                 fromS3 = true;
             } else {
-                scrapedData = await fetchFromLive(url);
+                scrapedData = await fetchFromLive(url, entityId);
             }
 
             const gameData = convertScrapedToGameData(scrapedData);

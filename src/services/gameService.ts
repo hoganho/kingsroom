@@ -1,6 +1,7 @@
 // services/gameService.ts
 // COMPLETE: Entity-aware game service with venue reassignment operations
 // UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
+// REFACTORED: Removed hardcoded DEFAULT_ENTITY_ID - entityId is now required from calling context
 
 import { generateClient } from 'aws-amplify/api';
 import type { GraphQLResult } from '@aws-amplify/api';
@@ -29,8 +30,8 @@ import {
 // CONSTANTS
 // ===================================================================
 
-// Default entity ID
-const DEFAULT_ENTITY_ID = '42101695-1332-48e3-963b-3c6ad4e909a0';
+// REMOVED: Hardcoded DEFAULT_ENTITY_ID
+// Entity ID must now be provided by the calling context (useEntity().currentEntity.id)
 
 // Unassigned venue placeholder
 const UNASSIGNED_VENUE_ID = '00000000-0000-0000-0000-000000000000';
@@ -214,25 +215,49 @@ export interface VenueClone {
 // ===================================================================
 
 /**
- * Get the current active entity from local storage or use default
+ * @deprecated Use useEntity().currentEntity.id from EntityContext instead
+ * This function is kept for backward compatibility during migration
+ * Will throw an error to help identify callers that need updating
  */
 export const getCurrentEntityId = (): string => {
-    const storedEntityId = localStorage.getItem('currentEntityId');
-    return storedEntityId || DEFAULT_ENTITY_ID;
+    // Check if there's a stored value (legacy support)
+    const storedEntityId = localStorage.getItem('selectedEntityId');
+    if (storedEntityId) {
+        console.warn(
+            '[gameService] getCurrentEntityId() is deprecated. ' +
+            'Please use useEntity().currentEntity.id from EntityContext instead. ' +
+            'Returning stored value for backward compatibility.'
+        );
+        return storedEntityId;
+    }
+    
+    // No stored value - throw to help identify callers
+    throw new Error(
+        '[gameService] entityId is required. ' +
+        'Use useEntity().currentEntity.id from EntityContext and pass it explicitly. ' +
+        'getCurrentEntityId() is deprecated and will be removed.'
+    );
 };
 
 /**
- * Set the current active entity ID
+ * @deprecated EntityContext manages entity selection now
  */
 export const setCurrentEntityId = (entityId: string): void => {
-    localStorage.setItem('currentEntityId', entityId);
+    console.warn(
+        '[gameService] setCurrentEntityId() is deprecated. ' +
+        'Use useEntity().setCurrentEntity() from EntityContext instead.'
+    );
+    localStorage.setItem('selectedEntityId', entityId);
 };
 
 /**
- * Get the default entity ID constant
+ * @deprecated No default entity - must be provided from user context
  */
 export const getDefaultEntityId = (): string => {
-    return DEFAULT_ENTITY_ID;
+    throw new Error(
+        '[gameService] getDefaultEntityId() is deprecated. ' +
+        'Entity ID must be provided from user context (useEntity().currentEntity.id or user.defaultEntityId).'
+    );
 };
 
 /**
@@ -317,6 +342,8 @@ const createNotPublishedPlaceholder = (
 ): any => {
     return {
         ...data,
+        sourceUrl,
+        entityId,
         name: data.name || `Tournament ${data.tournamentId} (Not Published)`,
         gameStatus: 'NOT_PUBLISHED',
         // Force critical fields to valid values
@@ -409,7 +436,8 @@ const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
 export const fetchGameDataFromBackend = async (
     url: string,
     forceRefresh: boolean = false,
-    scraperApiKey?: string | null
+    scraperApiKey?: string | null,
+    entityId?: string
 ): Promise<ScrapedGameData> => {
     const client = generateClient();
     
@@ -421,7 +449,8 @@ export const fetchGameDataFromBackend = async (
             variables: {
                 url,
                 forceRefresh,
-                scraperApiKey: scraperApiKey || null
+                scraperApiKey: scraperApiKey || null,
+                entityId: entityId || null
             }
         }) as any;
         
@@ -476,7 +505,16 @@ export const shouldAutoRefreshTournament = (data: ScrapedGameData | GameData | n
 
 /**
  * Save game data to backend via unified saveGame mutation
- * FIX: Safely handles nulls and passes venueAssignmentStatus correctly
+ * 
+ * UPDATED: entityId is now REQUIRED - no fallback to hardcoded value
+ * Callers must provide entityId from useEntity().currentEntity.id
+ * 
+ * @param sourceUrl - The source URL of the tournament
+ * @param venueId - The venue ID (can be null for auto-assignment)
+ * @param data - The game data to save
+ * @param existingGameId - Optional existing game ID for updates
+ * @param entityId - REQUIRED: The entity ID from context
+ * @param options - Additional save options
  */
 export const saveGameDataToBackend = async (
     sourceUrl: string,
@@ -490,7 +528,16 @@ export const saveGameDataToBackend = async (
     }
 ): Promise<SaveGameResult> => {
     const client = generateClient();
-    const effectiveEntityId = entityId || getCurrentEntityId();
+    
+    // UPDATED: entityId is now required
+    if (!entityId) {
+        throw new Error(
+            '[gameService.saveGameDataToBackend] entityId is required. ' +
+            'Pass entityId from useEntity().currentEntity.id'
+        );
+    }
+    
+    const effectiveEntityId = entityId;
     
     // 1. Handle NOT_PUBLISHED status special case
     let finalData: any = data;
@@ -636,6 +683,7 @@ export const saveGameDataToBackend = async (
     console.log('[GameService] Calling saveGame mutation:', {
         sourceUrl,
         venueId,
+        entityId: effectiveEntityId,
         gameStatus: saveGameInput.game.gameStatus,
         venueAssignmentStatus: (saveGameInput.game as any).venueAssignmentStatus,
         hasCompleteResults: playerData.hasCompleteResults
@@ -681,12 +729,15 @@ export const saveGameDataToBackend = async (
 
 /**
  * Reassign a single game to a different venue
- * * @param input - Reassignment parameters
+ * 
+ * @param input - Reassignment parameters
  * @returns Result with new venue/entity IDs and any cloned venue info
- * * @example
+ * 
+ * @example
  * // Move game to new entity (follow the venue)
  * await reassignGameVenue({ gameId: '123', newVenueId: '456', reassignEntity: true });
- * * // Keep game in current entity (clone venue if needed)
+ * 
+ * // Keep game in current entity (clone venue if needed)
  * await reassignGameVenue({ gameId: '123', newVenueId: '456', reassignEntity: false });
  */
 export const reassignGameVenue = async (
@@ -707,16 +758,7 @@ export const reassignGameVenue = async (
             throw new Error(response.errors[0]?.message || 'Failed to reassign venue');
         }
         
-        const result = response.data.reassignGameVenue;
-        
-        console.log('[GameService] Reassignment result:', {
-            success: result.success,
-            status: result.status,
-            venueCloned: result.venueCloned,
-            clonedVenueId: result.clonedVenueId
-        });
-        
-        return result;
+        return response.data.reassignGameVenue;
     } catch (error) {
         console.error('[GameService] Error reassigning venue:', error);
         throw error;
@@ -724,10 +766,11 @@ export const reassignGameVenue = async (
 };
 
 /**
- * Bulk reassign multiple games to a different venue
- * Always queues as async job for tracking progress
- * * @param input - Bulk reassignment parameters
- * @returns Task ID for tracking progress
+ * Bulk reassign multiple games to a new venue
+ * Creates a background task for processing
+ * 
+ * @param input - Bulk reassignment parameters
+ * @returns Task info with taskId for polling progress
  */
 export const bulkReassignGameVenues = async (
     input: BulkReassignGameVenuesInput
@@ -761,7 +804,8 @@ export const bulkReassignGameVenues = async (
 /**
  * Get the status of a background reassignment task
  * Use for polling progress on bulk operations
- * * @param taskId - Background task ID
+ * 
+ * @param taskId - Background task ID
  * @returns Task status with progress info
  */
 export const getReassignmentStatus = async (
@@ -789,7 +833,8 @@ export const getReassignmentStatus = async (
 /**
  * Get all clones of a canonical venue across entities
  * Useful for showing which entities have this physical venue
- * * @param canonicalVenueId - The canonical (original) venue ID
+ * 
+ * @param canonicalVenueId - The canonical (original) venue ID
  * @returns List of venue clones in different entities
  */
 export const getVenueClones = async (
@@ -816,7 +861,8 @@ export const getVenueClones = async (
 
 /**
  * Find if a specific entity already has a clone of a canonical venue
- * * @param canonicalVenueId - The canonical venue ID
+ * 
+ * @param canonicalVenueId - The canonical venue ID
  * @param entityId - The entity to check
  * @returns The existing venue clone or null
  */
@@ -845,7 +891,8 @@ export const findVenueForEntity = async (
 
 /**
  * Poll for task completion with progress callback
- * * @param taskId - Background task ID
+ * 
+ * @param taskId - Background task ID
  * @param onProgress - Callback for progress updates
  * @param pollInterval - Interval in ms (default 2000)
  * @param maxAttempts - Max poll attempts (default 150 = 5 min)

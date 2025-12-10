@@ -2564,7 +2564,7 @@ type Mutation {
     @auth(rules: [{ allow: groups, groups: ["SUPER_ADMIN"] }])
 
   # --- Scraper Controls ---
-  fetchTournamentData(url: AWSURL, s3Key: String, forceRefresh: Boolean, scraperApiKey: String): ScrapedGameData
+  fetchTournamentData(url: AWSURL, s3Key: String, forceRefresh: Boolean, scraperApiKey: String, entityId: ID): ScrapedGameData
     @function(name: "webScraperFunction-${env}")
 
   saveTournamentData(input: SaveTournamentInput!): Game
@@ -2573,7 +2573,7 @@ type Mutation {
   controlScraperOperation(operation: ScraperOperation!, entityId: ID): ScraperControlResponse
     @function(name: "autoScraper-${env}")
 
-  triggerAutoScraping(maxGames: Int): ScraperControlResponse
+  triggerAutoScraping(maxGames: Int, entityId: ID!): ScraperControlResponse
     @function(name: "autoScraper-${env}")
 
   startScraperJob(input: StartScraperJobInput!): ScraperJob

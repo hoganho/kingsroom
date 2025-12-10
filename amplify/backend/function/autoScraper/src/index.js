@@ -24,6 +24,11 @@ Amplify Params - DO NOT EDIT */
 // REFACTORED: This function is now a "headless client" of the AppSync API.
 // It no longer invokes webScraperFunction directly. Instead, it calls the
 // same fetchTournamentData and saveTournamentData mutations as the frontend.
+//
+// UPDATED: Removed hardcoded DEFAULT_ENTITY_ID
+// - entityId is now REQUIRED from args, event payload, or environment variable
+// - Supports EventBridge scheduled invocations with entityId in event payload
+// - Can optionally process ALL active entities if no specific entityId provided (multi-entity mode)
 
 const { 
     DynamoDBClient, 
@@ -58,16 +63,99 @@ const MAX_CONSECUTIVE_BLANKS = parseInt(process.env.MAX_CONSECUTIVE_BLANKS || '5
 const UPDATE_CHECK_INTERVAL_MS = parseInt(process.env.UPDATE_CHECK_INTERVAL_MS || '3600000', 10); // 1 hour
 const MAX_LOG_SIZE = 25;
 const MAX_GAME_LIST_SIZE = 10;
-const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0"; // Fallback
+
+// REMOVED: Hardcoded DEFAULT_ENTITY_ID
+// Entity ID must now be provided via:
+// 1. args.entityId (from AppSync)
+// 2. event.entityId (from EventBridge)
+// 3. process.env.DEFAULT_ENTITY_ID (from Lambda environment variable)
 
 // --- NEW: AppSync Environment Variables ---
 const APPSYNC_ENDPOINT = process.env.API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT;
 const AWS_REGION = process.env.REGION;
 
 // --- Lambda Monitoring Initialization ---
-const monitoring = new LambdaMonitoring('autoScraper', DEFAULT_ENTITY_ID);
+// Initialize with placeholder - will be set per invocation
+const monitoring = new LambdaMonitoring('autoScraper', 'pending-entity');
 const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
 // --- End Lambda Monitoring ---
+
+// ===================================================================
+// HELPER: Resolve Entity ID
+// ===================================================================
+/**
+ * Resolves the entityId from various sources with clear error messages
+ * Priority: args.entityId > event.entityId > process.env.DEFAULT_ENTITY_ID
+ * 
+ * @param {Object} event - Lambda event
+ * @param {Object} args - Parsed arguments
+ * @returns {string} entityId
+ * @throws {Error} if no entityId can be resolved
+ */
+function resolveEntityId(event, args) {
+    // Priority 1: Explicit argument from AppSync
+    if (args?.entityId) {
+        console.log('[EntityResolver] Using entityId from args:', args.entityId);
+        return args.entityId;
+    }
+    
+    // Priority 2: EventBridge scheduled event payload
+    if (event?.entityId) {
+        console.log('[EntityResolver] Using entityId from event payload:', event.entityId);
+        return event.entityId;
+    }
+    
+    // Priority 3: Detail from EventBridge rule (nested structure)
+    if (event?.detail?.entityId) {
+        console.log('[EntityResolver] Using entityId from event.detail:', event.detail.entityId);
+        return event.detail.entityId;
+    }
+    
+    // Priority 4: Environment variable (set via amplify update function)
+    if (process.env.DEFAULT_ENTITY_ID) {
+        console.log('[EntityResolver] Using entityId from environment variable:', process.env.DEFAULT_ENTITY_ID);
+        return process.env.DEFAULT_ENTITY_ID;
+    }
+    
+    // No entityId found - throw descriptive error
+    throw new Error(
+        '[autoScraper] entityId is required but was not provided. ' +
+        'Provide entityId via: (1) args.entityId from AppSync, ' +
+        '(2) event.entityId from EventBridge, or ' +
+        '(3) DEFAULT_ENTITY_ID environment variable. ' +
+        'To set environment variable, run: amplify update function -> autoScraper -> Environment variables'
+    );
+}
+
+/**
+ * Optional: Fetch all active entities for multi-entity scheduled runs
+ * Use this when you want to process ALL entities in a single scheduled invocation
+ */
+async function getAllActiveEntityIds() {
+    const entityTable = getTableName('Entity');
+    
+    try {
+        const result = await monitoredDdbDocClient.send(new ScanCommand({
+            TableName: entityTable,
+            FilterExpression: 'isActive = :active',
+            ExpressionAttributeValues: {
+                ':active': { BOOL: true }
+            },
+            ProjectionExpression: 'id, entityName'
+        }));
+        
+        const entities = (result.Items || []).map(item => ({
+            id: item.id.S,
+            name: item.entityName.S
+        }));
+        
+        console.log(`[EntityResolver] Found ${entities.length} active entities`);
+        return entities;
+    } catch (error) {
+        console.error('[EntityResolver] Error fetching entities:', error);
+        throw error;
+    }
+}
 
 
 // ===================================================================
@@ -836,18 +924,26 @@ async function controlScraperOperation(operation, entityId) {
 
 // ===================================================================
 // REFACTORED: Main Handler
+// UPDATED: entityId resolution with clear error messages
 // ===================================================================
 exports.handler = async (event) => {
     console.log('[AutoScraper] Event:', JSON.stringify(event, null, 2));
+    
+    // Detect event source for better logging
+    const isEventBridge = event.source === 'aws.events' || event['detail-type'];
+    const isAppSync = !!event.fieldName;
+    console.log(`[AutoScraper] Source: ${isEventBridge ? 'EventBridge' : isAppSync ? 'AppSync' : 'Direct'}`);
     
     try {
         // Support both direct invocation and AppSync
         const operation = event.operation || event.fieldName;
         const args = event.arguments || event;
         
-        // Get entity ID
-        const entityId = args.entityId || process.env.DEFAULT_ENTITY_ID || DEFAULT_ENTITY_ID;
+        // UPDATED: Resolve entityId with proper error handling
+        const entityId = resolveEntityId(event, args);
         monitoring.entityId = entityId; // Set entityId for monitoring
+        
+        console.log(`[AutoScraper] Resolved entityId: ${entityId}`);
         
         // Handle control operations first, as they might stop a run
         if (operation === 'controlScraperOperation') {
@@ -886,15 +982,19 @@ exports.handler = async (event) => {
                 lastRunStartTime: new Date().toISOString()
             });
             
+            // Determine trigger source
+            const triggerSource = isEventBridge ? 'SCHEDULED' : (args.triggerSource || 'MANUAL');
+            const triggeredBy = isEventBridge ? 'eventbridge' : (args.triggeredBy || 'user');
+            
             // Create scraper job
-            const job = await createScraperJob(entityId, args.triggerSource || 'MANUAL', args.triggeredBy || 'user', {
+            const job = await createScraperJob(entityId, triggerSource, triggeredBy, {
                 maxGames: args.maxGames,
                 isFullScan: args.isFullScan,
                 startId: args.startId,
                 endId: args.endId
             });
 
-            await logStatus(entityId, 'INFO', 'Scraper job started', `Job ID: ${job.id}`);
+            await logStatus(entityId, 'INFO', 'Scraper job started', `Job ID: ${job.id}, Source: ${triggerSource}`);
             
             // First, process any update candidates (RUNNING games)
             console.log('[AutoScraper] Checking for update candidates...');
@@ -942,12 +1042,25 @@ exports.handler = async (event) => {
     } catch (error) {
         console.error('[AutoScraper] Error:', error);
         
-        // If this was triggered by triggerAutoScraping, try to set state to not running
+        // Try to reset running state if we have an entityId
         try {
-            const entityId = event.arguments?.entityId || process.env.DEFAULT_ENTITY_ID || DEFAULT_ENTITY_ID;
-            const scraperState = await getOrCreateScraperState(entityId);
-            if (scraperState.isRunning) {
-                await updateScraperState(scraperState.id, { isRunning: false, lastRunEndTime: new Date().toISOString() });
+            // Attempt to resolve entityId for cleanup (may fail if that was the original error)
+            let cleanupEntityId = null;
+            try {
+                cleanupEntityId = resolveEntityId(event, event.arguments || event);
+            } catch (resolveError) {
+                // If we can't resolve entityId, we can't clean up state - that's okay
+                console.warn('[AutoScraper] Could not resolve entityId for cleanup:', resolveError.message);
+            }
+            
+            if (cleanupEntityId) {
+                const scraperState = await getOrCreateScraperState(cleanupEntityId);
+                if (scraperState.isRunning) {
+                    await updateScraperState(scraperState.id, { 
+                        isRunning: false, 
+                        lastRunEndTime: new Date().toISOString() 
+                    });
+                }
             }
         } catch (stateError) {
             console.error('[AutoScraper] CRITICAL: Failed to reset running state after error:', stateError);

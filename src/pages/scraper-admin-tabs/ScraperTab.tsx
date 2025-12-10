@@ -525,7 +525,8 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
         const parsedData = await fetchGameDataFromBackend(
           url,
           !options.useS3,
-          scraperApiKey
+          scraperApiKey,
+          currentEntity?.id  // ADDED: entityId parameter
         );
 
         // --- CRITICAL ERROR CHECK ---
@@ -705,7 +706,8 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
           const refetchedData = await fetchGameDataFromBackend(
             url,
             modalResult.action === 'LIVE',
-            scraperApiKey
+            scraperApiKey,
+            currentEntity?.id  // ADDED: entityId parameter
           );
           Object.assign(parsedData, refetchedData);
         }
