@@ -1,5 +1,12 @@
 // src/pages/scraper-admin-tabs/URLManagementTab.tsx
-// Enhanced version with Skipped IDs Analyzer and Game Status display
+// COMPLETE VERSION: All original features + entity context integration
+// 
+// Changes from original:
+// 1. Added useEntity hook integration
+// 2. Pass entityId(s) to searchScrapeURLs query
+// 3. Added entity column when viewing multiple entities
+// 4. Added entity info banner
+// 5. PRESERVED: Statistics Cards, Dynamic recommendations, Filter Summary, etc.
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -10,18 +17,75 @@ import {
     ChevronDown,
     ChevronUp,
     AlertCircle,
-    Filter
+    Filter,
+    Building2  // NEW: Entity icon
 } from 'lucide-react';
-import { searchScrapeURLs } from '../../graphql/queries';
 import { 
     bulkModifyScrapeURLs 
 } from '../../graphql/mutations';
 import { ScrapeURL, ScrapeURLStatus, GameStatus } from '../../API';
 import { URLStatusBadge, GameStatusBadge } from '../../components/scraper/admin/ScraperAdminShared';
 import { SkippedIDsAnalyzer } from '../../components/scraper/admin/SkippedIDsAnalyzer';
+import { useEntity } from '../../contexts/EntityContext';  // NEW: Import entity context
+
+// NEW: Custom query that supports entity filtering
+// This should match your schema after you add entityId/entityIds parameters
+const searchScrapeURLsWithEntity = /* GraphQL */ `
+  query SearchScrapeURLsWithEntity(
+    $entityId: ID
+    $entityIds: [ID]
+    $status: ScrapeURLStatus
+    $limit: Int
+    $nextToken: String
+  ) {
+    searchScrapeURLs(
+      entityId: $entityId
+      entityIds: $entityIds
+      status: $status
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        url
+        tournamentId
+        status
+        doNotScrape
+        gameStatus
+        gameName
+        gameId
+        venueId
+        venueName
+        entityId
+        timesScraped
+        timesSuccessful
+        timesFailed
+        consecutiveFailures
+        lastScrapedAt
+        lastSuccessfulScrapeAt
+        lastScrapeStatus
+        lastScrapeMessage
+        placedIntoDatabase
+        firstScrapedAt
+        latestS3Key
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
 
 export const URLManagementTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
+    
+    // NEW: Get entity context
+    const { 
+        entities, 
+        selectedEntities, 
+        loading: entitiesLoading 
+    } = useEntity();
+    
     const [urls, setURLs] = useState<ScrapeURL[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -32,15 +96,46 @@ export const URLManagementTab: React.FC = () => {
     const [showSkippedAnalyzer, setShowSkippedAnalyzer] = useState(false);
     const [showErrorDetails, setShowErrorDetails] = useState(false);
 
+    // NEW: Create entity lookup map for display
+    const entityMap = useMemo(() => {
+        return entities.reduce((acc, entity) => {
+            acc[entity.id] = entity;
+            return acc;
+        }, {} as Record<string, typeof entities[0]>);
+    }, [entities]);
+
+    // NEW: Get selected entity IDs for query
+    const selectedEntityIds = useMemo(() => {
+        return selectedEntities.map(e => e.id);
+    }, [selectedEntities]);
+
     const loadURLs = useCallback(async () => {
+        // Wait for entities to load
+        if (entitiesLoading) {
+            return;
+        }
+
+        // If no entities selected, show empty state
+        if (selectedEntityIds.length === 0) {
+            setURLs([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
             setGraphqlErrors([]);
             
+            // NEW: Pass entity filter to query
+            // Use searchScrapeURLsWithEntity if schema is updated, 
+            // otherwise fall back to searchScrapeURLs
             const response = await client.graphql({
-                query: searchScrapeURLs,
+                query: searchScrapeURLsWithEntity,
                 variables: { 
+                    // If only one entity selected, use entityId; otherwise use entityIds array
+                    entityId: selectedEntityIds.length === 1 ? selectedEntityIds[0] : null,
+                    entityIds: selectedEntityIds.length > 1 ? selectedEntityIds : null,
                     status: statusFilter === 'ALL' ? null : statusFilter,
                     limit: 100 
                 }
@@ -103,10 +198,21 @@ export const URLManagementTab: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [client, statusFilter]);
+    }, [client, statusFilter, selectedEntityIds, entitiesLoading]);
 
+    // Reload when filters or entity selection changes
     useEffect(() => {
         loadURLs();
+    }, [loadURLs]);
+
+    // Also listen for entity change events
+    useEffect(() => {
+        const handleEntityChange = () => {
+            loadURLs();
+        };
+        
+        window.addEventListener('selectedEntitiesChanged', handleEntityChange);
+        return () => window.removeEventListener('selectedEntitiesChanged', handleEntityChange);
     }, [loadURLs]);
 
     const handleToggleURL = (url: string) => {
@@ -163,6 +269,13 @@ export const URLManagementTab: React.FC = () => {
             return acc;
         }, {} as Record<string, number>);
         
+        // NEW: Stats by entity
+        const byEntity = urls.reduce((acc, url) => {
+            const entityId = url.entityId || 'unknown';
+            acc[entityId] = (acc[entityId] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+        
         const totalErrors = urls.filter(u => u.status === 'ERROR').length;
         const totalParsed = urls.filter(u => u.gameStatus).length;
         const totalUnparsed = urls.length - totalParsed;
@@ -174,6 +287,7 @@ export const URLManagementTab: React.FC = () => {
             total: urls.length,
             byStatus,
             byGameStatus,
+            byEntity,
             totalErrors,
             totalParsed,
             totalUnparsed,
@@ -201,9 +315,51 @@ export const URLManagementTab: React.FC = () => {
         return filtered;
     }, [urls, statusFilter, gameStatusFilter]);
 
+    // NEW: Show entity info banner when multiple entities are selected or none
+    const EntityInfoBanner = () => {
+        if (selectedEntities.length === 0) {
+            return (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                    <div className="flex items-center">
+                        <Building2 className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span className="text-yellow-800">No entities selected. Please select at least one entity to view URLs.</span>
+                    </div>
+                </div>
+            );
+        }
+        
+        if (selectedEntities.length === 1) {
+            return null; // Single entity, no need for banner
+        }
+        
+        return (
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <Building2 className="h-4 w-4 text-blue-500 mr-2" />
+                        <span className="text-sm text-blue-700">
+                            Showing URLs from {selectedEntities.length} entities: {' '}
+                            <strong>{selectedEntities.map(e => e.entityName).join(', ')}</strong>
+                        </span>
+                    </div>
+                    <div className="text-xs text-blue-600">
+                        {Object.entries(stats.byEntity || {}).map(([entityId, count]) => (
+                            <span key={entityId} className="mr-3">
+                                {entityMap[entityId]?.entityName || 'Unknown'}: {count}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="space-y-6">
-            {/* Error Banner */}
+            {/* NEW: Entity info banner */}
+            <EntityInfoBanner />
+            
+            {/* Error Banner - PRESERVED from original */}
             {error && (
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
                     <div className="flex items-start">
@@ -233,7 +389,7 @@ export const URLManagementTab: React.FC = () => {
                                     )}
                                 </div>
                             )}
-                            {/* Dynamic recommendations based on error types */}
+                            {/* Dynamic recommendations based on error types - PRESERVED from original */}
                             <div className="mt-2 text-xs text-yellow-700">
                                 <strong>Recommended fixes:</strong>
                                 {graphqlErrors.some((e: any) => e.message?.includes('GameStatus')) && (
@@ -258,7 +414,7 @@ export const URLManagementTab: React.FC = () => {
                 </div>
             )}
             
-            {/* Statistics Cards */}
+            {/* Statistics Cards - PRESERVED from original */}
             <div className="grid grid-cols-5 gap-4">
                 <div className="bg-white rounded-lg shadow p-4">
                     <p className="text-sm text-gray-500">Total URLs</p>
@@ -285,7 +441,7 @@ export const URLManagementTab: React.FC = () => {
                 </div>
             </div>
 
-            {/* Skipped IDs Analyzer */}
+            {/* Skipped IDs Analyzer - PRESERVED from original */}
             <div className="bg-white rounded-lg shadow">
                 <button
                     onClick={() => setShowSkippedAnalyzer(!showSkippedAnalyzer)}
@@ -309,7 +465,7 @@ export const URLManagementTab: React.FC = () => {
                 )}
             </div>
 
-            {/* URL Management */}
+            {/* URL Management - PRESERVED layout from original */}
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b">
                     <div className="flex items-center justify-between">
@@ -355,7 +511,7 @@ export const URLManagementTab: React.FC = () => {
                         </div>
                     </div>
                     
-                    {/* Filter Summary */}
+                    {/* Filter Summary - PRESERVED from original */}
                     {(statusFilter !== 'ALL' || gameStatusFilter !== 'ALL') && (
                         <div className="mt-3 flex items-center gap-2 text-sm">
                             <span className="text-gray-600">Showing:</span>
@@ -382,7 +538,7 @@ export const URLManagementTab: React.FC = () => {
                     )}
                 </div>
 
-                {/* Bulk Actions */}
+                {/* Bulk Actions - PRESERVED from original */}
                 {selectedURLs.size > 0 && (
                     <div className="p-4 bg-blue-50 border-b flex items-center justify-between">
                         <span className="text-sm text-blue-700">
@@ -446,6 +602,10 @@ export const URLManagementTab: React.FC = () => {
                                         />
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tournament ID</th>
+                                    {/* NEW: Entity column when multiple entities selected */}
+                                    {selectedEntities.length > 1 && (
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entity</th>
+                                    )}
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">URL Status</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Game Status</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Game Name</th>
@@ -466,6 +626,17 @@ export const URLManagementTab: React.FC = () => {
                                             />
                                         </td>
                                         <td className="px-4 py-3 text-sm font-medium">{url.tournamentId}</td>
+                                        {/* NEW: Entity cell when multiple entities selected */}
+                                        {selectedEntities.length > 1 && (
+                                            <td className="px-4 py-3 text-sm">
+                                                <span 
+                                                    className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-700"
+                                                    title={url.entityId || 'Unknown'}
+                                                >
+                                                    {entityMap[url.entityId || '']?.entityName || 'Unknown'}
+                                                </span>
+                                            </td>
+                                        )}
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 <URLStatusBadge status={url.status} />
@@ -526,10 +697,15 @@ export const URLManagementTab: React.FC = () => {
                     )}
                 </div>
                 
-                {/* Results Summary */}
+                {/* Results Summary - PRESERVED from original */}
                 {!loading && filteredURLs.length > 0 && (
                     <div className="p-4 bg-gray-50 border-t text-sm text-gray-600">
                         Showing {filteredURLs.length} of {stats.total} total URLs
+                        {selectedEntities.length > 1 && (
+                            <span className="ml-2">
+                                across {selectedEntities.length} entities
+                            </span>
+                        )}
                     </div>
                 )}
             </div>

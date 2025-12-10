@@ -449,7 +449,7 @@ const matchVenueByName = async (venueName, entityId) => {
     }
 };
 
-const resolveVenue = async (venueRef, entityId) => {
+const resolveVenue = async (venueRef, entityId, preferredStatus = null) => {
     const entity = await getEntityById(entityId);
     const defaultVenueId = entity?.defaultVenueId || null;
     
@@ -467,12 +467,14 @@ const resolveVenue = async (venueRef, entityId) => {
         return { venueId: UNASSIGNED_VENUE_ID, venueName: UNASSIGNED_VENUE_NAME, status: 'UNASSIGNED', confidence: 0, venueFee: 0 };
     }
     
+    // FIX: Check preferredStatus to allow AUTO_ASSIGNED even with a specific ID
     if (venueRef.venueId) {
         const venue = await getVenueById(venueRef.venueId);
         return {
             venueId: venueRef.venueId,
             venueName: venue?.name || venueRef.venueName || 'Unknown',
-            status: 'MANUALLY_ASSIGNED',
+            // If the input explicitly says AUTO_ASSIGNED, respect it. Otherwise assume MANUAL.
+            status: preferredStatus === 'AUTO_ASSIGNED' ? 'AUTO_ASSIGNED' : 'MANUALLY_ASSIGNED',
             confidence: 1.0,
             venueFee: venue?.fee ?? 0
         };
@@ -848,18 +850,34 @@ const createGame = async (input, venueResolution, seriesResolution) => {
     const isSeries = input.game.isSeries || false;
     const isSatellite = input.game.isSatellite || false;
     
-    const queryKeys = computeGameQueryKeys({
-        gameStartDateTime: gameStartDateTime,
-        buyIn: input.game.buyIn || 0,
-        gameVariant: input.game.gameVariant || 'NLHE',
-        venueId: venueResolution.venueId,
-        entityId: input.source.entityId,
-        isRegular,
-        isSeries,
-        isSatellite
-    });
-
-    console.log(`[SAVE-GAME] Computed query keys:`, queryKeys);
+    // MODIFIED: Check for NOT_PUBLISHED status
+    const isNotPublished = input.game.gameStatus === 'NOT_PUBLISHED';
+    
+let queryKeys;
+    
+    if (isNotPublished) {
+        console.log(`[SAVE-GAME] Game is NOT_PUBLISHED - omitting query keys`);
+        queryKeys = {
+            gameDayOfWeek: undefined,
+            buyInBucket: undefined,
+            venueScheduleKey: undefined,
+            entityQueryKey: undefined,
+            venueGameTypeKey: undefined,
+            entityGameTypeKey: undefined
+        };
+    } else {
+        queryKeys = computeGameQueryKeys({
+            gameStartDateTime: gameStartDateTime,
+            buyIn: input.game.buyIn || 0,
+            gameVariant: input.game.gameVariant || 'NLHE',
+            venueId: venueResolution.venueId,
+            entityId: input.source.entityId,
+            isRegular,
+            isSeries,
+            isSatellite
+        });
+        console.log(`[SAVE-GAME] Computed query keys:`, queryKeys);
+    }
 
     const game = {
         id: gameId,
@@ -1040,14 +1058,40 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     const currentIsRegular = updateFields.isRegular ?? existingGame.isRegular ?? false;
     const currentIsSeries = updateFields.isSeries ?? existingGame.isSeries ?? false;
     const currentIsSatellite = updateFields.isSatellite ?? existingGame.isSatellite ?? false;
+    
+    // MODIFIED: Determine effective status to check for NOT_PUBLISHED
+    const effectiveGameStatus = updateFields.gameStatus || existingGame.gameStatus;
 
     // Check if query keys are missing (legacy records) or need recomputation
     const queryKeysMissing = !existingGame.venueScheduleKey || !existingGame.entityQueryKey || 
                              !existingGame.gameDayOfWeek || !existingGame.buyInBucket;
     const gameTypeKeysMissing = !existingGame.venueGameTypeKey || !existingGame.entityGameTypeKey;
     
-    // Recompute query keys if relevant fields changed OR if keys are missing
-    if (shouldRecomputeQueryKeys(fieldsUpdated) || queryKeysMissing || gameTypeKeysMissing) {
+    // LOGIC CHANGE START
+    if (effectiveGameStatus === 'NOT_PUBLISHED') {
+        // If game is NOT_PUBLISHED, ensure all query keys are NULL
+        const keysToClear = [
+            'gameDayOfWeek', 'buyInBucket', 'venueScheduleKey', 'entityQueryKey',
+            'venueGameTypeKey', 'entityGameTypeKey'
+        ];
+        
+        let keysCleared = false;
+        keysToClear.forEach(key => {
+            // Only update if it's not already null
+            if (existingGame[key] !== null) {
+                updateFields[key] = null;
+                fieldsUpdated.push(key);
+                keysCleared = true;
+            }
+        });
+        
+        if (keysCleared) {
+            console.log(`[SAVE-GAME] Cleared query optimization keys for NOT_PUBLISHED game`);
+        }
+    } 
+    // Recompute query keys if relevant fields changed OR if keys are missing (ONLY if not NOT_PUBLISHED)
+    else if (shouldRecomputeQueryKeys(fieldsUpdated) || queryKeysMissing || gameTypeKeysMissing) {
+        // ... (existing recomputation logic goes here) ...
         const reason = queryKeysMissing ? 'missing query keys (legacy record)' : 
             gameTypeKeysMissing ? 'missing game type keys' :
             `changes in: ${fieldsUpdated.filter(f => ['gameStartDateTime', 'buyIn', 'gameVariant', 'venueId', 'entityId', 'isRegular', 'isSeries', 'isSatellite'].includes(f)).join(', ')}`;
@@ -1093,6 +1137,7 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
             fieldsUpdated.push('entityGameTypeKey');
         }
     }
+    // LOGIC CHANGE END
 
     if (input.source.wasEdited) {
         updateFields.wasEdited = true;
@@ -1353,7 +1398,12 @@ exports.handler = async (event) => {
             return { success: true, action: 'VALIDATED', message: 'Input validation passed', warnings: validation.warnings };
         }
 
-        const venueResolution = await resolveVenue(input.venue, input.source.entityId);
+        // FIX: Pass input.game.venueAssignmentStatus as the 3rd argument
+        const venueResolution = await resolveVenue(
+            input.venue, 
+            input.source.entityId, 
+            input.game.venueAssignmentStatus
+        );
         console.log(`[SAVE-GAME] Venue resolved:`, venueResolution);
 
         // Series resolution - now with comprehensive matching and auto-creation

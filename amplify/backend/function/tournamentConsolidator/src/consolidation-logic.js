@@ -462,7 +462,6 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     let projectedRakeRevenue = 0;
     let rakeRevenue = 0;  // *** FIX: Added rakeRevenue aggregation ***
     let rakeSubsidy = 0;
-    let actualRakeRevenue = 0;
     let totalBuyInsCollected = 0;
     let prizepoolPlayerContributions = 0;
     let prizepoolAddedValue = 0;
@@ -495,7 +494,6 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         projectedRakeRevenue += (child.projectedRakeRevenue || 0);
         rakeRevenue += (child.rakeRevenue || 0);  // *** FIX: Aggregate rakeRevenue ***
         rakeSubsidy += (child.rakeSubsidy || 0);
-        actualRakeRevenue += (child.actualRakeRevenue || 0);
         totalBuyInsCollected += (child.totalBuyInsCollected || 0);
         prizepoolPlayerContributions += (child.prizepoolPlayerContributions || 0);
         prizepoolAddedValue += (child.prizepoolAddedValue || 0);
@@ -661,7 +659,6 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         projectedRakeRevenue,
         rakeRevenue,  // *** FIX: Now properly aggregated ***
         rakeSubsidy,
-        actualRakeRevenue,
         prizepoolPlayerContributions,
         prizepoolAddedValue,
         prizepoolSurplus,
@@ -766,7 +763,6 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         totalUniquePlayers: 0,
         totalInitialEntries: 0,
         totalEntries: 0,
-        actualCalculatedUniquePlayers: 0,
         totalRebuys: 0,
         totalAddons: 0,
         prizepoolPaid: 0,
@@ -776,7 +772,6 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         projectedRakeRevenue: 0,
         rakeRevenue: 0,  // *** FIX: Added rakeRevenue ***
         rakeSubsidy: 0,
-        actualRakeRevenue: 0,
         prizepoolPlayerContributions: 0,
         prizepoolAddedValue: 0,
         gameProfit: 0,

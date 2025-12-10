@@ -1430,13 +1430,6 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "actualCalculatedUniquePlayers": {
-                    "name": "actualCalculatedUniquePlayers",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "gameDayOfWeek": {
                     "name": "gameDayOfWeek",
                     "isArray": false,
@@ -12020,6 +12013,15 @@ export const schema = {
                     "type": "Float",
                     "isRequired": false,
                     "attributes": []
+                },
+                "venueAssignmentStatus": {
+                    "name": "venueAssignmentStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "VenueAssignmentStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -12533,6 +12535,92 @@ export const schema = {
                     "name": "reScrapedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ScraperJobsReport": {
+            "name": "ScraperJobsReport",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "ScraperJob"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entitySummary": {
+                    "name": "entitySummary",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "EntityJobSummary"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "EntityJobSummary": {
+            "name": "EntityJobSummary",
+            "fields": {
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityName": {
+                    "name": "entityName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalJobs": {
+                    "name": "totalJobs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "runningJobs": {
+                    "name": "runningJobs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "completedJobs": {
+                    "name": "completedJobs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "failedJobs": {
+                    "name": "failedJobs",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -14179,7 +14267,7 @@ export const schema = {
                     "type": {
                         "model": "ScrapeURL"
                     },
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
                 },
@@ -14187,6 +14275,13 @@ export const schema = {
                     "name": "nextToken",
                     "isArray": false,
                     "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -14223,5 +14318,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "3cd93b274d9e366bb507e64802e0a390"
+    "version": "216ab4f94fd6021ee9ffaff1c892470e"
 };

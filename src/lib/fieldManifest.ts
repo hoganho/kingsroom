@@ -53,7 +53,6 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   totalBuyInsCollected: { label: 'Total Buy-Ins Collected', group: 'Financial Metrics', isBaselineOptional: true },
   projectedRakeRevenue: { label: 'Projected Rake Revenue', group: 'Financial Metrics', isBaselineOptional: true },
   rakeSubsidy: { label: 'Rake Subsidy', group: 'Financial Metrics', isBaselineOptional: true },
-  actualRakeRevenue: { label: 'Actual Rake Revenue', group: 'Financial Metrics', isBaselineOptional: true },
   prizepoolPlayerContributions: { label: 'Player Contributions', group: 'Financial Metrics', isBaselineOptional: true },
   prizepoolAddedValue: { label: 'Prizepool Added Value', group: 'Financial Metrics', isBaselineOptional: true },
   prizepoolSurplus: { label: 'Prizepool Surplus', group: 'Financial Metrics', isBaselineOptional: true },

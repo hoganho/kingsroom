@@ -78,7 +78,6 @@ export const GameDetails = () => {
               totalBuyInsCollected
               projectedRakeRevenue
               rakeSubsidy
-              actualRakeRevenue
               prizepoolPlayerContributions
               prizepoolAddedValue
               prizepoolSurplus

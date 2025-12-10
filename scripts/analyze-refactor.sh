@@ -97,7 +97,7 @@ count_term() {
     echo "============================================================================"
     echo ""
 
-    for field in "projectedRakeRevenue" "rakeSubsidy" "actualRakeRevenue" "guaranteeOverlayCost" "prizepoolPlayerContributions" "prizepoolAddedValue" "prizepoolSurplus" "gameProfit" "fullRakeRealized" "totalBuyInsCollected"; do
+    for field in "projectedRakeRevenue" "rakeSubsidy" "guaranteeOverlayCost" "prizepoolPlayerContributions" "prizepoolAddedValue" "prizepoolSurplus" "gameProfit" "fullRakeRealized" "totalBuyInsCollected"; do
         echo "--- $field ---"
         count=$(count_term "$field")
         if [ "$count" -gt 0 ]; then

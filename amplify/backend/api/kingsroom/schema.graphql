@@ -330,7 +330,6 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   isPartialData: Boolean @default(value: "false")
   missingFlightCount: Int
   expectedTotalEntries: Int
-  actualCalculatedUniquePlayers: Int
 
   # --- Query Optimisation Keys ---
   gameDayOfWeek: String @index(name: "byDayOfWeek", sortKeyFields: ["gameStartDateTime"])
@@ -1554,6 +1553,7 @@ type ScrapedGameData {
   prizepoolSurplus: Float
   guaranteeOverlayCost: Float
   gameProfit: Float
+  venueAssignmentStatus: VenueAssignmentStatus
 }
 
 type ScrapedTournamentLevel {
@@ -1649,6 +1649,23 @@ type ReScrapeResult {
   entityId: ID
   s3Key: String
   reScrapedAt: AWSDateTime
+}
+
+type ScraperJobsReport {
+  items: [ScraperJob]
+  nextToken: String
+  totalCount: Int           # Optional
+  entitySummary: [EntityJobSummary]  # NEW: Optional per-entity breakdown
+}
+
+# NEW: Entity-level summary (optional but useful)
+type EntityJobSummary {
+  entityId: ID!
+  entityName: String
+  totalJobs: Int
+  runningJobs: Int
+  completedJobs: Int
+  failedJobs: Int
 }
 
 # --- Gap Detection Types ---
@@ -1974,8 +1991,9 @@ type ScraperJobConnection {
 }
 
 type ScrapeURLConnection {
-  items: [ScrapeURL!]
+  items: [ScrapeURL]
   nextToken: String
+  totalCount: Int           # Optional: for showing total matching records
 }
 
 type UnfinishedGamesConnection {
@@ -2245,6 +2263,7 @@ input SaveGameDataInput {
   gameTags: [String]
   levels: AWSJSON
   venueFee: Float
+  venueAssignmentStatus: VenueAssignmentStatus
 }
 
 input SavePlayerDataInput {
@@ -2370,19 +2389,39 @@ type Query {
   fetchUpdateCandidates: [String!]
     @function(name: "webScraperFunction-${env}")
 
-  getScraperJobsReport(status: ScraperJobStatus, limit: Int, nextToken: String): ScraperJobConnection
+  getScraperJobsReport(
+    entityId: ID              # NEW: Filter by single entity
+    entityIds: [ID]           # NEW: Filter by multiple entities
+    status: ScraperJobStatus
+    limit: Int
+    nextToken: String
+  ): ScraperJobsReport
     @function(name: "scraperManagement-${env}")
 
   fetchScrapeURLDetails(url: AWSURL!): ScrapeURL
     @function(name: "scraperManagement-${env}")
 
-  searchScrapeURLs(status: ScrapeURLStatus, limit: Int, nextToken: String): ScrapeURLConnection
+  searchScrapeURLs(
+    entityId: ID              # NEW: Filter by single entity
+    entityIds: [ID]           # NEW: Filter by multiple entities  
+    status: ScrapeURLStatus
+    limit: Int
+    nextToken: String
+  ): ScrapeURLConnection
     @function(name: "scraperManagement-${env}")
 
-  getScraperMetrics(timeRange: TimeRange!, entityId: ID): ScraperMetrics
+  getScraperMetrics(
+    entityId: ID              # NEW: Filter by single entity
+    entityIds: [ID]           # NEW: Filter by multiple entities
+    timeRange: TimeRange
+  ): ScraperMetrics
     @function(name: "scraperManagement-${env}")
 
-  getUpdateCandidateURLs(limit: Int): [ScrapeURL!]
+  getUpdateCandidateURLs(
+    entityId: ID              # NEW
+    entityIds: [ID]           # NEW
+    limit: Int
+  ): [ScrapeURL]
     @function(name: "scraperManagement-${env}")
 
   scrapeGame(url: AWSURL!, entityId: ID, venueId: ID, doNotScrape: Boolean): ScrapedGameData

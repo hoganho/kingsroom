@@ -610,7 +610,6 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedUniquePlayers
             gameDayOfWeek
             buyInBucket
             venueScheduleKey
@@ -653,7 +652,6 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedUniquePlayers
           gameDayOfWeek
           buyInBucket
           venueScheduleKey
@@ -1584,7 +1582,6 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedUniquePlayers
             gameDayOfWeek
             buyInBucket
             venueScheduleKey
@@ -1627,7 +1624,6 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedUniquePlayers
           gameDayOfWeek
           buyInBucket
           venueScheduleKey
@@ -2574,7 +2570,6 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedUniquePlayers
             gameDayOfWeek
             buyInBucket
             venueScheduleKey
@@ -2617,7 +2612,6 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedUniquePlayers
           gameDayOfWeek
           buyInBucket
           venueScheduleKey
@@ -3551,7 +3545,6 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedUniquePlayers
             gameDayOfWeek
             buyInBucket
             venueScheduleKey
@@ -3594,7 +3587,6 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedUniquePlayers
           gameDayOfWeek
           buyInBucket
           venueScheduleKey
@@ -4528,7 +4520,6 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedUniquePlayers
             gameDayOfWeek
             buyInBucket
             venueScheduleKey
@@ -4571,7 +4562,6 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedUniquePlayers
           gameDayOfWeek
           buyInBucket
           venueScheduleKey
@@ -5502,7 +5492,6 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedUniquePlayers
             gameDayOfWeek
             buyInBucket
             venueScheduleKey
@@ -5545,7 +5534,6 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedUniquePlayers
           gameDayOfWeek
           buyInBucket
           venueScheduleKey
@@ -6489,7 +6477,6 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedUniquePlayers
             gameDayOfWeek
             buyInBucket
             venueScheduleKey
@@ -6532,7 +6519,6 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedUniquePlayers
           gameDayOfWeek
           buyInBucket
           venueScheduleKey
@@ -7476,7 +7462,6 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             isPartialData
             missingFlightCount
             expectedTotalEntries
-            actualCalculatedUniquePlayers
             gameDayOfWeek
             buyInBucket
             venueScheduleKey
@@ -7519,7 +7504,6 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           isPartialData
           missingFlightCount
           expectedTotalEntries
-          actualCalculatedUniquePlayers
           gameDayOfWeek
           buyInBucket
           venueScheduleKey

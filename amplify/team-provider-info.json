@@ -19,7 +19,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/autoScraper-576773654f734e464d32-build.zip"
+          "s3Key": "amplify-builds/autoScraper-74346376515937516843-build.zip"
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -52,11 +52,11 @@
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-63594156417659654a42-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-4e4572632b77686b4533-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/scraperManagement-6e36483639656e397173-build.zip"
+          "s3Key": "amplify-builds/scraperManagement-75456f77436d52535534-build.zip"
         },
         "socialFetcher": {
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
@@ -65,7 +65,7 @@
         },
         "tournamentConsolidator": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/tournamentConsolidator-6538497463364d683235-build.zip"
+          "s3Key": "amplify-builds/tournamentConsolidator-4a465159376a637a6c52-build.zip"
         },
         "venueAssignmentService": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -77,7 +77,7 @@
           "scraperS3Bucket": "pokerpro-scraper-storage",
           "saveGameFunctionName": "saveGameFunction-dev",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-5830516177704e6b3234-build.zip"
+          "s3Key": "amplify-builds/webScraperFunction-5179433765644a4d7249-build.zip"
         },
         "userManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",

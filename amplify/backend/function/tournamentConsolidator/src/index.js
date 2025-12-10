@@ -583,7 +583,6 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
         totalEntries: calculatedTotalEntries,
         // *** FIX V3: Use the properly calculated unique player count ***
         totalUniquePlayers: actualUniquePlayers,
-        actualCalculatedUniquePlayers: uniqueRunners,  // Keep this for tracking entry-based calculation
         totalRebuys: calculatedRebuys,  // *** FIX: Now calculated from totalEntries - uniquePlayers ***
         totalAddons: aggregated.totalAddons || 0,
         prizepoolPaid: aggregated.prizepoolPaid || 0,
@@ -594,7 +593,6 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
         // *** FIX V3: Properly aggregate rakeRevenue ***
         rakeRevenue: aggregated.rakeRevenue || 0,
         rakeSubsidy: aggregated.rakeSubsidy || 0,
-        actualRakeRevenue: aggregated.actualRakeRevenue || 0,
         prizepoolPlayerContributions: aggregated.prizepoolPlayerContributions || 0,
         prizepoolAddedValue: aggregated.prizepoolAddedValue || 0,
         prizepoolSurplus: aggregated.prizepoolSurplus || 0,

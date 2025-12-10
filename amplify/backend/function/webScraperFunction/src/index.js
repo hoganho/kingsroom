@@ -691,6 +691,162 @@ const updateScrapeURLDoNotScrape = async (url, doNotScrape, gameStatus) => {
     }
 };
 
+// ===================================================================
+// ScrapeAttempt Tracking Functions
+// ===================================================================
+
+/**
+ * Helper to extract error type from error message
+ */
+const extractErrorType = (errorMessage) => {
+    if (!errorMessage) return 'UNKNOWN';
+    
+    const patterns = [
+        { pattern: /timeout/i, type: 'TIMEOUT' },
+        { pattern: /ECONNREFUSED/i, type: 'CONNECTION_REFUSED' },
+        { pattern: /ECONNRESET/i, type: 'CONNECTION_RESET' },
+        { pattern: /ETIMEDOUT/i, type: 'TIMEOUT' },
+        { pattern: /404/i, type: 'NOT_FOUND' },
+        { pattern: /500/i, type: 'SERVER_ERROR' },
+        { pattern: /503/i, type: 'SERVICE_UNAVAILABLE' },
+        { pattern: /venue/i, type: 'VENUE_ERROR' },
+        { pattern: /parse/i, type: 'PARSE_ERROR' },
+        { pattern: /DynamoDB/i, type: 'DATABASE_ERROR' },
+        { pattern: /S3/i, type: 'S3_ERROR' },
+        { pattern: /not found/i, type: 'NOT_FOUND' },
+        { pattern: /not published/i, type: 'NOT_PUBLISHED' }
+    ];
+    
+    for (const { pattern, type } of patterns) {
+        if (pattern.test(errorMessage)) {
+            return type;
+        }
+    }
+    
+    return 'OTHER';
+};
+
+/**
+ * Create a ScrapeAttempt record for tracking individual scrape attempts
+ * 
+ * This tracks every attempt to scrape a URL, including:
+ * - Single URL scrapes via fetchTournamentData
+ * - Re-scrapes from cache
+ * - Batch scrapes (already handled by autoScraper, but we can track here too)
+ * 
+ * @param {Object} params - Attempt parameters
+ */
+const createScrapeAttempt = async (params) => {
+    const {
+        url,
+        tournamentId,
+        entityId,
+        scrapeURLId = null,
+        scraperJobId = null,      // null for single URL scrapes (not part of a batch job)
+        status,                    // ScrapeAttemptStatus enum
+        processingTime = 0,
+        gameName = null,
+        gameStatus = null,
+        registrationStatus = null,
+        dataHash = null,
+        hasChanges = false,
+        errorMessage = null,
+        errorType = null,
+        gameId = null,
+        wasNewGame = false,
+        fieldsUpdated = [],
+        foundKeys = [],
+        structureLabel = null,
+        contentHash = null,
+        s3Key = null,              // Track which S3 file was used/created
+        source = 'SINGLE_SCRAPE'   // SINGLE_SCRAPE, BATCH_SCRAPE, RESCRAPE_CACHE
+    } = params;
+    
+    const scrapeAttemptTable = getTableName('ScrapeAttempt');
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+    const attemptId = uuidv4();
+    
+    // Generate a synthetic job ID for single scrapes to maintain referential integrity
+    // Format: single-{entityId}-{timestamp} for easier filtering
+    const effectiveJobId = scraperJobId || `single-${entityId || 'unknown'}-${timestamp}`;
+    
+    const attemptRecord = {
+        id: attemptId,
+        url,
+        tournamentId: tournamentId || 0,
+        attemptTime: now,
+        
+        // Job tracking
+        scraperJobId: effectiveJobId,
+        scrapeURLId: scrapeURLId || null,
+        
+        // Status
+        status,
+        processingTime: processingTime || 0,
+        
+        // Game data extracted
+        gameName,
+        gameStatus,
+        registrationStatus,
+        
+        // Content tracking
+        dataHash: dataHash || contentHash,
+        contentHash: contentHash || dataHash,
+        hasChanges,
+        
+        // Error tracking
+        errorMessage: errorMessage ? errorMessage.substring(0, 500) : null,  // Limit error message length
+        errorType,
+        
+        // Game association
+        gameId,
+        wasNewGame,
+        
+        // Extraction details
+        fieldsUpdated: fieldsUpdated || [],
+        foundKeys: foundKeys || [],
+        fieldsExtracted: foundKeys || [],
+        structureLabel,
+        
+        // Metadata
+        wasEdited: false,
+        scrapedAt: now,
+        entityId,
+        
+        // DataStore fields
+        createdAt: now,
+        updatedAt: now,
+        _lastChangedAt: timestamp,
+        _version: 1,
+        __typename: 'ScrapeAttempt'
+    };
+    
+    try {
+        await monitoredDdbDocClient.send(new PutCommand({
+            TableName: scrapeAttemptTable,
+            Item: attemptRecord
+        }));
+        
+        console.log(`[ScrapeAttempt] ✅ Created attempt ${attemptId} for tournament ${tournamentId}:`, {
+            status,
+            hasChanges,
+            source,
+            processingTime
+        });
+        
+        return attemptId;
+    } catch (error) {
+        // Log but don't throw - tracking shouldn't break the scrape flow
+        console.error('[ScrapeAttempt] ❌ Error creating attempt record:', error.message);
+        monitoring.trackOperation('SCRAPE_ATTEMPT_CREATE_ERROR', 'ScrapeAttempt', attemptId, {
+            error: error.message,
+            tournamentId
+        });
+        return null;
+    }
+};
+
 // --- MAIN LAMBDA HANDLER ---
 exports.handler = async (event) => {
     console.log('[HANDLER] Incoming event:', JSON.stringify(event, null, 2));
@@ -698,6 +854,7 @@ exports.handler = async (event) => {
     let entityId = DEFAULT_ENTITY_ID;
     let jobId = null;
     let triggerSource = 'MANUAL';
+    const handlerStartTime = Date.now();  // For error tracking when attemptStartTime not available
     
     const operationName = event.fieldName || event.operationType || event.operation || 'fetchTournamentData';
     const args = event.arguments || event || {};
@@ -727,6 +884,7 @@ exports.handler = async (event) => {
             switch (operationName) {
                 case 'fetchTournamentData':
                 case 'FETCH':
+                    const attemptStartTime = Date.now();  // Track timing for ScrapeAttempt
                     const fetchUrl = args.url;
                     const s3KeyParam = args.s3Key;
                     const forceRefresh = args.forceRefresh || false;
@@ -848,11 +1006,46 @@ exports.handler = async (event) => {
                                 entityId: result.entityId
                             });
                             
+                            // Track successful cache re-scrape attempt
+                            await createScrapeAttempt({
+                                url: s3StorageRecord?.url || fetchUrl || s3KeyParam,
+                                tournamentId: result.tournamentId,
+                                entityId: result.entityId,
+                                scrapeURLId: null,
+                                scraperJobId: jobId,
+                                status: 'SUCCESS',
+                                processingTime: Date.now() - attemptStartTime,
+                                gameName: result.name,
+                                gameStatus: result.gameStatus,
+                                registrationStatus: result.registrationStatus,
+                                dataHash: result.contentHash,
+                                hasChanges: result.dataChanged || false,
+                                foundKeys: foundKeys,
+                                s3Key: s3KeyParam,
+                                source: 'RESCRAPE_CACHE'
+                            });
+                            
                             // CRITICAL: Return here to prevent falling through to live fetch
                             return result;
                             
                         } catch (cacheError) {
                             console.error('[FETCH] Error processing S3 cache:', cacheError);
+                            
+                            // Track failed cache re-scrape attempt
+                            await createScrapeAttempt({
+                                url: fetchUrl || s3KeyParam,
+                                tournamentId: 0,
+                                entityId,
+                                scrapeURLId: null,
+                                scraperJobId: jobId,
+                                status: 'FAILED',
+                                processingTime: Date.now() - attemptStartTime,
+                                errorMessage: cacheError.message,
+                                errorType: extractErrorType(cacheError.message),
+                                s3Key: s3KeyParam,
+                                source: 'RESCRAPE_CACHE'
+                            });
+                            
                             throw new Error(`Failed to process cached HTML: ${cacheError.message}`);
                         }
                     }
@@ -870,6 +1063,21 @@ exports.handler = async (event) => {
                     // Check doNotScrape
                     if (scrapeURLRecord.doNotScrape && !forceRefresh && !overrideDoNotScrape) {
                         console.log(`[FETCH] Skipping ${fetchUrl} - marked as doNotScrape`);
+                        
+                        // Track the skipped attempt
+                        await createScrapeAttempt({
+                            url: fetchUrl,
+                            tournamentId,
+                            entityId,
+                            scrapeURLId: scrapeURLRecord.id,
+                            scraperJobId: jobId,
+                            status: 'SKIPPED_DONOTSCRAPE',
+                            processingTime: Date.now() - attemptStartTime,
+                            gameName: scrapeURLRecord.gameName,
+                            gameStatus: scrapeURLRecord.gameStatus || 'NOT_IN_USE',
+                            source: 'SINGLE_SCRAPE'
+                        });
+                        
                         return {
                             tournamentId: tournamentId,
                             name: 'Skipped - Do Not Scrape',
@@ -900,6 +1108,20 @@ exports.handler = async (event) => {
                     );
                     
                     if (!fetchResult.success) {
+                        // Track failed fetch attempt
+                        await createScrapeAttempt({
+                            url: fetchUrl,
+                            tournamentId,
+                            entityId,
+                            scrapeURLId: scrapeURLRecord.id,
+                            scraperJobId: jobId,
+                            status: 'FAILED',
+                            processingTime: Date.now() - attemptStartTime,
+                            errorMessage: fetchResult.error,
+                            errorType: extractErrorType(fetchResult.error),
+                            source: 'SINGLE_SCRAPE'
+                        });
+                        
                         throw new Error(fetchResult.error || 'Fetch failed');
                     }
                     
@@ -960,6 +1182,26 @@ exports.handler = async (event) => {
                         }
                     }
                     
+                    // Track successful fetch attempt
+                    await createScrapeAttempt({
+                        url: fetchUrl,
+                        tournamentId: scrapedData.tournamentId || tournamentId,
+                        entityId,
+                        scrapeURLId: scrapeURLRecord.id,
+                        scraperJobId: jobId,
+                        status: 'SUCCESS',
+                        processingTime: Date.now() - attemptStartTime,
+                        gameName: scrapedData.name,
+                        gameStatus: scrapedData.gameStatus,
+                        registrationStatus: scrapedData.registrationStatus,
+                        dataHash: fetchResult.contentHash,
+                        hasChanges: result.dataChanged || false,
+                        foundKeys,
+                        structureLabel: scrapedData.structureLabel,
+                        s3Key: fetchResult.s3Key,
+                        source: 'SINGLE_SCRAPE'
+                    });
+                    
                     return result;
 
                 case 'saveTournamentData':
@@ -1019,6 +1261,24 @@ exports.handler = async (event) => {
             if (operationName === 'fetchTournamentData' || operationName === 'FETCH') {
                 const url = args.url || '';
                 const tournamentId = getTournamentId(url) || 1;
+                
+                // Track the failed attempt
+                try {
+                    await createScrapeAttempt({
+                        url: url || args.s3Key || '',
+                        tournamentId,
+                        entityId,
+                        scrapeURLId: null,
+                        scraperJobId: jobId,
+                        status: 'FAILED',
+                        processingTime: Date.now() - handlerStartTime,
+                        errorMessage: error.message,
+                        errorType: extractErrorType(error.message),
+                        source: args.s3Key ? 'RESCRAPE_CACHE' : 'SINGLE_SCRAPE'
+                    });
+                } catch (trackingError) {
+                    console.error('[HANDLER] Failed to track error attempt:', trackingError.message);
+                }
                 
                 return {
                     tournamentId: tournamentId,

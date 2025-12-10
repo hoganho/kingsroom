@@ -1,13 +1,10 @@
 // src/contexts/EntityContext.tsx
-// Enhanced Entity Context with user-based entity filtering
-// UPDATED: Correctly prioritizes User.defaultEntityId for both Single and Multi selectors
-
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { useAuth } from './AuthContext';
 import { Entity } from '../types/entity';
 
-// Custom shallow query to avoid nested relationship issues
+// Custom shallow query to avoid nested relationship issues when fetching lists
 const listEntitiesShallow = /* GraphQL */ `
   query ListEntitiesShallow(
     $filter: ModelEntityFilterInput
@@ -35,29 +32,32 @@ const listEntitiesShallow = /* GraphQL */ `
 `;
 
 interface EntityContextType {
-  // All entities (filtered by user permissions)
+  // All entities available to the system (filtered by user permissions)
   entities: Entity[];
   
-  // All entities before filtering (for admin purposes)
+  // All entities unfiltered (for admin use cases)
   allEntities: Entity[];
   
-  // Single entity selection (for scraping/input)
+  // Single entity selection (The "Write" Context - used for scraping, inputs, defaults)
   currentEntity: Entity | null;
   setCurrentEntity: (entity: Entity) => void;
   
-  // Multi-entity selection (for viewing)
+  // Multi-entity selection (The "Read" Context - used for dashboards, viewing lists)
   selectedEntities: Entity[];
   setSelectedEntities: (entities: Entity[]) => void;
   toggleEntitySelection: (entity: Entity) => void;
   selectAllEntities: () => void;
   clearEntitySelection: () => void;
   
+  // Helper to check if a specific entity is currently selected in the multi-select view
+  isEntitySelected: (entityId: string) => boolean;
+  
   // User's entity permissions
   userAllowedEntityIds: string[] | null;
   userDefaultEntityId: string | null;
   hasEntityRestrictions: boolean;
   
-  // State
+  // State flags
   loading: boolean;
   error: string | null;
   refreshEntities: () => Promise<void>;
@@ -89,24 +89,24 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Extract user's entity permissions
-  // @ts-ignore - these fields exist on the user object from the backend
+  // Extract user's entity permissions from the AuthUser object
+  // @ts-ignore - allowedEntityIds exists on the custom AppUser type
   const userAllowedEntityIds: string[] | null = user?.allowedEntityIds || null;
-  // @ts-ignore
+  // @ts-ignore - defaultEntityId exists on the custom AppUser type
   const userDefaultEntityId: string | null = user?.defaultEntityId || null;
   
   // SUPER_ADMIN and ADMIN have no restrictions
   const isSuperUser = userRole === 'SUPER_ADMIN' || userRole === 'ADMIN';
   const hasEntityRestrictions = !isSuperUser && userAllowedEntityIds !== null && userAllowedEntityIds.length > 0;
 
-  // Filter entities based on user permissions
+  // Filter the master list of entities based on user permissions
   const entities = useMemo(() => {
     if (!hasEntityRestrictions) {
-      // No restrictions - return all entities
+      // No restrictions - return all active entities
       return allEntities;
     }
     
-    // Filter to only allowed entities
+    // Filter to only entities present in the user's allowed list
     return allEntities.filter(entity => 
       userAllowedEntityIds!.includes(entity.id)
     );
@@ -139,19 +139,15 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     }
   };
 
-  // Initialize entity selection when entities or user permissions change
+  // Logic: Initialize Selections (Single and Multi)
   useEffect(() => {
     if (loading || entities.length === 0) return;
 
     const savedEntityId = localStorage.getItem('selectedEntityId');
     const savedSelectedIds = JSON.parse(localStorage.getItem('selectedEntityIds') || '[]');
     
-    // === SINGLE ENTITY (currentEntity) ===
-    // Priority:
-    // 1. LocalStorage (User's last session choice preserved on refresh)
-    // 2. User Default (Database setting for fresh session)
-    // 3. First Available (Fallback)
-
+    // === 1. Single Selection Logic (Global Context/Sidebar) ===
+    // Priority: LocalStorage -> User Default -> First Available
     let entityToSet: Entity | null = null;
 
     if (savedEntityId) {
@@ -169,7 +165,7 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     // Set the state
     if (entityToSet) {
       setCurrentEntityState(entityToSet);
-      // Only write to localStorage if it wasn't there already (avoid overwriting if we fell back to default)
+      // Only write to localStorage if it wasn't there (to avoid overwriting user preference)
       if (!savedEntityId) {
         localStorage.setItem('selectedEntityId', entityToSet.id);
       }
@@ -178,37 +174,25 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
       localStorage.removeItem('selectedEntityId');
     }
     
-    // === MULTI-ENTITY (selectedEntities) ===
-    // Priority:
-    // 1. LocalStorage (User's last session choice)
-    // 2. User Default (If set, start with ONLY this entity)
-    // 3. All Entities (If no default, start with ALL)
-
+    // === 2. Multi Selection Logic (Dashboard/Viewing) ===
+    // Priority: LocalStorage -> Fallback to Current Single Entity
     const validSavedIds = savedSelectedIds.filter((id: string) => 
       entities.some(e => e.id === id)
     );
 
     if (validSavedIds.length > 0) {
-      // Case 1: Restore valid saved selections
+      // Case A: Restore valid saved selections from previous session
       const savedSelected = entities.filter((e: Entity) => 
         validSavedIds.includes(e.id)
       );
       setSelectedEntitiesState(savedSelected);
     } else {
-      // No valid saved selection found
-      if (userDefaultEntityId) {
-        // Case 2: Use default entity if available
-        const defaultEntity = entities.find(e => e.id === userDefaultEntityId);
-        if (defaultEntity) {
-          setSelectedEntitiesState([defaultEntity]);
-          localStorage.setItem('selectedEntityIds', JSON.stringify([defaultEntity.id]));
-        } else {
-          // Default entity ID was invalid or not found, fallback to ALL
-          setSelectedEntitiesState(entities);
-          localStorage.setItem('selectedEntityIds', JSON.stringify(entities.map((e: Entity) => e.id)));
-        }
+      // Case B: No valid saved selection found, default to the Single Entity calculated above
+      if (entityToSet) {
+        setSelectedEntitiesState([entityToSet]);
+        localStorage.setItem('selectedEntityIds', JSON.stringify([entityToSet.id]));
       } else {
-        // Case 3: No default entity, default to ALL available
+        // Fallback: Select all if no single entity is determined
         setSelectedEntitiesState(entities);
         localStorage.setItem('selectedEntityIds', JSON.stringify(entities.map((e: Entity) => e.id)));
       }
@@ -220,13 +204,12 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     refreshEntities();
   }, []);
 
-  // Re-filter when user changes (e.g., login/logout)
+  // Re-validate selections when user permissions change (e.g. login/logout)
   useEffect(() => {
     if (user && allEntities.length > 0) {
-      // Entities list changed due to user permissions - reset selections if needed
+      // 1. Validate Single Entity
       const stillValidCurrent = currentEntity && entities.some(e => e.id === currentEntity.id);
       if (!stillValidCurrent && entities.length > 0) {
-        // Current entity no longer valid - reset to default
         const defaultEntity = userDefaultEntityId 
           ? entities.find(e => e.id === userDefaultEntityId) 
           : entities[0];
@@ -236,22 +219,30 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
         }
       }
 
-      // Filter selected entities to only valid ones
+      // 2. Validate Multi Selection
       const validSelected = selectedEntities.filter(se => 
         entities.some(e => e.id === se.id)
       );
+      
+      // If the validated list differs from state, update it
       if (validSelected.length !== selectedEntities.length) {
-        // If some selected entities became invalid, update selection
-        // If ALL became invalid (empty list), default to All Available (or User Default logic again if desired)
-        // Here we default to all available valid entities if selection becomes empty
-        const newSelection = validSelected.length > 0 ? validSelected : entities;
+        // If selection becomes empty due to permissions, default to the Single Entity or All
+        let newSelection = validSelected;
+        if (newSelection.length === 0) {
+            newSelection = currentEntity ? [currentEntity] : entities;
+        }
+        
         setSelectedEntitiesState(newSelection);
         localStorage.setItem('selectedEntityIds', JSON.stringify(newSelection.map(e => e.id)));
       }
     }
   }, [user, entities.length]);
 
-  // Set single entity (for scraping/input pages)
+  // === Actions ===
+
+  // Set single entity (Global Context - Sidebar)
+  // NOTE: This usually implies the user wants to switch context completely, 
+  // so we also reset the multi-selection to match this single entity.
   const setCurrentEntity = (entity: Entity) => {
     // Verify user has access to this entity
     if (hasEntityRestrictions && !userAllowedEntityIds!.includes(entity.id)) {
@@ -262,13 +253,17 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     setCurrentEntityState(entity);
     localStorage.setItem('selectedEntityId', entity.id);
     
-    // Dispatch event for components that need to react
+    // Sync Multi-Selection to this new context (Reset View)
+    setSelectedEntities([entity]);
+    
+    // Dispatch event for components that need to react immediately outside of React tree
     window.dispatchEvent(new CustomEvent('entityChanged', { 
       detail: entity 
     }));
   };
 
-  // Set multiple entities (for viewing pages)
+  // Set multiple entities (Viewing Context - Dashboards)
+  // This does NOT change the Single Entity state.
   const setSelectedEntities = (entitiesToSelect: Entity[]) => {
     // Filter to only entities user has access to
     const validEntities = hasEntityRestrictions
@@ -278,15 +273,13 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     setSelectedEntitiesState(validEntities);
     localStorage.setItem('selectedEntityIds', JSON.stringify(validEntities.map(e => e.id)));
     
-    // Dispatch event for components that need to react
     window.dispatchEvent(new CustomEvent('selectedEntitiesChanged', { 
       detail: validEntities 
     }));
   };
 
-  // Toggle entity in selection
+  // Toggle a single entity in the multi-selection list
   const toggleEntitySelection = (entity: Entity) => {
-    // Verify user has access
     if (hasEntityRestrictions && !userAllowedEntityIds!.includes(entity.id)) {
       return;
     }
@@ -299,7 +292,6 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
       
       localStorage.setItem('selectedEntityIds', JSON.stringify(newSelection.map(e => e.id)));
       
-      // Dispatch event
       window.dispatchEvent(new CustomEvent('selectedEntitiesChanged', { 
         detail: newSelection 
       }));
@@ -308,14 +300,17 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     });
   };
 
-  // Select all entities (that user has access to)
   const selectAllEntities = () => {
     setSelectedEntities(entities);
   };
 
-  // Clear entity selection
   const clearEntitySelection = () => {
     setSelectedEntities([]);
+  };
+
+  // Helper to check if an entity is selected in the current view
+  const isEntitySelected = (entityId: string) => {
+    return selectedEntities.some(e => e.id === entityId);
   };
 
   const contextValue: EntityContextType = {
@@ -328,6 +323,7 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     toggleEntitySelection,
     selectAllEntities,
     clearEntitySelection,
+    isEntitySelected, // Exposed helper
     userAllowedEntityIds,
     userDefaultEntityId,
     hasEntityRestrictions,
@@ -343,7 +339,7 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
   );
 };
 
-// Hook to get entity from URL
+// Hook to get entity from URL (Helper)
 export const useEntityFromUrl = (url: string): Entity | null => {
   const { entities } = useEntity();
   

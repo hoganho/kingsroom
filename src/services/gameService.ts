@@ -308,41 +308,44 @@ const mapToTournamentType = (value: any): TournamentType | null => {
 
 /**
  * Create placeholder data for NOT_PUBLISHED games
+ * FIX: Explicitly sets venueAssignmentStatus to 'AUTO_ASSIGNED'
  */
 const createNotPublishedPlaceholder = (
     data: GameData | ScrapedGameData,
     sourceUrl: string,
     entityId: string
-): GameData | ScrapedGameData => {
+): any => {
     return {
         ...data,
-        name: data.name || `Tournament ${data.tournamentId} - Not Published`,
-        gameType: data.gameType || 'TOURNAMENT',
-        gameVariant: data.gameVariant || 'NLHE',
+        name: data.name || `Tournament ${data.tournamentId} (Not Published)`,
         gameStatus: 'NOT_PUBLISHED',
-        gameStartDateTime: data.gameStartDateTime || new Date().toISOString(),
-        registrationStatus: data.registrationStatus || 'N_A',
-        tournamentId: data.tournamentId,
-        sourceUrl: sourceUrl,
-        entityId: entityId,
-        buyIn: data.buyIn || 0,
-        rake: data.rake || 0,
-        startingStack: data.startingStack || 0,
-        prizepoolPaid: data.prizepoolPaid || 0,
-        prizepoolCalculated: data.prizepoolCalculated || 0,
-        totalUniquePlayers: data.totalUniquePlayers || 0,
-        totalInitialEntries: data.totalInitialEntries || 0,
-        totalEntries: data.totalEntries || 0,
-        totalRebuys: data.totalRebuys || 0,
-        totalAddons: data.totalAddons || 0,
-        guaranteeAmount: data.guaranteeAmount || 0,
-        hasGuarantee: data.hasGuarantee || false,
+        // Force critical fields to valid values
+        buyIn: data.buyIn ?? 0,
+        rake: data.rake ?? 0,
+        guaranteeAmount: data.guaranteeAmount ?? 0,
+        hasGuarantee: false,
         isSeries: false,
-    } as GameData | ScrapedGameData;
+        isSatellite: false,
+        isRegular: false,
+        // Zero out player stats to prevent validation errors
+        totalUniquePlayers: 0,
+        totalInitialEntries: 0,
+        totalEntries: 0,
+        totalRebuys: 0,
+        totalAddons: 0,
+        // Ensure arrays are empty
+        players: { allPlayers: [], totalUniquePlayers: 0, hasCompleteResults: false },
+        levels: [],
+        gameTags: [],
+        
+        // FIX: Explicitly set this so backend doesn't force 'MANUALLY_ASSIGNED'
+        venueAssignmentStatus: 'AUTO_ASSIGNED' 
+    };
 };
 
 /**
  * Extract player data for save input
+ * FIX: Forces hasCompleteResults to be boolean (false) instead of undefined
  */
 const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
     const allPlayers: any[] = [];
@@ -382,12 +385,17 @@ const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
         });
     }
     
+    // Check if there are valid results (winnings > 0)
+    const hasResultsData = data.results && data.results.length > 0 && data.results.some(r => r.winnings && r.winnings > 0);
+
     return {
         allPlayers,
         totalInitialEntries: data.totalInitialEntries || allPlayers.length,
         totalEntries: data.totalEntries || allPlayers.length,
         totalUniquePlayers: data.totalUniquePlayers || allPlayers.length,
-        hasCompleteResults: data.results && data.results.length > 0 && data.results.some(r => r.winnings && r.winnings > 0)
+        // FIX: Use !! to ensure this is strictly true or false. Never undefined.
+        hasCompleteResults: !!hasResultsData,
+        totalPrizesPaid
     };
 };
 
@@ -468,13 +476,7 @@ export const shouldAutoRefreshTournament = (data: ScrapedGameData | GameData | n
 
 /**
  * Save game data to backend via unified saveGame mutation
- * 
- * @param sourceUrl - The source URL of the game
- * @param venueId - The venue ID to assign
- * @param data - The game data to save
- * @param existingGameId - Optional existing game ID for updates
- * @param entityId - Optional entity ID (defaults to current entity)
- * @param options - Optional { wasEdited, originalData }
+ * FIX: Safely handles nulls and passes venueAssignmentStatus correctly
  */
 export const saveGameDataToBackend = async (
     sourceUrl: string,
@@ -490,26 +492,27 @@ export const saveGameDataToBackend = async (
     const client = generateClient();
     const effectiveEntityId = entityId || getCurrentEntityId();
     
-    // If game is NOT_PUBLISHED, create placeholder
-    let finalData: GameData | ScrapedGameData = data;
+    // 1. Handle NOT_PUBLISHED status special case
+    let finalData: any = data;
     if (data.gameStatus === 'NOT_PUBLISHED') {
         console.log('[GameService] Creating NOT_PUBLISHED placeholder for tournament', data.tournamentId);
-        finalData = createNotPublishedPlaceholder(data, sourceUrl, effectiveEntityId);
+        finalData = typeof createNotPublishedPlaceholder === 'function' 
+            ? createNotPublishedPlaceholder(data, sourceUrl, effectiveEntityId)
+            : { ...data, gameStatus: 'NOT_PUBLISHED' };
     }
     
-    // Validate and prepare data
+    // 2. Validate and prepare data if edited
     let validationWarnings: string[] = [];
-    
-    if (options?.wasEdited) {
+    if (options?.wasEdited && finalData.gameStatus !== 'NOT_PUBLISHED') {
         const prepared = prepareGameDataForSave(finalData as GameData);
         finalData = prepared.data as any;
         validationWarnings = prepared.warnings;
     }
     
-    // Extract player data
+    // 3. Extract player data (uses fixed helper)
     const playerData = extractPlayersForSaveInput(finalData);
-    
-    // Build the save input
+
+    // 4. Build the SaveGameInput
     const saveGameInput = {
         source: {
             type: 'SCRAPE' as const,
@@ -531,55 +534,60 @@ export const saveGameDataToBackend = async (
             registrationStatus: mapToRegistrationStatus(finalData.registrationStatus),
             gameFrequency: mapToGameFrequency((finalData as any).gameFrequency),
             
-            // Financial fields (base data)
-            buyIn: finalData.buyIn || 0,
-            rake: finalData.rake || 0,
-            guaranteeAmount: finalData.guaranteeAmount || 0,
-            hasGuarantee: finalData.hasGuarantee || false,
+            // Financial fields - Using ?? to prevent Null errors
+            buyIn: finalData.buyIn ?? 0,
+            rake: finalData.rake ?? 0,
+            guaranteeAmount: finalData.guaranteeAmount ?? 0,
+            hasGuarantee: finalData.hasGuarantee ?? false,
             
-            // Simplified financial metrics
-            totalBuyInsCollected: (finalData as any).totalBuyInsCollected || null,
-            rakeRevenue: (finalData as any).rakeRevenue || null,
-            prizepoolPlayerContributions: (finalData as any).prizepoolPlayerContributions || null,
-            prizepoolAddedValue: (finalData as any).prizepoolAddedValue || null,
-            prizepoolSurplus: (finalData as any).prizepoolSurplus || null,
-            guaranteeOverlayCost: (finalData as any).guaranteeOverlayCost || null,
-            gameProfit: (finalData as any).gameProfit || null,
+            // Simplified financial metrics (nullable)
+            totalBuyInsCollected: (finalData as any).totalBuyInsCollected ?? null,
+            rakeRevenue: (finalData as any).rakeRevenue ?? null,
+            prizepoolPlayerContributions: (finalData as any).prizepoolPlayerContributions ?? null,
+            prizepoolAddedValue: (finalData as any).prizepoolAddedValue ?? null,
+            prizepoolSurplus: (finalData as any).prizepoolSurplus ?? null,
+            guaranteeOverlayCost: (finalData as any).guaranteeOverlayCost ?? null,
+            gameProfit: (finalData as any).gameProfit ?? null,
             
             // Venue fee
             venueFee: (finalData as any).venueFee ?? null,
             
-            // Game details
-            startingStack: finalData.startingStack || 0,
-            prizepoolPaid: finalData.prizepoolPaid || 0,
-            prizepoolCalculated: finalData.prizepoolCalculated || 0,
-            totalUniquePlayers: finalData.totalUniquePlayers || 0,
-            totalInitialEntries: finalData.totalInitialEntries || 0,
-            totalEntries: finalData.totalEntries || 0,
-            totalRebuys: finalData.totalRebuys || 0,
-            totalAddons: finalData.totalAddons || 0,
-            playersRemaining: (finalData as any).playersRemaining || null,
-            totalChipsInPlay: (finalData as any).totalChipsInPlay || null,
-            averagePlayerStack: (finalData as any).averagePlayerStack || null,
+            // Stats (Int! in schema -> must not be null)
+            startingStack: finalData.startingStack ?? 0,
+            prizepoolPaid: finalData.prizepoolPaid ?? 0,
+            prizepoolCalculated: finalData.prizepoolCalculated ?? 0,
+            totalUniquePlayers: finalData.totalUniquePlayers ?? 0,
+            totalInitialEntries: finalData.totalInitialEntries ?? 0,
+            totalEntries: finalData.totalEntries ?? 0,
+            totalRebuys: finalData.totalRebuys ?? 0,
+            totalAddons: finalData.totalAddons ?? 0,
+            
+            // Nullable stats
+            playersRemaining: (finalData as any).playersRemaining ?? null,
+            totalChipsInPlay: (finalData as any).totalChipsInPlay ?? null,
+            averagePlayerStack: (finalData as any).averagePlayerStack ?? null,
             
             // Tournament specifics
             tournamentType: mapToTournamentType(finalData.tournamentType),
-            isSeries: (finalData as any).isSeries || false,
-            seriesName: (finalData as any).seriesName || null,
-            isSatellite: (finalData as any).isSatellite || false,
-            isRegular: (finalData as any).isRegular || false,
+            isSeries: (finalData as any).isSeries ?? false,
+            seriesName: (finalData as any).seriesName ?? null,
+            isSatellite: (finalData as any).isSatellite ?? false,
+            isRegular: (finalData as any).isRegular ?? false,
             
-            // Series reference fields
+            // Series fields
             tournamentSeriesId: (finalData as any).tournamentSeriesId || null,
-            isMainEvent: (finalData as any).isMainEvent || false,
-            eventNumber: (finalData as any).eventNumber || null,
-            dayNumber: (finalData as any).dayNumber || null,
+            isMainEvent: (finalData as any).isMainEvent ?? false,
+            eventNumber: (finalData as any).eventNumber ?? null,
+            dayNumber: (finalData as any).dayNumber ?? null,
             flightLetter: (finalData as any).flightLetter || null,
-            finalDay: (finalData as any).finalDay || false,
+            finalDay: (finalData as any).finalDay ?? false,
             
             // Other
-            gameTags: finalData.gameTags?.filter((tag): tag is string => tag !== null) || [],
-            totalDuration: (finalData as any).totalDuration || null
+            gameTags: finalData.gameTags?.filter((tag: any) => tag !== null) || [],
+            totalDuration: (finalData as any).totalDuration || null,
+
+            // FIX: Pass assignment status directly (schema update required)
+            venueAssignmentStatus: (finalData as any).venueAssignmentStatus
         },
         players: playerData,
         venue: {
@@ -593,11 +601,11 @@ export const saveGameDataToBackend = async (
             suggestedSeriesId: (finalData as any).seriesMatch?.seriesTitleId || (finalData as any).seriesTitleId || null,
             seriesName: (finalData as any).seriesName,
             year: (finalData as any).seriesYear || new Date(finalData.gameStartDateTime || new Date()).getFullYear(),
-            isMainEvent: (finalData as any).isMainEvent || false,
-            eventNumber: (finalData as any).eventNumber || null,
-            dayNumber: (finalData as any).dayNumber || null,
+            isMainEvent: (finalData as any).isMainEvent ?? false,
+            eventNumber: (finalData as any).eventNumber ?? null,
+            dayNumber: (finalData as any).dayNumber ?? null,
             flightLetter: (finalData as any).flightLetter || null,
-            finalDay: (finalData as any).finalDay || false,
+            finalDay: (finalData as any).finalDay ?? false,
             confidence: (finalData as any).seriesMatch?.score || 0.8
         } : null,
         options: {
@@ -608,7 +616,7 @@ export const saveGameDataToBackend = async (
         },
     };
     
-    // Add levels if present
+    // 5. Add Levels JSON
     if (finalData.levels && Array.isArray(finalData.levels) && finalData.levels.length > 0) {
         const validLevels = finalData.levels
             .filter((level: any) => level && level.levelNumber != null)
@@ -629,8 +637,8 @@ export const saveGameDataToBackend = async (
         sourceUrl,
         venueId,
         gameStatus: saveGameInput.game.gameStatus,
-        existingGameId,
-        wasEdited: options?.wasEdited
+        venueAssignmentStatus: (saveGameInput.game as any).venueAssignmentStatus,
+        hasCompleteResults: playerData.hasCompleteResults
     });
     
     try {
@@ -673,15 +681,12 @@ export const saveGameDataToBackend = async (
 
 /**
  * Reassign a single game to a different venue
- * 
- * @param input - Reassignment parameters
+ * * @param input - Reassignment parameters
  * @returns Result with new venue/entity IDs and any cloned venue info
- * 
- * @example
+ * * @example
  * // Move game to new entity (follow the venue)
  * await reassignGameVenue({ gameId: '123', newVenueId: '456', reassignEntity: true });
- * 
- * // Keep game in current entity (clone venue if needed)
+ * * // Keep game in current entity (clone venue if needed)
  * await reassignGameVenue({ gameId: '123', newVenueId: '456', reassignEntity: false });
  */
 export const reassignGameVenue = async (
@@ -721,8 +726,7 @@ export const reassignGameVenue = async (
 /**
  * Bulk reassign multiple games to a different venue
  * Always queues as async job for tracking progress
- * 
- * @param input - Bulk reassignment parameters
+ * * @param input - Bulk reassignment parameters
  * @returns Task ID for tracking progress
  */
 export const bulkReassignGameVenues = async (
@@ -757,8 +761,7 @@ export const bulkReassignGameVenues = async (
 /**
  * Get the status of a background reassignment task
  * Use for polling progress on bulk operations
- * 
- * @param taskId - Background task ID
+ * * @param taskId - Background task ID
  * @returns Task status with progress info
  */
 export const getReassignmentStatus = async (
@@ -786,8 +789,7 @@ export const getReassignmentStatus = async (
 /**
  * Get all clones of a canonical venue across entities
  * Useful for showing which entities have this physical venue
- * 
- * @param canonicalVenueId - The canonical (original) venue ID
+ * * @param canonicalVenueId - The canonical (original) venue ID
  * @returns List of venue clones in different entities
  */
 export const getVenueClones = async (
@@ -814,8 +816,7 @@ export const getVenueClones = async (
 
 /**
  * Find if a specific entity already has a clone of a canonical venue
- * 
- * @param canonicalVenueId - The canonical venue ID
+ * * @param canonicalVenueId - The canonical venue ID
  * @param entityId - The entity to check
  * @returns The existing venue clone or null
  */
@@ -844,8 +845,7 @@ export const findVenueForEntity = async (
 
 /**
  * Poll for task completion with progress callback
- * 
- * @param taskId - Background task ID
+ * * @param taskId - Background task ID
  * @param onProgress - Callback for progress updates
  * @param pollInterval - Interval in ms (default 2000)
  * @param maxAttempts - Max poll attempts (default 150 = 5 min)

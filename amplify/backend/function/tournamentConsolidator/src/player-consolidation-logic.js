@@ -354,7 +354,7 @@ const consolidatePlayerResults = async (ddbDocClient, playerResultTable, parentG
             prizeWon: journey.amountWon > 0 || journey.survivedToEnd,
             amountWon: journey.amountWon || 0,
             pointsEarned: journey.finalResult?.pointsEarned || 0,
-            totalRunners: parentGame.totalUniquePlayers || parentGame.actualCalculatedUniquePlayers,
+            totalRunners: parentGame.totalUniquePlayers || 0,
             gameStartDateTime: parentGame.gameStartDateTime,
             recordType: RecordType.CONSOLIDATED,
             // Consolidation metadata

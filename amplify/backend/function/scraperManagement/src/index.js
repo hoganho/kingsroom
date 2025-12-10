@@ -222,41 +222,160 @@ async function getScraperJobsReport({ status, limit = 20, nextToken }) {
     }
 }
 
-async function searchScrapeURLs({ status, limit = 50, nextToken }) {
-    console.log('Searching scrape URLs:', { status, limit, nextToken });
+/**
+ * searchScrapeURLs - UPDATED with entity filtering support
+ * 
+ * Now supports:
+ * - entityId: Filter by single entity ID
+ * - entityIds: Filter by multiple entity IDs (array)
+ * - status: Filter by ScrapeURL status
+ * 
+ * @param {Object} args - Query arguments
+ * @param {string} args.entityId - Single entity ID to filter by
+ * @param {string[]} args.entityIds - Array of entity IDs to filter by
+ * @param {string} args.status - ScrapeURL status filter
+ * @param {number} args.limit - Max results to return (default: 100)
+ * @param {string} args.nextToken - Pagination token
+ */
+async function searchScrapeURLs({ entityId, entityIds, status, limit = 100, nextToken }) {
+    console.log('Searching ScrapeURLs:', { entityId, entityIds, status, limit, nextToken });
     
-    // ✅ Track business logic: Search ScrapeURLs
-    monitoring.trackOperation('SEARCH_URLS', 'ScrapeURL', status || 'all', { status, limit });
+    // ✅ Track business logic
+    monitoring.trackOperation('SEARCH_URLS', 'ScrapeURL', 'search', { 
+        entityId,
+        entityIdsCount: entityIds?.length || 0,
+        status 
+    });
 
     try {
         const tableName = getTableName('ScrapeURL');
         
-        const params = {
+        // Determine which entity IDs to filter by
+        let effectiveEntityIds = [];
+        if (entityId) {
+            effectiveEntityIds = [entityId];
+        } else if (entityIds && entityIds.length > 0) {
+            effectiveEntityIds = entityIds;
+        }
+        
+        // If we have entity IDs and the byEntityScrapeURL index exists, use it
+        if (effectiveEntityIds.length === 1) {
+            // Single entity - use GSI query for efficiency
+            try {
+                const params = {
+                    TableName: tableName,
+                    IndexName: 'byEntityScrapeURL',
+                    KeyConditionExpression: 'entityId = :entityId',
+                    ExpressionAttributeValues: { ':entityId': effectiveEntityIds[0] },
+                    Limit: limit
+                };
+                
+                // Add status filter if provided
+                if (status) {
+                    params.FilterExpression = '#status = :status';
+                    params.ExpressionAttributeNames = { '#status': 'status' };
+                    params.ExpressionAttributeValues[':status'] = status;
+                }
+                
+                if (nextToken) {
+                    try {
+                        params.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());
+                    } catch (e) {
+                        console.warn('Invalid nextToken, ignoring:', e.message);
+                    }
+                }
+                
+                const result = await monitoredDdbDocClient.send(new QueryCommand(params));
+                
+                // Sort by tournamentId descending for consistency
+                const sortedItems = (result.Items || []).sort((a, b) => 
+                    (b.tournamentId || 0) - (a.tournamentId || 0)
+                );
+                
+                return {
+                    items: sortedItems,
+                    nextToken: result.LastEvaluatedKey 
+                        ? Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString('base64') 
+                        : null
+                };
+                
+            } catch (indexError) {
+                console.warn('GSI query failed, falling back to scan:', indexError.message);
+            }
+        }
+        
+        // Multiple entities or no entity filter - use scan with filter
+        const scanParams = {
             TableName: tableName,
-            Limit: limit
+            Limit: Math.min(limit * 3, 1000) // Request more to account for filtering
         };
         
+        // Build filter expression
+        const filterExpressions = [];
+        const expressionAttributeValues = {};
+        const expressionAttributeNames = {};
+        
+        // Entity filter
+        if (effectiveEntityIds.length > 0) {
+            if (effectiveEntityIds.length === 1) {
+                filterExpressions.push('entityId = :entityId');
+                expressionAttributeValues[':entityId'] = effectiveEntityIds[0];
+            } else {
+                // Multiple entities - use IN expression
+                const entityPlaceholders = effectiveEntityIds.map((_, i) => `:entityId${i}`);
+                filterExpressions.push(`entityId IN (${entityPlaceholders.join(', ')})`);
+                effectiveEntityIds.forEach((id, i) => {
+                    expressionAttributeValues[`:entityId${i}`] = id;
+                });
+            }
+        }
+        
+        // Status filter
         if (status) {
-            params.FilterExpression = '#status = :status';
-            params.ExpressionAttributeNames = { '#status': 'status' };
-            params.ExpressionAttributeValues = { ':status': status };
+            filterExpressions.push('#status = :status');
+            expressionAttributeNames['#status'] = 'status';
+            expressionAttributeValues[':status'] = status;
+        }
+        
+        if (filterExpressions.length > 0) {
+            scanParams.FilterExpression = filterExpressions.join(' AND ');
+        }
+        
+        if (Object.keys(expressionAttributeValues).length > 0) {
+            scanParams.ExpressionAttributeValues = expressionAttributeValues;
+        }
+        
+        if (Object.keys(expressionAttributeNames).length > 0) {
+            scanParams.ExpressionAttributeNames = expressionAttributeNames;
         }
         
         if (nextToken) {
-            params.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());
+            try {
+                scanParams.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());
+            } catch (e) {
+                console.warn('Invalid nextToken, ignoring:', e.message);
+            }
         }
         
-        const result = await monitoredDdbDocClient.send(new ScanCommand(params));
+        console.log('Scan params:', JSON.stringify(scanParams, null, 2));
+        
+        const result = await monitoredDdbDocClient.send(new ScanCommand(scanParams));
+        
+        // Sort by tournamentId descending
+        const sortedItems = (result.Items || [])
+            .sort((a, b) => (b.tournamentId || 0) - (a.tournamentId || 0))
+            .slice(0, limit); // Limit after filtering and sorting
         
         return {
-            items: result.Items || [],
-            nextToken: result.LastEvaluatedKey ? 
-                Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString('base64') : null
+            items: sortedItems,
+            nextToken: result.LastEvaluatedKey 
+                ? Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString('base64') 
+                : null
         };
         
     } catch (error) {
-        console.error('Error searching URLs:', error);
-        return { items: [], nextToken: null };
+        console.error('Error searching ScrapeURLs:', error);
+        throw new Error(`Failed to search ScrapeURLs: ${error.message}`);
     }
 }
 

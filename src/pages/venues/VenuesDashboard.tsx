@@ -1,6 +1,6 @@
 // src/pages/venues/VenuesDashboard.tsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getClient } from '../../utils/apiClient';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,8 @@ import { BuildingOffice2Icon, TrophyIcon, CalendarIcon } from '@heroicons/react/
 import { format, subDays } from 'date-fns';
 import { GameData } from '../../types/game';
 import { formatCurrency } from '../../utils/generalHelpers';
-
+import { useEntity } from '../../contexts/EntityContext';
+import { MultiEntitySelector } from '../../components/entities/MultiEntitySelector';
 
 interface Venue {
   id: string;
@@ -18,6 +19,8 @@ interface Venue {
   country?: string;
   venueNumber?: number;
   aliases?: string[];
+  entityId?: string; // Added for filtering
+  canonicalVenueId?: string; // Added for reference
   totalGames?: number;
   lastGameDate?: string;
   totalUniquePlayers?: number;
@@ -29,6 +32,8 @@ interface Venue {
 
 export const VenuesDashboard = () => {
   const navigate = useNavigate();
+  const { isEntitySelected, loading: entityLoading } = useEntity(); // Enhanced context usage
+  
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'name' | 'games' | 'lastGame'>('lastGame');
@@ -41,7 +46,7 @@ export const VenuesDashboard = () => {
     const client = getClient();
     setLoading(true);
     try {
-      // Fetch all venues
+      // Fetch all venues, including entityId for filtering
       const venuesResponse = await client.graphql({
         query: /* GraphQL */ `
           query ListVenues {
@@ -54,6 +59,8 @@ export const VenuesDashboard = () => {
                 country
                 venueNumber
                 aliases
+                entityId
+                canonicalVenueId
               }
             }
           }
@@ -63,7 +70,7 @@ export const VenuesDashboard = () => {
       if ('data' in venuesResponse && venuesResponse.data) {
         const venueItems = venuesResponse.data.listVenues.items.filter(Boolean);
         
-        // Fetch games for each venue to get statistics
+        // Fetch games for each venue to get statistics [cite: 177, 187]
         const venuesWithStats = await Promise.all(
           venueItems.map(async (venue: Venue) => {
             try {
@@ -92,7 +99,7 @@ export const VenuesDashboard = () => {
               if ('data' in gamesResponse && gamesResponse.data) {
                 const games: GameData[] = gamesResponse.data.listGames.items.filter(Boolean) as GameData[];
                 
-                // Calculate stats
+                // Calculate stats [cite: 187, 188]
                 const totalGames = games.length;
                 const totalUniquePlayers = games.reduce((sum, g) => sum + (g.totalUniquePlayers || 0), 0);
                 const totalInitialEntries = games.reduce((sum, g) => sum + (g.totalInitialEntries || 0), 0);
@@ -143,8 +150,21 @@ export const VenuesDashboard = () => {
     }
   };
 
-  const sortVenues = (venues: Venue[], sortBy: string) => {
-    const sorted = [...venues];
+  // === Filtering Logic ===
+  // Filters the RAW venue list against the EntityContext's multi-selection
+  const filteredVenues = useMemo(() => {
+    return venues.filter(venue => {
+      // If venue has an entityId, check if it's in the selected list
+      if (venue.entityId) {
+        return isEntitySelected(venue.entityId);
+      }
+      // If venue has no entityId (e.g., legacy or global), default to showing it
+      return true;
+    });
+  }, [venues, isEntitySelected]);
+
+  const sortVenues = (venuesList: Venue[], sortBy: string) => {
+    const sorted = [...venuesList];
     switch (sortBy) {
       case 'name':
         return sorted.sort((a, b) => a.name.localeCompare(b.name));
@@ -185,15 +205,16 @@ export const VenuesDashboard = () => {
     navigate(`/venues/details?id=${venueId}`);
   };
 
-  const sortedVenues = sortVenues(venues, sortBy);
+  // Use the FILTERED list for the table and sort
+  const sortedVenues = sortVenues(filteredVenues, sortBy);
 
-  // Calculate summary stats
+  // Calculate summary stats based on the filtered list
   const stats = {
-    totalVenues: venues.length,
-    activeVenues: venues.filter(v => v.lastGameDate && new Date(v.lastGameDate) > subDays(new Date(), 30)).length,
-    totalGames: venues.reduce((sum, v) => sum + (v.totalGames || 0), 0),
-    totalPrizepoolPaid: venues.reduce((sum, v) => sum + (v.totalPrizepoolPaid || 0), 0),
-    totalPrizepoolCalculated: venues.reduce((sum, v) => sum + (v.totalPrizepoolCalculated || 0), 0),
+    totalVenues: filteredVenues.length,
+    activeVenues: filteredVenues.filter(v => v.lastGameDate && new Date(v.lastGameDate) > subDays(new Date(), 30)).length,
+    totalGames: filteredVenues.reduce((sum, v) => sum + (v.totalGames || 0), 0),
+    totalPrizepoolPaid: filteredVenues.reduce((sum, v) => sum + (v.totalPrizepoolPaid || 0), 0),
+    totalPrizepoolCalculated: filteredVenues.reduce((sum, v) => sum + (v.totalPrizepoolCalculated || 0), 0),
   };
 
   return (
@@ -201,24 +222,35 @@ export const VenuesDashboard = () => {
       title="Venues Dashboard"
       maxWidth="7xl"
       actions={
-        <div className="flex space-x-2">
-          {[
-            { value: 'lastGame', label: 'Last Game' },
-            { value: 'games', label: 'Total Games' },
-            { value: 'name', label: 'Name' }
-          ].map((option) => (
-            <button
-              key={option.value}
-              onClick={() => setSortBy(option.value as any)}
-              className={`px-3 py-1 text-sm rounded-md ${
-                sortBy === option.value
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Sort by {option.label}
-            </button>
-          ))}
+        <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+          {/* Enhanced: MultiEntitySelector for dashboard-level filtering */}
+          <div className="w-full sm:w-64">
+            <MultiEntitySelector 
+              showLabel={false}
+              placeholder="Filter by Entity..."
+              className="w-full"
+            />
+          </div>
+
+          <div className="flex space-x-2">
+            {[
+              { value: 'lastGame', label: 'Last Game' },
+              { value: 'games', label: 'Total Games' },
+              { value: 'name', label: 'Name' }
+            ].map((option) => (
+              <button
+                key={option.value}
+                onClick={() => setSortBy(option.value as any)}
+                className={`px-3 py-1 text-sm rounded-md ${
+                  sortBy === option.value
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Sort by {option.label}
+              </button>
+            ))}
+          </div>
         </div>
       }
     >
@@ -228,7 +260,7 @@ export const VenuesDashboard = () => {
           <div className="flex items-center">
             <BuildingOffice2Icon className="h-8 w-8 text-indigo-600" />
             <div className="ml-3">
-              <p className="text-sm text-gray-500">Total Venues</p>
+              <p className="text-sm text-gray-500">Venues (Visible)</p>
               <p className="text-2xl font-bold">{stats.totalVenues}</p>
             </div>
           </div>
@@ -259,23 +291,19 @@ export const VenuesDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <div className="ml-3">
-              <p className="text-sm text-gray-500">Total Prizepool Calculated</p>
-              <p className="text-lg font-bold">{formatCurrency(stats.totalPrizepoolCalculated)}</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Venues Table */}
       <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-gray-900">All Venues</h3>
+          {/* Display showing count vs total count if filtered */}
+          <span className="text-xs text-gray-500">
+            Showing {filteredVenues.length} of {venues.length} loaded
+          </span>
         </div>
 
-        {loading ? (
+        {loading || entityLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="text-gray-500">Loading venues...</div>
           </div>
@@ -316,8 +344,11 @@ export const VenuesDashboard = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {sortedVenues.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
-                      No venues found
+                    <td colSpan={9} className="px-6 py-8 text-center text-sm text-gray-500">
+                      <div className="flex flex-col items-center">
+                        <BuildingOffice2Icon className="h-10 w-10 text-gray-300 mb-2" />
+                        <p>No venues found matching current filters.</p>
+                      </div>
                     </td>
                   </tr>
                 ) : (

@@ -1,3 +1,5 @@
+// src/pages/scraper-admin-tabs/ScraperTab.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import {
@@ -23,6 +25,12 @@ import { ScrapedGameData } from '../../API';
 import type { GameState, GameData } from '../../types/game';
 
 // --- Types ---
+
+// FIX 1: Define the missing interface
+interface ScrapeTabProps {
+  urlToReparse?: string | null;
+  onReparseComplete?: () => void;
+}
 
 type IdSelectionMode = 'next' | 'bulk' | 'range' | 'gaps' | 'refresh' | 'auto';
 type ScrapeFlow = 'scrape' | 'scrape_save';
@@ -67,12 +75,50 @@ interface ModalResolverValue {
 // Helper to get client lazily (after Amplify is configured)
 const getClient = () => generateClient();
 
-// --- Component Props ---
+// ===================================================================
+// HELPER: Sanitize Data for Placeholders
+// ===================================================================
 
-interface ScrapeTabProps {
-  urlToReparse?: string | null;
-  onReparseComplete?: () => void;
-}
+/**
+ * Ensures minimal valid data for NOT_PUBLISHED placeholders to prevent
+ * "Coerced Null value for NonNull type 'Boolean!'" GraphQL errors.
+ */
+const sanitizeGameDataForPlaceholder = (data: ScrapedGameData): ScrapedGameData => {
+  return {
+    ...data,
+    // Force boolean flags to false if undefined/null
+    hasGuarantee: data.hasGuarantee ?? false,
+    isSeries: data.isSeries ?? false,
+    isSatellite: data.isSatellite ?? false,
+    isRegular: data.isRegular ?? false,
+    isMainEvent: data.isMainEvent ?? false,
+    finalDay: data.finalDay ?? false,
+    
+    // Force numeric values to 0 if undefined/null
+    buyIn: data.buyIn ?? 0,
+    rake: data.rake ?? 0,
+    guaranteeAmount: data.guaranteeAmount ?? 0,
+    
+    // CRITICAL: Ensure player counts are 0
+    totalUniquePlayers: 0,
+    totalInitialEntries: 0,
+    totalEntries: 0,
+    totalRebuys: 0,
+    totalAddons: 0,
+    
+    // Ensure data arrays are empty (ScrapedGameData uses these, not 'players')
+    entries: [],
+    results: [],
+    seating: [],
+    levels: [],
+    
+    // Ensure required strings exist
+    name: data.name || `Tournament ${data.tournamentId} (Not Published)`,
+    
+    // Cast string literal to satisfy strict Enum type in TypeScript
+    gameStatus: 'NOT_PUBLISHED' as any 
+  };
+};
 
 // ===================================================================
 // PROGRESS SUMMARY BAR
@@ -276,8 +322,7 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
     getUnfinishedGames,
   } = useGameIdTracking(currentEntity?.id);
 
-  // --- Data Loading ---
-
+  // ... (Data Loading logic remains the same) ...
   useEffect(() => {
     if (currentEntity?.id) {
       getScrapingStatus({ entityId: currentEntity.id });
@@ -330,7 +375,6 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
 
   const updateEntityDefaultVenue = async () => {
     if (!currentEntity?.id || !defaultVenueId) return;
-    
     setIsSavingDefaultVenue(true);
     try {
       await getClient().graphql({
@@ -343,14 +387,8 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
             }
           }
         `,
-        variables: {
-          input: {
-            id: currentEntity.id,
-            defaultVenueId: defaultVenueId
-          }
-        }
+        variables: { input: { id: currentEntity.id, defaultVenueId: defaultVenueId } }
       });
-      
       setEntityDefaultVenueId(defaultVenueId);
       console.log('Entity default venue updated successfully');
     } catch (error) {
@@ -361,8 +399,7 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
     }
   };
 
-  // --- ID Queue Generation ---
-
+  // ... (ID Queue generation logic remains the same) ...
   const parseRangeString = (rangeStr: string): number[] => {
     const ids = new Set<number>();
     const parts = rangeStr.split(',');
@@ -390,22 +427,18 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
       alert("Scraping status not loaded. Please refresh.");
       return [];
     }
-
     const { gaps, highestTournamentId } = scrapingStatus;
 
     switch (idSelectionMode) {
       case 'next':
         const nextId = (gaps && gaps.length > 0) ? gaps[0].start : (highestTournamentId || 0) + 1;
         return [nextId];
-      
       case 'bulk':
         const count = parseInt(idSelectionParams.bulkCount) || 10;
         const startId = (gaps && gaps.length > 0) ? gaps[0].start : (highestTournamentId || 0) + 1;
         return Array.from({ length: count }, (_, i) => startId + i);
-
       case 'range':
         return parseRangeString(idSelectionParams.rangeString);
-
       case 'gaps':
         if (!gaps || gaps.length === 0) return [];
         const gapIds: number[] = [];
@@ -415,11 +448,9 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
           }
         }
         return gapIds;
-
       case 'refresh':
         const unfinished = await getUnfinishedGames({ entityId: currentEntity?.id || '', limit: 1000 });
         return (unfinished.items || []).map(g => g.tournamentId).filter(Boolean) as number[];
-
       case 'auto':
         const autoQueue: number[] = [];
         if (gaps && gaps.length > 0) {
@@ -432,7 +463,6 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
           autoQueue.push((highestTournamentId || 0) + 1);
         }
         return autoQueue;
-
       default:
         return [];
     }
@@ -445,23 +475,19 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
       alert("Please select an entity first.");
       return;
     }
-
     const queue = await generateIdQueue();
     if (queue.length === 0) {
       alert("No IDs to process with the current selection.");
       return;
     }
-
-    // Auto-collapse sections when processing starts
     setEntitySectionOpen(false);
     setConfigSectionOpen(false);
-    setApiKeyError(null); // Clear previous errors
-
+    setApiKeyError(null);
     setIsProcessing(true);
     setIsPaused(false);
     setProcessingResults([]);
     abortControllerRef.current = new AbortController();
-
+    
     const initialResults: ProcessingResult[] = queue.map(id => ({
       id,
       url: `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${id}`,
@@ -469,9 +495,9 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
       message: 'Waiting...'
     }));
     setProcessingResults(initialResults);
-
+    
     await processQueue(queue, abortControllerRef.current.signal);
-
+    
     setIsProcessing(false);
     setIsPaused(false);
   };
@@ -484,358 +510,353 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
     setIsPaused(false);
   };
 
-const processQueue = async (queue: number[], signal: AbortSignal) => {
-  for (let i = 0; i < queue.length; i++) {
-    if (signal.aborted) break;
+  const processQueue = async (queue: number[], signal: AbortSignal) => {
+    for (let i = 0; i < queue.length; i++) {
+      if (signal.aborted) break;
 
-    const tournamentId = queue[i];
-    const url = `${currentEntity?.gameUrlDomain}${currentEntity?.gameUrlPath}${tournamentId}`;
+      const tournamentId = queue[i];
+      const url = `${currentEntity?.gameUrlDomain}${currentEntity?.gameUrlPath}${tournamentId}`;
 
-    setProcessingResults(prev => prev.map(r =>
-      r.id === tournamentId ? { ...r, status: 'scraping', message: 'Scraping...', parsedData: r.parsedData } : r
-    ));
+      setProcessingResults(prev => prev.map(r =>
+        r.id === tournamentId ? { ...r, status: 'scraping', message: 'Scraping...', parsedData: r.parsedData } : r
+      ));
 
-    try {
-      const parsedData = await fetchGameDataFromBackend(
-        url,
-        !options.useS3,
-        scraperApiKey
-      );
+      try {
+        const parsedData = await fetchGameDataFromBackend(
+          url,
+          !options.useS3,
+          scraperApiKey
+        );
 
-      // --- CRITICAL ERROR CHECK ---
-      // Check for error objects returned by the backend (e.g. ScraperAPI failures)
-      const errorMsg = (parsedData as any).error || (parsedData as any).errorMessage;
-      const isCriticalError = parsedData.name === 'Error processing tournament' || (parsedData as any).status === 'ERROR';
+        // --- CRITICAL ERROR CHECK ---
+        const errorMsg = (parsedData as any).error || (parsedData as any).errorMessage;
+        const isCriticalError = parsedData.name === 'Error processing tournament' || (parsedData as any).status === 'ERROR';
 
-      if (errorMsg || isCriticalError) {
-          const finalErrorMsg = errorMsg || (parsedData as any).message || 'Scraper Error';
-          
-          // Detect API Key issues (401, 403, Unauthorized)
-          const isAuthError = finalErrorMsg.includes('401') || 
-                              finalErrorMsg.includes('Unauthorized') || 
-                              finalErrorMsg.includes('Forbidden') ||
-                              finalErrorMsg.includes('ScraperAPI');
+        if (errorMsg || isCriticalError) {
+            const finalErrorMsg = errorMsg || (parsedData as any).message || 'Scraper Error';
+            const isAuthError = finalErrorMsg.includes('401') || 
+                                finalErrorMsg.includes('Unauthorized') || 
+                                finalErrorMsg.includes('Forbidden') ||
+                                finalErrorMsg.includes('ScraperAPI');
 
-          if (isAuthError) {
-              setProcessingResults(prev => prev.map(r =>
-                  r.id === tournamentId ? { ...r, status: 'error', message: `AUTH ERROR: ${finalErrorMsg}` } : r
-              ));
-              
-              setApiKeyError("ScraperAPI Key is invalid, expired, or unauthorized. Processing stopped.");
-              setConfigSectionOpen(true); // Open config to show the error
-              setIsProcessing(false); // STOP THE QUEUE
-              return; // Exit loop immediately
-          }
-          
-          // Regular error (e.g. 500 or timeout) - log and continue
-          setProcessingResults(prev => prev.map(r =>
-              r.id === tournamentId ? { ...r, status: 'error', message: finalErrorMsg } : r
-          ));
-          continue;
-      }
-      // -----------------------------
-
-      // Check for doNotScrape skip
-      const isSkippedDoNotScrape = 
-        ((parsedData as any).skipped && (parsedData as any).skipReason === 'DO_NOT_SCRAPE') ||
-        (parsedData.doNotScrape && parsedData.name?.includes('Skipped')) ||
-        (parsedData.name === 'Skipped - Do Not Scrape');
-
-      const isNotPublished = parsedData.gameStatus === 'NOT_PUBLISHED';
-
-      if ((isSkippedDoNotScrape && !options.ignoreDoNotScrape) || isNotPublished) {
-        setIsPaused(true);
-        setProcessingResults(prev => prev.map(r =>
-          r.id === tournamentId ? {
-            ...r,
-            status: 'review',
-            message: isNotPublished 
-              ? 'Tournament not published - choose save option...'
-              : 'Tournament marked as Do Not Scrape - awaiting decision...',
-            parsedData
-          } : r
-        ));
-
-        const modalResult = await new Promise<{ action: 'S3' | 'LIVE' | 'SKIP' | 'SAVE_PLACEHOLDER', s3Key?: string }>((resolve) => {
-          setScrapeOptionsModal({
-            isOpen: true,
-            tournamentId,
-            url,
-            gameStatus: parsedData.gameStatus || undefined,
-            isDoNotScrape: isSkippedDoNotScrape
-          });
-          (window as any).__scrapeOptionsResolver = resolve;
-        });
-
-        setScrapeOptionsModal(null);
-        setIsPaused(false);
-
-        if (modalResult.action === 'SAVE_PLACEHOLDER') {
-            try {
+            if (isAuthError) {
                 setProcessingResults(prev => prev.map(r =>
-                r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving NOT_PUBLISHED placeholder...' } : r
+                    r.id === tournamentId ? { ...r, status: 'error', message: `AUTH ERROR: ${finalErrorMsg}` } : r
                 ));
-                
-                const sourceUrl = `${currentEntity?.gameUrlDomain}${currentEntity?.gameUrlPath}${tournamentId}`;
-                
-                const saveResult = await saveGameDataToBackend(
-                sourceUrl,
-                defaultVenueId,
-                parsedData,
-                null,
-                currentEntity?.id || ''
-                );
-                
-                setProcessingResults(prev => prev.map(r =>
-                r.id === tournamentId ? {
-                    ...r,
-                    status: 'success',
-                    message: 'Saved (NOT_PUBLISHED placeholder)',
-                    parsedData,
-                    savedGameId: saveResult.gameId || undefined
-                } : r
-                ));
-
-                await getScrapingStatus({ entityId: currentEntity?.id, forceRefresh: true });
-            } catch (error: any) {
-                setProcessingResults(prev => prev.map(r =>
-                r.id === tournamentId ? {
-                    ...r,
-                    status: 'error',
-                    message: `Failed to save placeholder: ${error.message}`,
-                    parsedData
-                } : r
-                ));
+                setApiKeyError("ScraperAPI Key is invalid, expired, or unauthorized. Processing stopped.");
+                setConfigSectionOpen(true);
+                setIsProcessing(false);
+                return;
             }
+            
+            setProcessingResults(prev => prev.map(r =>
+                r.id === tournamentId ? { ...r, status: 'error', message: finalErrorMsg } : r
+            ));
             continue;
         }
 
-        if (modalResult.action === 'SKIP' || signal.aborted) {
+        const isSkippedDoNotScrape = 
+          ((parsedData as any).skipped && (parsedData as any).skipReason === 'DO_NOT_SCRAPE') ||
+          (parsedData.doNotScrape && parsedData.name?.includes('Skipped')) ||
+          (parsedData.name === 'Skipped - Do Not Scrape');
+
+        const isNotPublished = parsedData.gameStatus === 'NOT_PUBLISHED';
+
+        if ((isSkippedDoNotScrape && !options.ignoreDoNotScrape) || isNotPublished) {
+          // --- AUTO-SAVE FOR NOT_PUBLISHED WITH SKIP MANUAL REVIEWS ---
+          if (isNotPublished && options.skipManualReviews) {
+              if (scrapeFlow === 'scrape_save') {
+                  try {
+                      setProcessingResults(prev => prev.map(r =>
+                          r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving NOT_PUBLISHED placeholder...', parsedData } : r
+                      ));
+                      
+                      const sourceUrl = `${currentEntity?.gameUrlDomain}${currentEntity?.gameUrlPath}${tournamentId}`;
+                      
+                      const sanitizedData = sanitizeGameDataForPlaceholder(parsedData);
+                      
+                      const saveResult = await saveGameDataToBackend(
+                          sourceUrl,
+                          defaultVenueId,
+                          sanitizedData,
+                          null,
+                          currentEntity?.id || ''
+                      );
+                      
+                      setProcessingResults(prev => prev.map(r =>
+                          r.id === tournamentId ? {
+                              ...r,
+                              status: 'success',
+                              message: 'Saved (NOT_PUBLISHED placeholder)',
+                              parsedData: sanitizedData,
+                              savedGameId: saveResult.gameId || undefined
+                          } : r
+                      ));
+
+                      await getScrapingStatus({ entityId: currentEntity?.id, forceRefresh: true });
+
+                  } catch (error: any) {
+                      setProcessingResults(prev => prev.map(r =>
+                          r.id === tournamentId ? {
+                              ...r,
+                              status: 'error',
+                              message: `Failed to save NOT_PUBLISHED: ${error.message}`,
+                              parsedData
+                          } : r
+                      ));
+                  }
+              } else {
+                   setProcessingResults(prev => prev.map(r =>
+                      r.id === tournamentId ? {
+                      ...r,
+                      status: 'skipped',
+                      message: 'Skipped (NOT_PUBLISHED)',
+                      parsedData
+                      } : r
+                  ));
+              }
+              continue; 
+          }
+
+          // --- MANUAL REVIEW LOGIC ---
+          setIsPaused(true);
+          setProcessingResults(prev => prev.map(r =>
+            r.id === tournamentId ? {
+              ...r,
+              status: 'review',
+              message: isNotPublished 
+                ? 'Tournament not published - choose save option...'
+                : 'Tournament marked as Do Not Scrape - awaiting decision...',
+              parsedData
+            } : r
+          ));
+
+          const modalResult = await new Promise<{ action: 'S3' | 'LIVE' | 'SKIP' | 'SAVE_PLACEHOLDER', s3Key?: string }>((resolve) => {
+            setScrapeOptionsModal({
+              isOpen: true,
+              tournamentId,
+              url,
+              gameStatus: parsedData.gameStatus || undefined,
+              isDoNotScrape: isSkippedDoNotScrape
+            });
+            (window as any).__scrapeOptionsResolver = resolve;
+          });
+
+          setScrapeOptionsModal(null);
+          setIsPaused(false);
+
+          if (modalResult.action === 'SAVE_PLACEHOLDER') {
+              try {
+                  setProcessingResults(prev => prev.map(r =>
+                  r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving NOT_PUBLISHED placeholder...' } : r
+                  ));
+                  
+                  const sourceUrl = `${currentEntity?.gameUrlDomain}${currentEntity?.gameUrlPath}${tournamentId}`;
+                  const sanitizedData = sanitizeGameDataForPlaceholder(parsedData);
+                  
+                  const saveResult = await saveGameDataToBackend(
+                      sourceUrl,
+                      defaultVenueId,
+                      sanitizedData,
+                      null,
+                      currentEntity?.id || ''
+                  );
+                  
+                  setProcessingResults(prev => prev.map(r =>
+                  r.id === tournamentId ? {
+                      ...r,
+                      status: 'success',
+                      message: 'Saved (NOT_PUBLISHED placeholder)',
+                      parsedData: sanitizedData,
+                      savedGameId: saveResult.gameId || undefined
+                  } : r
+                  ));
+
+                  await getScrapingStatus({ entityId: currentEntity?.id, forceRefresh: true });
+              } catch (error: any) {
+                  setProcessingResults(prev => prev.map(r =>
+                  r.id === tournamentId ? {
+                      ...r,
+                      status: 'error',
+                      message: `Failed to save placeholder: ${error.message}`,
+                      parsedData
+                  } : r
+                  ));
+              }
+              continue;
+          }
+
+          if (modalResult.action === 'SKIP' || signal.aborted) {
+            setProcessingResults(prev => prev.map(r =>
+              r.id === tournamentId ? {
+                ...r,
+                status: 'skipped',
+                message: `Skipped (${parsedData.gameStatus || 'Do Not Scrape'})`,
+                parsedData
+              } : r
+            ));
+            continue;
+          }
+
+          setProcessingResults(prev => prev.map(r =>
+            r.id === tournamentId ? { ...r, status: 'scraping', message: `Fetching from ${modalResult.action}...`, parsedData } : r
+          ));
+
+          const refetchedData = await fetchGameDataFromBackend(
+            url,
+            modalResult.action === 'LIVE',
+            scraperApiKey
+          );
+          Object.assign(parsedData, refetchedData);
+        }
+
+        if (options.skipInProgress && (parsedData.gameStatus === 'RUNNING' || parsedData.gameStatus === 'SCHEDULED')) {
           setProcessingResults(prev => prev.map(r =>
             r.id === tournamentId ? {
               ...r,
               status: 'skipped',
-              message: `Skipped (${parsedData.gameStatus || 'Do Not Scrape'})`,
+              message: `Skipped (${parsedData.gameStatus})`,
               parsedData
             } : r
           ));
           continue;
         }
 
+        if (scrapeFlow === 'scrape') {
+          setProcessingResults(prev => prev.map(r =>
+            r.id === tournamentId ? {
+              ...r,
+              status: 'success',
+              message: 'Scraped (ready to save)',
+              parsedData: parsedData,
+              selectedVenueId: defaultVenueId
+            } : r
+          ));
+          continue;
+        }
+
         setProcessingResults(prev => prev.map(r =>
-          r.id === tournamentId ? { ...r, status: 'scraping', message: `Fetching from ${modalResult.action}...`, parsedData } : r
+          r.id === tournamentId ? { ...r, status: 'saving', message: 'Determining venue...', parsedData } : r
         ));
 
-        const refetchedData = await fetchGameDataFromBackend(
-          url,
-          modalResult.action === 'LIVE',
-          scraperApiKey
-        );
-        Object.assign(parsedData, refetchedData);
-      }
+        let venueIdToUse = '';
+        let modalResult: ModalResolverValue | undefined;
+        const autoVenueId = parsedData.venueMatch?.autoAssignedVenue?.id;
 
-      if (options.skipInProgress && (parsedData.gameStatus === 'RUNNING' || parsedData.gameStatus === 'SCHEDULED')) {
-        setProcessingResults(prev => prev.map(r =>
-          r.id === tournamentId ? {
-            ...r,
-            status: 'skipped',
-            message: `Skipped (${parsedData.gameStatus})`,
-            parsedData
-          } : r
-        ));
-        continue;
-      }
-
-      // Handle NOT_PUBLISHED games in bulk/auto mode
-      if (parsedData.gameStatus === 'NOT_PUBLISHED' && options.skipManualReviews) {
-        if (scrapeFlow === 'scrape_save') {
-          try {
+        if (options.skipManualReviews) {
+          venueIdToUse = autoVenueId || defaultVenueId;
+          if (autoVenueId) {
             setProcessingResults(prev => prev.map(r =>
-              r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving NOT_PUBLISHED placeholder...', parsedData } : r
-            ));
-            
-            const sourceUrl = `${currentEntity?.gameUrlDomain}${currentEntity?.gameUrlPath}${tournamentId}`;
-            
-            const saveResult = await saveGameDataToBackend(
-                sourceUrl,
-                defaultVenueId,
-                parsedData,
-                null,
-                currentEntity?.id || ''
-            );
-            
-            setProcessingResults(prev => prev.map(r =>
-              r.id === tournamentId ? {
-                ...r,
-                status: 'success',
-                message: 'Saved (NOT_PUBLISHED placeholder)',
-                parsedData,
-                savedGameId: saveResult.gameId || undefined
-              } : r
-            ));
-
-            await getScrapingStatus({ entityId: currentEntity?.id, forceRefresh: true });
-
-          } catch (error: any) {
-            setProcessingResults(prev => prev.map(r =>
-              r.id === tournamentId ? {
-                ...r,
-                status: 'error',
-                message: `Failed to save NOT_PUBLISHED: ${error.message}`,
-                parsedData
-              } : r
+              r.id === tournamentId ? { ...r, autoVenueId: venueIdToUse } : r
             ));
           }
+          // FIX 3: Cast AUTO_ASSIGNED to 'any' or VenueAssignmentStatus
+          if (parsedData) {
+            parsedData.venueAssignmentStatus = 'AUTO_ASSIGNED' as any;
+          }
         } else {
+          setIsPaused(true);
+          setProcessingResults(prev => prev.map(r =>
+            r.id === tournamentId ? { ...r, status: 'review', message: 'Awaiting review...', parsedData: parsedData } : r
+          ));
+
+          const suggestedVenueId = autoVenueId || defaultVenueId || '';
+          modalResult = await showSaveConfirmationModal(parsedData, suggestedVenueId, currentEntity?.id || '');
+          setIsPaused(false);
+
+          if (modalResult.action === 'cancel' || signal.aborted) {
+            setProcessingResults(prev => prev.map(r =>
+              r.id === tournamentId ? { ...r, status: 'skipped', message: 'User cancelled', parsedData: parsedData } : r
+            ));
+            continue;
+          }
+          venueIdToUse = modalResult.venueId || '';
+        }
+
+        if (!venueIdToUse) {
+          setProcessingResults(prev => prev.map(r =>
+            r.id === tournamentId ? { ...r, status: 'error', message: 'No venue selected', parsedData: parsedData } : r
+          ));
+          continue;
+        }
+
+        if (parsedData.existingGameId && !options.overrideExisting) {
           setProcessingResults(prev => prev.map(r =>
             r.id === tournamentId ? {
               ...r,
               status: 'skipped',
-              message: 'Skipped (NOT_PUBLISHED)',
-              parsedData
+              message: 'Game already exists (override disabled)',
+              parsedData: parsedData
             } : r
           ));
+          continue;
         }
-        continue;
-      }
 
-      if (scrapeFlow === 'scrape') {
+        setProcessingResults(prev => prev.map(r =>
+          r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving to Game...', parsedData: parsedData } : r
+        ));
+
+        const dataToSave = modalResult?.gameData || parsedData;
+        const sourceUrl = (dataToSave as any).sourceUrl || 
+          (currentEntity ? `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${dataToSave.tournamentId}` : 
+          `Tournament ID: ${dataToSave.tournamentId}`);
+
+        const sanitizedData = {
+          ...dataToSave,
+          gameStartDateTime: dataToSave.gameStartDateTime ?? undefined
+        } as any;
+
+        const saveResult = await saveGameDataToBackend(
+          sourceUrl,
+          venueIdToUse,
+          sanitizedData,
+          (dataToSave as any).existingGameId || null,
+          currentEntity?.id || ''
+        );
+
         setProcessingResults(prev => prev.map(r =>
           r.id === tournamentId ? {
             ...r,
             status: 'success',
-            message: 'Scraped (ready to save)',
+            message: 'Successfully saved',
             parsedData: parsedData,
-            selectedVenueId: defaultVenueId
+            savedGameId: saveResult.gameId || undefined
           } : r
         ));
-        continue;
-      }
 
-      setProcessingResults(prev => prev.map(r =>
-        r.id === tournamentId ? { ...r, status: 'saving', message: 'Determining venue...', parsedData } : r
-      ));
+        await getScrapingStatus({ entityId: currentEntity?.id, forceRefresh: true });
 
-      let venueIdToUse = '';
-      let modalResult: ModalResolverValue | undefined;
-      const autoVenueId = parsedData.venueMatch?.autoAssignedVenue?.id;
+      } catch (error: any) {
+        const errorMsg = error.message || 'Unknown error';
+        const isAuthError = errorMsg.includes('401') || errorMsg.includes('Unauthorized') || errorMsg.includes('ScraperAPI');
 
-      if (options.skipManualReviews) {
-        venueIdToUse = autoVenueId || defaultVenueId;
-        if (autoVenueId) {
-          setProcessingResults(prev => prev.map(r =>
-            r.id === tournamentId ? { ...r, autoVenueId: venueIdToUse } : r
-          ));
+        if (isAuthError) {
+            setProcessingResults(prev => prev.map(r =>
+              r.id === tournamentId ? {
+                ...r,
+                status: 'error',
+                message: `AUTH ERROR: ${errorMsg}`
+              } : r
+            ));
+            setApiKeyError("API Key is invalid or expired. Check logs.");
+            setConfigSectionOpen(true);
+            setIsProcessing(false);
+            return;
         }
-      } else {
-        setIsPaused(true);
-        setProcessingResults(prev => prev.map(r =>
-          r.id === tournamentId ? { ...r, status: 'review', message: 'Awaiting review...', parsedData: parsedData } : r
-        ));
-
-        const suggestedVenueId = autoVenueId || defaultVenueId || '';
-        modalResult = await showSaveConfirmationModal(parsedData, suggestedVenueId, currentEntity?.id || '');
         
-        setIsPaused(false);
-
-        if (modalResult.action === 'cancel' || signal.aborted) {
-          setProcessingResults(prev => prev.map(r =>
-            r.id === tournamentId ? { ...r, status: 'skipped', message: 'User cancelled', parsedData: parsedData } : r
-          ));
-          continue;
-        }
-
-        venueIdToUse = modalResult.venueId || '';
-      }
-
-      if (!venueIdToUse) {
-        setProcessingResults(prev => prev.map(r =>
-          r.id === tournamentId ? { ...r, status: 'error', message: 'No venue selected', parsedData: parsedData } : r
-        ));
-        continue;
-      }
-
-      if (parsedData.existingGameId && !options.overrideExisting) {
         setProcessingResults(prev => prev.map(r =>
           r.id === tournamentId ? {
             ...r,
-            status: 'skipped',
-            message: 'Game already exists (override disabled)',
-            parsedData: parsedData
+            status: 'error',
+            message: errorMsg
           } : r
         ));
-        continue;
       }
-
-      setProcessingResults(prev => prev.map(r =>
-        r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving to Game...', parsedData: parsedData } : r
-      ));
-
-      const dataToSave = modalResult?.gameData || parsedData;
-
-      const sourceUrl = (dataToSave as any).sourceUrl || 
-        (currentEntity ? `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${dataToSave.tournamentId}` : 
-        `Tournament ID: ${dataToSave.tournamentId}`);
-
-      const sanitizedData = {
-        ...dataToSave,
-        gameStartDateTime: dataToSave.gameStartDateTime ?? undefined
-      } as any;
-
-      const saveResult = await saveGameDataToBackend(
-        sourceUrl,
-        venueIdToUse,
-        sanitizedData,
-        (dataToSave as any).existingGameId || null,
-        currentEntity?.id || ''
-      );
-
-      setProcessingResults(prev => prev.map(r =>
-        r.id === tournamentId ? {
-          ...r,
-          status: 'success',
-          message: 'Successfully saved',
-          parsedData: parsedData,
-          savedGameId: saveResult.gameId || undefined
-        } : r
-      ));
-
-      await getScrapingStatus({ entityId: currentEntity?.id, forceRefresh: true });
-
-    } catch (error: any) {
-      // --- CATCH BLOCK ERROR HANDLING ---
-      const errorMsg = error.message || 'Unknown error';
-      const isAuthError = errorMsg.includes('401') || errorMsg.includes('Unauthorized') || errorMsg.includes('ScraperAPI');
-
-      if (isAuthError) {
-          setProcessingResults(prev => prev.map(r =>
-            r.id === tournamentId ? {
-              ...r,
-              status: 'error',
-              message: `AUTH ERROR: ${errorMsg}`
-            } : r
-          ));
-          setApiKeyError("API Key is invalid or expired. Check logs.");
-          setConfigSectionOpen(true);
-          setIsProcessing(false);
-          return;
-      }
-      
-      setProcessingResults(prev => prev.map(r =>
-        r.id === tournamentId ? {
-          ...r,
-          status: 'error',
-          message: errorMsg
-        } : r
-      ));
     }
-  }
-};
+  };
 
-
-  // --- Manual Save from Results ---
-
-const handleManualSave = async (result: ProcessingResult) => {
+  // ... (Rest of the component: Manual Save, Modals, Render methods remain the same) ...
+  const handleManualSave = async (result: ProcessingResult) => {
     if (!currentEntity || !result.parsedData) return;
     
     if (result.parsedData.gameStatus === 'NOT_PUBLISHED') {
@@ -857,11 +878,12 @@ const handleManualSave = async (result: ProcessingResult) => {
         
         try {
             const sourceUrl = `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${result.id}`;
+            const sanitizedData = sanitizeGameDataForPlaceholder(result.parsedData);
             
             const saveResult = await saveGameDataToBackend(
                 sourceUrl,
                 result.selectedVenueId || defaultVenueId,
-                result.parsedData,
+                sanitizedData,
                 null,
                 currentEntity.id
             );
@@ -951,15 +973,13 @@ const handleManualSave = async (result: ProcessingResult) => {
             r.id === result.id ? { ...r, status: 'error', message: error.message || 'Save failed' } : r
         ));
     }
-};
+  };
 
   const handleResultVenueChange = (resultId: number, venueId: string) => {
     setProcessingResults(prev => prev.map(r =>
       r.id === resultId ? { ...r, selectedVenueId: venueId } : r
     ));
   };
-
-  // --- Modal Handling ---
 
   const showSaveConfirmationModal = (game: ScrapedGameData, venueId: string, entityId: string): Promise<ModalResolverValue> => {
     return new Promise((resolve) => {
@@ -984,9 +1004,7 @@ const handleManualSave = async (result: ProcessingResult) => {
     setGameForReview(null);
   };
 
-    // --- Convert ProcessingResult to GameState ---
-
-    const resultToGameState = (result: ProcessingResult): GameState => {
+  const resultToGameState = (result: ProcessingResult): GameState => {
     const gameData = result.parsedData ? {
         ...result.parsedData,
         gameStartDateTime: result.parsedData.gameStartDateTime ?? undefined,
@@ -1012,9 +1030,7 @@ const handleManualSave = async (result: ProcessingResult) => {
         : undefined,
         fetchCount: 1,
     };
-    };
-
-  // --- UI Helpers ---
+  };
 
   const renderIdSelectionInputs = () => {
     switch (idSelectionMode) {
@@ -1087,7 +1103,7 @@ const handleManualSave = async (result: ProcessingResult) => {
             value={scraperApiKey}
             onChange={(e) => {
                 setScraperApiKey(e.target.value);
-                setApiKeyError(null); // Clear error on edit
+                setApiKeyError(null); 
             }}
             disabled={isProcessing}
             className={`w-full px-3 py-2 border rounded-md text-sm font-mono focus:ring-2 focus:border-transparent disabled:bg-gray-100 ${
@@ -1122,7 +1138,6 @@ const handleManualSave = async (result: ProcessingResult) => {
     </div>
   );
 
-  // --- Entity Warning ---
   if (!currentEntity) {
     return (
       <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-6 text-center">
@@ -1149,7 +1164,6 @@ const handleManualSave = async (result: ProcessingResult) => {
         onToggle={() => setConfigSectionOpen(!configSectionOpen)}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Column 1: ID Selection & Flow */}
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700">ID Selection Mode</label>
@@ -1266,7 +1280,6 @@ const handleManualSave = async (result: ProcessingResult) => {
             </div>
           </div>
           
-          {/* Column 2: Options */}
           <div className="space-y-4 rounded-lg bg-gray-50 p-4 border">
             <h4 className="text-sm font-medium text-gray-900">Processing Options</h4>
             {renderOption('useS3', 'Use S3 Cache (Default: ON)', 'If unchecked, forces a live fetch.')}
@@ -1286,7 +1299,6 @@ const handleManualSave = async (result: ProcessingResult) => {
           </div>
         </div>
 
-        {/* Action Button */}
         <div className="mt-6 border-t pt-5">
           <button
             type="button"
@@ -1316,7 +1328,6 @@ const handleManualSave = async (result: ProcessingResult) => {
         </div>
       </CollapsibleSection>
 
-      {/* Progress Summary */}
       {(isProcessing || processingResults.length > 0) && (
         <ProgressSummary
           results={processingResults}
@@ -1328,7 +1339,6 @@ const handleManualSave = async (result: ProcessingResult) => {
         />
       )}
       
-      {/* Processing Results - Using GameListItem */}
       {processingResults.length > 0 && (
         <div className="bg-white rounded-lg shadow">
           <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -1374,7 +1384,6 @@ const handleManualSave = async (result: ProcessingResult) => {
         </div>
       )}
 
-      {/* Modals */}
       {selectedGameDetails && (
         <GameDetailsModal
           game={{ data: selectedGameDetails }}

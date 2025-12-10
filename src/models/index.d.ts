@@ -974,6 +974,7 @@ type EagerScrapedGameData = {
   readonly prizepoolSurplus?: number | null;
   readonly guaranteeOverlayCost?: number | null;
   readonly gameProfit?: number | null;
+  readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
 }
 
 type LazyScrapedGameData = {
@@ -1046,6 +1047,7 @@ type LazyScrapedGameData = {
   readonly prizepoolSurplus?: number | null;
   readonly guaranteeOverlayCost?: number | null;
   readonly gameProfit?: number | null;
+  readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
 }
 
 export declare type ScrapedGameData = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameData : LazyScrapedGameData
@@ -1285,6 +1287,46 @@ type LazyReScrapeResult = {
 export declare type ReScrapeResult = LazyLoading extends LazyLoadingDisabled ? EagerReScrapeResult : LazyReScrapeResult
 
 export declare const ReScrapeResult: (new (init: ModelInit<ReScrapeResult>) => ReScrapeResult)
+
+type EagerScraperJobsReport = {
+  readonly items?: (ScraperJob | null)[] | null;
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+  readonly entitySummary?: (EntityJobSummary | null)[] | null;
+}
+
+type LazyScraperJobsReport = {
+  readonly items: AsyncCollection<ScraperJob>;
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+  readonly entitySummary?: (EntityJobSummary | null)[] | null;
+}
+
+export declare type ScraperJobsReport = LazyLoading extends LazyLoadingDisabled ? EagerScraperJobsReport : LazyScraperJobsReport
+
+export declare const ScraperJobsReport: (new (init: ModelInit<ScraperJobsReport>) => ScraperJobsReport)
+
+type EagerEntityJobSummary = {
+  readonly entityId: string;
+  readonly entityName?: string | null;
+  readonly totalJobs?: number | null;
+  readonly runningJobs?: number | null;
+  readonly completedJobs?: number | null;
+  readonly failedJobs?: number | null;
+}
+
+type LazyEntityJobSummary = {
+  readonly entityId: string;
+  readonly entityName?: string | null;
+  readonly totalJobs?: number | null;
+  readonly runningJobs?: number | null;
+  readonly completedJobs?: number | null;
+  readonly failedJobs?: number | null;
+}
+
+export declare type EntityJobSummary = LazyLoading extends LazyLoadingDisabled ? EagerEntityJobSummary : LazyEntityJobSummary
+
+export declare const EntityJobSummary: (new (init: ModelInit<EntityJobSummary>) => EntityJobSummary)
 
 type EagerGapRange = {
   readonly start: number;
@@ -2069,13 +2111,15 @@ export declare type ScraperJobConnection = LazyLoading extends LazyLoadingDisabl
 export declare const ScraperJobConnection: (new (init: ModelInit<ScraperJobConnection>) => ScraperJobConnection)
 
 type EagerScrapeURLConnection = {
-  readonly items?: ScrapeURL[] | null;
+  readonly items?: (ScrapeURL | null)[] | null;
   readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
 }
 
 type LazyScrapeURLConnection = {
   readonly items: AsyncCollection<ScrapeURL>;
   readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
 }
 
 export declare type ScrapeURLConnection = LazyLoading extends LazyLoadingDisabled ? EagerScrapeURLConnection : LazyScrapeURLConnection
@@ -2409,7 +2453,6 @@ type EagerGame = {
   readonly isPartialData?: boolean | null;
   readonly missingFlightCount?: number | null;
   readonly expectedTotalEntries?: number | null;
-  readonly actualCalculatedUniquePlayers?: number | null;
   readonly gameDayOfWeek?: string | null;
   readonly buyInBucket?: string | null;
   readonly venueScheduleKey?: string | null;
@@ -2505,7 +2548,6 @@ type LazyGame = {
   readonly isPartialData?: boolean | null;
   readonly missingFlightCount?: number | null;
   readonly expectedTotalEntries?: number | null;
-  readonly actualCalculatedUniquePlayers?: number | null;
   readonly gameDayOfWeek?: string | null;
   readonly buyInBucket?: string | null;
   readonly venueScheduleKey?: string | null;

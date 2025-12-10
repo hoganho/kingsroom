@@ -1,0 +1,203 @@
+.
+├── .DS_Store
+├── amplifyconfiguration.json
+├── API.ts
+├── App.css
+├── App.tsx
+├── assets
+│   ├── Kings-Room-Logo_web.png
+│   └── react.svg
+├── authenticator-theme.css
+├── aws-exports.d.ts
+├── aws-exports.js
+├── components
+│   ├── .DS_Store
+│   ├── auth
+│   │   ├── .DS_Store
+│   │   ├── CustomAuthenticator.tsx
+│   │   └── ProtectedRoute.tsx
+│   ├── entities
+│   │   ├── DeleteConfirmationModal.tsx
+│   │   ├── EntityDashboard.tsx
+│   │   ├── EntityDeleteConfirmationModal.tsx
+│   │   ├── EntityModal.tsx
+│   │   ├── EntitySelector.tsx
+│   │   ├── EntityTable.tsx
+│   │   └── MultiEntitySelector.tsx
+│   ├── games
+│   │   └── GameCard.tsx
+│   ├── layout
+│   │   ├── CollapsibleSection.tsx
+│   │   ├── MainLayout.tsx
+│   │   ├── MobileBottomNav.tsx
+│   │   ├── PageWrapper.tsx
+│   │   └── Sidebar.tsx
+│   ├── monitoring
+│   │   └── DatabaseChangeMonitor.tsx
+│   ├── players
+│   │   └── PlayerCard.tsx
+│   ├── scraper
+│   │   ├── .DS_Store
+│   │   ├── admin
+│   │   │   ├── .DS_Store
+│   │   │   ├── GameDetailsModal.tsx
+│   │   │   ├── JobDetailsModal.tsx
+│   │   │   ├── ScraperAdminShared.tsx
+│   │   │   └── SkippedIDsAnalyzer.tsx
+│   │   ├── BlindStructure.tsx
+│   │   ├── Breaks.tsx
+│   │   ├── FieldManifestReport.tsx
+│   │   ├── GameCard.tsx
+│   │   ├── GameListItem.tsx
+│   │   ├── helpers.ts
+│   │   ├── HtmlModal.tsx
+│   │   ├── InitialScanPanel.tsx
+│   │   ├── LiveTables.tsx
+│   │   ├── PlayerEntries.tsx
+│   │   ├── PlayerResults.tsx
+│   │   ├── PlayerSeating.tsx
+│   │   ├── SaveConfirmation
+│   │   │   ├── ConsolidationPreview.tsx
+│   │   │   ├── EditableField.tsx
+│   │   │   ├── QuickDataEditor.tsx
+│   │   │   ├── SeriesDetailsEditor.tsx
+│   │   │   └── TemplatePicker.tsx
+│   │   ├── SaveConfirmationModal.tsx
+│   │   ├── ScrapeOptionsModal.tsx
+│   │   ├── ScraperReport.tsx
+│   │   ├── StructureInfo.tsx
+│   │   ├── ValidationSummary.tsx
+│   │   └── VenueMatchDisplay.tsx
+│   ├── series
+│   │   ├── SeriesInstanceManager.tsx
+│   │   └── SeriesTitleManager.tsx
+│   ├── social
+│   │   ├── .DS_Store
+│   │   ├── index.ts
+│   │   ├── SocialAccountModal.tsx
+│   │   └── SocialAccountTable.tsx
+│   ├── users
+│   │   ├── EntityPermissionsModal.tsx
+│   │   ├── PagePermissionsModal.tsx
+│   │   ├── ResetPasswordModal.tsx
+│   │   ├── UserAuditModal.tsx
+│   │   ├── UserCreateModal.tsx
+│   │   └── UserEditModal.tsx
+│   └── venues
+│       ├── DeleteConfirmationModal.tsx
+│       ├── VenueModal.tsx
+│       └── VenueTable.tsx
+├── config
+│   └── pagePermissions.ts
+├── contexts
+│   ├── AuthContext.tsx
+│   ├── EntityContext.tsx
+│   └── GameContext.tsx
+├── directory_structure.txt
+├── graphql
+│   ├── .DS_Store
+│   ├── customQueries.ts
+│   ├── entityOperations.ts
+│   ├── mutations.ts
+│   ├── queries.ts
+│   ├── schema.json
+│   ├── scraperManagement.ts
+│   ├── subscriptions.ts
+│   └── userManagement.ts
+├── hooks
+│   ├── .DS_Store
+│   ├── social
+│   │   └── index.ts
+│   ├── useActivityLogger.tsx
+│   ├── useBulkGameFetcher.ts
+│   ├── useConsolidationPreview.ts
+│   ├── useGameDataEditor.ts
+│   ├── useGameIdTracking.ts
+│   ├── useGameTracker.ts
+│   ├── useScraperManagement.ts
+│   ├── useSocialAccounts.ts
+│   ├── useSocialPosts.ts
+│   ├── useURLManagement.ts
+│   └── useUserPermissions.ts
+├── index.css
+├── infrastructure
+│   └── client-cloudwatch.ts
+├── lib
+│   ├── fieldManifest.ts
+│   ├── tournamentTemplates.ts
+│   ├── validation.ts
+│   └── zz-structureManifest.ts
+├── main.tsx
+├── models
+│   ├── index.d.ts
+│   ├── index.js
+│   ├── schema.d.ts
+│   └── schema.js
+├── pages
+│   ├── .DS_Store
+│   ├── debug
+│   │   ├── DatabaseMonitor.tsx
+│   │   ├── GamesDebug.tsx
+│   │   └── PlayersDebug.tsx
+│   ├── games
+│   │   ├── GameDetails.tsx
+│   │   ├── GamesDashboard.tsx
+│   │   └── GameSearch.tsx
+│   ├── HomePage.tsx
+│   ├── legal
+│   │   ├── PrivacyPolicy.tsx
+│   │   └── TermsOfService.tsx
+│   ├── players
+│   │   ├── PlayerProfile.tsx
+│   │   ├── PlayersDashboard.tsx
+│   │   └── PlayerSearch.tsx
+│   ├── scraper
+│   │   └── ScraperAdmin.tsx
+│   ├── scraper-admin-tabs
+│   │   ├── .DS_Store
+│   │   ├── AnalyticsTab.tsx
+│   │   ├── JobHistoryTab.tsx
+│   │   ├── OverviewTab.tsx
+│   │   ├── S3ManagementTab.tsx
+│   │   ├── ScraperTab.tsx
+│   │   ├── SettingsTab.tsx
+│   │   └── URLManagementTab.tsx
+│   ├── ScraperAdminPage.tsx
+│   ├── series
+│   │   └── SeriesDashboard.tsx
+│   ├── SeriesManagementPage.tsx
+│   ├── settings
+│   │   ├── .DS_Store
+│   │   ├── EntityManagement.tsx
+│   │   ├── GameManagement.tsx
+│   │   ├── SeriesManagement.tsx
+│   │   ├── SocialAccountManagement.tsx
+│   │   ├── UserManagement.tsx
+│   │   └── VenueManagement.tsx
+│   ├── social
+│   │   ├── SocialDashboard.tsx
+│   │   └── SocialPulse.tsx
+│   └── venues
+│       ├── VenueDetails.tsx
+│       └── VenuesDashboard.tsx
+├── services
+│   └── gameService.ts
+├── tags.json
+├── types
+│   ├── entity.ts
+│   ├── game.ts
+│   ├── series.ts
+│   └── venue.ts
+└── utils
+    ├── .DS_Store
+    ├── apiClient.ts
+    ├── batchTournamentScanner.ts
+    ├── dateCalculations.ts
+    ├── enhanced-monitoring.ts
+    ├── gameDataValidation.ts
+    ├── generalHelpers.ts
+    └── scraperAnalytics.ts
+
+38 directories, 161 files
+
+Function List:

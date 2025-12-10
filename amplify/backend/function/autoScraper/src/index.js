@@ -153,7 +153,6 @@ const FETCH_TOURNAMENT_DATA = /* GraphQL */ `
             totalBuyInsCollected
             projectedRakeRevenue
             rakeSubsidy
-            actualRakeRevenue
             prizepoolPlayerContributions
             prizepoolAddedValue
             prizepoolSurplus
