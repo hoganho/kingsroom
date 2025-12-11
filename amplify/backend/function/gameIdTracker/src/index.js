@@ -137,58 +137,71 @@ exports.handler = async (event) => {
 
 /**
  * Get highest and lowest tournament IDs for an entity
- * FIX: Added FilterExpression to ignore PARENT records
+ * FIX: Uses pagination to handle cases where many PARENT records exist at boundaries
  */
 async function getTournamentIdBounds(entityId) {
   console.log(`[getTournamentIdBounds] Getting bounds for entity: ${entityId}`);
   
-  // Common filtering for Parent exclusion
-  const parentFilter = {
-    FilterExpression: 'consolidationType <> :parent',
-    ExpressionAttributeValues: {
-      ':entityId': entityId,
-      ':parent': 'PARENT'
-    }
-  };
-
-  // Query for lowest ID
-  // FIX: Increased limit to 10 to skip potential Parent records at the boundary
-  const lowestQuery = await monitoredDdbDocClient.send(new QueryCommand({
-    TableName: GAME_TABLE,
-    IndexName: 'byEntityAndTournamentId',
-    KeyConditionExpression: 'entityId = :entityId',
-    ...parentFilter,
-    ProjectionExpression: 'tournamentId, consolidationType',
-    Limit: 10, 
-    ScanIndexForward: true  // Ascending
-  }));
+  // Helper function to find first non-PARENT item with pagination
+  async function findBoundaryId(scanForward) {
+    let lastEvaluatedKey = undefined;
+    let iterations = 0;
+    const maxIterations = 10; // Safety limit
+    
+    do {
+      const result = await monitoredDdbDocClient.send(new QueryCommand({
+        TableName: GAME_TABLE,
+        IndexName: 'byEntityAndTournamentId',
+        KeyConditionExpression: 'entityId = :entityId',
+        FilterExpression: 'consolidationType <> :parent OR attribute_not_exists(consolidationType)',
+        ExpressionAttributeValues: {
+          ':entityId': entityId,
+          ':parent': 'PARENT'
+        },
+        ProjectionExpression: 'tournamentId, consolidationType',
+        Limit: 50, // Query more items per batch
+        ScanIndexForward: scanForward,
+        ExclusiveStartKey: lastEvaluatedKey
+      }));
+      
+      // Find first valid item in this batch
+      const validItem = result.Items?.find(item => 
+        item.tournamentId != null && item.consolidationType !== 'PARENT'
+      );
+      
+      if (validItem) {
+        return validItem.tournamentId;
+      }
+      
+      lastEvaluatedKey = result.LastEvaluatedKey;
+      iterations++;
+      
+      console.log(`[getTournamentIdBounds] Iteration ${iterations} (${scanForward ? 'asc' : 'desc'}): No valid item found, continuing...`);
+      
+    } while (lastEvaluatedKey && iterations < maxIterations);
+    
+    return undefined;
+  }
   
-  // Query for highest ID
-  const highestQuery = await monitoredDdbDocClient.send(new QueryCommand({
-    TableName: GAME_TABLE,
-    IndexName: 'byEntityAndTournamentId',
-    KeyConditionExpression: 'entityId = :entityId',
-    ...parentFilter,
-    ProjectionExpression: 'tournamentId, consolidationType',
-    Limit: 10,
-    ScanIndexForward: false  // Descending
-  }));
+  // Query for lowest ID (ascending)
+  const lowestId = await findBoundaryId(true);
+  
+  // Query for highest ID (descending)  
+  const highestId = await findBoundaryId(false);
   
   // Count total games (excluding Parents)
   const countQuery = await monitoredDdbDocClient.send(new QueryCommand({
     TableName: GAME_TABLE,
     IndexName: 'byEntityAndTournamentId',
     KeyConditionExpression: 'entityId = :entityId',
-    ...parentFilter,
+    FilterExpression: 'consolidationType <> :parent OR attribute_not_exists(consolidationType)',
+    ExpressionAttributeValues: {
+      ':entityId': entityId,
+      ':parent': 'PARENT'
+    },
     Select: 'COUNT'
   }));
   
-  // Find first valid non-parent item in the returned batch
-  const lowestItem = lowestQuery.Items?.find(i => i.consolidationType !== 'PARENT');
-  const highestItem = highestQuery.Items?.find(i => i.consolidationType !== 'PARENT');
-
-  const lowestId = lowestItem?.tournamentId;
-  const highestId = highestItem?.tournamentId;
   const totalCount = countQuery.Count || 0;
   
   console.log(`[getTournamentIdBounds] Bounds: ${lowestId} - ${highestId}, Total: ${totalCount}`);

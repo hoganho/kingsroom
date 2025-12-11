@@ -9935,11 +9935,19 @@ export const schema = {
         "GameVariant": {
             "name": "GameVariant",
             "values": [
+                "NOT_PUBLISHED",
                 "NLHE",
                 "PLO",
                 "PLOM",
+                "PL04",
+                "PLOM4",
+                "PLOM5",
                 "PLO5",
-                "PLO6"
+                "PLO6",
+                "PLOM6",
+                "PLMIXED",
+                "PLDC",
+                "NLDC"
             ]
         },
         "GameFrequency": {
@@ -10269,7 +10277,10 @@ export const schema = {
                 "SAVED",
                 "SUCCESS_EDITED",
                 "SAVED_EDITED",
-                "UPDATED_EDITED"
+                "UPDATED_EDITED",
+                "NOT_FOUND",
+                "NOT_IN_USE",
+                "NOT_PUBLISHED"
             ]
         },
         "TimeRange": {
@@ -12020,6 +12031,34 @@ export const schema = {
                     "type": {
                         "enum": "VenueAssignmentStatus"
                     },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "errorMessage": {
+                    "name": "errorMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "httpStatus": {
+                    "name": "httpStatus",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -14318,5 +14357,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "216ab4f94fd6021ee9ffaff1c892470e"
+    "version": "1d389cfe9f8c6675ee983b5bc7a99062"
 };

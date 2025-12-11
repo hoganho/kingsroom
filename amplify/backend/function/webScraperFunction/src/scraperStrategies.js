@@ -310,12 +310,39 @@ const defaultStrategy = {
 
     getTournamentType(ctx) {
         const tags = ctx.data.gameTags || [];
+        const name = ctx.data.name || '';
+        
+        // Combine tags and name for checking
+        const allText = [...tags, name].join(' ');
+        
         let tournamentType = 'FREEZEOUT';
-        for (const tag of tags) {
-            if (/(rebuy|re-buy|reentry|re-entry)/i.test(tag)) { tournamentType = 'REBUY'; break; }
-            if (/(sat|satellite|satty)/i.test(tag)) { tournamentType = 'SATELLITE'; break; }
+        
+        // Check for satellite first (highest priority as it changes the nature of the tournament)
+        if (/(satellite|satty|\bsat\b)/i.test(allText)) {
+            tournamentType = 'SATELLITE';
         }
+        // Check for rebuy/re-entry
+        else if (/(rebuy|re-buy|reentry|re-entry)/i.test(allText)) {
+            tournamentType = 'REBUY';
+        }
+        // Check for bounty/knockout
+        else if (/(bounty|knockout|ko\b|pko|progressive\s*knockout)/i.test(allText)) {
+            tournamentType = 'BOUNTY';
+        }
+        // Check for turbo/hyper
+        else if (/(hyper|turbo)/i.test(allText)) {
+            // This could be combined with other types, but mark it
+            if (tournamentType === 'FREEZEOUT') {
+                tournamentType = 'TURBO';
+            }
+        }
+        
         ctx.add('tournamentType', tournamentType);
+        
+        // Also set isSatellite flag for consistency
+        if (tournamentType === 'SATELLITE') {
+            ctx.add('isSatellite', true);
+        }
     },
 
     getGameStartDateTime(ctx) {
@@ -386,18 +413,89 @@ const defaultStrategy = {
     },
     
     getGuarantee(ctx) {
-        const text = ctx.$('.cw-game-shortdesc').text().trim();
-        if (!text) { ctx.add('hasGuarantee', false); return; }
-        if (/(gtd|guaranteed|g'teed)/i.test(text)) {
+        // Check multiple sources: the already-parsed name, shortdesc, and title
+        const shortDesc = ctx.$('.cw-game-shortdesc').text().trim();
+        const mainTitle = ctx.$('.cw-game-title').text().trim();
+        const combinedName = ctx.data.name || '';
+        
+        // Check all text sources
+        const textSources = [combinedName, mainTitle, shortDesc].filter(Boolean);
+        const allText = textSources.join(' ');
+        
+        if (!allText) { 
+            ctx.add('hasGuarantee', false); 
+            return; 
+        }
+        
+        // Enhanced guarantee detection patterns
+        const guaranteePatterns = [
+            /gtd/i,
+            /guaranteed/i,
+            /g'teed/i,
+            /guarantee/i,
+            /\$[\d,]+\s*gtd/i,           // $5,000 GTD
+            /\$[\d,]+\s*guaranteed/i,    // $5,000 Guaranteed
+        ];
+        
+        const hasGuaranteeMatch = guaranteePatterns.some(pattern => pattern.test(allText));
+        
+        if (hasGuaranteeMatch) {
             ctx.add('hasGuarantee', true);
             let guaranteeAmount = null;
-            const millionMatch = text.match(/\b(\d{1,2})M\b/i);
-            const thousandMatch = text.match(/\b(\d{1,3})K\b/i);
-            if (millionMatch) guaranteeAmount = parseInt(millionMatch[1], 10) * 1000000;
-            else if (thousandMatch) guaranteeAmount = parseInt(thousandMatch[1], 10) * 1000;
-            else { const num = parseInt(text.replace(/[^0-9.-]+/g, ''), 10); if (!isNaN(num)) guaranteeAmount = num; }
-            if (guaranteeAmount !== null) ctx.add('guaranteeAmount', guaranteeAmount);
-        } else ctx.add('hasGuarantee', false);
+            
+            // Try multiple patterns for extracting the guarantee amount
+            // Pattern 1: $X,XXX GTD or $X,XXX Guaranteed (most specific - amount right before GTD)
+            const dollarGtdMatch = allText.match(/\$([\d,]+(?:\.\d{2})?)\s*(?:GTD|Guaranteed|G'teed|Guarantee)/i);
+            if (dollarGtdMatch) {
+                guaranteeAmount = parseInt(dollarGtdMatch[1].replace(/,/g, ''), 10);
+            }
+            
+            // Pattern 2: $XM GTD (millions shorthand)
+            if (!guaranteeAmount) {
+                const millionDollarMatch = allText.match(/\$(\d+(?:\.\d+)?)\s*M\b/i);
+                if (millionDollarMatch) {
+                    guaranteeAmount = parseFloat(millionDollarMatch[1]) * 1000000;
+                }
+            }
+            
+            // Pattern 3: $XK GTD (thousands shorthand)
+            if (!guaranteeAmount) {
+                const thousandDollarMatch = allText.match(/\$(\d+(?:\.\d+)?)\s*K\b/i);
+                if (thousandDollarMatch) {
+                    guaranteeAmount = parseFloat(thousandDollarMatch[1]) * 1000;
+                }
+            }
+            
+            // Pattern 4: XM GTD or XK GTD (without dollar sign)
+            if (!guaranteeAmount) {
+                const millionMatch = allText.match(/\b(\d+(?:\.\d+)?)\s*M\s*(?:GTD|Guaranteed)/i);
+                if (millionMatch) {
+                    guaranteeAmount = parseFloat(millionMatch[1]) * 1000000;
+                }
+            }
+            
+            if (!guaranteeAmount) {
+                const thousandMatch = allText.match(/\b(\d+(?:\.\d+)?)\s*K\s*(?:GTD|Guaranteed)/i);
+                if (thousandMatch) {
+                    guaranteeAmount = parseFloat(thousandMatch[1]) * 1000;
+                }
+            }
+            
+            // Pattern 5: Any dollar amount near GTD (fallback)
+            if (!guaranteeAmount) {
+                const nearbyDollarMatch = allText.match(/\$([\d,]+)/);
+                if (nearbyDollarMatch && /(gtd|guaranteed|g'teed|guarantee)/i.test(allText)) {
+                    guaranteeAmount = parseInt(nearbyDollarMatch[1].replace(/,/g, ''), 10);
+                }
+            }
+            
+            if (guaranteeAmount !== null && !isNaN(guaranteeAmount) && guaranteeAmount > 0) {
+                ctx.add('guaranteeAmount', guaranteeAmount);
+                console.log(`[Guarantee] Detected: $${guaranteeAmount.toLocaleString()} from "${allText.substring(0, 80)}..."`);
+            }
+        } else {
+            ctx.add('hasGuarantee', false);
+        }
     },
 
     getSeriesName(ctx) { /* Handled by getName */ },

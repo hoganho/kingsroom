@@ -33,7 +33,6 @@ export const ALL_PAGES: PageConfig[] = [
     label: 'Home',
     description: 'Main dashboard and overview',
     category: 'core',
-    alwaysAllowed: true,
     icon: 'HomeIcon',
   },
 
@@ -96,7 +95,7 @@ export const ALL_PAGES: PageConfig[] = [
 
   // Venues Section
   {
-    path: '/venues/dashboard',
+    path: '/venues', // ✅ FIXED: Matches App.tsx route (was /venues/dashboard)
     label: 'Venues Dashboard',
     description: 'Venue overview and management',
     category: 'venues',
@@ -254,7 +253,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     '/players/search',
     '/games/dashboard',
     '/games/search',
-    '/venues/dashboard',
+    '/venues', // ✅ FIXED: Changed from /venues/dashboard
     '/venues/details',
     '/social/pulse',
   ],
@@ -274,55 +273,61 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   ],
 };
 
-// Check if a path matches a page (handles dynamic routes like /players/profile/:id)
+// Check if a path matches a page
 export const pathMatchesPage = (pathname: string, pagePath: string): boolean => {
+  const normalizedPath = pathname.replace(/\/$/, '') || '/';
+  const normalizedPagePath = pagePath.replace(/\/$/, '') || '/';
+
   // Exact match
-  if (pathname === pagePath) return true;
+  if (normalizedPath === normalizedPagePath) return true;
   
-  // Check if pathname starts with pagePath (for nested routes)
-  if (pathname.startsWith(pagePath + '/')) return true;
+  // Nested route match (e.g. /players/search matches /players/search/123)
+  if (normalizedPath.startsWith(normalizedPagePath + '/')) return true;
   
-  // Handle dynamic routes
-  const pageSegments = pagePath.split('/');
-  const pathSegments = pathname.split('/');
-  
-  if (pageSegments.length > pathSegments.length) return false;
-  
-  for (let i = 0; i < pageSegments.length; i++) {
-    if (pageSegments[i].startsWith(':')) continue; // Skip dynamic segments
-    if (pageSegments[i] !== pathSegments[i]) return false;
-  }
-  
-  return true;
+  return false;
 };
 
 // Check if user has access to a specific path
 export const hasPageAccess = (
   pathname: string,
-  userRole: UserRole,
+  userRole: string | undefined,
   allowedPages?: string[] | null
 ): boolean => {
-  // Find the page config
+  // 1. ✅ MOVED UP: Super Admin Override (Case insensitive check)
+  // Super Admins should ALWAYS have access, even if the page isn't in config yet
+  if (userRole && userRole.toUpperCase() === 'SUPER_ADMIN') return true;
+
+  // 2. Find the page config
   const pageConfig = ALL_PAGES.find(page => pathMatchesPage(pathname, page.path));
   
-  // If page not found in config, deny access (or allow for unknown routes)
+  // If page is not tracked in our system, allow it (e.g. login, 404s, public routes)
   if (!pageConfig) {
-    // Allow access to base routes and catch-all
+    // If it's a known public route or root, allow
     return pathname === '/' || pathname === '/login';
   }
   
-  // Always allowed pages (like home)
+  // 3. Check "Always Allowed" (Configured in ALL_PAGES)
   if (pageConfig.alwaysAllowed) return true;
   
-  // SUPER_ADMIN always has access
-  if (userRole === 'SUPER_ADMIN') return true;
-  
-  // If user has custom allowedPages, use those
-  if (allowedPages && allowedPages.length > 0) {
+  // 4. Custom User Permissions (The "Configurable" Logic)
+  // If allowedPages is an Array (even empty), we MUST respect it.
+  if (Array.isArray(allowedPages)) {
     return allowedPages.some(allowed => pathMatchesPage(pathname, allowed));
   }
   
-  // Fall back to default role permissions
-  const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[userRole] || [];
-  return defaultPermissions.some(allowed => pathMatchesPage(pathname, allowed));
+  // 5. Default Role Permissions Fallback
+  // Only reached if allowedPages is null/undefined
+  if (!userRole) return false;
+
+  // Normalize role to find in default map (handle SuperAdmin vs SUPER_ADMIN)
+  const normalizedRole = Object.keys(DEFAULT_ROLE_PERMISSIONS).find(
+    key => key.toUpperCase() === userRole.toUpperCase()
+  ) as UserRole | undefined;
+
+  if (normalizedRole) {
+    const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[normalizedRole];
+    return defaultPermissions.some(allowed => pathMatchesPage(pathname, allowed));
+  }
+
+  return false;
 };

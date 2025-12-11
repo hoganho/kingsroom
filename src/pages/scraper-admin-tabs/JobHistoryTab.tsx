@@ -8,8 +8,8 @@ import {
 } from 'lucide-react';
 import { getScraperJobsReport } from '../../graphql/queries';
 import type { ScraperJob, ScraperJobStatus } from '../../API'; // Removed .ts
-import { JobStatusBadge } from '../../components/scraper/admin/ScraperAdminShared'; // Removed .tsx
-import { JobDetailsModal } from '../../components/scraper/admin/JobDetailsModal'; // Removed .tsx
+import { JobStatusBadge } from '../../components/scraper/shared/StatusBadges'; // Removed .tsx
+import { JobDetailsModal } from '../../components/scraper/admin/ScraperModals'; // Removed .tsx
 
 export const JobHistoryTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);

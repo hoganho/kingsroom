@@ -380,7 +380,9 @@ const validateInput = (input) => {
     }
     
     if (!input.game.buyIn && input.game.buyIn !== 0) warnings.push('No buyIn specified');
-    if (!input.game.gameVariant) warnings.push('No gameVariant specified, defaulting to NLHE');
+    if (!input.game.gameVariant) {
+        errors.push('gameVariant is required - received null or undefined');
+    }
     if (!input.venue) warnings.push('No venue information provided');
     
     if (input.players) {
@@ -1280,7 +1282,7 @@ const shouldQueueForPDP = (input, game) => {
  * Splits players into batches of PLAYER_BATCH_SIZE to prevent Lambda timeouts.
  * Each batch is sent as a separate SQS message for parallel processing.
  */
-const PLAYER_BATCH_SIZE = 25;
+const PLAYER_BATCH_SIZE = 50;
 
 const queueForPDP = async (game, input) => {
     const allPlayers = input.players.allPlayers || [];

@@ -41,11 +41,19 @@ const GameStatus = {
 };
 
 const GameVariant = {
+  "NOT_PUBLISHED": "NOT_PUBLISHED",
   "NLHE": "NLHE",
   "PLO": "PLO",
   "PLOM": "PLOM",
+  "PL04": "PL04",
+  "PLOM4": "PLOM4",
+  "PLOM5": "PLOM5",
   "PLO5": "PLO5",
-  "PLO6": "PLO6"
+  "PLO6": "PLO6",
+  "PLOM6": "PLOM6",
+  "PLMIXED": "PLMIXED",
+  "PLDC": "PLDC",
+  "NLDC": "NLDC"
 };
 
 const GameFrequency = {
@@ -315,7 +323,10 @@ const ScrapeAttemptStatus = {
   "SAVED": "SAVED",
   "SUCCESS_EDITED": "SUCCESS_EDITED",
   "SAVED_EDITED": "SAVED_EDITED",
-  "UPDATED_EDITED": "UPDATED_EDITED"
+  "UPDATED_EDITED": "UPDATED_EDITED",
+  "NOT_FOUND": "NOT_FOUND",
+  "NOT_IN_USE": "NOT_IN_USE",
+  "NOT_PUBLISHED": "NOT_PUBLISHED"
 };
 
 const TimeRange = {

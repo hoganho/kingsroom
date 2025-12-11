@@ -18,7 +18,7 @@ import {
 } from '../../graphql/queries';
 // Import TimeRange enum from API types
 import { TimeRange, type ScraperJob } from '../../API';
-import { MetricCard, JobStatusBadge } from '../../components/scraper/admin/ScraperAdminShared';
+import { MetricCard, JobStatusBadge } from '../../components/scraper/shared/StatusBadges';
 import { useEntity } from '../../contexts/EntityContext';
 import { useGameIdTracking } from '../../hooks/useGameIdTracking';
 

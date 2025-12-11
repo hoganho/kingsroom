@@ -2,18 +2,23 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
-// Remove Authenticator import, keep UI components for ErrorBoundary
+import { signOut } from 'aws-amplify/auth'; // Added for the logout button in restricted view
+
+// UI Styles
 import '@aws-amplify/ui-react/styles.css';
 import './authenticator-theme.css';
 import awsExports from './aws-exports.js';
 import React, { useEffect, useRef } from 'react';
-import { useActivityLogger } from './hooks/useActivityLogger';
 
-// Import your Custom Authenticator
+// Hooks & Config
+import { useActivityLogger } from './hooks/useActivityLogger';
+import { ALL_PAGES, hasPageAccess } from './config/pagePermissions'; // Added for smart redirect
+
+// Components
 import { CustomAuthenticator } from './components/auth/CustomAuthenticator';
 
 // Context Providers
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { GameProvider } from './contexts/GameContext';
 import { EntityProvider } from './contexts/EntityContext';
 
@@ -40,6 +45,7 @@ import { GameDetails } from './pages/games/GameDetails';
 // Venues Pages
 import VenuesDashboard from './pages/venues/VenuesDashboard';
 import { VenueDetails } from './pages/venues/VenueDetails';
+import { VenueGameDetails } from './pages/venues/VenueGameDetails';
 
 // Settings Pages (Admin/SuperAdmin)
 import EntityManagement from './pages/settings/EntityManagement';
@@ -231,6 +237,60 @@ const PublicRoutes = () => {
 };
 
 // ============================================
+// SMART REDIRECT COMPONENT (New)
+// Finds the first page a user is allowed to see
+// ============================================
+const DefaultRoute = () => {
+    const { user, loading } = useAuth();
+
+    // 1. Wait for auth to load
+    if (loading || !user) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            </div>
+        );
+    }
+
+    // 2. Check if Home is allowed (Legacy preference)
+    if (hasPageAccess('/home', user.role, user.allowedPages)) {
+        return <Navigate to="/home" replace />;
+    }
+
+    // 3. Find the first accessible page in the system
+    const firstAllowedPage = ALL_PAGES.find(page => 
+        hasPageAccess(page.path, user.role, user.allowedPages)
+    );
+
+    if (firstAllowedPage) {
+        return <Navigate to={firstAllowedPage.path} replace />;
+    }
+
+    // 4. Fallback: User has NO permissions at all
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+            <div className="text-center bg-white p-8 rounded-xl shadow-md max-w-md w-full">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Account Restricted</h2>
+                <p className="text-gray-600 mb-6">
+                    Your account does not have permission to access any pages in this dashboard. 
+                </p>
+                <button
+                    onClick={() => signOut()}
+                    className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                    Sign Out
+                </button>
+            </div>
+        </div>
+    );
+};
+
+// ============================================
 // AUTHENTICATED ROUTES COMPONENT
 // ============================================
 const AuthenticatedRoutes = () => {
@@ -242,9 +302,9 @@ const AuthenticatedRoutes = () => {
                 <AuthEventLogger />
                 
                 <Routes>
-                    {/* Redirects */}
-                    <Route path="/login" element={<Navigate to="/home" replace />} />
-                    <Route path="/" element={<Navigate to="/home" replace />} />
+                    {/* ✅ Use Smart Redirect instead of hardcoded /home */}
+                    <Route path="/login" element={<DefaultRoute />} />
+                    <Route path="/" element={<DefaultRoute />} />
 
                     {/* Protected routes with layout */}
                     <Route element={<ProtectedLayout />}>
@@ -267,6 +327,7 @@ const AuthenticatedRoutes = () => {
                         {/* Venues */}
                         <Route path="/venues" element={<VenuesDashboard />} />
                         <Route path="/venues/details" element={<VenueDetails />} />
+                        <Route path="/venues/game" element={<VenueGameDetails />} />
                         
                         {/* Social Pulse */}
                         <Route path="/social/pulse" element={<SocialPulse />} />
@@ -289,8 +350,8 @@ const AuthenticatedRoutes = () => {
                         <Route path="/debug/database-monitor" element={<DatabaseMonitorPage />} />
                     </Route>
 
-                    {/* Catch all */}
-                    <Route path="*" element={<Navigate to="/home" replace />} />
+                    {/* ✅ Catch-all uses Smart Redirect */}
+                    <Route path="*" element={<DefaultRoute />} />
                 </Routes>
             </AuthProvider>
         </CustomAuthenticator>
@@ -304,16 +365,14 @@ const AppRouter = () => {
     const location = useLocation();
     
     useEffect(() => {
-        console.log('剥 Current path:', location.pathname);
-        console.log('箔 Is public path:', isPublicPath(location.pathname));
+        // Reduced noise logging
+        // console.log('Current path:', location.pathname);
     }, [location.pathname]);
 
     if (isPublicPath(location.pathname)) {
-        console.log('塘 Rendering public route');
         return <PublicRoutes />;
     }
 
-    console.log('柏 Rendering authenticated route');
     return <AuthenticatedRoutes />;
 };
 

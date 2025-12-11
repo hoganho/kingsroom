@@ -40,9 +40,15 @@
 │   │   ├── .DS_Store
 │   │   ├── admin
 │   │   │   ├── .DS_Store
+│   │   │   ├── CollapsibleSection.tsx
+│   │   │   ├── ErrorHandlingModal.tsx
 │   │   │   ├── GameDetailsModal.tsx
+│   │   │   ├── index.ts
 │   │   │   ├── JobDetailsModal.tsx
+│   │   │   ├── ProgressSummary.tsx
 │   │   │   ├── ScraperAdminShared.tsx
+│   │   │   ├── ScraperConfig.tsx
+│   │   │   ├── ScraperResults.tsx
 │   │   │   └── SkippedIDsAnalyzer.tsx
 │   │   ├── BlindStructure.tsx
 │   │   ├── Breaks.tsx
@@ -79,6 +85,7 @@
 │   ├── ui
 │   │   ├── DataTable.tsx
 │   │   ├── MetricCard.tsx
+│   │   ├── timeRange.ts
 │   │   └── TimeRangeToggle.tsx
 │   ├── users
 │   │   ├── EntityPermissionsModal.tsx
@@ -183,13 +190,16 @@
 │   │   └── SocialPulse.tsx
 │   └── venues
 │       ├── VenueDetails.tsx
+│       ├── VenueGameDetails.tsx
 │       └── VenuesDashboard.tsx
 ├── services
-│   └── gameService.ts
+│   ├── gameService.ts
+│   └── scrapeURLService.ts
 ├── tags.json
 ├── types
 │   ├── entity.ts
 │   ├── game.ts
+│   ├── scraper.ts
 │   ├── series.ts
 │   └── venue.ts
 └── utils
@@ -200,8 +210,9 @@
     ├── enhanced-monitoring.ts
     ├── gameDataValidation.ts
     ├── generalHelpers.ts
-    └── scraperAnalytics.ts
+    ├── scraperAnalytics.ts
+    └── scraperErrorUtils.ts
 
-39 directories, 164 files
+39 directories, 175 files
 
 Function List:

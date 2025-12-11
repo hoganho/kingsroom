@@ -24,7 +24,7 @@ import {
     bulkModifyScrapeURLs 
 } from '../../graphql/mutations';
 import { ScrapeURL, ScrapeURLStatus, GameStatus } from '../../API';
-import { URLStatusBadge, GameStatusBadge } from '../../components/scraper/admin/ScraperAdminShared';
+import { URLStatusBadge, GameStatusBadge } from '../../components/scraper/shared/StatusBadges';
 import { SkippedIDsAnalyzer } from '../../components/scraper/admin/SkippedIDsAnalyzer';
 import { useEntity } from '../../contexts/EntityContext';  // NEW: Import entity context
 

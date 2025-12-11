@@ -41,11 +41,19 @@ export enum GameStatus {
 }
 
 export enum GameVariant {
+  NOT_PUBLISHED = "NOT_PUBLISHED",
   NLHE = "NLHE",
   PLO = "PLO",
   PLOM = "PLOM",
+  PL04 = "PL04",
+  PLOM4 = "PLOM4",
+  PLOM5 = "PLOM5",
   PLO5 = "PLO5",
-  PLO6 = "PLO6"
+  PLO6 = "PLO6",
+  PLOM6 = "PLOM6",
+  PLMIXED = "PLMIXED",
+  PLDC = "PLDC",
+  NLDC = "NLDC"
 }
 
 export enum GameFrequency {
@@ -315,7 +323,10 @@ export enum ScrapeAttemptStatus {
   SAVED = "SAVED",
   SUCCESS_EDITED = "SUCCESS_EDITED",
   SAVED_EDITED = "SAVED_EDITED",
-  UPDATED_EDITED = "UPDATED_EDITED"
+  UPDATED_EDITED = "UPDATED_EDITED",
+  NOT_FOUND = "NOT_FOUND",
+  NOT_IN_USE = "NOT_IN_USE",
+  NOT_PUBLISHED = "NOT_PUBLISHED"
 }
 
 export enum TimeRange {
@@ -975,6 +986,10 @@ type EagerScrapedGameData = {
   readonly guaranteeOverlayCost?: number | null;
   readonly gameProfit?: number | null;
   readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly error?: string | null;
+  readonly errorMessage?: string | null;
+  readonly status?: string | null;
+  readonly httpStatus?: number | null;
 }
 
 type LazyScrapedGameData = {
@@ -1048,6 +1063,10 @@ type LazyScrapedGameData = {
   readonly guaranteeOverlayCost?: number | null;
   readonly gameProfit?: number | null;
   readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly error?: string | null;
+  readonly errorMessage?: string | null;
+  readonly status?: string | null;
+  readonly httpStatus?: number | null;
 }
 
 export declare type ScrapedGameData = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameData : LazyScrapedGameData

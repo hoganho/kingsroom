@@ -303,10 +303,16 @@ const mapToGameVariant = (value: any): GameVariant | null => {
     const map: Record<string, GameVariant> = {
         'NLH': GameVariant.NLHE,
         'NLHE': GameVariant.NLHE,
-        'PLO': GameVariant.PLOM,
+        'PLO': GameVariant.PLO,
         'PLOM': GameVariant.PLOM,
         'PLO5': GameVariant.PLO5,
+        'PLOM5': GameVariant.PLOM5,
         'PLO6': GameVariant.PLO6,
+        'PLOM6': GameVariant.PLOM6,
+        'PLMIXED': GameVariant.PLMIXED,
+        'PLDC': GameVariant.PLDC,
+        'NLDC': GameVariant.NLDC,
+        'NOT_PUBLISHED': GameVariant.NOT_PUBLISHED,
     };
     return map[value] || null;
 };
@@ -346,6 +352,7 @@ const createNotPublishedPlaceholder = (
         entityId,
         name: data.name || `Tournament ${data.tournamentId} (Not Published)`,
         gameStatus: 'NOT_PUBLISHED',
+        gameVariant: 'NOT_PUBLISHED',
         // Force critical fields to valid values
         buyIn: data.buyIn ?? 0,
         rake: data.rake ?? 0,
@@ -442,7 +449,12 @@ export const fetchGameDataFromBackend = async (
     const client = generateClient();
     
     try {
-        console.log(`[GameService] Fetching game data`, { url, forceRefresh, hasApiKey: !!scraperApiKey });
+        console.log(`[GameService] Fetching game data`, { 
+            url, 
+            forceRefresh, 
+            hasApiKey: !!scraperApiKey,
+            apiKeyLength: scraperApiKey?.length // Debug: log key length to catch truncation
+        });
         
         const response = await client.graphql({
             query: fetchTournamentData,
@@ -454,19 +466,128 @@ export const fetchGameDataFromBackend = async (
             }
         }) as any;
         
-        const result = response.data.fetchTournamentData;
+        const result = response.data?.fetchTournamentData;
         
-        console.log(`[GameService] Received data`, {
-            hasData: !!result,
-            s3Key: result?.s3Key,
-            wasForced: result?.wasForced
-        });
+        // Check for GraphQL errors FIRST
+        if (response.errors?.length) {
+            console.warn('[GameService] GraphQL errors in response:', JSON.stringify(response.errors, null, 2));
+            
+            // Extract the primary error message
+            const primaryError = response.errors[0];
+            const errorMessage = primaryError?.message || 'Unknown GraphQL error';
+            
+            // Check if this is an auth error (Lambda threw 401/403)
+            if (errorMessage.includes('401') || 
+                errorMessage.includes('403') || 
+                errorMessage.includes('Unauthorized') ||
+                errorMessage.includes('forbidden') ||
+                errorMessage.includes('API key')) {
+                console.error('[GameService] Auth error from Lambda:', errorMessage);
+                throw new Error(errorMessage);
+            }
+            
+            // Check for enum errors (can still return partial data)
+            const enumErrors = parseEnumErrors(response.errors);
+            if (enumErrors.length > 0) {
+                console.warn('[GameService] Enum validation errors detected:', enumErrors);
+                if (result) {
+                    result._enumErrors = enumErrors;
+                    result._enumErrorMessage = formatEnumErrorMessage(enumErrors);
+                }
+            }
+            
+            // If we have errors but no result, throw
+            if (!result) {
+                console.error('[GameService] GraphQL returned errors with no data:', errorMessage);
+                throw new Error(errorMessage);
+            }
+        }
+        
+        // If result is null/undefined without errors, something unexpected happened
+        if (!result) {
+            console.error('[GameService] No data returned from fetchTournamentData');
+            throw new Error('No data returned from scraper');
+        }
+        
+        // ADDITIONAL CHECK: Detect when gameVariant is null (may indicate invalid enum)
+        if (result.gameVariant === null) {
+            console.warn('[GameService] gameVariant is null - may indicate invalid enum value');
+        }
         
         return result as ScrapedGameData;
+        
     } catch (error: any) {
-        console.error('[GameService] Error fetching game data:', error);
-        throw error;
+        // Handle Amplify GraphQL errors which have a specific structure
+        console.warn('[GameService] GraphQL threw error:', error?.message);
+        
+        // Extract error message from various error formats
+        let errorMessage = 'Unknown error';
+        
+        if (error?.message) {
+            errorMessage = error.message;
+        } else if (error?.errors?.[0]?.message) {
+            errorMessage = error.errors[0].message;
+        } else if (typeof error === 'string') {
+            errorMessage = error;
+        }
+        
+        // Check for partial data in error response
+        if (error?.data?.fetchTournamentData) {
+            const result = error.data.fetchTournamentData;
+            console.warn('[GameService] Partial data available despite error');
+            
+            const enumErrors = parseEnumErrors(error.errors || []);
+            
+            if (enumErrors.length > 0) {
+                console.warn('[GameService] Partial success with enum errors:', enumErrors);
+                result._enumErrors = enumErrors;
+                result._enumErrorMessage = formatEnumErrorMessage(enumErrors);
+                return result as ScrapedGameData;
+            }
+            
+            // Return partial data even without detected enum errors
+            return result as ScrapedGameData;
+        }
+        
+        // No partial data - create a proper error to throw
+        console.error('[GameService] Error fetching game data:', errorMessage);
+        
+        // Re-throw with clean error message
+        const cleanError = new Error(errorMessage);
+        (cleanError as any).originalError = error;
+        throw cleanError;
     }
+};
+
+/**
+ * Parse GraphQL errors to extract enum validation failures
+ */
+const parseEnumErrors = (errors: any[]): Array<{ field: string; enumType: string; path: string }> => {
+    const enumErrors: Array<{ field: string; enumType: string; path: string }> = [];
+    
+    for (const error of errors) {
+        const message = error?.message || '';
+        // Match: "Can't serialize value (/fetchTournamentData/gameVariant) : Invalid input for Enum 'GameVariant'."
+        const match = message.match(/Can't serialize value \(([^)]+)\).*Invalid input for Enum '([^']+)'/);
+        if (match) {
+            const path = match[1];
+            const enumType = match[2];
+            const field = path.split('/').pop() || path;
+            enumErrors.push({ field, enumType, path });
+        }
+    }
+    
+    return enumErrors;
+};
+
+/**
+ * Format enum errors into a user-friendly message
+ */
+const formatEnumErrorMessage = (enumErrors: Array<{ field: string; enumType: string }>): string => {
+    if (enumErrors.length === 0) return '';
+    
+    const errorDetails = enumErrors.map(e => `"${e.field}" (${e.enumType} enum)`).join(', ');
+    return `⚠️ Unknown value(s) for: ${errorDetails}. The field contains a value not yet defined in the schema. Please add the new value to the ${enumErrors.map(e => e.enumType).join('/')} enum in schema.graphql and run 'amplify push'.`;
 };
 
 /**
