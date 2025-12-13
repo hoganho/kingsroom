@@ -1,0 +1,208 @@
+# 85-social.graphql
+# ==========================================
+
+type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  platform: SocialPlatform!
+  platformAccountId: String! @index(name: "byPlatformAccountId", queryField: "socialAccountByPlatformId")
+  accountName: String! @index(name: "byAccountName")
+  accountHandle: String
+  accountUrl: AWSURL!
+  businessLocation: String @index(name: "byAccountLocation", queryField: "socialAccountsByLocation")
+  tags: [String]
+  profileImageUrl: AWSURL
+  coverImageUrl: AWSURL
+  bio: String
+  followerCount: Int
+  followingCount: Int
+  postCount: Int
+  hasFullHistory: Boolean @default(value: "false")
+  pageDescription: String
+  category: String
+  website: String
+  status: SocialAccountStatus! @default(value: "PENDING_VERIFICATION")
+  isScrapingEnabled: Boolean! @default(value: "true")
+  scrapeFrequencyMinutes: Int @default(value: "60")
+  lastScrapedAt: AWSDateTime
+  lastSuccessfulScrapeAt: AWSDateTime
+  nextScheduledScrapeAt: AWSDateTime
+  consecutiveFailures: Int @default(value: "0")
+  lastErrorMessage: String
+  hasPostAccess: Boolean @default(value: "false")
+  accessTokenExpiry: AWSDateTime
+  permissionsGranted: [String]
+  entityId: ID @index(name: "bySocialAccountEntity")
+  entity: Entity @belongsTo(fields: ["entityId"])
+  venueId: ID @index(name: "bySocialAccountVenue")
+  venue: Venue @belongsTo(fields: ["venueId"])
+  posts: [SocialPost] @hasMany(indexName: "bySocialAccount", fields: ["id"])
+  scrapeAttempts: [SocialScrapeAttempt] @hasMany(indexName: "bySocialAccountAttempt", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  createdBy: String
+}
+
+type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  platformPostId: String! @index(name: "byPlatformPostId", queryField: "socialPostByPlatformId")
+  postUrl: AWSURL
+  postType: SocialPostType!
+  accountName: String
+  accountProfileImageUrl: String
+  platform: String
+  businessLocation: String @index(name: "byPostLocation", queryField: "socialPostsByLocation", sortKeyFields: ["postedAt"])
+  content: String
+  contentPreview: String
+  rawContent: AWSJSON
+  mediaUrls: [AWSURL]
+  thumbnailUrl: AWSURL
+  mediaType: String
+  videoUrl: String
+  videoThumbnailUrl: String
+  videoWidth: Int
+  videoHeight: Int
+  videoTitle: String
+  videoDescription: String
+  likeCount: Int @default(value: "0")
+  commentCount: Int @default(value: "0")
+  shareCount: Int @default(value: "0")
+  reactionCount: Int @default(value: "0")
+  viewCount: Int
+  postedAt: AWSDateTime! @index(name: "byPostedAt", sortKeyFields: ["likeCount"])
+  scrapedAt: AWSDateTime!
+  lastUpdatedAt: AWSDateTime
+  status: SocialPostStatus! @default(value: "ACTIVE") @index(name: "byPostStatus", queryField: "socialPostsByPostStatus", sortKeyFields: ["postedAt"])
+  isPromotional: Boolean @default(value: "false")
+  isPinned: Boolean @default(value: "false")
+  isTournamentRelated: Boolean @default(value: "false")
+  tags: [String]
+  sentiment: String
+  contentCategory: String
+  linkedGameId: ID @index(name: "bySocialPostGame")
+  linkedGame: Game @belongsTo(fields: ["linkedGameId"])
+  socialAccountId: ID! @index(name: "bySocialAccount", sortKeyFields: ["postedAt"])
+  socialAccount: SocialAccount @belongsTo(fields: ["socialAccountId"])
+  entityId: ID @index(name: "bySocialPostEntity", sortKeyFields: ["postedAt"])
+  venueId: ID @index(name: "bySocialPostVenue", sortKeyFields: ["postedAt"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type SocialScrapeAttempt @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  status: SocialScrapeStatus!
+  startedAt: AWSDateTime!
+  completedAt: AWSDateTime
+  durationMs: Int
+  syncType: String
+  postsFound: Int @default(value: "0")
+  newPostsAdded: Int @default(value: "0")
+  postsUpdated: Int @default(value: "0")
+  errorMessage: String
+  errorCode: String
+  triggerSource: ScraperJobTriggerSource
+  triggeredBy: String
+  socialAccountId: ID! @index(name: "bySocialAccountAttempt", sortKeyFields: ["startedAt"])
+  socialAccount: SocialAccount @belongsTo(fields: ["socialAccountId"])
+  createdAt: AWSDateTime!
+}
+
+type SocialScheduledPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  content: String!
+  mediaUrls: [AWSURL]
+  linkUrl: AWSURL
+  scheduledFor: AWSDateTime! @index(name: "byScheduledTime")
+  publishedAt: AWSDateTime
+  status: ScheduledPostStatus! @default(value: "SCHEDULED") @index(name: "byScheduledPostStatus", sortKeyFields: ["scheduledFor"])
+  targetAccountIds: [ID!]!
+  linkedGameId: ID @index(name: "byScheduledPostGame")
+  templateType: String
+  entityId: ID! @index(name: "byScheduledPostEntity", sortKeyFields: ["scheduledFor"])
+  createdBy: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# 7. NON-MODEL TYPES & RESPONSES
+# ===================================================================
+
+type SocialFeedConnection {
+  items: [SocialPost!]!
+  nextToken: String
+  totalCount: Int
+}
+
+type SocialPostConnection {
+  items: [SocialPost!]!
+  nextToken: String
+}
+
+type SocialAccountConnection {
+  items: [SocialAccount!]!
+  nextToken: String
+}
+
+type SocialAccountMetrics {
+  accountId: ID!
+  totalPosts: Int!
+  totalEngagement: Int!
+  avgLikesPerPost: Float
+  avgCommentsPerPost: Float
+  avgSharesPerPost: Float
+  postsThisPeriod: Int
+  engagementGrowth: Float
+  topPerformingPosts: [SocialPost!]
+}
+
+type SocialScrapeResult {
+  success: Boolean!
+  message: String
+  postsFound: Int
+  newPostsAdded: Int
+}
+
+input AddSocialAccountInput {
+  platform: SocialPlatform!
+  accountUrl: AWSURL!
+  accountName: String!
+  accountHandle: String
+  platformAccountId: String
+  entityId: ID
+  venueId: ID
+  scrapeFrequencyMinutes: Int
+}
+
+input UpdateSocialAccountInput {
+  id: ID!
+  accountName: String
+  accountHandle: String
+  isScrapingEnabled: Boolean
+  scrapeFrequencyMinutes: Int
+  status: SocialAccountStatus
+  entityId: ID
+  venueId: ID
+  profileImageUrl: AWSURL
+  bio: String
+}
+
+input SchedulePostInput {
+  content: String!
+  mediaUrls: [AWSURL]
+  linkUrl: AWSURL
+  scheduledFor: AWSDateTime!
+  targetAccountIds: [ID!]!
+  entityId: ID!
+  linkedGameId: ID
+  templateType: String
+}
+
+input UpdateSocialPostInput {
+  id: ID!
+  status: SocialPostStatus
+  isTournamentRelated: Boolean
+  linkedGameId: ID
+  tags: [String]
+  contentCategory: String
+}

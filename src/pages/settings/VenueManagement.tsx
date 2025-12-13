@@ -19,8 +19,14 @@ type Entity = Pick<APITypes.Entity, 'id' | 'entityName'>;
 type SortDirection = 'asc' | 'desc';
 type SortField = 'name' | 'venueNumber' | 'city' | 'fee';
 
-// ✅ FIX: Create client outside component to prevent recreation on every render
-const client = generateClient();
+// ✅ FIX: Lazy client initialization to avoid "Amplify not configured" warning
+let _client: any = null;
+const getClient = () => {
+  if (!_client) {
+    _client = generateClient();
+  }
+  return _client;
+};
 
 const VenueManagement = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -46,36 +52,43 @@ const VenueManagement = () => {
   // ✅ FIX: Regular functions, not useCallback with unstable dependencies
   const fetchEntities = async () => {
     try {
-      const response = await client.graphql<GraphQLResult<APITypes.ListEntitiesShallowQuery>>({
+      // FIX: Remove <Generic> from call, cast result with 'as' instead
+      const response = (await getClient().graphql({
         query: listEntitiesShallow
-      });
-      if ('data' in response && response.data) {
-        const entityItems = (response.data.listEntities.items as Entity[])
-          .filter(Boolean)
-          .sort((a, b) => a.entityName.localeCompare(b.entityName));
-        setEntities(entityItems);
-      }
+      })) as GraphQLResult<APITypes.ListEntitiesShallowQuery>;
+
+        if ('data' in response && response.data?.listEntities) {
+        // Added ?. after listEntities to handle potential null/undefined
+        const entityItems = (response.data.listEntities?.items as Entity[]) || [];
+        
+        const sortedEntities = entityItems
+            .filter(Boolean)
+            .sort((a, b) => a.entityName.localeCompare(b.entityName));
+        setEntities(sortedEntities);
+        }
     } catch (err) {
       console.error('Error fetching entities:', err);
     }
   };
 
-  const fetchVenues = async () => {
+const fetchVenues = async () => {
     console.log('[VenueManagement] Fetching venues...');
     try {
-      const response = await client.graphql<GraphQLResult<APITypes.ListVenuesShallowQuery>>({
+      // FIX: Remove <Generic> from call, cast result with 'as' instead
+      const response = (await getClient().graphql({
         query: listVenuesShallow,
         variables: {
           filter: {
             isSpecial: { ne: true }
           }
         }
-      });
+      })) as GraphQLResult<APITypes.ListVenuesShallowQuery>;
 
       if ('data' in response && response.data) {
-        const venueItems = (response.data.listVenues.items as Venue[]).filter(Boolean);
-        
-        console.log('[VenueManagement] Fetched venues:', venueItems.length);
+        const venueItems = (response.data.listVenues?.items as Venue[]) || [];
+        const validVenues = venueItems.filter(Boolean);
+
+        console.log('[VenueManagement] Fetched venues:', validVenues.length);
         if (venueItems.length > 0) {
           console.log('[VenueManagement] Sample venue data:', {
             name: venueItems[0].name,
@@ -243,7 +256,7 @@ const VenueManagement = () => {
         
         console.log('[VenueManagement] Update mutation input:', updateInput);
         
-        const result = await client.graphql({
+        const result = await getClient().graphql({
           query: updateVenue,
           variables: { input: updateInput },
         });
@@ -263,7 +276,7 @@ const VenueManagement = () => {
         
         console.log('[VenueManagement] Create mutation input:', createInput);
         
-        const result = await client.graphql({
+        const result = await getClient().graphql({
           query: createVenue,
           variables: { input: createInput },
         });
@@ -304,7 +317,7 @@ const VenueManagement = () => {
     }
 
     try {
-      await client.graphql({
+      await getClient().graphql({
         query: deleteVenue,
         variables: {
           input: {

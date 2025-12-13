@@ -1,6 +1,8 @@
 // src/pages/scraper-admin-tabs/ScraperTab.tsx
-// REFACTORED: Uses extracted hooks and utilities
-// Reduced from ~1400 lines to ~450 lines
+// FINAL: All phases integrated (1-5)
+// - Phase 3: useScrapeOrchestrator with unified save + doNotScrape handling
+// - Phase 4: State machine helpers available
+// - Phase 5: Status normalization + structured logging
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -27,16 +29,11 @@ import {
   useErrorTracking,
   useScraperModals,
 } from '../../hooks/scraper';
+import { useScrapeOrchestrator, ScrapeOptionsResult } from '../../hooks/scraper/useScrapeOrchestrator';
 
 // --- Utils ---
-import { 
-  classifyError, 
-  isTransientError, 
-  shouldStopImmediately, 
-  isNotFoundResponse, 
-  shouldPauseForDecision 
-} from '../../utils/scraperErrorUtils';
-import { sanitizeGameDataForPlaceholder } from '../../utils/processingResultUtils';
+// Phase 5: Structured logging
+import { scraperLogger } from '../../utils/scraperLogger';
 
 // --- Components ---
 import { CollapsibleSection } from '../../components/scraper/admin/CollapsibleSection';
@@ -46,11 +43,17 @@ import { ScraperResults } from '../../components/scraper/admin/ScraperResults';
 import { ErrorHandlingModal } from '../../components/scraper/admin/ErrorHandlingModal';
 import { GameDetailsModal } from '../../components/scraper/admin/ScraperModals';
 import { SaveConfirmationModal } from '../../components/scraper/SaveConfirmationModal';
+import { ScrapeOptionsModal } from '../../components/scraper/ScrapeOptionsModal';
 import { VenueModal } from '../../components/venues/VenueModal';
 
 // --- Services ---
-import { fetchGameDataFromBackend, saveGameDataToBackend } from '../../services/gameService';
-import { prefetchScrapeURLStatuses, checkCachedNotPublished, checkCachedNotFoundGap, ScrapeURLStatusCache } from '../../services/scrapeURLService';
+import { saveGameDataToBackend } from '../../services/gameService';
+import { 
+  prefetchScrapeURLStatuses, 
+  checkCachedNotPublished, 
+  checkCachedNotFoundGap, 
+  ScrapeURLStatusCache 
+} from '../../services/scrapeURLService';
 
 // --- Contexts & Hooks ---
 import { useEntity } from '../../contexts/EntityContext';
@@ -61,6 +64,19 @@ import { Venue, ScrapedGameData } from '../../API';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
 
 const getClient = () => generateClient();
+
+// ===================================================================
+// SCRAPE OPTIONS MODAL STATE
+// ===================================================================
+
+interface ScrapeOptionsState {
+  tournamentId: number;
+  url: string;
+  doNotScrape: boolean;
+  gameStatus: string | null;
+  hasS3Cache: boolean;
+  resolve: (result: ScrapeOptionsResult) => void;
+}
 
 // ===================================================================
 // MAIN COMPONENT
@@ -92,6 +108,15 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
   const [selectedGameDetails, setSelectedGameDetails] = useState<ScrapedGameData | null>(null);
   const [venueModalOpen, setVenueModalOpen] = useState(false);
 
+  // --- Skip Summary State ---
+  const [skipSummary, setSkipSummary] = useState<{
+    notFound: number[];
+    notPublished: number[];
+  } | null>(null);
+
+  // --- ScrapeOptionsModal State ---
+  const [scrapeOptionsState, setScrapeOptionsState] = useState<ScrapeOptionsState | null>(null);
+
   // --- Custom Hooks ---
   const processingState = useProcessingState({
     baseUrl: currentEntity?.gameUrlDomain || '',
@@ -107,22 +132,108 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
   const { scrapingStatus, loading: gapLoading, getScrapingStatus, getBounds, bounds } = useGameIdTracking(currentEntity?.id);
   const highestTournamentId = scrapingStatus?.highestTournamentId ?? bounds?.highestId;
 
-  // --- Mount tracking ---
-  useEffect(() => {
-    console.log('[ScraperTab] Component MOUNTED', { 
-      entityId: currentEntity?.id,
-      scraperApiKeyLength: scraperApiKey?.length || 0,
-      nextId: idSelectionParams.nextId,
-    });
-    return () => {
-      console.log('[ScraperTab] Component UNMOUNTING');
+  // --- Orchestrator Callbacks ---
+  const handleNeedsSaveConfirmation = useCallback(async (
+    _tournamentId: number,
+    parsedData: ScrapedGameData,
+    autoVenueId: string | undefined
+  ): Promise<{ action: 'save' | 'cancel'; venueId?: string; editedData?: ScrapedGameData }> => {
+    const result = await modals.saveConfirmation.openModal(
+      parsedData,
+      autoVenueId || defaultVenueId,
+      currentEntity?.id || ''
+    );
+    return {
+      action: result.action === 'cancel' ? 'cancel' : 'save',
+      venueId: result.venueId,
+      editedData: result.editedData,
     };
+  }, [modals.saveConfirmation, defaultVenueId, currentEntity?.id]);
+
+  const handleNeedsErrorDecision = useCallback(async (
+    tournamentId: number,
+    url: string,
+    errorType: any,
+    errorMsg: string,
+    isRetryable: boolean
+  ): Promise<{ action: 'continue' | 'stop' | 'retry' }> => {
+    const decision = await modals.error.openModal(tournamentId, url, errorType, errorMsg, isRetryable);
+    return { action: decision.action as 'continue' | 'stop' | 'retry' };
+  }, [modals.error]);
+
+  // Handle doNotScrape URLs via ScrapeOptionsModal
+  const handleNeedsScrapeOptions = useCallback(async (
+    tournamentId: number,
+    url: string,
+    doNotScrape: boolean,
+    gameStatus: string | null,
+    hasS3Cache: boolean
+  ): Promise<ScrapeOptionsResult> => {
+    return new Promise<ScrapeOptionsResult>((resolve) => {
+      setScrapeOptionsState({
+        tournamentId,
+        url,
+        doNotScrape,
+        gameStatus,
+        hasS3Cache,
+        resolve,
+      });
+    });
   }, []);
 
-  // Track nextId changes
-  useEffect(() => {
-    console.log('[ScraperTab] idSelectionParams.nextId CHANGED to:', idSelectionParams.nextId);
-  }, [idSelectionParams.nextId]);
+  const handleScrapeOptionsSelect = useCallback((option: 'S3' | 'LIVE' | 'SKIP' | 'SAVE_PLACEHOLDER', s3Key?: string) => {
+    if (scrapeOptionsState) {
+      scrapeOptionsState.resolve({ action: option, s3Key });
+      setScrapeOptionsState(null);
+    }
+  }, [scrapeOptionsState]);
+
+  const handleScrapeOptionsClose = useCallback(() => {
+    if (scrapeOptionsState) {
+      scrapeOptionsState.resolve({ action: 'SKIP' });
+      setScrapeOptionsState(null);
+    }
+  }, [scrapeOptionsState]);
+
+  const handleApiKeyError = useCallback((message: string) => {
+    setApiKeyError(message);
+    scraperLogger.error('AUTH_ERROR', message);
+  }, []);
+
+  const handleProcessingComplete = useCallback(async () => {
+    await getScrapingStatus({ forceRefresh: true }).catch(() => {});
+  }, [getScrapingStatus]);
+
+  const handleUpdateNextId = useCallback((newNextId: string) => {
+    scraperLogger.debug('PROCESSING_COMPLETE', `Next ID updated to ${newNextId}`);
+    setIdSelectionParams(prev => ({ ...prev, nextId: newNextId }));
+  }, []);
+
+  // --- Orchestrator Hook ---
+  const orchestrator = useScrapeOrchestrator(
+    {
+      entityId: currentEntity?.id || '',
+      baseUrl: currentEntity?.gameUrlDomain || '',
+      urlPath: currentEntity?.gameUrlPath || '',
+      scraperApiKey,
+      options,
+      scrapeFlow,
+      autoConfig,
+      defaultVenueId,
+      idSelectionMode,
+      maxId: idSelectionParams.maxId || null,
+    },
+    {
+      onNeedsSaveConfirmation: handleNeedsSaveConfirmation,
+      onNeedsErrorDecision: handleNeedsErrorDecision,
+      onNeedsScrapeOptions: handleNeedsScrapeOptions,
+      onApiKeyError: handleApiKeyError,
+      onProcessingComplete: handleProcessingComplete,
+      onUpdateNextId: handleUpdateNextId,
+    },
+    processingState,
+    errorTracking
+  );
 
   // --- Effects ---
   useEffect(() => {
@@ -186,17 +297,10 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
     }
   };
 
-  // --- Skip Summary State ---
-  const [skipSummary, setSkipSummary] = useState<{
-    notFound: number[];
-    notPublished: number[];
-  } | null>(null);
-
   // --- Processing ---
   const handleStartProcessing = useCallback(async () => {
     if (!currentEntity) return;
     
-    // Collapse config section immediately
     setConfigSectionOpen(false);
     setSkipSummary(null);
     
@@ -209,33 +313,27 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
       gaps: scrapingStatus?.gaps,
     });
     
-    console.log('[ScraperTab] Queue built:', {
-      mode: idSelectionMode,
-      nextIdParam: idSelectionParams.nextId,
-      highestTournamentId,
-      queueContents: JSON.stringify(queue),
-    });
-    
     if (queue.length === 0) {
       alert("No IDs to process with the current selection.");
-      setConfigSectionOpen(true); // Re-open if nothing to process
+      setConfigSectionOpen(true);
       return;
     }
     
     setApiKeyError(null);
     errorTracking.resetAll();
     
-    // Pre-fetch ScrapeURL statuses and filter out skip IDs BEFORE processing
+    // Pre-fetch ScrapeURL statuses (includes doNotScrape flag)
     let filteredQueue = queue;
     let cache: ScrapeURLStatusCache = {};
     const skippedNotFound: number[] = [];
     const skippedNotPublished: number[] = [];
     
+    scraperLogger.info('PREFETCH_START', `Prefetching statuses for ${queue.length} IDs`);
+    
     if ((options.skipNotPublished || options.skipNotFoundGaps) && currentEntity.id) {
       try {
         cache = await prefetchScrapeURLStatuses(currentEntity.id, queue);
         
-        // Filter out IDs that should be skipped
         filteredQueue = queue.filter(id => {
           if (options.skipNotFoundGaps && checkCachedNotFoundGap(cache, id)) {
             skippedNotFound.push(id);
@@ -248,45 +346,39 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
           return true;
         });
         
-        // Set skip summary for UI
+        const totalSkipped = skippedNotFound.length + skippedNotPublished.length;
+        scraperLogger.logPrefetchComplete(Object.keys(cache).length, totalSkipped);
+        
         if (skippedNotFound.length > 0 || skippedNotPublished.length > 0) {
-          setSkipSummary({
-            notFound: skippedNotFound,
-            notPublished: skippedNotPublished,
-          });
-          console.log('[ScraperTab] Pre-filtered skip IDs:', {
-            notFound: skippedNotFound,
-            notPublished: skippedNotPublished,
-            originalCount: queue.length,
-            filteredCount: filteredQueue.length,
-          });
+          setSkipSummary({ notFound: skippedNotFound, notPublished: skippedNotPublished });
         }
       } catch (error) {
-        console.warn('[ScrapeTab] Failed to prefetch ScrapeURL statuses:', error);
+        scraperLogger.warn('PREFETCH_ERROR', 'Failed to prefetch ScrapeURL statuses');
+      }
+    } else if (currentEntity.id) {
+      // Even without skip options, prefetch for doNotScrape detection
+      try {
+        cache = await prefetchScrapeURLStatuses(currentEntity.id, queue);
+        scraperLogger.logPrefetchComplete(Object.keys(cache).length, 0);
+      } catch (error) {
+        scraperLogger.warn('PREFETCH_ERROR', 'Failed to prefetch ScrapeURL statuses');
       }
     }
     
     if (filteredQueue.length === 0) {
-      // For 'auto' mode with maxId set, we should still start scanning new IDs
-      // even if all gaps were filtered out
       if (idSelectionMode === 'auto' && idSelectionParams.maxId) {
         const startFromId = (highestTournamentId || 0) + 1;
         const maxId = parseInt(idSelectionParams.maxId);
         
-        // Find first ID that's not in the skip cache
         let firstNewId = startFromId;
         while (firstNewId <= maxId) {
-          const shouldSkipNotFound = options.skipNotFoundGaps && checkCachedNotFoundGap(cache, firstNewId);
-          const shouldSkipNotPublished = options.skipNotPublished && checkCachedNotPublished(cache, firstNewId);
-          
-          if (!shouldSkipNotFound && !shouldSkipNotPublished) {
-            break;
-          }
+          const shouldSkipNF = options.skipNotFoundGaps && checkCachedNotFoundGap(cache, firstNewId);
+          const shouldSkipNP = options.skipNotPublished && checkCachedNotPublished(cache, firstNewId);
+          if (!shouldSkipNF && !shouldSkipNP) break;
           firstNewId++;
         }
         
         if (firstNewId <= maxId) {
-          console.log('[ScraperTab] Auto mode: All gaps filtered, starting from new ID:', firstNewId);
           filteredQueue = [firstNewId];
         } else {
           alert(`All IDs up to ${maxId} were skipped based on your skip options.`);
@@ -294,13 +386,8 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
           return;
         }
       } else {
-        // For other modes, show alert and return
         if (idSelectionMode === 'next' && queue.length > 0) {
-          const maxSkippedId = Math.max(...queue);
-          setIdSelectionParams(prev => ({
-            ...prev,
-            nextId: String(maxSkippedId + 1)
-          }));
+          setIdSelectionParams(prev => ({ ...prev, nextId: String(Math.max(...queue) + 1) }));
         }
         alert(`All ${queue.length} IDs were skipped based on your skip options.`);
         setConfigSectionOpen(true);
@@ -308,328 +395,17 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
       }
     }
     
-    // startProcessing now returns the abort controller directly
-    console.log('[ScraperTab] Calling processQueue with filteredQueue:', JSON.stringify(filteredQueue));
+    scraperLogger.info('QUEUE_FILTERED', `Starting with ${filteredQueue.length} IDs after filtering`);
+    
     const controller = processingState.startProcessing(filteredQueue);
-    processQueue(filteredQueue, controller, cache);
-  }, [currentEntity, idSelectionMode, idSelectionParams, highestTournamentId, scrapingStatus, options]);
+    orchestrator.processQueue(filteredQueue, controller, cache);
+  }, [currentEntity, idSelectionMode, idSelectionParams, highestTournamentId, scrapingStatus, options, orchestrator, processingState, errorTracking]);
 
   const handleStopProcessing = useCallback(() => {
     processingState.stopProcessing();
+    scraperLogger.info('PROCESSING_STOP', 'Processing stopped by user');
     getScrapingStatus({ forceRefresh: true }).catch(() => {});
   }, [processingState, getScrapingStatus]);
-
-  // --- Core Processing Logic ---
-  // --- Rate Limiting Config ---
-  const THROTTLE_DELAY_MS = 500; // Delay between requests (500ms = 2 requests/second)
-  const MAX_RETRIES = 3;
-  const INITIAL_BACKOFF_MS = 1000; // Start with 1 second backoff
-  
-  // Helper: delay function
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-  
-  // Helper: fetch with retry and exponential backoff
-  const fetchWithRetry = async (
-    url: string, 
-    forceRefresh: boolean, 
-    apiKey: string | null, 
-    entityId: string | undefined,
-    retries = MAX_RETRIES
-  ): Promise<any> => {
-    let lastError: any;
-    
-    for (let attempt = 0; attempt < retries; attempt++) {
-      try {
-        return await fetchGameDataFromBackend(url, forceRefresh, apiKey, entityId);
-      } catch (error: any) {
-        lastError = error;
-        const errorMessage = error?.message || error?.toString() || '';
-        
-        // Check for rate limit errors (429 or "Rate Exceeded")
-        const isRateLimited = errorMessage.includes('429') || 
-                             errorMessage.includes('Rate Exceeded') ||
-                             errorMessage.includes('TooManyRequests');
-        
-        if (isRateLimited && attempt < retries - 1) {
-          // Exponential backoff: 1s, 2s, 4s...
-          const backoffMs = INITIAL_BACKOFF_MS * Math.pow(2, attempt);
-          console.warn(`[ScraperTab] Rate limited, waiting ${backoffMs}ms before retry ${attempt + 1}/${retries - 1}`);
-          await delay(backoffMs);
-          continue;
-        }
-        
-        // Non-retryable error or max retries reached
-        throw error;
-      }
-    }
-    
-    throw lastError;
-  };
-
-  const processQueue = async (initialQueue: number[], controller: AbortController, cache: ScrapeURLStatusCache) => {
-    const signal = controller.signal;
-
-    console.log('[ScraperTab] processQueue started:', {
-      initialQueue: JSON.stringify(initialQueue),
-      entityDomain: currentEntity?.gameUrlDomain,
-      entityPath: currentEntity?.gameUrlPath,
-    });
-
-    try {
-      const maxId = idSelectionParams.maxId ? parseInt(idSelectionParams.maxId) : null;
-      let autoFrontier = idSelectionMode === 'auto' ? Math.max(...initialQueue) : -1;
-      const queue = [...initialQueue].sort((a, b) => a - b);
-      const processedIds = new Set<number>();
-      const queuedIds = new Set<number>(initialQueue);
-
-      console.log('[ScraperTab] Sorted queue:', JSON.stringify(queue));
-
-      for (let i = 0; i < queue.length && !signal.aborted; i++) {
-        const tournamentId = queue[i];
-        console.log('[ScraperTab] Processing tournamentId:', tournamentId);
-        
-        if (processedIds.has(tournamentId)) continue;
-        processedIds.add(tournamentId);
-
-        if (idSelectionMode === 'auto' && maxId && tournamentId > maxId) break;
-
-        const url = `${currentEntity?.gameUrlDomain}${currentEntity?.gameUrlPath}${tournamentId}`;
-        console.log('[ScraperTab] Built URL:', url);
-
-        // Ensure result exists for simplified view
-        if (!processingState.results.some(r => r.id === tournamentId)) {
-          processingState.addToQueue(tournamentId);
-        }
-
-        // Skip conditions are now checked BEFORE processing starts (pre-filtered)
-        // This loop only contains IDs that passed the skip filter
-
-        processingState.setResultScraping(tournamentId);
-
-        try {
-          // Use fetch with retry for rate limit handling
-          const parsedData = await fetchWithRetry(url, !options.useS3, scraperApiKey, currentEntity?.id);
-          
-          // Defensive check for null/undefined response
-          if (!parsedData) {
-            await handleFetchError(tournamentId, url, 'No data returned from scraper', null);
-            // Throttle before next request
-            await delay(THROTTLE_DELAY_MS);
-            continue;
-          }
-          
-          const errorMsg = (parsedData as any).error || (parsedData as any).errorMessage;
-          if (errorMsg || parsedData.name === 'Error processing tournament') {
-            await handleFetchError(tournamentId, url, errorMsg || 'Scraper Error', parsedData);
-            // Throttle before next request
-            await delay(THROTTLE_DELAY_MS);
-            continue;
-          }
-
-          errorTracking.resetOnSuccess();
-          await handleFetchSuccess(tournamentId, url, parsedData);
-          maybeExtendFrontier(tournamentId);
-
-        } catch (error: any) {
-          // Defensive error message extraction
-          const errorMessage = error?.message || error?.toString?.() || 'Unknown error occurred';
-          console.error(`[ScraperTab] Error processing ${tournamentId}:`, error);
-          await handleFetchError(tournamentId, url, errorMessage, null);
-        }
-        
-        // Throttle between requests to avoid rate limiting
-        if (i < queue.length - 1 && !signal.aborted) {
-          await delay(THROTTLE_DELAY_MS);
-        }
-      }
-
-      // Processing complete - only call stopProcessing if we weren't aborted
-      // (if aborted, handleStopProcessing already called stopProcessing)
-      await getScrapingStatus({ forceRefresh: true }).catch(() => {});
-      if (!signal.aborted) {
-        processingState.stopProcessing();
-        
-        // For "Next ID" mode, increment the Next ID past what we just processed
-        // This prevents re-processing the same ID if it was skipped/not saved
-        console.log('[ScraperTab] Processing complete:', {
-          idSelectionMode,
-          processedIdsSize: processedIds.size,
-          processedIds: [...processedIds],
-        });
-        
-        if (idSelectionMode === 'next' && processedIds.size > 0) {
-          const maxProcessedId = Math.max(...processedIds);
-          const newNextId = String(maxProcessedId + 1);
-          console.log('[ScraperTab] Updating Next ID from', idSelectionParams.nextId, 'to', newNextId);
-          setIdSelectionParams(prev => ({
-            ...prev,
-            nextId: newNextId
-          }));
-        }
-      }
-
-      // --- Helper Function (closure over queue state) ---
-      function maybeExtendFrontier(processedId: number) {
-        if (idSelectionMode !== 'auto' || signal?.aborted || processedId !== autoFrontier) return;
-        
-        let nextId = autoFrontier + 1;
-        
-        // Skip IDs that are in the skip cache
-        while (nextId <= (maxId || Infinity)) {
-          const shouldSkipNotFound = options.skipNotFoundGaps && checkCachedNotFoundGap(cache, nextId);
-          const shouldSkipNotPublished = options.skipNotPublished && checkCachedNotPublished(cache, nextId);
-          
-          if (!shouldSkipNotFound && !shouldSkipNotPublished) {
-            break;
-          }
-          
-          console.log(`[ScraperTab] Auto mode: Skipping ${nextId} (cached skip)`);
-          nextId++;
-        }
-        
-        if (maxId && nextId > maxId) return;
-        if (queuedIds.has(nextId) || processedIds.has(nextId)) return;
-        
-        queue.push(nextId);
-        queuedIds.add(nextId);
-        autoFrontier = nextId;
-        processingState.addToQueue(nextId);
-      }
-
-    } catch (fatalError: any) {
-      // Catch any unhandled errors in the processing loop
-      console.error('[ScraperTab] FATAL ERROR in processQueue:', fatalError);
-      processingState.stopProcessing();
-      alert(`Processing failed unexpectedly: ${fatalError?.message || 'Unknown error'}`);
-    }
-  };
-
-  // NOTE: Skip conditions are now checked in handleStartProcessing BEFORE processing starts
-  // IDs matching skip conditions are filtered out and shown in skipSummary
-
-  const handleFetchSuccess = async (tournamentId: number, url: string, parsedData: ScrapedGameData) => {
-    // Handle special statuses
-    const isNotPublished = parsedData.gameStatus === 'NOT_PUBLISHED';
-    const isDoNotScrape = (parsedData as any).skipped && (parsedData as any).skipReason === 'DO_NOT_SCRAPE';
-
-    if (isNotPublished || (isDoNotScrape && !options.ignoreDoNotScrape)) {
-      if (isNotPublished && options.skipManualReviews && scrapeFlow === 'scrape_save') {
-        await autoSaveNotPublished(tournamentId, url, parsedData);
-        return;
-      }
-      processingState.setResultSkipped(tournamentId, parsedData.gameStatus || 'Do Not Scrape', parsedData);
-      return;
-    }
-
-    if (options.skipInProgress && (parsedData.gameStatus === 'RUNNING' || parsedData.gameStatus === 'SCHEDULED')) {
-      processingState.setResultSkipped(tournamentId, parsedData.gameStatus, parsedData);
-      return;
-    }
-
-    // Scrape-only flow
-    if (scrapeFlow === 'scrape') {
-      const enumWarning = (parsedData as any)._enumErrorMessage;
-      if (enumWarning) {
-        processingState.setResultWarning(tournamentId, `Scraped with warnings: ${enumWarning}`, parsedData);
-      } else {
-        processingState.setResultSuccess(tournamentId, 'Scraped (not saved)', parsedData);
-      }
-      return;
-    }
-
-    // Scrape + Save flow
-    await saveGame(tournamentId, url, parsedData);
-  };
-
-  const handleFetchError = async (tournamentId: number, url: string, errorMsg: string, parsedData: any) => {
-    const errorType = classifyError(errorMsg, parsedData);
-    
-    if (isNotFoundResponse(parsedData, errorMsg)) {
-      errorTracking.incrementNotFoundError();
-    } else {
-      errorTracking.incrementGenericError();
-    }
-
-    if (shouldStopImmediately(errorType)) {
-      processingState.setResultError(tournamentId, `AUTH ERROR: ${errorMsg}`, errorType);
-      setApiKeyError("ScraperAPI Key is invalid or unauthorized. Processing stopped.");
-      // Don't auto-expand - the "Auth Error" badge is visible in the collapsed header
-      processingState.stopProcessing();
-      return;
-    }
-
-    // Auto-retry transient errors
-    if (isTransientError(errorType) && autoConfig.autoRetryTransientErrors && errorTracking.counters.consecutiveErrors === 1) {
-      await new Promise(resolve => setTimeout(resolve, autoConfig.retryDelayMs));
-      // Retry will happen on next iteration
-    }
-
-    // Check if should pause for decision
-    if (shouldPauseForDecision(errorTracking.counters, autoConfig, errorType, idSelectionMode === 'auto') && !options.skipManualReviews) {
-      processingState.pauseProcessing();
-      const decision = await modals.error.openModal(tournamentId, url, errorType, errorMsg, isTransientError(errorType));
-      processingState.resumeProcessing();
-      
-      if (decision.action === 'stop') {
-        processingState.stopProcessing();
-        return;
-      }
-    }
-
-    processingState.setResultError(tournamentId, errorMsg, errorType);
-  };
-
-  const autoSaveNotPublished = async (tournamentId: number, url: string, parsedData: ScrapedGameData) => {
-    processingState.setResultSaving(tournamentId, parsedData);
-    try {
-      const sanitizedData = sanitizeGameDataForPlaceholder(parsedData);
-      const saveResult = await saveGameDataToBackend(url, defaultVenueId, sanitizedData, null, currentEntity?.id || '');
-      processingState.setResultSuccess(tournamentId, 'Saved (NOT_PUBLISHED - auto)', sanitizedData, saveResult.gameId || undefined);
-    } catch (error: any) {
-      processingState.setResultError(tournamentId, `Failed to save: ${error.message}`, 'SAVE');
-    }
-  };
-
-  const saveGame = async (tournamentId: number, url: string, parsedData: ScrapedGameData) => {
-    // Check for enum errors
-    if ((parsedData as any)._enumErrors?.length > 0 || parsedData.gameVariant === null) {
-      processingState.setResultError(tournamentId, 'Cannot save - invalid enum value', 'ENUM_VALIDATION');
-      return;
-    }
-
-    // Determine venue
-    const autoVenueId = parsedData.venueMatch?.autoAssignedVenue?.id;
-    let venueIdToUse = options.skipManualReviews ? (autoVenueId || defaultVenueId) : '';
-
-    if (!options.skipManualReviews) {
-      const venueConfidence = parsedData.venueMatch?.autoAssignedVenue?.score ?? 0;
-      if (venueConfidence >= 0.6) {
-        venueIdToUse = autoVenueId || '';
-      } else {
-        const result = await modals.saveConfirmation.openModal(parsedData, autoVenueId || defaultVenueId, currentEntity?.id || '');
-        if (result.action === 'cancel') {
-          processingState.setResultError(tournamentId, 'No venue selected', 'VALIDATION');
-          return;
-        }
-        venueIdToUse = result.venueId || defaultVenueId;
-      }
-    }
-
-    processingState.setResultSaving(tournamentId, parsedData);
-    
-    try {
-      const saveResult = await saveGameDataToBackend(url, venueIdToUse, parsedData, null, currentEntity?.id || '');
-      const isUpdate = saveResult.action === 'UPDATE';
-      processingState.setResultSuccess(
-        tournamentId, 
-        isUpdate ? `Updated game ${saveResult.gameId}` : `Created game ${saveResult.gameId}`,
-        parsedData,
-        saveResult.gameId || undefined
-      );
-    } catch (error: any) {
-      processingState.setResultError(tournamentId, `Save failed: ${error.message}`, 'SAVE');
-    }
-  };
 
   // --- Result Handlers ---
   const handleResultVenueChange = (resultId: number, venueId: string) => {
@@ -645,11 +421,15 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
     }
 
     processingState.setResultSaving(result.id, result.parsedData);
+    scraperLogger.info('ITEM_SAVING', 'Manual save initiated', { tournamentId: result.id });
+    
     try {
       const saveResult = await saveGameDataToBackend(result.url, venueId, result.parsedData, null, currentEntity.id);
       processingState.setResultSuccess(result.id, `Saved (${saveResult.action})`, result.parsedData, saveResult.gameId || undefined);
+      scraperLogger.logSaveSuccess(result.id, saveResult.gameId || 'unknown', saveResult.action as 'CREATE' | 'UPDATE');
     } catch (error: any) {
       processingState.setResultError(result.id, `Save failed: ${error.message}`, 'SAVE');
+      scraperLogger.error('ITEM_SAVE_ERROR', `Manual save failed: ${error.message}`, { tournamentId: result.id });
     }
   };
 
@@ -709,7 +489,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
         />
       </CollapsibleSection>
 
-      {/* Skip Summary - shows IDs that were pre-filtered before processing */}
+      {/* Skip Summary */}
       {skipSummary && (skipSummary.notFound.length > 0 || skipSummary.notPublished.length > 0) && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
           <h4 className="text-sm font-medium text-amber-800 mb-2">Skipped IDs (Pre-filtered)</h4>
@@ -738,7 +518,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
             )}
           </div>
           <p className="text-xs text-amber-500 mt-2">
-            Total: {skipSummary.notFound.length + skipSummary.notPublished.length} IDs skipped based on cached ScrapeURL status
+            Total: {skipSummary.notFound.length + skipSummary.notPublished.length} IDs skipped
           </p>
         </div>
       )}
@@ -802,6 +582,20 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
           consecutiveNotFound={errorTracking.counters.consecutiveNotFound}
           remainingInQueue={processingState.stats.pending}
           onDecision={modals.error.resolve}
+        />
+      )}
+
+      {/* ScrapeOptionsModal for doNotScrape URLs */}
+      {scrapeOptionsState && (
+        <ScrapeOptionsModal
+          isOpen={true}
+          onClose={handleScrapeOptionsClose}
+          onSelectOption={handleScrapeOptionsSelect}
+          url={scrapeOptionsState.url}
+          entityId={currentEntity.id}
+          doNotScrape={scrapeOptionsState.doNotScrape}
+          gameStatus={scrapeOptionsState.gameStatus || undefined}
+          warningMessage={scrapeOptionsState.doNotScrape ? 'This tournament is marked as "Do Not Scrape"' : undefined}
         />
       )}
 

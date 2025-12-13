@@ -26,6 +26,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
+    "entityVenueDashMetricCounter": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "gameIdTracker": {
       "Arn": "string",
       "LambdaExecutionRole": "string",

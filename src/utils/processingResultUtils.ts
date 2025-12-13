@@ -2,7 +2,7 @@
 // Centralized utilities for managing ProcessingResult state
 // Eliminates ~30 duplicated setProcessingResults patterns in ScraperTab
 
-import { ProcessingResult, ProcessingStatus, ErrorType } from '../types/scraper';
+import { ProcessingResult, ProcessingStatus, ErrorType, DataSourceType } from '../types/scraper';
 import { ScrapedGameData } from '../API';
 
 // ===================================================================
@@ -354,8 +354,6 @@ export const sanitizeGameDataForPlaceholder = (data: ScrapedGameData): ScrapedGa
 // ===================================================================
 // DATA SOURCE DETECTION
 // ===================================================================
-
-export type DataSourceType = 's3' | 'web' | 'none' | 'pending';
 
 /**
  * Determine the data source from a result

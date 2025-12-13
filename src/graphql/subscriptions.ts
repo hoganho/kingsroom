@@ -98,6 +98,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -159,6 +163,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -225,6 +233,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
       defaultVenueId
       createdAt
       updatedAt
+      gameCount
+      venueCount
+      lastGameAddedAt
+      lastDataRefreshedAt
       scraperStates {
         items {
           id
@@ -265,6 +277,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -331,6 +347,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -395,6 +415,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -451,6 +475,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             _lastChangedAt
             __typename
           }
+          logo
+          gameCount
+          lastGameAddedAt
+          lastDataRefreshedAt
           canonicalVenueId
           assets {
             nextToken
@@ -477,6 +505,21 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             startedAt
             __typename
           }
+          recurringGames {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -493,6 +536,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -636,6 +683,14 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             entityId
             createdAt
             updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
             _version
             _deleted
             _lastChangedAt
@@ -684,6 +739,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -801,6 +860,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -808,6 +871,63 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           }
           createdAt
           updatedAt
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameAssignmentConfidence
+          recurringGameAssignmentStatus
+          wasScheduledInstance
+          deviationNotes
+          instanceNumber
+          isReplacementInstance
+          replacementReason
           _version
           _deleted
           _lastChangedAt
@@ -837,6 +957,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -858,6 +982,488 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGames {
+        items {
+          id
+          name
+          displayName
+          description
+          aliases
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          dayOfWeek
+          startTime
+          endTime
+          frequency
+          gameType
+          gameVariant
+          typicalBuyIn
+          typicalRake
+          typicalStartingStack
+          typicalGuarantee
+          isActive
+          isPaused
+          pausedReason
+          lastGameDate
+          nextScheduledDate
+          expectedInstanceCount
+          isSignature
+          isBeginnerFriendly
+          isBounty
+          tags
+          marketingDescription
+          imageUrl
+          socialMediaHashtags
+          autoDetectionConfidence
+          wasManuallyCreated
+          requiresReview
+          totalInstancesRun
+          avgAttendance
+          lastMonthAttendance
+          gameInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          notes
+          adminNotes
+          createdAt
+          updatedAt
+          createdBy
+          lastEditedBy
+          lastEditedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          timeRange
+          totalVenues
+          activeVenues
+          inactiveVenues
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          totalOperationsCost
+          avgEntriesPerGame
+          avgPrizepoolPerGame
+          avgProfitPerGame
+          avgRevenuePerGame
+          avgGamesPerVenue
+          avgPlayersPerVenue
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          profitTrend
+          profitTrendPercent
+          playerGrowthTrend
+          playerGrowthTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          topVenuesByRevenue
+          topVenuesByAttendance
+          topRecurringGames
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          venuesIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venueName
+          timeRange
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalTournaments
+          totalCashGames
+          totalNLHE
+          totalPLO
+          totalOther
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          returningPlayers
+          newPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          avgEntriesPerGame
+          avgUniquePlayersPerGame
+          avgPrizepoolPerGame
+          avgRevenuePerGame
+          avgProfitPerGame
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          daysSinceLastGame
+          gamesByDayOfWeek
+          peakAttendanceDay
+          topRecurringGames
+          topBuyInLevels
+          profitTrend
+          profitTrendPercent
+          attendanceTrend
+          attendanceTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          overallHealth
+          profitability
+          consistency
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGameMetrics {
+        items {
+          id
+          entityId
+          venueId
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameName
+          timeRange
+          totalInstances
+          scheduledInstances
+          actualInstances
+          missedInstances
+          runRate
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          regularPlayers
+          occasionalPlayers
+          oneTimePlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntries
+          avgUniquePlayers
+          avgPrizepool
+          avgRevenue
+          avgProfit
+          stdDevEntries
+          stdDevProfit
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          firstInstanceDate
+          firstInstanceDaysAgo
+          latestInstanceDate
+          latestInstanceDaysAgo
+          daysSinceLastInstance
+          avgEntriesByMonth
+          peakMonth
+          lowMonth
+          attendanceHealth
+          profitability
+          consistency
+          overallHealth
+          attendanceTrend
+          attendanceTrendPercent
+          profitTrend
+          profitTrendPercent
+          recentAvgEntries
+          longtermAvgEntries
+          entriesTrendDirection
+          regularPlayersList
+          playerRetentionRate
+          rankAtVenue
+          totalRecurringGamesAtVenue
+          avgEntriesEntityWide
+          performanceVsEntityAvg
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -916,6 +1522,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -932,6 +1542,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -1070,6 +1684,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -1131,6 +1749,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -1197,6 +1819,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
       defaultVenueId
       createdAt
       updatedAt
+      gameCount
+      venueCount
+      lastGameAddedAt
+      lastDataRefreshedAt
       scraperStates {
         items {
           id
@@ -1237,6 +1863,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -1303,6 +1933,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -1367,6 +2001,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -1423,6 +2061,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             _lastChangedAt
             __typename
           }
+          logo
+          gameCount
+          lastGameAddedAt
+          lastDataRefreshedAt
           canonicalVenueId
           assets {
             nextToken
@@ -1449,6 +2091,21 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             startedAt
             __typename
           }
+          recurringGames {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -1465,6 +2122,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -1608,6 +2269,14 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             entityId
             createdAt
             updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
             _version
             _deleted
             _lastChangedAt
@@ -1656,6 +2325,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -1773,6 +2446,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -1780,6 +2457,63 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           }
           createdAt
           updatedAt
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameAssignmentConfidence
+          recurringGameAssignmentStatus
+          wasScheduledInstance
+          deviationNotes
+          instanceNumber
+          isReplacementInstance
+          replacementReason
           _version
           _deleted
           _lastChangedAt
@@ -1809,6 +2543,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -1830,6 +2568,488 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGames {
+        items {
+          id
+          name
+          displayName
+          description
+          aliases
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          dayOfWeek
+          startTime
+          endTime
+          frequency
+          gameType
+          gameVariant
+          typicalBuyIn
+          typicalRake
+          typicalStartingStack
+          typicalGuarantee
+          isActive
+          isPaused
+          pausedReason
+          lastGameDate
+          nextScheduledDate
+          expectedInstanceCount
+          isSignature
+          isBeginnerFriendly
+          isBounty
+          tags
+          marketingDescription
+          imageUrl
+          socialMediaHashtags
+          autoDetectionConfidence
+          wasManuallyCreated
+          requiresReview
+          totalInstancesRun
+          avgAttendance
+          lastMonthAttendance
+          gameInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          notes
+          adminNotes
+          createdAt
+          updatedAt
+          createdBy
+          lastEditedBy
+          lastEditedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          timeRange
+          totalVenues
+          activeVenues
+          inactiveVenues
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          totalOperationsCost
+          avgEntriesPerGame
+          avgPrizepoolPerGame
+          avgProfitPerGame
+          avgRevenuePerGame
+          avgGamesPerVenue
+          avgPlayersPerVenue
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          profitTrend
+          profitTrendPercent
+          playerGrowthTrend
+          playerGrowthTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          topVenuesByRevenue
+          topVenuesByAttendance
+          topRecurringGames
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          venuesIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venueName
+          timeRange
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalTournaments
+          totalCashGames
+          totalNLHE
+          totalPLO
+          totalOther
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          returningPlayers
+          newPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          avgEntriesPerGame
+          avgUniquePlayersPerGame
+          avgPrizepoolPerGame
+          avgRevenuePerGame
+          avgProfitPerGame
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          daysSinceLastGame
+          gamesByDayOfWeek
+          peakAttendanceDay
+          topRecurringGames
+          topBuyInLevels
+          profitTrend
+          profitTrendPercent
+          attendanceTrend
+          attendanceTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          overallHealth
+          profitability
+          consistency
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGameMetrics {
+        items {
+          id
+          entityId
+          venueId
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameName
+          timeRange
+          totalInstances
+          scheduledInstances
+          actualInstances
+          missedInstances
+          runRate
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          regularPlayers
+          occasionalPlayers
+          oneTimePlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntries
+          avgUniquePlayers
+          avgPrizepool
+          avgRevenue
+          avgProfit
+          stdDevEntries
+          stdDevProfit
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          firstInstanceDate
+          firstInstanceDaysAgo
+          latestInstanceDate
+          latestInstanceDaysAgo
+          daysSinceLastInstance
+          avgEntriesByMonth
+          peakMonth
+          lowMonth
+          attendanceHealth
+          profitability
+          consistency
+          overallHealth
+          attendanceTrend
+          attendanceTrendPercent
+          profitTrend
+          profitTrendPercent
+          recentAvgEntries
+          longtermAvgEntries
+          entriesTrendDirection
+          regularPlayersList
+          playerRetentionRate
+          rankAtVenue
+          totalRecurringGamesAtVenue
+          avgEntriesEntityWide
+          performanceVsEntityAvg
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -1888,6 +3108,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -1904,6 +3128,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -2058,6 +3286,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -2119,6 +3351,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -2185,6 +3421,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
       defaultVenueId
       createdAt
       updatedAt
+      gameCount
+      venueCount
+      lastGameAddedAt
+      lastDataRefreshedAt
       scraperStates {
         items {
           id
@@ -2225,6 +3465,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -2291,6 +3535,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -2355,6 +3603,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -2411,6 +3663,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             _lastChangedAt
             __typename
           }
+          logo
+          gameCount
+          lastGameAddedAt
+          lastDataRefreshedAt
           canonicalVenueId
           assets {
             nextToken
@@ -2437,6 +3693,21 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             startedAt
             __typename
           }
+          recurringGames {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -2453,6 +3724,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -2596,6 +3871,14 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             entityId
             createdAt
             updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
             _version
             _deleted
             _lastChangedAt
@@ -2644,6 +3927,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -2761,6 +4048,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -2768,6 +4059,63 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           }
           createdAt
           updatedAt
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameAssignmentConfidence
+          recurringGameAssignmentStatus
+          wasScheduledInstance
+          deviationNotes
+          instanceNumber
+          isReplacementInstance
+          replacementReason
           _version
           _deleted
           _lastChangedAt
@@ -2797,6 +4145,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -2818,6 +4170,488 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGames {
+        items {
+          id
+          name
+          displayName
+          description
+          aliases
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          dayOfWeek
+          startTime
+          endTime
+          frequency
+          gameType
+          gameVariant
+          typicalBuyIn
+          typicalRake
+          typicalStartingStack
+          typicalGuarantee
+          isActive
+          isPaused
+          pausedReason
+          lastGameDate
+          nextScheduledDate
+          expectedInstanceCount
+          isSignature
+          isBeginnerFriendly
+          isBounty
+          tags
+          marketingDescription
+          imageUrl
+          socialMediaHashtags
+          autoDetectionConfidence
+          wasManuallyCreated
+          requiresReview
+          totalInstancesRun
+          avgAttendance
+          lastMonthAttendance
+          gameInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          notes
+          adminNotes
+          createdAt
+          updatedAt
+          createdBy
+          lastEditedBy
+          lastEditedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          timeRange
+          totalVenues
+          activeVenues
+          inactiveVenues
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          totalOperationsCost
+          avgEntriesPerGame
+          avgPrizepoolPerGame
+          avgProfitPerGame
+          avgRevenuePerGame
+          avgGamesPerVenue
+          avgPlayersPerVenue
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          profitTrend
+          profitTrendPercent
+          playerGrowthTrend
+          playerGrowthTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          topVenuesByRevenue
+          topVenuesByAttendance
+          topRecurringGames
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          venuesIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venueName
+          timeRange
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalTournaments
+          totalCashGames
+          totalNLHE
+          totalPLO
+          totalOther
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          returningPlayers
+          newPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          avgEntriesPerGame
+          avgUniquePlayersPerGame
+          avgPrizepoolPerGame
+          avgRevenuePerGame
+          avgProfitPerGame
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          daysSinceLastGame
+          gamesByDayOfWeek
+          peakAttendanceDay
+          topRecurringGames
+          topBuyInLevels
+          profitTrend
+          profitTrendPercent
+          attendanceTrend
+          attendanceTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          overallHealth
+          profitability
+          consistency
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGameMetrics {
+        items {
+          id
+          entityId
+          venueId
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameName
+          timeRange
+          totalInstances
+          scheduledInstances
+          actualInstances
+          missedInstances
+          runRate
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          regularPlayers
+          occasionalPlayers
+          oneTimePlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntries
+          avgUniquePlayers
+          avgPrizepool
+          avgRevenue
+          avgProfit
+          stdDevEntries
+          stdDevProfit
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          firstInstanceDate
+          firstInstanceDaysAgo
+          latestInstanceDate
+          latestInstanceDaysAgo
+          daysSinceLastInstance
+          avgEntriesByMonth
+          peakMonth
+          lowMonth
+          attendanceHealth
+          profitability
+          consistency
+          overallHealth
+          attendanceTrend
+          attendanceTrendPercent
+          profitTrend
+          profitTrendPercent
+          recentAvgEntries
+          longtermAvgEntries
+          entriesTrendDirection
+          regularPlayersList
+          playerRetentionRate
+          rankAtVenue
+          totalRecurringGamesAtVenue
+          avgEntriesEntityWide
+          performanceVsEntityAvg
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -2876,6 +4710,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -2892,6 +4730,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -3033,6 +4875,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -3094,6 +4940,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -3160,6 +5010,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
       defaultVenueId
       createdAt
       updatedAt
+      gameCount
+      venueCount
+      lastGameAddedAt
+      lastDataRefreshedAt
       scraperStates {
         items {
           id
@@ -3200,6 +5054,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -3266,6 +5124,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -3330,6 +5192,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -3386,6 +5252,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             _lastChangedAt
             __typename
           }
+          logo
+          gameCount
+          lastGameAddedAt
+          lastDataRefreshedAt
           canonicalVenueId
           assets {
             nextToken
@@ -3412,6 +5282,21 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             startedAt
             __typename
           }
+          recurringGames {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -3428,6 +5313,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -3571,6 +5460,14 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             entityId
             createdAt
             updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
             _version
             _deleted
             _lastChangedAt
@@ -3619,6 +5516,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -3736,6 +5637,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -3743,6 +5648,63 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           }
           createdAt
           updatedAt
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameAssignmentConfidence
+          recurringGameAssignmentStatus
+          wasScheduledInstance
+          deviationNotes
+          instanceNumber
+          isReplacementInstance
+          replacementReason
           _version
           _deleted
           _lastChangedAt
@@ -3772,6 +5734,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -3793,6 +5759,488 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGames {
+        items {
+          id
+          name
+          displayName
+          description
+          aliases
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          dayOfWeek
+          startTime
+          endTime
+          frequency
+          gameType
+          gameVariant
+          typicalBuyIn
+          typicalRake
+          typicalStartingStack
+          typicalGuarantee
+          isActive
+          isPaused
+          pausedReason
+          lastGameDate
+          nextScheduledDate
+          expectedInstanceCount
+          isSignature
+          isBeginnerFriendly
+          isBounty
+          tags
+          marketingDescription
+          imageUrl
+          socialMediaHashtags
+          autoDetectionConfidence
+          wasManuallyCreated
+          requiresReview
+          totalInstancesRun
+          avgAttendance
+          lastMonthAttendance
+          gameInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          notes
+          adminNotes
+          createdAt
+          updatedAt
+          createdBy
+          lastEditedBy
+          lastEditedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          timeRange
+          totalVenues
+          activeVenues
+          inactiveVenues
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          totalOperationsCost
+          avgEntriesPerGame
+          avgPrizepoolPerGame
+          avgProfitPerGame
+          avgRevenuePerGame
+          avgGamesPerVenue
+          avgPlayersPerVenue
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          profitTrend
+          profitTrendPercent
+          playerGrowthTrend
+          playerGrowthTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          topVenuesByRevenue
+          topVenuesByAttendance
+          topRecurringGames
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          venuesIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venueName
+          timeRange
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalTournaments
+          totalCashGames
+          totalNLHE
+          totalPLO
+          totalOther
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          returningPlayers
+          newPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          avgEntriesPerGame
+          avgUniquePlayersPerGame
+          avgPrizepoolPerGame
+          avgRevenuePerGame
+          avgProfitPerGame
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          daysSinceLastGame
+          gamesByDayOfWeek
+          peakAttendanceDay
+          topRecurringGames
+          topBuyInLevels
+          profitTrend
+          profitTrendPercent
+          attendanceTrend
+          attendanceTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          overallHealth
+          profitability
+          consistency
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGameMetrics {
+        items {
+          id
+          entityId
+          venueId
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameName
+          timeRange
+          totalInstances
+          scheduledInstances
+          actualInstances
+          missedInstances
+          runRate
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          regularPlayers
+          occasionalPlayers
+          oneTimePlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntries
+          avgUniquePlayers
+          avgPrizepool
+          avgRevenue
+          avgProfit
+          stdDevEntries
+          stdDevProfit
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          firstInstanceDate
+          firstInstanceDaysAgo
+          latestInstanceDate
+          latestInstanceDaysAgo
+          daysSinceLastInstance
+          avgEntriesByMonth
+          peakMonth
+          lowMonth
+          attendanceHealth
+          profitability
+          consistency
+          overallHealth
+          attendanceTrend
+          attendanceTrendPercent
+          profitTrend
+          profitTrendPercent
+          recentAvgEntries
+          longtermAvgEntries
+          entriesTrendDirection
+          regularPlayersList
+          playerRetentionRate
+          rankAtVenue
+          totalRecurringGamesAtVenue
+          avgEntriesEntityWide
+          performanceVsEntityAvg
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -3851,6 +6299,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -3867,6 +6319,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -4008,6 +6464,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -4069,6 +6529,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -4135,6 +6599,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
       defaultVenueId
       createdAt
       updatedAt
+      gameCount
+      venueCount
+      lastGameAddedAt
+      lastDataRefreshedAt
       scraperStates {
         items {
           id
@@ -4175,6 +6643,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -4241,6 +6713,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -4305,6 +6781,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -4361,6 +6841,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             _lastChangedAt
             __typename
           }
+          logo
+          gameCount
+          lastGameAddedAt
+          lastDataRefreshedAt
           canonicalVenueId
           assets {
             nextToken
@@ -4387,6 +6871,21 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             startedAt
             __typename
           }
+          recurringGames {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -4403,6 +6902,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -4546,6 +7049,14 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             entityId
             createdAt
             updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
             _version
             _deleted
             _lastChangedAt
@@ -4594,6 +7105,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -4711,6 +7226,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -4718,6 +7237,63 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           }
           createdAt
           updatedAt
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameAssignmentConfidence
+          recurringGameAssignmentStatus
+          wasScheduledInstance
+          deviationNotes
+          instanceNumber
+          isReplacementInstance
+          replacementReason
           _version
           _deleted
           _lastChangedAt
@@ -4747,6 +7323,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -4768,6 +7348,488 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGames {
+        items {
+          id
+          name
+          displayName
+          description
+          aliases
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          dayOfWeek
+          startTime
+          endTime
+          frequency
+          gameType
+          gameVariant
+          typicalBuyIn
+          typicalRake
+          typicalStartingStack
+          typicalGuarantee
+          isActive
+          isPaused
+          pausedReason
+          lastGameDate
+          nextScheduledDate
+          expectedInstanceCount
+          isSignature
+          isBeginnerFriendly
+          isBounty
+          tags
+          marketingDescription
+          imageUrl
+          socialMediaHashtags
+          autoDetectionConfidence
+          wasManuallyCreated
+          requiresReview
+          totalInstancesRun
+          avgAttendance
+          lastMonthAttendance
+          gameInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          notes
+          adminNotes
+          createdAt
+          updatedAt
+          createdBy
+          lastEditedBy
+          lastEditedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          timeRange
+          totalVenues
+          activeVenues
+          inactiveVenues
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          totalOperationsCost
+          avgEntriesPerGame
+          avgPrizepoolPerGame
+          avgProfitPerGame
+          avgRevenuePerGame
+          avgGamesPerVenue
+          avgPlayersPerVenue
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          profitTrend
+          profitTrendPercent
+          playerGrowthTrend
+          playerGrowthTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          topVenuesByRevenue
+          topVenuesByAttendance
+          topRecurringGames
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          venuesIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venueName
+          timeRange
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalTournaments
+          totalCashGames
+          totalNLHE
+          totalPLO
+          totalOther
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          returningPlayers
+          newPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          avgEntriesPerGame
+          avgUniquePlayersPerGame
+          avgPrizepoolPerGame
+          avgRevenuePerGame
+          avgProfitPerGame
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          daysSinceLastGame
+          gamesByDayOfWeek
+          peakAttendanceDay
+          topRecurringGames
+          topBuyInLevels
+          profitTrend
+          profitTrendPercent
+          attendanceTrend
+          attendanceTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          overallHealth
+          profitability
+          consistency
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGameMetrics {
+        items {
+          id
+          entityId
+          venueId
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameName
+          timeRange
+          totalInstances
+          scheduledInstances
+          actualInstances
+          missedInstances
+          runRate
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          regularPlayers
+          occasionalPlayers
+          oneTimePlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntries
+          avgUniquePlayers
+          avgPrizepool
+          avgRevenue
+          avgProfit
+          stdDevEntries
+          stdDevProfit
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          firstInstanceDate
+          firstInstanceDaysAgo
+          latestInstanceDate
+          latestInstanceDaysAgo
+          daysSinceLastInstance
+          avgEntriesByMonth
+          peakMonth
+          lowMonth
+          attendanceHealth
+          profitability
+          consistency
+          overallHealth
+          attendanceTrend
+          attendanceTrendPercent
+          profitTrend
+          profitTrendPercent
+          recentAvgEntries
+          longtermAvgEntries
+          entriesTrendDirection
+          regularPlayersList
+          playerRetentionRate
+          rankAtVenue
+          totalRecurringGamesAtVenue
+          avgEntriesEntityWide
+          performanceVsEntityAvg
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -4826,6 +7888,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -4842,6 +7908,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -4980,6 +8050,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -5041,6 +8115,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -5107,6 +8185,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
       defaultVenueId
       createdAt
       updatedAt
+      gameCount
+      venueCount
+      lastGameAddedAt
+      lastDataRefreshedAt
       scraperStates {
         items {
           id
@@ -5147,6 +8229,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -5213,6 +8299,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -5277,6 +8367,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -5333,6 +8427,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             _lastChangedAt
             __typename
           }
+          logo
+          gameCount
+          lastGameAddedAt
+          lastDataRefreshedAt
           canonicalVenueId
           assets {
             nextToken
@@ -5359,6 +8457,21 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             startedAt
             __typename
           }
+          recurringGames {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -5375,6 +8488,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -5518,6 +8635,14 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             entityId
             createdAt
             updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
             _version
             _deleted
             _lastChangedAt
@@ -5566,6 +8691,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -5683,6 +8812,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -5690,6 +8823,63 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           }
           createdAt
           updatedAt
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameAssignmentConfidence
+          recurringGameAssignmentStatus
+          wasScheduledInstance
+          deviationNotes
+          instanceNumber
+          isReplacementInstance
+          replacementReason
           _version
           _deleted
           _lastChangedAt
@@ -5719,6 +8909,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -5740,6 +8934,488 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGames {
+        items {
+          id
+          name
+          displayName
+          description
+          aliases
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          dayOfWeek
+          startTime
+          endTime
+          frequency
+          gameType
+          gameVariant
+          typicalBuyIn
+          typicalRake
+          typicalStartingStack
+          typicalGuarantee
+          isActive
+          isPaused
+          pausedReason
+          lastGameDate
+          nextScheduledDate
+          expectedInstanceCount
+          isSignature
+          isBeginnerFriendly
+          isBounty
+          tags
+          marketingDescription
+          imageUrl
+          socialMediaHashtags
+          autoDetectionConfidence
+          wasManuallyCreated
+          requiresReview
+          totalInstancesRun
+          avgAttendance
+          lastMonthAttendance
+          gameInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          notes
+          adminNotes
+          createdAt
+          updatedAt
+          createdBy
+          lastEditedBy
+          lastEditedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          timeRange
+          totalVenues
+          activeVenues
+          inactiveVenues
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          totalOperationsCost
+          avgEntriesPerGame
+          avgPrizepoolPerGame
+          avgProfitPerGame
+          avgRevenuePerGame
+          avgGamesPerVenue
+          avgPlayersPerVenue
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          profitTrend
+          profitTrendPercent
+          playerGrowthTrend
+          playerGrowthTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          topVenuesByRevenue
+          topVenuesByAttendance
+          topRecurringGames
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          venuesIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venueName
+          timeRange
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalTournaments
+          totalCashGames
+          totalNLHE
+          totalPLO
+          totalOther
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          returningPlayers
+          newPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          avgEntriesPerGame
+          avgUniquePlayersPerGame
+          avgPrizepoolPerGame
+          avgRevenuePerGame
+          avgProfitPerGame
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          daysSinceLastGame
+          gamesByDayOfWeek
+          peakAttendanceDay
+          topRecurringGames
+          topBuyInLevels
+          profitTrend
+          profitTrendPercent
+          attendanceTrend
+          attendanceTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          overallHealth
+          profitability
+          consistency
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGameMetrics {
+        items {
+          id
+          entityId
+          venueId
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameName
+          timeRange
+          totalInstances
+          scheduledInstances
+          actualInstances
+          missedInstances
+          runRate
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          regularPlayers
+          occasionalPlayers
+          oneTimePlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntries
+          avgUniquePlayers
+          avgPrizepool
+          avgRevenue
+          avgProfit
+          stdDevEntries
+          stdDevProfit
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          firstInstanceDate
+          firstInstanceDaysAgo
+          latestInstanceDate
+          latestInstanceDaysAgo
+          daysSinceLastInstance
+          avgEntriesByMonth
+          peakMonth
+          lowMonth
+          attendanceHealth
+          profitability
+          consistency
+          overallHealth
+          attendanceTrend
+          attendanceTrendPercent
+          profitTrend
+          profitTrendPercent
+          recentAvgEntries
+          longtermAvgEntries
+          entriesTrendDirection
+          regularPlayersList
+          playerRetentionRate
+          rankAtVenue
+          totalRecurringGamesAtVenue
+          avgEntriesEntityWide
+          performanceVsEntityAvg
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -5798,6 +9474,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -5814,6 +9494,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -5965,6 +9649,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -6026,6 +9714,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -6092,6 +9784,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
       defaultVenueId
       createdAt
       updatedAt
+      gameCount
+      venueCount
+      lastGameAddedAt
+      lastDataRefreshedAt
       scraperStates {
         items {
           id
@@ -6132,6 +9828,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -6198,6 +9898,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -6262,6 +9966,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -6318,6 +10026,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             _lastChangedAt
             __typename
           }
+          logo
+          gameCount
+          lastGameAddedAt
+          lastDataRefreshedAt
           canonicalVenueId
           assets {
             nextToken
@@ -6344,6 +10056,21 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             startedAt
             __typename
           }
+          recurringGames {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -6360,6 +10087,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -6503,6 +10234,14 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             entityId
             createdAt
             updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
             _version
             _deleted
             _lastChangedAt
@@ -6551,6 +10290,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -6668,6 +10411,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -6675,6 +10422,63 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           }
           createdAt
           updatedAt
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameAssignmentConfidence
+          recurringGameAssignmentStatus
+          wasScheduledInstance
+          deviationNotes
+          instanceNumber
+          isReplacementInstance
+          replacementReason
           _version
           _deleted
           _lastChangedAt
@@ -6704,6 +10508,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -6725,6 +10533,488 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGames {
+        items {
+          id
+          name
+          displayName
+          description
+          aliases
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          dayOfWeek
+          startTime
+          endTime
+          frequency
+          gameType
+          gameVariant
+          typicalBuyIn
+          typicalRake
+          typicalStartingStack
+          typicalGuarantee
+          isActive
+          isPaused
+          pausedReason
+          lastGameDate
+          nextScheduledDate
+          expectedInstanceCount
+          isSignature
+          isBeginnerFriendly
+          isBounty
+          tags
+          marketingDescription
+          imageUrl
+          socialMediaHashtags
+          autoDetectionConfidence
+          wasManuallyCreated
+          requiresReview
+          totalInstancesRun
+          avgAttendance
+          lastMonthAttendance
+          gameInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          notes
+          adminNotes
+          createdAt
+          updatedAt
+          createdBy
+          lastEditedBy
+          lastEditedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          timeRange
+          totalVenues
+          activeVenues
+          inactiveVenues
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          totalOperationsCost
+          avgEntriesPerGame
+          avgPrizepoolPerGame
+          avgProfitPerGame
+          avgRevenuePerGame
+          avgGamesPerVenue
+          avgPlayersPerVenue
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          profitTrend
+          profitTrendPercent
+          playerGrowthTrend
+          playerGrowthTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          topVenuesByRevenue
+          topVenuesByAttendance
+          topRecurringGames
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          venuesIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venueName
+          timeRange
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalTournaments
+          totalCashGames
+          totalNLHE
+          totalPLO
+          totalOther
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          returningPlayers
+          newPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          avgEntriesPerGame
+          avgUniquePlayersPerGame
+          avgPrizepoolPerGame
+          avgRevenuePerGame
+          avgProfitPerGame
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          daysSinceLastGame
+          gamesByDayOfWeek
+          peakAttendanceDay
+          topRecurringGames
+          topBuyInLevels
+          profitTrend
+          profitTrendPercent
+          attendanceTrend
+          attendanceTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          overallHealth
+          profitability
+          consistency
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGameMetrics {
+        items {
+          id
+          entityId
+          venueId
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameName
+          timeRange
+          totalInstances
+          scheduledInstances
+          actualInstances
+          missedInstances
+          runRate
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          regularPlayers
+          occasionalPlayers
+          oneTimePlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntries
+          avgUniquePlayers
+          avgPrizepool
+          avgRevenue
+          avgProfit
+          stdDevEntries
+          stdDevProfit
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          firstInstanceDate
+          firstInstanceDaysAgo
+          latestInstanceDate
+          latestInstanceDaysAgo
+          daysSinceLastInstance
+          avgEntriesByMonth
+          peakMonth
+          lowMonth
+          attendanceHealth
+          profitability
+          consistency
+          overallHealth
+          attendanceTrend
+          attendanceTrendPercent
+          profitTrend
+          profitTrendPercent
+          recentAvgEntries
+          longtermAvgEntries
+          entriesTrendDirection
+          regularPlayersList
+          playerRetentionRate
+          rankAtVenue
+          totalRecurringGamesAtVenue
+          avgEntriesEntityWide
+          performanceVsEntityAvg
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -6783,6 +11073,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -6799,6 +11093,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -6950,6 +11248,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -7011,6 +11313,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -7077,6 +11383,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
       defaultVenueId
       createdAt
       updatedAt
+      gameCount
+      venueCount
+      lastGameAddedAt
+      lastDataRefreshedAt
       scraperStates {
         items {
           id
@@ -7117,6 +11427,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -7183,6 +11497,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -7247,6 +11565,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -7303,6 +11625,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             _lastChangedAt
             __typename
           }
+          logo
+          gameCount
+          lastGameAddedAt
+          lastDataRefreshedAt
           canonicalVenueId
           assets {
             nextToken
@@ -7329,6 +11655,21 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             startedAt
             __typename
           }
+          recurringGames {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -7345,6 +11686,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -7488,6 +11833,14 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             entityId
             createdAt
             updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
             _version
             _deleted
             _lastChangedAt
@@ -7536,6 +11889,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -7653,6 +12010,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -7660,6 +12021,63 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           }
           createdAt
           updatedAt
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameAssignmentConfidence
+          recurringGameAssignmentStatus
+          wasScheduledInstance
+          deviationNotes
+          instanceNumber
+          isReplacementInstance
+          replacementReason
           _version
           _deleted
           _lastChangedAt
@@ -7689,6 +12107,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt
@@ -7710,6 +12132,488 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGames {
+        items {
+          id
+          name
+          displayName
+          description
+          aliases
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          dayOfWeek
+          startTime
+          endTime
+          frequency
+          gameType
+          gameVariant
+          typicalBuyIn
+          typicalRake
+          typicalStartingStack
+          typicalGuarantee
+          isActive
+          isPaused
+          pausedReason
+          lastGameDate
+          nextScheduledDate
+          expectedInstanceCount
+          isSignature
+          isBeginnerFriendly
+          isBounty
+          tags
+          marketingDescription
+          imageUrl
+          socialMediaHashtags
+          autoDetectionConfidence
+          wasManuallyCreated
+          requiresReview
+          totalInstancesRun
+          avgAttendance
+          lastMonthAttendance
+          gameInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          notes
+          adminNotes
+          createdAt
+          updatedAt
+          createdBy
+          lastEditedBy
+          lastEditedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          timeRange
+          totalVenues
+          activeVenues
+          inactiveVenues
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          totalOperationsCost
+          avgEntriesPerGame
+          avgPrizepoolPerGame
+          avgProfitPerGame
+          avgRevenuePerGame
+          avgGamesPerVenue
+          avgPlayersPerVenue
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          profitTrend
+          profitTrendPercent
+          playerGrowthTrend
+          playerGrowthTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          topVenuesByRevenue
+          topVenuesByAttendance
+          topRecurringGames
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          venuesIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venueName
+          timeRange
+          totalGames
+          totalRecurringGames
+          totalOneOffGames
+          totalActiveRecurringGameTypes
+          totalTournaments
+          totalCashGames
+          totalNLHE
+          totalPLO
+          totalOther
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          returningPlayers
+          newPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          totalRakeRevenue
+          totalVenueFees
+          totalStaffCost
+          totalVenueRentalCost
+          totalMarketingCost
+          avgEntriesPerGame
+          avgUniquePlayersPerGame
+          avgPrizepoolPerGame
+          avgRevenuePerGame
+          avgProfitPerGame
+          profitMargin
+          rakeMarginPercent
+          firstGameDate
+          firstGameDaysAgo
+          latestGameDate
+          latestGameDaysAgo
+          daysSinceLastGame
+          gamesByDayOfWeek
+          peakAttendanceDay
+          topRecurringGames
+          topBuyInLevels
+          profitTrend
+          profitTrendPercent
+          attendanceTrend
+          attendanceTrendPercent
+          revenueGrowthTrend
+          revenueGrowthTrendPercent
+          overallHealth
+          profitability
+          consistency
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          recurringGamesIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      recurringGameMetrics {
+        items {
+          id
+          entityId
+          venueId
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            totalInstancesRun
+            avgAttendance
+            lastMonthAttendance
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameName
+          timeRange
+          totalInstances
+          scheduledInstances
+          actualInstances
+          missedInstances
+          runRate
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          regularPlayers
+          occasionalPlayers
+          oneTimePlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntries
+          avgUniquePlayers
+          avgPrizepool
+          avgRevenue
+          avgProfit
+          stdDevEntries
+          stdDevProfit
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          firstInstanceDate
+          firstInstanceDaysAgo
+          latestInstanceDate
+          latestInstanceDaysAgo
+          daysSinceLastInstance
+          avgEntriesByMonth
+          peakMonth
+          lowMonth
+          attendanceHealth
+          profitability
+          consistency
+          overallHealth
+          attendanceTrend
+          attendanceTrendPercent
+          profitTrend
+          profitTrendPercent
+          recentAvgEntries
+          longtermAvgEntries
+          entriesTrendDirection
+          regularPlayersList
+          playerRetentionRate
+          rankAtVenue
+          totalRecurringGamesAtVenue
+          avgEntriesEntityWide
+          performanceVsEntityAvg
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -7768,6 +12672,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             defaultVenueId
             createdAt
             updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             _version
             _deleted
             _lastChangedAt
@@ -7784,6 +12692,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             country
             fee
             isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
             canonicalVenueId
             entityId
             createdAt

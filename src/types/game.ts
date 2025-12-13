@@ -3,6 +3,8 @@
 
 import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant, GameFrequency, VenueAssignmentStatus } from '../API';
 
+export type RecurringGameAssignmentStatus = 'AUTO_ASSIGNED' | 'MANUALLY_ASSIGNED' | 'PENDING_ASSIGNMENT' | 'NOT_RECURRING' | 'DEVIATION_FLAGGED';
+
 export type TournamentLevelData = {
     levelNumber: number;
     durationMinutes: number;
@@ -103,25 +105,16 @@ export type GameData = {
     gameTags?: (string | null)[] | null;
     seriesName?: string | null;
     
-    // =========================================================================
-    // SIMPLIFIED FINANCIAL METRICS
-    // =========================================================================
-    // 
-    // Revenue (what we collect):
-    //   rakeRevenue = rake × entriesForRake (we collect this, period)
-    // 
-    // Prizepool (what players receive):
-    //   prizepoolPlayerContributions = (buyIn - rake) × entries
-    //   prizepoolAddedValue = guaranteeOverlayCost (when we add money)
-    //   prizepoolSurplus = excess above guarantee (bonus to players)
-    // 
-    // Cost:
-    //   guaranteeOverlayCost = max(0, guarantee - playerContributions)
-    // 
-    // Profit:
-    //   gameProfit = rakeRevenue - guaranteeOverlayCost
-    // =========================================================================
-    
+    // === NEW RECURRING GAME FIELDS (ADD THESE) ===
+    recurringGameId?: string | null;
+    recurringGameAssignmentStatus?: RecurringGameAssignmentStatus;
+    recurringGameAssignmentConfidence?: number;
+    wasScheduledInstance?: boolean;
+    deviationNotes?: string | null;
+    instanceNumber?: number | null;
+    isReplacementInstance?: boolean;
+    replacementReason?: string | null;
+
     // Revenue
     totalBuyInsCollected?: number | null;         // Total money from players: buyIn × totalEntries
     rakeRevenue?: number | null;                  // Rake we collect: rake × entriesForRake

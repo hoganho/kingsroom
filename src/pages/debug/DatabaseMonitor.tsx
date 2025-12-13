@@ -4,7 +4,7 @@ import { generateClient } from 'aws-amplify/api';
 import { getMonitoring } from '../../utils/enhanced-monitoring';
 import { 
     Database, Server, Monitor, Activity, RefreshCw, 
-    Play, Users, DollarSign, Globe, Share2, Shield
+    Play, Users, DollarSign, Globe, Share2, Shield, BarChart3 
 } from 'lucide-react';
 
 // ==========================================
@@ -20,15 +20,17 @@ const SCHEMA_GROUPS = [
             { name: 'Entity', plural: 'Entities' },
             { name: 'Venue', plural: 'Venues' },
             { name: 'VenueDetails', plural: 'VenueDetails' },
-            { name: 'Asset', plural: 'Assets' }
+            { name: 'Asset', plural: 'Assets' },
+            { name: 'BackgroundTask', plural: 'BackgroundTasks' }
         ]
     },
     {
         id: 'games',
         title: 'Games & Series',
-        icon: <Activity className="w-4 h-4 text-blue-600" />, // Swapped Layers for Activity since Layers was unused
+        icon: <Activity className="w-4 h-4 text-blue-600" />,
         tables: [
             { name: 'Game', plural: 'Games' },
+            { name: 'RecurringGame', plural: 'RecurringGames' },
             { name: 'TournamentSeries', plural: 'TournamentSeries' },
             { name: 'TournamentSeriesTitle', plural: 'TournamentSeriesTitles' },
             { name: 'TournamentStructure', plural: 'TournamentStructures' },
@@ -64,9 +66,19 @@ const SCHEMA_GROUPS = [
             { name: 'PlayerTicket', plural: 'PlayerTickets' },
             { name: 'TicketTemplate', plural: 'TicketTemplates' },
             { name: 'GameCost', plural: 'GameCosts' },
-            { name: 'GameFinancialSnapshot', plural: 'GameFinancialSnapshots' },
             { name: 'GameCostLineItem', plural: 'GameCostLineItems' },
-            { name: 'GameCostItem', plural: 'GameCostItems' }
+            { name: 'GameCostItem', plural: 'GameCostItems' },
+            { name: 'GameFinancialSnapshot', plural: 'GameFinancialSnapshots' }
+        ]
+    },
+    {
+        id: 'metrics',
+        title: 'Analytics & Metrics',
+        icon: <BarChart3 className="w-4 h-4 text-violet-600" />,
+        tables: [
+            { name: 'EntityMetrics', plural: 'EntityMetrics' },
+            { name: 'VenueMetrics', plural: 'VenueMetrics' },
+            { name: 'RecurringGameMetrics', plural: 'RecurringGameMetrics' }
         ]
     },
     {
@@ -78,6 +90,7 @@ const SCHEMA_GROUPS = [
             { name: 'ScrapeURL', plural: 'ScrapeURLs' },
             { name: 'ScrapeAttempt', plural: 'ScrapeAttempts' },
             { name: 'ScraperState', plural: 'ScraperStates' },
+            { name: 'ScrapeStructure', plural: 'ScrapeStructures' },
             { name: 'S3Storage', plural: 'S3Storages' },
             { name: 'DataSync', plural: 'DataSyncs' }
         ]
@@ -383,7 +396,7 @@ export const DatabaseMonitorPage: React.FC = () => {
             </div>
 
             {/* ================= TABLE GROUPS GRID ================= */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                 {SCHEMA_GROUPS.map((group) => (
                     <div key={group.id} className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
                         {/* Group Header */}
@@ -415,7 +428,7 @@ export const DatabaseMonitorPage: React.FC = () => {
                                                     {stat.status === 'SCANNING' ? (
                                                         <span className="text-indigo-600 animate-pulse text-xs">Scanning...</span>
                                                     ) : stat.status === 'ERROR' ? (
-                                                        <span className="text-red-500 text-xs">Error</span>
+                                                        <span className="text-red-500 text-xs" title={stat.error}>Error</span>
                                                     ) : stat.status === 'IDLE' ? (
                                                         <span className="text-gray-300 text-xs">-</span>
                                                     ) : (
@@ -480,7 +493,6 @@ export const DatabaseMonitorPage: React.FC = () => {
                                 <div key={`${op.timestamp}-${index}`} className="p-3 hover:bg-gray-50 flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-3">
                                         {op.source === 'LAMBDA' 
-                                            // Title prop removed here to fix TS error
                                             ? <Server className="w-4 h-4 text-purple-500" /> 
                                             : <Monitor className="w-4 h-4 text-blue-500" />
                                         }

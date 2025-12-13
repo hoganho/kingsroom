@@ -1,1393 +1,229 @@
-/* Amplify Params - DO NOT EDIT
-	API_KINGSROOM_ENTITYTABLE_ARN
-	API_KINGSROOM_ENTITYTABLE_NAME
-	API_KINGSROOM_GAMETABLE_ARN
-	API_KINGSROOM_GAMETABLE_NAME
-	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
-	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
-	API_KINGSROOM_PLAYERENTRYTABLE_ARN
-	API_KINGSROOM_PLAYERENTRYTABLE_NAME
-	API_KINGSROOM_PLAYERTABLE_ARN
-	API_KINGSROOM_PLAYERTABLE_NAME
-	API_KINGSROOM_S3STORAGETABLE_ARN
-	API_KINGSROOM_S3STORAGETABLE_NAME
-	API_KINGSROOM_SCRAPEATTEMPTTABLE_ARN
-	API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME
-	API_KINGSROOM_SCRAPERJOBTABLE_ARN
-	API_KINGSROOM_SCRAPERJOBTABLE_NAME
-	API_KINGSROOM_SCRAPESTRUCTURETABLE_ARN
-	API_KINGSROOM_SCRAPESTRUCTURETABLE_NAME
-	API_KINGSROOM_SCRAPEURLTABLE_ARN
-	API_KINGSROOM_SCRAPEURLTABLE_NAME
-	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_ARN
-	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_NAME
-	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_ARN
-	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_NAME
-	API_KINGSROOM_VENUETABLE_ARN
-	API_KINGSROOM_VENUETABLE_NAME
-	ENV
-	REGION
-Amplify Params - DO NOT EDIT */
-
 /**
  * ===================================================================
- * WEB SCRAPER FUNCTION - REFACTORED
+ * webScraperFunction - Entry Point
+ * ===================================================================
  * 
- * This version delegates all SAVE operations to the saveGameFunction Lambda.
- * The webScraperFunction now focuses ONLY on:
- * - Fetching HTML (live or from S3 cache)
- * - Parsing HTML to extract tournament data
- * - Returning parsed data to the caller
+ * RESPONSIBILITIES (Fetch + Parse ONLY):
+ * - Fetch HTML from live site or S3 cache
+ * - Parse HTML to extract tournament data
+ * - Track scraping activity (ScrapeURL, ScrapeAttempt, S3Storage)
+ * - Return parsed data to caller
  * 
- * The saveGameFunction handles:
- * - Saving/updating games in DynamoDB
- * - Venue resolution
- * - ScrapeAttempt tracking
- * - PDP queueing
+ * DOES NOT:
+ * - Write to Game table (delegated to saveGameFunction)
+ * - Create/modify venues or series
+ * - Process player data
  * 
- * REFACTORED (Dec 2025): Removed hardcoded DEFAULT_ENTITY_ID
- * - entityId should be provided by frontend caller (from EntityContext)
- * - Falls back to URL domain matching (getEntityIdFromUrl)
- * - Falls back to process.env.DEFAULT_ENTITY_ID if not provided
- * - Logs warnings when entityId is missing (indicates frontend issue)
+ * OPERATIONS:
+ * - fetchTournamentData: Fetch + parse a single tournament
+ * - saveTournamentData: Passthrough to saveGameFunction Lambda
+ * - fetchTournamentDataRange: Batch fetch multiple tournaments
+ * - reScrapeFromCache: Re-parse existing S3 HTML with new strategies
+ * 
  * ===================================================================
  */
 
-const axios = require('axios');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, GetCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
-const crypto = require('crypto');
-const { v4: uuidv4 } = require('uuid');
-const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
-const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
+const { DynamoDBDocumentClient } = require('@aws-sdk/lib-dynamodb');
+const { S3Client } = require('@aws-sdk/client-s3');
+const { LambdaClient } = require('@aws-sdk/client-lambda');
 
-// --- Lambda Monitoring ---
-const { LambdaMonitoring } = require('./lambda-monitoring');
+// Core modules
+const { LambdaMonitoring } = require('./utils/monitoring');
+const { resolveEntityId, getEntityIdFromUrl } = require('./core/entity-resolver');
+const { getTableName } = require('./config/tables');
 
-// Import the refactored modules
-const { enhancedHandleFetch } = require('./enhanced-handleFetch');
-const { runScraper, getTournamentId, getStatusAndReg } = require('./scraperStrategies');
-const { updateS3StorageWithParsedData } = require('./update-s3storage-with-parsed-data');
+// Handlers
+const { handleFetch } = require('./handlers/fetch-handler');
+const { handleSave } = require('./handlers/save-handler');
+const { handleFetchRange } = require('./handlers/range-handler');
 
-// VENUE ASSIGNMENT CONSTANTS
-const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
-const UNASSIGNED_VENUE_NAME = "Unassigned";
-
-// REMOVED: Hardcoded DEFAULT_ENTITY_ID
-// Entity ID should come from frontend (via EntityContext) or URL domain matching
-// Falls back to process.env.DEFAULT_ENTITY_ID if not provided
-
-const client = new DynamoDBClient({});
-const ddbDocClient = DynamoDBDocumentClient.from(client);
+// Initialize AWS clients (shared across invocations)
+const ddbClient = new DynamoDBClient({});
+const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 const s3Client = new S3Client({});
 const lambdaClient = new LambdaClient({});
 
-const S3_BUCKET = process.env.S3_BUCKET || 'pokerpro-scraper-storage';
-const SAVE_GAME_FUNCTION_NAME = process.env.SAVE_GAME_FUNCTION_NAME || `saveGameFunction-${process.env.ENV}`;
-
-// --- Lambda Monitoring Initialization ---
-// Initialize with placeholder - will be set per request
-const monitoring = new LambdaMonitoring('webScraperFunction', 'pending-entity');
-const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
-
-// ===================================================================
-// ENTITY ID RESOLUTION HELPERS
-// ===================================================================
-
 /**
- * Resolves entityId with proper fallback chain and warning logging
- * 
- * Priority order:
- * 1. Explicitly provided entityId (from args/frontend)
- * 2. URL domain matching (getEntityIdFromUrl)
- * 3. Existing record's entityId (for updates)
- * 4. Environment variable fallback (process.env.DEFAULT_ENTITY_ID)
- * 
- * @param {string|null} providedEntityId - entityId from args/frontend
- * @param {string|null} urlEntityId - entityId resolved from URL domain
- * @param {string|null} existingEntityId - entityId from existing record
- * @param {string} context - Description for logging
- * @returns {string} resolved entityId
- * @throws {Error} if no entityId can be resolved
+ * Main Lambda Handler
  */
-const resolveEntityId = (providedEntityId, urlEntityId = null, existingEntityId = null, context = 'unknown') => {
-    // Priority 1: Explicitly provided entityId (from frontend/args)
-    if (providedEntityId) {
-        return providedEntityId;
-    }
-    
-    // Priority 2: URL domain matching
-    if (urlEntityId) {
-        console.log(`[ENTITY-RESOLVE] ${context}: Using entityId from URL domain matching`);
-        return urlEntityId;
-    }
-    
-    // Priority 3: Existing record's entityId (for updates)
-    if (existingEntityId) {
-        console.warn(`[ENTITY-RESOLVE] ${context}: Using existing record entityId (frontend should pass entityId)`);
-        return existingEntityId;
-    }
-    
-    // Priority 4: Environment variable fallback
-    if (process.env.DEFAULT_ENTITY_ID) {
-        console.warn(
-            `[ENTITY-RESOLVE] ${context}: entityId missing from request, using DEFAULT_ENTITY_ID env var. ` +
-            `Frontend should pass entityId from EntityContext.`
-        );
-        return process.env.DEFAULT_ENTITY_ID;
-    }
-    
-    // No entityId available - throw error
-    throw new Error(
-        `[webScraperFunction] ${context}: entityId is required but was not provided. ` +
-        `Frontend must pass entityId from EntityContext, or set DEFAULT_ENTITY_ID environment variable.`
-    );
-};
-
-/**
- * Get entityId by matching URL domain against Entity table
- * Returns null if no match found (instead of hardcoded fallback)
- */
-const getEntityIdFromUrl = async (url) => {
-    if (!url) return null;
-    
-    try {
-        const urlObj = new URL(url);
-        const domain = urlObj.hostname;
-        const entityTable = getTableName('Entity');
-        
-        const scanResult = await monitoredDdbDocClient.send(new ScanCommand({
-            TableName: entityTable,
-            FilterExpression: 'gameUrlDomain = :domain',
-            ExpressionAttributeValues: { ':domain': domain }
-        }));
-        
-        if (scanResult.Items && scanResult.Items.length > 0) {
-            console.log(`[Entity] Found entity ${scanResult.Items[0].id} for domain ${domain}`);
-            return scanResult.Items[0].id;
-        }
-        
-        console.log(`[Entity] No entity found for domain ${domain}`);
-        return null; // CHANGED: Return null instead of DEFAULT_ENTITY_ID
-        
-    } catch (error) {
-        console.error('[Entity] Error determining entity from URL:', error);
-        return null; // CHANGED: Return null instead of DEFAULT_ENTITY_ID
-    }
-};
-
-/**
- * DEPRECATED: ensureDefaultEntity
- * 
- * This function auto-created a default entity if none existed.
- * With the new entity-aware architecture, entities should be created
- * explicitly through the admin interface, not auto-created.
- * 
- * Keeping as no-op for backward compatibility but logging warning.
- */
-const ensureDefaultEntity = async () => {
-    // DEPRECATED: No longer auto-creates entities
-    // Entities should be created explicitly through admin interface
-    if (!process.env.DEFAULT_ENTITY_ID) {
-        console.warn(
-            '[Entity] DEPRECATED: ensureDefaultEntity called but DEFAULT_ENTITY_ID not set. ' +
-            'Entities should be created through admin interface. ' +
-            'Set DEFAULT_ENTITY_ID env var for fallback support.'
-        );
-    }
-    return process.env.DEFAULT_ENTITY_ID || null;
-};
-
-// --- Date Helper Functions ---
-const ensureISODate = (dateValue, fallback = null) => {
-    if (!dateValue) return fallback || new Date().toISOString();
-    if (typeof dateValue === 'string' && dateValue.includes('T')) {
-        try {
-            const testDate = new Date(dateValue);
-            if (!isNaN(testDate.getTime())) return dateValue;
-        } catch (e) {}
-    }
-    if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
-        return `${dateValue}T00:00:00.000Z`;
-    }
-    try {
-        const date = new Date(dateValue);
-        if (!isNaN(date.getTime())) return date.toISOString();
-    } catch (error) {
-        console.error(`Failed to parse date: ${dateValue}`, error);
-    }
-    return fallback || new Date().toISOString();
-};
-
-const getTableName = (modelName) => {
-    const specialTables = {
-        'Entity': process.env.API_KINGSROOM_ENTITYTABLE_NAME,
-        'ScraperJob': process.env.API_KINGSROOM_SCRAPERJOBTABLE_NAME,
-        'ScrapeURL': process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME,
-        'ScrapeAttempt': process.env.API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME,
-        'ScraperState': process.env.API_KINGSROOM_SCRAPERSTATETABLE_NAME,
-        'Game': process.env.API_KINGSROOM_GAMETABLE_NAME,
-        'Venue': process.env.API_KINGSROOM_VENUETABLE_NAME,
-        'TournamentStructure': process.env.API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_NAME,
-        'TournamentSeries': process.env.API_KINGSROOM_TOURNAMENTSERIESTABLE_NAME,
-        'TournamentSeriesTitle': process.env.API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_NAME,
-        'PlayerEntry': process.env.API_KINGSROOM_PLAYERENTRYTABLE_NAME,
-        'PlayerResult': process.env.API_KINGSROOM_PLAYERRESULTTABLE_NAME,
-        'PlayerSummary': process.env.API_KINGSROOM_PLAYERSUMMARYTABLE_NAME,
-        'Player': process.env.API_KINGSROOM_PLAYERTABLE_NAME,
-        'PlayerTransaction': process.env.API_KINGSROOM_PLAYERTRANSACTIONTABLE_NAME,
-        'PlayerVenue': process.env.API_KINGSROOM_PLAYERVENUETABLE_NAME,
-        'ScrapeStructure': process.env.API_KINGSROOM_SCRAPESTRUCTURETABLE_NAME,
-        'S3Storage': process.env.API_KINGSROOM_S3STORAGETABLE_NAME,
-    };
-    if (specialTables[modelName]) return specialTables[modelName];
-    const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
-    const env = process.env.ENV;
-    if (!apiId || !env) throw new Error(`API ID or environment name not found.`);
-    return `${modelName}-${apiId}-${env}`;
-};
-
-const getAllVenues = async () => {
-    const venueTable = getTableName('Venue');
-    try {
-        const command = new ScanCommand({
-            TableName: venueTable,
-            ProjectionExpression: 'id, #name, aliases',
-            ExpressionAttributeNames: { '#name': 'name' }
-        });
-        const response = await monitoredDdbDocClient.send(command);
-        return response.Items || [];
-    } catch (error) {
-        console.error('Error fetching venues from DynamoDB:', error);
-        return [];
-    }
-};
-
-const getAllSeriesTitles = async () => {
-    const seriesTitleTable = getTableName('TournamentSeriesTitle');
-    try {
-        const command = new ScanCommand({
-            TableName: seriesTitleTable,
-            ProjectionExpression: 'id, title, aliases'
-        });
-        const response = await monitoredDdbDocClient.send(command);
-        return response.Items || [];
-    } catch (error) {
-        console.error('Error fetching series titles from DynamoDB:', error);
-        return [];
-    }
-};
-
-/**
- * Get or create ScrapeURL record
- * UPDATED: Uses resolveEntityId helper
- */
-const getOrCreateScrapeURL = async (url, tournamentId, entityId) => {
-    const scrapeURLTable = getTableName('ScrapeURL');
-    try {
-        const response = await monitoredDdbDocClient.send(new GetCommand({ 
-            TableName: scrapeURLTable, 
-            Key: { id: url } 
-        }));
-        
-        if (response.Item) {
-            return response.Item;
-        }
-        
-        // Create new record if doesn't exist
-        // UPDATED: Use resolveEntityId for new records
-        const effectiveEntityId = resolveEntityId(entityId, null, null, `getOrCreateScrapeURL(${url})`);
-        
-        const now = new Date().toISOString();
-        const timestamp = Date.now();
-        
-        const newRecord = {
-            id: url, 
-            url, 
-            tournamentId: parseInt(tournamentId, 10), 
-            entityId: effectiveEntityId,
-            status: 'ACTIVE', 
-            doNotScrape: false,
-            placedIntoDatabase: false, 
-            firstScrapedAt: now, 
-            lastScrapedAt: now,
-            timesScraped: 0, 
-            timesSuccessful: 0, 
-            timesFailed: 0, 
-            consecutiveFailures: 0, 
-            sourceSystem: "KINGSROOM_WEB",
-            s3StorageEnabled: true, 
-            createdAt: now, 
-            updatedAt: now, 
-            __typename: 'ScrapeURL', 
-            _version: 1,
-            _lastChangedAt: timestamp,
-            _deleted: null
-        };
-        
-        await monitoredDdbDocClient.send(new PutCommand({ 
-            TableName: scrapeURLTable, 
-            Item: newRecord 
-        }));
-        
-        return newRecord;
-    } catch (error) {
-        console.error('[getOrCreateScrapeURL] Error:', error);
-        return { 
-            id: url, 
-            tournamentId: parseInt(tournamentId, 10), 
-            s3StorageEnabled: false,
-            doNotScrape: false
-        };
-    }
-};
-
-/**
- * Process structure fingerprint
- */
-const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl) => {
-    const structureTable = getTableName('ScrapeStructure');
-    const sortedKeys = [...foundKeys].sort();
-    const structureId = crypto.createHash('sha256').update(sortedKeys.join(',')).digest('hex').substring(0, 16);
-    const now = new Date().toISOString();
-    const timestamp = Date.now();
-
-    try {
-        const getResponse = await monitoredDdbDocClient.send(new QueryCommand({
-            TableName: structureTable, KeyConditionExpression: 'id = :id', ExpressionAttributeValues: { ':id': structureId }
-        }));
-        const isNew = getResponse.Items.length === 0;
-        if (isNew) {
-            monitoring.trackOperation('FINGERPRINT_NEW', 'ScrapeStructure', structureId, { structureLabel, sourceUrl });
-            console.log(`Saving new structure fingerprint: ${structureId}`);
-            await monitoredDdbDocClient.send(new PutCommand({
-                TableName: structureTable,
-                Item: {
-                    id: structureId, fields: foundKeys, structureLabel: structureLabel,
-                    occurrenceCount: 1, firstSeenAt: now, lastSeenAt: now, exampleUrl: sourceUrl,
-                    __typename: "ScrapeStructure", createdAt: now, updatedAt: now, 
-                    _version: 1, _lastChangedAt: timestamp
-                }
-            }));
-            return { isNewStructure: true, structureLabel };
-        } else {
-            await monitoredDdbDocClient.send(new UpdateCommand({
-                TableName: structureTable, Key: { id: structureId },
-                UpdateExpression: 'SET lastSeenAt = :now, occurrenceCount = occurrenceCount + :inc, updatedAt = :now, #lca = :timestamp',
-                ExpressionAttributeNames: { '#lca': '_lastChangedAt' },
-                ExpressionAttributeValues: { ':now': now, ':inc': 1, ':timestamp': timestamp }
-            }));
-            return { isNewStructure: false, structureLabel: structureLabel }; 
-        }
-    } catch (error) {
-        console.error('Error processing structure fingerprint:', error);
-        return { isNewStructure: false, structureLabel };
-    }
-};
-
-/**
- * Scrape data from HTML
- */
-const scrapeDataFromHtml = async (html, venues, seriesTitles, url, forceRefresh = false) => {
-    const { data, foundKeys } = runScraper(html, null, venues, seriesTitles, url, forceRefresh);
-    
-    if (!data.tournamentId) {
-        data.tournamentId = getTournamentId(url);
-    }
-    
-    if (!data.structureLabel) {
-        data.structureLabel = `STATUS: ${data.gameStatus || 'UNKNOWN'} | REG: ${data.registrationStatus || 'UNKNOWN'}`;
-    }
-    if (!foundKeys.includes('structureLabel')) foundKeys.push('structureLabel');
-
-    const { isNewStructure } = await processStructureFingerprint(foundKeys, data.structureLabel, url);
-    data.isNewStructure = isNewStructure;
-
-    console.log(`[DEBUG-SCRAPER] Scraped status: ${data.gameStatus}, doNotScrape: ${data.doNotScrape}, tournamentId: ${data.tournamentId}, forceRefresh: ${forceRefresh}`);
-    return { data, foundKeys };
-};
-
-/**
- * Download HTML from S3
- */
-const downloadHtmlFromS3 = async (s3Key) => {
-    console.log(`[S3_CACHE] Downloading HTML from S3: ${s3Key}`);
-    
-    try {
-        const command = new GetObjectCommand({
-            Bucket: S3_BUCKET,
-            Key: s3Key
-        });
-        
-        const response = await s3Client.send(command);
-        
-        const chunks = [];
-        for await (const chunk of response.Body) {
-            chunks.push(chunk);
-        }
-        const html = Buffer.concat(chunks).toString('utf8');
-        
-        console.log(`[S3_CACHE] Downloaded ${html.length} bytes of HTML from S3`);
-        return html;
-        
-    } catch (error) {
-        console.error(`[S3_CACHE] Error downloading from S3:`, error);
-        throw new Error(`Failed to download HTML from S3: ${error.message}`);
-    }
-};
-
-/**
- * Extract player data for processing
- */
-const extractPlayerDataForProcessing = (scrapedData) => {
-    if (!scrapedData) return { 
-        allPlayers: [], 
-        totalUniquePlayers: 0, 
-        hasCompleteResults: false 
-    };
-    
-    const results = scrapedData.results || [];
-    const entries = scrapedData.entries || [];
-    const seating = scrapedData.seating || [];
-    const playerMap = new Map();
-    
-    if (results.length > 0) {
-        results.forEach(result => {
-            if (result.name) {
-                playerMap.set(result.name, { 
-                    name: result.name, 
-                    rank: result.rank, 
-                    winnings: result.winnings || 0, 
-                    points: result.points || 0, 
-                    isQualification: result.isQualification || false 
-                });
-            }
-        });
-    } else {
-        entries.forEach(entry => {
-            if (entry.name && !playerMap.has(entry.name)) {
-                playerMap.set(entry.name, { name: entry.name });
-            }
-        });
-        seating.forEach(seat => {
-            if (seat.name && !playerMap.has(seat.name)) {
-                playerMap.set(seat.name, { name: seat.name });
-            }
-        });
-    }
-    
-    const allPlayers = Array.from(playerMap.values());
-    const hasCompleteResults = results.length > 0 && results.some(r => r.rank);
-    
-    return {
-        allPlayers,
-        totalUniquePlayers: allPlayers.length,
-        hasCompleteResults
-    };
-};
-
-/**
- * ===================================================================
- * REFACTORED: handleSave now invokes saveGameFunction Lambda
- * UPDATED: Uses resolveEntityId helper
- * ===================================================================
- */
-const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape = false, entityId, scraperJobId = null) => {
-    // UPDATED: Use resolveEntityId helper
-    const effectiveEntityId = resolveEntityId(entityId, null, null, `handleSave(${sourceUrl})`);
-    
-    console.log(`[handleSave] Delegating save to saveGameFunction for ${sourceUrl}`);
-    
-    let parsedData;
-    try {
-        parsedData = typeof data === 'string' ? JSON.parse(data) : data;
-    } catch (error) {
-        console.error('[handleSave] Failed to parse data:', error);
-        parsedData = {};
-    }
-    
-    const tournamentId = parsedData.tournamentId || getTournamentId(sourceUrl);
-    
-    // Extract player data
-    const playerData = extractPlayerDataForProcessing(parsedData);
-    
-    // Build SaveGameInput for saveGameFunction
-    const saveGameInput = {
-        source: {
-            type: 'SCRAPE',
-            sourceId: sourceUrl,
-            entityId: effectiveEntityId,
-            fetchedAt: new Date().toISOString(),
-            contentHash: parsedData.contentHash || null
-        },
-        game: {
-            tournamentId: tournamentId,
-            existingGameId: existingGameId || null,
-            name: parsedData.name || `Tournament ${tournamentId}`,
-            gameType: parsedData.gameType || 'TOURNAMENT',
-            gameStatus: parsedData.gameStatus || 'SCHEDULED',
-            gameVariant: parsedData.gameVariant || 'NLHE',
-            gameStartDateTime: ensureISODate(parsedData.gameStartDateTime),
-            gameEndDateTime: parsedData.gameEndDateTime ? ensureISODate(parsedData.gameEndDateTime) : null,
-            registrationStatus: parsedData.registrationStatus || null,
-            buyIn: parsedData.buyIn || 0,
-            rake: parsedData.rake || 0,
-            startingStack: parsedData.startingStack || 0,
-            hasGuarantee: parsedData.hasGuarantee || false,
-            guaranteeAmount: parsedData.guaranteeAmount || 0,
-            prizepoolPaid: parsedData.prizepoolPaid || 0,
-            prizepoolCalculated: parsedData.prizepoolCalculated || 0,
-            totalUniquePlayers: parsedData.totalUniquePlayers || 0,
-            totalInitialEntries: parsedData.totalInitialEntries || 0,
-            totalEntries: parsedData.totalEntries || 0,
-            playersRemaining: parsedData.playersRemaining || null,
-            totalRebuys: parsedData.totalRebuys || 0,
-            totalAddons: parsedData.totalAddons || 0,
-            totalDuration: parsedData.totalDuration || null,
-            isSatellite: parsedData.isSatellite || false,
-            isSeries: parsedData.isSeries || false,
-            isRegular: parsedData.isRegular || false,
-            seriesName: parsedData.seriesName || null,
-            gameFrequency: parsedData.gameFrequency || null,
-            gameTags: parsedData.gameTags || [],
-            levels: parsedData.levels || [],
-            // Financial metrics (simplified model)
-            totalBuyInsCollected: parsedData.totalBuyInsCollected || null,
-            rakeRevenue: parsedData.rakeRevenue || null,
-            prizepoolPlayerContributions: parsedData.prizepoolPlayerContributions || null,
-            prizepoolAddedValue: parsedData.prizepoolAddedValue || null,
-            prizepoolSurplus: parsedData.prizepoolSurplus || null,
-            guaranteeOverlayCost: parsedData.guaranteeOverlayCost || null,
-            gameProfit: parsedData.gameProfit || null
-        },
-        series: parsedData.isSeries ? {
-            seriesId: parsedData.tournamentSeriesId || null,  // Manual override
-            seriesName: parsedData.seriesName || null,
-            suggestedSeriesId: parsedData.seriesMatch?.autoAssignedSeries?.id || null,  // From scraper
-            confidence: parsedData.seriesMatch?.autoAssignedSeries?.score || 0,
-            // Include structure fields
-            isMainEvent: parsedData.isMainEvent || false,
-            eventNumber: parsedData.eventNumber || null,
-            dayNumber: parsedData.dayNumber || null,
-            flightLetter: parsedData.flightLetter || null,
-            finalDay: parsedData.finalDay || false,
-            year: parsedData.seriesYear || new Date(parsedData.gameStartDateTime || new Date()).getFullYear()
-        } : null,
-        players: playerData.totalUniquePlayers > 0 ? {
-            allPlayers: playerData.allPlayers,
-            totalUniquePlayers: playerData.totalUniquePlayers,
-            hasCompleteResults: playerData.hasCompleteResults
-        } : null,
-        venue: {
-            venueId: venueId || null,
-            venueName: parsedData.venueName || null,
-            suggestedVenueId: parsedData.venueMatch?.autoAssignedVenue?.id || null,
-            confidence: parsedData.venueMatch?.suggestions?.[0]?.score || 0
-        },
-        options: {
-            skipPlayerProcessing: false,
-            forceUpdate: !!existingGameId,
-            doNotScrape: doNotScrape,
-            scraperJobId: scraperJobId
-        }
-    };
-    
-    // Invoke saveGameFunction Lambda
-    try {
-        monitoring.trackOperation('INVOKE_SAVE_GAME', 'Game', tournamentId.toString(), { entityId: effectiveEntityId });
-        
-        const invokeCommand = new InvokeCommand({
-            FunctionName: SAVE_GAME_FUNCTION_NAME,
-            InvocationType: 'RequestResponse',
-            Payload: JSON.stringify({ input: saveGameInput })
-        });
-        
-        const response = await lambdaClient.send(invokeCommand);
-        
-        // Parse response
-        const responsePayload = JSON.parse(Buffer.from(response.Payload).toString());
-        
-        if (responsePayload.errorMessage) {
-            throw new Error(responsePayload.errorMessage);
-        }
-        
-        console.log(`[handleSave] saveGameFunction response:`, {
-            success: responsePayload.success,
-            action: responsePayload.action,
-            gameId: responsePayload.gameId,
-            playerProcessingQueued: responsePayload.playerProcessingQueued
-        });
-        
-        if (!responsePayload.success) {
-            throw new Error(responsePayload.message || 'saveGameFunction failed');
-        }
-
-        if (responsePayload.success && responsePayload.gameId && parsedData.s3Key) {
-            try {
-                const s3StorageTable = getTableName('S3Storage');
-                
-                // Find the S3Storage record by tournamentId + entityId
-                const queryResult = await monitoredDdbDocClient.send(new QueryCommand({
-                    TableName: s3StorageTable,
-                    IndexName: 'byTournamentId',
-                    KeyConditionExpression: 'tournamentId = :tid',
-                    FilterExpression: 'entityId = :eid',
-                    ExpressionAttributeValues: { 
-                        ':tid': tournamentId,
-                        ':eid': effectiveEntityId
-                    },
-                    ScanIndexForward: false,
-                    Limit: 1
-                }));
-            
-                if (queryResult.Items && queryResult.Items.length > 0) {
-                    const s3Record = queryResult.Items[0];
-                    const now = new Date().toISOString();
-                    const timestamp = Date.now();
-                    
-                    await monitoredDdbDocClient.send(new UpdateCommand({
-                        TableName: s3StorageTable,
-                        Key: { id: s3Record.id },
-                        UpdateExpression: `
-                            SET gameId = :gameId,
-                                wasGameCreated = :created,
-                                wasGameUpdated = :updated,
-                                updatedAt = :now,
-                                #lca = :timestamp
-                        `,
-                        ExpressionAttributeNames: { '#lca': '_lastChangedAt' },
-                        ExpressionAttributeValues: {
-                            ':gameId': responsePayload.gameId,
-                            ':created': responsePayload.action === 'CREATED',
-                            ':updated': responsePayload.action === 'UPDATED',
-                            ':now': now,
-                            ':timestamp': timestamp
-                        }
-                    }));
-                    
-                    console.log(`[handleSave] Linked S3Storage ${s3Record.id} to game ${responsePayload.gameId}`);
-                }
-            } catch (linkError) {
-                console.warn('[handleSave] Failed to link S3Storage to game:', linkError.message);
-            }
-        }
-        
-        // Return a compatible response structure
-        return {
-            id: responsePayload.gameId,
-            name: parsedData.name,
-            gameStatus: parsedData.gameStatus,
-            venueId: responsePayload.venueAssignment?.venueId,
-            entityId: effectiveEntityId,
-            sourceUrl: sourceUrl,
-            action: responsePayload.action,
-            playerProcessingQueued: responsePayload.playerProcessingQueued,
-            playerProcessingReason: responsePayload.playerProcessingReason,
-            fieldsUpdated: responsePayload.fieldsUpdated || []
-        };
-        
-    } catch (error) {
-        console.error(`[handleSave] Error invoking saveGameFunction:`, error);
-        monitoring.trackOperation('SAVE_GAME_ERROR', 'Game', tournamentId.toString(), { 
-            error: error.message, 
-            entityId: effectiveEntityId 
-        });
-        throw error;
-    }
-};
-
-/**
- * Handle Fetch Range
- * UPDATED: Uses resolveEntityId helper
- */
-const handleFetchRange = async (startId, endId, entityId) => {
-    monitoring.trackOperation('FETCH_RANGE_START', 'Game', `${startId}-${endId}`, { entityId });
-    console.log(`[handleFetchRange] Processing ${startId} to ${endId}`);
-    if (startId > endId || endId - startId + 1 > 100) throw new Error('Invalid range (max 100).');
-
-    const allResults = [];
-    const chunkSize = 10;
-    
-    // UPDATED: Use resolveEntityId helper
-    const effectiveEntityId = resolveEntityId(entityId, null, null, `handleFetchRange(${startId}-${endId})`);
-
-    for (let i = startId; i <= endId; i += chunkSize) {
-        const chunkEnd = Math.min(i + chunkSize - 1, endId);
-        const chunkPromises = [];
-        for (let j = i; j <= chunkEnd; j++) {
-            const url = `https://kingsroom.com.au/tournament/?id=${j}`;
-            chunkPromises.push((async () => {
-                try {
-                    const scrapeURLRecord = await getOrCreateScrapeURL(url, j, effectiveEntityId);
-                    const result = await enhancedHandleFetch(url, scrapeURLRecord, effectiveEntityId, j, false, monitoredDdbDocClient);
-                    
-                    if (!result.success) throw new Error(result.error);
-                    
-                    const { data } = await scrapeDataFromHtml(result.html, [], [], url);
-                    
-                    return { ...data, id: j.toString(), rawHtml: null };
-                } catch (error) {
-                    return { id: j.toString(), error: error.message };
-                }
-            })());
-        }
-        const settled = await Promise.allSettled(chunkPromises);
-        allResults.push(...settled.map(r => r.status === 'fulfilled' ? r.value : { error: r.reason }));
-    }
-    
-    monitoring.trackOperation('FETCH_RANGE_COMPLETE', 'Game', `${startId}-${endId}`, { resultsCount: allResults.length, entityId: effectiveEntityId });
-    return allResults;
-};
-
-// Helper function to update ScrapeURL doNotScrape status
-const updateScrapeURLDoNotScrape = async (url, doNotScrape, gameStatus) => {
-    const scrapeURLTable = getTableName('ScrapeURL');
-    try {
-        await monitoredDdbDocClient.send(new UpdateCommand({
-            TableName: scrapeURLTable,
-            Key: { id: url },
-            UpdateExpression: 'SET doNotScrape = :dns, gameStatus = :gs, lastScrapeStatus = :lss, updatedAt = :now',
-            ExpressionAttributeValues: {
-                ':dns': doNotScrape,
-                ':gs': gameStatus,
-                ':lss': doNotScrape ? 'SKIPPED_DONOTSCRAPE' : 'SUCCESS',
-                ':now': new Date().toISOString()
-            }
-        }));
-        console.log(`[UpdateScrapeURL] Set doNotScrape=${doNotScrape} for ${url}`);
-    } catch (error) {
-        console.error('[UpdateScrapeURL] Error updating doNotScrape:', error);
-    }
-};
-
-// ===================================================================
-// ScrapeAttempt Tracking Functions
-// ===================================================================
-
-/**
- * Helper to extract error type from error message
- */
-const extractErrorType = (errorMessage) => {
-    if (!errorMessage) return 'UNKNOWN';
-    
-    const patterns = [
-        { pattern: /timeout/i, type: 'TIMEOUT' },
-        { pattern: /ECONNREFUSED/i, type: 'CONNECTION_REFUSED' },
-        { pattern: /ECONNRESET/i, type: 'CONNECTION_RESET' },
-        { pattern: /ETIMEDOUT/i, type: 'TIMEOUT' },
-        { pattern: /404/i, type: 'NOT_FOUND' },
-        { pattern: /500/i, type: 'SERVER_ERROR' },
-        { pattern: /503/i, type: 'SERVICE_UNAVAILABLE' },
-        { pattern: /venue/i, type: 'VENUE_ERROR' },
-        { pattern: /parse/i, type: 'PARSE_ERROR' },
-        { pattern: /DynamoDB/i, type: 'DATABASE_ERROR' },
-        { pattern: /S3/i, type: 'S3_ERROR' },
-        { pattern: /not found/i, type: 'NOT_FOUND' },
-        { pattern: /not published/i, type: 'NOT_PUBLISHED' }
-    ];
-    
-    for (const { pattern, type } of patterns) {
-        if (pattern.test(errorMessage)) {
-            return type;
-        }
-    }
-    
-    return 'OTHER';
-};
-
-/**
- * Create a ScrapeAttempt record for tracking individual scrape attempts
- * 
- * This tracks every attempt to scrape a URL, including:
- * - Single URL scrapes via fetchTournamentData
- * - Re-scrapes from cache
- * - Batch scrapes (already handled by autoScraper, but we can track here too)
- * 
- * @param {Object} params - Attempt parameters
- */
-const createScrapeAttempt = async (params) => {
-    const {
-        url,
-        tournamentId,
-        entityId,
-        scrapeURLId = null,
-        scraperJobId = null,      // null for single URL scrapes (not part of a batch job)
-        status,                    // ScrapeAttemptStatus enum
-        processingTime = 0,
-        gameName = null,
-        gameStatus = null,
-        registrationStatus = null,
-        dataHash = null,
-        hasChanges = false,
-        errorMessage = null,
-        errorType = null,
-        gameId = null,
-        wasNewGame = false,
-        fieldsUpdated = [],
-        foundKeys = [],
-        structureLabel = null,
-        contentHash = null,
-        s3Key = null,              // Track which S3 file was used/created
-        source = 'SINGLE_SCRAPE'   // SINGLE_SCRAPE, BATCH_SCRAPE, RESCRAPE_CACHE
-    } = params;
-    
-    const scrapeAttemptTable = getTableName('ScrapeAttempt');
-    const now = new Date().toISOString();
-    const timestamp = Date.now();
-    const attemptId = uuidv4();
-    
-    // Generate a synthetic job ID for single scrapes to maintain referential integrity
-    // Format: single-{entityId}-{timestamp} for easier filtering
-    const effectiveJobId = scraperJobId || `single-${entityId || 'unknown'}-${timestamp}`;
-    
-    const attemptRecord = {
-        id: attemptId,
-        url,
-        tournamentId: tournamentId || 0,
-        attemptTime: now,
-        
-        // Job tracking
-        scraperJobId: effectiveJobId,
-        scrapeURLId: scrapeURLId || null,
-        
-        // Status
-        status,
-        processingTime: processingTime || 0,
-        
-        // Game data extracted
-        gameName,
-        gameStatus,
-        registrationStatus,
-        
-        // Content tracking
-        dataHash: dataHash || contentHash,
-        contentHash: contentHash || dataHash,
-        hasChanges,
-        
-        // Error tracking
-        errorMessage: errorMessage ? errorMessage.substring(0, 500) : null,  // Limit error message length
-        errorType,
-        
-        // Game association
-        gameId,
-        wasNewGame,
-        
-        // Extraction details
-        fieldsUpdated: fieldsUpdated || [],
-        foundKeys: foundKeys || [],
-        fieldsExtracted: foundKeys || [],
-        structureLabel,
-        
-        // Metadata
-        wasEdited: false,
-        scrapedAt: now,
-        entityId,
-        
-        // DataStore fields
-        createdAt: now,
-        updatedAt: now,
-        _lastChangedAt: timestamp,
-        _version: 1,
-        __typename: 'ScrapeAttempt'
-    };
-    
-    try {
-        await monitoredDdbDocClient.send(new PutCommand({
-            TableName: scrapeAttemptTable,
-            Item: attemptRecord
-        }));
-        
-        console.log(`[ScrapeAttempt] ✅ Created attempt ${attemptId} for tournament ${tournamentId}:`, {
-            status,
-            hasChanges,
-            source,
-            processingTime
-        });
-        
-        return attemptId;
-    } catch (error) {
-        // Log but don't throw - tracking shouldn't break the scrape flow
-        console.error('[ScrapeAttempt] ❌ Error creating attempt record:', error.message);
-        monitoring.trackOperation('SCRAPE_ATTEMPT_CREATE_ERROR', 'ScrapeAttempt', attemptId, {
-            error: error.message,
-            tournamentId
-        });
-        return null;
-    }
-};
-
-// --- MAIN LAMBDA HANDLER ---
 exports.handler = async (event) => {
-    console.log('[HANDLER] Incoming event:', JSON.stringify(event, null, 2));
+    const handlerStartTime = Date.now();
     
-    // UPDATED: Initialize entityId as null, will be resolved below
-    let entityId = null;
-    let urlEntityId = null;
-    let jobId = null;
-    let triggerSource = 'MANUAL';
-    const handlerStartTime = Date.now();  // For error tracking when attemptStartTime not available
+    // Initialize monitoring for this request
+    const monitoring = new LambdaMonitoring('webScraperFunction', 'pending-entity');
+    const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
     
-    const operationName = event.fieldName || event.operationType || event.operation || 'fetchTournamentData';
-    const args = event.arguments || event || {};
-    
-    if (args.jobId) jobId = args.jobId;
-    if (args.triggerSource) triggerSource = args.triggerSource;
-    
-    // DEPRECATED: Still call for backward compatibility but it's now a no-op
-    await ensureDefaultEntity();
+    // Build shared context object
+    const context = {
+        ddbDocClient: monitoredDdbDocClient,
+        s3Client,
+        lambdaClient,
+        monitoring,
+        getTableName
+    };
     
     try {
-        // Try to resolve entityId from URL domain
-        if (operationName === 'fetchTournamentData' || operationName === 'FETCH') {
-            const url = args.url;
-            if (url) {
-                urlEntityId = await getEntityIdFromUrl(url);
-            }
-        }
+        // Extract operation details from event
+        const fieldName = event.fieldName || event.operation;
+        const args = event.arguments || event.args || event;
+        const identity = event.identity;
         
-        // UPDATED: Use resolveEntityId with all fallback options
-        entityId = resolveEntityId(
-            args.entityId,           // Priority 1: Explicitly passed
-            urlEntityId,             // Priority 2: From URL domain matching
-            null,                    // Priority 3: No existing record at handler level
-            `handler(${operationName})`
+        // Resolve entity ID early (needed for all operations)
+        const urlEntityId = args.url ? await getEntityIdFromUrl(args.url, context) : null;
+        const entityId = resolveEntityId(
+            args.entityId,
+            urlEntityId,
+            null,
+            `handler(${fieldName})`
         );
         
-        monitoring.entityId = entityId; 
+        // Update monitoring with resolved entity
+        monitoring.setEntityId(entityId);
         
-        monitoring.trackOperation('HANDLER_START', 'Handler', operationName, { entityId, jobId, triggerSource });
-        console.log(`[HANDLER] Op: ${operationName}. Job: ${jobId || 'N/A'}, Entity: ${entityId}`);
+        // Extract common options
+        const options = {
+            entityId,
+            forceRefresh: args.forceRefresh || false,
+            overrideDoNotScrape: args.overrideDoNotScrape || false,
+            scraperJobId: args.scraperJobId || args.jobId || null,
+            scraperApiKey: args.scraperApiKey || process.env.SCRAPERAPI_KEY || null
+        };
         
-        try {
-            switch (operationName) {
-                case 'fetchTournamentData':
-                case 'FETCH':
-                    const attemptStartTime = Date.now();  // Track timing for ScrapeAttempt
-                    const fetchUrl = args.url;
-                    const s3KeyParam = args.s3Key;
-                    const forceRefresh = args.forceRefresh || false;
-                    const overrideDoNotScrape = args.overrideDoNotScrape || false;
-                    
-                    // NEW: Extract scraperApiKey from arguments
-                    const scraperApiKey = args.scraperApiKey || process.env.SCRAPERAPI_KEY;
-                    console.log('[HANDLER] ScraperAPI Key:', {
-                        hasCustomKey: !!args.scraperApiKey,
-                        keyLength: scraperApiKey?.length,
-                        keyPreview: scraperApiKey?.substring(0, 8) + '...'
-                    });
-                    
-                    // Handle S3 cache scenario
-                    if (s3KeyParam) {
-                        console.log(`[FETCH] 🔒 S3 CACHE MODE - Using cached HTML`);
-                        console.log(`[FETCH] 🔒 S3 key: ${s3KeyParam}`);
-                        console.log(`[FETCH] 🔒 This path should NEVER create new S3 files`);
-                        
-                        monitoring.trackOperation('FETCH_FROM_CACHE', 'Game', 'cached', { 
-                            s3Key: s3KeyParam, 
-                            entityId 
-                        });
-                        
-                        try {
-                            // Download HTML from S3
-                            const cachedHtml = await downloadHtmlFromS3(s3KeyParam);
-                            
-                            // Get venues and series titles for parsing
-                            const [venues, seriesTitles] = await Promise.all([
-                                getAllVenues(), 
-                                getAllSeriesTitles()
-                            ]);
-                            
-                            // Parse using existing scrapeDataFromHtml function
-                            const { data: scrapedData, foundKeys } = await scrapeDataFromHtml(
-                                cachedHtml,
-                                venues,
-                                seriesTitles,
-                                fetchUrl || 'cached',
-                                false
-                            );
-                            
-                            // Get S3Storage metadata
-                            let s3StorageRecord = null;
-                            try {
-                                const s3StorageTable = getTableName('S3Storage');
-                                const queryCommand = new QueryCommand({
-                                    TableName: s3StorageTable,
-                                    IndexName: 'byS3Key',
-                                    KeyConditionExpression: 's3Key = :key',
-                                    ExpressionAttributeValues: { ':key': s3KeyParam },
-                                    Limit: 1
-                                });
-                                const queryResult = await monitoredDdbDocClient.send(queryCommand);
-                                s3StorageRecord = queryResult.Items?.[0];
-                                
-                                if (!s3StorageRecord) {
-                                    console.warn('[FETCH] ⚠️ No S3Storage record found for s3Key:', s3KeyParam);
-                                }
-                            } catch (metadataError) {
-                                console.warn('[FETCH] Could not fetch S3Storage metadata:', metadataError.message);
-                            }
-                            
-                            // UPDATED: Use resolveEntityId for cache response
-                            const cacheEntityId = resolveEntityId(
-                                entityId,
-                                null,
-                                s3StorageRecord?.entityId,
-                                `fetchFromCache(${s3KeyParam})`
-                            );
-                            
-                            // Build response with S3_CACHE source
-                            const result = {
-                                tournamentId: scrapedData.tournamentId || s3StorageRecord?.tournamentId || 1,
-                                name: scrapedData.name || 'Unnamed Tournament',
-                                gameStatus: scrapedData.gameStatus || 'SCHEDULED',
-                                hasGuarantee: scrapedData.hasGuarantee || false,
-                                doNotScrape: scrapedData.doNotScrape || false,
-                                s3Key: s3KeyParam,
-                                ...scrapedData,
-                                source: 'S3_CACHE',
-                                sourceUrl: s3StorageRecord?.url || fetchUrl || null,
-                                reScrapedAt: new Date().toISOString(),
-                                contentHash: s3StorageRecord?.contentHash || null,
-                                entityId: cacheEntityId
-                            };
-                            
-                            // ✅ Update S3Storage with parsed data (even if HTML unchanged)
-                            // This captures improvements from evolved scraper strategies
-                            try {
-                                const s3StorageTable = getTableName('S3Storage');
-                                const updateResult = await updateS3StorageWithParsedData(
-                                    s3KeyParam,
-                                    scrapedData,
-                                    foundKeys,
-                                    monitoredDdbDocClient,
-                                    s3StorageTable,
-                                    true, // isRescrape = true (from cache)
-                                    s3StorageRecord?.url || fetchUrl, // URL for fallback lookup
-                                    scrapedData.tournamentId || s3StorageRecord?.tournamentId, // tournamentId for primary lookup
-                                    cacheEntityId // entityId for primary lookup
-                                );
-                                
-                                console.log(`[FETCH] S3Storage update result:`, {
-                                    source: 'S3_CACHE',
-                                    dataChanged: updateResult.dataChanged,
-                                    gameStatus: updateResult.gameStatus,
-                                    registrationStatus: updateResult.registrationStatus,
-                                    fieldsExtracted: updateResult.extractedFields?.length
-                                });
-                                
-                                // Add update info to result
-                                result.s3StorageUpdated = updateResult.success;
-                                result.dataChanged = updateResult.dataChanged;
-                                
-                            } catch (s3UpdateError) {
-                                console.warn('[FETCH] Failed to update S3Storage with parsed data:', s3UpdateError.message);
-                                // Don't fail the whole operation if S3Storage update fails
-                            }
-                            
-                            console.log(`[FETCH] ✅ Successfully parsed cached HTML for tournament ${result.tournamentId}`);
-                            console.log(`[FETCH] ✅ NO NEW S3 FILE CREATED (cache mode)`);
-                            
-                            monitoring.trackOperation('CACHE_PARSE_SUCCESS', 'Game', result.tournamentId, {
-                                s3Key: s3KeyParam,
-                                entityId: result.entityId
-                            });
-                            
-                            // Track successful cache re-scrape attempt
-                            await createScrapeAttempt({
-                                url: s3StorageRecord?.url || fetchUrl || s3KeyParam,
-                                tournamentId: result.tournamentId,
-                                entityId: result.entityId,
-                                scrapeURLId: null,
-                                scraperJobId: jobId,
-                                status: 'SUCCESS',
-                                processingTime: Date.now() - attemptStartTime,
-                                gameName: result.name,
-                                gameStatus: result.gameStatus,
-                                registrationStatus: result.registrationStatus,
-                                dataHash: result.contentHash,
-                                hasChanges: result.dataChanged || false,
-                                foundKeys: foundKeys,
-                                s3Key: s3KeyParam,
-                                source: 'RESCRAPE_CACHE'
-                            });
-                            
-                            // CRITICAL: Return here to prevent falling through to live fetch
-                            return result;
-                            
-                        } catch (cacheError) {
-                            console.error('[FETCH] Error processing S3 cache:', cacheError);
-                            
-                            // Track failed cache re-scrape attempt
-                            await createScrapeAttempt({
-                                url: fetchUrl || s3KeyParam,
-                                tournamentId: 0,
-                                entityId,
-                                scrapeURLId: null,
-                                scraperJobId: jobId,
-                                status: 'FAILED',
-                                processingTime: Date.now() - attemptStartTime,
-                                errorMessage: cacheError.message,
-                                errorType: extractErrorType(cacheError.message),
-                                s3Key: s3KeyParam,
-                                source: 'RESCRAPE_CACHE'
-                            });
-                            
-                            throw new Error(`Failed to process cached HTML: ${cacheError.message}`);
-                        }
-                    }
-                    
-                    // Live fetch
-                    if (!fetchUrl) {
-                        throw new Error('No URL or s3Key provided for fetch operation');
-                    }
-                    
-                    monitoring.trackOperation('FETCH_START', 'Game', getTournamentId(fetchUrl).toString(), { entityId });
-                    
-                    const tournamentId = getTournamentId(fetchUrl);
-                    const scrapeURLRecord = await getOrCreateScrapeURL(fetchUrl, tournamentId, entityId);
-                    
-                    // Check doNotScrape
-                    if (scrapeURLRecord.doNotScrape && !forceRefresh && !overrideDoNotScrape) {
-                        console.log(`[FETCH] Skipping ${fetchUrl} - marked as doNotScrape`);
-                        
-                        // Track the skipped attempt
-                        await createScrapeAttempt({
-                            url: fetchUrl,
-                            tournamentId,
-                            entityId,
-                            scrapeURLId: scrapeURLRecord.id,
-                            scraperJobId: jobId,
-                            status: 'SKIPPED_DONOTSCRAPE',
-                            processingTime: Date.now() - attemptStartTime,
-                            gameName: scrapeURLRecord.gameName,
-                            gameStatus: scrapeURLRecord.gameStatus || 'NOT_IN_USE',
-                            source: 'SINGLE_SCRAPE'
-                        });
-                        
-                        return {
-                            tournamentId: tournamentId,
-                            name: 'Skipped - Do Not Scrape',
-                            gameStatus: scrapeURLRecord.gameStatus || 'NOT_IN_USE',
-                            hasGuarantee: false,
-                            doNotScrape: true,
-                            s3Key: '',
-                            skipped: true,
-                            skipReason: 'DO_NOT_SCRAPE',
-                            entityId: entityId
-                        };
-                    }
-                    
-                    const [venues, seriesTitles] = await Promise.all([
-                        getAllVenues(), 
-                        getAllSeriesTitles()
-                    ]);
-                    
-                    // NEW: Pass scraperApiKey to enhancedHandleFetch
-                    const fetchResult = await enhancedHandleFetch(
-                        fetchUrl, 
-                        scrapeURLRecord, 
-                        entityId, 
-                        tournamentId, 
-                        forceRefresh, 
-                        monitoredDdbDocClient,
-                        scraperApiKey  // ADDED: Pass as 7th parameter
-                    );
-                    
-                    if (!fetchResult.success) {
-                        // Track failed fetch attempt
-                        await createScrapeAttempt({
-                            url: fetchUrl,
-                            tournamentId,
-                            entityId,
-                            scrapeURLId: scrapeURLRecord.id,
-                            scraperJobId: jobId,
-                            status: 'FAILED',
-                            processingTime: Date.now() - attemptStartTime,
-                            errorMessage: fetchResult.error,
-                            errorType: extractErrorType(fetchResult.error),
-                            source: 'SINGLE_SCRAPE'
-                        });
-                        
-                        throw new Error(fetchResult.error || 'Fetch failed');
-                    }
-                    
-                    const { data: scrapedData, foundKeys } = await scrapeDataFromHtml(
-                        fetchResult.html, 
-                        venues, 
-                        seriesTitles, 
-                        fetchUrl,
-                        forceRefresh
-                    );
-                    
-                    const shouldMarkDoNotScrape = scrapedData.gameStatus === 'NOT_PUBLISHED' || 
-                                                 scrapedData.gameStatus === 'NOT_IN_USE' ||
-                                                 scrapedData.doNotScrape === true;
-                    
-                    if (shouldMarkDoNotScrape && !scrapeURLRecord.doNotScrape) {
-                        console.log(`[HANDLER] Marking tournament as doNotScrape due to status: ${scrapedData.gameStatus}`);
-                        await updateScrapeURLDoNotScrape(fetchUrl, true, scrapedData.gameStatus);
-                    }
-
-                    const result = {
-                        tournamentId: scrapedData.tournamentId || tournamentId,
-                        name: scrapedData.name || 'Unnamed Tournament',
-                        gameStatus: scrapedData.gameStatus || 'SCHEDULED',
-                        hasGuarantee: scrapedData.hasGuarantee || false,
-                        doNotScrape: scrapedData.doNotScrape || false,
-                        s3Key: fetchResult.s3Key || '',
-                        ...scrapedData,
-                        rawHtml: fetchResult.html,
-                        source: fetchResult.source,
-                        contentHash: fetchResult.contentHash,
-                        fetchedAt: new Date().toISOString(),
-                        entityId: entityId,
-                        wasForced: forceRefresh || overrideDoNotScrape
-                    };
-                    
-                    // Update S3Storage with parsed data
-                    if (fetchResult.s3Key) {
-                        try {
-                            const s3StorageTable = getTableName('S3Storage');
-                            const updateResult = await updateS3StorageWithParsedData(
-                                fetchResult.s3Key,
-                                scrapedData,
-                                foundKeys,
-                                monitoredDdbDocClient,
-                                s3StorageTable,
-                                false,
-                                fetchUrl,
-                                scrapedData.tournamentId || tournamentId,
-                                entityId
-                            );
-                            
-                            result.s3StorageUpdated = updateResult.success;
-                            result.dataChanged = updateResult.dataChanged;
-                            
-                        } catch (s3UpdateError) {
-                            console.warn('[FETCH] Failed to update S3Storage with parsed data:', s3UpdateError.message);
-                        }
-                    }
-                    
-                    // Track successful fetch attempt
-                    await createScrapeAttempt({
-                        url: fetchUrl,
-                        tournamentId: scrapedData.tournamentId || tournamentId,
-                        entityId,
-                        scrapeURLId: scrapeURLRecord.id,
-                        scraperJobId: jobId,
-                        status: 'SUCCESS',
-                        processingTime: Date.now() - attemptStartTime,
-                        gameName: scrapedData.name,
-                        gameStatus: scrapedData.gameStatus,
-                        registrationStatus: scrapedData.registrationStatus,
-                        dataHash: fetchResult.contentHash,
-                        hasChanges: result.dataChanged || false,
-                        foundKeys,
-                        structureLabel: scrapedData.structureLabel,
-                        s3Key: fetchResult.s3Key,
-                        source: 'SINGLE_SCRAPE'
-                    });
-                    
-                    return result;
-
-                case 'saveTournamentData':
-                case 'SAVE': {
-                    monitoring.trackOperation('SAVE_DATA', 'Game', args.input?.existingGameId || args.existingGameId || 'new', { entityId });
-                    
-                    const input = args.input || args;
-                    const fullScrapedData = input.originalScrapedData || input.data;
-
-                    return await handleSave(
-                        input.sourceUrl, 
-                        input.venueId, 
-                        fullScrapedData,
-                        input.existingGameId,
-                        input.doNotScrape, 
-                        input.entityId || entityId,
-                        jobId
-                    );
+        console.log(`[Handler] Operation: ${fieldName}, EntityId: ${entityId}`);
+        
+        // Route to appropriate handler
+        switch (fieldName) {
+            // ─────────────────────────────────────────────────────────────
+            // FETCH: Get HTML and parse tournament data
+            // ─────────────────────────────────────────────────────────────
+            case 'fetchTournamentData':
+            case 'FETCH': {
+                // Support both URL fetch and S3 cache re-parse
+                if (args.s3Key && !args.url) {
+                    // Re-scrape from cache (parse existing HTML with new strategies)
+                    return await handleFetch({
+                        s3Key: args.s3Key,
+                        url: args.url || null,
+                        ...options
+                    }, context);
                 }
                 
-                case 'fetchTournamentDataRange': {
-                    monitoring.trackOperation('FETCH_RANGE', 'Game', `${args.startId}-${args.endId}`, { entityId });
-                    const rangeForceRefresh = args.forceRefresh || false;
-                    return await handleFetchRange(args.startId, args.endId, entityId, rangeForceRefresh);
+                // Standard URL fetch
+                if (!args.url) {
+                    throw new Error('URL is required for fetchTournamentData');
                 }
                 
-                case 'reScrapeFromCache': {
-                    console.log('[HANDLER] reScrapeFromCache invoked');
-                    monitoring.trackOperation('RESCRAPE_CACHE', 'Game', 'cached', { entityId });
-                    
-                    const input = args.input || args;
-                    if (!input.s3Key) {
-                        throw new Error('s3Key is required for reScrapeFromCache');
-                    }
-                    
-                    return await exports.handler({
-                        fieldName: 'fetchTournamentData',
-                        arguments: {
-                            s3Key: input.s3Key,
-                            url: input.url || null,
-                            entityId: entityId // Pass through entityId
-                        },
-                        identity: event.identity
-                    });
-                }
-                
-                default:
-                    throw new Error(`Unknown operation: ${operationName}.`);
-            }
-        } catch (error) {
-            console.error('[HANDLER] CRITICAL Error:', error);
-            monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'fatal', { 
-                error: error.message, 
-                operationName, 
-                entityId 
-            });
-
-            if (operationName === 'fetchTournamentData' || operationName === 'FETCH') {
-                const url = args.url || '';
-                const tournamentId = getTournamentId(url) || 1;
-                
-                // Track the failed attempt
-                try {
-                    await createScrapeAttempt({
-                        url: url || args.s3Key || '',
-                        tournamentId,
-                        entityId,
-                        scrapeURLId: null,
-                        scraperJobId: jobId,
-                        status: 'FAILED',
-                        processingTime: Date.now() - handlerStartTime,
-                        errorMessage: error.message,
-                        errorType: extractErrorType(error.message),
-                        source: args.s3Key ? 'RESCRAPE_CACHE' : 'SINGLE_SCRAPE'
-                    });
-                } catch (trackingError) {
-                    console.error('[HANDLER] Failed to track error attempt:', trackingError.message);
-                }
-                
-                return {
-                    tournamentId: tournamentId,
-                    name: 'Error processing tournament',
-                    gameStatus: 'SCHEDULED', 
-                    hasGuarantee: false,
-                    doNotScrape: true,
-                    s3Key: '',
-                    error: error.message || 'Internal Lambda Error',
-                    status: 'ERROR',
-                    registrationStatus: 'N_A',
-                    entityId: entityId
-                };
+                return await handleFetch({
+                    url: args.url,
+                    ...options
+                }, context);
             }
             
-            return { errorMessage: error.message || 'Internal Lambda Error' };
+            // ─────────────────────────────────────────────────────────────
+            // SAVE: Passthrough to saveGameFunction Lambda
+            // ─────────────────────────────────────────────────────────────
+            case 'saveTournamentData':
+            case 'SAVE': {
+                const input = args.input || args;
+                
+                return await handleSave({
+                    sourceUrl: input.sourceUrl || input.url,
+                    venueId: input.venueId,
+                    data: input.originalScrapedData || input.data,
+                    existingGameId: input.existingGameId,
+                    doNotScrape: input.doNotScrape || false,
+                    entityId: input.entityId || entityId,
+                    scraperJobId: options.scraperJobId
+                }, context);
+            }
+            
+            // ─────────────────────────────────────────────────────────────
+            // FETCH RANGE: Batch fetch multiple tournaments
+            // ─────────────────────────────────────────────────────────────
+            case 'fetchTournamentDataRange': {
+                if (!args.startId || !args.endId) {
+                    throw new Error('startId and endId are required for fetchTournamentDataRange');
+                }
+                
+                return await handleFetchRange({
+                    startId: args.startId,
+                    endId: args.endId,
+                    ...options
+                }, context);
+            }
+            
+            // ─────────────────────────────────────────────────────────────
+            // RE-SCRAPE FROM CACHE: Parse existing S3 HTML
+            // ─────────────────────────────────────────────────────────────
+            case 'reScrapeFromCache': {
+                const input = args.input || args;
+                
+                if (!input.s3Key) {
+                    throw new Error('s3Key is required for reScrapeFromCache');
+                }
+                
+                // Delegate to fetchTournamentData with s3Key
+                return await handleFetch({
+                    s3Key: input.s3Key,
+                    url: input.url || null,
+                    isRescrape: true,
+                    ...options
+                }, context);
+            }
+            
+            // ─────────────────────────────────────────────────────────────
+            // UNKNOWN OPERATION
+            // ─────────────────────────────────────────────────────────────
+            default:
+                throw new Error(`Unknown operation: ${fieldName}`);
         }
+        
+    } catch (error) {
+        console.error('[Handler] Error:', error);
+        monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'fatal', {
+            error: error.message,
+            stack: error.stack
+        });
+        
+        // Return structured error for fetch operations
+        if (event.fieldName === 'fetchTournamentData' || event.fieldName === 'FETCH') {
+            const args = event.arguments || event.args || event;
+            const tournamentId = args.url ? extractTournamentIdFromUrl(args.url) : 0;
+            
+            return {
+                tournamentId,
+                name: 'Error processing tournament',
+                gameStatus: 'SCHEDULED',
+                hasGuarantee: false,
+                doNotScrape: true,
+                s3Key: '',
+                error: error.message,
+                status: 'ERROR',
+                registrationStatus: 'N_A',
+                entityId: args.entityId || null
+            };
+        }
+        
+        throw error;
+        
     } finally {
-        if (monitoring) {
-            console.log('[HANDLER] Flushing monitoring metrics...');
-            await monitoring.flush();
-            console.log('[HANDLER] Monitoring flush complete.');
-        }
+        // Always flush monitoring metrics
+        const duration = Date.now() - handlerStartTime;
+        console.log(`[Handler] Completed in ${duration}ms`);
+        await monitoring.flush();
+    }
+};
+
+/**
+ * Extract tournament ID from URL (inline helper)
+ */
+const extractTournamentIdFromUrl = (url) => {
+    if (!url) return 0;
+    try {
+        const match = url.match(/[?&]id=(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+    } catch {
+        return 0;
     }
 };

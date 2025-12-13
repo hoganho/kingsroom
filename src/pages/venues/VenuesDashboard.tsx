@@ -1,24 +1,37 @@
 // src/pages/venues/VenuesDashboard.tsx
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, Grid, Text } from '@tremor/react';
+import { useCallback, useEffect, useMemo, useState, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import {
+  ArrowPathIcon,
   BuildingOffice2Icon,
   CalendarIcon,
+  CurrencyDollarIcon,
   TrophyIcon,
   UserGroupIcon,
-} from '@heroicons/react/24/outline';
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EyeSlashIcon,
+  ListBulletIcon
+} from "@heroicons/react/24/outline"
 
-import { PageWrapper } from '../../components/layout/PageWrapper';
-import { MultiEntitySelector } from '../../components/entities/MultiEntitySelector';
-import { useEntity } from '../../contexts/EntityContext';
-import { getClient } from '../../utils/apiClient';
+import { cx, formatCurrency, formatDateTimeAEST, formatDateWithDaysAgo } from "@/lib/utils"
+import { Card } from "@/components/ui/Card"
+import { Button } from "@/components/ui/Button"
+import { KpiCard } from "@/components/ui/KpiCard"
+import { DataTable } from "@/components/ui/DataTable"
+import { TimeRangeToggle, type TimeRangeKey } from "@/components/ui/TimeRangeToggle"
 
-import { MetricCard } from '../../components/ui/MetricCard';
-import { TimeRangeToggle } from '../../components/ui/TimeRangeToggle';
-import { DataTable } from '../../components/ui/DataTable';
+import { MultiEntitySelector } from "@/components/entities/MultiEntitySelector"
+import { useEntity } from "@/contexts/EntityContext"
+import { getClient } from "@/utils/apiClient"
 
-// Custom shallow query for venues - avoids nested relationships that cause enum serialization errors
+import type { ColumnDef } from "@tanstack/react-table"
+import type { Venue } from "@/types/venue"
+
+// ============================================
+// GRAPHQL QUERIES
+// ============================================
+
 const listVenuesShallow = /* GraphQL */ `
   query ListVenuesShallow(
     $filter: ModelVenueFilterInput
@@ -30,14 +43,13 @@ const listVenuesShallow = /* GraphQL */ `
         id
         name
         entityId
+        logo
       }
       nextToken
     }
   }
-`;
+`
 
-// Custom query to get financial snapshots with game data for filtering
-// netProfit is the comprehensive profit including all costs from GameCost
 const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
   query ListGameFinancialSnapshotsWithGame(
     $filter: ModelGameFinancialSnapshotFilterInput
@@ -65,485 +77,746 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
       nextToken
     }
   }
-`;
+`
 
-import type { ColumnDef } from '@tanstack/react-table';
-import type { Venue } from '../../types/venue';
-
-// ---- Time range keys (keep in sync with TimeRangeToggle) ----
-
-export type TimeRangeKey = 'ALL' | '12M' | '6M' | '3M' | '1M';
-
-function getTimeRangeBounds(range: TimeRangeKey): { from: string | null; to: string | null } {
-  const to = new Date();
-  if (range === 'ALL') return { from: null, to: to.toISOString() };
-
-  const months =
-    range === '12M' ? 12 :
-    range === '6M'  ? 6  :
-    range === '3M'  ? 3  : 1;
-
-  const from = new Date();
-  from.setMonth(from.getMonth() - months);
-  return { from: from.toISOString(), to: to.toISOString() };
-}
-
-// ---- Types for game data & aggregated stats ----
+// ============================================
+// TYPES
+// ============================================
 
 interface GameFinancialSnapshotWithGame {
-  id: string;
-  entityId?: string | null;
-  venueId?: string | null;
-  gameStartDateTime?: string | null;
-  totalEntries?: number | null;
-  totalUniquePlayers?: number | null;
-  prizepoolTotal?: number | null;
-  netProfit?: number | null;
+  id: string
+  entityId?: string | null
+  venueId?: string | null
+  gameStartDateTime?: string | null
+  totalEntries?: number | null
+  totalUniquePlayers?: number | null
+  prizepoolTotal?: number | null
+  netProfit?: number | null
   game?: {
-    id: string;
-    gameStatus?: string | null;
-    isRegular?: boolean | null;
-    venueScheduleKey?: string | null;
-    venueGameTypeKey?: string | null;
-  } | null;
+    id: string
+    gameStatus?: string | null
+    isRegular?: boolean | null
+    venueScheduleKey?: string | null
+    venueGameTypeKey?: string | null
+  } | null
 }
 
-// Helper to check if a snapshot's game meets our criteria
+interface VenueSummaryStats {
+  venueId: string
+  entityId: string
+  venueName: string
+  venueLogo?: string | null
+  totalGames: number
+  totalEntries: number
+  totalRegistrations: number
+  totalPrizepool: number
+  totalProfit: number
+  // Game date tracking
+  firstGameDate: Date | null
+  firstGameDaysAgo: number | null
+  latestGameDate: Date | null
+  latestGameDaysAgo: number | null
+}
+
+// ============================================
+// HELPERS
+// ============================================
+
+function getTimeRangeBounds(range: TimeRangeKey): { from: string | null; to: string | null } {
+  const to = new Date()
+  if (range === "ALL") return { from: null, to: to.toISOString() }
+
+  const months =
+    range === "12M" ? 12 :
+    range === "6M" ? 6 :
+    range === "3M" ? 3 : 1
+
+  const from = new Date()
+  from.setMonth(from.getMonth() - months)
+  return { from: from.toISOString(), to: to.toISOString() }
+}
+
 function isValidGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
-  const game = snapshot.game;
-  
+  const game = snapshot.game
+
   const checks = {
     hasGame: !!game,
     gameStatus: game?.gameStatus,
-    isStatusFinished: game?.gameStatus === 'FINISHED',
+    isStatusFinished: game?.gameStatus === "FINISHED",
     isRegular: game?.isRegular,
     venueScheduleKey: game?.venueScheduleKey,
     hasVenueScheduleKey: !!game?.venueScheduleKey,
     venueGameTypeKey: game?.venueGameTypeKey,
     hasVenueGameTypeKey: !!game?.venueGameTypeKey,
-  };
-  
-  const isValid = (
+  }
+
+  return (
     checks.hasGame &&
     checks.isStatusFinished &&
     checks.isRegular === true &&
     checks.hasVenueScheduleKey &&
     checks.hasVenueGameTypeKey
-  );
-  
-  if (!isValid) {
-    console.log(`[Filter] Snapshot ${snapshot.id} EXCLUDED:`, {
-      snapshotId: snapshot.id,
-      venueId: snapshot.venueId,
-      gameStartDateTime: snapshot.gameStartDateTime,
-      ...checks,
-      failedChecks: [
-        !checks.hasGame && 'no game data',
-        !checks.isStatusFinished && `gameStatus=${checks.gameStatus} (not FINISHED)`,
-        checks.isRegular !== true && `isRegular=${checks.isRegular} (not true)`,
-        !checks.hasVenueScheduleKey && 'missing venueScheduleKey',
-        !checks.hasVenueGameTypeKey && 'missing venueGameTypeKey',
-      ].filter(Boolean)
-    });
-  }
-  
-  return isValid;
+  )
 }
 
-interface VenueSummaryStats {
-  venueId: string;
-  venueName: string;
-  totalGames: number;
-  totalEntries: number;
-  totalRegistrations: number;
-  totalPrizepool: number;
-  totalProfit: number;
-}
-
-// ---- Helpers ----
-
-function formatCurrency(value: number): string {
-  if (!Number.isFinite(value)) return '$0';
-  return value.toLocaleString('en-AU', {
-    style: 'currency',
-    currency: 'AUD',
-    maximumFractionDigits: 0,
-  });
+function valOrDash(value: number | null | undefined, formatter?: (v: number) => string): string {
+  if (!value || value === 0) return "-"
+  return formatter ? formatter(value) : value.toLocaleString()
 }
 
 function buildVenueStats(
   venues: Venue[],
   snapshots: GameFinancialSnapshotWithGame[]
 ): { venueStats: VenueSummaryStats[]; globalStats: VenueSummaryStats } {
-  const venueById = new Map<string, Venue>();
-  venues.forEach((v) => {
-    if (v.id) venueById.set(v.id, v);
-  });
+  const statsByVenue = new Map<string, VenueSummaryStats>()
 
-  const statsByVenue = new Map<string, VenueSummaryStats>();
-
-  for (const snap of snapshots) {
-    const venueId = snap.venueId;
-    if (!venueId) continue;
-
-    if (!statsByVenue.has(venueId)) {
-      const venue = venueById.get(venueId);
-      statsByVenue.set(venueId, {
-        venueId,
-        venueName: venue?.name ?? 'Unknown venue',
+  // 1. Initialize all venues
+  venues.forEach(venue => {
+    if(venue.id) {
+       statsByVenue.set(venue.id, {
+        venueId: venue.id,
+        entityId: venue.entityId || "",
+        venueName: venue.name ?? "Unknown venue",
+        venueLogo: (venue as any).logo, 
         totalGames: 0,
         totalEntries: 0,
         totalRegistrations: 0,
         totalPrizepool: 0,
         totalProfit: 0,
-      });
+        firstGameDate: null,
+        firstGameDaysAgo: null,
+        latestGameDate: null,
+        latestGameDaysAgo: null,
+      })
     }
+  })
 
-    const s = statsByVenue.get(venueId)!;
-    s.totalGames += 1;
-    s.totalEntries += snap.totalEntries ?? 0;
-    s.totalRegistrations += snap.totalUniquePlayers ?? 0;
-    s.totalPrizepool += snap.prizepoolTotal ?? 0;
-    s.totalProfit += snap.netProfit ?? 0;
+  // 2. Populate with Snapshot data
+  for (const snap of snapshots) {
+    const venueId = snap.venueId
+    if (!venueId || !statsByVenue.has(venueId)) continue
+
+    const s = statsByVenue.get(venueId)!
+    s.totalGames += 1
+    s.totalEntries += snap.totalEntries ?? 0
+    s.totalRegistrations += snap.totalUniquePlayers ?? 0
+    s.totalPrizepool += snap.prizepoolTotal ?? 0
+    s.totalProfit += snap.netProfit ?? 0
+
+    if (snap.gameStartDateTime) {
+      const gameDate = new Date(snap.gameStartDateTime)
+      if (!s.firstGameDate || gameDate < s.firstGameDate) {
+        s.firstGameDate = gameDate
+      }
+      if (!s.latestGameDate || gameDate > s.latestGameDate) {
+        s.latestGameDate = gameDate
+      }
+    }
+  }
+
+  // 3. Calculate days ago
+  const now = new Date()
+  for (const stats of statsByVenue.values()) {
+    if (stats.firstGameDate) {
+      stats.firstGameDaysAgo = Math.floor(
+        (now.getTime() - stats.firstGameDate.getTime()) / (1000 * 60 * 60 * 24)
+      )
+    }
+    if (stats.latestGameDate) {
+      stats.latestGameDaysAgo = Math.floor(
+        (now.getTime() - stats.latestGameDate.getTime()) / (1000 * 60 * 60 * 24)
+      )
+    }
   }
 
   const venueStats = Array.from(statsByVenue.values()).sort((a, b) =>
     a.venueName.localeCompare(b.venueName)
-  );
+  )
 
+  // 4. Global stats
   const globalStats: VenueSummaryStats = venueStats.reduce(
-    (acc, v) => ({
-      venueId: 'GLOBAL',
-      venueName: 'All venues',
-      totalGames: acc.totalGames + v.totalGames,
-      totalEntries: acc.totalEntries + v.totalEntries,
-      totalRegistrations: acc.totalRegistrations + v.totalRegistrations,
-      totalPrizepool: acc.totalPrizepool + v.totalPrizepool,
-      totalProfit: acc.totalProfit + v.totalProfit,
-    }),
+    (acc, v) => {
+      let firstGameDate = acc.firstGameDate
+      let latestGameDate = acc.latestGameDate
+      
+      if (v.firstGameDate && (!firstGameDate || v.firstGameDate < firstGameDate)) {
+        firstGameDate = v.firstGameDate
+      }
+      
+      if (v.latestGameDate && (!latestGameDate || v.latestGameDate > latestGameDate)) {
+        latestGameDate = v.latestGameDate
+      }
+      
+      return {
+        venueId: "GLOBAL",
+        entityId: "GLOBAL",
+        venueName: "All venues",
+        totalGames: acc.totalGames + v.totalGames,
+        totalEntries: acc.totalEntries + v.totalEntries,
+        totalRegistrations: acc.totalRegistrations + v.totalRegistrations,
+        totalPrizepool: acc.totalPrizepool + v.totalPrizepool,
+        totalProfit: acc.totalProfit + v.totalProfit,
+        firstGameDate,
+        firstGameDaysAgo: firstGameDate 
+          ? Math.floor((now.getTime() - firstGameDate.getTime()) / (1000 * 60 * 60 * 24))
+          : null,
+        latestGameDate,
+        latestGameDaysAgo: latestGameDate
+          ? Math.floor((now.getTime() - latestGameDate.getTime()) / (1000 * 60 * 60 * 24))
+          : null,
+      }
+    },
     {
-      venueId: 'GLOBAL',
-      venueName: 'All venues',
+      venueId: "GLOBAL",
+      entityId: "GLOBAL",
+      venueName: "All venues",
       totalGames: 0,
       totalEntries: 0,
       totalRegistrations: 0,
       totalPrizepool: 0,
       totalProfit: 0,
+      firstGameDate: null,
+      firstGameDaysAgo: null,
+      latestGameDate: null,
+      latestGameDaysAgo: null,
     }
-  );
+  )
 
-  return { venueStats, globalStats };
+  return { venueStats, globalStats }
 }
 
-// ---- Main component ----
+// ============================================
+// SUB-COMPONENTS
+// ============================================
 
-const PAGE_LIMIT = 500; // per request – we still paginate until nextToken is null
+const HorizontalScrollRow: React.FC<{ 
+  children: React.ReactNode;
+}> = ({ children }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
-const VenuesDashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const { selectedEntities, loading: entityLoading } = useEntity();
-  
-  // Use first selected entity for filtering (dashboard uses multi-select context)
-  const entityId: string | undefined = selectedEntities[0]?.id;
-  
-  const [timeRange, setTimeRange] = useState<TimeRangeKey>('ALL');
-
-  const [venues, setVenues] = useState<Venue[]>([]);
-  const [snapshots, setSnapshots] = useState<GameFinancialSnapshotWithGame[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const checkScrollability = useCallback(() => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  }, []);
 
   useEffect(() => {
-    if (!entityId) return;
+    checkScrollability();
+    window.addEventListener('resize', checkScrollability);
+    return () => window.removeEventListener('resize', checkScrollability);
+  }, [children, checkScrollability]);
 
-    const load = async () => {
-      setLoading(true);
-      setError(null);
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 400;
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+      // Allow scroll to happen before checking again
+      setTimeout(checkScrollability, 300);
+    }
+  };
 
-      try {
-        const client = getClient();
+  return (
+    <div className="relative group">
+      {/* Scroll Buttons - Absolute positioned overlay */}
+      <div className="absolute top-1/2 -translate-y-1/2 left-0 z-10 -ml-4">
+        {canScrollLeft && (
+           <button
+             onClick={() => scroll('left')}
+             className="p-2 rounded-full bg-white border border-gray-200 text-gray-600 shadow-md hover:bg-gray-50 hover:text-indigo-600 transition-colors"
+           >
+             <ChevronLeftIcon className="w-5 h-5" />
+           </button>
+        )}
+      </div>
 
-        // 1) Fetch venues for entity (shallow query to avoid nested relationship issues)
-        const venuesRes = await client.graphql({
-          query: listVenuesShallow,
-          variables: {
-            filter: { entityId: { eq: entityId } },
-            limit: PAGE_LIMIT,
-          },
-        }) as any;
+      <div className="absolute top-1/2 -translate-y-1/2 right-0 z-10 -mr-4">
+        {canScrollRight && (
+           <button
+             onClick={() => scroll('right')}
+             className="p-2 rounded-full bg-white border border-gray-200 text-gray-600 shadow-md hover:bg-gray-50 hover:text-indigo-600 transition-colors"
+           >
+             <ChevronRightIcon className="w-5 h-5" />
+           </button>
+        )}
+      </div>
 
-        const venuesItems =
-          venuesRes?.data?.listVenues?.items?.filter((v: Venue | null) => !!v) ?? [];
-        setVenues(venuesItems as Venue[]);
+      <div 
+        ref={scrollRef}
+        onScroll={checkScrollability}
+        className="flex gap-4 overflow-x-auto pb-4 px-1 scrollbar-hide"
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
 
-        // 2) Fetch GameFinancialSnapshots for entity + time range, then filter client-side
-        const { from, to } = getTimeRangeBounds(timeRange);
+// ============================================
+// MAIN COMPONENT
+// ============================================
 
-        const allSnapshots: GameFinancialSnapshotWithGame[] = [];
-        let nextToken: string | null | undefined = null;
+const PAGE_LIMIT = 500
 
-        // Build filter for entity + optional date range
-        // Game-level filters (FINISHED, isRegular, venue keys) applied client-side
-        const baseFilter: any = {
-          entityId: { eq: entityId },
-        };
+export default function VenuesDashboard() {
+  const navigate = useNavigate()
+  const { selectedEntities, loading: entityLoading } = useEntity()
 
+  const [timeRange, setTimeRange] = useState<TimeRangeKey>("ALL")
+  const [venues, setVenues] = useState<Venue[]>([])
+  const [snapshots, setSnapshots] = useState<GameFinancialSnapshotWithGame[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [refreshTrigger, setRefreshTrigger] = useState<number>(0)
+  
+  // State to track filtering per entity (Key: EntityID, Value: boolean isHidden)
+  const [hideEmptyVenuesMap, setHideEmptyVenuesMap] = useState<Record<string, boolean>>({})
+
+  // ---- Data Loading ----
+  const loadData = useCallback(async () => {
+    if (selectedEntities.length === 0) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const client = getClient()
+      const { from, to } = getTimeRangeBounds(timeRange)
+      
+      const allVenues: Venue[] = []
+      const allSnapshots: GameFinancialSnapshotWithGame[] = []
+
+      await Promise.all(selectedEntities.map(async (entity) => {
+        // 1) Fetch Venues
+        let venueNextToken: string | null | undefined = null
+        do {
+          const venuesRes = (await client.graphql({
+            query: listVenuesShallow,
+            variables: {
+              filter: { entityId: { eq: entity.id } },
+              limit: PAGE_LIMIT,
+              nextToken: venueNextToken,
+            },
+          })) as any
+
+          const page = venuesRes?.data?.listVenues
+          const pageItems = page?.items?.filter((v: Venue | null) => !!v) ?? []
+
+          allVenues.push(...(pageItems as Venue[]))
+          venueNextToken = page?.nextToken ?? null
+        } while (venueNextToken)
+
+        // 2) Fetch Snapshots
+        let snapNextToken: string | null | undefined = null
+        const baseFilter: any = { entityId: { eq: entity.id } }
         if (from && to) {
-          baseFilter.gameStartDateTime = { between: [from, to] };
+          baseFilter.gameStartDateTime = { between: [from, to] }
         }
 
         do {
-          const snapRes = await client.graphql({
+          const snapRes = (await client.graphql({
             query: listGameFinancialSnapshotsWithGame,
             variables: {
               filter: baseFilter,
               limit: PAGE_LIMIT,
-              nextToken,
+              nextToken: snapNextToken,
             },
-          }) as any;
+          })) as any
 
-          // Handle both success and partial error responses
-          // GraphQL can return data with errors when non-nullable fields are null
-          const page = snapRes?.data?.listGameFinancialSnapshots;
-          
-          if (snapRes?.errors?.length) {
-            console.warn('GraphQL returned partial data with errors:', snapRes.errors.length, 'errors');
-          }
-          
-          const pageItems =
-            page?.items?.filter((s: GameFinancialSnapshotWithGame | null) => s != null) ?? [];
+          const page = snapRes?.data?.listGameFinancialSnapshots
+          const pageItems = page?.items?.filter((s: GameFinancialSnapshotWithGame | null) => s != null) ?? []
 
-          allSnapshots.push(...(pageItems as GameFinancialSnapshotWithGame[]));
-          nextToken = page?.nextToken ?? null;
-        } while (nextToken);
+          allSnapshots.push(...(pageItems as GameFinancialSnapshotWithGame[]))
+          snapNextToken = page?.nextToken ?? null
+        } while (snapNextToken)
+      }))
 
-        // Filter to only include snapshots for valid games:
-        // - gameStatus = FINISHED
-        // - isRegular = true
-        // - venueScheduleKey populated
-        // - venueGameTypeKey populated
-        console.log(`[VenuesDashboard] Raw snapshots retrieved:`, allSnapshots.map(s => ({
-          id: s.id,
-          venueId: s.venueId,
-          gameStartDateTime: s.gameStartDateTime,
-          game: s.game
-        })));
-        
-        const validSnapshots = allSnapshots.filter(isValidGameSnapshot);
-        
-        console.log(`Loaded ${allSnapshots.length} snapshots, ${validSnapshots.length} valid after filtering`);
-        
-        setSnapshots(validSnapshots);
-      } catch (err: any) {
-        // Check if we got partial data despite errors
-        const partialData = err?.data?.listGameFinancialSnapshots?.items;
-        if (partialData) {
-          const validItems = partialData
-            .filter((s: GameFinancialSnapshotWithGame | null) => s != null)
-            .filter(isValidGameSnapshot);
-          console.warn(`Recovered ${validItems.length} valid snapshots from partial error response`);
-          setSnapshots(validItems);
-        } else {
-          console.error('Error loading venue dashboard data', err);
-          setError(err?.message ?? 'Failed to load venue dashboard data');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+      setVenues(allVenues)
+      setSnapshots(allSnapshots.filter(isValidGameSnapshot))
+      setLastUpdated(new Date())
 
-    void load();
-  }, [entityId, timeRange]);
+    } catch (err: any) {
+      console.error("Error loading venue dashboard data", err)
+      setError(err?.message ?? "Failed to load venue dashboard data")
+    } finally {
+      setLoading(false)
+    }
+  }, [selectedEntities, timeRange])
 
-  const { venueStats, globalStats } = useMemo(
-    () => buildVenueStats(venues, snapshots),
-    [venues, snapshots]
-  );
+  useEffect(() => {
+    void loadData()
+  }, [loadData, refreshTrigger])
 
-    const columns = useMemo<ColumnDef<VenueSummaryStats>[]>(
-    () => [
-        {
-        header: 'Venue',
-        accessorKey: 'venueName',
-        },
-        {
-        header: 'Games',
-        accessorKey: 'totalGames',
-        cell: ({ row }) => row.original.totalGames.toLocaleString(),
-        },
-        {
-        header: 'Registrations',
-        accessorKey: 'totalRegistrations',
-        cell: ({ row }) => row.original.totalRegistrations.toLocaleString(),
-        },
-        {
-        header: 'Entries',
-        accessorKey: 'totalEntries',
-        cell: ({ row }) => row.original.totalEntries.toLocaleString(),
-        },
-        {
-        header: 'Prizepool',
-        accessorKey: 'totalPrizepool',
-        cell: ({ row }) => formatCurrency(row.original.totalPrizepool),
-        },
-        {
-        header: 'Profit',
-        accessorKey: 'totalProfit',
-        cell: ({ row }) => formatCurrency(row.original.totalProfit),
-        },
-    ],
-    []
-    );
-
-  if (entityLoading) {
-    return (
-      <PageWrapper title="Venues">
-        <div className="py-20 text-center text-gray-400">
-          Loading entity…
-        </div>
-      </PageWrapper>
-    );
+  const handleRefresh = () => {
+    setRefreshTrigger((prev) => prev + 1)
   }
 
-  if (!entityId) {
+  const toggleEntityFilter = (entityId: string) => {
+    setHideEmptyVenuesMap(prev => ({
+      ...prev,
+      [entityId]: !prev[entityId]
+    }))
+  }
+
+  const { venueStats, globalStats } = useMemo(() => {
+    return buildVenueStats(venues, snapshots)
+  }, [venues, snapshots])
+
+  // Columns for DataTable
+  const columns = useMemo<ColumnDef<VenueSummaryStats>[]>(
+    () => [
+      {
+        header: "Venue",
+        accessorKey: "venueName",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-3">
+            {row.original.venueLogo ? (
+              <img 
+                src={row.original.venueLogo} 
+                alt={row.original.venueName} 
+                className="w-8 h-8 rounded-full object-cover border border-gray-200"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                <BuildingOffice2Icon className="w-4 h-4" />
+              </div>
+            )}
+            <span>{row.original.venueName}</span>
+          </div>
+        )
+      },
+      {
+        header: "First Game",
+        accessorKey: "firstGameDate",
+        cell: ({ row }) => row.original.firstGameDate 
+          ? formatDateWithDaysAgo(row.original.firstGameDate, row.original.firstGameDaysAgo)
+          : "-",
+      },
+      {
+        header: "Latest Game",
+        accessorKey: "latestGameDate",
+        cell: ({ row }) => row.original.latestGameDate
+          ? formatDateWithDaysAgo(row.original.latestGameDate, row.original.latestGameDaysAgo)
+          : "-",
+      },
+      {
+        header: "Games",
+        accessorKey: "totalGames",
+        cell: ({ row }) => valOrDash(row.original.totalGames),
+      },
+      {
+        header: "Registrations",
+        accessorKey: "totalRegistrations",
+        cell: ({ row }) => valOrDash(row.original.totalRegistrations),
+      },
+      {
+        header: "Entries",
+        accessorKey: "totalEntries",
+        cell: ({ row }) => valOrDash(row.original.totalEntries),
+      },
+      {
+        header: "Prizepool",
+        accessorKey: "totalPrizepool",
+        cell: ({ row }) => valOrDash(row.original.totalPrizepool, formatCurrency),
+      },
+      {
+        header: "Profit",
+        accessorKey: "totalProfit",
+        cell: ({ row }) => valOrDash(row.original.totalProfit, formatCurrency),
+      },
+    ],
+    []
+  )
+
+  // ---- Loading state for entity ----
+  if (entityLoading) {
     return (
-      <PageWrapper
-        title="Venues"
-        actions={
-          <div className="flex items-center gap-4">
+      <div className="flex items-center justify-center py-20">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+      </div>
+    )
+  }
+
+  // ---- No entity selected state ----
+  if (selectedEntities.length === 0) {
+    return (
+      <>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-50 sm:text-2xl">
+            Venues
+          </h1>
+        </div>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full sm:flex-1 sm:max-w-xs">
             <MultiEntitySelector />
           </div>
-        }
-      >
-        <div className="py-20 text-center text-gray-400">
-          Please select an entity to view venue metrics.
+          <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
         </div>
-      </PageWrapper>
-    );
+        <div className="mt-8 py-20 text-center">
+          <BuildingOffice2Icon className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-700" />
+          <p className="mt-4 text-gray-500 dark:text-gray-400">
+            Select an entity to view venue metrics
+          </p>
+        </div>
+      </>
+    )
   }
 
   return (
-    <PageWrapper
-      title="Venues"
-      actions={
-        <div className="flex items-center gap-4">
-          <MultiEntitySelector />
-          <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
+    <>
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+      
+      {/* ============ PAGE HEADER ============ */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-50 sm:text-2xl">
+          Venues
+        </h1>
+
+        <div className="flex items-center gap-2">
+          {lastUpdated && (
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              AEST: {formatDateTimeAEST(lastUpdated)}
+            </span>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={loading}
+            className="h-8 w-8 p-0"
+          >
+            <ArrowPathIcon
+              className={cx("h-4 w-4", loading && "animate-spin")}
+            />
+          </Button>
         </div>
-      }
-    >
+      </div>
+
+      {/* ============ FILTERS ============ */}
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="w-full sm:flex-1 sm:max-w-xs">
+          <MultiEntitySelector />
+        </div>
+        <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
+      </div>
+
+      {/* ============ ERROR ============ */}
       {error && (
-        <Card className="mb-4 border-red-200 bg-red-50">
-          <Text className="text-sm text-red-700">
-            {error}
-          </Text>
-        </Card>
+        <div className="mt-4">
+          <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+          </Card>
+        </div>
       )}
 
+      {/* ============ MAIN CONTENT ============ */}
       {loading ? (
-        <div className="py-16 text-center text-gray-400">
-          Loading venue dashboard…
+        <div className="mt-8 flex items-center justify-center py-16">
+          <div className="text-center">
+            <div className="h-8 w-8 mx-auto animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+              Loading venue data…
+            </p>
+          </div>
         </div>
       ) : (
         <>
-          {/* Top summary cards */}
-          <Grid numItemsSm={2} numItemsLg={5} className="gap-4 mb-6">
-            <MetricCard
-              label="Total Venues"
+          {/* ============ GLOBAL KPI CARDS ============ */}
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            <KpiCard
+              title="Total Venues"
               value={venues.length}
-              icon={<BuildingOffice2Icon className="h-6 w-6" />}
+              icon={<BuildingOffice2Icon className="h-5 w-5" />}
             />
-            <MetricCard
-              label="Total Games"
+            <KpiCard
+              title="Total Games"
               value={globalStats.totalGames.toLocaleString()}
-              icon={<CalendarIcon className="h-6 w-6" />}
+              icon={<CalendarIcon className="h-5 w-5" />}
             />
-            <MetricCard
-              label="Total Entries"
+            <KpiCard
+              title="Total Entries"
               value={globalStats.totalEntries.toLocaleString()}
-              icon={<UserGroupIcon className="h-6 w-6" />}
+              icon={<UserGroupIcon className="h-5 w-5" />}
             />
-            <MetricCard
-              label="Total Prizepool"
+            <KpiCard
+              title="Total Prizepool"
               value={formatCurrency(globalStats.totalPrizepool)}
-              icon={<TrophyIcon className="h-6 w-6" />}
+              icon={<TrophyIcon className="h-5 w-5" />}
             />
-            <MetricCard
-              label="Profit"
+            <KpiCard
+              title="Profit"
               value={formatCurrency(globalStats.totalProfit)}
+              icon={<CurrencyDollarIcon className="h-5 w-5" />}
             />
-          </Grid>
+          </div>
 
-          {/* Venue cards */}
-          <Text className="mb-2 text-xs font-semibold uppercase text-gray-500">
-            Venues
-          </Text>
+          {/* ============ ENTITY VENUE SECTIONS ============ */}
+          <div className="mt-12 space-y-12">
+            {selectedEntities.map(entity => {
+              const entityVenues = venueStats.filter(v => v.entityId === entity.id);
+              if (entityVenues.length === 0) return null;
 
-          <Grid numItemsSm={1} numItemsMd={2} numItemsLg={3} className="gap-4 mb-8">
-            {venueStats.map((v) => (
-              <Card
-                key={v.venueId}
-                className="cursor-pointer hover:shadow-md transition"
-                onClick={() => navigate(`/venues/details?venueId=${v.venueId}`)}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <Text className="text-xs uppercase tracking-wide text-gray-400">
-                      Venue
-                    </Text>
-                    <Text className="text-sm font-semibold text-gray-900">
-                      {v.venueName}
-                    </Text>
+              // Determine logic for this entity's filter
+              const isHidingEmpty = hideEmptyVenuesMap[entity.id] ?? false;
+              
+              const displayedVenues = isHidingEmpty 
+                ? entityVenues.filter(v => v.totalGames > 0)
+                : entityVenues;
+
+              return (
+                <div key={entity.id} className="relative">
+                  {/* Entity Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      {entity.entityLogo ? (
+                          <img 
+                              src={entity.entityLogo} 
+                              alt={entity.entityName} 
+                              className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm"
+                          />
+                      ) : (
+                          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 border border-indigo-200">
+                              <span className="text-sm font-bold">{entity.entityName.substring(0,2).toUpperCase()}</span>
+                          </div>
+                      )}
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50">
+                        {entity.entityName}
+                      </h2>
+                      <span className="px-2.5 py-1 bg-gray-100 text-gray-600 text-sm font-medium rounded-full">
+                          {displayedVenues.length} {isHidingEmpty ? 'active ' : ''}venue{displayedVenues.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+
+                    {/* Toggle Button */}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => toggleEntityFilter(entity.id)}
+                      className={cx(
+                        "flex items-center gap-2 text-xs",
+                        isHidingEmpty ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : ""
+                      )}
+                    >
+                      {isHidingEmpty ? (
+                        <>
+                          <ListBulletIcon className="w-4 h-4" />
+                          Show all venues
+                        </>
+                      ) : (
+                        <>
+                          <EyeSlashIcon className="w-4 h-4" />
+                          Hide empty venues
+                        </>
+                      )}
+                    </Button>
                   </div>
+
+                  {/* Horizontal Scroll Row */}
+                  {displayedVenues.length === 0 ? (
+                    <div className="py-12 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                       <p className="text-sm text-gray-500">No venues with games found for this period.</p>
+                       <button 
+                         onClick={() => toggleEntityFilter(entity.id)}
+                         className="mt-2 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                       >
+                         Show all venues
+                       </button>
+                    </div>
+                  ) : (
+                    <HorizontalScrollRow>
+                      {displayedVenues.map((v) => (
+                        <div 
+                          key={v.venueId}
+                          onClick={() => navigate(`/venues/details?venueId=${v.venueId}`)}
+                          className="flex-shrink-0 w-[380px] bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow self-start cursor-pointer group"
+                        >
+                          {/* Card Header */}
+                          <div className="p-4 flex items-center gap-3 border-b border-slate-100">
+                              <div className="relative">
+                                  {v.venueLogo ? (
+                                      <img 
+                                          src={v.venueLogo} 
+                                          alt={v.venueName} 
+                                          className="w-12 h-12 rounded-full object-cover border-2 border-slate-100"
+                                      />
+                                  ) : (
+                                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-400 border-2 border-slate-100">
+                                          <BuildingOffice2Icon className="w-6 h-6" />
+                                      </div>
+                                  )}
+                              </div>
+                              <div className="overflow-hidden">
+                                  <h4 className="font-semibold text-slate-800 text-base truncate group-hover:text-indigo-600 transition-colors">
+                                      {v.venueName}
+                                  </h4>
+                                  <p className="text-xs text-slate-500">
+                                      Latest: {v.latestGameDate 
+                                          ? formatDateWithDaysAgo(v.latestGameDate, v.latestGameDaysAgo)
+                                          : "No recent games"}
+                                  </p>
+                              </div>
+                          </div>
+
+                          {/* Card Body - Stats Grid */}
+                          <div className="p-4 grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
+                              <div className="flex flex-col">
+                                  <span className="text-xs text-gray-500">Games</span>
+                                  <span className="font-semibold text-gray-900">{valOrDash(v.totalGames)}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                  <span className="text-xs text-gray-500">Prizepool</span>
+                                  <span className="font-semibold text-gray-900">{valOrDash(v.totalPrizepool, formatCurrency)}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                  <span className="text-xs text-gray-500">Entries</span>
+                                  <span className="font-semibold text-gray-900">{valOrDash(v.totalEntries)}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                  <span className="text-xs text-gray-500">Profit</span>
+                                  <span className="font-semibold text-green-600">{valOrDash(v.totalProfit, formatCurrency)}</span>
+                              </div>
+                          </div>
+                        </div>
+                      ))}
+                    </HorizontalScrollRow>
+                  )}
                 </div>
+              );
+            })}
+          </div>
 
-                <div className="mt-1 grid grid-cols-2 gap-y-1 text-xs">
-                  <span className="text-gray-500">Games</span>
-                  <span className="text-right font-semibold">
-                    {v.totalGames.toLocaleString()}
-                  </span>
-
-                  <span className="text-gray-500">Registrations</span>
-                  <span className="text-right font-semibold">
-                    {v.totalRegistrations.toLocaleString()}
-                  </span>
-
-                  <span className="text-gray-500">Entries</span>
-                  <span className="text-right font-semibold">
-                    {v.totalEntries.toLocaleString()}
-                  </span>
-
-                  <span className="text-gray-500">Prizepool</span>
-                  <span className="text-right font-semibold">
-                    {formatCurrency(v.totalPrizepool)}
-                  </span>
-
-                  <span className="text-gray-500">Profit</span>
-                  <span className="text-right font-semibold">
-                    {formatCurrency(v.totalProfit)}
-                  </span>
-                </div>
-              </Card>
-            ))}
-
-            {venueStats.length === 0 && (
-              <Text className="col-span-full text-sm text-gray-400 text-center py-8">
-                No venue data available for the selected time range.
-              </Text>
-            )}
-          </Grid>
-
-          {/* Tabular view via TanStack */}
-          <Card>
-            <Text className="mb-3 text-sm font-semibold">
-              Venue Metrics (tabular)
-            </Text>
-            <DataTable<VenueSummaryStats> data={venueStats} columns={columns} />
-          </Card>
+          {/* ============ DATA TABLE (Aggregated) ============ */}
+          <div className="mt-16">
+            <Card>
+              <h2 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-50">
+                All Venue Metrics
+              </h2>
+              <div className="-mx-4 sm:-mx-6">
+                <DataTable data={venueStats} columns={columns} />
+              </div>
+            </Card>
+          </div>
         </>
       )}
-    </PageWrapper>
-  );
-};
-
-export default VenuesDashboard;
+    </>
+  )
+}

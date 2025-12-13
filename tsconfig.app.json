@@ -22,7 +22,14 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Tremor dashboard UI */    
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+
   },
   "include": ["src"]
 }

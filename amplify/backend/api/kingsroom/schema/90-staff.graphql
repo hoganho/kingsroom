@@ -1,0 +1,129 @@
+# 90-staff.graphql
+# ==========================================
+
+type User @model(subscriptions: null) @auth(rules: [
+  { allow: private, operations: [create, read, update] },
+  { allow: groups, groups: ["SUPER_ADMIN"], operations: [create, read, update, delete] }
+]) {
+  id: ID!
+  username: String!
+  email: String! @index(name: "byEmail", queryField: "userByEmail")
+  role: UserRole!
+  isActive: Boolean @default(value: "true")
+  allowedPages: [String]
+  firstName: String
+  lastName: String
+  phone: String
+  avatar: AWSURL
+  allowedEntityIds: [ID]
+  allowedVenueIds: [ID]
+  defaultEntityId: ID
+  lastLoginAt: AWSDateTime
+  lastActiveAt: AWSDateTime
+  passwordLastChangedAt: AWSDateTime
+  mustChangePassword: Boolean @default(value: "false")
+  loginAttempts: Int @default(value: "0")
+  lockedUntil: AWSDateTime
+  createdBy: String
+  updatedBy: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  preferences: [UserPreference] @hasMany(indexName: "byUser", fields: ["id"])
+  auditLogs: [UserAuditLog] @hasMany(indexName: "byUser", fields: ["id"])
+}
+
+type UserPreference @model(subscriptions: null) @auth(rules: [{ allow: owner, ownerField: "userId" }]) {
+  id: ID!
+  page: String!
+  widget: String!
+  preference: AWSJSON
+  userId: ID! @index(name: "byUser")
+}
+
+type UserAuditLog @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser", sortKeyFields: ["createdAt"])
+  user: User @belongsTo(fields: ["userId"])
+  action: String!
+  resource: String
+  details: AWSJSON
+  ipAddress: String
+  userAgent: String
+  createdAt: AWSDateTime!
+}
+
+type Staff @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  firstName: String!
+  lastName: String
+  role: StaffRole!
+  assignedVenueId: ID @index(name: "byVenue")
+}
+
+type Asset @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  name: String!
+  type: String!
+  condition: AssetCondition!
+  acquiredDate: AWSDateTime!
+  lastCheckedDate: AWSDateTime!
+  venueId: ID! @index(name: "byVenue")
+  venue: Venue @belongsTo(fields: ["venueId"])
+  entityId: ID @index(name: "byEntityAsset", sortKeyFields: ["type"])
+  entity: Entity @belongsTo(fields: ["entityId"])
+}
+
+type UserManagementResponse {
+  success: Boolean!
+  message: String
+  user: User
+  temporaryPassword: String
+}
+
+type UsersConnection {
+  items: [User!]!
+  nextToken: String
+  totalCount: Int
+}
+
+type UserMetricsSummary {
+  userId: String!
+  userName: String
+  totalActions: Int
+  totalPageViews: Int
+  totalErrors: Int
+  lastActive: String
+  mostUsedFeature: String
+}
+
+input CreateUserInput {
+  id: ID
+  username: String!
+  email: String!
+  role: UserRole!
+  firstName: String
+  lastName: String
+  phone: String
+  allowedPages: [String]
+  allowedEntityIds: [ID]
+  allowedVenueIds: [ID]
+  defaultEntityId: ID
+  isActive: Boolean
+}
+
+input UpdateUserInput {
+  id: ID!
+  username: String
+  email: String
+  role: UserRole
+  firstName: String
+  lastName: String
+  phone: String
+  avatar: AWSURL
+  allowedPages: [String]
+  allowedEntityIds: [ID]
+  allowedVenueIds: [ID]
+  defaultEntityId: ID
+  isActive: Boolean
+  mustChangePassword: Boolean
+}

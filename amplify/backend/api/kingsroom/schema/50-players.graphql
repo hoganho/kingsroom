@@ -1,0 +1,293 @@
+# 50-players.graphql
+# ==========================================
+
+# ===================================================================
+# KINGSROOM SCHEMA (MERGED WITH ENTITY-AWARE UPDATES)
+# Version: 1.4.0
+# ===================================================================
+# 
+# Changes in this version:
+# - Added canonicalVenueId to Venue model
+# - Added entityId, visityKey, canonicalVenueId to PlayerVenue model
+# - Added entityId to PlayerEntry, PlayerResult, PlayerTransaction
+# - Added BackgroundTask model
+# - Added BackgroundTaskType, BackgroundTaskStatus enums
+# - Added reassignment mutations and types
+# ===================================================================
+
+type Player @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  primaryEntityId: ID @index(name: "byPrimaryEntity")
+  firstName: String!
+  lastName: String!
+  phone: String @index(name: "byPhone", queryField: "playerByPhone")
+  email: String @index(name: "byEmail", queryField: "playerByEmail")
+  status: PlayerAccountStatus!
+  category: PlayerAccountCategory!
+  targetingClassification: PlayerTargetingClassification!
+  registrationDate: AWSDateTime!
+  firstGamePlayed: AWSDateTime
+  lastPlayedDate: AWSDateTime
+  creditBalance: Int
+  pointsBalance: Int
+
+  playerSummary: PlayerSummary @hasOne(fields: ["id"])
+  knownIdentities: [KnownPlayerIdentity] @hasMany(indexName: "byPlayer", fields: ["id"])
+  marketingPreferences: PlayerMarketingPreferences @hasOne(fields: ["id"])
+  marketingMessages: [PlayerMarketingMessage] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerVenues: [PlayerVenue] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerEntries: [PlayerEntry] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerResults: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerTickets: [PlayerTicket] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerTransactions: [PlayerTransaction] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerCredits: [PlayerCredits] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerPoints: [PlayerPoints] @hasMany(indexName: "byPlayer", fields: ["id"])
+
+  venueAssignmentStatus: VenueAssignmentStatus @default(value: "PENDING_ASSIGNMENT")
+  registrationVenueId: ID @index(name: "byRegistrationVenue")
+  registrationVenue: Venue @belongsTo(fields: ["registrationVenueId"])
+  updatedAt: AWSDateTime!
+}
+
+type PlayerSummary @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  playerId: ID! @index(name: "byPlayer")
+  gamesPlayedLast30Days: Int
+  gamesPlayedLast90Days: Int
+  gamesPlayedAllTime: Int
+  averageFinishPosition: Float
+  netBalance: Float
+  player: Player @belongsTo(fields: ["playerId"])
+  sessionsPlayed: Int
+  tournamentsPlayed: Int
+  cashGamesPlayed: Int
+  venuesVisited: Int
+  tournamentWinnings: Float
+  tournamentBuyIns: Float
+  tournamentITM: Int
+  tournamentsCashed: Int
+  cashGameWinnings: Float
+  cashGameBuyIns: Float
+  totalWinnings: Float
+  totalBuyIns: Float
+  lastPlayed: AWSDateTime!
+}
+
+type PlayerEntry @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["gameStartDateTime"])
+  gameId: ID! @index(name: "byGame")
+  venueId: ID @index(name: "byVenue")
+  
+  # NEW: Entity that ran the game (for entity-level analytics)
+  entityId: ID @index(name: "byEntityEntry", sortKeyFields: ["gameStartDateTime"])
+  
+  status: PlayerEntryStatus!
+  registrationTime: AWSDateTime!
+  eliminationTime: AWSDateTime
+  gameStartDateTime: AWSDateTime!
+  lastKnownStackSize: Int
+  tableNumber: Int
+  seatNumber: Int
+  numberOfReEntries: Int
+  player: Player @belongsTo(fields: ["playerId"])
+  game: Game @belongsTo(fields: ["gameId"])
+
+  # Multi-day tournament tracking
+  isMultiDayTournament: Boolean
+  qualifyingGameId: ID  # The child game they qualified from
+  entryType: EntryType @default(value: "INITIAL")
+  recordType: String @default(value: "ORIGINAL") @index(name: "byRecordType", sortKeyFields: ["gameStartDateTime"])
+}
+
+type PlayerResult @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  finishingPlace: Int
+  isMultiDayQualification: Boolean
+  prizeWon: Boolean
+  amountWon: Float
+  totalRunners: Int
+  pointsEarned: Float
+  gameStartDateTime: AWSDateTime!
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["gameStartDateTime"])
+  player: Player @belongsTo(fields: ["playerId"])
+  gameId: ID! @index(name: "byGame")
+  game: Game @belongsTo(fields: ["gameId"])
+  recordType: String @default(value: "ORIGINAL") @index(name: "byRecordTypeResult", sortKeyFields: ["gameStartDateTime"])
+  venueId: ID @index(name: "byVenueResult", sortKeyFields: ["gameStartDateTime"])
+  
+  # NEW: Entity that ran the game (for entity-level analytics)
+  entityId: ID @index(name: "byEntityResult", sortKeyFields: ["gameStartDateTime"])
+
+  # Consolidation tracking
+  isConsolidatedRecord: Boolean
+  sourceEntryCount: Int        # How many flights this represents
+  sourceBuyInCount: Int        # How many buy-ins this represents
+  totalBuyInsPaid: Float       # Actual amount player paid
+  netProfitLoss: Float         # amountWon - totalBuyInsPaid
+  consolidatedIntoGameId: ID   # Points to parent game (for child results)
+}
+
+type PlayerVenue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  
+  # Core relationships
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["visityKey"])
+  player: Player @belongsTo(fields: ["playerId"])
+  
+  venueId: ID! @index(name: "byVenue", sortKeyFields: ["playerId"])
+  venue: Venue @belongsTo(fields: ["venueId"])
+  
+  # NEW: Entity that ran the games (enables entity+venue analytics)
+  entityId: ID! @index(name: "byEntityPlayerVenue", sortKeyFields: ["venueId"])
+  
+  # NEW: Composite key for unique constraint and fast lookups
+  # Format: "{playerId}#{entityId}#{venueId}"
+  visityKey: String @index(name: "byVisitKey", queryField: "playerVenueByVisitKey")
+  
+  # NEW: Link to canonical venue for cross-entity aggregation
+  canonicalVenueId: ID @index(name: "byCanonicalVenuePlayer", sortKeyFields: ["playerId"])
+  
+  # Stats for this player at this venue FOR THIS ENTITY
+  totalGamesPlayed: Int
+  averageBuyIn: Float
+  totalBuyIns: Float
+  totalWinnings: Float
+  netProfit: Float
+  firstPlayedDate: AWSDateTime
+  lastPlayedDate: AWSDateTime
+  
+  # Targeting
+  targetingClassification: PlayerVenueTargetingClassification!
+}
+
+type PlayerTransaction @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  type: TransactionType!
+  amount: Float!
+  rake: Float
+  paymentSource: PaymentSourceType!
+  transactionDate: AWSDateTime!
+  notes: String
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
+  player: Player @belongsTo(fields: ["playerId"])
+  gameId: ID @index(name: "byGame")
+  venueId: ID @index(name: "byVenueTransaction", sortKeyFields: ["transactionDate"])
+  
+  # NEW: Entity that ran the game/transaction (for entity-level analytics)
+  entityId: ID @index(name: "byEntityTransaction", sortKeyFields: ["transactionDate"])
+}
+
+type PlayerCredits @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  type: CreditTransactionType!
+  changeAmount: Float!
+  balanceAfter: Float!
+  transactionDate: AWSDateTime!
+  reason: String
+  expiryDate: AWSDateTime
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
+  player: Player @belongsTo(fields: ["playerId"])
+  relatedGameId: ID @index(name: "byGame")
+  relatedTransactionId: ID
+}
+
+type PlayerPoints @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  type: PointsTransactionType!
+  changeAmount: Float!
+  balanceAfter: Float!
+  transactionDate: AWSDateTime!
+  reason: String
+  expiryDate: AWSDateTime
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
+  player: Player @belongsTo(fields: ["playerId"])
+  relatedGameId: ID @index(name: "byGame")
+  relatedTransactionId: ID
+}
+
+type KnownPlayerIdentity @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  sourceSystem: String!
+  identityValue: String!
+  identityType: String!
+  playerId: ID! @index(name: "byPlayer")
+  player: Player @belongsTo(fields: ["playerId"])
+}
+
+type TicketTemplate @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  name: String!
+  description: String
+  value: Float!
+  validityDays: Int!
+  originGameId: ID
+  targetGameId: ID
+  playerTickets: [PlayerTicket] @hasMany(indexName: "byTicketTemplate", fields: ["id"])
+}
+
+type PlayerTicket @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  assignedAt: AWSDateTime!
+  expiryDate: AWSDateTime!
+  status: TicketStatus!
+  usedInGameId: ID
+  playerId: ID! @index(name: "byPlayer")
+  player: Player @belongsTo(fields: ["playerId"])
+  ticketTemplateId: ID! @index(name: "byTicketTemplate")
+  ticketTemplate: TicketTemplate @belongsTo(fields: ["ticketTemplateId"])
+}
+
+type MarketingMessage @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  name: String!
+  subject: String
+  emailBody: String
+  smsBody: String
+  sentMessages: [PlayerMarketingMessage] @hasMany(indexName: "byMarketingMessage", fields: ["id"])
+}
+
+type PlayerMarketingMessage @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  status: MessageStatus!
+  sentAt: AWSDateTime!
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["sentAt"])
+  marketingMessageId: ID! @index(name: "byMarketingMessage")
+}
+
+type PlayerMarketingPreferences @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  optOutSms: Boolean
+  optOutEmail: Boolean
+  playerId: ID! @index(name: "byPlayer")
+  player: Player @belongsTo(fields: ["playerId"])
+}
+
+input SavePlayerDataInput {
+  allPlayers: [SavePlayerInfoInput!]!
+  totalInitialEntries: Int!
+  totalEntries: Int!
+  totalUniquePlayers: Int!
+  hasCompleteResults: Boolean!
+  totalPrizesPaid: Float
+  hasEntryList: Boolean
+  hasSeatingData: Boolean
+}
+
+input SavePlayerInfoInput {
+  name: String!
+  rank: Int
+  winnings: Float
+  points: Float
+  isQualification: Boolean
+  rebuys: Int
+  addons: Int
+}
+
+input SaveProcessingOptionsInput {
+  skipPlayerProcessing: Boolean
+  forceUpdate: Boolean
+  validateOnly: Boolean
+  doNotScrape: Boolean
+  priority: String
+}

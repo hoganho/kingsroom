@@ -267,27 +267,36 @@ const calculatePlayerVenueTargetingClassification = (lastActivityDate, membershi
     const now = new Date();
     
     if (!lastActivityDate) {
-        if (!membershipCreatedDate) return 'Not Activated - Early Life';
+        if (!membershipCreatedDate) return 'NotActivated_EL';
         
         const daysSinceMembership = daysBetween(membershipCreatedDate, now);
         
-        if (daysSinceMembership <= 30) return 'Not Activated - Early Life';
-        if (daysSinceMembership <= 60) return 'Not Activated - 31-60d';
-        if (daysSinceMembership <= 90) return 'Not Activated - 61-90d';
-        if (daysSinceMembership <= 120) return 'Not Activated - 91-120d';
-        if (daysSinceMembership <= 180) return 'Not Activated - 121-180d';
-        if (daysSinceMembership <= 360) return 'Not Activated - 181-360d';
+        // Logic for Not Activated seems mostly correct in original, 
+        // but double-check strictly against the label ranges:
+        if (daysSinceMembership <= 30) return 'NotActivated_EL';
+        if (daysSinceMembership <= 60) return 'NotActivated_31_60d';
+        if (daysSinceMembership <= 90) return 'NotActivated_61_90d';
+        if (daysSinceMembership <= 120) return 'NotActivated_91_120d';
+        if (daysSinceMembership <= 180) return 'NotActivated_121_180d';
+        if (daysSinceMembership <= 360) return 'NotActivated_181_360d';
         return 'Not Activated - 361d+';
     } else {
         const daysSinceLastActivity = daysBetween(lastActivityDate, now);
         
-        if (daysSinceLastActivity <= 30) return 'Active_EL';
-        if (daysSinceLastActivity <= 60) return 'Active';
-        if (daysSinceLastActivity <= 90) return 'Retain_Inactive31_60d';
-        if (daysSinceLastActivity <= 120) return 'Retain_Inactive61-90d';
-        if (daysSinceLastActivity <= 180) return 'Churned_91_120d';
-        if (daysSinceLastActivity <= 360) return 'Churned_121-180d';
-        if (daysSinceLastActivity <= 720) return 'Churned_181_360d';
+        // FIXED: Aligned thresholds to the labels
+        if (daysSinceLastActivity <= 30) return 'Active_EL'; 
+        // 31-60 days inactive -> Retain Inactive 31-60
+        if (daysSinceLastActivity <= 60) return 'Retain_Inactive31_60d';
+        // 61-90 days inactive -> Retain Inactive 61-90
+        if (daysSinceLastActivity <= 90) return 'Retain_Inactive61_90d';
+        // 91-120 days inactive -> Churned 91-120
+        if (daysSinceLastActivity <= 120) return 'Churned_91_120d';
+        // 121-180 days inactive -> Churned 121-180
+        if (daysSinceLastActivity <= 180) return 'Churned_121_180d';
+        // 181-360 days inactive -> Churned 181-360
+        if (daysSinceLastActivity <= 360) return 'Churned_181_360d';
+        
+        // 361+ days
         return 'Churned_361d';
     }
 };
@@ -299,20 +308,25 @@ const calculatePlayerVenueTargetingClassification = (lastActivityDate, membershi
 const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, registrationDate, isNewPlayer = false) => {
     const now = new Date();
 
+    // --- HELPER FUNCTION FOR CONSISTENCY ---
+    // Since this logic is repeated twice below, using a helper prevents errors
+    const getStatusFromDays = (days) => {
+        if (days <= 30) return 'Active_EL';
+        if (days <= 60) return 'Retain_Inactive31_60d';
+        if (days <= 90) return 'Retain_Inactive61_90d';
+        if (days <= 120) return 'Churned_91_120d';
+        if (days <= 180) return 'Churned_121_180d';
+        if (days <= 360) return 'Churned_181_360d';
+        return 'Churned_361d';
+    };
+
     if (isNewPlayer) {
         console.log(`[TARGETING] New player ${playerId}. Classifying based on game date: ${lastPlayedDate}`);
         if (!lastPlayedDate) {
             return 'NotPlayed'; 
         }
         const daysSinceLastPlayed = daysBetween(lastPlayedDate, now);
-        if (daysSinceLastPlayed <= 30) return 'Active_EL';
-        if (daysSinceLastPlayed <= 60) return 'Active';
-        if (daysSinceLastPlayed <= 90) return 'Retain_Inactive31_60d';
-        if (daysSinceLastPlayed <= 120) return 'Retain_Inactive61_90d';
-        if (daysSinceLastPlayed <= 180) return 'Churned_91_120d';
-        if (daysSinceLastPlayed <= 360) return 'Churned_121-180d';
-        if (daysSinceLastPlayed <= 720) return 'Churned_181_360d';
-        return 'Churned_361d';
+        return getStatusFromDays(daysSinceLastPlayed);
     }
 
     try {
@@ -344,7 +358,8 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
         const daysSinceCreation = daysBetween(registrationDate, now);
         if (daysSinceCreation <= 30 && mostRecentVenue) {
             const venueClassification = mostRecentVenue.targetingClassification;
-            const newPlayerClassifications = ['Active_EL', 'Active', 'Retain_Inactive31_60d', 'Retain_Inactive61_90d'];
+            // Updated list to remove vague 'Active' and include the correct bucket labels
+            const newPlayerClassifications = ['Active_EL', 'Retain_Inactive31_60d', 'Retain_Inactive61_90d'];
             if (newPlayerClassifications.includes(venueClassification)) {
                 return venueClassification;
             }
@@ -352,14 +367,9 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
         
         if (!lastPlayedDate) return 'NotPlayed';
         const daysSinceLastPlayed = daysBetween(lastPlayedDate, now);
-        if (daysSinceLastPlayed <= 30) return 'Active_EL';
-        if (daysSinceLastPlayed <= 60) return 'Active';
-        if (daysSinceLastPlayed <= 90) return 'Retain_Inactive31_60d';
-        if (daysSinceLastPlayed <= 120) return 'Retain_Inactive61_90d';
-        if (daysSinceLastPlayed <= 180) return 'Churned_91_120d';
-        if (daysSinceLastPlayed <= 360) return 'Churned_121-180d';
-        if (daysSinceLastPlayed <= 720) return 'Churned_181_360d';
-        return 'Churned_361d';
+        
+        return getStatusFromDays(daysSinceLastPlayed);
+
     } catch (error) {
         console.error('[TARGETING] Error fetching PlayerVenue data:', error);
         return 'NotPlayed';

@@ -1,33 +1,39 @@
 // src/hooks/scraper/index.ts
-// Barrel exports for scraper-related hooks
+// Barrel export for scraper hooks
 
 export { 
   useProcessingState, 
   buildProcessingQueue,
   type UseProcessingStateResult,
   type ProcessingStateConfig,
-  type QueueBuildParams 
+  type QueueBuildParams,
 } from './useProcessingState';
 
 export { 
   useErrorTracking,
-  type UseErrorTrackingResult 
+  type UseErrorTrackingResult,
 } from './useErrorTracking';
 
-export {
-  useModalResolver,
-  useSaveConfirmationModal,
-  useErrorModal,
-  useScrapeOptionsModal,
+export { 
   useScraperModals,
-  type SaveConfirmationModalState,
-  type SaveConfirmationResult,
-  type ErrorModalState,
-  type ScrapeOptionsModalState,
-  type ScrapeOptionsResult,
-  type ScraperModalsState,
 } from './useModalResolver';
 
-// NOTE: Error classification utilities (isTransientError, shouldStopImmediately, 
-// isNotFoundResponse, shouldPauseForDecision) are exported from 
-// '../../utils/scraperErrorUtils' - import them from there
+export { 
+  useScrapeOrchestrator,
+  type OrchestratorConfig,
+  type OrchestratorCallbacks,
+  type OrchestratorResult,
+  type SaveConfirmationResult,
+  type ScrapeOptionsResult,
+} from './useScrapeOrchestrator';
+
+// Phase 4: State machine
+export {
+  useResultStateMachine,
+  validateTransition,
+  getStatusDescription,
+  canRetry,
+  isComplete,
+  type TransitionResult,
+  type StateMachineHelpers,
+} from './useResultStateMachine';

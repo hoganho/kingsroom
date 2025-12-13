@@ -109,7 +109,8 @@ exports.handler = async (event) => {
 /**
  * Handle GraphQL resolver requests
  */
-const args = event.arguments || {}; 
+async function handleGraphQLRequest(event) {
+  const args = event.arguments || {}; 
   const fieldName = event.fieldName;
 
   switch (fieldName) {

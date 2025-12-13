@@ -750,6 +750,16 @@ export const saveGameDataToBackend = async (
             flightLetter: (finalData as any).flightLetter || null,
             finalDay: (finalData as any).finalDay ?? false,
             
+            // === NEW: Recurring Game Fields ===
+            recurringGameId: (finalData as any).recurringGameId || null,
+            recurringGameAssignmentStatus: (finalData as any).recurringGameAssignmentStatus || 'PENDING_ASSIGNMENT',
+            recurringGameAssignmentConfidence: (finalData as any).recurringGameAssignmentConfidence || 0,
+            wasScheduledInstance: (finalData as any).wasScheduledInstance ?? false,
+            deviationNotes: (finalData as any).deviationNotes || null,
+            instanceNumber: (finalData as any).instanceNumber || null,
+            isReplacementInstance: (finalData as any).isReplacementInstance ?? false,
+            replacementReason: (finalData as any).replacementReason || null,
+            
             // Other
             gameTags: finalData.gameTags?.filter((tag: any) => tag !== null) || [],
             totalDuration: (finalData as any).totalDuration || null,

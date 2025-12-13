@@ -232,6 +232,14 @@ export enum SeriesAssignmentStatus {
   NOT_SERIES = "NOT_SERIES"
 }
 
+export enum RecurringGameAssignmentStatus {
+  AUTO_ASSIGNED = "AUTO_ASSIGNED",
+  MANUALLY_ASSIGNED = "MANUALLY_ASSIGNED",
+  PENDING_ASSIGNMENT = "PENDING_ASSIGNMENT",
+  NOT_RECURRING = "NOT_RECURRING",
+  DEVIATION_FLAGGED = "DEVIATION_FLAGGED"
+}
+
 export enum CostItemType {
   DEALER = "DEALER",
   TOURNAMENT_DIRECTOR = "TOURNAMENT_DIRECTOR",
@@ -402,15 +410,18 @@ export enum BackgroundTaskType {
   BULK_IMPORT = "BULK_IMPORT",
   DATA_MIGRATION = "DATA_MIGRATION",
   REPORT_GENERATION = "REPORT_GENERATION",
-  VENUE_DETAILS_RECALC = "VENUE_DETAILS_RECALC"
+  VENUE_DETAILS_RECALC = "VENUE_DETAILS_RECALC",
+  RECURRING_GAME_DETECTION = "RECURRING_GAME_DETECTION",
+  METRICS_CALCULATION = "METRICS_CALCULATION"
 }
 
 export enum BackgroundTaskStatus {
   QUEUED = "QUEUED",
-  PROCESSING = "PROCESSING",
+  RUNNING = "RUNNING",
   COMPLETED = "COMPLETED",
   FAILED = "FAILED",
-  CANCELLED = "CANCELLED"
+  CANCELLED = "CANCELLED",
+  PARTIAL_SUCCESS = "PARTIAL_SUCCESS"
 }
 
 type EagerVenueMetricsResult = {
@@ -470,6 +481,130 @@ type LazyVenueMetricsPreview = {
 export declare type VenueMetricsPreview = LazyLoading extends LazyLoadingDisabled ? EagerVenueMetricsPreview : LazyVenueMetricsPreview
 
 export declare const VenueMetricsPreview: (new (init: ModelInit<VenueMetricsPreview>) => VenueMetricsPreview)
+
+type EagerVenueMatch = {
+  readonly autoAssignedVenue?: ScrapedVenueMatchDetails | null;
+  readonly suggestions?: (ScrapedVenueMatchDetails | null)[] | null;
+}
+
+type LazyVenueMatch = {
+  readonly autoAssignedVenue?: ScrapedVenueMatchDetails | null;
+  readonly suggestions?: (ScrapedVenueMatchDetails | null)[] | null;
+}
+
+export declare type VenueMatch = LazyLoading extends LazyLoadingDisabled ? EagerVenueMatch : LazyVenueMatch
+
+export declare const VenueMatch: (new (init: ModelInit<VenueMatch>) => VenueMatch)
+
+type EagerAllCountsResult = {
+  readonly playerCount?: number | null;
+  readonly playerSummaryCount?: number | null;
+  readonly playerEntryCount?: number | null;
+  readonly playerResultCount?: number | null;
+  readonly playerVenueCount?: number | null;
+  readonly playerTransactionCount?: number | null;
+  readonly playerCreditsCount?: number | null;
+  readonly playerPointsCount?: number | null;
+  readonly playerTicketCount?: number | null;
+  readonly playerMarketingPreferencesCount?: number | null;
+  readonly playerMarketingMessageCount?: number | null;
+  readonly gameCount?: number | null;
+  readonly tournamentStructureCount?: number | null;
+}
+
+type LazyAllCountsResult = {
+  readonly playerCount?: number | null;
+  readonly playerSummaryCount?: number | null;
+  readonly playerEntryCount?: number | null;
+  readonly playerResultCount?: number | null;
+  readonly playerVenueCount?: number | null;
+  readonly playerTransactionCount?: number | null;
+  readonly playerCreditsCount?: number | null;
+  readonly playerPointsCount?: number | null;
+  readonly playerTicketCount?: number | null;
+  readonly playerMarketingPreferencesCount?: number | null;
+  readonly playerMarketingMessageCount?: number | null;
+  readonly gameCount?: number | null;
+  readonly tournamentStructureCount?: number | null;
+}
+
+export declare type AllCountsResult = LazyLoading extends LazyLoadingDisabled ? EagerAllCountsResult : LazyAllCountsResult
+
+export declare const AllCountsResult: (new (init: ModelInit<AllCountsResult>) => AllCountsResult)
+
+type EagerVenueAssignmentResult = {
+  readonly success: boolean;
+  readonly gameId: string;
+  readonly venueId: string;
+  readonly affectedRecords?: AffectedRecords | null;
+  readonly error?: string | null;
+}
+
+type LazyVenueAssignmentResult = {
+  readonly success: boolean;
+  readonly gameId: string;
+  readonly venueId: string;
+  readonly affectedRecords?: AffectedRecords | null;
+  readonly error?: string | null;
+}
+
+export declare type VenueAssignmentResult = LazyLoading extends LazyLoadingDisabled ? EagerVenueAssignmentResult : LazyVenueAssignmentResult
+
+export declare const VenueAssignmentResult: (new (init: ModelInit<VenueAssignmentResult>) => VenueAssignmentResult)
+
+type EagerAffectedRecords = {
+  readonly gameUpdated?: boolean | null;
+  readonly playerEntriesUpdated?: number | null;
+  readonly playerVenueRecordsCreated?: number | null;
+  readonly playersWithRegistrationUpdated?: number | null;
+  readonly playerSummariesUpdated?: number | null;
+}
+
+type LazyAffectedRecords = {
+  readonly gameUpdated?: boolean | null;
+  readonly playerEntriesUpdated?: number | null;
+  readonly playerVenueRecordsCreated?: number | null;
+  readonly playersWithRegistrationUpdated?: number | null;
+  readonly playerSummariesUpdated?: number | null;
+}
+
+export declare type AffectedRecords = LazyLoading extends LazyLoadingDisabled ? EagerAffectedRecords : LazyAffectedRecords
+
+export declare const AffectedRecords: (new (init: ModelInit<AffectedRecords>) => AffectedRecords)
+
+type EagerBatchVenueAssignmentResult = {
+  readonly successful?: (VenueAssignmentResult | null)[] | null;
+  readonly failed?: (VenueAssignmentResult | null)[] | null;
+  readonly totalProcessed?: number | null;
+}
+
+type LazyBatchVenueAssignmentResult = {
+  readonly successful?: (VenueAssignmentResult | null)[] | null;
+  readonly failed?: (VenueAssignmentResult | null)[] | null;
+  readonly totalProcessed?: number | null;
+}
+
+export declare type BatchVenueAssignmentResult = LazyLoading extends LazyLoadingDisabled ? EagerBatchVenueAssignmentResult : LazyBatchVenueAssignmentResult
+
+export declare const BatchVenueAssignmentResult: (new (init: ModelInit<BatchVenueAssignmentResult>) => BatchVenueAssignmentResult)
+
+type EagerSaveVenueAssignmentInfo = {
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly status?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly confidence?: number | null;
+}
+
+type LazySaveVenueAssignmentInfo = {
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly status?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly confidence?: number | null;
+}
+
+export declare type SaveVenueAssignmentInfo = LazyLoading extends LazyLoadingDisabled ? EagerSaveVenueAssignmentInfo : LazySaveVenueAssignmentInfo
+
+export declare const SaveVenueAssignmentInfo: (new (init: ModelInit<SaveVenueAssignmentInfo>) => SaveVenueAssignmentInfo)
 
 type EagerVenueMetricsSnapshot = {
   readonly totalGamesHeld?: number | null;
@@ -607,77 +742,543 @@ export declare type ProjectedConsolidationTotals = LazyLoading extends LazyLoadi
 
 export declare const ProjectedConsolidationTotals: (new (init: ModelInit<ProjectedConsolidationTotals>) => ProjectedConsolidationTotals)
 
-type EagerDetectedMultiDayPattern = {
-  readonly isMultiDay: boolean;
-  readonly detectionSource?: string | null;
-  readonly parsedDayNumber?: number | null;
-  readonly parsedFlightLetter?: string | null;
-  readonly isFinalDay?: boolean | null;
-  readonly derivedParentName: string;
+type EagerReScrapeResult = {
+  readonly name?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly gameEndDateTime?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
+  readonly gameType?: GameType | keyof typeof GameType | null;
+  readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly prizepoolPaid?: number | null;
+  readonly prizepoolCalculated?: number | null;
+  readonly buyIn?: number | null;
+  readonly rake?: number | null;
+  readonly startingStack?: number | null;
+  readonly hasGuarantee?: boolean | null;
+  readonly guaranteeAmount?: number | null;
+  readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
+  readonly totalEntries?: number | null;
+  readonly totalRebuys?: number | null;
+  readonly totalAddons?: number | null;
+  readonly totalDuration?: string | null;
+  readonly playersRemaining?: number | null;
+  readonly seriesName?: string | null;
+  readonly gameTags?: (string | null)[] | null;
+  readonly venueMatch?: VenueMatch | null;
+  readonly existingGameId?: string | null;
+  readonly doNotScrape?: boolean | null;
+  readonly sourceUrl?: string | null;
+  readonly tournamentId?: number | null;
+  readonly entityId?: string | null;
+  readonly s3Key?: string | null;
+  readonly reScrapedAt?: string | null;
 }
 
-type LazyDetectedMultiDayPattern = {
-  readonly isMultiDay: boolean;
-  readonly detectionSource?: string | null;
-  readonly parsedDayNumber?: number | null;
-  readonly parsedFlightLetter?: string | null;
-  readonly isFinalDay?: boolean | null;
-  readonly derivedParentName: string;
+type LazyReScrapeResult = {
+  readonly name?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly gameEndDateTime?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
+  readonly gameType?: GameType | keyof typeof GameType | null;
+  readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly prizepoolPaid?: number | null;
+  readonly prizepoolCalculated?: number | null;
+  readonly buyIn?: number | null;
+  readonly rake?: number | null;
+  readonly startingStack?: number | null;
+  readonly hasGuarantee?: boolean | null;
+  readonly guaranteeAmount?: number | null;
+  readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
+  readonly totalEntries?: number | null;
+  readonly totalRebuys?: number | null;
+  readonly totalAddons?: number | null;
+  readonly totalDuration?: string | null;
+  readonly playersRemaining?: number | null;
+  readonly seriesName?: string | null;
+  readonly gameTags?: (string | null)[] | null;
+  readonly venueMatch?: VenueMatch | null;
+  readonly existingGameId?: string | null;
+  readonly doNotScrape?: boolean | null;
+  readonly sourceUrl?: string | null;
+  readonly tournamentId?: number | null;
+  readonly entityId?: string | null;
+  readonly s3Key?: string | null;
+  readonly reScrapedAt?: string | null;
 }
 
-export declare type DetectedMultiDayPattern = LazyLoading extends LazyLoadingDisabled ? EagerDetectedMultiDayPattern : LazyDetectedMultiDayPattern
+export declare type ReScrapeResult = LazyLoading extends LazyLoadingDisabled ? EagerReScrapeResult : LazyReScrapeResult
 
-export declare const DetectedMultiDayPattern: (new (init: ModelInit<DetectedMultiDayPattern>) => DetectedMultiDayPattern)
+export declare const ReScrapeResult: (new (init: ModelInit<ReScrapeResult>) => ReScrapeResult)
 
-type EagerUserManagementResponse = {
+type EagerEntityScrapingStatus = {
+  readonly entityId: string;
+  readonly entityName?: string | null;
+  readonly lowestTournamentId?: number | null;
+  readonly highestTournamentId?: number | null;
+  readonly totalGamesStored: number;
+  readonly unfinishedGameCount: number;
+  readonly gaps: GapRange[];
+  readonly gapSummary: GapSummary;
+  readonly lastUpdated: string;
+  readonly cacheAge?: number | null;
+}
+
+type LazyEntityScrapingStatus = {
+  readonly entityId: string;
+  readonly entityName?: string | null;
+  readonly lowestTournamentId?: number | null;
+  readonly highestTournamentId?: number | null;
+  readonly totalGamesStored: number;
+  readonly unfinishedGameCount: number;
+  readonly gaps: GapRange[];
+  readonly gapSummary: GapSummary;
+  readonly lastUpdated: string;
+  readonly cacheAge?: number | null;
+}
+
+export declare type EntityScrapingStatus = LazyLoading extends LazyLoadingDisabled ? EagerEntityScrapingStatus : LazyEntityScrapingStatus
+
+export declare const EntityScrapingStatus: (new (init: ModelInit<EntityScrapingStatus>) => EntityScrapingStatus)
+
+type EagerEntityVenueAssignmentSummary = {
+  readonly entityId?: string | null;
+  readonly entityName: string;
+  readonly totalGames?: number | null;
+  readonly gamesWithVenue?: number | null;
+  readonly gamesNeedingVenue?: number | null;
+}
+
+type LazyEntityVenueAssignmentSummary = {
+  readonly entityId?: string | null;
+  readonly entityName: string;
+  readonly totalGames?: number | null;
+  readonly gamesWithVenue?: number | null;
+  readonly gamesNeedingVenue?: number | null;
+}
+
+export declare type EntityVenueAssignmentSummary = LazyLoading extends LazyLoadingDisabled ? EagerEntityVenueAssignmentSummary : LazyEntityVenueAssignmentSummary
+
+export declare const EntityVenueAssignmentSummary: (new (init: ModelInit<EntityVenueAssignmentSummary>) => EntityVenueAssignmentSummary)
+
+type EagerVenueAssignmentSummary = {
+  readonly totalGames?: number | null;
+  readonly gamesWithVenue?: number | null;
+  readonly gamesNeedingVenue?: number | null;
+  readonly pendingAssignments?: number | null;
+  readonly byEntity?: (EntityVenueAssignmentSummary | null)[] | null;
+}
+
+type LazyVenueAssignmentSummary = {
+  readonly totalGames?: number | null;
+  readonly gamesWithVenue?: number | null;
+  readonly gamesNeedingVenue?: number | null;
+  readonly pendingAssignments?: number | null;
+  readonly byEntity?: (EntityVenueAssignmentSummary | null)[] | null;
+}
+
+export declare type VenueAssignmentSummary = LazyLoading extends LazyLoadingDisabled ? EagerVenueAssignmentSummary : LazyVenueAssignmentSummary
+
+export declare const VenueAssignmentSummary: (new (init: ModelInit<VenueAssignmentSummary>) => VenueAssignmentSummary)
+
+type EagerReassignGameVenueResult = {
+  readonly success: boolean;
+  readonly status: string;
+  readonly message?: string | null;
+  readonly gameId?: string | null;
+  readonly taskId?: string | null;
+  readonly oldVenueId?: string | null;
+  readonly newVenueId?: string | null;
+  readonly oldEntityId?: string | null;
+  readonly newEntityId?: string | null;
+  readonly venueCloned?: boolean | null;
+  readonly clonedVenueId?: string | null;
+  readonly recordsUpdated?: string | null;
+}
+
+type LazyReassignGameVenueResult = {
+  readonly success: boolean;
+  readonly status: string;
+  readonly message?: string | null;
+  readonly gameId?: string | null;
+  readonly taskId?: string | null;
+  readonly oldVenueId?: string | null;
+  readonly newVenueId?: string | null;
+  readonly oldEntityId?: string | null;
+  readonly newEntityId?: string | null;
+  readonly venueCloned?: boolean | null;
+  readonly clonedVenueId?: string | null;
+  readonly recordsUpdated?: string | null;
+}
+
+export declare type ReassignGameVenueResult = LazyLoading extends LazyLoadingDisabled ? EagerReassignGameVenueResult : LazyReassignGameVenueResult
+
+export declare const ReassignGameVenueResult: (new (init: ModelInit<ReassignGameVenueResult>) => ReassignGameVenueResult)
+
+type EagerBulkReassignGameVenuesResult = {
+  readonly success: boolean;
+  readonly status: string;
+  readonly message?: string | null;
+  readonly taskId?: string | null;
+  readonly gameCount?: number | null;
+  readonly newVenueId?: string | null;
+  readonly reassignEntity?: boolean | null;
+}
+
+type LazyBulkReassignGameVenuesResult = {
+  readonly success: boolean;
+  readonly status: string;
+  readonly message?: string | null;
+  readonly taskId?: string | null;
+  readonly gameCount?: number | null;
+  readonly newVenueId?: string | null;
+  readonly reassignEntity?: boolean | null;
+}
+
+export declare type BulkReassignGameVenuesResult = LazyLoading extends LazyLoadingDisabled ? EagerBulkReassignGameVenuesResult : LazyBulkReassignGameVenuesResult
+
+export declare const BulkReassignGameVenuesResult: (new (init: ModelInit<BulkReassignGameVenuesResult>) => BulkReassignGameVenuesResult)
+
+type EagerSaveGameResult = {
+  readonly success: boolean;
+  readonly gameId?: string | null;
+  readonly action: string;
+  readonly message?: string | null;
+  readonly warnings?: (string | null)[] | null;
+  readonly playerProcessingQueued?: boolean | null;
+  readonly playerProcessingReason?: string | null;
+  readonly venueAssignment?: SaveVenueAssignmentInfo | null;
+  readonly seriesAssignment?: SaveSeriesAssignmentInfo | null;
+  readonly fieldsUpdated?: (string | null)[] | null;
+  readonly wasEdited?: boolean | null;
+}
+
+type LazySaveGameResult = {
+  readonly success: boolean;
+  readonly gameId?: string | null;
+  readonly action: string;
+  readonly message?: string | null;
+  readonly warnings?: (string | null)[] | null;
+  readonly playerProcessingQueued?: boolean | null;
+  readonly playerProcessingReason?: string | null;
+  readonly venueAssignment?: SaveVenueAssignmentInfo | null;
+  readonly seriesAssignment?: SaveSeriesAssignmentInfo | null;
+  readonly fieldsUpdated?: (string | null)[] | null;
+  readonly wasEdited?: boolean | null;
+}
+
+export declare type SaveGameResult = LazyLoading extends LazyLoadingDisabled ? EagerSaveGameResult : LazySaveGameResult
+
+export declare const SaveGameResult: (new (init: ModelInit<SaveGameResult>) => SaveGameResult)
+
+type EagerAssignGameResult = {
+  readonly success: boolean;
+  readonly game?: Game | null;
+  readonly recurringGame?: RecurringGame | null;
+  readonly message?: string | null;
+  readonly confidence?: number | null;
+}
+
+type LazyAssignGameResult = {
+  readonly success: boolean;
+  readonly game: AsyncItem<Game | undefined>;
+  readonly recurringGame: AsyncItem<RecurringGame | undefined>;
+  readonly message?: string | null;
+  readonly confidence?: number | null;
+}
+
+export declare type AssignGameResult = LazyLoading extends LazyLoadingDisabled ? EagerAssignGameResult : LazyAssignGameResult
+
+export declare const AssignGameResult: (new (init: ModelInit<AssignGameResult>) => AssignGameResult)
+
+type EagerDetectRecurringGamesResult = {
   readonly success: boolean;
   readonly message?: string | null;
-  readonly user?: User | null;
-  readonly temporaryPassword?: string | null;
+  readonly gamesAnalyzed?: number | null;
+  readonly recurringGamesCreated?: number | null;
+  readonly recurringGamesUpdated?: number | null;
+  readonly gamesAssigned?: number | null;
+  readonly gamesPendingReview?: number | null;
+  readonly newRecurringGames?: (RecurringGame | null)[] | null;
+  readonly assignmentResults?: (AssignGameResult | null)[] | null;
+  readonly preview?: string | null;
+  readonly errors?: (string | null)[] | null;
 }
 
-type LazyUserManagementResponse = {
+type LazyDetectRecurringGamesResult = {
   readonly success: boolean;
   readonly message?: string | null;
-  readonly user: AsyncItem<User | undefined>;
-  readonly temporaryPassword?: string | null;
+  readonly gamesAnalyzed?: number | null;
+  readonly recurringGamesCreated?: number | null;
+  readonly recurringGamesUpdated?: number | null;
+  readonly gamesAssigned?: number | null;
+  readonly gamesPendingReview?: number | null;
+  readonly newRecurringGames: AsyncCollection<RecurringGame>;
+  readonly assignmentResults?: (AssignGameResult | null)[] | null;
+  readonly preview?: string | null;
+  readonly errors?: (string | null)[] | null;
 }
 
-export declare type UserManagementResponse = LazyLoading extends LazyLoadingDisabled ? EagerUserManagementResponse : LazyUserManagementResponse
+export declare type DetectRecurringGamesResult = LazyLoading extends LazyLoadingDisabled ? EagerDetectRecurringGamesResult : LazyDetectRecurringGamesResult
 
-export declare const UserManagementResponse: (new (init: ModelInit<UserManagementResponse>) => UserManagementResponse)
+export declare const DetectRecurringGamesResult: (new (init: ModelInit<DetectRecurringGamesResult>) => DetectRecurringGamesResult)
 
-type EagerResetPasswordResponse = {
+type EagerBulkAssignResult = {
   readonly success: boolean;
-  readonly message?: string | null;
-  readonly temporaryPassword?: string | null;
+  readonly totalGames?: number | null;
+  readonly successfulAssignments?: number | null;
+  readonly failedAssignments?: number | null;
+  readonly results?: (AssignGameResult | null)[] | null;
+  readonly errors?: (string | null)[] | null;
 }
 
-type LazyResetPasswordResponse = {
+type LazyBulkAssignResult = {
   readonly success: boolean;
-  readonly message?: string | null;
-  readonly temporaryPassword?: string | null;
+  readonly totalGames?: number | null;
+  readonly successfulAssignments?: number | null;
+  readonly failedAssignments?: number | null;
+  readonly results?: (AssignGameResult | null)[] | null;
+  readonly errors?: (string | null)[] | null;
 }
 
-export declare type ResetPasswordResponse = LazyLoading extends LazyLoadingDisabled ? EagerResetPasswordResponse : LazyResetPasswordResponse
+export declare type BulkAssignResult = LazyLoading extends LazyLoadingDisabled ? EagerBulkAssignResult : LazyBulkAssignResult
 
-export declare const ResetPasswordResponse: (new (init: ModelInit<ResetPasswordResponse>) => ResetPasswordResponse)
+export declare const BulkAssignResult: (new (init: ModelInit<BulkAssignResult>) => BulkAssignResult)
 
-type EagerUsersConnection = {
-  readonly items: User[];
+type EagerRecurringGameWithStats = {
+  readonly recurringGame?: RecurringGame | null;
+  readonly totalInstances?: number | null;
+  readonly avgEntries?: number | null;
+  readonly avgProfit?: number | null;
+  readonly recentTrend?: string | null;
+  readonly recentGames?: (Game | null)[] | null;
+  readonly consistency?: string | null;
+  readonly profitability?: string | null;
+  readonly attendanceHealth?: string | null;
+  readonly topPlayers?: (RecurringGamePlayerSummary | null)[] | null;
+}
+
+type LazyRecurringGameWithStats = {
+  readonly recurringGame: AsyncItem<RecurringGame | undefined>;
+  readonly totalInstances?: number | null;
+  readonly avgEntries?: number | null;
+  readonly avgProfit?: number | null;
+  readonly recentTrend?: string | null;
+  readonly recentGames: AsyncCollection<Game>;
+  readonly consistency?: string | null;
+  readonly profitability?: string | null;
+  readonly attendanceHealth?: string | null;
+  readonly topPlayers?: (RecurringGamePlayerSummary | null)[] | null;
+}
+
+export declare type RecurringGameWithStats = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameWithStats : LazyRecurringGameWithStats
+
+export declare const RecurringGameWithStats: (new (init: ModelInit<RecurringGameWithStats>) => RecurringGameWithStats)
+
+type EagerRecurringGamePlayerSummary = {
+  readonly playerId?: string | null;
+  readonly playerName?: string | null;
+  readonly appearances?: number | null;
+  readonly avgFinish?: number | null;
+  readonly totalWinnings?: number | null;
+}
+
+type LazyRecurringGamePlayerSummary = {
+  readonly playerId?: string | null;
+  readonly playerName?: string | null;
+  readonly appearances?: number | null;
+  readonly avgFinish?: number | null;
+  readonly totalWinnings?: number | null;
+}
+
+export declare type RecurringGamePlayerSummary = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGamePlayerSummary : LazyRecurringGamePlayerSummary
+
+export declare const RecurringGamePlayerSummary: (new (init: ModelInit<RecurringGamePlayerSummary>) => RecurringGamePlayerSummary)
+
+type EagerSearchRecurringGamesResult = {
+  readonly items?: (RecurringGame | null)[] | null;
+  readonly total?: number | null;
   readonly nextToken?: string | null;
-  readonly totalCount?: number | null;
 }
 
-type LazyUsersConnection = {
-  readonly items: AsyncCollection<User>;
+type LazySearchRecurringGamesResult = {
+  readonly items: AsyncCollection<RecurringGame>;
+  readonly total?: number | null;
   readonly nextToken?: string | null;
-  readonly totalCount?: number | null;
 }
 
-export declare type UsersConnection = LazyLoading extends LazyLoadingDisabled ? EagerUsersConnection : LazyUsersConnection
+export declare type SearchRecurringGamesResult = LazyLoading extends LazyLoadingDisabled ? EagerSearchRecurringGamesResult : LazySearchRecurringGamesResult
 
-export declare const UsersConnection: (new (init: ModelInit<UsersConnection>) => UsersConnection)
+export declare const SearchRecurringGamesResult: (new (init: ModelInit<SearchRecurringGamesResult>) => SearchRecurringGamesResult)
+
+type EagerRefreshAllMetricsResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly entityMetricsUpdated?: number | null;
+  readonly venueMetricsUpdated?: number | null;
+  readonly recurringGameMetricsUpdated?: number | null;
+  readonly entitiesProcessed?: number | null;
+  readonly venuesProcessed?: number | null;
+  readonly recurringGamesProcessed?: number | null;
+  readonly snapshotsAnalyzed?: number | null;
+  readonly executionTimeMs?: number | null;
+  readonly peakMemoryMB?: number | null;
+  readonly entityResults?: (MetricsUpdateResult | null)[] | null;
+  readonly venueResults?: (MetricsUpdateResult | null)[] | null;
+  readonly recurringGameResults?: (MetricsUpdateResult | null)[] | null;
+  readonly errors?: (string | null)[] | null;
+  readonly warnings?: (string | null)[] | null;
+  readonly refreshedAt?: string | null;
+  readonly refreshedBy?: string | null;
+}
+
+type LazyRefreshAllMetricsResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly entityMetricsUpdated?: number | null;
+  readonly venueMetricsUpdated?: number | null;
+  readonly recurringGameMetricsUpdated?: number | null;
+  readonly entitiesProcessed?: number | null;
+  readonly venuesProcessed?: number | null;
+  readonly recurringGamesProcessed?: number | null;
+  readonly snapshotsAnalyzed?: number | null;
+  readonly executionTimeMs?: number | null;
+  readonly peakMemoryMB?: number | null;
+  readonly entityResults?: (MetricsUpdateResult | null)[] | null;
+  readonly venueResults?: (MetricsUpdateResult | null)[] | null;
+  readonly recurringGameResults?: (MetricsUpdateResult | null)[] | null;
+  readonly errors?: (string | null)[] | null;
+  readonly warnings?: (string | null)[] | null;
+  readonly refreshedAt?: string | null;
+  readonly refreshedBy?: string | null;
+}
+
+export declare type RefreshAllMetricsResult = LazyLoading extends LazyLoadingDisabled ? EagerRefreshAllMetricsResult : LazyRefreshAllMetricsResult
+
+export declare const RefreshAllMetricsResult: (new (init: ModelInit<RefreshAllMetricsResult>) => RefreshAllMetricsResult)
+
+type EagerMetricsUpdateResult = {
+  readonly id?: string | null;
+  readonly name?: string | null;
+  readonly type?: string | null;
+  readonly timeRange?: string | null;
+  readonly success?: boolean | null;
+  readonly recordsCreated?: number | null;
+  readonly recordsUpdated?: number | null;
+  readonly error?: string | null;
+  readonly durationMs?: number | null;
+}
+
+type LazyMetricsUpdateResult = {
+  readonly id?: string | null;
+  readonly name?: string | null;
+  readonly type?: string | null;
+  readonly timeRange?: string | null;
+  readonly success?: boolean | null;
+  readonly recordsCreated?: number | null;
+  readonly recordsUpdated?: number | null;
+  readonly error?: string | null;
+  readonly durationMs?: number | null;
+}
+
+export declare type MetricsUpdateResult = LazyLoading extends LazyLoadingDisabled ? EagerMetricsUpdateResult : LazyMetricsUpdateResult
+
+export declare const MetricsUpdateResult: (new (init: ModelInit<MetricsUpdateResult>) => MetricsUpdateResult)
+
+type EagerEntityDashboard = {
+  readonly entity?: Entity | null;
+  readonly metrics?: EntityMetrics | null;
+  readonly venueBreakdown?: (VenueMetrics | null)[] | null;
+  readonly topRecurringGames?: (RecurringGameMetrics | null)[] | null;
+  readonly trends?: TrendAnalysis | null;
+}
+
+type LazyEntityDashboard = {
+  readonly entity: AsyncItem<Entity | undefined>;
+  readonly metrics: AsyncItem<EntityMetrics | undefined>;
+  readonly venueBreakdown: AsyncCollection<VenueMetrics>;
+  readonly topRecurringGames: AsyncCollection<RecurringGameMetrics>;
+  readonly trends?: TrendAnalysis | null;
+}
+
+export declare type EntityDashboard = LazyLoading extends LazyLoadingDisabled ? EagerEntityDashboard : LazyEntityDashboard
+
+export declare const EntityDashboard: (new (init: ModelInit<EntityDashboard>) => EntityDashboard)
+
+type EagerVenueDashboard = {
+  readonly venue?: Venue | null;
+  readonly metrics?: VenueMetrics | null;
+  readonly recurringGameBreakdown?: (RecurringGameMetrics | null)[] | null;
+  readonly recentGames?: (Game | null)[] | null;
+  readonly trends?: TrendAnalysis | null;
+}
+
+type LazyVenueDashboard = {
+  readonly venue: AsyncItem<Venue | undefined>;
+  readonly metrics: AsyncItem<VenueMetrics | undefined>;
+  readonly recurringGameBreakdown: AsyncCollection<RecurringGameMetrics>;
+  readonly recentGames: AsyncCollection<Game>;
+  readonly trends?: TrendAnalysis | null;
+}
+
+export declare type VenueDashboard = LazyLoading extends LazyLoadingDisabled ? EagerVenueDashboard : LazyVenueDashboard
+
+export declare const VenueDashboard: (new (init: ModelInit<VenueDashboard>) => VenueDashboard)
+
+type EagerRecurringGameReport = {
+  readonly recurringGame?: RecurringGame | null;
+  readonly metricsAllTime?: RecurringGameMetrics | null;
+  readonly metrics12M?: RecurringGameMetrics | null;
+  readonly metrics6M?: RecurringGameMetrics | null;
+  readonly metrics3M?: RecurringGameMetrics | null;
+  readonly metrics1M?: RecurringGameMetrics | null;
+  readonly recentInstances?: (Game | null)[] | null;
+  readonly regularPlayers?: (PlayerSummary | null)[] | null;
+  readonly trends?: TrendAnalysis | null;
+  readonly recommendations?: (string | null)[] | null;
+}
+
+type LazyRecurringGameReport = {
+  readonly recurringGame: AsyncItem<RecurringGame | undefined>;
+  readonly metricsAllTime: AsyncItem<RecurringGameMetrics | undefined>;
+  readonly metrics12M: AsyncItem<RecurringGameMetrics | undefined>;
+  readonly metrics6M: AsyncItem<RecurringGameMetrics | undefined>;
+  readonly metrics3M: AsyncItem<RecurringGameMetrics | undefined>;
+  readonly metrics1M: AsyncItem<RecurringGameMetrics | undefined>;
+  readonly recentInstances: AsyncCollection<Game>;
+  readonly regularPlayers: AsyncCollection<PlayerSummary>;
+  readonly trends?: TrendAnalysis | null;
+  readonly recommendations?: (string | null)[] | null;
+}
+
+export declare type RecurringGameReport = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameReport : LazyRecurringGameReport
+
+export declare const RecurringGameReport: (new (init: ModelInit<RecurringGameReport>) => RecurringGameReport)
+
+type EagerTrendAnalysis = {
+  readonly period?: string | null;
+  readonly direction?: string | null;
+  readonly percentChange?: number | null;
+  readonly significance?: string | null;
+  readonly insights?: (string | null)[] | null;
+}
+
+type LazyTrendAnalysis = {
+  readonly period?: string | null;
+  readonly direction?: string | null;
+  readonly percentChange?: number | null;
+  readonly significance?: string | null;
+  readonly insights?: (string | null)[] | null;
+}
+
+export declare type TrendAnalysis = LazyLoading extends LazyLoadingDisabled ? EagerTrendAnalysis : LazyTrendAnalysis
+
+export declare const TrendAnalysis: (new (init: ModelInit<TrendAnalysis>) => TrendAnalysis)
 
 type EagerScraperControlResponse = {
   readonly success: boolean;
@@ -832,62 +1433,6 @@ type LazyScraperMetrics = {
 export declare type ScraperMetrics = LazyLoading extends LazyLoadingDisabled ? EagerScraperMetrics : LazyScraperMetrics
 
 export declare const ScraperMetrics: (new (init: ModelInit<ScraperMetrics>) => ScraperMetrics)
-
-type EagerErrorMetric = {
-  readonly errorType: string;
-  readonly count: number;
-  readonly urls?: string[] | null;
-}
-
-type LazyErrorMetric = {
-  readonly errorType: string;
-  readonly count: number;
-  readonly urls?: string[] | null;
-}
-
-export declare type ErrorMetric = LazyLoading extends LazyLoadingDisabled ? EagerErrorMetric : LazyErrorMetric
-
-export declare const ErrorMetric: (new (init: ModelInit<ErrorMetric>) => ErrorMetric)
-
-type EagerHourlyMetric = {
-  readonly hour: string;
-  readonly jobCount: number;
-  readonly urlsScraped: number;
-  readonly successRate: number;
-}
-
-type LazyHourlyMetric = {
-  readonly hour: string;
-  readonly jobCount: number;
-  readonly urlsScraped: number;
-  readonly successRate: number;
-}
-
-export declare type HourlyMetric = LazyLoading extends LazyLoadingDisabled ? EagerHourlyMetric : LazyHourlyMetric
-
-export declare const HourlyMetric: (new (init: ModelInit<HourlyMetric>) => HourlyMetric)
-
-type EagerEntityScraperMetrics = {
-  readonly entityId?: string | null;
-  readonly entityName: string;
-  readonly totalJobs: number;
-  readonly successfulJobs: number;
-  readonly failedJobs: number;
-  readonly totalURLsScraped: number;
-}
-
-type LazyEntityScraperMetrics = {
-  readonly entityId?: string | null;
-  readonly entityName: string;
-  readonly totalJobs: number;
-  readonly successfulJobs: number;
-  readonly failedJobs: number;
-  readonly totalURLsScraped: number;
-}
-
-export declare type EntityScraperMetrics = LazyLoading extends LazyLoadingDisabled ? EagerEntityScraperMetrics : LazyEntityScraperMetrics
-
-export declare const EntityScraperMetrics: (new (init: ModelInit<EntityScraperMetrics>) => EntityScraperMetrics)
 
 type EagerScrapedGameSummary = {
   readonly id: string;
@@ -1219,94 +1764,6 @@ export declare type ScrapedVenueMatchDetails = LazyLoading extends LazyLoadingDi
 
 export declare const ScrapedVenueMatchDetails: (new (init: ModelInit<ScrapedVenueMatchDetails>) => ScrapedVenueMatchDetails)
 
-type EagerVenueMatch = {
-  readonly autoAssignedVenue?: ScrapedVenueMatchDetails | null;
-  readonly suggestions?: (ScrapedVenueMatchDetails | null)[] | null;
-}
-
-type LazyVenueMatch = {
-  readonly autoAssignedVenue?: ScrapedVenueMatchDetails | null;
-  readonly suggestions?: (ScrapedVenueMatchDetails | null)[] | null;
-}
-
-export declare type VenueMatch = LazyLoading extends LazyLoadingDisabled ? EagerVenueMatch : LazyVenueMatch
-
-export declare const VenueMatch: (new (init: ModelInit<VenueMatch>) => VenueMatch)
-
-type EagerReScrapeResult = {
-  readonly name?: string | null;
-  readonly gameStartDateTime?: string | null;
-  readonly gameEndDateTime?: string | null;
-  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
-  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
-  readonly gameType?: GameType | keyof typeof GameType | null;
-  readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
-  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
-  readonly prizepoolPaid?: number | null;
-  readonly prizepoolCalculated?: number | null;
-  readonly buyIn?: number | null;
-  readonly rake?: number | null;
-  readonly startingStack?: number | null;
-  readonly hasGuarantee?: boolean | null;
-  readonly guaranteeAmount?: number | null;
-  readonly totalUniquePlayers?: number | null;
-  readonly totalInitialEntries?: number | null;
-  readonly totalEntries?: number | null;
-  readonly totalRebuys?: number | null;
-  readonly totalAddons?: number | null;
-  readonly totalDuration?: string | null;
-  readonly playersRemaining?: number | null;
-  readonly seriesName?: string | null;
-  readonly gameTags?: (string | null)[] | null;
-  readonly venueMatch?: VenueMatch | null;
-  readonly existingGameId?: string | null;
-  readonly doNotScrape?: boolean | null;
-  readonly sourceUrl?: string | null;
-  readonly tournamentId?: number | null;
-  readonly entityId?: string | null;
-  readonly s3Key?: string | null;
-  readonly reScrapedAt?: string | null;
-}
-
-type LazyReScrapeResult = {
-  readonly name?: string | null;
-  readonly gameStartDateTime?: string | null;
-  readonly gameEndDateTime?: string | null;
-  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
-  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
-  readonly gameType?: GameType | keyof typeof GameType | null;
-  readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
-  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
-  readonly prizepoolPaid?: number | null;
-  readonly prizepoolCalculated?: number | null;
-  readonly buyIn?: number | null;
-  readonly rake?: number | null;
-  readonly startingStack?: number | null;
-  readonly hasGuarantee?: boolean | null;
-  readonly guaranteeAmount?: number | null;
-  readonly totalUniquePlayers?: number | null;
-  readonly totalInitialEntries?: number | null;
-  readonly totalEntries?: number | null;
-  readonly totalRebuys?: number | null;
-  readonly totalAddons?: number | null;
-  readonly totalDuration?: string | null;
-  readonly playersRemaining?: number | null;
-  readonly seriesName?: string | null;
-  readonly gameTags?: (string | null)[] | null;
-  readonly venueMatch?: VenueMatch | null;
-  readonly existingGameId?: string | null;
-  readonly doNotScrape?: boolean | null;
-  readonly sourceUrl?: string | null;
-  readonly tournamentId?: number | null;
-  readonly entityId?: string | null;
-  readonly s3Key?: string | null;
-  readonly reScrapedAt?: string | null;
-}
-
-export declare type ReScrapeResult = LazyLoading extends LazyLoadingDisabled ? EagerReScrapeResult : LazyReScrapeResult
-
-export declare const ReScrapeResult: (new (init: ModelInit<ReScrapeResult>) => ReScrapeResult)
-
 type EagerScraperJobsReport = {
   readonly items?: (ScraperJob | null)[] | null;
   readonly nextToken?: string | null;
@@ -1325,28 +1782,6 @@ export declare type ScraperJobsReport = LazyLoading extends LazyLoadingDisabled 
 
 export declare const ScraperJobsReport: (new (init: ModelInit<ScraperJobsReport>) => ScraperJobsReport)
 
-type EagerEntityJobSummary = {
-  readonly entityId: string;
-  readonly entityName?: string | null;
-  readonly totalJobs?: number | null;
-  readonly runningJobs?: number | null;
-  readonly completedJobs?: number | null;
-  readonly failedJobs?: number | null;
-}
-
-type LazyEntityJobSummary = {
-  readonly entityId: string;
-  readonly entityName?: string | null;
-  readonly totalJobs?: number | null;
-  readonly runningJobs?: number | null;
-  readonly completedJobs?: number | null;
-  readonly failedJobs?: number | null;
-}
-
-export declare type EntityJobSummary = LazyLoading extends LazyLoadingDisabled ? EagerEntityJobSummary : LazyEntityJobSummary
-
-export declare const EntityJobSummary: (new (init: ModelInit<EntityJobSummary>) => EntityJobSummary)
-
 type EagerGapRange = {
   readonly start: number;
   readonly end: number;
@@ -1362,36 +1797,6 @@ type LazyGapRange = {
 export declare type GapRange = LazyLoading extends LazyLoadingDisabled ? EagerGapRange : LazyGapRange
 
 export declare const GapRange: (new (init: ModelInit<GapRange>) => GapRange)
-
-type EagerEntityScrapingStatus = {
-  readonly entityId: string;
-  readonly entityName?: string | null;
-  readonly lowestTournamentId?: number | null;
-  readonly highestTournamentId?: number | null;
-  readonly totalGamesStored: number;
-  readonly unfinishedGameCount: number;
-  readonly gaps: GapRange[];
-  readonly gapSummary: GapSummary;
-  readonly lastUpdated: string;
-  readonly cacheAge?: number | null;
-}
-
-type LazyEntityScrapingStatus = {
-  readonly entityId: string;
-  readonly entityName?: string | null;
-  readonly lowestTournamentId?: number | null;
-  readonly highestTournamentId?: number | null;
-  readonly totalGamesStored: number;
-  readonly unfinishedGameCount: number;
-  readonly gaps: GapRange[];
-  readonly gapSummary: GapSummary;
-  readonly lastUpdated: string;
-  readonly cacheAge?: number | null;
-}
-
-export declare type EntityScrapingStatus = LazyLoading extends LazyLoadingDisabled ? EagerEntityScrapingStatus : LazyEntityScrapingStatus
-
-export declare const EntityScrapingStatus: (new (init: ModelInit<EntityScrapingStatus>) => EntityScrapingStatus)
 
 type EagerGapSummary = {
   readonly totalGaps: number;
@@ -1414,26 +1819,6 @@ type LazyGapSummary = {
 export declare type GapSummary = LazyLoading extends LazyLoadingDisabled ? EagerGapSummary : LazyGapSummary
 
 export declare const GapSummary: (new (init: ModelInit<GapSummary>) => GapSummary)
-
-type EagerTournamentIdBounds = {
-  readonly entityId: string;
-  readonly lowestId?: number | null;
-  readonly highestId?: number | null;
-  readonly totalCount: number;
-  readonly lastUpdated: string;
-}
-
-type LazyTournamentIdBounds = {
-  readonly entityId: string;
-  readonly lowestId?: number | null;
-  readonly highestId?: number | null;
-  readonly totalCount: number;
-  readonly lastUpdated: string;
-}
-
-export declare type TournamentIdBounds = LazyLoading extends LazyLoadingDisabled ? EagerTournamentIdBounds : LazyTournamentIdBounds
-
-export declare const TournamentIdBounds: (new (init: ModelInit<TournamentIdBounds>) => TournamentIdBounds)
 
 type EagerS3VersionHistory = {
   readonly s3Key: string;
@@ -1480,24 +1865,6 @@ type LazyCachingStatsResponse = {
 export declare type CachingStatsResponse = LazyLoading extends LazyLoadingDisabled ? EagerCachingStatsResponse : LazyCachingStatsResponse
 
 export declare const CachingStatsResponse: (new (init: ModelInit<CachingStatsResponse>) => CachingStatsResponse)
-
-type EagerCacheActivityLog = {
-  readonly url: string;
-  readonly timestamp: string;
-  readonly action: string;
-  readonly reason?: string | null;
-}
-
-type LazyCacheActivityLog = {
-  readonly url: string;
-  readonly timestamp: string;
-  readonly action: string;
-  readonly reason?: string | null;
-}
-
-export declare type CacheActivityLog = LazyLoading extends LazyLoadingDisabled ? EagerCacheActivityLog : LazyCacheActivityLog
-
-export declare const CacheActivityLog: (new (init: ModelInit<CacheActivityLog>) => CacheActivityLog)
 
 type EagerS3ContentResponse = {
   readonly s3Key: string;
@@ -1547,371 +1914,49 @@ export declare type S3StorageListResponse = LazyLoading extends LazyLoadingDisab
 
 export declare const S3StorageListResponse: (new (init: ModelInit<S3StorageListResponse>) => S3StorageListResponse)
 
-type EagerTournamentLevel = {
-  readonly levelNumber: number;
-  readonly durationMinutes?: number | null;
-  readonly smallBlind?: number | null;
-  readonly bigBlind?: number | null;
-  readonly ante?: number | null;
+type EagerS3StorageConnection = {
+  readonly items: S3Storage[];
+  readonly nextToken?: string | null;
 }
 
-type LazyTournamentLevel = {
-  readonly levelNumber: number;
-  readonly durationMinutes?: number | null;
-  readonly smallBlind?: number | null;
-  readonly bigBlind?: number | null;
-  readonly ante?: number | null;
+type LazyS3StorageConnection = {
+  readonly items: AsyncCollection<S3Storage>;
+  readonly nextToken?: string | null;
 }
 
-export declare type TournamentLevel = LazyLoading extends LazyLoadingDisabled ? EagerTournamentLevel : LazyTournamentLevel
+export declare type S3StorageConnection = LazyLoading extends LazyLoadingDisabled ? EagerS3StorageConnection : LazyS3StorageConnection
 
-export declare const TournamentLevel: (new (init: ModelInit<TournamentLevel>) => TournamentLevel)
+export declare const S3StorageConnection: (new (init: ModelInit<S3StorageConnection>) => S3StorageConnection)
 
-type EagerBreak = {
-  readonly levelNumberBeforeBreak: number;
-  readonly durationMinutes?: number | null;
+type EagerScraperJobConnection = {
+  readonly items?: ScraperJob[] | null;
+  readonly nextToken?: string | null;
 }
 
-type LazyBreak = {
-  readonly levelNumberBeforeBreak: number;
-  readonly durationMinutes?: number | null;
+type LazyScraperJobConnection = {
+  readonly items: AsyncCollection<ScraperJob>;
+  readonly nextToken?: string | null;
 }
 
-export declare type Break = LazyLoading extends LazyLoadingDisabled ? EagerBreak : LazyBreak
+export declare type ScraperJobConnection = LazyLoading extends LazyLoadingDisabled ? EagerScraperJobConnection : LazyScraperJobConnection
 
-export declare const Break: (new (init: ModelInit<Break>) => Break)
+export declare const ScraperJobConnection: (new (init: ModelInit<ScraperJobConnection>) => ScraperJobConnection)
 
-type EagerClientMetricResponse = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly userId?: string | null;
-}
-
-type LazyClientMetricResponse = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly userId?: string | null;
-}
-
-export declare type ClientMetricResponse = LazyLoading extends LazyLoadingDisabled ? EagerClientMetricResponse : LazyClientMetricResponse
-
-export declare const ClientMetricResponse: (new (init: ModelInit<ClientMetricResponse>) => ClientMetricResponse)
-
-type EagerUserMetricsSummary = {
-  readonly userId: string;
-  readonly userName?: string | null;
-  readonly totalActions?: number | null;
-  readonly totalPageViews?: number | null;
-  readonly totalErrors?: number | null;
-  readonly lastActive?: string | null;
-  readonly mostUsedFeature?: string | null;
-}
-
-type LazyUserMetricsSummary = {
-  readonly userId: string;
-  readonly userName?: string | null;
-  readonly totalActions?: number | null;
-  readonly totalPageViews?: number | null;
-  readonly totalErrors?: number | null;
-  readonly lastActive?: string | null;
-  readonly mostUsedFeature?: string | null;
-}
-
-export declare type UserMetricsSummary = LazyLoading extends LazyLoadingDisabled ? EagerUserMetricsSummary : LazyUserMetricsSummary
-
-export declare const UserMetricsSummary: (new (init: ModelInit<UserMetricsSummary>) => UserMetricsSummary)
-
-type EagerDatabaseMetric = {
-  readonly timestamp: string;
-  readonly functionName: string;
-  readonly operation: string;
-  readonly table: string;
-  readonly success: boolean;
-  readonly duration?: number | null;
-  readonly count?: number | null;
-  readonly entityId?: string | null;
-}
-
-type LazyDatabaseMetric = {
-  readonly timestamp: string;
-  readonly functionName: string;
-  readonly operation: string;
-  readonly table: string;
-  readonly success: boolean;
-  readonly duration?: number | null;
-  readonly count?: number | null;
-  readonly entityId?: string | null;
-}
-
-export declare type DatabaseMetric = LazyLoading extends LazyLoadingDisabled ? EagerDatabaseMetric : LazyDatabaseMetric
-
-export declare const DatabaseMetric: (new (init: ModelInit<DatabaseMetric>) => DatabaseMetric)
-
-type EagerDatabaseMetricsResponse = {
-  readonly metrics: DatabaseMetric[];
-}
-
-type LazyDatabaseMetricsResponse = {
-  readonly metrics: DatabaseMetric[];
-}
-
-export declare type DatabaseMetricsResponse = LazyLoading extends LazyLoadingDisabled ? EagerDatabaseMetricsResponse : LazyDatabaseMetricsResponse
-
-export declare const DatabaseMetricsResponse: (new (init: ModelInit<DatabaseMetricsResponse>) => DatabaseMetricsResponse)
-
-type EagerAllCountsResult = {
-  readonly playerCount?: number | null;
-  readonly playerSummaryCount?: number | null;
-  readonly playerEntryCount?: number | null;
-  readonly playerResultCount?: number | null;
-  readonly playerVenueCount?: number | null;
-  readonly playerTransactionCount?: number | null;
-  readonly playerCreditsCount?: number | null;
-  readonly playerPointsCount?: number | null;
-  readonly playerTicketCount?: number | null;
-  readonly playerMarketingPreferencesCount?: number | null;
-  readonly playerMarketingMessageCount?: number | null;
-  readonly gameCount?: number | null;
-  readonly tournamentStructureCount?: number | null;
-}
-
-type LazyAllCountsResult = {
-  readonly playerCount?: number | null;
-  readonly playerSummaryCount?: number | null;
-  readonly playerEntryCount?: number | null;
-  readonly playerResultCount?: number | null;
-  readonly playerVenueCount?: number | null;
-  readonly playerTransactionCount?: number | null;
-  readonly playerCreditsCount?: number | null;
-  readonly playerPointsCount?: number | null;
-  readonly playerTicketCount?: number | null;
-  readonly playerMarketingPreferencesCount?: number | null;
-  readonly playerMarketingMessageCount?: number | null;
-  readonly gameCount?: number | null;
-  readonly tournamentStructureCount?: number | null;
-}
-
-export declare type AllCountsResult = LazyLoading extends LazyLoadingDisabled ? EagerAllCountsResult : LazyAllCountsResult
-
-export declare const AllCountsResult: (new (init: ModelInit<AllCountsResult>) => AllCountsResult)
-
-type EagerEntityVenueAssignmentSummary = {
-  readonly entityId?: string | null;
-  readonly entityName: string;
-  readonly totalGames?: number | null;
-  readonly gamesWithVenue?: number | null;
-  readonly gamesNeedingVenue?: number | null;
-}
-
-type LazyEntityVenueAssignmentSummary = {
-  readonly entityId?: string | null;
-  readonly entityName: string;
-  readonly totalGames?: number | null;
-  readonly gamesWithVenue?: number | null;
-  readonly gamesNeedingVenue?: number | null;
-}
-
-export declare type EntityVenueAssignmentSummary = LazyLoading extends LazyLoadingDisabled ? EagerEntityVenueAssignmentSummary : LazyEntityVenueAssignmentSummary
-
-export declare const EntityVenueAssignmentSummary: (new (init: ModelInit<EntityVenueAssignmentSummary>) => EntityVenueAssignmentSummary)
-
-type EagerVenueAssignmentSummary = {
-  readonly totalGames?: number | null;
-  readonly gamesWithVenue?: number | null;
-  readonly gamesNeedingVenue?: number | null;
-  readonly pendingAssignments?: number | null;
-  readonly byEntity?: (EntityVenueAssignmentSummary | null)[] | null;
-}
-
-type LazyVenueAssignmentSummary = {
-  readonly totalGames?: number | null;
-  readonly gamesWithVenue?: number | null;
-  readonly gamesNeedingVenue?: number | null;
-  readonly pendingAssignments?: number | null;
-  readonly byEntity?: (EntityVenueAssignmentSummary | null)[] | null;
-}
-
-export declare type VenueAssignmentSummary = LazyLoading extends LazyLoadingDisabled ? EagerVenueAssignmentSummary : LazyVenueAssignmentSummary
-
-export declare const VenueAssignmentSummary: (new (init: ModelInit<VenueAssignmentSummary>) => VenueAssignmentSummary)
-
-type EagerVenueAssignmentResult = {
-  readonly success: boolean;
-  readonly gameId: string;
-  readonly venueId: string;
-  readonly affectedRecords?: AffectedRecords | null;
-  readonly error?: string | null;
-}
-
-type LazyVenueAssignmentResult = {
-  readonly success: boolean;
-  readonly gameId: string;
-  readonly venueId: string;
-  readonly affectedRecords?: AffectedRecords | null;
-  readonly error?: string | null;
-}
-
-export declare type VenueAssignmentResult = LazyLoading extends LazyLoadingDisabled ? EagerVenueAssignmentResult : LazyVenueAssignmentResult
-
-export declare const VenueAssignmentResult: (new (init: ModelInit<VenueAssignmentResult>) => VenueAssignmentResult)
-
-type EagerAffectedRecords = {
-  readonly gameUpdated?: boolean | null;
-  readonly playerEntriesUpdated?: number | null;
-  readonly playerVenueRecordsCreated?: number | null;
-  readonly playersWithRegistrationUpdated?: number | null;
-  readonly playerSummariesUpdated?: number | null;
-}
-
-type LazyAffectedRecords = {
-  readonly gameUpdated?: boolean | null;
-  readonly playerEntriesUpdated?: number | null;
-  readonly playerVenueRecordsCreated?: number | null;
-  readonly playersWithRegistrationUpdated?: number | null;
-  readonly playerSummariesUpdated?: number | null;
-}
-
-export declare type AffectedRecords = LazyLoading extends LazyLoadingDisabled ? EagerAffectedRecords : LazyAffectedRecords
-
-export declare const AffectedRecords: (new (init: ModelInit<AffectedRecords>) => AffectedRecords)
-
-type EagerBatchVenueAssignmentResult = {
-  readonly successful?: (VenueAssignmentResult | null)[] | null;
-  readonly failed?: (VenueAssignmentResult | null)[] | null;
-  readonly totalProcessed?: number | null;
-}
-
-type LazyBatchVenueAssignmentResult = {
-  readonly successful?: (VenueAssignmentResult | null)[] | null;
-  readonly failed?: (VenueAssignmentResult | null)[] | null;
-  readonly totalProcessed?: number | null;
-}
-
-export declare type BatchVenueAssignmentResult = LazyLoading extends LazyLoadingDisabled ? EagerBatchVenueAssignmentResult : LazyBatchVenueAssignmentResult
-
-export declare const BatchVenueAssignmentResult: (new (init: ModelInit<BatchVenueAssignmentResult>) => BatchVenueAssignmentResult)
-
-type EagerGamesNeedingVenueResponse = {
-  readonly items?: (Game | null)[] | null;
+type EagerScrapeURLConnection = {
+  readonly items?: (ScrapeURL | null)[] | null;
   readonly nextToken?: string | null;
   readonly totalCount?: number | null;
 }
 
-type LazyGamesNeedingVenueResponse = {
-  readonly items: AsyncCollection<Game>;
+type LazyScrapeURLConnection = {
+  readonly items: AsyncCollection<ScrapeURL>;
   readonly nextToken?: string | null;
   readonly totalCount?: number | null;
 }
 
-export declare type GamesNeedingVenueResponse = LazyLoading extends LazyLoadingDisabled ? EagerGamesNeedingVenueResponse : LazyGamesNeedingVenueResponse
+export declare type ScrapeURLConnection = LazyLoading extends LazyLoadingDisabled ? EagerScrapeURLConnection : LazyScrapeURLConnection
 
-export declare const GamesNeedingVenueResponse: (new (init: ModelInit<GamesNeedingVenueResponse>) => GamesNeedingVenueResponse)
-
-type EagerReassignGameVenueResult = {
-  readonly success: boolean;
-  readonly status: string;
-  readonly message?: string | null;
-  readonly gameId?: string | null;
-  readonly taskId?: string | null;
-  readonly oldVenueId?: string | null;
-  readonly newVenueId?: string | null;
-  readonly oldEntityId?: string | null;
-  readonly newEntityId?: string | null;
-  readonly venueCloned?: boolean | null;
-  readonly clonedVenueId?: string | null;
-  readonly recordsUpdated?: string | null;
-}
-
-type LazyReassignGameVenueResult = {
-  readonly success: boolean;
-  readonly status: string;
-  readonly message?: string | null;
-  readonly gameId?: string | null;
-  readonly taskId?: string | null;
-  readonly oldVenueId?: string | null;
-  readonly newVenueId?: string | null;
-  readonly oldEntityId?: string | null;
-  readonly newEntityId?: string | null;
-  readonly venueCloned?: boolean | null;
-  readonly clonedVenueId?: string | null;
-  readonly recordsUpdated?: string | null;
-}
-
-export declare type ReassignGameVenueResult = LazyLoading extends LazyLoadingDisabled ? EagerReassignGameVenueResult : LazyReassignGameVenueResult
-
-export declare const ReassignGameVenueResult: (new (init: ModelInit<ReassignGameVenueResult>) => ReassignGameVenueResult)
-
-type EagerBulkReassignGameVenuesResult = {
-  readonly success: boolean;
-  readonly status: string;
-  readonly message?: string | null;
-  readonly taskId?: string | null;
-  readonly gameCount?: number | null;
-  readonly newVenueId?: string | null;
-  readonly reassignEntity?: boolean | null;
-}
-
-type LazyBulkReassignGameVenuesResult = {
-  readonly success: boolean;
-  readonly status: string;
-  readonly message?: string | null;
-  readonly taskId?: string | null;
-  readonly gameCount?: number | null;
-  readonly newVenueId?: string | null;
-  readonly reassignEntity?: boolean | null;
-}
-
-export declare type BulkReassignGameVenuesResult = LazyLoading extends LazyLoadingDisabled ? EagerBulkReassignGameVenuesResult : LazyBulkReassignGameVenuesResult
-
-export declare const BulkReassignGameVenuesResult: (new (init: ModelInit<BulkReassignGameVenuesResult>) => BulkReassignGameVenuesResult)
-
-type EagerGetReassignmentStatusResult = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly task?: BackgroundTaskInfo | null;
-}
-
-type LazyGetReassignmentStatusResult = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly task?: BackgroundTaskInfo | null;
-}
-
-export declare type GetReassignmentStatusResult = LazyLoading extends LazyLoadingDisabled ? EagerGetReassignmentStatusResult : LazyGetReassignmentStatusResult
-
-export declare const GetReassignmentStatusResult: (new (init: ModelInit<GetReassignmentStatusResult>) => GetReassignmentStatusResult)
-
-type EagerBackgroundTaskInfo = {
-  readonly id: string;
-  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
-  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
-  readonly targetCount?: number | null;
-  readonly processedCount?: number | null;
-  readonly progressPercent?: number | null;
-  readonly result?: string | null;
-  readonly errorMessage?: string | null;
-  readonly createdAt: string;
-  readonly startedAt?: string | null;
-  readonly completedAt?: string | null;
-}
-
-type LazyBackgroundTaskInfo = {
-  readonly id: string;
-  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
-  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
-  readonly targetCount?: number | null;
-  readonly processedCount?: number | null;
-  readonly progressPercent?: number | null;
-  readonly result?: string | null;
-  readonly errorMessage?: string | null;
-  readonly createdAt: string;
-  readonly startedAt?: string | null;
-  readonly completedAt?: string | null;
-}
-
-export declare type BackgroundTaskInfo = LazyLoading extends LazyLoadingDisabled ? EagerBackgroundTaskInfo : LazyBackgroundTaskInfo
-
-export declare const BackgroundTaskInfo: (new (init: ModelInit<BackgroundTaskInfo>) => BackgroundTaskInfo)
+export declare const ScrapeURLConnection: (new (init: ModelInit<ScrapeURLConnection>) => ScrapeURLConnection)
 
 type EagerSocialFeedConnection = {
   readonly items: SocialPost[];
@@ -2003,6 +2048,370 @@ export declare type SocialScrapeResult = LazyLoading extends LazyLoadingDisabled
 
 export declare const SocialScrapeResult: (new (init: ModelInit<SocialScrapeResult>) => SocialScrapeResult)
 
+type EagerUserManagementResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly user?: User | null;
+  readonly temporaryPassword?: string | null;
+}
+
+type LazyUserManagementResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly user: AsyncItem<User | undefined>;
+  readonly temporaryPassword?: string | null;
+}
+
+export declare type UserManagementResponse = LazyLoading extends LazyLoadingDisabled ? EagerUserManagementResponse : LazyUserManagementResponse
+
+export declare const UserManagementResponse: (new (init: ModelInit<UserManagementResponse>) => UserManagementResponse)
+
+type EagerUsersConnection = {
+  readonly items: User[];
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+type LazyUsersConnection = {
+  readonly items: AsyncCollection<User>;
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+export declare type UsersConnection = LazyLoading extends LazyLoadingDisabled ? EagerUsersConnection : LazyUsersConnection
+
+export declare const UsersConnection: (new (init: ModelInit<UsersConnection>) => UsersConnection)
+
+type EagerUserMetricsSummary = {
+  readonly userId: string;
+  readonly userName?: string | null;
+  readonly totalActions?: number | null;
+  readonly totalPageViews?: number | null;
+  readonly totalErrors?: number | null;
+  readonly lastActive?: string | null;
+  readonly mostUsedFeature?: string | null;
+}
+
+type LazyUserMetricsSummary = {
+  readonly userId: string;
+  readonly userName?: string | null;
+  readonly totalActions?: number | null;
+  readonly totalPageViews?: number | null;
+  readonly totalErrors?: number | null;
+  readonly lastActive?: string | null;
+  readonly mostUsedFeature?: string | null;
+}
+
+export declare type UserMetricsSummary = LazyLoading extends LazyLoadingDisabled ? EagerUserMetricsSummary : LazyUserMetricsSummary
+
+export declare const UserMetricsSummary: (new (init: ModelInit<UserMetricsSummary>) => UserMetricsSummary)
+
+type EagerDetectedMultiDayPattern = {
+  readonly isMultiDay: boolean;
+  readonly detectionSource?: string | null;
+  readonly parsedDayNumber?: number | null;
+  readonly parsedFlightLetter?: string | null;
+  readonly isFinalDay?: boolean | null;
+  readonly derivedParentName: string;
+}
+
+type LazyDetectedMultiDayPattern = {
+  readonly isMultiDay: boolean;
+  readonly detectionSource?: string | null;
+  readonly parsedDayNumber?: number | null;
+  readonly parsedFlightLetter?: string | null;
+  readonly isFinalDay?: boolean | null;
+  readonly derivedParentName: string;
+}
+
+export declare type DetectedMultiDayPattern = LazyLoading extends LazyLoadingDisabled ? EagerDetectedMultiDayPattern : LazyDetectedMultiDayPattern
+
+export declare const DetectedMultiDayPattern: (new (init: ModelInit<DetectedMultiDayPattern>) => DetectedMultiDayPattern)
+
+type EagerResetPasswordResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly temporaryPassword?: string | null;
+}
+
+type LazyResetPasswordResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly temporaryPassword?: string | null;
+}
+
+export declare type ResetPasswordResponse = LazyLoading extends LazyLoadingDisabled ? EagerResetPasswordResponse : LazyResetPasswordResponse
+
+export declare const ResetPasswordResponse: (new (init: ModelInit<ResetPasswordResponse>) => ResetPasswordResponse)
+
+type EagerErrorMetric = {
+  readonly errorType: string;
+  readonly count: number;
+  readonly urls?: string[] | null;
+}
+
+type LazyErrorMetric = {
+  readonly errorType: string;
+  readonly count: number;
+  readonly urls?: string[] | null;
+}
+
+export declare type ErrorMetric = LazyLoading extends LazyLoadingDisabled ? EagerErrorMetric : LazyErrorMetric
+
+export declare const ErrorMetric: (new (init: ModelInit<ErrorMetric>) => ErrorMetric)
+
+type EagerHourlyMetric = {
+  readonly hour: string;
+  readonly jobCount: number;
+  readonly urlsScraped: number;
+  readonly successRate: number;
+}
+
+type LazyHourlyMetric = {
+  readonly hour: string;
+  readonly jobCount: number;
+  readonly urlsScraped: number;
+  readonly successRate: number;
+}
+
+export declare type HourlyMetric = LazyLoading extends LazyLoadingDisabled ? EagerHourlyMetric : LazyHourlyMetric
+
+export declare const HourlyMetric: (new (init: ModelInit<HourlyMetric>) => HourlyMetric)
+
+type EagerEntityScraperMetrics = {
+  readonly entityId?: string | null;
+  readonly entityName: string;
+  readonly totalJobs: number;
+  readonly successfulJobs: number;
+  readonly failedJobs: number;
+  readonly totalURLsScraped: number;
+}
+
+type LazyEntityScraperMetrics = {
+  readonly entityId?: string | null;
+  readonly entityName: string;
+  readonly totalJobs: number;
+  readonly successfulJobs: number;
+  readonly failedJobs: number;
+  readonly totalURLsScraped: number;
+}
+
+export declare type EntityScraperMetrics = LazyLoading extends LazyLoadingDisabled ? EagerEntityScraperMetrics : LazyEntityScraperMetrics
+
+export declare const EntityScraperMetrics: (new (init: ModelInit<EntityScraperMetrics>) => EntityScraperMetrics)
+
+type EagerEntityJobSummary = {
+  readonly entityId: string;
+  readonly entityName?: string | null;
+  readonly totalJobs?: number | null;
+  readonly runningJobs?: number | null;
+  readonly completedJobs?: number | null;
+  readonly failedJobs?: number | null;
+}
+
+type LazyEntityJobSummary = {
+  readonly entityId: string;
+  readonly entityName?: string | null;
+  readonly totalJobs?: number | null;
+  readonly runningJobs?: number | null;
+  readonly completedJobs?: number | null;
+  readonly failedJobs?: number | null;
+}
+
+export declare type EntityJobSummary = LazyLoading extends LazyLoadingDisabled ? EagerEntityJobSummary : LazyEntityJobSummary
+
+export declare const EntityJobSummary: (new (init: ModelInit<EntityJobSummary>) => EntityJobSummary)
+
+type EagerTournamentIdBounds = {
+  readonly entityId: string;
+  readonly lowestId?: number | null;
+  readonly highestId?: number | null;
+  readonly totalCount: number;
+  readonly lastUpdated: string;
+}
+
+type LazyTournamentIdBounds = {
+  readonly entityId: string;
+  readonly lowestId?: number | null;
+  readonly highestId?: number | null;
+  readonly totalCount: number;
+  readonly lastUpdated: string;
+}
+
+export declare type TournamentIdBounds = LazyLoading extends LazyLoadingDisabled ? EagerTournamentIdBounds : LazyTournamentIdBounds
+
+export declare const TournamentIdBounds: (new (init: ModelInit<TournamentIdBounds>) => TournamentIdBounds)
+
+type EagerCacheActivityLog = {
+  readonly url: string;
+  readonly timestamp: string;
+  readonly action: string;
+  readonly reason?: string | null;
+}
+
+type LazyCacheActivityLog = {
+  readonly url: string;
+  readonly timestamp: string;
+  readonly action: string;
+  readonly reason?: string | null;
+}
+
+export declare type CacheActivityLog = LazyLoading extends LazyLoadingDisabled ? EagerCacheActivityLog : LazyCacheActivityLog
+
+export declare const CacheActivityLog: (new (init: ModelInit<CacheActivityLog>) => CacheActivityLog)
+
+type EagerTournamentLevel = {
+  readonly levelNumber: number;
+  readonly durationMinutes?: number | null;
+  readonly smallBlind?: number | null;
+  readonly bigBlind?: number | null;
+  readonly ante?: number | null;
+}
+
+type LazyTournamentLevel = {
+  readonly levelNumber: number;
+  readonly durationMinutes?: number | null;
+  readonly smallBlind?: number | null;
+  readonly bigBlind?: number | null;
+  readonly ante?: number | null;
+}
+
+export declare type TournamentLevel = LazyLoading extends LazyLoadingDisabled ? EagerTournamentLevel : LazyTournamentLevel
+
+export declare const TournamentLevel: (new (init: ModelInit<TournamentLevel>) => TournamentLevel)
+
+type EagerBreak = {
+  readonly levelNumberBeforeBreak: number;
+  readonly durationMinutes?: number | null;
+}
+
+type LazyBreak = {
+  readonly levelNumberBeforeBreak: number;
+  readonly durationMinutes?: number | null;
+}
+
+export declare type Break = LazyLoading extends LazyLoadingDisabled ? EagerBreak : LazyBreak
+
+export declare const Break: (new (init: ModelInit<Break>) => Break)
+
+type EagerClientMetricResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly userId?: string | null;
+}
+
+type LazyClientMetricResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly userId?: string | null;
+}
+
+export declare type ClientMetricResponse = LazyLoading extends LazyLoadingDisabled ? EagerClientMetricResponse : LazyClientMetricResponse
+
+export declare const ClientMetricResponse: (new (init: ModelInit<ClientMetricResponse>) => ClientMetricResponse)
+
+type EagerDatabaseMetric = {
+  readonly timestamp: string;
+  readonly functionName: string;
+  readonly operation: string;
+  readonly table: string;
+  readonly success: boolean;
+  readonly duration?: number | null;
+  readonly count?: number | null;
+  readonly entityId?: string | null;
+}
+
+type LazyDatabaseMetric = {
+  readonly timestamp: string;
+  readonly functionName: string;
+  readonly operation: string;
+  readonly table: string;
+  readonly success: boolean;
+  readonly duration?: number | null;
+  readonly count?: number | null;
+  readonly entityId?: string | null;
+}
+
+export declare type DatabaseMetric = LazyLoading extends LazyLoadingDisabled ? EagerDatabaseMetric : LazyDatabaseMetric
+
+export declare const DatabaseMetric: (new (init: ModelInit<DatabaseMetric>) => DatabaseMetric)
+
+type EagerDatabaseMetricsResponse = {
+  readonly metrics: DatabaseMetric[];
+}
+
+type LazyDatabaseMetricsResponse = {
+  readonly metrics: DatabaseMetric[];
+}
+
+export declare type DatabaseMetricsResponse = LazyLoading extends LazyLoadingDisabled ? EagerDatabaseMetricsResponse : LazyDatabaseMetricsResponse
+
+export declare const DatabaseMetricsResponse: (new (init: ModelInit<DatabaseMetricsResponse>) => DatabaseMetricsResponse)
+
+type EagerGamesNeedingVenueResponse = {
+  readonly items?: (Game | null)[] | null;
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+type LazyGamesNeedingVenueResponse = {
+  readonly items: AsyncCollection<Game>;
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+export declare type GamesNeedingVenueResponse = LazyLoading extends LazyLoadingDisabled ? EagerGamesNeedingVenueResponse : LazyGamesNeedingVenueResponse
+
+export declare const GamesNeedingVenueResponse: (new (init: ModelInit<GamesNeedingVenueResponse>) => GamesNeedingVenueResponse)
+
+type EagerGetReassignmentStatusResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly task?: BackgroundTaskInfo | null;
+}
+
+type LazyGetReassignmentStatusResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly task?: BackgroundTaskInfo | null;
+}
+
+export declare type GetReassignmentStatusResult = LazyLoading extends LazyLoadingDisabled ? EagerGetReassignmentStatusResult : LazyGetReassignmentStatusResult
+
+export declare const GetReassignmentStatusResult: (new (init: ModelInit<GetReassignmentStatusResult>) => GetReassignmentStatusResult)
+
+type EagerBackgroundTaskInfo = {
+  readonly id: string;
+  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
+  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
+  readonly targetCount?: number | null;
+  readonly processedCount?: number | null;
+  readonly progressPercent?: number | null;
+  readonly result?: string | null;
+  readonly errorMessage?: string | null;
+  readonly createdAt: string;
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+}
+
+type LazyBackgroundTaskInfo = {
+  readonly id: string;
+  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
+  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
+  readonly targetCount?: number | null;
+  readonly processedCount?: number | null;
+  readonly progressPercent?: number | null;
+  readonly result?: string | null;
+  readonly errorMessage?: string | null;
+  readonly createdAt: string;
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+}
+
+export declare type BackgroundTaskInfo = LazyLoading extends LazyLoadingDisabled ? EagerBackgroundTaskInfo : LazyBackgroundTaskInfo
+
+export declare const BackgroundTaskInfo: (new (init: ModelInit<BackgroundTaskInfo>) => BackgroundTaskInfo)
+
 type EagerSyncPageInfoResult = {
   readonly success: boolean;
   readonly message?: string | null;
@@ -2033,56 +2442,6 @@ export declare type RefreshResponse = LazyLoading extends LazyLoadingDisabled ? 
 
 export declare const RefreshResponse: (new (init: ModelInit<RefreshResponse>) => RefreshResponse)
 
-type EagerSaveGameResult = {
-  readonly success: boolean;
-  readonly gameId?: string | null;
-  readonly action: string;
-  readonly message?: string | null;
-  readonly warnings?: (string | null)[] | null;
-  readonly playerProcessingQueued?: boolean | null;
-  readonly playerProcessingReason?: string | null;
-  readonly venueAssignment?: SaveVenueAssignmentInfo | null;
-  readonly seriesAssignment?: SaveSeriesAssignmentInfo | null;
-  readonly fieldsUpdated?: (string | null)[] | null;
-  readonly wasEdited?: boolean | null;
-}
-
-type LazySaveGameResult = {
-  readonly success: boolean;
-  readonly gameId?: string | null;
-  readonly action: string;
-  readonly message?: string | null;
-  readonly warnings?: (string | null)[] | null;
-  readonly playerProcessingQueued?: boolean | null;
-  readonly playerProcessingReason?: string | null;
-  readonly venueAssignment?: SaveVenueAssignmentInfo | null;
-  readonly seriesAssignment?: SaveSeriesAssignmentInfo | null;
-  readonly fieldsUpdated?: (string | null)[] | null;
-  readonly wasEdited?: boolean | null;
-}
-
-export declare type SaveGameResult = LazyLoading extends LazyLoadingDisabled ? EagerSaveGameResult : LazySaveGameResult
-
-export declare const SaveGameResult: (new (init: ModelInit<SaveGameResult>) => SaveGameResult)
-
-type EagerSaveVenueAssignmentInfo = {
-  readonly venueId?: string | null;
-  readonly venueName?: string | null;
-  readonly status?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
-  readonly confidence?: number | null;
-}
-
-type LazySaveVenueAssignmentInfo = {
-  readonly venueId?: string | null;
-  readonly venueName?: string | null;
-  readonly status?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
-  readonly confidence?: number | null;
-}
-
-export declare type SaveVenueAssignmentInfo = LazyLoading extends LazyLoadingDisabled ? EagerSaveVenueAssignmentInfo : LazySaveVenueAssignmentInfo
-
-export declare const SaveVenueAssignmentInfo: (new (init: ModelInit<SaveVenueAssignmentInfo>) => SaveVenueAssignmentInfo)
-
 type EagerSaveSeriesAssignmentInfo = {
   readonly tournamentSeriesId?: string | null;
   readonly seriesName?: string | null;
@@ -2100,50 +2459,6 @@ type LazySaveSeriesAssignmentInfo = {
 export declare type SaveSeriesAssignmentInfo = LazyLoading extends LazyLoadingDisabled ? EagerSaveSeriesAssignmentInfo : LazySaveSeriesAssignmentInfo
 
 export declare const SaveSeriesAssignmentInfo: (new (init: ModelInit<SaveSeriesAssignmentInfo>) => SaveSeriesAssignmentInfo)
-
-type EagerS3StorageConnection = {
-  readonly items: S3Storage[];
-  readonly nextToken?: string | null;
-}
-
-type LazyS3StorageConnection = {
-  readonly items: AsyncCollection<S3Storage>;
-  readonly nextToken?: string | null;
-}
-
-export declare type S3StorageConnection = LazyLoading extends LazyLoadingDisabled ? EagerS3StorageConnection : LazyS3StorageConnection
-
-export declare const S3StorageConnection: (new (init: ModelInit<S3StorageConnection>) => S3StorageConnection)
-
-type EagerScraperJobConnection = {
-  readonly items?: ScraperJob[] | null;
-  readonly nextToken?: string | null;
-}
-
-type LazyScraperJobConnection = {
-  readonly items: AsyncCollection<ScraperJob>;
-  readonly nextToken?: string | null;
-}
-
-export declare type ScraperJobConnection = LazyLoading extends LazyLoadingDisabled ? EagerScraperJobConnection : LazyScraperJobConnection
-
-export declare const ScraperJobConnection: (new (init: ModelInit<ScraperJobConnection>) => ScraperJobConnection)
-
-type EagerScrapeURLConnection = {
-  readonly items?: (ScrapeURL | null)[] | null;
-  readonly nextToken?: string | null;
-  readonly totalCount?: number | null;
-}
-
-type LazyScrapeURLConnection = {
-  readonly items: AsyncCollection<ScrapeURL>;
-  readonly nextToken?: string | null;
-  readonly totalCount?: number | null;
-}
-
-export declare type ScrapeURLConnection = LazyLoading extends LazyLoadingDisabled ? EagerScrapeURLConnection : LazyScrapeURLConnection
-
-export declare const ScrapeURLConnection: (new (init: ModelInit<ScrapeURLConnection>) => ScrapeURLConnection)
 
 type EagerUnfinishedGamesConnection = {
   readonly items: Game[];
@@ -2174,12 +2489,20 @@ type EagerEntity = {
   readonly defaultVenueId?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly gameCount?: number | null;
+  readonly venueCount?: number | null;
+  readonly lastGameAddedAt?: string | null;
+  readonly lastDataRefreshedAt?: string | null;
   readonly scraperStates?: (ScraperState | null)[] | null;
   readonly scraperJobs?: (ScraperJob | null)[] | null;
   readonly scrapeURLs?: (ScrapeURL | null)[] | null;
   readonly venues?: (Venue | null)[] | null;
   readonly games?: (Game | null)[] | null;
   readonly assets?: (Asset | null)[] | null;
+  readonly recurringGames?: (RecurringGame | null)[] | null;
+  readonly entityMetrics?: (EntityMetrics | null)[] | null;
+  readonly venueMetrics?: (VenueMetrics | null)[] | null;
+  readonly recurringGameMetrics?: (RecurringGameMetrics | null)[] | null;
   readonly socialAccounts?: (SocialAccount | null)[] | null;
 }
 
@@ -2196,12 +2519,20 @@ type LazyEntity = {
   readonly defaultVenueId?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly gameCount?: number | null;
+  readonly venueCount?: number | null;
+  readonly lastGameAddedAt?: string | null;
+  readonly lastDataRefreshedAt?: string | null;
   readonly scraperStates: AsyncCollection<ScraperState>;
   readonly scraperJobs: AsyncCollection<ScraperJob>;
   readonly scrapeURLs: AsyncCollection<ScrapeURL>;
   readonly venues: AsyncCollection<Venue>;
   readonly games: AsyncCollection<Game>;
   readonly assets: AsyncCollection<Asset>;
+  readonly recurringGames: AsyncCollection<RecurringGame>;
+  readonly entityMetrics: AsyncCollection<EntityMetrics>;
+  readonly venueMetrics: AsyncCollection<VenueMetrics>;
+  readonly recurringGameMetrics: AsyncCollection<RecurringGameMetrics>;
   readonly socialAccounts: AsyncCollection<SocialAccount>;
 }
 
@@ -2209,6 +2540,62 @@ export declare type Entity = LazyLoading extends LazyLoadingDisabled ? EagerEnti
 
 export declare const Entity: (new (init: ModelInit<Entity>) => Entity) & {
   copyOf(source: Entity, mutator: (draft: MutableModel<Entity>) => MutableModel<Entity> | void): Entity;
+}
+
+type EagerBackgroundTask = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<BackgroundTask, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
+  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
+  readonly targetType: string;
+  readonly targetId?: string | null;
+  readonly targetIds?: (string | null)[] | null;
+  readonly targetCount?: number | null;
+  readonly payload?: string | null;
+  readonly processedCount?: number | null;
+  readonly progressPercent?: number | null;
+  readonly result?: string | null;
+  readonly errorMessage?: string | null;
+  readonly createdAt: string;
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+  readonly initiatedBy?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyBackgroundTask = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<BackgroundTask, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
+  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
+  readonly targetType: string;
+  readonly targetId?: string | null;
+  readonly targetIds?: (string | null)[] | null;
+  readonly targetCount?: number | null;
+  readonly payload?: string | null;
+  readonly processedCount?: number | null;
+  readonly progressPercent?: number | null;
+  readonly result?: string | null;
+  readonly errorMessage?: string | null;
+  readonly createdAt: string;
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+  readonly initiatedBy?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type BackgroundTask = LazyLoading extends LazyLoadingDisabled ? EagerBackgroundTask : LazyBackgroundTask
+
+export declare const BackgroundTask: (new (init: ModelInit<BackgroundTask>) => BackgroundTask) & {
+  copyOf(source: BackgroundTask, mutator: (draft: MutableModel<BackgroundTask>) => MutableModel<BackgroundTask> | void): BackgroundTask;
 }
 
 type EagerVenue = {
@@ -2226,12 +2613,19 @@ type EagerVenue = {
   readonly fee?: number | null;
   readonly isSpecial?: boolean | null;
   readonly details?: VenueDetails | null;
+  readonly logo?: string | null;
+  readonly gameCount?: number | null;
+  readonly lastGameAddedAt?: string | null;
+  readonly lastDataRefreshedAt?: string | null;
   readonly canonicalVenueId?: string | null;
   readonly assets?: (Asset | null)[] | null;
   readonly games?: (Game | null)[] | null;
   readonly series?: (TournamentSeries | null)[] | null;
   readonly playerMemberships?: (PlayerVenue | null)[] | null;
   readonly registeredPlayers?: (Player | null)[] | null;
+  readonly recurringGames?: (RecurringGame | null)[] | null;
+  readonly venueMetrics?: (VenueMetrics | null)[] | null;
+  readonly recurringGameMetrics?: (RecurringGameMetrics | null)[] | null;
   readonly socialAccounts?: (SocialAccount | null)[] | null;
   readonly entityId?: string | null;
   readonly entity?: Entity | null;
@@ -2255,12 +2649,19 @@ type LazyVenue = {
   readonly fee?: number | null;
   readonly isSpecial?: boolean | null;
   readonly details: AsyncItem<VenueDetails | undefined>;
+  readonly logo?: string | null;
+  readonly gameCount?: number | null;
+  readonly lastGameAddedAt?: string | null;
+  readonly lastDataRefreshedAt?: string | null;
   readonly canonicalVenueId?: string | null;
   readonly assets: AsyncCollection<Asset>;
   readonly games: AsyncCollection<Game>;
   readonly series: AsyncCollection<TournamentSeries>;
   readonly playerMemberships: AsyncCollection<PlayerVenue>;
   readonly registeredPlayers: AsyncCollection<Player>;
+  readonly recurringGames: AsyncCollection<RecurringGame>;
+  readonly venueMetrics: AsyncCollection<VenueMetrics>;
+  readonly recurringGameMetrics: AsyncCollection<RecurringGameMetrics>;
   readonly socialAccounts: AsyncCollection<SocialAccount>;
   readonly entityId?: string | null;
   readonly entity: AsyncItem<Entity | undefined>;
@@ -2317,102 +2718,6 @@ export declare type VenueDetails = LazyLoading extends LazyLoadingDisabled ? Eag
 
 export declare const VenueDetails: (new (init: ModelInit<VenueDetails>) => VenueDetails) & {
   copyOf(source: VenueDetails, mutator: (draft: MutableModel<VenueDetails>) => MutableModel<VenueDetails> | void): VenueDetails;
-}
-
-type EagerTournamentSeriesTitle = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<TournamentSeriesTitle, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly title: string;
-  readonly aliases?: (string | null)[] | null;
-  readonly seriesCategory?: SeriesCategory | keyof typeof SeriesCategory | null;
-  readonly seriesInstances?: (TournamentSeries | null)[] | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyTournamentSeriesTitle = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<TournamentSeriesTitle, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly title: string;
-  readonly aliases?: (string | null)[] | null;
-  readonly seriesCategory?: SeriesCategory | keyof typeof SeriesCategory | null;
-  readonly seriesInstances: AsyncCollection<TournamentSeries>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type TournamentSeriesTitle = LazyLoading extends LazyLoadingDisabled ? EagerTournamentSeriesTitle : LazyTournamentSeriesTitle
-
-export declare const TournamentSeriesTitle: (new (init: ModelInit<TournamentSeriesTitle>) => TournamentSeriesTitle) & {
-  copyOf(source: TournamentSeriesTitle, mutator: (draft: MutableModel<TournamentSeriesTitle>) => MutableModel<TournamentSeriesTitle> | void): TournamentSeriesTitle;
-}
-
-type EagerTournamentSeries = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<TournamentSeries, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly name: string;
-  readonly year: number;
-  readonly quarter?: number | null;
-  readonly month?: number | null;
-  readonly seriesCategory: SeriesCategory | keyof typeof SeriesCategory;
-  readonly holidayType?: HolidayType | keyof typeof HolidayType | null;
-  readonly status: SeriesStatus | keyof typeof SeriesStatus;
-  readonly startDate?: string | null;
-  readonly endDate?: string | null;
-  readonly numberOfEvents?: number | null;
-  readonly guaranteedPrizepool?: number | null;
-  readonly estimatedPrizepool?: number | null;
-  readonly actualPrizepool?: number | null;
-  readonly tournamentSeriesTitleId: string;
-  readonly title?: TournamentSeriesTitle | null;
-  readonly venueId?: string | null;
-  readonly venue?: Venue | null;
-  readonly games?: (Game | null)[] | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyTournamentSeries = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<TournamentSeries, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly name: string;
-  readonly year: number;
-  readonly quarter?: number | null;
-  readonly month?: number | null;
-  readonly seriesCategory: SeriesCategory | keyof typeof SeriesCategory;
-  readonly holidayType?: HolidayType | keyof typeof HolidayType | null;
-  readonly status: SeriesStatus | keyof typeof SeriesStatus;
-  readonly startDate?: string | null;
-  readonly endDate?: string | null;
-  readonly numberOfEvents?: number | null;
-  readonly guaranteedPrizepool?: number | null;
-  readonly estimatedPrizepool?: number | null;
-  readonly actualPrizepool?: number | null;
-  readonly tournamentSeriesTitleId: string;
-  readonly title: AsyncItem<TournamentSeriesTitle | undefined>;
-  readonly venueId?: string | null;
-  readonly venue: AsyncItem<Venue | undefined>;
-  readonly games: AsyncCollection<Game>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type TournamentSeries = LazyLoading extends LazyLoadingDisabled ? EagerTournamentSeries : LazyTournamentSeries
-
-export declare const TournamentSeries: (new (init: ModelInit<TournamentSeries>) => TournamentSeries) & {
-  copyOf(source: TournamentSeries, mutator: (draft: MutableModel<TournamentSeries>) => MutableModel<TournamentSeries> | void): TournamentSeries;
 }
 
 type EagerGame = {
@@ -2507,6 +2812,15 @@ type EagerGame = {
   readonly entity?: Entity | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly recurringGameId?: string | null;
+  readonly recurringGame?: RecurringGame | null;
+  readonly recurringGameAssignmentConfidence?: number | null;
+  readonly recurringGameAssignmentStatus?: RecurringGameAssignmentStatus | keyof typeof RecurringGameAssignmentStatus | null;
+  readonly wasScheduledInstance?: boolean | null;
+  readonly deviationNotes?: string | null;
+  readonly instanceNumber?: number | null;
+  readonly isReplacementInstance?: boolean | null;
+  readonly replacementReason?: string | null;
   readonly gameStructureId?: string | null;
 }
 
@@ -2602,6 +2916,15 @@ type LazyGame = {
   readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly recurringGameId?: string | null;
+  readonly recurringGame: AsyncItem<RecurringGame | undefined>;
+  readonly recurringGameAssignmentConfidence?: number | null;
+  readonly recurringGameAssignmentStatus?: RecurringGameAssignmentStatus | keyof typeof RecurringGameAssignmentStatus | null;
+  readonly wasScheduledInstance?: boolean | null;
+  readonly deviationNotes?: string | null;
+  readonly instanceNumber?: number | null;
+  readonly isReplacementInstance?: boolean | null;
+  readonly replacementReason?: string | null;
   readonly gameStructureId?: string | null;
 }
 
@@ -3079,6 +3402,214 @@ export declare type GameCostItem = LazyLoading extends LazyLoadingDisabled ? Eag
 
 export declare const GameCostItem: (new (init: ModelInit<GameCostItem>) => GameCostItem) & {
   copyOf(source: GameCostItem, mutator: (draft: MutableModel<GameCostItem>) => MutableModel<GameCostItem> | void): GameCostItem;
+}
+
+type EagerRecurringGame = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<RecurringGame, 'id'>;
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly displayName?: string | null;
+  readonly description?: string | null;
+  readonly aliases?: (string | null)[] | null;
+  readonly entityId: string;
+  readonly entity?: Entity | null;
+  readonly venueId: string;
+  readonly venue?: Venue | null;
+  readonly dayOfWeek?: string | null;
+  readonly startTime?: string | null;
+  readonly endTime?: string | null;
+  readonly frequency: GameFrequency | keyof typeof GameFrequency;
+  readonly gameType: GameType | keyof typeof GameType;
+  readonly gameVariant: GameVariant | keyof typeof GameVariant;
+  readonly typicalBuyIn?: number | null;
+  readonly typicalRake?: number | null;
+  readonly typicalStartingStack?: number | null;
+  readonly typicalGuarantee?: number | null;
+  readonly isActive: boolean;
+  readonly isPaused?: boolean | null;
+  readonly pausedReason?: string | null;
+  readonly lastGameDate?: string | null;
+  readonly nextScheduledDate?: string | null;
+  readonly expectedInstanceCount?: number | null;
+  readonly isSignature?: boolean | null;
+  readonly isBeginnerFriendly?: boolean | null;
+  readonly isBounty?: boolean | null;
+  readonly tags?: (string | null)[] | null;
+  readonly marketingDescription?: string | null;
+  readonly imageUrl?: string | null;
+  readonly socialMediaHashtags?: (string | null)[] | null;
+  readonly autoDetectionConfidence?: number | null;
+  readonly wasManuallyCreated?: boolean | null;
+  readonly requiresReview?: boolean | null;
+  readonly totalInstancesRun?: number | null;
+  readonly avgAttendance?: number | null;
+  readonly lastMonthAttendance?: number | null;
+  readonly gameInstances?: (Game | null)[] | null;
+  readonly metrics?: (RecurringGameMetrics | null)[] | null;
+  readonly notes?: string | null;
+  readonly adminNotes?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly createdBy?: string | null;
+  readonly lastEditedBy?: string | null;
+  readonly lastEditedAt?: string | null;
+}
+
+type LazyRecurringGame = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<RecurringGame, 'id'>;
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly displayName?: string | null;
+  readonly description?: string | null;
+  readonly aliases?: (string | null)[] | null;
+  readonly entityId: string;
+  readonly entity: AsyncItem<Entity | undefined>;
+  readonly venueId: string;
+  readonly venue: AsyncItem<Venue | undefined>;
+  readonly dayOfWeek?: string | null;
+  readonly startTime?: string | null;
+  readonly endTime?: string | null;
+  readonly frequency: GameFrequency | keyof typeof GameFrequency;
+  readonly gameType: GameType | keyof typeof GameType;
+  readonly gameVariant: GameVariant | keyof typeof GameVariant;
+  readonly typicalBuyIn?: number | null;
+  readonly typicalRake?: number | null;
+  readonly typicalStartingStack?: number | null;
+  readonly typicalGuarantee?: number | null;
+  readonly isActive: boolean;
+  readonly isPaused?: boolean | null;
+  readonly pausedReason?: string | null;
+  readonly lastGameDate?: string | null;
+  readonly nextScheduledDate?: string | null;
+  readonly expectedInstanceCount?: number | null;
+  readonly isSignature?: boolean | null;
+  readonly isBeginnerFriendly?: boolean | null;
+  readonly isBounty?: boolean | null;
+  readonly tags?: (string | null)[] | null;
+  readonly marketingDescription?: string | null;
+  readonly imageUrl?: string | null;
+  readonly socialMediaHashtags?: (string | null)[] | null;
+  readonly autoDetectionConfidence?: number | null;
+  readonly wasManuallyCreated?: boolean | null;
+  readonly requiresReview?: boolean | null;
+  readonly totalInstancesRun?: number | null;
+  readonly avgAttendance?: number | null;
+  readonly lastMonthAttendance?: number | null;
+  readonly gameInstances: AsyncCollection<Game>;
+  readonly metrics: AsyncCollection<RecurringGameMetrics>;
+  readonly notes?: string | null;
+  readonly adminNotes?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly createdBy?: string | null;
+  readonly lastEditedBy?: string | null;
+  readonly lastEditedAt?: string | null;
+}
+
+export declare type RecurringGame = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGame : LazyRecurringGame
+
+export declare const RecurringGame: (new (init: ModelInit<RecurringGame>) => RecurringGame) & {
+  copyOf(source: RecurringGame, mutator: (draft: MutableModel<RecurringGame>) => MutableModel<RecurringGame> | void): RecurringGame;
+}
+
+type EagerTournamentSeriesTitle = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentSeriesTitle, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly title: string;
+  readonly aliases?: (string | null)[] | null;
+  readonly seriesCategory?: SeriesCategory | keyof typeof SeriesCategory | null;
+  readonly seriesInstances?: (TournamentSeries | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyTournamentSeriesTitle = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentSeriesTitle, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly title: string;
+  readonly aliases?: (string | null)[] | null;
+  readonly seriesCategory?: SeriesCategory | keyof typeof SeriesCategory | null;
+  readonly seriesInstances: AsyncCollection<TournamentSeries>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type TournamentSeriesTitle = LazyLoading extends LazyLoadingDisabled ? EagerTournamentSeriesTitle : LazyTournamentSeriesTitle
+
+export declare const TournamentSeriesTitle: (new (init: ModelInit<TournamentSeriesTitle>) => TournamentSeriesTitle) & {
+  copyOf(source: TournamentSeriesTitle, mutator: (draft: MutableModel<TournamentSeriesTitle>) => MutableModel<TournamentSeriesTitle> | void): TournamentSeriesTitle;
+}
+
+type EagerTournamentSeries = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentSeries, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly year: number;
+  readonly quarter?: number | null;
+  readonly month?: number | null;
+  readonly seriesCategory: SeriesCategory | keyof typeof SeriesCategory;
+  readonly holidayType?: HolidayType | keyof typeof HolidayType | null;
+  readonly status: SeriesStatus | keyof typeof SeriesStatus;
+  readonly startDate?: string | null;
+  readonly endDate?: string | null;
+  readonly numberOfEvents?: number | null;
+  readonly guaranteedPrizepool?: number | null;
+  readonly estimatedPrizepool?: number | null;
+  readonly actualPrizepool?: number | null;
+  readonly tournamentSeriesTitleId: string;
+  readonly title?: TournamentSeriesTitle | null;
+  readonly venueId?: string | null;
+  readonly venue?: Venue | null;
+  readonly games?: (Game | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyTournamentSeries = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentSeries, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly year: number;
+  readonly quarter?: number | null;
+  readonly month?: number | null;
+  readonly seriesCategory: SeriesCategory | keyof typeof SeriesCategory;
+  readonly holidayType?: HolidayType | keyof typeof HolidayType | null;
+  readonly status: SeriesStatus | keyof typeof SeriesStatus;
+  readonly startDate?: string | null;
+  readonly endDate?: string | null;
+  readonly numberOfEvents?: number | null;
+  readonly guaranteedPrizepool?: number | null;
+  readonly estimatedPrizepool?: number | null;
+  readonly actualPrizepool?: number | null;
+  readonly tournamentSeriesTitleId: string;
+  readonly title: AsyncItem<TournamentSeriesTitle | undefined>;
+  readonly venueId?: string | null;
+  readonly venue: AsyncItem<Venue | undefined>;
+  readonly games: AsyncCollection<Game>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type TournamentSeries = LazyLoading extends LazyLoadingDisabled ? EagerTournamentSeries : LazyTournamentSeries
+
+export declare const TournamentSeries: (new (init: ModelInit<TournamentSeries>) => TournamentSeries) & {
+  copyOf(source: TournamentSeries, mutator: (draft: MutableModel<TournamentSeries>) => MutableModel<TournamentSeries> | void): TournamentSeries;
 }
 
 type EagerPlayer = {
@@ -3587,6 +4118,626 @@ export declare const KnownPlayerIdentity: (new (init: ModelInit<KnownPlayerIdent
   copyOf(source: KnownPlayerIdentity, mutator: (draft: MutableModel<KnownPlayerIdentity>) => MutableModel<KnownPlayerIdentity> | void): KnownPlayerIdentity;
 }
 
+type EagerTicketTemplate = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TicketTemplate, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly description?: string | null;
+  readonly value: number;
+  readonly validityDays: number;
+  readonly originGameId?: string | null;
+  readonly targetGameId?: string | null;
+  readonly playerTickets?: (PlayerTicket | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyTicketTemplate = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TicketTemplate, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly description?: string | null;
+  readonly value: number;
+  readonly validityDays: number;
+  readonly originGameId?: string | null;
+  readonly targetGameId?: string | null;
+  readonly playerTickets: AsyncCollection<PlayerTicket>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type TicketTemplate = LazyLoading extends LazyLoadingDisabled ? EagerTicketTemplate : LazyTicketTemplate
+
+export declare const TicketTemplate: (new (init: ModelInit<TicketTemplate>) => TicketTemplate) & {
+  copyOf(source: TicketTemplate, mutator: (draft: MutableModel<TicketTemplate>) => MutableModel<TicketTemplate> | void): TicketTemplate;
+}
+
+type EagerPlayerTicket = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerTicket, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly assignedAt: string;
+  readonly expiryDate: string;
+  readonly status: TicketStatus | keyof typeof TicketStatus;
+  readonly usedInGameId?: string | null;
+  readonly playerId: string;
+  readonly player?: Player | null;
+  readonly ticketTemplateId: string;
+  readonly ticketTemplate?: TicketTemplate | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyPlayerTicket = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerTicket, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly assignedAt: string;
+  readonly expiryDate: string;
+  readonly status: TicketStatus | keyof typeof TicketStatus;
+  readonly usedInGameId?: string | null;
+  readonly playerId: string;
+  readonly player: AsyncItem<Player | undefined>;
+  readonly ticketTemplateId: string;
+  readonly ticketTemplate: AsyncItem<TicketTemplate | undefined>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type PlayerTicket = LazyLoading extends LazyLoadingDisabled ? EagerPlayerTicket : LazyPlayerTicket
+
+export declare const PlayerTicket: (new (init: ModelInit<PlayerTicket>) => PlayerTicket) & {
+  copyOf(source: PlayerTicket, mutator: (draft: MutableModel<PlayerTicket>) => MutableModel<PlayerTicket> | void): PlayerTicket;
+}
+
+type EagerMarketingMessage = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<MarketingMessage, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly subject?: string | null;
+  readonly emailBody?: string | null;
+  readonly smsBody?: string | null;
+  readonly sentMessages?: (PlayerMarketingMessage | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyMarketingMessage = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<MarketingMessage, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly subject?: string | null;
+  readonly emailBody?: string | null;
+  readonly smsBody?: string | null;
+  readonly sentMessages: AsyncCollection<PlayerMarketingMessage>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type MarketingMessage = LazyLoading extends LazyLoadingDisabled ? EagerMarketingMessage : LazyMarketingMessage
+
+export declare const MarketingMessage: (new (init: ModelInit<MarketingMessage>) => MarketingMessage) & {
+  copyOf(source: MarketingMessage, mutator: (draft: MutableModel<MarketingMessage>) => MutableModel<MarketingMessage> | void): MarketingMessage;
+}
+
+type EagerPlayerMarketingMessage = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerMarketingMessage, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly status: MessageStatus | keyof typeof MessageStatus;
+  readonly sentAt: string;
+  readonly playerId: string;
+  readonly marketingMessageId: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyPlayerMarketingMessage = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerMarketingMessage, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly status: MessageStatus | keyof typeof MessageStatus;
+  readonly sentAt: string;
+  readonly playerId: string;
+  readonly marketingMessageId: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type PlayerMarketingMessage = LazyLoading extends LazyLoadingDisabled ? EagerPlayerMarketingMessage : LazyPlayerMarketingMessage
+
+export declare const PlayerMarketingMessage: (new (init: ModelInit<PlayerMarketingMessage>) => PlayerMarketingMessage) & {
+  copyOf(source: PlayerMarketingMessage, mutator: (draft: MutableModel<PlayerMarketingMessage>) => MutableModel<PlayerMarketingMessage> | void): PlayerMarketingMessage;
+}
+
+type EagerPlayerMarketingPreferences = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerMarketingPreferences, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly optOutSms?: boolean | null;
+  readonly optOutEmail?: boolean | null;
+  readonly playerId: string;
+  readonly player?: Player | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyPlayerMarketingPreferences = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerMarketingPreferences, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly optOutSms?: boolean | null;
+  readonly optOutEmail?: boolean | null;
+  readonly playerId: string;
+  readonly player: AsyncItem<Player | undefined>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type PlayerMarketingPreferences = LazyLoading extends LazyLoadingDisabled ? EagerPlayerMarketingPreferences : LazyPlayerMarketingPreferences
+
+export declare const PlayerMarketingPreferences: (new (init: ModelInit<PlayerMarketingPreferences>) => PlayerMarketingPreferences) & {
+  copyOf(source: PlayerMarketingPreferences, mutator: (draft: MutableModel<PlayerMarketingPreferences>) => MutableModel<PlayerMarketingPreferences> | void): PlayerMarketingPreferences;
+}
+
+type EagerEntityMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<EntityMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly entity?: Entity | null;
+  readonly timeRange: string;
+  readonly totalVenues: number;
+  readonly activeVenues: number;
+  readonly inactiveVenues: number;
+  readonly totalGames: number;
+  readonly totalRecurringGames: number;
+  readonly totalOneOffGames: number;
+  readonly totalActiveRecurringGameTypes: number;
+  readonly totalEntries: number;
+  readonly totalUniquePlayers: number;
+  readonly totalReentries: number;
+  readonly totalAddons: number;
+  readonly totalPrizepool: number;
+  readonly totalRevenue: number;
+  readonly totalCost: number;
+  readonly totalProfit: number;
+  readonly totalRakeRevenue: number;
+  readonly totalVenueFees: number;
+  readonly totalStaffCost: number;
+  readonly totalVenueRentalCost: number;
+  readonly totalMarketingCost: number;
+  readonly totalOperationsCost: number;
+  readonly avgEntriesPerGame?: number | null;
+  readonly avgPrizepoolPerGame?: number | null;
+  readonly avgProfitPerGame?: number | null;
+  readonly avgRevenuePerGame?: number | null;
+  readonly avgGamesPerVenue?: number | null;
+  readonly avgPlayersPerVenue?: number | null;
+  readonly profitMargin?: number | null;
+  readonly rakeMarginPercent?: number | null;
+  readonly firstGameDate?: string | null;
+  readonly firstGameDaysAgo?: number | null;
+  readonly latestGameDate?: string | null;
+  readonly latestGameDaysAgo?: number | null;
+  readonly profitTrend?: string | null;
+  readonly profitTrendPercent?: number | null;
+  readonly playerGrowthTrend?: string | null;
+  readonly playerGrowthTrendPercent?: number | null;
+  readonly revenueGrowthTrend?: string | null;
+  readonly revenueGrowthTrendPercent?: number | null;
+  readonly topVenuesByRevenue?: string | null;
+  readonly topVenuesByAttendance?: string | null;
+  readonly topRecurringGames?: string | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy?: string | null;
+  readonly calculationDurationMs?: number | null;
+  readonly snapshotsIncluded?: number | null;
+  readonly venuesIncluded?: number | null;
+  readonly recurringGamesIncluded?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyEntityMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<EntityMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly entity: AsyncItem<Entity | undefined>;
+  readonly timeRange: string;
+  readonly totalVenues: number;
+  readonly activeVenues: number;
+  readonly inactiveVenues: number;
+  readonly totalGames: number;
+  readonly totalRecurringGames: number;
+  readonly totalOneOffGames: number;
+  readonly totalActiveRecurringGameTypes: number;
+  readonly totalEntries: number;
+  readonly totalUniquePlayers: number;
+  readonly totalReentries: number;
+  readonly totalAddons: number;
+  readonly totalPrizepool: number;
+  readonly totalRevenue: number;
+  readonly totalCost: number;
+  readonly totalProfit: number;
+  readonly totalRakeRevenue: number;
+  readonly totalVenueFees: number;
+  readonly totalStaffCost: number;
+  readonly totalVenueRentalCost: number;
+  readonly totalMarketingCost: number;
+  readonly totalOperationsCost: number;
+  readonly avgEntriesPerGame?: number | null;
+  readonly avgPrizepoolPerGame?: number | null;
+  readonly avgProfitPerGame?: number | null;
+  readonly avgRevenuePerGame?: number | null;
+  readonly avgGamesPerVenue?: number | null;
+  readonly avgPlayersPerVenue?: number | null;
+  readonly profitMargin?: number | null;
+  readonly rakeMarginPercent?: number | null;
+  readonly firstGameDate?: string | null;
+  readonly firstGameDaysAgo?: number | null;
+  readonly latestGameDate?: string | null;
+  readonly latestGameDaysAgo?: number | null;
+  readonly profitTrend?: string | null;
+  readonly profitTrendPercent?: number | null;
+  readonly playerGrowthTrend?: string | null;
+  readonly playerGrowthTrendPercent?: number | null;
+  readonly revenueGrowthTrend?: string | null;
+  readonly revenueGrowthTrendPercent?: number | null;
+  readonly topVenuesByRevenue?: string | null;
+  readonly topVenuesByAttendance?: string | null;
+  readonly topRecurringGames?: string | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy?: string | null;
+  readonly calculationDurationMs?: number | null;
+  readonly snapshotsIncluded?: number | null;
+  readonly venuesIncluded?: number | null;
+  readonly recurringGamesIncluded?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type EntityMetrics = LazyLoading extends LazyLoadingDisabled ? EagerEntityMetrics : LazyEntityMetrics
+
+export declare const EntityMetrics: (new (init: ModelInit<EntityMetrics>) => EntityMetrics) & {
+  copyOf(source: EntityMetrics, mutator: (draft: MutableModel<EntityMetrics>) => MutableModel<EntityMetrics> | void): EntityMetrics;
+}
+
+type EagerVenueMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<VenueMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly venueId: string;
+  readonly venueName: string;
+  readonly timeRange: string;
+  readonly totalGames: number;
+  readonly totalRecurringGames: number;
+  readonly totalOneOffGames: number;
+  readonly totalActiveRecurringGameTypes: number;
+  readonly totalTournaments: number;
+  readonly totalCashGames: number;
+  readonly totalNLHE: number;
+  readonly totalPLO: number;
+  readonly totalOther: number;
+  readonly totalEntries: number;
+  readonly totalUniquePlayers: number;
+  readonly totalReentries: number;
+  readonly totalAddons: number;
+  readonly returningPlayers?: number | null;
+  readonly newPlayers?: number | null;
+  readonly totalPrizepool: number;
+  readonly totalRevenue: number;
+  readonly totalCost: number;
+  readonly totalProfit: number;
+  readonly totalRakeRevenue: number;
+  readonly totalVenueFees: number;
+  readonly totalStaffCost: number;
+  readonly totalVenueRentalCost: number;
+  readonly totalMarketingCost: number;
+  readonly avgEntriesPerGame?: number | null;
+  readonly avgUniquePlayersPerGame?: number | null;
+  readonly avgPrizepoolPerGame?: number | null;
+  readonly avgRevenuePerGame?: number | null;
+  readonly avgProfitPerGame?: number | null;
+  readonly profitMargin?: number | null;
+  readonly rakeMarginPercent?: number | null;
+  readonly firstGameDate?: string | null;
+  readonly firstGameDaysAgo?: number | null;
+  readonly latestGameDate?: string | null;
+  readonly latestGameDaysAgo?: number | null;
+  readonly daysSinceLastGame?: number | null;
+  readonly gamesByDayOfWeek?: string | null;
+  readonly peakAttendanceDay?: string | null;
+  readonly topRecurringGames?: string | null;
+  readonly topBuyInLevels?: string | null;
+  readonly profitTrend?: string | null;
+  readonly profitTrendPercent?: number | null;
+  readonly attendanceTrend?: string | null;
+  readonly attendanceTrendPercent?: number | null;
+  readonly revenueGrowthTrend?: string | null;
+  readonly revenueGrowthTrendPercent?: number | null;
+  readonly overallHealth?: string | null;
+  readonly profitability?: string | null;
+  readonly consistency?: string | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy?: string | null;
+  readonly calculationDurationMs?: number | null;
+  readonly snapshotsIncluded?: number | null;
+  readonly recurringGamesIncluded?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly venue?: Venue | null;
+  readonly entity?: Entity | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyVenueMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<VenueMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly venueId: string;
+  readonly venueName: string;
+  readonly timeRange: string;
+  readonly totalGames: number;
+  readonly totalRecurringGames: number;
+  readonly totalOneOffGames: number;
+  readonly totalActiveRecurringGameTypes: number;
+  readonly totalTournaments: number;
+  readonly totalCashGames: number;
+  readonly totalNLHE: number;
+  readonly totalPLO: number;
+  readonly totalOther: number;
+  readonly totalEntries: number;
+  readonly totalUniquePlayers: number;
+  readonly totalReentries: number;
+  readonly totalAddons: number;
+  readonly returningPlayers?: number | null;
+  readonly newPlayers?: number | null;
+  readonly totalPrizepool: number;
+  readonly totalRevenue: number;
+  readonly totalCost: number;
+  readonly totalProfit: number;
+  readonly totalRakeRevenue: number;
+  readonly totalVenueFees: number;
+  readonly totalStaffCost: number;
+  readonly totalVenueRentalCost: number;
+  readonly totalMarketingCost: number;
+  readonly avgEntriesPerGame?: number | null;
+  readonly avgUniquePlayersPerGame?: number | null;
+  readonly avgPrizepoolPerGame?: number | null;
+  readonly avgRevenuePerGame?: number | null;
+  readonly avgProfitPerGame?: number | null;
+  readonly profitMargin?: number | null;
+  readonly rakeMarginPercent?: number | null;
+  readonly firstGameDate?: string | null;
+  readonly firstGameDaysAgo?: number | null;
+  readonly latestGameDate?: string | null;
+  readonly latestGameDaysAgo?: number | null;
+  readonly daysSinceLastGame?: number | null;
+  readonly gamesByDayOfWeek?: string | null;
+  readonly peakAttendanceDay?: string | null;
+  readonly topRecurringGames?: string | null;
+  readonly topBuyInLevels?: string | null;
+  readonly profitTrend?: string | null;
+  readonly profitTrendPercent?: number | null;
+  readonly attendanceTrend?: string | null;
+  readonly attendanceTrendPercent?: number | null;
+  readonly revenueGrowthTrend?: string | null;
+  readonly revenueGrowthTrendPercent?: number | null;
+  readonly overallHealth?: string | null;
+  readonly profitability?: string | null;
+  readonly consistency?: string | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy?: string | null;
+  readonly calculationDurationMs?: number | null;
+  readonly snapshotsIncluded?: number | null;
+  readonly recurringGamesIncluded?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly venue: AsyncItem<Venue | undefined>;
+  readonly entity: AsyncItem<Entity | undefined>;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type VenueMetrics = LazyLoading extends LazyLoadingDisabled ? EagerVenueMetrics : LazyVenueMetrics
+
+export declare const VenueMetrics: (new (init: ModelInit<VenueMetrics>) => VenueMetrics) & {
+  copyOf(source: VenueMetrics, mutator: (draft: MutableModel<VenueMetrics>) => MutableModel<VenueMetrics> | void): VenueMetrics;
+}
+
+type EagerRecurringGameMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<RecurringGameMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly venueId: string;
+  readonly recurringGameId: string;
+  readonly recurringGame?: RecurringGame | null;
+  readonly recurringGameName: string;
+  readonly timeRange: string;
+  readonly totalInstances: number;
+  readonly scheduledInstances: number;
+  readonly actualInstances: number;
+  readonly missedInstances: number;
+  readonly runRate?: number | null;
+  readonly totalEntries: number;
+  readonly totalUniquePlayers: number;
+  readonly totalReentries: number;
+  readonly totalAddons: number;
+  readonly regularPlayers?: number | null;
+  readonly occasionalPlayers?: number | null;
+  readonly oneTimePlayers?: number | null;
+  readonly totalPrizepool: number;
+  readonly totalRevenue: number;
+  readonly totalCost: number;
+  readonly totalProfit: number;
+  readonly avgEntries?: number | null;
+  readonly avgUniquePlayers?: number | null;
+  readonly avgPrizepool?: number | null;
+  readonly avgRevenue?: number | null;
+  readonly avgProfit?: number | null;
+  readonly stdDevEntries?: number | null;
+  readonly stdDevProfit?: number | null;
+  readonly minEntries?: number | null;
+  readonly maxEntries?: number | null;
+  readonly medianEntries?: number | null;
+  readonly entriesCV?: number | null;
+  readonly firstInstanceDate?: string | null;
+  readonly firstInstanceDaysAgo?: number | null;
+  readonly latestInstanceDate?: string | null;
+  readonly latestInstanceDaysAgo?: number | null;
+  readonly daysSinceLastInstance?: number | null;
+  readonly avgEntriesByMonth?: string | null;
+  readonly peakMonth?: string | null;
+  readonly lowMonth?: string | null;
+  readonly attendanceHealth?: string | null;
+  readonly profitability?: string | null;
+  readonly consistency?: string | null;
+  readonly overallHealth?: string | null;
+  readonly attendanceTrend?: string | null;
+  readonly attendanceTrendPercent?: number | null;
+  readonly profitTrend?: string | null;
+  readonly profitTrendPercent?: number | null;
+  readonly recentAvgEntries?: number | null;
+  readonly longtermAvgEntries?: number | null;
+  readonly entriesTrendDirection?: string | null;
+  readonly regularPlayersList?: string | null;
+  readonly playerRetentionRate?: number | null;
+  readonly rankAtVenue?: number | null;
+  readonly totalRecurringGamesAtVenue?: number | null;
+  readonly avgEntriesEntityWide?: number | null;
+  readonly performanceVsEntityAvg?: string | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy?: string | null;
+  readonly calculationDurationMs?: number | null;
+  readonly snapshotsIncluded?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly venue?: Venue | null;
+  readonly entity?: Entity | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyRecurringGameMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<RecurringGameMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly venueId: string;
+  readonly recurringGameId: string;
+  readonly recurringGame: AsyncItem<RecurringGame | undefined>;
+  readonly recurringGameName: string;
+  readonly timeRange: string;
+  readonly totalInstances: number;
+  readonly scheduledInstances: number;
+  readonly actualInstances: number;
+  readonly missedInstances: number;
+  readonly runRate?: number | null;
+  readonly totalEntries: number;
+  readonly totalUniquePlayers: number;
+  readonly totalReentries: number;
+  readonly totalAddons: number;
+  readonly regularPlayers?: number | null;
+  readonly occasionalPlayers?: number | null;
+  readonly oneTimePlayers?: number | null;
+  readonly totalPrizepool: number;
+  readonly totalRevenue: number;
+  readonly totalCost: number;
+  readonly totalProfit: number;
+  readonly avgEntries?: number | null;
+  readonly avgUniquePlayers?: number | null;
+  readonly avgPrizepool?: number | null;
+  readonly avgRevenue?: number | null;
+  readonly avgProfit?: number | null;
+  readonly stdDevEntries?: number | null;
+  readonly stdDevProfit?: number | null;
+  readonly minEntries?: number | null;
+  readonly maxEntries?: number | null;
+  readonly medianEntries?: number | null;
+  readonly entriesCV?: number | null;
+  readonly firstInstanceDate?: string | null;
+  readonly firstInstanceDaysAgo?: number | null;
+  readonly latestInstanceDate?: string | null;
+  readonly latestInstanceDaysAgo?: number | null;
+  readonly daysSinceLastInstance?: number | null;
+  readonly avgEntriesByMonth?: string | null;
+  readonly peakMonth?: string | null;
+  readonly lowMonth?: string | null;
+  readonly attendanceHealth?: string | null;
+  readonly profitability?: string | null;
+  readonly consistency?: string | null;
+  readonly overallHealth?: string | null;
+  readonly attendanceTrend?: string | null;
+  readonly attendanceTrendPercent?: number | null;
+  readonly profitTrend?: string | null;
+  readonly profitTrendPercent?: number | null;
+  readonly recentAvgEntries?: number | null;
+  readonly longtermAvgEntries?: number | null;
+  readonly entriesTrendDirection?: string | null;
+  readonly regularPlayersList?: string | null;
+  readonly playerRetentionRate?: number | null;
+  readonly rankAtVenue?: number | null;
+  readonly totalRecurringGamesAtVenue?: number | null;
+  readonly avgEntriesEntityWide?: number | null;
+  readonly performanceVsEntityAvg?: string | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy?: string | null;
+  readonly calculationDurationMs?: number | null;
+  readonly snapshotsIncluded?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly venue: AsyncItem<Venue | undefined>;
+  readonly entity: AsyncItem<Entity | undefined>;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type RecurringGameMetrics = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameMetrics : LazyRecurringGameMetrics
+
+export declare const RecurringGameMetrics: (new (init: ModelInit<RecurringGameMetrics>) => RecurringGameMetrics) & {
+  copyOf(source: RecurringGameMetrics, mutator: (draft: MutableModel<RecurringGameMetrics>) => MutableModel<RecurringGameMetrics> | void): RecurringGameMetrics;
+}
+
 type EagerScraperJob = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<ScraperJob, 'id'>;
@@ -4071,468 +5222,6 @@ export declare const S3Storage: (new (init: ModelInit<S3Storage>) => S3Storage) 
   copyOf(source: S3Storage, mutator: (draft: MutableModel<S3Storage>) => MutableModel<S3Storage> | void): S3Storage;
 }
 
-type EagerUser = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<User, 'id'>;
-  };
-  readonly id: string;
-  readonly username: string;
-  readonly email: string;
-  readonly role: UserRole | keyof typeof UserRole;
-  readonly isActive?: boolean | null;
-  readonly allowedPages?: (string | null)[] | null;
-  readonly firstName?: string | null;
-  readonly lastName?: string | null;
-  readonly phone?: string | null;
-  readonly avatar?: string | null;
-  readonly allowedEntityIds?: (string | null)[] | null;
-  readonly allowedVenueIds?: (string | null)[] | null;
-  readonly defaultEntityId?: string | null;
-  readonly lastLoginAt?: string | null;
-  readonly lastActiveAt?: string | null;
-  readonly passwordLastChangedAt?: string | null;
-  readonly mustChangePassword?: boolean | null;
-  readonly loginAttempts?: number | null;
-  readonly lockedUntil?: string | null;
-  readonly createdBy?: string | null;
-  readonly updatedBy?: string | null;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-  readonly preferences?: (UserPreference | null)[] | null;
-  readonly auditLogs?: (UserAuditLog | null)[] | null;
-}
-
-type LazyUser = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<User, 'id'>;
-  };
-  readonly id: string;
-  readonly username: string;
-  readonly email: string;
-  readonly role: UserRole | keyof typeof UserRole;
-  readonly isActive?: boolean | null;
-  readonly allowedPages?: (string | null)[] | null;
-  readonly firstName?: string | null;
-  readonly lastName?: string | null;
-  readonly phone?: string | null;
-  readonly avatar?: string | null;
-  readonly allowedEntityIds?: (string | null)[] | null;
-  readonly allowedVenueIds?: (string | null)[] | null;
-  readonly defaultEntityId?: string | null;
-  readonly lastLoginAt?: string | null;
-  readonly lastActiveAt?: string | null;
-  readonly passwordLastChangedAt?: string | null;
-  readonly mustChangePassword?: boolean | null;
-  readonly loginAttempts?: number | null;
-  readonly lockedUntil?: string | null;
-  readonly createdBy?: string | null;
-  readonly updatedBy?: string | null;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-  readonly preferences: AsyncCollection<UserPreference>;
-  readonly auditLogs: AsyncCollection<UserAuditLog>;
-}
-
-export declare type User = LazyLoading extends LazyLoadingDisabled ? EagerUser : LazyUser
-
-export declare const User: (new (init: ModelInit<User>) => User) & {
-  copyOf(source: User, mutator: (draft: MutableModel<User>) => MutableModel<User> | void): User;
-}
-
-type EagerUserPreference = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<UserPreference, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly page: string;
-  readonly widget: string;
-  readonly preference?: string | null;
-  readonly userId: string;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyUserPreference = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<UserPreference, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly page: string;
-  readonly widget: string;
-  readonly preference?: string | null;
-  readonly userId: string;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type UserPreference = LazyLoading extends LazyLoadingDisabled ? EagerUserPreference : LazyUserPreference
-
-export declare const UserPreference: (new (init: ModelInit<UserPreference>) => UserPreference) & {
-  copyOf(source: UserPreference, mutator: (draft: MutableModel<UserPreference>) => MutableModel<UserPreference> | void): UserPreference;
-}
-
-type EagerUserAuditLog = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<UserAuditLog, 'id'>;
-    readOnlyFields: 'updatedAt';
-  };
-  readonly id: string;
-  readonly userId: string;
-  readonly user?: User | null;
-  readonly action: string;
-  readonly resource?: string | null;
-  readonly details?: string | null;
-  readonly ipAddress?: string | null;
-  readonly userAgent?: string | null;
-  readonly createdAt: string;
-  readonly updatedAt?: string | null;
-}
-
-type LazyUserAuditLog = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<UserAuditLog, 'id'>;
-    readOnlyFields: 'updatedAt';
-  };
-  readonly id: string;
-  readonly userId: string;
-  readonly user: AsyncItem<User | undefined>;
-  readonly action: string;
-  readonly resource?: string | null;
-  readonly details?: string | null;
-  readonly ipAddress?: string | null;
-  readonly userAgent?: string | null;
-  readonly createdAt: string;
-  readonly updatedAt?: string | null;
-}
-
-export declare type UserAuditLog = LazyLoading extends LazyLoadingDisabled ? EagerUserAuditLog : LazyUserAuditLog
-
-export declare const UserAuditLog: (new (init: ModelInit<UserAuditLog>) => UserAuditLog) & {
-  copyOf(source: UserAuditLog, mutator: (draft: MutableModel<UserAuditLog>) => MutableModel<UserAuditLog> | void): UserAuditLog;
-}
-
-type EagerStaff = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Staff, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly firstName: string;
-  readonly lastName?: string | null;
-  readonly role: StaffRole | keyof typeof StaffRole;
-  readonly assignedVenueId?: string | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyStaff = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Staff, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly firstName: string;
-  readonly lastName?: string | null;
-  readonly role: StaffRole | keyof typeof StaffRole;
-  readonly assignedVenueId?: string | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type Staff = LazyLoading extends LazyLoadingDisabled ? EagerStaff : LazyStaff
-
-export declare const Staff: (new (init: ModelInit<Staff>) => Staff) & {
-  copyOf(source: Staff, mutator: (draft: MutableModel<Staff>) => MutableModel<Staff> | void): Staff;
-}
-
-type EagerAsset = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Asset, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly name: string;
-  readonly type: string;
-  readonly condition: AssetCondition | keyof typeof AssetCondition;
-  readonly acquiredDate: string;
-  readonly lastCheckedDate: string;
-  readonly venueId: string;
-  readonly venue?: Venue | null;
-  readonly entityId?: string | null;
-  readonly entity?: Entity | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyAsset = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Asset, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly name: string;
-  readonly type: string;
-  readonly condition: AssetCondition | keyof typeof AssetCondition;
-  readonly acquiredDate: string;
-  readonly lastCheckedDate: string;
-  readonly venueId: string;
-  readonly venue: AsyncItem<Venue | undefined>;
-  readonly entityId?: string | null;
-  readonly entity: AsyncItem<Entity | undefined>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type Asset = LazyLoading extends LazyLoadingDisabled ? EagerAsset : LazyAsset
-
-export declare const Asset: (new (init: ModelInit<Asset>) => Asset) & {
-  copyOf(source: Asset, mutator: (draft: MutableModel<Asset>) => MutableModel<Asset> | void): Asset;
-}
-
-type EagerTicketTemplate = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<TicketTemplate, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly name: string;
-  readonly description?: string | null;
-  readonly value: number;
-  readonly validityDays: number;
-  readonly originGameId?: string | null;
-  readonly targetGameId?: string | null;
-  readonly playerTickets?: (PlayerTicket | null)[] | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyTicketTemplate = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<TicketTemplate, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly name: string;
-  readonly description?: string | null;
-  readonly value: number;
-  readonly validityDays: number;
-  readonly originGameId?: string | null;
-  readonly targetGameId?: string | null;
-  readonly playerTickets: AsyncCollection<PlayerTicket>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type TicketTemplate = LazyLoading extends LazyLoadingDisabled ? EagerTicketTemplate : LazyTicketTemplate
-
-export declare const TicketTemplate: (new (init: ModelInit<TicketTemplate>) => TicketTemplate) & {
-  copyOf(source: TicketTemplate, mutator: (draft: MutableModel<TicketTemplate>) => MutableModel<TicketTemplate> | void): TicketTemplate;
-}
-
-type EagerPlayerTicket = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<PlayerTicket, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly assignedAt: string;
-  readonly expiryDate: string;
-  readonly status: TicketStatus | keyof typeof TicketStatus;
-  readonly usedInGameId?: string | null;
-  readonly playerId: string;
-  readonly player?: Player | null;
-  readonly ticketTemplateId: string;
-  readonly ticketTemplate?: TicketTemplate | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyPlayerTicket = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<PlayerTicket, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly assignedAt: string;
-  readonly expiryDate: string;
-  readonly status: TicketStatus | keyof typeof TicketStatus;
-  readonly usedInGameId?: string | null;
-  readonly playerId: string;
-  readonly player: AsyncItem<Player | undefined>;
-  readonly ticketTemplateId: string;
-  readonly ticketTemplate: AsyncItem<TicketTemplate | undefined>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type PlayerTicket = LazyLoading extends LazyLoadingDisabled ? EagerPlayerTicket : LazyPlayerTicket
-
-export declare const PlayerTicket: (new (init: ModelInit<PlayerTicket>) => PlayerTicket) & {
-  copyOf(source: PlayerTicket, mutator: (draft: MutableModel<PlayerTicket>) => MutableModel<PlayerTicket> | void): PlayerTicket;
-}
-
-type EagerMarketingMessage = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<MarketingMessage, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly name: string;
-  readonly subject?: string | null;
-  readonly emailBody?: string | null;
-  readonly smsBody?: string | null;
-  readonly sentMessages?: (PlayerMarketingMessage | null)[] | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyMarketingMessage = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<MarketingMessage, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly name: string;
-  readonly subject?: string | null;
-  readonly emailBody?: string | null;
-  readonly smsBody?: string | null;
-  readonly sentMessages: AsyncCollection<PlayerMarketingMessage>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type MarketingMessage = LazyLoading extends LazyLoadingDisabled ? EagerMarketingMessage : LazyMarketingMessage
-
-export declare const MarketingMessage: (new (init: ModelInit<MarketingMessage>) => MarketingMessage) & {
-  copyOf(source: MarketingMessage, mutator: (draft: MutableModel<MarketingMessage>) => MutableModel<MarketingMessage> | void): MarketingMessage;
-}
-
-type EagerPlayerMarketingMessage = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<PlayerMarketingMessage, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly status: MessageStatus | keyof typeof MessageStatus;
-  readonly sentAt: string;
-  readonly playerId: string;
-  readonly marketingMessageId: string;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyPlayerMarketingMessage = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<PlayerMarketingMessage, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly status: MessageStatus | keyof typeof MessageStatus;
-  readonly sentAt: string;
-  readonly playerId: string;
-  readonly marketingMessageId: string;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type PlayerMarketingMessage = LazyLoading extends LazyLoadingDisabled ? EagerPlayerMarketingMessage : LazyPlayerMarketingMessage
-
-export declare const PlayerMarketingMessage: (new (init: ModelInit<PlayerMarketingMessage>) => PlayerMarketingMessage) & {
-  copyOf(source: PlayerMarketingMessage, mutator: (draft: MutableModel<PlayerMarketingMessage>) => MutableModel<PlayerMarketingMessage> | void): PlayerMarketingMessage;
-}
-
-type EagerPlayerMarketingPreferences = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<PlayerMarketingPreferences, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly optOutSms?: boolean | null;
-  readonly optOutEmail?: boolean | null;
-  readonly playerId: string;
-  readonly player?: Player | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyPlayerMarketingPreferences = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<PlayerMarketingPreferences, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly optOutSms?: boolean | null;
-  readonly optOutEmail?: boolean | null;
-  readonly playerId: string;
-  readonly player: AsyncItem<Player | undefined>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type PlayerMarketingPreferences = LazyLoading extends LazyLoadingDisabled ? EagerPlayerMarketingPreferences : LazyPlayerMarketingPreferences
-
-export declare const PlayerMarketingPreferences: (new (init: ModelInit<PlayerMarketingPreferences>) => PlayerMarketingPreferences) & {
-  copyOf(source: PlayerMarketingPreferences, mutator: (draft: MutableModel<PlayerMarketingPreferences>) => MutableModel<PlayerMarketingPreferences> | void): PlayerMarketingPreferences;
-}
-
-type EagerBackgroundTask = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<BackgroundTask, 'id'>;
-    readOnlyFields: 'updatedAt';
-  };
-  readonly id: string;
-  readonly entityId: string;
-  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
-  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
-  readonly targetType: string;
-  readonly targetId?: string | null;
-  readonly targetIds?: (string | null)[] | null;
-  readonly targetCount?: number | null;
-  readonly payload?: string | null;
-  readonly processedCount?: number | null;
-  readonly progressPercent?: number | null;
-  readonly result?: string | null;
-  readonly errorMessage?: string | null;
-  readonly createdAt: string;
-  readonly startedAt?: string | null;
-  readonly completedAt?: string | null;
-  readonly initiatedBy?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyBackgroundTask = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<BackgroundTask, 'id'>;
-    readOnlyFields: 'updatedAt';
-  };
-  readonly id: string;
-  readonly entityId: string;
-  readonly taskType: BackgroundTaskType | keyof typeof BackgroundTaskType;
-  readonly status: BackgroundTaskStatus | keyof typeof BackgroundTaskStatus;
-  readonly targetType: string;
-  readonly targetId?: string | null;
-  readonly targetIds?: (string | null)[] | null;
-  readonly targetCount?: number | null;
-  readonly payload?: string | null;
-  readonly processedCount?: number | null;
-  readonly progressPercent?: number | null;
-  readonly result?: string | null;
-  readonly errorMessage?: string | null;
-  readonly createdAt: string;
-  readonly startedAt?: string | null;
-  readonly completedAt?: string | null;
-  readonly initiatedBy?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type BackgroundTask = LazyLoading extends LazyLoadingDisabled ? EagerBackgroundTask : LazyBackgroundTask
-
-export declare const BackgroundTask: (new (init: ModelInit<BackgroundTask>) => BackgroundTask) & {
-  copyOf(source: BackgroundTask, mutator: (draft: MutableModel<BackgroundTask>) => MutableModel<BackgroundTask> | void): BackgroundTask;
-}
-
 type EagerSocialAccount = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<SocialAccount, 'id'>;
@@ -4829,4 +5518,224 @@ export declare type SocialScheduledPost = LazyLoading extends LazyLoadingDisable
 
 export declare const SocialScheduledPost: (new (init: ModelInit<SocialScheduledPost>) => SocialScheduledPost) & {
   copyOf(source: SocialScheduledPost, mutator: (draft: MutableModel<SocialScheduledPost>) => MutableModel<SocialScheduledPost> | void): SocialScheduledPost;
+}
+
+type EagerUser = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<User, 'id'>;
+  };
+  readonly id: string;
+  readonly username: string;
+  readonly email: string;
+  readonly role: UserRole | keyof typeof UserRole;
+  readonly isActive?: boolean | null;
+  readonly allowedPages?: (string | null)[] | null;
+  readonly firstName?: string | null;
+  readonly lastName?: string | null;
+  readonly phone?: string | null;
+  readonly avatar?: string | null;
+  readonly allowedEntityIds?: (string | null)[] | null;
+  readonly allowedVenueIds?: (string | null)[] | null;
+  readonly defaultEntityId?: string | null;
+  readonly lastLoginAt?: string | null;
+  readonly lastActiveAt?: string | null;
+  readonly passwordLastChangedAt?: string | null;
+  readonly mustChangePassword?: boolean | null;
+  readonly loginAttempts?: number | null;
+  readonly lockedUntil?: string | null;
+  readonly createdBy?: string | null;
+  readonly updatedBy?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly preferences?: (UserPreference | null)[] | null;
+  readonly auditLogs?: (UserAuditLog | null)[] | null;
+}
+
+type LazyUser = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<User, 'id'>;
+  };
+  readonly id: string;
+  readonly username: string;
+  readonly email: string;
+  readonly role: UserRole | keyof typeof UserRole;
+  readonly isActive?: boolean | null;
+  readonly allowedPages?: (string | null)[] | null;
+  readonly firstName?: string | null;
+  readonly lastName?: string | null;
+  readonly phone?: string | null;
+  readonly avatar?: string | null;
+  readonly allowedEntityIds?: (string | null)[] | null;
+  readonly allowedVenueIds?: (string | null)[] | null;
+  readonly defaultEntityId?: string | null;
+  readonly lastLoginAt?: string | null;
+  readonly lastActiveAt?: string | null;
+  readonly passwordLastChangedAt?: string | null;
+  readonly mustChangePassword?: boolean | null;
+  readonly loginAttempts?: number | null;
+  readonly lockedUntil?: string | null;
+  readonly createdBy?: string | null;
+  readonly updatedBy?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly preferences: AsyncCollection<UserPreference>;
+  readonly auditLogs: AsyncCollection<UserAuditLog>;
+}
+
+export declare type User = LazyLoading extends LazyLoadingDisabled ? EagerUser : LazyUser
+
+export declare const User: (new (init: ModelInit<User>) => User) & {
+  copyOf(source: User, mutator: (draft: MutableModel<User>) => MutableModel<User> | void): User;
+}
+
+type EagerUserPreference = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<UserPreference, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly page: string;
+  readonly widget: string;
+  readonly preference?: string | null;
+  readonly userId: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyUserPreference = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<UserPreference, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly page: string;
+  readonly widget: string;
+  readonly preference?: string | null;
+  readonly userId: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type UserPreference = LazyLoading extends LazyLoadingDisabled ? EagerUserPreference : LazyUserPreference
+
+export declare const UserPreference: (new (init: ModelInit<UserPreference>) => UserPreference) & {
+  copyOf(source: UserPreference, mutator: (draft: MutableModel<UserPreference>) => MutableModel<UserPreference> | void): UserPreference;
+}
+
+type EagerUserAuditLog = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<UserAuditLog, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly userId: string;
+  readonly user?: User | null;
+  readonly action: string;
+  readonly resource?: string | null;
+  readonly details?: string | null;
+  readonly ipAddress?: string | null;
+  readonly userAgent?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt?: string | null;
+}
+
+type LazyUserAuditLog = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<UserAuditLog, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly userId: string;
+  readonly user: AsyncItem<User | undefined>;
+  readonly action: string;
+  readonly resource?: string | null;
+  readonly details?: string | null;
+  readonly ipAddress?: string | null;
+  readonly userAgent?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt?: string | null;
+}
+
+export declare type UserAuditLog = LazyLoading extends LazyLoadingDisabled ? EagerUserAuditLog : LazyUserAuditLog
+
+export declare const UserAuditLog: (new (init: ModelInit<UserAuditLog>) => UserAuditLog) & {
+  copyOf(source: UserAuditLog, mutator: (draft: MutableModel<UserAuditLog>) => MutableModel<UserAuditLog> | void): UserAuditLog;
+}
+
+type EagerStaff = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Staff, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly firstName: string;
+  readonly lastName?: string | null;
+  readonly role: StaffRole | keyof typeof StaffRole;
+  readonly assignedVenueId?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyStaff = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Staff, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly firstName: string;
+  readonly lastName?: string | null;
+  readonly role: StaffRole | keyof typeof StaffRole;
+  readonly assignedVenueId?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type Staff = LazyLoading extends LazyLoadingDisabled ? EagerStaff : LazyStaff
+
+export declare const Staff: (new (init: ModelInit<Staff>) => Staff) & {
+  copyOf(source: Staff, mutator: (draft: MutableModel<Staff>) => MutableModel<Staff> | void): Staff;
+}
+
+type EagerAsset = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Asset, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+  readonly condition: AssetCondition | keyof typeof AssetCondition;
+  readonly acquiredDate: string;
+  readonly lastCheckedDate: string;
+  readonly venueId: string;
+  readonly venue?: Venue | null;
+  readonly entityId?: string | null;
+  readonly entity?: Entity | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyAsset = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Asset, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+  readonly condition: AssetCondition | keyof typeof AssetCondition;
+  readonly acquiredDate: string;
+  readonly lastCheckedDate: string;
+  readonly venueId: string;
+  readonly venue: AsyncItem<Venue | undefined>;
+  readonly entityId?: string | null;
+  readonly entity: AsyncItem<Entity | undefined>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type Asset = LazyLoading extends LazyLoadingDisabled ? EagerAsset : LazyAsset
+
+export declare const Asset: (new (init: ModelInit<Asset>) => Asset) & {
+  copyOf(source: Asset, mutator: (draft: MutableModel<Asset>) => MutableModel<Asset> | void): Asset;
 }

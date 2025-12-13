@@ -100,6 +100,22 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "entityVenueDashMetricCounter": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "gameIdTracker": {
       "build": true,
       "dependsOn": [
@@ -402,6 +418,22 @@
         {
           "category": "function",
           "resourceName": "autoScraper"
+        }
+      ]
+    },
+    "AMPLIFY_function_entityVenueDashMetricCounter_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "entityVenueDashMetricCounter"
+        }
+      ]
+    },
+    "AMPLIFY_function_entityVenueDashMetricCounter_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "entityVenueDashMetricCounter"
         }
       ]
     },

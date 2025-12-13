@@ -9,6 +9,7 @@
     "@types/uuid": "^10.0.0"
   },
   "dependencies": {
+    "string-similarity": "^4.0.4",
     "uuid": "^8.3.2"
   }
 }
