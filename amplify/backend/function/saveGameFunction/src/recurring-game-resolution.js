@@ -1,4 +1,10 @@
 // recurring-game-resolution.js
+// VERSION: 1.2.0 - Fixed GSI query and record creation for dayOfWeek#name sort key
+//
+// GSI SCHEMA (byVenueRecurringGame):
+//   - Partition Key: venueId
+//   - Sort Key: dayOfWeek#name (composite attribute, e.g., "MONDAY#Big Friday Tournament")
+//
 const { QueryCommand, PutCommand } = require('@aws-sdk/lib-dynamodb');
 const { v4: uuidv4 } = require('uuid');
 const stringSimilarity = require('string-similarity');
@@ -7,38 +13,45 @@ const stringSimilarity = require('string-similarity');
 // HELPERS
 // ===================================================================
 
+/**
+ * Get day of week from ISO date string
+ * Uses getUTCDay() for consistency with game-query-keys.js
+ */
 const getDayOfWeek = (isoDate) => {
     if (!isoDate) return null;
-    const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-    return days[new Date(isoDate).getDay()];
+    try {
+        const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        const d = new Date(isoDate);
+        if (isNaN(d.getTime())) return null;
+        return days[d.getUTCDay()];
+    } catch (error) {
+        console.error('[RECURRING] Error getting day of week:', error);
+        return null;
+    }
 };
 
 const getTimeAsMinutes = (isoDate) => {
     if (!isoDate) return 0;
     const d = new Date(isoDate);
-    return d.getHours() * 60 + d.getMinutes();
+    return d.getUTCHours() * 60 + d.getUTCMinutes();
 };
 
 const formatTimeFromISO = (isoDate) => {
     if (!isoDate) return null;
     const d = new Date(isoDate);
-    const hours = d.getHours().toString().padStart(2, '0');
-    const minutes = d.getMinutes().toString().padStart(2, '0');
+    const hours = d.getUTCHours().toString().padStart(2, '0');
+    const minutes = d.getUTCMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
 };
 
 const normalizeGameName = (name) => {
     if (!name) return '';
     return name.toLowerCase()
-        // Remove guarantees and money patterns
         .replace(/\$[0-9,]+(k)?\s*(gtd|guaranteed)/gi, '')
         .replace(/\b(gtd|guaranteed)\b/gi, '')
-        // Remove structural keywords
         .replace(/\b(weekly|monthly|annual)\b/gi, '')
         .replace(/\b(rebuy|re-entry|freezeout|entry)\b.*$/gi, '') 
-        // Remove strictly numeric money amounts usually at start ($100)
         .replace(/^\$[0-9]+\s+/, '')
-        // Clean special chars and extra spaces
         .replace(/[^a-z0-9\s]/g, '')
         .replace(/\s+/g, ' ')
         .trim();
@@ -50,8 +63,20 @@ const normalizeGameName = (name) => {
  */
 const generateRecurringDisplayName = (rawName) => {
     const clean = normalizeGameName(rawName);
-    // Capitalize words
     return clean.replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+};
+
+/**
+ * Build the composite sort key for the GSI
+ * Format: "MONDAY#Big Friday Tournament"
+ * 
+ * @param {string} dayOfWeek - Day of week (MONDAY, TUESDAY, etc.)
+ * @param {string} name - Game name
+ * @returns {string} Composite key for GSI sort key
+ */
+const buildDayOfWeekNameKey = (dayOfWeek, name) => {
+    if (!dayOfWeek || !name) return null;
+    return `${dayOfWeek}#${name}`;
 };
 
 // ===================================================================
@@ -62,13 +87,22 @@ const createRecurringGame = async (ddbDocClient, tableName, data) => {
     const now = new Date().toISOString();
     const timestamp = Date.now();
     
+    // Build the composite GSI sort key
+    const dayOfWeekNameKey = buildDayOfWeekNameKey(data.dayOfWeek, data.name);
+    
+    if (!dayOfWeekNameKey) {
+        console.error('[RECURRING] Cannot create game without dayOfWeek or name');
+        throw new Error('dayOfWeek and name are required');
+    }
+    
     const newGame = {
         id: uuidv4(),
         name: data.name,
         venueId: data.venueId,
         entityId: data.entityId,
-        dayOfWeek: data.dayOfWeek,
-        frequency: 'WEEKLY', // Default safe assumption
+        dayOfWeek: data.dayOfWeek,                    // Keep standalone for filtering
+        'dayOfWeek#name': dayOfWeekNameKey,           // GSI sort key attribute
+        frequency: 'WEEKLY',
         gameType: data.gameType || 'TOURNAMENT',
         gameVariant: data.gameVariant || 'NLHE',
         startTime: data.startTime || null,
@@ -87,7 +121,7 @@ const createRecurringGame = async (ddbDocClient, tableName, data) => {
             TableName: tableName,
             Item: newGame
         }));
-        console.log(`[RECURRING] Created new game: ${newGame.name} (${newGame.id})`);
+        console.log(`[RECURRING] Created new game: ${newGame.name} (${newGame.id}) with key: ${dayOfWeekNameKey}`);
         return newGame;
     } catch (error) {
         console.error('[RECURRING] Error creating game:', error);
@@ -151,26 +185,59 @@ const calculateMatchScore = (gameInput, candidate) => {
 const resolveRecurringGame = async (gameInput, venueId, entityId, ddbDocClient, getTableName, options = {}) => {
     const { autoCreate = true } = options;
     
-    if (!venueId || !gameInput.gameStartDateTime || !gameInput.gameVariant) return null;
+    // Validation
+    if (!venueId) {
+        console.log('[RECURRING] No venueId provided, skipping resolution');
+        return null;
+    }
+    
+    if (!gameInput.gameStartDateTime) {
+        console.log('[RECURRING] No gameStartDateTime provided, skipping resolution');
+        return null;
+    }
+    
+    if (!gameInput.gameVariant) {
+        console.log('[RECURRING] No gameVariant provided, skipping resolution');
+        return null;
+    }
 
     const dayOfWeek = getDayOfWeek(gameInput.gameStartDateTime);
+    
+    if (!dayOfWeek) {
+        console.warn('[RECURRING] Could not determine day of week from:', gameInput.gameStartDateTime);
+        return null;
+    }
+    
     const tableName = getTableName('RecurringGame');
 
     try {
-        // 1. Fetch Candidates
+        // =====================================================================
+        // QUERY USING GSI: byVenueRecurringGame
+        // Partition Key: venueId
+        // Sort Key: dayOfWeek#name (composite attribute)
+        // 
+        // Use begins_with to get all games for this venue on this day
+        // e.g., begins_with("MONDAY#") returns all Monday games
+        // =====================================================================
+        
         const result = await ddbDocClient.send(new QueryCommand({
             TableName: tableName,
-            IndexName: 'byVenueRecurringGame', 
-            KeyConditionExpression: 'venueId = :vid AND dayOfWeek = :dow',
+            IndexName: 'byVenueRecurringGame',
+            KeyConditionExpression: 'venueId = :vid AND begins_with(#sortKey, :dayPrefix)',
             FilterExpression: 'isActive = :active',
+            ExpressionAttributeNames: {
+                '#sortKey': 'dayOfWeek#name'    // The literal attribute name
+            },
             ExpressionAttributeValues: {
                 ':vid': venueId,
-                ':dow': dayOfWeek,
+                ':dayPrefix': `${dayOfWeek}#`,  // e.g., "MONDAY#"
                 ':active': true
             }
         }));
 
         const candidates = result.Items || [];
+        
+        console.log(`[RECURRING] Found ${candidates.length} candidates for ${dayOfWeek} at venue ${venueId.substring(0, 8)}...`);
         
         // 2. Score & Match
         if (candidates.length > 0) {
@@ -196,7 +263,6 @@ const resolveRecurringGame = async (gameInput, venueId, entityId, ddbDocClient, 
                 };
 
                 // === GUARANTEE LOGIC ===
-                // If input game has no guarantee (0 or null), but parent has one, suggest it.
                 if ((!gameInput.guaranteeAmount || gameInput.guaranteeAmount === 0) && bestMatch.typicalGuarantee) {
                     response.suggestedGuarantee = bestMatch.typicalGuarantee;
                     console.log(`[RECURRING] Inheriting guarantee $${bestMatch.typicalGuarantee} from parent ${bestMatch.name}`);
