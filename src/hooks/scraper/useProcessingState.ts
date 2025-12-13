@@ -111,34 +111,34 @@ export const useProcessingState = (
     return controller;
   }, [baseUrl, urlPath, mode, useSimplifiedView]);
 
-  const stopProcessing = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    
-    // Mark all pending items as stopped
-    setResults(prev => prev.map(result => {
-      if (result.status === 'pending') {
-        return {
-          ...result,
-          status: 'skipped' as const,
-          statusMessage: 'Stopped by user',
-        };
-      }
-      // Also handle items that were mid-scrape when stopped
-      if (result.status === 'scraping') {
-        return {
-          ...result,
-          status: 'skipped' as const,
-          statusMessage: 'Cancelled',
-        };
-      }
-      return result;
-    }));
-    
-    setIsProcessing(false);
-    setIsPaused(false);
-  }, []);
+    const stopProcessing = useCallback(() => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        setResults(prev =>
+            prev.map(result => {
+            if (result.status === 'pending') {
+                return {
+                ...result,
+                status: 'skipped' as const,
+                message: 'Stopped by user',
+                };
+            }
+            if (result.status === 'scraping') {
+                return {
+                ...result,
+                status: 'skipped' as const,
+                message: 'Cancelled',
+                };
+            }
+            return result;
+            })
+        );
+
+        setIsProcessing(false);
+        setIsPaused(false);
+    }, []);
 
   const pauseProcessing = useCallback(() => {
     setIsPaused(true);

@@ -1,5 +1,6 @@
 // src/services/scrapeURLService.ts
 // Service for querying ScrapeURL status for skip options
+// UPDATED: Added doNotScrape tracking for pre-fetch blocking
 
 import { generateClient } from 'aws-amplify/api';
 
@@ -15,6 +16,8 @@ export interface ScrapeURLStatus {
   lastScrapeStatus: string | null;
   gameStatus: string | null;
   entityId: string | null;
+  doNotScrape: boolean;  // NEW: Track doNotScrape flag
+  latestS3Key?: string;  // NEW: Track if S3 cache exists
 }
 
 export interface ScrapeURLStatusCache {
@@ -23,13 +26,10 @@ export interface ScrapeURLStatusCache {
 
 // ===================================================================
 // GRAPHQL QUERIES
-// Note: listScrapeURLs is DISABLED in schema (list: null)
-// Must use GSI queries or custom searchScrapeURLs resolver
-// Note: Avoid requesting fields with enum types that may have invalid values in DB
+// Updated to include doNotScrape and latestS3Key fields
 // ===================================================================
 
 // Query using byEntityScrapeURL GSI - actual generated name is scrapeURLSByEntityId
-// Only fetch the minimal fields we need for skip logic
 const SCRAPE_URLS_BY_ENTITY_GSI = /* GraphQL */ `
   query ScrapeURLSByEntityId(
     $entityId: ID!
@@ -47,6 +47,8 @@ const SCRAPE_URLS_BY_ENTITY_GSI = /* GraphQL */ `
         lastScrapeStatus
         gameStatus
         entityId
+        doNotScrape
+        latestS3Key
       }
       nextToken
     }
@@ -71,6 +73,8 @@ const SEARCH_SCRAPE_URLS = /* GraphQL */ `
         lastScrapeStatus
         gameStatus
         entityId
+        doNotScrape
+        latestS3Key
       }
       nextToken
     }
@@ -93,6 +97,8 @@ const SCRAPE_URLS_BY_TOURNAMENT_ID = /* GraphQL */ `
         lastScrapeStatus
         gameStatus
         entityId
+        doNotScrape
+        latestS3Key
       }
     }
   }
@@ -104,7 +110,6 @@ const SCRAPE_URLS_BY_TOURNAMENT_ID = /* GraphQL */ `
 
 /**
  * Check if a tournament ID should be skipped based on NOT_PUBLISHED status
- * Returns true if the tournament has been previously scraped with gameStatus=NOT_PUBLISHED
  */
 export const shouldSkipNotPublished = async (
   tournamentId: number,
@@ -112,8 +117,6 @@ export const shouldSkipNotPublished = async (
 ): Promise<boolean> => {
   try {
     const client = getClient();
-    
-    // Use byTournamentId GSI
     let items: ScrapeURLStatus[] = [];
     
     try {
@@ -124,7 +127,6 @@ export const shouldSkipNotPublished = async (
       
       items = response?.data?.scrapeURLSByTournamentId?.items || [];
     } catch (queryError: any) {
-      // Check for partial success - data may exist even with enum serialization errors
       if (queryError?.data?.scrapeURLSByTournamentId?.items) {
         items = queryError.data.scrapeURLSByTournamentId.items;
       } else {
@@ -134,10 +136,10 @@ export const shouldSkipNotPublished = async (
     }
     
     const match = items.find((item: ScrapeURLStatus) => item?.entityId === entityId);
-    
     const result = match?.gameStatus === 'NOT_PUBLISHED';
+    
     if (result) {
-      console.log(`[scrapeURLService] shouldSkipNotPublished(${tournamentId}): SKIP (direct query found NOT_PUBLISHED)`);
+      console.log(`[scrapeURLService] shouldSkipNotPublished(${tournamentId}): SKIP`);
     }
     
     return result;
@@ -149,7 +151,6 @@ export const shouldSkipNotPublished = async (
 
 /**
  * Check if a gap ID should be skipped based on NOT_FOUND status
- * Returns true if the ID has lastScrapeStatus=NOT_FOUND or BLANK
  */
 export const shouldSkipNotFoundGap = async (
   tournamentId: number,
@@ -157,8 +158,6 @@ export const shouldSkipNotFoundGap = async (
 ): Promise<boolean> => {
   try {
     const client = getClient();
-    
-    // Use byTournamentId GSI
     let items: ScrapeURLStatus[] = [];
     
     try {
@@ -169,7 +168,6 @@ export const shouldSkipNotFoundGap = async (
       
       items = response?.data?.scrapeURLSByTournamentId?.items || [];
     } catch (queryError: any) {
-      // Check for partial success - data may exist even with enum serialization errors
       if (queryError?.data?.scrapeURLSByTournamentId?.items) {
         items = queryError.data.scrapeURLSByTournamentId.items;
       } else {
@@ -187,7 +185,7 @@ export const shouldSkipNotFoundGap = async (
     }
     
     if (result) {
-      console.log(`[scrapeURLService] shouldSkipNotFoundGap(${tournamentId}): SKIP (direct query found ${match?.lastScrapeStatus})`);
+      console.log(`[scrapeURLService] shouldSkipNotFoundGap(${tournamentId}): SKIP (${match?.lastScrapeStatus})`);
     }
     
     return result;
@@ -200,6 +198,7 @@ export const shouldSkipNotFoundGap = async (
 /**
  * Pre-fetch ScrapeURL statuses for a batch of tournament IDs
  * Returns a cache object for O(1) lookup
+ * NOW INCLUDES: doNotScrape flag and latestS3Key
  */
 export const prefetchScrapeURLStatuses = async (
   entityId: string,
@@ -228,12 +227,10 @@ export const prefetchScrapeURLStatuses = async (
     const client = getClient();
     let nextToken: string | null = null;
     
-    // Use byEntityScrapeURL GSI query (scrapeURLSByEntityId)
     do {
       let items: ScrapeURLStatus[] = [];
       
       try {
-        // Try GSI query: scrapeURLSByEntityId
         const response = await client.graphql({
           query: SCRAPE_URLS_BY_ENTITY_GSI,
           variables: { 
@@ -243,18 +240,17 @@ export const prefetchScrapeURLStatuses = async (
           }
         }) as any;
         
-        // Handle partial success - data may exist even with errors
         items = response?.data?.scrapeURLSByEntityId?.items || [];
         nextToken = response?.data?.scrapeURLSByEntityId?.nextToken || null;
         
         console.log(`[scrapeURLService] GSI query returned ${items.length} items, nextToken: ${!!nextToken}`);
         
-        // Log sample of items returned
         if (items.length > 0) {
           console.log('[scrapeURLService] Sample items from GSI:', items.slice(0, 3).map(i => ({
             tournamentId: i?.tournamentId,
             gameStatus: i?.gameStatus,
-            lastScrapeStatus: i?.lastScrapeStatus
+            lastScrapeStatus: i?.lastScrapeStatus,
+            doNotScrape: i?.doNotScrape
           })));
         }
         
@@ -262,15 +258,12 @@ export const prefetchScrapeURLStatuses = async (
           console.warn('[scrapeURLService] GSI query had errors but returned data:', response.errors.length, 'errors');
         }
       } catch (gsiError: any) {
-        // Check if it's a partial success (has data despite errors)
         if (gsiError?.data?.scrapeURLSByEntityId?.items) {
           items = gsiError.data.scrapeURLSByEntityId.items;
           nextToken = gsiError.data.scrapeURLSByEntityId.nextToken || null;
           console.warn('[scrapeURLService] GSI query had errors but returned', items.length, 'items');
         } else {
-          // GSI query failed completely, try searchScrapeURLs
-          console.log('[scrapeURLService] GSI query failed completely, error:', gsiError?.message || gsiError);
-          console.log('[scrapeURLService] Trying searchScrapeURLs fallback...');
+          console.log('[scrapeURLService] GSI query failed, trying searchScrapeURLs fallback...');
           
           try {
             const searchResponse = await client.graphql({
@@ -285,26 +278,13 @@ export const prefetchScrapeURLStatuses = async (
             items = searchResponse?.data?.searchScrapeURLs?.items || [];
             nextToken = searchResponse?.data?.searchScrapeURLs?.nextToken || null;
             console.log(`[scrapeURLService] searchScrapeURLs returned ${items.length} items`);
-            
-            if (searchResponse?.errors?.length) {
-              console.warn('[scrapeURLService] searchScrapeURLs had errors:', searchResponse.errors.length);
-            }
           } catch (searchError: any) {
-            console.log('[scrapeURLService] searchScrapeURLs threw exception:', {
-              message: searchError?.message,
-              hasData: !!searchError?.data,
-              dataKeys: searchError?.data ? Object.keys(searchError.data) : [],
-              hasItems: !!searchError?.data?.searchScrapeURLs?.items,
-              itemCount: searchError?.data?.searchScrapeURLs?.items?.length
-            });
-            
-            // Check for partial success on search too
             if (searchError?.data?.searchScrapeURLs?.items) {
               items = searchError.data.searchScrapeURLs.items;
               nextToken = searchError.data.searchScrapeURLs.nextToken || null;
               console.log(`[scrapeURLService] searchScrapeURLs partial success: ${items.length} items`);
             } else {
-              console.error('[scrapeURLService] Both queries failed completely, no usable data');
+              console.error('[scrapeURLService] Both queries failed completely');
               return cache;
             }
           }
@@ -313,42 +293,25 @@ export const prefetchScrapeURLStatuses = async (
       
       // Filter and cache only the IDs we care about
       let itemsInRange = 0;
-      let itemsOutOfRange = 0;
       for (const item of items) {
         if (item && item.tournamentId >= minId && item.tournamentId <= maxId) {
-          cache[item.tournamentId] = item;
+          cache[item.tournamentId] = {
+            ...item,
+            doNotScrape: item.doNotScrape ?? false  // Ensure boolean
+          };
           itemsInRange++;
-          // Log first few cached items for debugging
-          if (Object.keys(cache).length <= 5) {
-            console.log(`[scrapeURLService] Caching tournamentId ${item.tournamentId}:`, {
-              gameStatus: item.gameStatus,
-              lastScrapeStatus: item.lastScrapeStatus
-            });
-          }
-        } else {
-          itemsOutOfRange++;
         }
       }
-      console.log(`[scrapeURLService] Batch filtering: ${itemsInRange} in range, ${itemsOutOfRange} out of range (looking for ${minId}-${maxId})`);
-      
-      // Log sample of out-of-range IDs if many filtered out
-      if (itemsOutOfRange > 0 && items.length > 0) {
-        const sampleOutOfRange = items
-          .filter(i => i && (i.tournamentId < minId || i.tournamentId > maxId))
-          .slice(0, 3)
-          .map(i => i?.tournamentId);
-        console.log(`[scrapeURLService] Sample out-of-range IDs:`, sampleOutOfRange);
-      }
+      console.log(`[scrapeURLService] Cached ${itemsInRange} items in range ${minId}-${maxId}`);
       
       // Stop if we've found all the IDs we need
-      const cachedCount = Object.keys(cache).length;
-      if (cachedCount >= tournamentIds.length) {
+      if (Object.keys(cache).length >= tournamentIds.length) {
         break;
       }
       
     } while (nextToken);
     
-    console.log(`[scrapeURLService] Prefetched ${Object.keys(cache).length} ScrapeURL statuses for range ${minId}-${maxId}`);
+    console.log(`[scrapeURLService] Prefetched ${Object.keys(cache).length} ScrapeURL statuses`);
     return cache;
     
   } catch (error: any) {
@@ -366,9 +329,8 @@ export const checkCachedNotPublished = (
 ): boolean => {
   const entry = cache[tournamentId];
   const result = entry?.gameStatus === 'NOT_PUBLISHED';
-  // Only log when actually skipping
   if (result) {
-    console.log(`[scrapeURLService] checkCachedNotPublished(${tournamentId}): SKIP (gameStatus=${entry?.gameStatus})`);
+    console.log(`[scrapeURLService] checkCachedNotPublished(${tournamentId}): SKIP`);
   }
   return result;
 };
@@ -381,17 +343,43 @@ export const checkCachedNotFoundGap = (
   tournamentId: number
 ): boolean => {
   const entry = cache[tournamentId];
-  if (!entry) {
-    return false;
-  }
+  if (!entry) return false;
   
   const status = entry.lastScrapeStatus?.toUpperCase();
   const result = status === 'NOT_FOUND' || status === 'BLANK' || status === 'NOT_IN_USE';
-  // Only log when actually skipping
   if (result) {
-    console.log(`[scrapeURLService] checkCachedNotFoundGap(${tournamentId}): SKIP (lastScrapeStatus=${entry.lastScrapeStatus})`);
+    console.log(`[scrapeURLService] checkCachedNotFoundGap(${tournamentId}): SKIP (${entry.lastScrapeStatus})`);
   }
   return result;
+};
+
+/**
+ * NEW: Check from cache if a tournament is marked as doNotScrape
+ * Returns the cached status if found, null otherwise
+ */
+export const checkCachedDoNotScrape = (
+  cache: ScrapeURLStatusCache,
+  tournamentId: number
+): { doNotScrape: boolean; gameStatus: string | null; hasS3Cache: boolean } | null => {
+  const entry = cache[tournamentId];
+  if (!entry) return null;
+  
+  return {
+    doNotScrape: entry.doNotScrape ?? false,
+    gameStatus: entry.gameStatus,
+    hasS3Cache: !!entry.latestS3Key
+  };
+};
+
+/**
+ * NEW: Get full cached status for a tournament
+ * Used when doNotScrape is detected to show ScrapeOptionsModal
+ */
+export const getCachedStatus = (
+  cache: ScrapeURLStatusCache,
+  tournamentId: number
+): ScrapeURLStatus | null => {
+  return cache[tournamentId] || null;
 };
 
 export default {
@@ -400,4 +388,6 @@ export default {
   prefetchScrapeURLStatuses,
   checkCachedNotPublished,
   checkCachedNotFoundGap,
+  checkCachedDoNotScrape,
+  getCachedStatus,
 };

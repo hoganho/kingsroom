@@ -9,6 +9,9 @@ import { Venue } from '../../../API';
 import type { GameState, JobStatus } from '../../../types/game';
 import { ScrapedGameData } from '../../../API';
 
+// Import shared getDataSource utility
+import { getDataSource } from '../../../utils/processingResultUtils';
+
 interface ScraperResultsProps {
   results: ProcessingResult[];
   mode: IdSelectionMode;
@@ -21,51 +24,10 @@ interface ScraperResultsProps {
 }
 
 // ===================================================================
-// DATA SOURCE DETECTION - FIXED
+// DATA SOURCE DETECTION
 // ===================================================================
 
-/**
- * Determines the data source for display purposes.
- * 
- * IMPORTANT: Only use the explicit `source` field from the Lambda response.
- * Do NOT fallback to checking s3Key existence, because:
- * - When we fetch LIVE, the Lambda caches to S3 and returns BOTH source:'LIVE' AND s3Key
- * - Falling back to s3Key would incorrectly label LIVE fetches as S3
- * 
- * Lambda source values (from enhanced-handleFetch.js):
- * - 'S3_CACHE' - Content retrieved from S3 cache (line 415)
- * - 'HTTP_304_CACHE' - Content unchanged per HTTP headers (line 473)
- * - 'LIVE' - Fresh fetch from web (line 635)
- */
-const getDataSource = (result: ProcessingResult): 's3' | 'web' | 'none' | 'pending' => {
-  // Handle pending/in-progress states
-  if (result.status === 'pending' || result.status === 'scraping') {
-    return 'pending';
-  }
-  
-  // Check for skipped results
-  const skipped = (result.parsedData as any)?.skipped;
-  if (skipped || result.status === 'skipped') {
-    return 'none';
-  }
-  
-  // Get the explicit source field from Lambda response
-  const source = (result.parsedData as any)?.source;
-  
-  // Map Lambda source values to display values
-  // CRITICAL: Do NOT add fallback to s3Key - that causes the bug
-  switch (source) {
-    case 'S3_CACHE':
-    case 'HTTP_304_CACHE':
-      return 's3';
-    case 'LIVE':
-      return 'web';
-    default:
-      // If no source field and we have parsedData, it's likely from an older response
-      // Default to 'pending' to indicate unknown state rather than guessing
-      return result.parsedData ? 'web' : 'pending';
-  }
-};
+// getDataSource imported from ../../../utils/processingResultUtils
 
 // ===================================================================
 // RESULT TO GAME STATE CONVERSION

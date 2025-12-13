@@ -7,7 +7,7 @@ import { useEntity } from '../contexts/EntityContext';
 import { 
   socialPostsBySocialAccountIdAndPostedAt,
   socialPostsByEntityIdAndPostedAt,
-  socialPostsByPostStatus // Ensure you have run 'amplify push' so this exists
+  socialPostsByPostStatus 
 } from '../graphql/queries';
 import { updateSocialPost } from '../graphql/mutations';
 
@@ -25,6 +25,7 @@ export { SocialPostStatus };
 export interface UseSocialPostsOptions {
   entityId?: string;
   accountId?: string;
+  accountIds?: string[];
   limit?: number;
   autoFetch?: boolean;
   filterByEntity?: boolean;
@@ -42,18 +43,13 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [nextToken, setNextToken] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(false);
-
+  
   const hasFetchedRef = useRef(false);
   const lastFetchKeyRef = useRef<string>('');
 
   const { filterByEntity = true, daysBack } = options;
   const effectiveEntityId = options.entityId || (filterByEntity ? currentEntity?.id : undefined);
   
-  // Default limit for standard pagination (Load More)
-  const paginationLimit = options.limit || 50;
-
   // Calculate the date string for filtering
   const minDate = useMemo(() => {
     if (!daysBack) return undefined;
@@ -62,8 +58,71 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
     return d.toISOString();
   }, [daysBack]);
 
+  /**
+   * Helper: Fetch a single account's posts until limit or date condition is met.
+   * Updates the global 'posts' state incrementally.
+   */
+  const fetchSingleAccount = useCallback(async (accountId: string, dateCondition: any, limit: number) => {
+    let items: SocialPost[] = [];
+    let nextToken: string | null | undefined = null;
+    let shouldFetch = true;
+    let pageCount = 0;
+    const MAX_PAGES = 5; // Safety cap to prevent infinite loops
+
+    while (shouldFetch && pageCount < MAX_PAGES) {
+      try {
+        const response = (await client.graphql({
+          query: socialPostsBySocialAccountIdAndPostedAt,
+          variables: { 
+            socialAccountId: accountId,
+            postedAt: dateCondition,
+            sortDirection: ModelSortDirection.DESC,
+            filter: { status: { eq: SocialPostStatus.ACTIVE } },
+            limit: limit,
+            nextToken: nextToken
+          },
+        })) as any;
+
+        const data = response.data?.socialPostsBySocialAccountIdAndPostedAt;
+        const newItems = (data?.items || []).filter((i: any) => i !== null);
+        items = [...items, ...newItems];
+        nextToken = data?.nextToken;
+        pageCount++;
+
+        // === INCREMENTAL UPDATE ===
+        // Update the UI immediately when we get data for this account
+        if (newItems.length > 0) {
+            setPosts(prev => {
+                // Deduplicate based on ID
+                const existingIds = new Set(prev.map(p => p.id));
+                const uniqueNewItems = newItems.filter((p: SocialPost) => !existingIds.has(p.id));
+                return [...prev, ...uniqueNewItems];
+            });
+        }
+
+        // Stop if we run out of data
+        if (!nextToken) {
+            shouldFetch = false;
+        }
+        // Stop if we have enough data (if we are just viewing recent posts)
+        // If we are viewing "All History" (minDate is undefined), we might want to keep going
+        if (minDate && items.length >= limit) {
+            shouldFetch = false;
+        }
+
+      } catch (e) {
+        console.warn(`Error fetching account ${accountId}`, e);
+        shouldFetch = false;
+      }
+    }
+    return items;
+  }, [client, minDate]);
+
+
   const fetchPosts = useCallback(async (loadMore = false, forceRefresh = false, ignoreDateLimit = false) => {
-    const currentFetchKey = `${options.accountId || ''}-${effectiveEntityId || ''}-${filterByEntity}-${daysBack}-${ignoreDateLimit}`;
+    // Generate a key to prevent duplicate fetches of the same config
+    const accountIdsKey = (options.accountIds || []).sort().join(',');
+    const currentFetchKey = `${options.accountId || ''}-${accountIdsKey}-${effectiveEntityId || ''}-${filterByEntity}-${daysBack}-${ignoreDateLimit}`;
     
     if (!forceRefresh && !loadMore && hasFetchedRef.current && lastFetchKeyRef.current === currentFetchKey) {
       return;
@@ -71,112 +130,58 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
 
     if (!loadMore) {
       setLoading(true);
+      // Only clear posts if we are doing a hard refresh or configuration change
+      if (!loadMore) setPosts([]); 
     }
+
     setError(null);
+    const dateCondition = (minDate && !ignoreDateLimit) ? { gt: minDate } : undefined;
+    // We use a smaller per-request limit for parallel fetching to keep individual requests fast
+    const currentLimit = 50; 
 
     try {
-      // Determine if we are in "Initial Load" mode with a Date Window
-      // In this mode, we want to fetch ALL items in the window, not just the first page.
-      const isInitialWindowFetch = !loadMore && minDate && !ignoreDateLimit;
-
-      let accumulatedItems: SocialPost[] = [];
-      let nextTokenToUse = loadMore ? nextToken : null;
-      let shouldKeepFetching = true;
-      let pageCount = 0;
-      
-      // Use a larger batch size for auto-fetching to reduce network requests
-      const currentLimit = isInitialWindowFetch ? 100 : paginationLimit;
-
-      const activeFilter = { status: { eq: SocialPostStatus.ACTIVE } };
-      const dateCondition = (minDate && !ignoreDateLimit) ? { gt: minDate } : undefined;
-
-      // --- FETCH LOOP ---
-      while (shouldKeepFetching) {
-        let response: unknown;
-        let items: SocialPost[] = [];
-        let responseNextToken: string | undefined | null = null;
-
-        if (options.accountId) {
-          response = await client.graphql({
-            query: socialPostsBySocialAccountIdAndPostedAt,
-            variables: { 
-              socialAccountId: options.accountId,
-              postedAt: dateCondition,
-              sortDirection: ModelSortDirection.DESC,
-              filter: activeFilter,
-              limit: currentLimit,
-              nextToken: nextTokenToUse
-            },
-          });
-          
-          if (hasGraphQLData<{ socialPostsBySocialAccountIdAndPostedAt: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
-              items = response.data.socialPostsBySocialAccountIdAndPostedAt?.items || [];
-              responseNextToken = response.data.socialPostsBySocialAccountIdAndPostedAt?.nextToken;
-          }
-        } 
-        else if (effectiveEntityId) {
-          response = await client.graphql({
+      // STRATEGY 1: Parallel Account Fetch (Fastest for UI)
+      if (options.accountIds && options.accountIds.length > 0) {
+        await Promise.all(
+          options.accountIds.map(accountId => 
+             fetchSingleAccount(accountId, dateCondition, currentLimit)
+          )
+        );
+      } 
+      // STRATEGY 2: Single Account
+      else if (options.accountId) {
+        await fetchSingleAccount(options.accountId, dateCondition, currentLimit);
+      }
+      // STRATEGY 3: Entity Fallback (Legacy / Slow)
+      else if (effectiveEntityId) {
+         const response = (await client.graphql({
             query: socialPostsByEntityIdAndPostedAt,
             variables: { 
               entityId: effectiveEntityId,
               postedAt: dateCondition,
               sortDirection: ModelSortDirection.DESC,
-              filter: activeFilter,
-              limit: currentLimit,
-              nextToken: nextTokenToUse
+              filter: { status: { eq: SocialPostStatus.ACTIVE } },
+              limit: currentLimit
             },
-          });
-
-          if (hasGraphQLData<{ socialPostsByEntityIdAndPostedAt: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
-              items = response.data.socialPostsByEntityIdAndPostedAt?.items || [];
-              responseNextToken = response.data.socialPostsByEntityIdAndPostedAt?.nextToken;
-          }
-        } 
-        else {
-          // GLOBAL FEED: Use the specific Index Query
-          const dateRange = dateCondition ? { postedAt: dateCondition } : undefined;
-
-          response = await client.graphql({
+         })) as any;
+         
+         const items = response.data?.socialPostsByEntityIdAndPostedAt?.items || [];
+         setPosts(items);
+      }
+      // STRATEGY 4: Global Fallback (Legacy / Slow)
+      else {
+         const response = (await client.graphql({
             query: socialPostsByPostStatus,
             variables: { 
               status: SocialPostStatus.ACTIVE,
               sortDirection: ModelSortDirection.DESC,
               limit: currentLimit,
-              nextToken: nextTokenToUse,
-              ...dateRange
+              ... (dateCondition ? { postedAt: dateCondition } : {})
             },
-          });
-
-          if (hasGraphQLData<{ socialPostsByPostStatus: { items: SocialPost[]; nextToken?: string | null } }>(response)) {
-              items = response.data.socialPostsByPostStatus?.items || [];
-              responseNextToken = response.data.socialPostsByPostStatus?.nextToken;
-          }
-        }
-
-        const validItems = items.filter((item): item is SocialPost => item !== null);
-        accumulatedItems = [...accumulatedItems, ...validItems];
-
-        // LOGIC: Should we fetch the next page immediately?
-        if (isInitialWindowFetch && responseNextToken && pageCount < 20) {
-            // Yes: We are auto-filling the 7-day window. 
-            // We have a token, and we haven't hit a safety limit (e.g. 2000 posts).
-            nextTokenToUse = responseNextToken;
-            pageCount++;
-        } else {
-            // No: Either we are done, or we are in manual "Load More" mode.
-            shouldKeepFetching = false;
-            
-            // Set the state for the *next* manual user interaction
-            setNextToken(responseNextToken || null);
-            setHasMore(!!responseNextToken);
-        }
-      } 
-      // --- END LOOP ---
-
-      if (loadMore) {
-        setPosts(prev => [...prev, ...accumulatedItems]);
-      } else {
-        setPosts(accumulatedItems);
+         })) as any;
+         
+         const items = response.data?.socialPostsByPostStatus?.items || [];
+         setPosts(items);
       }
 
       hasFetchedRef.current = true;
@@ -188,7 +193,7 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [client, options.accountId, effectiveEntityId, paginationLimit, nextToken, filterByEntity, minDate]);
+  }, [client, options.accountIds, options.accountId, effectiveEntityId, minDate, fetchSingleAccount, filterByEntity, daysBack]);
 
   const updatePostFn = useCallback(async (input: UpdateSocialPostInput): Promise<SocialPost | null> => {
     try {
@@ -224,29 +229,28 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
   }, [updatePostFn]);
 
   const loadMore = useCallback(() => {
-    if (hasMore && !loading) {
-      fetchPosts(true);
-    }
-  }, [hasMore, loading, fetchPosts]);
+    // Parallel fetch doesn't support simple global "load more" yet, 
+    // but we keep the function signature.
+  }, []);
 
   const refresh = useCallback(() => {
-    setNextToken(null);
     fetchPosts(false, true);
   }, [fetchPosts]);
 
   const fetchFullHistory = useCallback(() => {
-    setNextToken(null); 
     fetchPosts(false, true, true); 
   }, [fetchPosts]);
 
   useEffect(() => {
-    if (options.autoFetch !== false) {
-      const currentFetchKey = `${options.accountId || ''}-${effectiveEntityId || ''}-${filterByEntity}-${daysBack}`;
-      if (!hasFetchedRef.current || lastFetchKeyRef.current !== currentFetchKey) {
-        fetchPosts();
-      }
+    // Trigger auto-fetch if we have IDs available
+    const hasIds = options.accountIds && options.accountIds.length > 0;
+    const hasId = !!options.accountId;
+    const hasEntity = !!effectiveEntityId;
+
+    if (options.autoFetch !== false && !hasFetchedRef.current && (hasIds || hasId || hasEntity)) {
+      fetchPosts();
     }
-  }, [options.accountId, effectiveEntityId, options.autoFetch, fetchPosts, filterByEntity, daysBack]);
+  }, [options.autoFetch, options.accountIds, options.accountId, effectiveEntityId, fetchPosts]);
 
   const totalEngagement = useMemo(() => {
     return posts.reduce(
@@ -266,7 +270,7 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
     posts,
     loading,
     error,
-    hasMore,
+    hasMore: false,
     fetchPosts: useCallback(() => fetchPosts(false, true), [fetchPosts]),
     fetchFullHistory,
     updatePost: updatePostFn,

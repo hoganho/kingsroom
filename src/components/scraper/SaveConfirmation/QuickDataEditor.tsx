@@ -1,15 +1,27 @@
 // src/components/scraper/SaveConfirmation/QuickDataEditor.tsx
+// COMPLETE: Integrated Recurring Game and Series Editors
 // UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
 
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { GameData } from '../../../types/game';
 import { EditableField } from './EditableField';
 import { fieldManifest } from '../../../lib/fieldManifest';
 import type { UseGameDataEditorReturn } from '../../../hooks/useGameDataEditor';
 
+// Import sub-editors
+import { RecurringGameEditor } from './RecurringGameEditor';
+import SeriesDetailsEditor from './SeriesDetailsEditor';
+
+// Import Types
+import type { TournamentSeries, TournamentSeriesTitle } from '../../../types/series';
+
 interface QuickDataEditorProps {
     editor: UseGameDataEditorReturn;
     showAdvanced?: boolean;
+    // Data sources for sub-editors
+    recurringGames?: any[]; // Replace 'any' with RecurringGame API type if available
+    series?: TournamentSeries[];
+    seriesTitles?: TournamentSeriesTitle[];
 }
 
 interface FieldGroup {
@@ -21,7 +33,10 @@ interface FieldGroup {
 
 export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({ 
     editor, 
-    showAdvanced = false 
+    showAdvanced = false,
+    recurringGames = [],
+    series = [],
+    seriesTitles = []
 }) => {
     const { 
         editedData, 
@@ -33,7 +48,7 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
     
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
     
-    // Define field groups with priority (simplified financial fields)
+    // Define field groups with priority
     const fieldGroups = useMemo((): FieldGroup[] => {
         const groups: FieldGroup[] = [
             {
@@ -53,6 +68,13 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
                 fields: ['buyIn', 'rake', 'prizepoolPaid', 'prizepoolCalculated', 'totalUniquePlayers', 'totalInitialEntries', 'totalEntries', 'guaranteeAmount', 'hasGuarantee'],
                 priority: 'important',
                 defaultOpen: true
+            },
+            // === NEW: Recurring Game Group ===
+            {
+                title: '🔄 Recurring Game',
+                fields: ['recurringGameId', 'recurringGameAssignmentStatus', 'deviationNotes'],
+                priority: 'important',
+                defaultOpen: !!editedData.recurringGameId // Open if assigned
             },
             {
                 title: '🎮 Game Details',
@@ -106,7 +128,7 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
         }
         
         return groups;
-    }, [showAdvanced]);
+    }, [showAdvanced, editedData.recurringGameId]);
     
     const fieldsWithIssues = useMemo(() => {
         const issues = new Set<keyof GameData>();
@@ -277,16 +299,16 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
                                 </div>
                                 
                                 {validationStatus.warnings.some(w => 
-                                    group.fields.some(f => w.toLowerCase().includes(f.toLowerCase()))
+                                    group.fields.some(f => w.field === f || w.message?.toLowerCase().includes(f.toLowerCase()))
                                 ) && (
                                     <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
                                         <div className="text-xs text-yellow-800">
                                             {validationStatus.warnings
                                                 .filter(w => group.fields.some(f => 
-                                                    w.toLowerCase().includes(f.toLowerCase())
+                                                    w.message?.toLowerCase().includes(f.toLowerCase())
                                                 ))
                                                 .map((warning, idx) => (
-                                                    <div key={idx}>⚠ {warning}</div>
+                                                    <div key={idx}>⚠ {warning.message}</div>
                                                 ))}
                                         </div>
                                     </div>
@@ -296,6 +318,26 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
                     </div>
                 );
             })}
+
+            {/* === ADVANCED EDITORS (Recurring & Series) === */}
+            {showAdvanced && (
+                <>
+                    {/* Recurring Game Editor */}
+                    <RecurringGameEditor 
+                        editor={editor}
+                        availableRecurringGames={recurringGames}
+                        venueId={editor.editedData.venueId || undefined}
+                    />
+
+                    {/* Series Editor */}
+                    <SeriesDetailsEditor
+                        editor={editor}
+                        series={series}
+                        seriesTitles={seriesTitles}
+                        venueId={editor.editedData.venueId || undefined}
+                    />
+                </>
+            )}
             
             {/* Complex Data Fields */}
             {showAdvanced && (

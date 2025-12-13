@@ -1,0 +1,569 @@
+# 99-mutations.graphql
+# ==========================================
+
+# ===================================================================
+
+# 1. ENUMS
+
+# ===================================================================
+
+# --- Social Pulse Enums ---
+
+# --- Background Task Enums (NEW) ---
+
+# ===================================================================
+
+# ===================================================================
+
+# ===================================================================
+
+# 3. GAME DOMAIN & CONSOLIDATION
+
+# ===================================================================
+
+type DetectedMultiDayPattern {
+  isMultiDay: Boolean!
+  detectionSource: String
+  parsedDayNumber: Int
+  parsedFlightLetter: String
+  isFinalDay: Boolean
+  derivedParentName: String!
+}
+
+# ===================================================================
+
+# 4. PLAYER DOMAIN
+
+# ===================================================================
+
+# ===================================================================
+
+# 5. SCRAPER & INGESTION ENGINE
+
+# ===================================================================
+
+# ===================================================================
+
+# 6. SYSTEM, ADMIN & ASSETS
+
+# ===================================================================
+
+# ===================================================================
+
+# 6.5 BACKGROUND TASK (NEW)
+
+# ===================================================================
+
+# ===================================================================
+
+# 6.6 SOCIAL PULSE
+
+# ===================================================================
+
+# --- User Management Responses ---
+
+type ResetPasswordResponse {
+  success: Boolean!
+  message: String
+  temporaryPassword: String
+}
+
+# --- Scraper Types ---
+
+type ErrorMetric {
+  errorType: String!
+  count: Int!
+  urls: [String!]
+}
+
+type HourlyMetric {
+  hour: String!
+  jobCount: Int!
+  urlsScraped: Int!
+  successRate: Float!
+}
+
+type EntityScraperMetrics {
+  entityId: ID
+  entityName: String!
+  totalJobs: Int!
+  successfulJobs: Int!
+  failedJobs: Int!
+  totalURLsScraped: Int!
+}
+
+# NEW: Entity-level summary (optional but useful)
+
+type EntityJobSummary {
+  entityId: ID!
+  entityName: String
+  totalJobs: Int
+  runningJobs: Int
+  completedJobs: Int
+  failedJobs: Int
+}
+
+# --- Gap Detection Types ---
+
+type TournamentIdBounds {
+  entityId: ID!
+  lowestId: Int
+  highestId: Int
+  totalCount: Int!
+  lastUpdated: AWSDateTime!
+}
+
+# --- S3 & Caching Types ---
+
+type CacheActivityLog {
+  url: AWSURL!
+  timestamp: AWSDateTime!
+  action: String!
+  reason: String
+}
+
+# --- Structure Types ---
+
+type TournamentLevel {
+  levelNumber: Int!
+  durationMinutes: Int
+  smallBlind: Int
+  bigBlind: Int
+  ante: Int
+}
+
+type Break {
+  levelNumberBeforeBreak: Int!
+  durationMinutes: Int
+}
+
+# --- Metrics Types ---
+
+type ClientMetricResponse {
+  success: Boolean!
+  message: String
+  userId: String
+}
+
+type DatabaseMetric {
+  timestamp: AWSDateTime!
+  functionName: String!
+  operation: String!
+  table: String!
+  success: Boolean!
+  duration: Float
+  count: Int
+  entityId: String
+}
+
+type DatabaseMetricsResponse {
+  metrics: [DatabaseMetric!]!
+}
+
+type GamesNeedingVenueResponse {
+  items: [Game]
+  nextToken: String
+  totalCount: Int
+}
+
+type GetReassignmentStatusResult {
+  success: Boolean!
+  message: String
+  task: BackgroundTaskInfo
+}
+
+type BackgroundTaskInfo {
+  id: ID!
+  status: BackgroundTaskStatus!
+  taskType: BackgroundTaskType!
+  targetCount: Int
+  processedCount: Int
+  progressPercent: Float
+  result: AWSJSON
+  errorMessage: String
+  createdAt: AWSDateTime!
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+}
+
+# --- Social Pulse Response Types ---
+
+type SyncPageInfoResult {
+  success: Boolean!
+  message: String
+  logoUrl: String
+}
+
+# --- Misc Response Types ---
+
+type RefreshResponse {
+  message: String!
+  status: String!
+}
+
+type SaveSeriesAssignmentInfo {
+  tournamentSeriesId: ID
+  seriesName: String
+  status: SeriesAssignmentStatus
+  confidence: Float
+}
+
+# --- Connection Types (Paginated) ---
+
+type UnfinishedGamesConnection {
+  items: [Game!]!
+  nextToken: String
+  totalCount: Int!
+}
+
+# ===================================================================
+# 8. INPUT TYPES
+# ===================================================================
+
+# --- Input Types for User Management ---
+
+input ResetUserPasswordInput {
+  userId: ID!
+  temporaryPassword: String
+  sendEmail: Boolean
+}
+
+# --- Existing Input Types ---
+
+input ClientMetricInput {
+  metricName: String!
+  value: Float!
+  unit: String!
+  dimensions: String
+  timestamp: String
+  metadata: String
+}
+
+input ManualHTMLUploadInput {
+  htmlContent: String!
+  url: AWSURL!
+  tournamentId: Int!
+  entityId: ID!
+  notes: String
+  uploadedBy: String!
+}
+
+input ReScrapeFromCacheInput {
+  s3Key: String!
+  saveToDatabase: Boolean
+}
+
+input UploadManualHTMLInput {
+  htmlContent: String!
+  url: AWSURL!
+  tournamentId: Int!
+  entityId: ID!
+  notes: String
+  uploadedBy: String
+}
+
+input DataSourceInfoInput {
+  type: DataSource!
+  sourceId: String!
+  entityId: ID!
+  fetchedAt: AWSDateTime!
+  contentHash: String
+  wasEdited: Boolean
+}
+
+input SeriesReferenceInput {
+  seriesId: ID
+  seriesName: String
+  suggestedSeriesId: ID
+  year: Int
+  confidence: Float
+  isMainEvent: Boolean
+  eventNumber: Int
+  dayNumber: Int
+  flightLetter: String
+  finalDay: Boolean
+}
+
+# --- Social Pulse Input Types ---
+
+# ===================================================================
+
+# 9. ROOT OPERATIONS
+
+# ===================================================================
+
+type Query {
+  # --- User Management Queries ---
+  adminListUsers(role: UserRole, isActive: Boolean, limit: Int, nextToken: String): UsersConnection
+    @function(name: "userManagement-${env}")
+    @auth(rules: [{ allow: groups, groups: ["SUPER_ADMIN"] }])
+
+  getUserById(id: ID!): User
+    @function(name: "userManagement-${env}")
+    @auth(rules: [{ allow: groups, groups: ["SUPER_ADMIN"] }])
+
+  # --- Consolidation Queries ---
+  previewConsolidation(input: ConsolidationPreviewInput!): ConsolidationPreviewResult!
+    @function(name: "tournamentConsolidator-${env}")
+
+  # --- Scraper & Jobs ---
+  fetchTournamentDataRange(startId: Int!, endId: Int!): [ScrapedGameSummary!]
+    @function(name: "webScraperFunction-${env}")
+
+  getScraperControlState(entityId: ID): ScraperControlResponse
+    @function(name: "autoScraper-${env}")
+
+  fetchUpdateCandidates: [String!]
+    @function(name: "webScraperFunction-${env}")
+
+  getScraperJobsReport(
+    entityId: ID              # NEW: Filter by single entity
+    entityIds: [ID]           # NEW: Filter by multiple entities
+    status: ScraperJobStatus
+    limit: Int
+    nextToken: String
+  ): ScraperJobsReport
+    @function(name: "scraperManagement-${env}")
+
+  fetchScrapeURLDetails(url: AWSURL!): ScrapeURL
+    @function(name: "scraperManagement-${env}")
+
+  searchScrapeURLs(
+    entityId: ID              # NEW: Filter by single entity
+    entityIds: [ID]           # NEW: Filter by multiple entities  
+    status: ScrapeURLStatus
+    limit: Int
+    nextToken: String
+  ): ScrapeURLConnection
+    @function(name: "scraperManagement-${env}")
+
+  getScraperMetrics(
+    entityId: ID              # NEW: Filter by single entity
+    entityIds: [ID]           # NEW: Filter by multiple entities
+    timeRange: TimeRange
+  ): ScraperMetrics
+    @function(name: "scraperManagement-${env}")
+
+  getUpdateCandidateURLs(
+    entityId: ID              # NEW
+    entityIds: [ID]           # NEW
+    limit: Int
+  ): [ScrapeURL]
+    @function(name: "scraperManagement-${env}")
+
+  scrapeGame(url: AWSURL!, entityId: ID, venueId: ID, doNotScrape: Boolean): ScrapedGameData
+    @function(name: "singleGameScraper-${env}")
+
+  scrapeBulkGames(startId: Int!, endId: Int!, entityId: ID): [ScrapedGameSummary]
+    @function(name: "bulkGamesScraper-${env}")
+
+  listScraperJobs(entityId: ID, status: ScraperJobStatus, startTime: AWSDateTime, endTime: AWSDateTime, limit: Int, nextToken: String): ScraperJobConnection
+    @function(name: "scraperJobQuery-${env}")
+
+  listScrapeURLs(entityId: ID, status: ScrapeURLStatus, limit: Int, nextToken: String): ScrapeURLConnection
+    @function(name: "scrapeURLQuery-${env}")
+
+  # --- Venue & Assignments ---
+  listGamesNeedingVenue(limit: Int, nextToken: String, entityId: ID): GamesNeedingVenueResponse
+    @function(name: "venueAssignmentService-${env}")
+
+  getVenueAssignmentSummary(entityId: ID): VenueAssignmentSummary
+    @function(name: "venueAssignmentService-${env}")
+
+  # --- Venue Reassignment Queries (NEW) ---
+  getReassignmentStatus(taskId: ID!): GetReassignmentStatusResult
+    @function(name: "venueAssignmentService-${env}")
+
+  getVenueClones(canonicalVenueId: ID!): [Venue]
+    @function(name: "venueAssignmentService-${env}")
+
+  findVenueForEntity(canonicalVenueId: ID!, entityId: ID!): Venue
+    @function(name: "venueAssignmentService-${env}")
+
+  # --- Metrics ---
+  getMyMetrics(timeRange: String): UserMetricsSummary
+    @function(name: "getUserMetrics-${env}")
+    @auth(rules: [{ allow: private }])
+
+  getUserMetrics(userId: String!, timeRange: String): UserMetricsSummary
+    @function(name: "getUserMetrics-${env}")
+    @auth(rules: [{ allow: groups, groups: ["Admin"] }])
+
+  getDatabaseMetrics(timeRange: String): DatabaseMetricsResponse
+    @function(name: "getDatabaseMetrics-${env}")
+
+  getVenueMetricsPreview(input: VenueMetricsPreviewInput!): VenueMetricsPreview
+    @function(name: "venueDetailsUpdater-${env}")
+
+  # --- Counts ---
+  playerCount: Int
+    @function(name: "getModelCount-${env}")
+
+  playerSummaryCount: Int
+    @function(name: "getModelCount-${env}")
+
+  playerEntryCount: Int
+    @function(name: "getModelCount-${env}")
+
+  playerResultCount: Int
+    @function(name: "getModelCount-${env}")
+
+  playerVenueCount: Int
+    @function(name: "getModelCount-${env}")
+
+  playerTransactionCount: Int
+    @function(name: "getModelCount-${env}")
+
+  playerCreditsCount: Int
+    @function(name: "getModelCount-${env}")
+
+  playerPointsCount: Int
+    @function(name: "getModelCount-${env}")
+
+  playerTicketCount: Int
+    @function(name: "getModelCount-${env}")
+
+  playerMarketingPreferencesCount: Int
+    @function(name: "getModelCount-${env}")
+
+  playerMarketingMessageCount: Int
+    @function(name: "getModelCount-${env}")
+
+  gameCount: Int
+    @function(name: "getModelCount-${env}")
+
+  tournamentStructureCount: Int
+    @function(name: "getModelCount-${env}")
+
+  getAllCounts: AllCountsResult
+    @function(name: "getModelCount-${env}")
+
+  # --- S3 & Storage ---
+  getS3StorageHistory(tournamentId: Int!, entityId: ID!, limit: Int): S3StorageConnection
+    @function(name: "s3ManagementFunction-${env}")
+
+  viewS3Content(s3Key: String!): S3ContentResponse
+    @function(name: "s3ManagementFunction-${env}")
+
+  getCachingStats(entityId: ID!, timeRange: TimeRange): CachingStatsResponse
+    @function(name: "s3ManagementFunction-${env}")
+
+  listStoredHTML(url: AWSURL!, limit: Int): S3StorageConnection
+    @function(name: "s3ManagementFunction-${env}")
+
+  # --- Game Tracker & Gaps ---
+  getTournamentIdBounds(entityId: ID!): TournamentIdBounds
+    @function(name: "gameIdTracker-${env}")
+
+  getEntityScrapingStatus(entityId: ID!, forceRefresh: Boolean, startId: Int, endId: Int): EntityScrapingStatus
+    @function(name: "gameIdTracker-${env}")
+
+  findTournamentIdGaps(entityId: ID!, startId: Int, endId: Int, maxGapsToReturn: Int): [GapRange!]
+    @function(name: "gameIdTracker-${env}")
+
+  getUnfinishedGamesByEntity(entityId: ID!, limit: Int, nextToken: String): UnfinishedGamesConnection
+    @function(name: "gameIdTracker-${env}")
+
+  listExistingTournamentIds(entityId: ID!, startId: Int, endId: Int, limit: Int): [Int!]
+    @function(name: "gameIdTracker-${env}")
+}
+
+type Mutation {
+  # --- User Management Mutations ---
+  adminCreateUser(input: CreateUserInput!): UserManagementResponse
+    @function(name: "userManagement-${env}")
+    @auth(rules: [{ allow: groups, groups: ["SUPER_ADMIN"] }])
+
+  adminUpdateUser(input: UpdateUserInput!): UserManagementResponse
+    @function(name: "userManagement-${env}")
+    @auth(rules: [{ allow: groups, groups: ["SUPER_ADMIN"] }])
+
+  adminResetPassword(input: ResetUserPasswordInput!): ResetPasswordResponse
+    @function(name: "userManagement-${env}")
+    @auth(rules: [{ allow: groups, groups: ["SUPER_ADMIN"] }])
+
+  adminDeactivateUser(userId: ID!): UserManagementResponse
+    @function(name: "userManagement-${env}")
+    @auth(rules: [{ allow: groups, groups: ["SUPER_ADMIN"] }])
+
+  adminReactivateUser(userId: ID!): UserManagementResponse
+    @function(name: "userManagement-${env}")
+    @auth(rules: [{ allow: groups, groups: ["SUPER_ADMIN"] }])
+
+  # --- Scraper Controls ---
+  fetchTournamentData(url: AWSURL, s3Key: String, forceRefresh: Boolean, scraperApiKey: String, entityId: ID): ScrapedGameData
+    @function(name: "webScraperFunction-${env}")
+
+  saveTournamentData(input: SaveTournamentInput!): Game
+    @function(name: "webScraperFunction-${env}")
+
+  controlScraperOperation(operation: ScraperOperation!, entityId: ID): ScraperControlResponse
+    @function(name: "autoScraper-${env}")
+
+  triggerAutoScraping(maxGames: Int, entityId: ID!): ScraperControlResponse
+    @function(name: "autoScraper-${env}")
+
+  startScraperJob(input: StartScraperJobInput!): ScraperJob
+    @function(name: "scraperManagement-${env}")
+
+  cancelScraperJob(jobId: String!): ScraperJob
+    @function(name: "scraperManagement-${env}")
+
+  modifyScrapeURLStatus(url: AWSURL!, status: ScrapeURLStatus, doNotScrape: Boolean): ScrapeURL
+    @function(name: "scraperManagement-${env}")
+
+  bulkModifyScrapeURLs(urls: [AWSURL!]!, status: ScrapeURLStatus, doNotScrape: Boolean): [ScrapeURL!]
+    @function(name: "scraperManagement-${env}")
+
+  reScrapeFromCache(input: ReScrapeFromCacheInput!): ScrapedGameData
+    @function(name: "webScraperFunction-${env}")
+
+  forceRefreshScrape(url: AWSURL!): ScrapedGameData
+
+  clearURLCache(url: AWSURL!): Boolean
+
+  saveGame(input: SaveGameInput!): SaveGameResult!
+    @function(name: "saveGameFunction-${env}")
+
+  recalculateVenueDetails(input: RecalculateVenueDetailsInput!): VenueMetricsResult
+    @function(name: "venueDetailsUpdater-${env}")
+
+  # --- Venue Assignment ---
+  assignVenueToGame(gameId: ID!, venueId: ID!): VenueAssignmentResult
+    @function(name: "venueAssignmentService-${env}")
+
+  batchAssignVenues(assignments: [VenueAssignment!]!): BatchVenueAssignmentResult
+    @function(name: "venueAssignmentService-${env}")
+
+  # --- Venue Reassignment (NEW) ---
+  reassignGameVenue(input: ReassignGameVenueInput!): ReassignGameVenueResult
+    @function(name: "venueAssignmentService-${env}")
+
+  bulkReassignGameVenues(input: BulkReassignGameVenuesInput!): BulkReassignGameVenuesResult
+    @function(name: "venueAssignmentService-${env}")
+
+  # --- Misc & S3 ---
+  publishClientMetrics(metrics: [ClientMetricInput!]!): ClientMetricResponse
+    @function(name: "publishClientMetrics-${env}")
+    @auth(rules: [{ allow: private }])
+
+  uploadManualHTML(input: ManualHTMLUploadInput!): S3Storage
+
+  # --- Social Pulse Mutations ---
+  triggerSocialScrape(socialAccountId: ID!): SocialScrapeResult
+    @function(name: "socialFetcher-${env}")
+
+  triggerFullSync(socialAccountId: ID!): SocialScrapeResult
+    @function(name: "socialFetcher-${env}")
+
+  syncPageInfo(socialAccountId: ID!, forceRefresh: Boolean): SyncPageInfoResult
+    @function(name: "socialFetcher-${env}")
+}
+
+type Subscription {
+  onScraperJobUpdate(jobId: String): ScraperJob
+    @aws_subscribe(mutations: ["startScraperJob", "cancelScraperJob"])
+
+  onScrapeURLStatusChange(url: AWSURL): ScrapeURL
+    @aws_subscribe(mutations: ["modifyScrapeURLStatus", "bulkModifyScrapeURLs"])
+}

@@ -1,0 +1,546 @@
+# ===================================================================
+# METRICS - Pre-calculated Analytics
+# ===================================================================
+# Three-level metrics hierarchy for fast dashboard loading:
+# 1. EntityMetrics - Aggregate across all venues
+# 2. VenueMetrics - Aggregate per venue
+# 3. RecurringGameMetrics - Aggregate per recurring game
+#
+# Updated nightly by Lambda or on-demand via mutation
+# Each level has 5 time range variants: ALL, 12M, 6M, 3M, 1M
+# ===================================================================
+
+# ===================================================================
+# ENTITY METRICS (Top Level)
+# ===================================================================
+
+type EntityMetrics
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  # === PRIMARY KEY ===
+  id: ID!
+  
+  # === COMPOSITE KEY ===
+  entityId: ID! 
+    @index(name: "byEntityMetrics", sortKeyFields: ["timeRange"])
+  entity: Entity @belongsTo(fields: ["entityId"])
+  
+  # === TIME RANGE ===
+  # Values: "ALL", "12M", "6M", "3M", "1M"
+  timeRange: String! 
+    @index(name: "byTimeRangeEntity", sortKeyFields: ["entityId"])
+  
+  # === VENUE AGGREGATES ===
+  totalVenues: Int! @default(value: "0")
+  activeVenues: Int! @default(value: "0")
+  inactiveVenues: Int! @default(value: "0")
+  
+  # === GAME AGGREGATES ===
+  totalGames: Int! @default(value: "0")
+  totalRecurringGames: Int! @default(value: "0") # Instances of recurring games
+  totalOneOffGames: Int! @default(value: "0")
+  totalActiveRecurringGameTypes: Int! @default(value: "0") # Unique recurring games
+  
+  # === PLAYER AGGREGATES ===
+  totalEntries: Int! @default(value: "0")
+  totalUniquePlayers: Int! @default(value: "0")
+  totalReentries: Int! @default(value: "0")
+  totalAddons: Int! @default(value: "0")
+  
+  # === FINANCIAL AGGREGATES ===
+  totalPrizepool: Float! @default(value: "0")
+  totalRevenue: Float! @default(value: "0")
+  totalCost: Float! @default(value: "0")
+  totalProfit: Float! @default(value: "0")
+  
+  # Rake breakdown
+  totalRakeRevenue: Float! @default(value: "0")
+  totalVenueFees: Float! @default(value: "0")
+  
+  # Cost breakdown
+  totalStaffCost: Float! @default(value: "0")
+  totalVenueRentalCost: Float! @default(value: "0")
+  totalMarketingCost: Float! @default(value: "0")
+  totalOperationsCost: Float! @default(value: "0")
+  
+  # === AVERAGES ===
+  avgEntriesPerGame: Float
+  avgPrizepoolPerGame: Float
+  avgProfitPerGame: Float
+  avgRevenuePerGame: Float
+  avgGamesPerVenue: Float
+  avgPlayersPerVenue: Float
+  
+  # === MARGINS ===
+  profitMargin: Float # (profit / revenue) * 100
+  rakeMarginPercent: Float # (rake / total buy-ins) * 100
+  
+  # === DATE TRACKING ===
+  firstGameDate: AWSDateTime
+  firstGameDaysAgo: Int
+  latestGameDate: AWSDateTime
+  latestGameDaysAgo: Int
+  
+  # === TRENDS (Optional - compare to previous period) ===
+  profitTrend: String # "up", "down", "neutral"
+  profitTrendPercent: Float
+  playerGrowthTrend: String
+  playerGrowthTrendPercent: Float
+  revenueGrowthTrend: String
+  revenueGrowthTrendPercent: Float
+  
+  # === TOP PERFORMERS (as JSON) ===
+  topVenuesByRevenue: AWSJSON
+  # [{ venueId, venueName, totalRevenue, totalProfit }, ...]
+  
+  topVenuesByAttendance: AWSJSON
+  # [{ venueId, venueName, avgEntries, totalGames }, ...]
+  
+  topRecurringGames: AWSJSON
+  # [{ recurringGameId, name, avgEntries, avgProfit }, ...]
+  
+  # === METADATA ===
+  calculatedAt: AWSDateTime!
+  calculatedBy: String # "SCHEDULED_LAMBDA" | "ON_DEMAND" | "BACKFILL"
+  calculationDurationMs: Int # How long did calculation take?
+  
+  snapshotsIncluded: Int
+  venuesIncluded: Int
+  recurringGamesIncluded: Int
+  
+  dateRangeStart: AWSDateTime
+  dateRangeEnd: AWSDateTime
+  
+  # === AUDIT ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# VENUE METRICS (Mid Level)
+# ===================================================================
+
+type VenueMetrics
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  # === PRIMARY KEY ===
+  id: ID!
+  
+  # === COMPOSITE KEYS ===
+  entityId: ID! 
+    @index(name: "byEntityVenueMetrics", sortKeyFields: ["venueName"])
+  
+  venueId: ID! 
+    @index(name: "byVenueMetrics", sortKeyFields: ["timeRange"])
+  
+  venueName: String! # Denormalized for sorting/display
+  
+  # === TIME RANGE ===
+  timeRange: String! 
+    @index(name: "byTimeRangeVenue", sortKeyFields: ["venueId"])
+  
+  # === GAME BREAKDOWN ===
+  totalGames: Int! @default(value: "0")
+  totalRecurringGames: Int! @default(value: "0")
+  totalOneOffGames: Int! @default(value: "0")
+  totalActiveRecurringGameTypes: Int! @default(value: "0")
+  
+  # By game type
+  totalTournaments: Int! @default(value: "0")
+  totalCashGames: Int! @default(value: "0")
+  
+  # By variant
+  totalNLHE: Int! @default(value: "0")
+  totalPLO: Int! @default(value: "0")
+  totalOther: Int! @default(value: "0")
+  
+  # === PLAYER METRICS ===
+  totalEntries: Int! @default(value: "0")
+  totalUniquePlayers: Int! @default(value: "0")
+  totalReentries: Int! @default(value: "0")
+  totalAddons: Int! @default(value: "0")
+  
+  # Player retention
+  returningPlayers: Int # Players who played 2+ times
+  newPlayers: Int # First-time players
+  
+  # === FINANCIAL METRICS ===
+  totalPrizepool: Float! @default(value: "0")
+  totalRevenue: Float! @default(value: "0")
+  totalCost: Float! @default(value: "0")
+  totalProfit: Float! @default(value: "0")
+  
+  # Rake breakdown
+  totalRakeRevenue: Float! @default(value: "0")
+  totalVenueFees: Float! @default(value: "0")
+  
+  # Cost breakdown
+  totalStaffCost: Float! @default(value: "0")
+  totalVenueRentalCost: Float! @default(value: "0")
+  totalMarketingCost: Float! @default(value: "0")
+  
+  # === AVERAGES ===
+  avgEntriesPerGame: Float
+  avgUniquePlayersPerGame: Float
+  avgPrizepoolPerGame: Float
+  avgRevenuePerGame: Float
+  avgProfitPerGame: Float
+  
+  # === MARGINS ===
+  profitMargin: Float
+  rakeMarginPercent: Float
+  
+  # === DATE TRACKING ===
+  firstGameDate: AWSDateTime
+  firstGameDaysAgo: Int
+  latestGameDate: AWSDateTime
+  latestGameDaysAgo: Int
+  daysSinceLastGame: Int
+  
+  # === GAME SCHEDULE ANALYSIS ===
+  # Which days are most active?
+  gamesByDayOfWeek: AWSJSON
+  # { "MONDAY": 52, "TUESDAY": 48, "WEDNESDAY": 50, ... }
+  
+  peakAttendanceDay: String # "TUESDAY"
+  
+  # === TOP PERFORMERS (as JSON) ===
+  topRecurringGames: AWSJSON
+  # [{ recurringGameId, name, avgEntries, avgProfit, consistency }, ...]
+  
+  topBuyInLevels: AWSJSON
+  # [{ buyIn, gameCount, avgEntries, totalRevenue }, ...]
+  
+  # === TRENDS ===
+  profitTrend: String
+  profitTrendPercent: Float
+  attendanceTrend: String
+  attendanceTrendPercent: Float
+  revenueGrowthTrend: String
+  revenueGrowthTrendPercent: Float
+  
+  # === HEALTH INDICATORS ===
+  overallHealth: String # "excellent", "good", "needs-attention", "critical"
+  profitability: String # "highly-profitable", "profitable", "break-even", "loss"
+  consistency: String # "very-consistent", "consistent", "variable", "erratic"
+  
+  # === METADATA ===
+  calculatedAt: AWSDateTime!
+  calculatedBy: String
+  calculationDurationMs: Int
+  
+  snapshotsIncluded: Int
+  recurringGamesIncluded: Int
+  
+  dateRangeStart: AWSDateTime
+  dateRangeEnd: AWSDateTime
+  
+  # === RELATIONSHIPS ===
+  venue: Venue @belongsTo(fields: ["venueId"])
+  entity: Entity @belongsTo(fields: ["entityId"])
+  
+  # === AUDIT ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# RECURRING GAME METRICS (Detailed Level)
+# ===================================================================
+
+type RecurringGameMetrics
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  # === PRIMARY KEY ===
+  id: ID!
+  
+  # === COMPOSITE KEYS ===
+  entityId: ID! 
+    @index(name: "byEntityRecurringGameMetrics", sortKeyFields: ["recurringGameId"])
+  
+  venueId: ID! 
+    @index(name: "byVenueRecurringGameMetrics", sortKeyFields: ["recurringGameId"])
+  
+  recurringGameId: ID! 
+    @index(name: "byRecurringGameMetrics", sortKeyFields: ["timeRange"])
+  recurringGame: RecurringGame @belongsTo(fields: ["recurringGameId"])
+  
+  recurringGameName: String! # Denormalized for display
+  
+  # === TIME RANGE ===
+  timeRange: String! 
+    @index(name: "byTimeRangeRecurringGame", sortKeyFields: ["recurringGameId"])
+  
+  # === INSTANCE COUNT ===
+  totalInstances: Int! @default(value: "0")
+  scheduledInstances: Int! @default(value: "0") # Expected count
+  actualInstances: Int! @default(value: "0") # Games that ran
+  missedInstances: Int! @default(value: "0") # Cancelled/no-show
+  
+  # Run rate
+  runRate: Float # (actual / scheduled) * 100
+  
+  # === PLAYER METRICS ===
+  totalEntries: Int! @default(value: "0")
+  totalUniquePlayers: Int! @default(value: "0")
+  totalReentries: Int! @default(value: "0")
+  totalAddons: Int! @default(value: "0")
+  
+  # Player loyalty
+  regularPlayers: Int # Players who attended 50%+ of instances
+  occasionalPlayers: Int # Attended 2-49% of instances
+  oneTimePlayers: Int # Attended once
+  
+  # === FINANCIAL METRICS ===
+  totalPrizepool: Float! @default(value: "0")
+  totalRevenue: Float! @default(value: "0")
+  totalCost: Float! @default(value: "0")
+  totalProfit: Float! @default(value: "0")
+  
+  # === AVERAGES (Per Instance) ===
+  avgEntries: Float
+  avgUniquePlayers: Float
+  avgPrizepool: Float
+  avgRevenue: Float
+  avgProfit: Float
+  
+  # === CONSISTENCY METRICS ===
+  # Standard deviation - lower = more consistent
+  stdDevEntries: Float
+  stdDevProfit: Float
+  
+  # Range
+  minEntries: Int
+  maxEntries: Int
+  medianEntries: Float
+  
+  # Coefficient of variation (lower = more consistent)
+  entriesCV: Float # (stdDev / mean) * 100
+  
+  # === DATE TRACKING ===
+  firstInstanceDate: AWSDateTime
+  firstInstanceDaysAgo: Int
+  latestInstanceDate: AWSDateTime
+  latestInstanceDaysAgo: Int
+  daysSinceLastInstance: Int
+  
+  # === SEASONAL ANALYSIS ===
+  # Which months had best attendance?
+  avgEntriesByMonth: AWSJSON
+  # { "01": 52, "02": 48, "03": 55, ... }
+  
+  peakMonth: String # "MARCH"
+  lowMonth: String # "DECEMBER"
+  
+  # === HEALTH INDICATORS ===
+  attendanceHealth: String # "growing", "stable", "declining", "critical"
+  profitability: String # "highly-profitable", "profitable", "break-even", "loss"
+  consistency: String # "very-reliable", "reliable", "variable", "erratic"
+  overallHealth: String # "excellent", "good", "needs-attention", "critical"
+  
+  # === TRENDS (Compare recent vs previous period) ===
+  attendanceTrend: String # "up", "down", "stable"
+  attendanceTrendPercent: Float
+  profitTrend: String
+  profitTrendPercent: Float
+  
+  # Recent vs long-term
+  recentAvgEntries: Float # Last 4 instances
+  longtermAvgEntries: Float # All instances
+  entriesTrendDirection: String # "above-average", "average", "below-average"
+  
+  # === PLAYER INSIGHTS ===
+  # Top regular players (as JSON)
+  regularPlayersList: AWSJSON
+  # [{ playerId, playerName, appearances, appearanceRate, avgFinish, totalWinnings }, ...]
+  
+  # Player retention
+  playerRetentionRate: Float # (returning / total) * 100
+  
+  # === COMPETITIVE ANALYSIS ===
+  # How does this game compare to similar games at this venue?
+  rankAtVenue: Int # 1 = most popular
+  totalRecurringGamesAtVenue: Int
+  
+  # Compare to same game at other venues (optional)
+  avgEntriesEntityWide: Float # Avg for same game across all venues
+  performanceVsEntityAvg: String # "above", "average", "below"
+  
+  # === METADATA ===
+  calculatedAt: AWSDateTime!
+  calculatedBy: String
+  calculationDurationMs: Int
+  
+  snapshotsIncluded: Int
+  
+  dateRangeStart: AWSDateTime
+  dateRangeEnd: AWSDateTime
+  
+  # === RELATIONSHIPS ===
+  venue: Venue @belongsTo(fields: ["venueId"])
+  entity: Entity @belongsTo(fields: ["entityId"])
+  
+  # === AUDIT ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# MUTATION INPUTS
+# ===================================================================
+
+input RefreshAllMetricsInput {
+  # Scope
+  entityId: ID
+  venueId: ID
+  recurringGameId: ID
+  
+  # Time ranges to refresh
+  timeRanges: [String]
+  
+  # Which metrics to calculate - REMOVED @default HERE
+  includeEntityMetrics: Boolean 
+  includeVenueMetrics: Boolean
+  includeRecurringGameMetrics: Boolean
+  
+  # Performance options - REMOVED @default HERE
+  parallelExecution: Boolean 
+  skipIfRecent: Boolean 
+  
+  # Debug - REMOVED @default HERE
+  dryRun: Boolean 
+  verbose: Boolean 
+}
+
+# ===================================================================
+# MUTATION RESULTS
+# ===================================================================
+
+type RefreshAllMetricsResult {
+  success: Boolean!
+  message: String
+  
+  # Summary counts
+  entityMetricsUpdated: Int
+  venueMetricsUpdated: Int
+  recurringGameMetricsUpdated: Int
+  
+  # Processing counts
+  entitiesProcessed: Int
+  venuesProcessed: Int
+  recurringGamesProcessed: Int
+  snapshotsAnalyzed: Int
+  
+  # Performance
+  executionTimeMs: Int
+  peakMemoryMB: Float
+  
+  # Results breakdown
+  entityResults: [MetricsUpdateResult]
+  venueResults: [MetricsUpdateResult]
+  recurringGameResults: [MetricsUpdateResult]
+  
+  # Errors
+  errors: [String]
+  warnings: [String]
+  
+  # Metadata
+  refreshedAt: AWSDateTime
+  refreshedBy: String
+}
+
+type MetricsUpdateResult {
+  id: ID
+  name: String
+  type: String # "entity", "venue", "recurringGame"
+  timeRange: String
+  success: Boolean
+  recordsCreated: Int
+  recordsUpdated: Int
+  error: String
+  durationMs: Int
+}
+
+# ===================================================================
+# CUSTOM MUTATIONS
+# ===================================================================
+
+extend type Mutation {
+  # Refresh all metrics (or subset)
+  refreshAllMetrics(input: RefreshAllMetricsInput!): RefreshAllMetricsResult
+    @function(name: "refreshAllMetrics-${env}")
+  
+  # Quick refresh for single entity (faster)
+  refreshEntityMetrics(entityId: ID!, timeRanges: [String]): RefreshAllMetricsResult
+    @function(name: "refreshAllMetrics-${env}")
+  
+  # Quick refresh for single venue (faster)
+  refreshVenueMetrics(venueId: ID!, timeRanges: [String]): RefreshAllMetricsResult
+    @function(name: "refreshAllMetrics-${env}")
+  
+  # Quick refresh for single recurring game (fastest)
+  refreshRecurringGameMetrics(recurringGameId: ID!, timeRanges: [String]): RefreshAllMetricsResult
+    @function(name: "refreshAllMetrics-${env}")
+}
+
+# ===================================================================
+# QUERY HELPERS
+# ===================================================================
+
+extend type Query {
+  # Get comprehensive metrics dashboard
+  getEntityDashboard(entityId: ID!, timeRange: String!): EntityDashboard
+    @function(name: "metricsQuery-${env}")
+  
+  # Get venue dashboard with breakdown
+  getVenueDashboard(venueId: ID!, timeRange: String!): VenueDashboard
+    @function(name: "metricsQuery-${env}")
+  
+  # Get recurring game performance report
+  getRecurringGameReport(recurringGameId: ID!): RecurringGameReport
+    @function(name: "metricsQuery-${env}")
+}
+
+# ===================================================================
+# QUERY RESULT TYPES
+# ===================================================================
+
+type EntityDashboard {
+  entity: Entity
+  metrics: EntityMetrics
+  venueBreakdown: [VenueMetrics]
+  topRecurringGames: [RecurringGameMetrics]
+  trends: TrendAnalysis
+}
+
+type VenueDashboard {
+  venue: Venue
+  metrics: VenueMetrics
+  recurringGameBreakdown: [RecurringGameMetrics]
+  recentGames: [Game]
+  trends: TrendAnalysis
+}
+
+type RecurringGameReport {
+  recurringGame: RecurringGame
+  metricsAllTime: RecurringGameMetrics
+  metrics12M: RecurringGameMetrics
+  metrics6M: RecurringGameMetrics
+  metrics3M: RecurringGameMetrics
+  metrics1M: RecurringGameMetrics
+  recentInstances: [Game]
+  regularPlayers: [PlayerSummary]
+  trends: TrendAnalysis
+  recommendations: [String]
+}
+
+type TrendAnalysis {
+  period: String # "12M", "6M", etc.
+  direction: String # "up", "down", "stable"
+  percentChange: Float
+  significance: String # "significant", "moderate", "minimal"
+  insights: [String]
+}

@@ -1,6 +1,7 @@
 // vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path'
 
 // Helper function to format the date
 const getBuildVersion = () => {
@@ -18,5 +19,10 @@ export default defineConfig({
   // ✅ NEW SECTION: This injects the build version into your app
   define: {
     'import.meta.env.VITE_BUILD_VERSION': JSON.stringify(getBuildVersion()),
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
   },
 });

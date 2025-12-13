@@ -2,17 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
- * Added base layer styles inspired by your base.css
- * This sets a default background for the app.
- */
 @layer base {
-  html,
-  body {
-    @apply h-full overflow-x-hidden;
+  html {
+    @apply h-full overflow-x-hidden antialiased;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
   }
+
   body {
-    @apply bg-gray-100 text-gray-900 antialiased;
+    @apply h-full;
+    /* Light mode background */
+    @apply bg-gray-50 text-gray-900;
+    /* Dark mode background */
+    @apply dark:bg-gray-950 dark:text-gray-50;
+  }
+
+  /* Improved focus visibility for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-indigo-500 ring-offset-2;
+    @apply dark:ring-offset-gray-950;
+  }
+
+  /* Remove default focus styles (we use focus-visible instead) */
+  :focus:not(:focus-visible) {
+    @apply outline-none ring-0;
+  }
+
+  /* Smooth transitions for interactive elements */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    @apply transition-colors duration-150;
   }
 }
 
+@layer components {
+  /* Scrollbar styling for webkit browsers */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme("colors.gray.300") transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: theme("colors.gray.300");
+    border-radius: 3px;
+  }
+
+  .dark .scrollbar-thin {
+    scrollbar-color: theme("colors.gray.700") transparent;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: theme("colors.gray.700");
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Text balance for headings */
+  .text-balance {
+    text-wrap: balance;
+  }
+}

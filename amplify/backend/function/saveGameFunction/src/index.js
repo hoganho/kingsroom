@@ -17,6 +17,7 @@
 	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_NAME
 	API_KINGSROOM_VENUETABLE_ARN
 	API_KINGSROOM_VENUETABLE_NAME
+    API_KINGSROOM_RECURRINGGAMETABLE_NAME
 	ENV
 	REGION
 Amplify Params - DO NOT EDIT */
@@ -24,37 +25,30 @@ Amplify Params - DO NOT EDIT */
 /**
  * ===================================================================
  * SAVEGAME LAMBDA FUNCTION - WITH SERIES RESOLUTION & QUERY KEYS
- * 
- * VERSION: 2.2.0 (entity ID refactoring)
- * 
- * ENTITY ID REQUIREMENT:
+ * * VERSION: 3.0.0 (Recurring Game Support)
+ * * ENTITY ID REQUIREMENT:
  * This Lambda REQUIRES source.entityId to be provided in the input.
  * Unlike other Lambdas that have fallback logic, saveGameFunction 
  * enforces entityId as a required field in validation. The caller
  * (webScraperFunction or frontend) must provide this value.
- * 
- * REFACTORED (Dec 2025): Removed hardcoded DEFAULT_ENTITY_ID constant.
+ * * REFACTORED (Dec 2025): Removed hardcoded DEFAULT_ENTITY_ID constant.
  * The entityId must be explicitly provided by the caller.
- * 
- * ENTRY FIELD DEFINITIONS:
+ * * ENTRY FIELD DEFINITIONS:
  * - totalInitialEntries: Number of unique initial buy-ins (no rebuys/addons)
  * - totalRebuys: Number of rebuy entries (calculated: totalEntries - totalUniquePlayers)
  * - totalAddons: Number of addon entries  
  * - totalEntries: Total entries = totalInitialEntries + totalRebuys + totalAddons
  * - totalUniquePlayers: Unique players (may differ from totalInitialEntries in multi-flight)
- * 
- * QUERY OPTIMIZATION KEYS (computed on save):
+ * * QUERY OPTIMIZATION KEYS (computed on save):
  * - gameDayOfWeek: Day of week for day-based queries
  * - buyInBucket: Buy-in range for price-based queries
  * - venueScheduleKey: Composite key for venue + day + variant
  * - entityQueryKey: Composite key for entity-wide multi-dimension queries
- * 
- * SERIES RESOLUTION:
+ * * SERIES RESOLUTION:
  * - Uses TournamentSeriesTitle for template matching
  * - Temporal matching: month → quarter → year
  * - Auto-creates TournamentSeries when needed
- * 
- * SIMPLIFIED FINANCIAL MODEL:
+ * * SIMPLIFIED FINANCIAL MODEL:
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │ REVENUE (what we collect)                                                  │
  * │   rakeRevenue = rake × entriesForRake                                      │
@@ -86,6 +80,9 @@ const {
     updateSeriesDateRange,
     incrementSeriesEventCount
 } = require('./series-resolution');
+
+// Recurring Game Resolution Module
+const { resolveRecurringGame } = require('./recurring-game-resolution');
 
 // Lambda Monitoring
 const { LambdaMonitoring } = require('./lambda-monitoring');
@@ -136,6 +133,10 @@ const getTableName = (modelName) => {
     if (!apiId || !env) {
         throw new Error('API ID or environment name not found in environment variables.');
     }
+    // Check for direct environment variable overrides first (RecurringGame table often needs this)
+    const envVarName = `API_KINGSROOM_${modelName.toUpperCase()}TABLE_NAME`;
+    if (process.env[envVarName]) return process.env[envVarName];
+    
     return `${modelName}-${apiId}-${env}`;
 };
 
@@ -205,11 +206,9 @@ const extractYearFromDate = (dateValue) => {
 
 /**
  * *** FIX: Calculate unique players from player list ***
- * 
- * Counts unique players by normalizing names and deduplicating.
+ * * Counts unique players by normalizing names and deduplicating.
  * Falls back to scraped value if no player list is provided.
- * 
- * @param {Object} input - The full input object
+ * * @param {Object} input - The full input object
  * @returns {number} Count of unique players
  */
 const calculateUniquePlayersFromList = (input) => {
@@ -242,13 +241,10 @@ const calculateUniquePlayersFromList = (input) => {
 
 /**
  * *** FIX: Calculate totalRebuys from entry data ***
- * 
- * Formula: totalRebuys = totalEntries - totalUniquePlayers
- * 
- * This represents the number of re-entries/rebuys players made beyond their initial entry.
+ * * Formula: totalRebuys = totalEntries - totalUniquePlayers
+ * * This represents the number of re-entries/rebuys players made beyond their initial entry.
  * For example: 118 totalEntries with 78 unique players = 40 rebuys
- * 
- * @param {number} totalEntries - Total entries (initial + rebuys + addons)
+ * * @param {number} totalEntries - Total entries (initial + rebuys + addons)
  * @param {number} totalUniquePlayers - Count of unique players
  * @param {number} scrapedRebuys - Value from scraper (may be 0 or null)
  * @param {string} consolidationType - Type of record (PARENT, CHILD, null)
@@ -857,7 +853,7 @@ const createOrUpdateGameCost = async (gameId, venueId, entityId, gameStartDateTi
 // CREATE GAME (WITH QUERY KEYS)
 // ===================================================================
 
-const createGame = async (input, venueResolution, seriesResolution) => {
+const createGame = async (input, venueResolution, seriesResolution, recurringResolution) => {
     const gameId = uuidv4();
     const now = new Date().toISOString();
     const timestamp = Date.now();
@@ -878,7 +874,7 @@ const createGame = async (input, venueResolution, seriesResolution) => {
     // MODIFIED: Check for NOT_PUBLISHED status
     const isNotPublished = input.game.gameStatus === 'NOT_PUBLISHED';
     
-let queryKeys;
+    let queryKeys;
     
     if (isNotPublished) {
         console.log(`[SAVE-GAME] Game is NOT_PUBLISHED - omitting query keys`);
@@ -904,9 +900,25 @@ let queryKeys;
         console.log(`[SAVE-GAME] Computed query keys:`, queryKeys);
     }
 
+    // --- RECURRING GAME RESOLUTION LOGIC ---
+    let deviationNotes = null;
+    let wasScheduledInstance = false;
+    
+    if (recurringResolution.recurringGameId && recurringResolution.status === 'AUTO_ASSIGNED') {
+        wasScheduledInstance = true; // Auto-assigned means it matched the schedule
+        // Check for deviation (e.g. buyin mismatch)
+        if (recurringResolution.typicalBuyIn && input.game.buyIn && recurringResolution.typicalBuyIn !== input.game.buyIn) {
+            deviationNotes = `Buy-in deviation: Game $${input.game.buyIn} vs Typical $${recurringResolution.typicalBuyIn}`;
+        }
+    }
+
+    const finalGameVariant = input.game.gameStatus === 'NOT_PUBLISHED' 
+        ? 'NOT_PUBLISHED' 
+        : (input.game.gameVariant || 'NLHE');
+
     const game = {
         id: gameId,
-        name: input.game.name, gameType: input.game.gameType, gameVariant: input.game.gameVariant || 'NLHE', gameStatus: input.game.gameStatus,
+        name: input.game.name, gameType: input.game.gameType, gameVariant: finalGameVariant, gameStatus: input.game.gameStatus,
         gameStartDateTime: gameStartDateTime, gameEndDateTime: input.game.gameEndDateTime ? ensureISODate(input.game.gameEndDateTime) : null,
         registrationStatus: input.game.registrationStatus || 'N_A', gameFrequency: input.game.gameFrequency || 'UNKNOWN',
         buyIn: input.game.buyIn || 0, rake: input.game.rake || 0, venueFee: effectiveVenueFee,
@@ -950,6 +962,12 @@ let queryKeys;
         dayNumber: input.series?.dayNumber || input.game.dayNumber || null, flightLetter: input.series?.flightLetter || input.game.flightLetter || null,
         finalDay: input.series?.finalDay || input.game.finalDay || false,
         
+        // --- NEW: Recurring Game Fields ---
+        recurringGameAssignmentStatus: recurringResolution.status || 'PENDING_ASSIGNMENT',
+        recurringGameAssignmentConfidence: recurringResolution.confidence || 0,
+        wasScheduledInstance: wasScheduledInstance,
+        deviationNotes: deviationNotes,
+        
         // Query optimization keys
         gameDayOfWeek: queryKeys.gameDayOfWeek,
         buyInBucket: queryKeys.buyInBucket,
@@ -963,6 +981,10 @@ let queryKeys;
         entityId: input.source.entityId, createdAt: now, updatedAt: now, _version: 1, _lastChangedAt: timestamp, __typename: 'Game'
     };
 
+    if (recurringResolution.recurringGameId) {
+        game.recurringGameId = recurringResolution.recurringGameId;
+    }
+
     if (input.auditTrail) {
         const auditInfo = parseAuditTrail(input.auditTrail);
         if (auditInfo) { game.lastEditedAt = auditInfo.editedAt; game.lastEditedBy = auditInfo.editedBy; game.editHistory = JSON.stringify([auditInfo]); }
@@ -975,6 +997,11 @@ let queryKeys;
     if (seriesResolution.wasCreated) {
         console.log(`[SAVE-GAME] 📦 Auto-created series: ${seriesResolution.seriesName} (${seriesResolution.tournamentSeriesId})`);
     }
+    
+    // Log if recurring game was matched
+    if (recurringResolution.recurringGameId) {
+        console.log(`[SAVE-GAME] 🔄 Linked to Recurring Game: ${recurringResolution.name} (${recurringResolution.status})`);
+    }
 
     await createOrUpdateGameCost(gameId, venueResolution.venueId, input.source.entityId, game.gameStartDateTime, game.totalInitialEntries || 0, game.totalEntries || 0);
     await createOrUpdateGameFinancialSnapshot(game, input.source.entityId, venueResolution.venueId);
@@ -986,7 +1013,7 @@ let queryKeys;
 // UPDATE GAME (WITH QUERY KEYS)
 // ===================================================================
 
-const updateGame = async (existingGame, input, venueResolution, seriesResolution) => {
+const updateGame = async (existingGame, input, venueResolution, seriesResolution, recurringResolution) => {
     const now = new Date().toISOString();
     const timestamp = Date.now();
     const fieldsUpdated = [];
@@ -1009,7 +1036,14 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     checkAndUpdate('hasGuarantee', input.game.hasGuarantee, existingGame.hasGuarantee);
     checkAndUpdate('guaranteeAmount', input.game.guaranteeAmount, existingGame.guaranteeAmount);
     checkAndUpdate('startingStack', input.game.startingStack, existingGame.startingStack);
-    checkAndUpdate('gameVariant', input.game.gameVariant, existingGame.gameVariant);
+
+    let newGameVariant = input.game.gameVariant;
+    const newGameStatus = input.game.gameStatus || existingGame.gameStatus;
+    if (newGameStatus === 'NOT_PUBLISHED') {
+        newGameVariant = 'NOT_PUBLISHED';
+    }
+    checkAndUpdate('gameVariant', newGameVariant, existingGame.gameVariant);
+
     if (effectiveVenueFee !== existingGame.venueFee) { updateFields.venueFee = effectiveVenueFee; fieldsUpdated.push('venueFee'); }
 
     // Simplified financials
@@ -1086,6 +1120,38 @@ const updateGame = async (existingGame, input, venueResolution, seriesResolution
     
     // MODIFIED: Determine effective status to check for NOT_PUBLISHED
     const effectiveGameStatus = updateFields.gameStatus || existingGame.gameStatus;
+
+    // --- NEW: Recurring Game Logic ---
+    const isManualOverride = input.game.recurringGameAssignmentStatus === 'MANUALLY_ASSIGNED';
+    const currentIsManual = existingGame.recurringGameAssignmentStatus === 'MANUALLY_ASSIGNED';
+    
+    if (isManualOverride) {
+        // FIX: Only update recurringGameId if it has a valid string value. 
+        // DynamoDB GSIs do not allow NULL keys.
+        if (input.game.recurringGameId) {
+            checkAndUpdate('recurringGameId', input.game.recurringGameId, existingGame.recurringGameId);
+        }
+        
+        checkAndUpdate('recurringGameAssignmentStatus', 'MANUALLY_ASSIGNED', existingGame.recurringGameAssignmentStatus);
+    } else if (!currentIsManual && recurringResolution.recurringGameId) {
+        // Auto-resolution found something better?
+        const newConf = recurringResolution.confidence || 0;
+        const oldConf = existingGame.recurringGameAssignmentConfidence || 0;
+        
+        if (newConf > oldConf || !existingGame.recurringGameId) {
+            // FIX: Ensure resolution ID is valid before updating
+            if (recurringResolution.recurringGameId) {
+                checkAndUpdate('recurringGameId', recurringResolution.recurringGameId, existingGame.recurringGameId);
+            }
+            
+            checkAndUpdate('recurringGameAssignmentStatus', recurringResolution.status, existingGame.recurringGameAssignmentStatus);
+            checkAndUpdate('recurringGameAssignmentConfidence', newConf, existingGame.recurringGameAssignmentConfidence);
+            
+            if (recurringResolution.status === 'AUTO_ASSIGNED') {
+                checkAndUpdate('wasScheduledInstance', true, existingGame.wasScheduledInstance);
+            }
+        }
+    }
 
     // Check if query keys are missing (legacy records) or need recomputation
     const queryKeysMissing = !existingGame.venueScheduleKey || !existingGame.entityQueryKey || 
@@ -1278,8 +1344,7 @@ const shouldQueueForPDP = (input, game) => {
 
 /**
  * Queue game for Player Data Processor with BATCHED player messages
- * 
- * Splits players into batches of PLAYER_BATCH_SIZE to prevent Lambda timeouts.
+ * * Splits players into batches of PLAYER_BATCH_SIZE to prevent Lambda timeouts.
  * Each batch is sent as a separate SQS message for parallel processing.
  */
 const PLAYER_BATCH_SIZE = 50;
@@ -1443,6 +1508,34 @@ exports.handler = async (event) => {
             console.log(`[SAVE-GAME] 📦 New TournamentSeries created: ${seriesResolution.seriesName} (${seriesResolution.tournamentSeriesId})`);
         }
 
+        // 3. --- NEW: Resolve Recurring Game ---
+        let recurringResolution = { recurringGameId: null, status: 'NOT_RECURRING', confidence: 0 };
+        
+        // Only check for recurring if it's NOT a series (usually distinct) and we have a valid venue
+        if (!input.game.isSeries && venueResolution.venueId !== UNASSIGNED_VENUE_ID) {
+            console.log('[SAVE-GAME] Attempting Recurring Game Resolution...');
+            const result = await resolveRecurringGame(
+                input.game,
+                venueResolution.venueId,
+                input.source.entityId,
+                monitoredDdbDocClient,
+                getTableName
+            );
+            if (result) {
+                recurringResolution = result;
+                console.log(`[SAVE-GAME] Recurring Match: ${result.name} (${result.status})`);
+            }
+        }
+        
+        // --- LOGIC INSERTION: Inherit Guarantee from Recurring Game ---
+        // If the scraper missed the guarantee (0 or null), but the recurring parent knows it, inherit it.
+        // We also explicitly set hasGuarantee to true so the frontend knows to display it.
+        if ((!input.game.guaranteeAmount || input.game.guaranteeAmount === 0) && recurringResolution.suggestedGuarantee) {
+             console.log(`[SAVE-GAME] Inheriting guarantee from Recurring Game: $${recurringResolution.suggestedGuarantee}`);
+             input.game.guaranteeAmount = recurringResolution.suggestedGuarantee;
+             input.game.hasGuarantee = true;
+        }
+
         const existingGame = await findExistingGame(input);
 
         let saveResult;
@@ -1462,12 +1555,12 @@ exports.handler = async (event) => {
                 console.log(`[SAVE-GAME] Game exists with no changes, skipping`);
                 saveResult = { gameId: existingGame.id, game: existingGame, wasNewGame: false, fieldsUpdated: [], seriesWasCreated: false };
             } else {
-                saveResult = await updateGame(existingGame, input, venueResolution, seriesResolution);
+                saveResult = await updateGame(existingGame, input, venueResolution, seriesResolution, recurringResolution);
             }
         } else if (existingGame && input.options?.forceUpdate) {
-            saveResult = await updateGame(existingGame, input, venueResolution, seriesResolution);
+            saveResult = await updateGame(existingGame, input, venueResolution, seriesResolution, recurringResolution);
         } else {
-            saveResult = await createGame(input, venueResolution, seriesResolution);
+            saveResult = await createGame(input, venueResolution, seriesResolution, recurringResolution);
         }
 
         const { gameId, game, wasNewGame, fieldsUpdated, seriesWasCreated } = saveResult;
@@ -1496,7 +1589,7 @@ exports.handler = async (event) => {
         }
 
         if (input.source.type === 'SCRAPE') {
-            await updateScrapeURL(input.source.sourceId, gameId, game.gameStatus, input.options?.doNotScrape, input.source.wasEdited);
+            await updateScrapeURL(input.source.sourceId, saveResult.gameId, input.game.gameStatus, input.options?.doNotScrape, input.source.wasEdited);
             await createScrapeAttempt(input, gameId, wasNewGame, fieldsUpdated);
         }
 
@@ -1512,8 +1605,9 @@ exports.handler = async (event) => {
         monitoring.trackOperation('HANDLER_COMPLETE', 'Handler', action, { gameId, entityId: input.source.entityId, wasEdited: input.source.wasEdited, fieldsUpdated: fieldsUpdated.length, venueFee: venueResolution.venueFee, seriesWasCreated });
 
         return {
-            success: true, gameId, action, message: `Game ${action.toLowerCase()} successfully${messageDetail}`,
-            warnings: validation.warnings, playerProcessingQueued, playerProcessingReason: pdpDecision.reason,
+            success: true,
+            gameId: saveResult.gameId,
+            action: saveResult.wasNewGame ? 'CREATED' : 'UPDATED',
             venueAssignment: { venueId: venueResolution.venueId, venueName: venueResolution.venueName, venueFee: venueResolution.venueFee, status: venueResolution.status, confidence: venueResolution.confidence },
             seriesAssignment: { 
                 tournamentSeriesId: seriesResolution.tournamentSeriesId, 
@@ -1524,6 +1618,11 @@ exports.handler = async (event) => {
                 confidence: seriesResolution.confidence,
                 wasCreated: seriesWasCreated,
                 seriesTitleId: seriesResolution.seriesTitleId
+            },
+            recurringGameAssignment: {
+                recurringGameId: recurringResolution.recurringGameId,
+                status: recurringResolution.status,
+                confidence: recurringResolution.confidence
             },
             fieldsUpdated, wasEdited: input.source.wasEdited || false
         };

@@ -24,7 +24,11 @@ import {
   Loader2
 } from 'lucide-react';
 
-// No API imports needed - all status types accept string | null | undefined
+// Import canonical type from types/scraper
+import { DataSourceType } from '../../../types/scraper';
+
+// Re-export for consumers
+export type { DataSourceType };
 
 // ===================================================================
 // JOB STATUS BADGE
@@ -187,7 +191,7 @@ export const GameStatusBadge: React.FC<{
 // DATA SOURCE BADGE
 // ===================================================================
 
-export type DataSourceType = 's3' | 'web' | 'none' | 'pending';
+// DataSourceType imported from ../../../types/scraper
 
 const DATA_SOURCE_CONFIG: Record<DataSourceType, { 
   label: string; 

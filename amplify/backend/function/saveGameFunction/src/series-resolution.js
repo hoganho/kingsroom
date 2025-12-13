@@ -2,24 +2,101 @@
 // Comprehensive series detection, matching, and creation logic
 // 
 // LOGIC FLOW:
-// 1. Detect series membership using TournamentSeriesTitle (via seriesTitleId from scraper)
-// 2. Find best temporal match: month → quarter → year
-// 3. Create new TournamentSeries if none exists
-// 4. Handle cases where seriesTitleId is missing but series name exists
-//
-// FIX: Improved name normalization to strip temporal components before comparing
+// 1. Check heuristics (Signals) - Detects "Flight 1A", "Championship", etc.
+// 2. Detect series membership using TournamentSeriesTitle (via ID)
+// 3. Find best temporal match: month → quarter → year
+// 4. Create new TournamentSeries if none exists
 
 const { v4: uuidv4 } = require('uuid');
 const { QueryCommand, GetCommand, ScanCommand, PutCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 
 // ===================================================================
-// NAME NORMALIZATION HELPERS
+// CONFIGURATION & CONSTANTS
+// ===================================================================
+
+const SERIES_KEYWORDS = [
+    'championship', 'festival', 'series', 'classic', 'open', 
+    'cup', 'challenge', 'state', 'annual', 'invitational', 
+    'platinum', 'diamond', 'gold', 'prestige', 'tour'
+];
+
+const STRUCTURE_KEYWORDS = [
+    'flight 1', 'flight a', 'flight b', 'flight c', 'flight d',
+    'day 2', 'day 3', 'final day', 'main event', 'high roller'
+];
+
+// NSW/Australian Major Holidays (Month 0-11)
+const HOLIDAY_PATTERNS = [
+    { name: 'New Years', month: 0, day: 1, window: 3 },
+    { name: 'Australia Day', month: 0, day: 26, window: 4 },
+    { name: 'Anzac Day', month: 3, day: 25, window: 5 },
+    { name: 'Kings Birthday', month: 5, window: 7 }, // Moveable
+    { name: 'Labour Day', month: 9, window: 7 },     // Oct in NSW
+    { name: 'Christmas', month: 11, day: 25, window: 7 },
+    { name: 'Easter', month: 2, window: 14 },        // Broad window
+    { name: 'Easter', month: 3, window: 14 }
+];
+
+// ===================================================================
+// HEURISTIC HELPERS
 // ===================================================================
 
 /**
- * Normalize a series name by removing temporal components
- * This allows matching "Signature Series February 2023" with "Signature Series 2023"
+ * Determines if a game is definitively a series based on name/structure 
+ * This overrides standard scraper defaults (like "Weekly").
  */
+const detectSeriesSignal = (name) => {
+    if (!name) return { isSeries: false, confidence: 0 };
+    
+    const lowerName = name.toLowerCase();
+
+    // 1. Structural Check (Definitive)
+    // Regular weekly games NEVER have Flights or Day 2s
+    if (STRUCTURE_KEYWORDS.some(k => lowerName.includes(k))) {
+        return { isSeries: true, confidence: 1.0, reason: 'STRUCTURE_INDICATOR' };
+    }
+
+    // 2. Prestige/Keyword Check
+    if (SERIES_KEYWORDS.some(k => lowerName.includes(k))) {
+        return { isSeries: true, confidence: 0.9, reason: 'KEYWORD_MATCH' };
+    }
+
+    // 3. High Guarantee Check
+    // FIX: Threshold set to 30k to avoid "Big Friday $20k" regular games
+    // FIX: Explicitly ignore if the name contains "weekly"
+    const guaranteeMatch = lowerName.match(/\$([0-9]+)k/);
+    if (guaranteeMatch) {
+        const amount = parseInt(guaranteeMatch[1]);
+        if (amount >= 30 && !lowerName.includes('weekly')) {
+            return { isSeries: true, confidence: 0.85, reason: 'HIGH_GUARANTEE' };
+        }
+    }
+
+    return { isSeries: false, confidence: 0 };
+};
+
+const detectHolidayContext = (dateObj) => {
+    if (!dateObj) return null;
+    const month = dateObj.getMonth();
+    const day = dateObj.getDate();
+
+    for (const h of HOLIDAY_PATTERNS) {
+        if (h.month === month) {
+            if (h.day) {
+                const diff = Math.abs(day - h.day);
+                if (diff <= h.window) return h.name;
+            } else {
+                return h.name; // Loose match for moveable holidays
+            }
+        }
+    }
+    return null;
+};
+
+// ===================================================================
+// NAME NORMALIZATION HELPERS
+// ===================================================================
+
 const normalizeSeriesName = (name) => {
     if (!name) return '';
     
@@ -31,28 +108,23 @@ const normalizeSeriesName = (name) => {
         .replace(/\bq[1-4]\b/gi, '')
         // Remove years (2020-2030)
         .replace(/\b20[2-3][0-9]\b/g, '')
-        // Remove common suffixes that shouldn't affect matching
-        .replace(/\b(edition|series)\b/gi, 'series') // Normalize "edition" to "series"
-        // Clean up whitespace
+        // Remove structure info
+        .replace(/flight\s+[0-9a-z]+/gi, '')
+        .replace(/day\s+[0-9]+/gi, '')
+        .replace(/\$[0-9]+k\s+gtd/gi, '')
+        // Remove common suffixes
+        .replace(/\b(edition|series)\b/gi, 'series') 
         .replace(/\s+/g, ' ')
         .trim();
 };
 
-/**
- * Calculate similarity score between two series names
- * Returns 0-100 score
- */
 const calculateNameSimilarity = (name1, name2) => {
     const norm1 = normalizeSeriesName(name1);
     const norm2 = normalizeSeriesName(name2);
     
-    // Exact match after normalization
     if (norm1 === norm2) return 100;
-    
-    // One contains the other
     if (norm1.includes(norm2) || norm2.includes(norm1)) return 90;
     
-    // Check word overlap
     const words1 = new Set(norm1.split(' ').filter(w => w.length > 2));
     const words2 = new Set(norm2.split(' ').filter(w => w.length > 2));
     
@@ -61,22 +133,16 @@ const calculateNameSimilarity = (name1, name2) => {
     const intersection = [...words1].filter(w => words2.has(w));
     const union = new Set([...words1, ...words2]);
     
-    // Jaccard similarity
     const jaccard = intersection.length / union.size;
-    
-    return Math.round(jaccard * 80); // Max 80 for partial word match
+    return Math.round(jaccard * 80); 
 };
 
 // ===================================================================
 // TEMPORAL MATCHING HELPERS
 // ===================================================================
 
-/**
- * Extract temporal components from a date
- */
 const extractTemporalComponents = (dateValue) => {
     if (!dateValue) return null;
-    
     try {
         const date = new Date(dateValue);
         if (isNaN(date.getTime())) return null;
@@ -92,22 +158,6 @@ const extractTemporalComponents = (dateValue) => {
     }
 };
 
-/**
- * Calculate proximity score between game date and series date range
- * Higher score = closer match
- * 
- * Scoring:
- * - Within date range: 100 points
- * - Same month: 95 points
- * - Adjacent month: 85 points
- * - Within 2 months: 75 points
- * - Same quarter: 70 points  
- * - Adjacent quarter: 60 points
- * - Same year: 50 points
- * 
- * FIX: Relaxed scoring to be more lenient for multi-day tournaments
- * that may span month boundaries
- */
 const calculateTemporalProximity = (gameDate, series) => {
     const game = extractTemporalComponents(gameDate);
     if (!game) return 0;
@@ -116,55 +166,39 @@ const calculateTemporalProximity = (gameDate, series) => {
     const seriesMonth = series.month;
     const seriesQuarter = series.quarter;
     
-    // Must be same year or we return 0
     if (game.year !== seriesYear) return 0;
     
-    // If series has startDate/endDate, check if game falls within range (with buffer)
+    // Check strict date range if available
     if (series.startDate && series.endDate) {
         const seriesStart = new Date(series.startDate);
         const seriesEnd = new Date(series.endDate);
-        
-        // Add 7-day buffer on each end for multi-day tournaments
+        // Buffer for multi-day events
         seriesStart.setDate(seriesStart.getDate() - 7);
         seriesEnd.setDate(seriesEnd.getDate() + 7);
         
         if (game.date >= seriesStart && game.date <= seriesEnd) {
-            return 100; // Game falls within series date range - perfect match
+            return 100; 
         }
     }
     
     let score = 50; // Base score for same year
     
-    // Month matching (highest priority)
     if (seriesMonth) {
         const monthDiff = Math.abs(game.month - seriesMonth);
-        if (monthDiff === 0) {
-            score = 95; // Exact month match
-        } else if (monthDiff === 1) {
-            score = Math.max(score, 85); // Adjacent month
-        } else if (monthDiff <= 2) {
-            score = Math.max(score, 75); // Within 2 months
-        }
+        if (monthDiff === 0) score = 95;
+        else if (monthDiff === 1) score = Math.max(score, 85);
+        else if (monthDiff <= 2) score = Math.max(score, 75);
     }
     
-    // Quarter matching (medium priority)
     if (seriesQuarter && score < 95) {
         const quarterDiff = Math.abs(game.quarter - seriesQuarter);
-        if (quarterDiff === 0) {
-            score = Math.max(score, 70); // Exact quarter match
-        } else if (quarterDiff === 1) {
-            score = Math.max(score, 60); // Adjacent quarter
-        }
+        if (quarterDiff === 0) score = Math.max(score, 70);
+        else if (quarterDiff === 1) score = Math.max(score, 60);
     }
     
     return score;
 };
 
-/**
- * Find the best matching TournamentSeries from a list based on temporal proximity and name similarity
- * 
- * FIX: Now considers both temporal AND name similarity for better matching
- */
 const findBestTemporalMatch = (seriesList, gameStartDateTime, venueId = null, inputSeriesName = null) => {
     if (!seriesList || seriesList.length === 0) return null;
     
@@ -174,25 +208,16 @@ const findBestTemporalMatch = (seriesList, gameStartDateTime, venueId = null, in
     for (const series of seriesList) {
         let score = calculateTemporalProximity(gameStartDateTime, series);
         
-        // FIX: Add name similarity bonus
         if (inputSeriesName && series.name) {
             const nameSimilarity = calculateNameSimilarity(inputSeriesName, series.name);
-            // High name similarity can boost a temporal match significantly
-            if (nameSimilarity >= 90) {
-                score += 15; // Strong name match bonus
-            } else if (nameSimilarity >= 70) {
-                score += 10; // Good name match bonus
-            } else if (nameSimilarity >= 50) {
-                score += 5; // Partial name match bonus
-            }
+            if (nameSimilarity >= 90) score += 15;
+            else if (nameSimilarity >= 70) score += 10;
+            else if (nameSimilarity >= 50) score += 5;
         }
         
-        // Bonus points for venue match
         if (venueId && series.venueId === venueId) {
             score += 10;
         }
-        
-        console.log(`[SERIES] Candidate "${series.name}" (${series.id}): temporal=${calculateTemporalProximity(gameStartDateTime, series)}, total=${score}`);
         
         if (score > bestScore) {
             bestScore = score;
@@ -200,8 +225,7 @@ const findBestTemporalMatch = (seriesList, gameStartDateTime, venueId = null, in
         }
     }
     
-    // FIX: Lowered threshold from 75 to 60 to allow same-year matches
-    // when temporal components are less precise
+    // Threshold set to 60 to allow same-year matches
     if (bestScore >= 60) {
         return {
             series: bestMatch,
@@ -217,9 +241,6 @@ const findBestTemporalMatch = (seriesList, gameStartDateTime, venueId = null, in
 // DATABASE OPERATIONS
 // ===================================================================
 
-/**
- * Get all TournamentSeries for a given TournamentSeriesTitle
- */
 const getSeriesInstancesByTitleId = async (ddbDocClient, tableName, seriesTitleId) => {
     try {
         const result = await ddbDocClient.send(new QueryCommand({
@@ -235,9 +256,6 @@ const getSeriesInstancesByTitleId = async (ddbDocClient, tableName, seriesTitleI
     }
 };
 
-/**
- * Get TournamentSeries by year (fallback for name-based matching)
- */
 const getSeriesByYear = async (ddbDocClient, tableName, year) => {
     try {
         const result = await ddbDocClient.send(new QueryCommand({
@@ -254,9 +272,6 @@ const getSeriesByYear = async (ddbDocClient, tableName, year) => {
     }
 };
 
-/**
- * Get TournamentSeriesTitle by ID
- */
 const getSeriesTitleById = async (ddbDocClient, tableName, titleId) => {
     try {
         const result = await ddbDocClient.send(new GetCommand({
@@ -270,36 +285,23 @@ const getSeriesTitleById = async (ddbDocClient, tableName, titleId) => {
     }
 };
 
-/**
- * Search TournamentSeriesTitle by name (for cases where we don't have seriesTitleId)
- * FIX: Uses normalized name matching
- */
 const findSeriesTitleByName = async (ddbDocClient, tableName, seriesName) => {
     if (!seriesName) return null;
-    
     const normalizedInput = normalizeSeriesName(seriesName);
     
     try {
-        // Scan the TournamentSeriesTitle table
-        const result = await ddbDocClient.send(new ScanCommand({
-            TableName: tableName
-        }));
-        
+        const result = await ddbDocClient.send(new ScanCommand({ TableName: tableName }));
         const titles = result.Items || [];
         
-        // Score all titles and find best match
         let bestMatch = null;
         let bestScore = 0;
         
         for (const title of titles) {
-            // Check title
             const titleScore = calculateNameSimilarity(seriesName, title.title);
             if (titleScore > bestScore) {
                 bestScore = titleScore;
                 bestMatch = title;
             }
-            
-            // Check aliases
             if (title.aliases && Array.isArray(title.aliases)) {
                 for (const alias of title.aliases) {
                     const aliasScore = calculateNameSimilarity(seriesName, alias);
@@ -311,12 +313,10 @@ const findSeriesTitleByName = async (ddbDocClient, tableName, seriesName) => {
             }
         }
         
-        // Require at least 70% similarity
         if (bestScore >= 70) {
             console.log(`[SERIES] Title match: "${bestMatch.title}" with score ${bestScore}`);
             return bestMatch;
         }
-        
         return null;
     } catch (error) {
         console.error('[SERIES] Error searching series title by name:', error);
@@ -324,9 +324,6 @@ const findSeriesTitleByName = async (ddbDocClient, tableName, seriesName) => {
     }
 };
 
-/**
- * Create a new TournamentSeries
- */
 const createTournamentSeries = async (ddbDocClient, tableName, seriesData) => {
     const now = new Date().toISOString();
     const timestamp = Date.now();
@@ -337,7 +334,7 @@ const createTournamentSeries = async (ddbDocClient, tableName, seriesData) => {
         year: seriesData.year,
         seriesCategory: seriesData.seriesCategory || 'REGULAR',
         status: 'SCHEDULED',
-        tournamentSeriesTitleId: seriesData.tournamentSeriesTitleId,
+        tournamentSeriesTitleId: seriesData.tournamentSeriesTitleId, // Can be null if heuristic creation
         numberOfEvents: 0,
         createdAt: now,
         updatedAt: now,
@@ -346,36 +343,18 @@ const createTournamentSeries = async (ddbDocClient, tableName, seriesData) => {
         __typename: 'TournamentSeries'
     };
     
-    // Only add quarter if it has a value (GSI key can't be null)
-    if (seriesData.quarter) {
-        newSeries.quarter = seriesData.quarter;
-    }
-    
-    // Only add month if it has a value (GSI key can't be null)
-    if (seriesData.month) {
-        newSeries.month = seriesData.month;
-    }
-    
-    // Optional fields - only add if they have values
-    if (seriesData.holidayType) {
-        newSeries.holidayType = seriesData.holidayType;
-    }
-    if (seriesData.startDate) {
-        newSeries.startDate = seriesData.startDate;
-    }
-    if (seriesData.endDate) {
-        newSeries.endDate = seriesData.endDate;
-    }
-    if (seriesData.venueId) {
-        newSeries.venueId = seriesData.venueId;
-    }
+    if (seriesData.quarter) newSeries.quarter = seriesData.quarter;
+    if (seriesData.month) newSeries.month = seriesData.month;
+    if (seriesData.holidayType) newSeries.holidayType = seriesData.holidayType;
+    if (seriesData.startDate) newSeries.startDate = seriesData.startDate;
+    if (seriesData.endDate) newSeries.endDate = seriesData.endDate;
+    if (seriesData.venueId) newSeries.venueId = seriesData.venueId;
     
     try {
         await ddbDocClient.send(new PutCommand({
             TableName: tableName,
             Item: newSeries
         }));
-        
         console.log(`[SERIES] Created new TournamentSeries: ${newSeries.name} (${newSeries.id})`);
         return newSeries;
     } catch (error) {
@@ -384,23 +363,15 @@ const createTournamentSeries = async (ddbDocClient, tableName, seriesData) => {
     }
 };
 
-/**
- * Generate a descriptive name for a new TournamentSeries
- */
 const generateSeriesName = (titleName, year, month = null, quarter = null) => {
     const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 
                         'July', 'August', 'September', 'October', 'November', 'December'];
     const quarterNames = ['', 'Q1', 'Q2', 'Q3', 'Q4'];
     
     let name = titleName;
-    
-    if (month) {
-        name += ` ${monthNames[month]} ${year}`;
-    } else if (quarter) {
-        name += ` ${quarterNames[quarter]} ${year}`;
-    } else {
-        name += ` ${year}`;
-    }
+    if (month) name += ` ${monthNames[month]} ${year}`;
+    else if (quarter) name += ` ${quarterNames[quarter]} ${year}`;
+    else name += ` ${year}`;
     
     return name;
 };
@@ -409,19 +380,6 @@ const generateSeriesName = (titleName, year, month = null, quarter = null) => {
 // MAIN SERIES RESOLUTION FUNCTION
 // ===================================================================
 
-/**
- * Comprehensive series resolution
- * 
- * @param {Object} seriesRef - Series reference from scraper (seriesName, seriesTitleId, etc.)
- * @param {String} entityId - Entity ID
- * @param {String} gameStartDateTime - Game start date/time (ISO string)
- * @param {String} venueId - Venue ID (optional)
- * @param {Object} ddbDocClient - DynamoDB Document Client
- * @param {Function} getTableName - Function to get table name
- * @param {Object} monitoring - Monitoring instance (optional)
- * @param {Object} options - Additional options
- * @returns {Object} Resolution result
- */
 const resolveSeriesComprehensive = async (
     seriesRef,
     entityId,
@@ -433,120 +391,139 @@ const resolveSeriesComprehensive = async (
     options = {}
 ) => {
     const { autoCreate = true } = options;
-    
-    // Not a series - return early
-    if (!seriesRef || (!seriesRef.seriesName && !seriesRef.seriesTitleId)) {
-        return {
-            tournamentSeriesId: null,
-            seriesName: null,
-            seriesCategory: null,
-            holidayType: null,
-            status: 'NOT_SERIES',
-            confidence: 0,
-            wasCreated: false
-        };
-    }
-    
     const seriesTable = getTableName('TournamentSeries');
     const seriesTitleTable = getTableName('TournamentSeriesTitle');
     
-    // Extract temporal components from game date
+    // Extract temporal components
     const temporal = extractTemporalComponents(gameStartDateTime);
     if (!temporal) {
-        console.warn('[SERIES] Could not extract temporal components from game date');
         return {
             tournamentSeriesId: null,
-            seriesName: seriesRef.seriesName,
-            seriesCategory: null,
-            holidayType: null,
             status: 'PENDING_ASSIGNMENT',
             confidence: 0,
             reason: 'Invalid game date',
             wasCreated: false
         };
     }
-    
     const { year, month, quarter } = temporal;
+
+    // -------------------------------------------------------------
+    // PRIORITY 1: HEURISTIC CHECK (Signals)
+    // -------------------------------------------------------------
     
-    // Track operation
-    if (monitoring) {
-        monitoring.trackOperation('SERIES_RESOLVE', 'TournamentSeries', seriesRef.seriesName || 'unknown', {
-            seriesTitleId: seriesRef.seriesTitleId,
-            year,
-            month,
-            quarter
-        });
+    const heuristicSignal = detectSeriesSignal(seriesRef.seriesName);
+    
+    if (heuristicSignal.isSeries) {
+        console.log(`[SERIES] Detected Heuristic Signal: ${heuristicSignal.reason}`);
+        
+        const holidayName = detectHolidayContext(new Date(gameStartDateTime));
+        let generatedSeriesName = normalizeSeriesName(seriesRef.seriesName); 
+        let category = 'SPECIAL';
+
+        if (holidayName) {
+            generatedSeriesName = `${holidayName} Series ${year}`;
+            category = 'HOLIDAY';
+        } else if (generatedSeriesName.includes('championship')) {
+            generatedSeriesName = generatedSeriesName.replace(/\d{4}/, '').trim() + ` ${year}`;
+            category = 'CHAMPIONSHIP';
+        } else {
+            generatedSeriesName = `${generatedSeriesName} ${year}`;
+            category = 'SEASONAL';
+        }
+
+        // Search for existing Series by name
+        const yearSeries = await getSeriesByYear(ddbDocClient, seriesTable, year);
+        
+        let bestCandidate = null;
+        let bestScore = 0;
+
+        for (const s of yearSeries) {
+            const sim = calculateNameSimilarity(generatedSeriesName, s.name);
+            if (sim > bestScore) {
+                bestScore = sim;
+                bestCandidate = s;
+            }
+        }
+
+        if (bestCandidate && bestScore >= 75) {
+             return {
+                tournamentSeriesId: bestCandidate.id,
+                seriesName: bestCandidate.name,
+                seriesCategory: bestCandidate.seriesCategory,
+                status: 'AUTO_ASSIGNED',
+                confidence: 0.95,
+                wasCreated: false,
+                note: 'Heuristic Match'
+            };
+        }
+        
+        if (autoCreate) {
+             try {
+                const displaySeriesName = generatedSeriesName.charAt(0).toUpperCase() + generatedSeriesName.slice(1);
+                const newSeries = await createTournamentSeries(ddbDocClient, seriesTable, {
+                    name: displaySeriesName,
+                    year,
+                    seriesCategory: category,
+                    tournamentSeriesTitleId: null,
+                    venueId: venueId || null,
+                    startDate: gameStartDateTime
+                });
+
+                return {
+                    tournamentSeriesId: newSeries.id,
+                    seriesName: newSeries.name,
+                    seriesCategory: newSeries.seriesCategory,
+                    status: 'AUTO_ASSIGNED',
+                    confidence: 0.9,
+                    wasCreated: true,
+                    note: 'Heuristic Creation'
+                };
+            } catch (err) {
+                console.error('[SERIES] Heuristic creation failed:', err);
+            }
+        }
     }
+
+    // -------------------------------------------------------------
+    // PRIORITY 2: STANDARD TITLE ID / NAME LOOKUP
+    // -------------------------------------------------------------
     
-    console.log(`[SERIES] Resolving series: "${seriesRef.seriesName}" for ${year}-${month} (Q${quarter})`);
-    
-    // ===================================================================
-    // STEP 1: Get or find TournamentSeriesTitle
-    // ===================================================================
-    
+    if (!seriesRef || (!seriesRef.seriesName && !seriesRef.seriesTitleId)) {
+        return { tournamentSeriesId: null, status: 'NOT_SERIES', confidence: 0 };
+    }
+
     let seriesTitle = null;
-    
+
     if (seriesRef.seriesTitleId) {
-        // We have a title ID from the scraper
         seriesTitle = await getSeriesTitleById(ddbDocClient, seriesTitleTable, seriesRef.seriesTitleId);
-        console.log(`[SERIES] Found series title by ID: ${seriesTitle?.title}`);
     }
     
     if (!seriesTitle && seriesRef.seriesName) {
-        // Try to find by name
         seriesTitle = await findSeriesTitleByName(ddbDocClient, seriesTitleTable, seriesRef.seriesName);
-        console.log(`[SERIES] Found series title by name search: ${seriesTitle?.title}`);
     }
-    
-    // ===================================================================
-    // STEP 2: Find existing TournamentSeries instances
-    // ===================================================================
-    
+
     let candidateSeries = [];
-    
     if (seriesTitle) {
-        // Get all series instances for this title
         candidateSeries = await getSeriesInstancesByTitleId(ddbDocClient, seriesTable, seriesTitle.id);
-        console.log(`[SERIES] Found ${candidateSeries.length} series instances for title "${seriesTitle.title}"`);
     }
-    
-    // FIX: Always search by year AND use improved name matching
-    // This catches cases where we have series instances that might match
+
     if (seriesRef.seriesName) {
         const yearSeries = await getSeriesByYear(ddbDocClient, seriesTable, year);
-        console.log(`[SERIES] Found ${yearSeries.length} series for year ${year}`);
-        
-        // FIX: Use normalized name matching instead of simple includes
         const nameCandidates = yearSeries.filter(s => {
-            const similarity = calculateNameSimilarity(seriesRef.seriesName, s.name);
-            if (similarity >= 70) {
-                console.log(`[SERIES] Name match: "${s.name}" similarity=${similarity}`);
-                return true;
-            }
-            return false;
+            const sim = calculateNameSimilarity(seriesRef.seriesName, s.name);
+            return sim >= 70;
         });
         
-        // Merge unique candidates
-        for (const candidate of nameCandidates) {
-            if (!candidateSeries.find(c => c.id === candidate.id)) {
-                candidateSeries.push(candidate);
+        for (const c of nameCandidates) {
+            if (!candidateSeries.find(existing => existing.id === c.id)) {
+                candidateSeries.push(c);
             }
         }
-        console.log(`[SERIES] After name search: ${candidateSeries.length} total candidates`);
     }
-    
-    // ===================================================================
-    // STEP 3: Find best temporal match
-    // FIX: Pass inputSeriesName to findBestTemporalMatch for name similarity scoring
-    // ===================================================================
-    
+
     const match = findBestTemporalMatch(candidateSeries, gameStartDateTime, venueId, seriesRef.seriesName);
-    
-    // FIX: Lowered threshold from 75 to 60 to allow matches across month boundaries
+
     if (match && match.score >= 60) {
-        // Good match found
-        console.log(`[SERIES] Found temporal match: "${match.series.name}" (score: ${match.score})`);
-        
         return {
             tournamentSeriesId: match.series.id,
             seriesName: match.series.name,
@@ -558,144 +535,105 @@ const resolveSeriesComprehensive = async (
             matchScore: match.score
         };
     }
-    
-    // ===================================================================
-    // STEP 4: Check if we should create a new series
-    // ===================================================================
-    
-    if (!autoCreate || !seriesTitle) {
-        // Can't or shouldn't create - return pending
-        console.log('[SERIES] No match found and auto-create disabled or no title found');
-        
-        return {
-            tournamentSeriesId: null,
-            seriesName: seriesRef.seriesName,
-            seriesCategory: seriesTitle?.seriesCategory || null,
-            holidayType: null,
-            status: 'PENDING_ASSIGNMENT',
-            confidence: 0,
-            reason: !seriesTitle ? 'No matching TournamentSeriesTitle found' : 'Auto-create disabled',
-            wasCreated: false,
-            suggestedName: generateSeriesName(seriesRef.seriesName, year, month)
-        };
-    }
-    
-    // ===================================================================
-    // STEP 5: Create new TournamentSeries
-    // FIX: Don't create if we have ANY candidates for the same year - just use the best one
-    // ===================================================================
-    
-    // Last check: if we have candidates but they didn't meet the threshold,
-    // use the best one anyway rather than creating a duplicate
-    if (candidateSeries.length > 0) {
-        // Find best candidate regardless of score
-        let bestCandidate = null;
-        let bestScore = -1;
-        
-        for (const candidate of candidateSeries) {
-            let score = calculateTemporalProximity(gameStartDateTime, candidate);
-            const nameSimilarity = calculateNameSimilarity(seriesRef.seriesName, candidate.name);
-            score += (nameSimilarity / 10); // Add some name weight
+
+    // -------------------------------------------------------------
+    // LOGIC RESTORED HERE: Check for duplicate avoidance
+    // -------------------------------------------------------------
+
+    if (autoCreate && seriesTitle) {
+        // If we have candidates but score was low, force match to best one to avoid dupe
+        // This prevents creating "Summer Series 2024" if "Summer Series 2024" exists but dates were slightly off
+        if (candidateSeries.length > 0) {
+             let bestCandidate = null;
+             let bestScore = -1;
+             
+             for (const candidate of candidateSeries) {
+                 // Recalculate basic proximity without strict threshold
+                 let score = calculateTemporalProximity(gameStartDateTime, candidate);
+                 
+                 // If names are very similar, boost score heavily
+                 if (seriesRef.seriesName) {
+                    const sim = calculateNameSimilarity(seriesRef.seriesName, candidate.name);
+                    score += (sim / 5); // Add up to 20 points for name match
+                 }
+
+                 if (score > bestScore) { 
+                     bestScore = score; 
+                     bestCandidate = candidate; 
+                 }
+             }
+
+             // If we found a candidate in the same year, use it
+             if (bestCandidate && bestCandidate.year === year) {
+                 console.log(`[SERIES] Avoided duplicate. Matched to ${bestCandidate.name} (Score: ${bestScore})`);
+                 return {
+                     tournamentSeriesId: bestCandidate.id,
+                     seriesName: bestCandidate.name,
+                     seriesCategory: bestCandidate.seriesCategory,
+                     status: 'AUTO_ASSIGNED',
+                     confidence: 0.75, 
+                     wasCreated: false,
+                     note: 'Forced match to existing candidate to avoid duplicate'
+                 };
+             }
+        }
+
+        // If no viable candidate, proceed to create
+        const sameYearSeries = candidateSeries.filter(s => s.year === year);
+        const useMonth = sameYearSeries.length > 0;
+        const useQuarter = !useMonth && candidateSeries.length > 0;
+
+        const newSeriesName = generateSeriesName(
+            seriesTitle.title,
+            year,
+            useMonth ? month : null,
+            useQuarter ? quarter : null
+        );
+
+        try {
+            const newSeries = await createTournamentSeries(ddbDocClient, seriesTable, {
+                name: newSeriesName,
+                year,
+                quarter: useQuarter || useMonth ? quarter : null,
+                month: useMonth ? month : null,
+                seriesCategory: seriesTitle.seriesCategory || 'REGULAR',
+                tournamentSeriesTitleId: seriesTitle.id,
+                venueId: venueId || null,
+                startDate: gameStartDateTime
+            });
             
-            if (score > bestScore) {
-                bestScore = score;
-                bestCandidate = candidate;
-            }
-        }
-        
-        if (bestCandidate) {
-            console.log(`[SERIES] Using existing series "${bestCandidate.name}" to avoid duplicate (score: ${bestScore})`);
             return {
-                tournamentSeriesId: bestCandidate.id,
-                seriesName: bestCandidate.name,
-                seriesCategory: bestCandidate.seriesCategory,
-                holidayType: bestCandidate.holidayType,
+                tournamentSeriesId: newSeries.id,
+                seriesName: newSeries.name,
+                seriesCategory: newSeries.seriesCategory,
                 status: 'AUTO_ASSIGNED',
-                confidence: Math.min(bestScore / 100, 0.8), // Cap at 0.8 for lower-confidence match
-                wasCreated: false,
-                matchScore: bestScore,
-                note: 'Used existing series to avoid duplicate'
+                confidence: 0.9,
+                wasCreated: true,
+                seriesTitleId: seriesTitle.id
             };
+        } catch (error) {
+            console.error('[SERIES] Failed to create:', error);
+            // Fallthrough
         }
     }
-    
-    console.log(`[SERIES] Creating new TournamentSeries for "${seriesTitle.title}" ${year}-${month}`);
-    
-    // Track creation
-    if (monitoring) {
-        monitoring.trackOperation('SERIES_CREATE', 'TournamentSeries', seriesTitle.title, {
-            year,
-            month,
-            quarter
-        });
-    }
-    
-    // Determine if we should scope by month, quarter, or year
-    // Use month if there are multiple series in the same year
-    const sameYearSeries = candidateSeries.filter(s => s.year === year);
-    const useMonth = sameYearSeries.length > 0;
-    const useQuarter = !useMonth && candidateSeries.length > 0;
-    
-    const newSeriesName = generateSeriesName(
-        seriesTitle.title,
-        year,
-        useMonth ? month : null,
-        useQuarter ? quarter : null
-    );
-    
-    try {
-        const newSeries = await createTournamentSeries(ddbDocClient, seriesTable, {
-            name: newSeriesName,
-            year,
-            quarter: useQuarter || useMonth ? quarter : null,
-            month: useMonth ? month : null,
-            seriesCategory: seriesTitle.seriesCategory || 'REGULAR',
-            tournamentSeriesTitleId: seriesTitle.id,
-            venueId: venueId || null,
-            startDate: gameStartDateTime // Use game date as initial start date
-        });
-        
-        return {
-            tournamentSeriesId: newSeries.id,
-            seriesName: newSeries.name,
-            seriesCategory: newSeries.seriesCategory,
-            holidayType: newSeries.holidayType,
-            status: 'AUTO_ASSIGNED',
-            confidence: 0.9,
-            wasCreated: true,
-            seriesTitleId: seriesTitle.id
-        };
-        
-    } catch (error) {
-        console.error('[SERIES] Failed to create TournamentSeries:', error);
-        
-        return {
-            tournamentSeriesId: null,
-            seriesName: seriesRef.seriesName,
-            seriesCategory: seriesTitle?.seriesCategory || null,
-            holidayType: null,
-            status: 'PENDING_ASSIGNMENT',
-            confidence: 0,
-            error: error.message,
-            wasCreated: false
-        };
-    }
+
+    return {
+        tournamentSeriesId: null,
+        seriesName: seriesRef.seriesName,
+        status: 'PENDING_ASSIGNMENT',
+        confidence: 0,
+        wasCreated: false
+    };
 };
 
-/**
- * Update TournamentSeries date range when a game is assigned
- * Call this after successfully saving a game to a series
- */
 const updateSeriesDateRange = async (ddbDocClient, tableName, seriesId, gameStartDateTime) => {
     try {
-        // Get current series
         const result = await ddbDocClient.send(new GetCommand({
             TableName: tableName,
             Key: { id: seriesId }
         }));
         
         if (!result.Item) return;
-        
         const series = result.Item;
         const gameDate = new Date(gameStartDateTime);
         const now = new Date().toISOString();
@@ -704,73 +642,56 @@ const updateSeriesDateRange = async (ddbDocClient, tableName, seriesId, gameStar
         let needsUpdate = false;
         const updates = {};
         
-        // Check if we need to expand the date range
         if (!series.startDate || gameDate < new Date(series.startDate)) {
             updates.startDate = gameStartDateTime;
             needsUpdate = true;
         }
-        
         if (!series.endDate || gameDate > new Date(series.endDate)) {
             updates.endDate = gameStartDateTime;
             needsUpdate = true;
         }
-        
-        // Update status if game is in the past
         if (new Date() > gameDate && series.status === 'SCHEDULED') {
             updates.status = 'LIVE';
             needsUpdate = true;
         }
         
-        if (!needsUpdate) return;
-        
-        updates.updatedAt = now;
-        updates._lastChangedAt = timestamp;
-        
-        const updateExpression = 'SET ' + Object.keys(updates).map(k => `#${k} = :${k}`).join(', ');
-        const expressionAttributeNames = Object.fromEntries(Object.keys(updates).map(k => [`#${k}`, k]));
-        const expressionAttributeValues = Object.fromEntries(Object.keys(updates).map(k => [`:${k}`, updates[k]]));
-        
-        await ddbDocClient.send(new UpdateCommand({
-            TableName: tableName,
-            Key: { id: seriesId },
-            UpdateExpression: updateExpression,
-            ExpressionAttributeNames: expressionAttributeNames,
-            ExpressionAttributeValues: expressionAttributeValues
-        }));
-        
-        console.log(`[SERIES] Updated series ${seriesId} date range`);
-        
+        if (needsUpdate) {
+            updates.updatedAt = now;
+            updates._lastChangedAt = timestamp;
+            
+            const updateExpression = 'SET ' + Object.keys(updates).map(k => `#${k} = :${k}`).join(', ');
+            const expressionAttributeNames = Object.fromEntries(Object.keys(updates).map(k => [`#${k}`, k]));
+            const expressionAttributeValues = Object.fromEntries(Object.keys(updates).map(k => [`:${k}`, updates[k]]));
+            
+            await ddbDocClient.send(new UpdateCommand({
+                TableName: tableName,
+                Key: { id: seriesId },
+                UpdateExpression: updateExpression,
+                ExpressionAttributeNames: expressionAttributeNames,
+                ExpressionAttributeValues: expressionAttributeValues
+            }));
+            console.log(`[SERIES] Updated series ${seriesId} date range`);
+        }
     } catch (error) {
         console.error('[SERIES] Error updating series date range:', error);
-        // Non-critical error - don't throw
     }
 };
 
-/**
- * Increment event count on TournamentSeries
- */
 const incrementSeriesEventCount = async (ddbDocClient, tableName, seriesId) => {
     try {
         const timestamp = Date.now();
-        
         await ddbDocClient.send(new UpdateCommand({
             TableName: tableName,
             Key: { id: seriesId },
             UpdateExpression: 'SET numberOfEvents = if_not_exists(numberOfEvents, :zero) + :one, updatedAt = :now, #lca = :lca',
             ExpressionAttributeNames: { '#lca': '_lastChangedAt' },
             ExpressionAttributeValues: {
-                ':zero': 0,
-                ':one': 1,
-                ':now': new Date().toISOString(),
-                ':lca': timestamp
+                ':zero': 0, ':one': 1, ':now': new Date().toISOString(), ':lca': timestamp
             }
         }));
-        
         console.log(`[SERIES] Incremented event count for series ${seriesId}`);
-        
     } catch (error) {
         console.error('[SERIES] Error incrementing event count:', error);
-        // Non-critical error - don't throw
     }
 };
 
@@ -782,10 +703,8 @@ module.exports = {
     generateSeriesName,
     updateSeriesDateRange,
     incrementSeriesEventCount,
-    // NEW: Export name helpers for testing
     normalizeSeriesName,
     calculateNameSimilarity,
-    // Export helpers for testing
     getSeriesInstancesByTitleId,
     getSeriesByYear,
     getSeriesTitleById,

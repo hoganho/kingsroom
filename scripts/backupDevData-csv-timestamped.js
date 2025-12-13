@@ -1,67 +1,41 @@
-// backupDevData-csv-timestamped.js
-// This script iterates through a list of DynamoDB tables, scans ALL items
-// from each one, and saves the data to a local CSV file per table.
+// backupAllDynamoTables-csv-timestamped.js
+// This script enumerates DynamoDB tables in a region, scans ALL items
+// from each selected table, and saves the data to a local CSV file per table.
 // All CSV files are saved into a single, timestamped directory.
+//
+// ⚠️ WARNING: This performs full table scans and may incur RCU costs.
 
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, ListTablesCommand } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import * as readline from 'readline';
-import { promises as fs } from 'fs'; // Node.js File System module
-import * as path from 'path'; // Node.js Path module for joining paths
+import { promises as fs } from 'fs';
+import * as path from 'path';
 
-// --- CONFIGURATION ---
+// ------------------------------------------------------------------
+// CONFIGURATION
+// ------------------------------------------------------------------
+
 const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 
-// --- List of Tables to Backup ---
-const TABLES_TO_BACKUP = [
-    'AmplifyDataStore-sjyzke3u45golhnttlco6bpcua-dev',
-    'Asset-sjyzke3u45golhnttlco6bpcua-dev',
-    'CashStructure-sjyzke3u45golhnttlco6bpcua-dev',
-    'DataSync-sjyzke3u45golhnttlco6bpcua-dev',
-    'Entity-sjyzke3u45golhnttlco6bpcua-dev',
-    'Game-sjyzke3u45golhnttlco6bpcua-dev',
-    'GameCost-sjyzke3u45golhnttlco6bpcua-dev',
-    'GameCostItem-sjyzke3u45golhnttlco6bpcua-dev',
-    'GameCostLineItem-sjyzke3u45golhnttlco6bpcua-dev',
-    'GameFinancialSnapshot-sjyzke3u45golhnttlco6bpcua-dev',
-    'KnownPlayerIdentity-sjyzke3u45golhnttlco6bpcua-dev',
-    'MarketingMessage-sjyzke3u45golhnttlco6bpcua-dev',
-    'Player-sjyzke3u45golhnttlco6bpcua-dev',
-    'PlayerCredits-sjyzke3u45golhnttlco6bpcua-dev',
-    'PlayerEntry-sjyzke3u45golhnttlco6bpcua-dev',
-    'PlayerMarketingMessage-sjyzke3u45golhnttlco6bpcua-dev',
-    'PlayerMarketingPreferences-sjyzke3u45golhnttlco6bpcua-dev',
-    'PlayerPoints-sjyzke3u45golhnttlco6bpcua-dev',
-    'PlayerResult-sjyzke3u45golhnttlco6bpcua-dev',
-    'PlayerSummary-sjyzke3u45golhnttlco6bpcua-dev',
-    'PlayerTicket-sjyzke3u45golhnttlco6bpcua-dev',
-    'PlayerTransaction-sjyzke3u45golhnttlco6bpcua-dev',
-    'PlayerVenue-sjyzke3u45golhnttlco6bpcua-dev',
-    'RakeStructure-sjyzke3u45golhnttlco6bpcua-dev',
-    'S3Storage-sjyzke3u45golhnttlco6bpcua-dev',
-    'ScrapeAttempt-sjyzke3u45golhnttlco6bpcua-dev',
-    'ScraperJob-sjyzke3u45golhnttlco6bpcua-dev',
-    'ScraperState-sjyzke3u45golhnttlco6bpcua-dev',
-    'ScrapeStructure-sjyzke3u45golhnttlco6bpcua-dev',
-    'ScrapeURL-sjyzke3u45golhnttlco6bpcua-dev',
-    'SocialAccount-sjyzke3u45golhnttlco6bpcua-dev',
-    'SocialPost-sjyzke3u45golhnttlco6bpcua-dev',
-    'SocialScheduledPost-sjyzke3u45golhnttlco6bpcua-dev',
-    'SocialScrapeAttempt-sjyzke3u45golhnttlco6bpcua-dev',
-    'Staff-sjyzke3u45golhnttlco6bpcua-dev',
-    'TicketTemplate-sjyzke3u45golhnttlco6bpcua-dev',
-    'TournamentLevelData-sjyzke3u45golhnttlco6bpcua-dev',
-    'TournamentSeries-sjyzke3u45golhnttlco6bpcua-dev',
-    'TournamentSeriesTitle-sjyzke3u45golhnttlco6bpcua-dev',
-    'TournamentStructure-sjyzke3u45golhnttlco6bpcua-dev',
-    'User-sjyzke3u45golhnttlco6bpcua-dev',
-    'UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev',
-    'UserPreference-sjyzke3u45golhnttlco6bpcua-dev',
-    'Venue-sjyzke3u45golhnttlco6bpcua-dev',
-    'VenueDetails-sjyzke3u45golhnttlco6bpcua-dev'
-];
+// Optional filters (recommended)
+// - ENV_SUFFIX: only tables ending with "-dev" (default "dev")
+// - API_ID_FILTER: only tables containing this amplify apiId (e.g. "sjyzke3u45golhnttlco6bpcua")
+// - TABLE_PREFIX_FILTER: only tables starting with a string (rarely needed)
+const ENV_SUFFIX = process.env.ENV_SUFFIX || 'dev';
+const API_ID_FILTER = process.env.API_ID_FILTER || 'sjyzke3u45golhnttlco6bpcua'; // e.g. sjyzke3u45golhnttlco6bpcua
+const TABLE_PREFIX_FILTER = process.env.TABLE_PREFIX_FILTER || ''; // e.g. "Game-"
 
-// --- Logger (copied from your script) ---
+// If set to 1, we don't scan or write files; we just print which tables would be backed up.
+const DRY_RUN = process.env.DRY_RUN === '1';
+
+// For large tables, you might want to limit scan page size
+// (smaller = gentler on RCUs, but slower)
+const SCAN_PAGE_LIMIT = Number(process.env.SCAN_PAGE_LIMIT || 0); // 0 = default (SDK chooses)
+
+// ------------------------------------------------------------------
+// LOGGER
+// ------------------------------------------------------------------
+
 const logger = {
   info: (msg) => console.log(`[INFO] ${msg}`),
   warn: (msg) => console.log(`[WARN] ⚠️  ${msg}`),
@@ -69,16 +43,17 @@ const logger = {
   success: (msg) => console.log(`[SUCCESS] ✅ ${msg}`),
 };
 
-// --- Setup DynamoDB Clients ---
+// ------------------------------------------------------------------
+// AWS CLIENTS
+// ------------------------------------------------------------------
+
 const ddbClient = new DynamoDBClient({ region: REGION });
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
-// --- Helper Functions ---
+// ------------------------------------------------------------------
+// HELPERS
+// ------------------------------------------------------------------
 
-/**
- * Creates a readline interface to ask the user a question.
- * (Copied from your script)
- */
 function askQuestion(query) {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -92,61 +67,96 @@ function askQuestion(query) {
   );
 }
 
-/**
- * Sanitizes a value for CSV export.
- * Handles nulls, objects/arrays, and strings with commas/quotes.
- * @param {*} value The value to sanitize.
- * @returns {string} A CSV-safe string.
- */
 function sanitizeCell(value) {
-  if (value === null || value === undefined) {
-    return '';
-  }
+  if (value === null || value === undefined) return '';
+
   if (typeof value === 'object' || Array.isArray(value)) {
     value = JSON.stringify(value);
   }
+
   let strValue = String(value);
   strValue = strValue.replace(/"/g, '""');
-  if (
-    strValue.includes(',') ||
-    strValue.includes('\n') ||
-    strValue.includes('"')
-  ) {
+
+  if (strValue.includes(',') || strValue.includes('\n') || strValue.includes('"')) {
     strValue = `"${strValue}"`;
   }
+
   return strValue;
 }
 
-/**
- * Converts an array of DynamoDB items (JS objects) into a CSV string.
- * @param {Object[]} items Array of items from DynamoDB.
- * @returns {string} A CSV-formatted string.
- */
 function convertToCsv(items) {
-  if (items.length === 0) {
-    return '';
-  }
+  if (items.length === 0) return '';
+
   const allKeys = new Set();
   items.forEach((item) => {
     Object.keys(item).forEach((key) => allKeys.add(key));
   });
+
   const headers = Array.from(allKeys);
   const headerRow = headers.map(sanitizeCell).join(',');
-  const dataRows = items.map((item) => {
-    return headers
-      .map((header) => {
-        return sanitizeCell(item[header]);
-      })
-      .join(',');
-  });
+
+  const dataRows = items.map((item) =>
+    headers.map((h) => sanitizeCell(item[h])).join(',')
+  );
+
   return [headerRow, ...dataRows].join('\n');
 }
 
-/**
- * Scans a table and saves all items to a CSV file inside the backup directory.
- * @param {string} tableName The name of the table to back up.
- * @param {string} backupDir The timestamped directory to save the file in.
- */
+function makeTimestampedDirName(prefix = 'backup') {
+  const now = new Date();
+  const pad = (n) => n.toString().padStart(2, '0');
+  const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(
+    now.getHours()
+  )}${pad(now.getMinutes())}`;
+  return `${prefix}_${timestamp}`;
+}
+
+function tableMatchesFilters(tableName) {
+  // If user wants only "-dev" etc
+  if (ENV_SUFFIX && !tableName.endsWith(`-${ENV_SUFFIX}`)) return false;
+
+  // If user wants only tables for a given amplify apiId
+  if (API_ID_FILTER && !tableName.includes(API_ID_FILTER)) return false;
+
+  // Optional prefix filter
+  if (TABLE_PREFIX_FILTER && !tableName.startsWith(TABLE_PREFIX_FILTER)) return false;
+
+  return true;
+}
+
+// ------------------------------------------------------------------
+// DISCOVER TABLES
+// ------------------------------------------------------------------
+
+async function listAllTables() {
+  const allTables = [];
+  let lastEvaluatedTableName = undefined;
+
+  do {
+    const resp = await ddbClient.send(
+      new ListTablesCommand({
+        ExclusiveStartTableName: lastEvaluatedTableName,
+      })
+    );
+
+    const names = resp.TableNames || [];
+    allTables.push(...names);
+
+    lastEvaluatedTableName = resp.LastEvaluatedTableName;
+  } while (lastEvaluatedTableName);
+
+  return allTables;
+}
+
+async function getTablesToBackup() {
+  const tables = await listAllTables();
+  return tables.filter(tableMatchesFilters).sort();
+}
+
+// ------------------------------------------------------------------
+// BACKUP ONE TABLE
+// ------------------------------------------------------------------
+
 async function backupTableData(tableName, backupDir) {
   logger.info(`Starting to back up all data from table: ${tableName}`);
 
@@ -159,6 +169,11 @@ async function backupTableData(tableName, backupDir) {
       TableName: tableName,
       ExclusiveStartKey: lastEvaluatedKey,
     };
+
+    if (SCAN_PAGE_LIMIT > 0) {
+      scanParams.Limit = SCAN_PAGE_LIMIT;
+    }
+
     const scanResult = await ddbDocClient.send(new ScanCommand(scanParams));
     const items = scanResult.Items || [];
 
@@ -167,53 +182,55 @@ async function backupTableData(tableName, backupDir) {
       totalScanned += items.length;
       logger.info(`Scanned ${totalScanned} items from ${tableName}...`);
     }
+
     lastEvaluatedKey = scanResult.LastEvaluatedKey;
   } while (lastEvaluatedKey);
 
-  if (allTableItems.length > 0) {
-    const baseFileName = `${tableName}.csv`;
-    // Join the directory path and the filename
-    const fileName = path.join(backupDir, baseFileName);
-
-    try {
-      const csvData = convertToCsv(allTableItems);
-      await fs.writeFile(fileName, csvData);
-      logger.success(
-        `Successfully saved ${allTableItems.length} items from ${tableName} to ${fileName}`
-      );
-    } catch (writeErr) {
-      logger.error(
-        `Failed to write backup file ${fileName}: ${writeErr.message}`
-      );
-    }
-  } else {
+  if (allTableItems.length === 0) {
     logger.info(`Table ${tableName} is empty. No backup file created.`);
-  }
-}
-
-/**
- * Main execution function.
- */
-async function main() {
-  logger.info('--- KINGSROOM DEV DATABASE BACKUP SCRIPT (CSV) ---');
-  logger.info(
-    'This script will scan and save ALL items from the specified tables to CSV files.'
-  );
-  logger.info('All files will be saved in a new, timestamped directory.');
-  logger.warn(
-    'This will perform a full scan on all tables and may incur RCU costs.'
-  );
-
-  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-    logger.error(
-      'AWS credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) are not found in your environment variables. Aborting.'
-    );
-    logger.info('Please set them in your terminal before running this script.');
     return;
   }
 
-  console.log('\nThis script will back up all data from the following tables:');
-  TABLES_TO_BACKUP.forEach((table) => console.log(`- ${table}`));
+  const fileName = path.join(backupDir, `${tableName}.csv`);
+
+  const csvData = convertToCsv(allTableItems);
+  await fs.writeFile(fileName, csvData);
+  logger.success(`Saved ${allTableItems.length} items from ${tableName} → ${fileName}`);
+}
+
+// ------------------------------------------------------------------
+// MAIN
+// ------------------------------------------------------------------
+
+async function main() {
+  logger.info('--- DYNAMODB DATABASE BACKUP SCRIPT (CSV) ---');
+  logger.info('This script will discover tables dynamically and back them up.');
+  logger.warn('This performs full table scans and may incur RCU costs.');
+
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    logger.error('AWS credentials not found in environment variables. Aborting.');
+    logger.info('Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY, or use an AWS profile via the SDK default chain.');
+    return;
+  }
+
+  logger.info(`Region: ${REGION}`);
+  logger.info(`Filters: ENV_SUFFIX="${ENV_SUFFIX}", API_ID_FILTER="${API_ID_FILTER || '(none)'}", TABLE_PREFIX_FILTER="${TABLE_PREFIX_FILTER || '(none)'}"`);
+
+  const TABLES_TO_BACKUP = await getTablesToBackup();
+
+  if (TABLES_TO_BACKUP.length === 0) {
+    logger.warn('No tables matched your filters. Nothing to back up.');
+    logger.info('Tip: try running with ENV_SUFFIX="" to include all tables, or set API_ID_FILTER correctly.');
+    return;
+  }
+
+  console.log(`\nThis script will back up all data from the following ${TABLES_TO_BACKUP.length} tables:`);
+  TABLES_TO_BACKUP.forEach((t) => console.log(`- ${t}`));
+
+  if (DRY_RUN) {
+    logger.warn('\nDRY_RUN=1 set, so no scans or files will be created.');
+    return;
+  }
 
   const confirmation = await askQuestion('\nType "backup" to continue: ');
   if (confirmation.toLowerCase() !== 'backup') {
@@ -221,44 +238,29 @@ async function main() {
     return;
   }
 
-  // --- Create timestamped backup directory ---
-  const now = new Date();
-  const pad = (num) => num.toString().padStart(2, '0');
-  const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
-    now.getDate()
-  )}_${pad(now.getHours())}${pad(now.getMinutes())}`;
-  const backupDirName = `backup_${timestamp}`;
-
+  const backupDirName = makeTimestampedDirName('backup');
   try {
-    // recursive: true ensures it doesn't error if the path (or parts) already exists
     await fs.mkdir(backupDirName, { recursive: true });
     logger.info(`Saving backups to directory: ./${backupDirName}`);
   } catch (mkdirErr) {
-    logger.error(
-      `Failed to create backup directory ${backupDirName}: ${mkdirErr.message}`
-    );
-    return; // Stop if we can't create the directory
+    logger.error(`Failed to create backup directory ${backupDirName}: ${mkdirErr.message}`);
+    return;
   }
-  // -------------------------------------------
 
   for (const tableName of TABLES_TO_BACKUP) {
     try {
       logger.info(`\nProcessing table: ${tableName}`);
-      // Pass the new directory name to the backup function
       await backupTableData(tableName, backupDirName);
     } catch (err) {
-      logger.error(
-        `An error occurred while processing ${tableName}: ${err.message}`
-      );
+      logger.error(`Error while processing ${tableName}: ${err.message}`);
       logger.error('Continuing to the next table...');
     }
   }
 
-  logger.success('\nAll specified tables have been processed.');
+  logger.success('\nAll matched tables have been processed.');
   logger.success(`Backup data is located in: ./${backupDirName}`);
 }
 
-// --- Execute ---
 main().catch((err) => {
   logger.error('Script failed due to an unhandled error: ' + err.message);
   process.exit(1);

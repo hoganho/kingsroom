@@ -25,13 +25,18 @@
 │   │   ├── EntityTable.tsx
 │   │   └── MultiEntitySelector.tsx
 │   ├── games
-│   │   └── GameCard.tsx
+│   │   ├── .DS_Store
+│   │   ├── GameCard.tsx
+│   │   └── recurring-games
+│   │       └── RecurringGameForm.tsx
 │   ├── layout
+│   │   ├── .DS_Store
 │   │   ├── CollapsibleSection.tsx
 │   │   ├── MainLayout.tsx
-│   │   ├── MobileBottomNav.tsx
+│   │   ├── MobileSidebar.tsx
 │   │   ├── PageWrapper.tsx
-│   │   └── Sidebar.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── UserProfile.tsx
 │   ├── monitoring
 │   │   └── DatabaseChangeMonitor.tsx
 │   ├── players
@@ -42,12 +47,10 @@
 │   │   │   ├── .DS_Store
 │   │   │   ├── CollapsibleSection.tsx
 │   │   │   ├── ErrorHandlingModal.tsx
-│   │   │   ├── GameDetailsModal.tsx
 │   │   │   ├── index.ts
-│   │   │   ├── JobDetailsModal.tsx
 │   │   │   ├── ProgressSummary.tsx
-│   │   │   ├── ScraperAdminShared.tsx
 │   │   │   ├── ScraperConfig.tsx
+│   │   │   ├── ScraperModals.tsx
 │   │   │   ├── ScraperResults.tsx
 │   │   │   └── SkippedIDsAnalyzer.tsx
 │   │   ├── BlindStructure.tsx
@@ -66,11 +69,14 @@
 │   │   │   ├── ConsolidationPreview.tsx
 │   │   │   ├── EditableField.tsx
 │   │   │   ├── QuickDataEditor.tsx
+│   │   │   ├── RecurringGameEditor.tsx
 │   │   │   ├── SeriesDetailsEditor.tsx
 │   │   │   └── TemplatePicker.tsx
 │   │   ├── SaveConfirmationModal.tsx
 │   │   ├── ScrapeOptionsModal.tsx
 │   │   ├── ScraperReport.tsx
+│   │   ├── shared
+│   │   │   └── StatusBadges.tsx
 │   │   ├── StructureInfo.tsx
 │   │   ├── ValidationSummary.tsx
 │   │   └── VenueMatchDisplay.tsx
@@ -83,8 +89,29 @@
 │   │   ├── SocialAccountModal.tsx
 │   │   └── SocialAccountTable.tsx
 │   ├── ui
+│   │   ├── Badge.tsx
+│   │   ├── Button.tsx
+│   │   ├── Card.tsx
+│   │   ├── ContentCard.tsx
+│   │   ├── DataInfo.tsx
 │   │   ├── DataTable.tsx
+│   │   ├── EmptyState.tsx
+│   │   ├── ErrorAlert.tsx
+│   │   ├── FilterBar.tsx
+│   │   ├── Grid.tsx
+│   │   ├── index.ts
+│   │   ├── Input.tsx
+│   │   ├── KpiCard.tsx
+│   │   ├── Label.tsx
+│   │   ├── LoadingState.tsx
 │   │   ├── MetricCard.tsx
+│   │   ├── Modal.tsx
+│   │   ├── PageHeader.tsx
+│   │   ├── PageShell.tsx
+│   │   ├── PageWrapper.tsx
+│   │   ├── SectionHeader.tsx
+│   │   ├── Select.tsx
+│   │   ├── StatsGrid.tsx
 │   │   ├── timeRange.ts
 │   │   └── TimeRangeToggle.tsx
 │   ├── users
@@ -117,6 +144,13 @@
 │   └── userManagement.ts
 ├── hooks
 │   ├── .DS_Store
+│   ├── scraper
+│   │   ├── index.ts
+│   │   ├── useErrorTracking.ts
+│   │   ├── useModalResolver.ts
+│   │   ├── useProcessingState.ts
+│   │   ├── useResultStateMachine.ts
+│   │   └── useScrapeOrchestrator.ts
 │   ├── social
 │   │   └── index.ts
 │   ├── useActivityLogger.tsx
@@ -134,10 +168,11 @@
 ├── infrastructure
 │   └── client-cloudwatch.ts
 ├── lib
+│   ├── .DS_Store
 │   ├── fieldManifest.ts
 │   ├── tournamentTemplates.ts
-│   ├── validation.ts
-│   └── zz-structureManifest.ts
+│   ├── utils.ts
+│   └── validation.ts
 ├── main.tsx
 ├── models
 │   ├── index.d.ts
@@ -153,7 +188,8 @@
 │   ├── games
 │   │   ├── GameDetails.tsx
 │   │   ├── GamesDashboard.tsx
-│   │   └── GameSearch.tsx
+│   │   ├── GameSearch.tsx
+│   │   └── RecurringGamesManager.tsx
 │   ├── HomePage.tsx
 │   ├── legal
 │   │   ├── PrivacyPolicy.tsx
@@ -194,6 +230,7 @@
 │       └── VenuesDashboard.tsx
 ├── services
 │   ├── gameService.ts
+│   ├── recurringGameService.ts
 │   └── scrapeURLService.ts
 ├── tags.json
 ├── types
@@ -210,9 +247,12 @@
     ├── enhanced-monitoring.ts
     ├── gameDataValidation.ts
     ├── generalHelpers.ts
+    ├── processingResultUtils.ts
     ├── scraperAnalytics.ts
-    └── scraperErrorUtils.ts
+    ├── scraperErrorUtils.ts
+    ├── scraperLogger.ts
+    └── statusNormalization.ts
 
-39 directories, 175 files
+42 directories, 212 files
 
 Function List:

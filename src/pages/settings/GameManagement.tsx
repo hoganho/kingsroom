@@ -1,37 +1,56 @@
 // src/pages/settings/GameManagement.tsx
-// Game management page with venue reassignment and entity-awareness
-// UPDATED: Uses EntityContext for multi-entity selection
+// UPDATED: Integrated GameEditorModal for create/edit functionality
 
 import { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { PageWrapper } from '../../components/layout/PageWrapper';
-import { formatCurrency } from '../../utils/generalHelpers';
+import type { ColumnDef } from "@tanstack/react-table";
+import { cx, formatCurrency, formatDateTimeAEST } from '../../lib/utils';
+
+// --- UI Components ---
+import { Card } from '../../components/ui/Card'; 
+import { DataTable } from '../../components/ui/DataTable';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import { Modal } from '../../components/ui/Modal';
 import { MultiEntitySelector } from '../../components/entities/MultiEntitySelector';
-import { useEntity } from '../../contexts/EntityContext';
+
+// --- Game Editor ---
+import { GameEditorModal } from '../../components/games/editor';
+import type { EntityOption, VenueOption, RecurringGameOption, SeriesOption, SaveGameResult } from '../../components/games/editor';
+
+// --- Icons ---
 import {
-    ChevronUpIcon,
-    ChevronDownIcon,
-    MagnifyingGlassIcon,
     ArrowPathIcon,
     ExclamationTriangleIcon,
-    CheckCircleIcon,
-    ClockIcon,
-    XMarkIcon,
     InformationCircleIcon,
-    DocumentDuplicateIcon,
-    ArrowsRightLeftIcon,
+    FunnelIcon,
+    PlusIcon,
+    PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 
-// Import from gameService
+// --- Context & Services ---
+import { useEntity } from '../../contexts/EntityContext';
 import {
     reassignGameVenue,
     bulkReassignGameVenues,
     getUnassignedVenueId,
-    type ReassignGameVenueInput,
-    type BulkReassignGameVenuesInput,
 } from '../../services/gameService';
 
-const client = generateClient();
+// --- Sub-Components ---
+import { RecurringGamesManager } from '../games/RecurringGamesManager';
+
+// ✅ FIX: Lazy client initialization to avoid "Amplify not configured" warning
+let _client: any = null;
+const getClient = () => {
+    if (!_client) {
+        _client = generateClient();
+    }
+    return _client;
+};
+
+const UNASSIGNED_VENUE_ID = getUnassignedVenueId();
 
 // ===================================================================
 // TYPES
@@ -42,17 +61,30 @@ interface Game {
     name: string;
     gameStartDateTime: string;
     gameStatus: string;
-    gameVariant: string;
-    buyIn: number;
+    registrationStatus?: string;
     venueId: string;
     venueName?: string;
     venueAssignmentStatus: string;
     venueAssignmentConfidence: number;
     suggestedVenueName?: string;
     totalUniquePlayers: number;
-    totalEntries: number;
+    buyIn: number;
+    rake?: number;
     entityId: string;
     entityName?: string;
+    gameVariant?: string;
+    tournamentType?: string;
+    hasGuarantee?: boolean;
+    guaranteeAmount?: number;
+    startingStack?: number;
+    totalInitialEntries?: number;
+    totalEntries?: number;
+    totalRebuys?: number;
+    totalAddons?: number;
+    prizepoolPaid?: number;
+    isSeries?: boolean;
+    seriesName?: string;
+    recurringGameId?: string;
 }
 
 interface Venue {
@@ -60,15 +92,42 @@ interface Venue {
     name: string;
     entityId: string;
     entityName?: string;
-    canonicalVenueId?: string;
 }
 
-type SortField = 'gameStartDateTime' | 'name' | 'venueAssignmentStatus' | 'totalUniquePlayers';
-type SortDirection = 'asc' | 'desc';
+interface RecurringGame {
+    id: string;
+    name: string;
+    displayName?: string;
+    venueId: string;
+    venueName?: string;
+    entityId: string;
+    dayOfWeek: string;
+    startTime: string;
+    gameType?: string;
+    gameVariant?: string;
+    typicalBuyIn?: number;
+    typicalRake?: number;
+    typicalStartingStack?: number;
+    typicalGuarantee?: number;
+    isActive?: boolean;
+    isSignature?: boolean;
+    isBounty?: boolean;
+}
+
+interface Series {
+    id: string;
+    name: string;
+    year?: number;
+    venueId?: string;
+    venueName?: string;
+    entityId?: string;
+    status?: string;
+}
+
 type VenueFilterType = 'all' | 'unassigned' | 'auto_assigned' | 'manually_assigned' | 'needs_review';
 
 // ===================================================================
-// GRAPHQL QUERIES
+// GRAPHQL
 // ===================================================================
 
 const listGamesForManagement = /* GraphQL */ `
@@ -79,24 +138,30 @@ const listGamesForManagement = /* GraphQL */ `
                 name
                 gameStartDateTime
                 gameStatus
-                gameVariant
-                buyIn
+                registrationStatus
                 venueId
                 venueAssignmentStatus
                 venueAssignmentConfidence
                 suggestedVenueName
                 totalUniquePlayers
+                totalInitialEntries
                 totalEntries
+                totalRebuys
+                totalAddons
+                buyIn
+                rake
+                startingStack
+                hasGuarantee
+                guaranteeAmount
+                prizepoolPaid
+                gameVariant
+                tournamentType
+                isSeries
+                seriesName
+                recurringGameId
                 entityId
-                venue {
-                    id
-                    name
-                    entityId
-                }
-                entity {
-                    id
-                    entityName
-                }
+                venue { id name }
+                entity { id entityName }
             }
             nextToken
         }
@@ -110,107 +175,105 @@ const listVenuesWithEntity = /* GraphQL */ `
                 id
                 name
                 entityId
-                canonicalVenueId
-                entity {
-                    id
-                    entityName
-                }
+                entity { id entityName }
+            }
+        }
+    }
+`;
+
+const listRecurringGamesQuery = /* GraphQL */ `
+    query ListRecurringGames($filter: ModelRecurringGameFilterInput, $limit: Int) {
+        listRecurringGames(filter: $filter, limit: $limit) {
+            items {
+                id
+                name
+                displayName
+                venueId
+                entityId
+                dayOfWeek
+                startTime
+                gameType
+                gameVariant
+                typicalBuyIn
+                typicalRake
+                typicalStartingStack
+                typicalGuarantee
+                isActive
+                isSignature
+                isBounty
+                venue { id name }
+            }
+        }
+    }
+`;
+
+const listSeriesQuery = /* GraphQL */ `
+    query ListTournamentSeries($filter: ModelTournamentSeriesFilterInput, $limit: Int) {
+        listTournamentSeries(filter: $filter, limit: $limit) {
+            items {
+                id
+                name
+                year
+                venueId
+                entityId
+                status
+                venue { id name }
             }
         }
     }
 `;
 
 // ===================================================================
-// CONSTANTS
-// ===================================================================
-
-const UNASSIGNED_VENUE_ID = getUnassignedVenueId();
-
-const VENUE_STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-    'MANUALLY_ASSIGNED': {
-        label: 'Manually Assigned',
-        color: 'bg-green-100 text-green-800',
-        icon: <CheckCircleIcon className="h-4 w-4" />
-    },
-    'AUTO_ASSIGNED': {
-        label: 'Auto Assigned',
-        color: 'bg-blue-100 text-blue-800',
-        icon: <ClockIcon className="h-4 w-4" />
-    },
-    'PENDING_ASSIGNMENT': {
-        label: 'Pending',
-        color: 'bg-yellow-100 text-yellow-800',
-        icon: <ExclamationTriangleIcon className="h-4 w-4" />
-    },
-    'UNASSIGNED': {
-        label: 'Unassigned',
-        color: 'bg-red-100 text-red-800',
-        icon: <ExclamationTriangleIcon className="h-4 w-4" />
-    }
-};
-
-// ===================================================================
 // COMPONENT
 // ===================================================================
 
 export const GameManagement = () => {
-    // Entity context - multi-entity support
-    const { 
-        entities, 
-        selectedEntities, 
-        selectAllEntities,
-        loading: entitiesLoading 
-    } = useEntity();
+    // Context
+    const { selectedEntities, selectAllEntities, loading: entitiesLoading } = useEntity();
 
-    // Data state
+    // UI State
+    const [activeTab, setActiveTab] = useState<'games' | 'recurring'>('games');
+    const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
+    // Data State
     const [games, setGames] = useState<Game[]>([]);
     const [venues, setVenues] = useState<Venue[]>([]);
+    const [recurringGames, setRecurringGames] = useState<RecurringGame[]>([]);
+    const [series, setSeries] = useState<Series[]>([]);
     const [loading, setLoading] = useState(true);
     const [nextToken, setNextToken] = useState<string | null>(null);
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-    // Filter state
+    // Filter State
     const [searchQuery, setSearchQuery] = useState('');
     const [venueFilter, setVenueFilter] = useState<VenueFilterType>('needs_review');
-
-    // Sort state
-    const [sortField, setSortField] = useState<SortField>('gameStartDateTime');
-    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-
-    // Selection state
+    
+    // Selection State
     const [selectedGameIds, setSelectedGameIds] = useState<Set<string>>(new Set());
     const [selectAll, setSelectAll] = useState(false);
-
-    // Modal state
+    
+    // Reassign Modal State
     const [isReassignModalOpen, setIsReassignModalOpen] = useState(false);
     const [reassignTargetVenueId, setReassignTargetVenueId] = useState<string>('');
     const [reassignEntity, setReassignEntity] = useState<boolean>(true);
     const [isProcessing, setIsProcessing] = useState(false);
-
-    // Cross-entity warning state
     const [crossEntityWarning, setCrossEntityWarning] = useState<{
         show: boolean;
         targetVenueEntity: string | null;
         gameEntities: string[];
     }>({ show: false, targetVenueEntity: null, gameEntities: [] });
 
-    // Toast/notification state
-    const [notification, setNotification] = useState<{ 
-        type: 'success' | 'error' | 'info' | 'warning'; 
-        message: string;
-        details?: string;
-    } | null>(null);
+    // === NEW: Game Editor Modal State ===
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [editingGame, setEditingGame] = useState<Game | null>(null);
 
-    // ===================================================================
-    // DATA FETCHING
-    // ===================================================================
+    // --- Data Fetching ---
 
     const fetchVenues = async () => {
         try {
-            const response: any = await client.graphql({
+            const response: any = await getClient().graphql({
                 query: listVenuesWithEntity,
-                variables: {
-                    filter: { isSpecial: { ne: true } }
-                }
+                variables: { filter: { isSpecial: { ne: true } } }
             });
             const items = (response.data?.listVenues?.items?.filter(Boolean) || []).map((v: any) => ({
                 ...v,
@@ -222,40 +285,95 @@ export const GameManagement = () => {
         }
     };
 
+    const fetchRecurringGames = async () => {
+        if (selectedEntities.length === 0) {
+            setRecurringGames([]);
+            return;
+        }
+
+        try {
+            // Fetch recurring games for selected entities' venues
+            const venueIds = venues
+                .filter(v => selectedEntities.some(e => e.id === v.entityId))
+                .map(v => v.id);
+
+            if (venueIds.length === 0) {
+                setRecurringGames([]);
+                return;
+            }
+
+            const response: any = await getClient().graphql({
+                query: listRecurringGamesQuery,
+                variables: { 
+                    filter: { or: venueIds.map(id => ({ venueId: { eq: id } })) },
+                    limit: 500 
+                }
+            });
+            
+            const items = (response.data?.listRecurringGames?.items?.filter(Boolean) || []).map((rg: any) => ({
+                ...rg,
+                venueName: rg.venue?.name
+            }));
+            
+            setRecurringGames(items);
+        } catch (error) {
+            console.error('Error fetching recurring games:', error);
+        }
+    };
+
+    const fetchSeries = async () => {
+        if (selectedEntities.length === 0) {
+            setSeries([]);
+            return;
+        }
+
+        try {
+            const entityFilters = selectedEntities.map(entity => ({ entityId: { eq: entity.id } }));
+            
+            const response: any = await getClient().graphql({
+                query: listSeriesQuery,
+                variables: { 
+                    filter: selectedEntities.length === 1 
+                        ? { entityId: { eq: selectedEntities[0].id } }
+                        : { or: entityFilters },
+                    limit: 100 
+                }
+            });
+            
+            const items = (response.data?.listTournamentSeries?.items?.filter(Boolean) || []).map((s: any) => ({
+                ...s,
+                venueName: s.venue?.name
+            }));
+            
+            // Sort by year (newest first), then by name
+            setSeries(items.sort((a: Series, b: Series) => {
+                const yearDiff = (b.year || 0) - (a.year || 0);
+                if (yearDiff !== 0) return yearDiff;
+                return a.name.localeCompare(b.name);
+            }));
+        } catch (error) {
+            console.error('Error fetching series:', error);
+        }
+    };
+
     const fetchGames = async (loadMore = false) => {
-        // Don't fetch if no entities are selected
         if (selectedEntities.length === 0) {
             setGames([]);
             setLoading(false);
             return;
         }
 
-        if (!loadMore) {
-            setLoading(true);
-        }
+        if (!loadMore) setLoading(true);
 
         try {
-            // Build entity filter for multiple selected entities
-            const entityFilters = selectedEntities.map(entity => ({
-                entityId: { eq: entity.id }
-            }));
-
-            // Start with entity filter (always applied when entities are selected)
+            const entityFilters = selectedEntities.map(entity => ({ entityId: { eq: entity.id } }));
             let filter: any = {};
-            
-            // Build venue status filter conditions
             let statusConditions: any[] = [];
-            
+
             switch (venueFilter) {
-                case 'unassigned':
-                    statusConditions = [{ venueId: { eq: UNASSIGNED_VENUE_ID } }];
-                    break;
-                case 'auto_assigned':
-                    statusConditions = [{ venueAssignmentStatus: { eq: 'AUTO_ASSIGNED' } }];
-                    break;
-                case 'manually_assigned':
-                    statusConditions = [{ venueAssignmentStatus: { eq: 'MANUALLY_ASSIGNED' } }];
-                    break;
+                case 'unassigned': statusConditions = [{ venueId: { eq: UNASSIGNED_VENUE_ID } }]; break;
+                case 'auto_assigned': statusConditions = [{ venueAssignmentStatus: { eq: 'AUTO_ASSIGNED' } }]; break;
+                case 'manually_assigned': statusConditions = [{ venueAssignmentStatus: { eq: 'MANUALLY_ASSIGNED' } }]; break;
                 case 'needs_review':
                     statusConditions = [
                         { venueAssignmentStatus: { eq: 'AUTO_ASSIGNED' } },
@@ -263,59 +381,22 @@ export const GameManagement = () => {
                         { venueId: { eq: UNASSIGNED_VENUE_ID } }
                     ];
                     break;
-                // 'all' - no status filter needed
             }
 
-            // Combine filters:
-            // If single entity and no status filter: simple entityId filter
-            // If single entity with status filter: and: [entityId, or: [statuses]]
-            // If multiple entities and no status filter: or: [entities]
-            // If multiple entities with status filter: and: [or: [entities], or: [statuses]]
-            
-            if (selectedEntities.length === 1) {
-                // Single entity
-                if (statusConditions.length === 0) {
-                    filter = { entityId: { eq: selectedEntities[0].id } };
-                } else if (statusConditions.length === 1) {
-                    filter = {
-                        and: [
-                            { entityId: { eq: selectedEntities[0].id } },
-                            statusConditions[0]
-                        ]
-                    };
-                } else {
-                    filter = {
-                        and: [
-                            { entityId: { eq: selectedEntities[0].id } },
-                            { or: statusConditions }
-                        ]
-                    };
-                }
+            const entityCondition = selectedEntities.length === 1 
+                ? { entityId: { eq: selectedEntities[0].id } }
+                : { or: entityFilters };
+
+            if (statusConditions.length > 0) {
+                filter = { and: [entityCondition, { or: statusConditions }] };
             } else {
-                // Multiple entities
-                if (statusConditions.length === 0) {
-                    filter = { or: entityFilters };
-                } else if (statusConditions.length === 1) {
-                    filter = {
-                        and: [
-                            { or: entityFilters },
-                            statusConditions[0]
-                        ]
-                    };
-                } else {
-                    filter = {
-                        and: [
-                            { or: entityFilters },
-                            { or: statusConditions }
-                        ]
-                    };
-                }
+                filter = entityCondition;
             }
 
-            const response: any = await client.graphql({
+            const response: any = await getClient().graphql({
                 query: listGamesForManagement,
                 variables: {
-                    filter: Object.keys(filter).length > 0 ? filter : undefined,
+                    filter,
                     limit: 100,
                     nextToken: loadMore ? nextToken : undefined
                 }
@@ -330,113 +411,242 @@ export const GameManagement = () => {
                 entityName: game.entity?.entityName || 'Unknown'
             }));
 
-            if (loadMore) {
-                setGames(prev => [...prev, ...enrichedGames]);
-            } else {
-                setGames(enrichedGames);
-            }
-
+            setGames(prev => loadMore ? [...prev, ...enrichedGames] : enrichedGames);
             setNextToken(newNextToken);
+            setLastUpdated(new Date());
         } catch (error) {
             console.error('Error fetching games:', error);
-            showNotification('error', 'Failed to fetch games');
         } finally {
             setLoading(false);
         }
     };
 
-    // Auto-select all entities when they first load
+    // --- Effects ---
+
     useEffect(() => {
-        if (!entitiesLoading && entities.length > 0 && selectedEntities.length === 0) {
+        if (!entitiesLoading && selectedEntities.length === 0) {
             selectAllEntities();
         }
-    }, [entitiesLoading, entities.length]);
+    }, [entitiesLoading]);
+
+    useEffect(() => { fetchVenues(); }, []);
+
+    // Fetch recurring games and series when venues or entities change
+    useEffect(() => {
+        if (venues.length > 0 && selectedEntities.length > 0) {
+            fetchRecurringGames();
+            fetchSeries();
+        }
+    }, [venues, selectedEntities]);
 
     useEffect(() => {
-        fetchVenues();
-    }, []);
-
-    // Fetch games when selected entities or venue filter changes
-    useEffect(() => {
-        if (!entitiesLoading && selectedEntities.length > 0) {
+        if (!entitiesLoading && selectedEntities.length > 0 && activeTab === 'games') {
             setSelectedGameIds(new Set());
             setSelectAll(false);
             fetchGames();
         }
-    }, [selectedEntities, venueFilter, entitiesLoading]);
+    }, [selectedEntities, venueFilter, entitiesLoading, activeTab]);
 
-    // ===================================================================
-    // FILTERING & SORTING
-    // ===================================================================
+    // --- Table Logic ---
 
-    const filteredAndSortedGames = useMemo(() => {
-        let result = [...games];
+    const filteredGames = useMemo(() => {
+        if (!searchQuery) return games;
+        const query = searchQuery.toLowerCase();
+        return games.filter(g => 
+            g.name.toLowerCase().includes(query) || 
+            g.venueName?.toLowerCase().includes(query)
+        );
+    }, [games, searchQuery]);
 
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            result = result.filter(game =>
-                game.name?.toLowerCase().includes(query) ||
-                game.venueName?.toLowerCase().includes(query) ||
-                game.suggestedVenueName?.toLowerCase().includes(query)
-            );
-        }
-
-        result.sort((a, b) => {
-            let comparison = 0;
-            switch (sortField) {
-                case 'gameStartDateTime':
-                    comparison = new Date(a.gameStartDateTime).getTime() - new Date(b.gameStartDateTime).getTime();
-                    break;
-                case 'name':
-                    comparison = (a.name || '').localeCompare(b.name || '');
-                    break;
-                case 'venueAssignmentStatus':
-                    comparison = (a.venueAssignmentStatus || '').localeCompare(b.venueAssignmentStatus || '');
-                    break;
-                case 'totalUniquePlayers':
-                    comparison = (a.totalUniquePlayers || 0) - (b.totalUniquePlayers || 0);
-                    break;
-            }
-            return sortDirection === 'asc' ? comparison : -comparison;
-        });
-
-        return result;
-    }, [games, searchQuery, sortField, sortDirection]);
-
-    // ===================================================================
-    // SELECTION HANDLERS
-    // ===================================================================
-
-    const handleSelectGame = (gameId: string) => {
-        setSelectedGameIds(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(gameId)) {
-                newSet.delete(gameId);
-            } else {
-                newSet.add(gameId);
-            }
-            return newSet;
-        });
-    };
-
+    // Handle "Select All" Logic
     const handleSelectAll = () => {
         if (selectAll) {
             setSelectedGameIds(new Set());
         } else {
-            setSelectedGameIds(new Set(filteredAndSortedGames.map(g => g.id)));
+            const allIds = filteredGames.map(g => g.id);
+            setSelectedGameIds(new Set(allIds));
         }
         setSelectAll(!selectAll);
     };
 
-    // ===================================================================
-    // VENUE REASSIGNMENT (Using gameService)
-    // ===================================================================
+    // === NEW: Prepare dropdown options for editor ===
+    const entityOptions: EntityOption[] = useMemo(() => 
+        selectedEntities.map(e => ({ id: e.id, entityName: e.entityName || e.id })),
+        [selectedEntities]
+    );
 
-    const handleOpenReassignModal = () => {
-        if (selectedGameIds.size === 0) {
-            showNotification('error', 'Please select at least one game');
-            return;
-        }
+    const venueOptions: VenueOption[] = useMemo(() => 
+        venues.map(v => ({ 
+            id: v.id, 
+            name: v.name, 
+            entityId: v.entityId, 
+            entityName: v.entityName 
+        })),
+        [venues]
+    );
+
+    const recurringGameOptions: RecurringGameOption[] = useMemo(() => 
+        recurringGames
+            .filter(rg => rg.isActive !== false) // Only show active recurring games
+            .map(rg => ({
+                id: rg.id,
+                name: rg.displayName || rg.name,
+                venueId: rg.venueId,
+                venueName: rg.venueName,
+                entityId: rg.entityId,
+                dayOfWeek: rg.dayOfWeek,
+                startTime: rg.startTime,
+                // Map typical values to standard field names for auto-populate
+                buyIn: rg.typicalBuyIn,
+                rake: rg.typicalRake,
+                startingStack: rg.typicalStartingStack,
+                guaranteeAmount: rg.typicalGuarantee,
+                gameVariant: rg.gameVariant,
+                gameType: rg.gameType,
+                isSignature: rg.isSignature,
+                isBounty: rg.isBounty,
+            })),
+        [recurringGames]
+    );
+
+    const seriesOptions: SeriesOption[] = useMemo(() => 
+        series
+            .filter(s => s.status !== 'CANCELLED') // Exclude cancelled series
+            .map(s => ({
+                id: s.id,
+                name: s.name,
+                year: s.year,
+                venueId: s.venueId,
+                status: s.status,
+            })),
+        [series]
+    );
+
+    // === NEW: Handle editor callbacks ===
+    const handleCreateSuccess = (result: SaveGameResult) => {
+        console.log('Game created:', result);
+        setIsCreateModalOpen(false);
+        fetchGames(); // Refresh the list
+    };
+
+    const handleEditSuccess = (result: SaveGameResult) => {
+        console.log('Game updated:', result);
+        setEditingGame(null);
+        fetchGames(); // Refresh the list
+    };
+
+    const handleEditGame = (game: Game) => {
+        setEditingGame(game);
+    };
+
+    const columns = useMemo<ColumnDef<Game>[]>(() => [
+        {
+            id: 'select',
+            header: () => (
+                <div className="px-1">
+                    <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                    />
+                </div>
+            ),
+            cell: ({ row }) => (
+                <div className="px-1">
+                    <input
+                        type="checkbox"
+                        checked={selectedGameIds.has(row.original.id)}
+                        onChange={() => {
+                            const id = row.original.id;
+                            setSelectedGameIds(prev => {
+                                const next = new Set(prev);
+                                next.has(id) ? next.delete(id) : next.add(id);
+                                return next;
+                            });
+                        }}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                    />
+                </div>
+            ),
+        },
+        {
+            accessorKey: 'gameStartDateTime',
+            header: 'Date',
+            cell: ({ getValue }) => (
+                <span className="whitespace-nowrap font-medium">
+                    {formatDateTimeAEST(new Date(getValue() as string))}
+                </span>
+            ),
+        },
+        {
+            accessorKey: 'name',
+            header: 'Name',
+            cell: ({ getValue }) => (
+                <span className="font-medium text-gray-900 dark:text-gray-50 truncate max-w-[200px] block" title={getValue() as string}>
+                    {getValue() as string}
+                </span>
+            ),
+        },
+        {
+            accessorKey: 'venueName',
+            header: 'Venue',
+            cell: ({ getValue }) => <span className="text-gray-700 dark:text-gray-300">{getValue() as string}</span>
+        },
+        {
+            accessorKey: 'venueAssignmentStatus',
+            header: 'Status',
+            cell: ({ getValue }) => {
+                const status = getValue() as string;
+                let variant: 'success' | 'warning' | 'error' | 'default' | 'neutral' = 'default';
+                if (status === 'MANUALLY_ASSIGNED') variant = 'success';
+                if (status === 'AUTO_ASSIGNED') variant = 'neutral';
+                if (status === 'PENDING_ASSIGNMENT') variant = 'warning';
+                if (status === 'UNASSIGNED') variant = 'error';
+                
+                return <Badge variant={variant}>{status?.replace('_', ' ') || 'UNKNOWN'}</Badge>;
+            }
+        },
+        {
+            accessorKey: 'suggestedVenueName',
+            header: 'Suggested',
+            cell: ({ getValue }) => <span className="text-gray-500 italic">{getValue() as string || '-'}</span>
+        },
+        {
+            accessorKey: 'totalUniquePlayers',
+            header: 'Players',
+            cell: ({ getValue }) => (getValue() as number)?.toLocaleString() || 0,
+        },
+        {
+            accessorKey: 'buyIn',
+            header: 'Buy-in',
+            cell: ({ getValue }) => formatCurrency(getValue() as number),
+        },
+        // === NEW: Actions column ===
+        {
+            id: 'actions',
+            header: '',
+            cell: ({ row }) => (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditGame(row.original);
+                    }}
+                    className="h-8 w-8 p-0"
+                    title="Edit Game"
+                >
+                    <PencilSquareIcon className="h-4 w-4" />
+                </Button>
+            ),
+        },
+    ], [selectedGameIds, selectAll, filteredGames]);
+
+    // --- Modal Handlers ---
+
+    const handleReassignOpen = () => {
+        if (selectedGameIds.size === 0) return;
         setReassignTargetVenueId('');
         setReassignEntity(true);
         setCrossEntityWarning({ show: false, targetVenueEntity: null, gameEntities: [] });
@@ -445,162 +655,64 @@ export const GameManagement = () => {
 
     const handleVenueSelectionChange = (venueId: string) => {
         setReassignTargetVenueId(venueId);
-        
         if (!venueId) {
             setCrossEntityWarning({ show: false, targetVenueEntity: null, gameEntities: [] });
             return;
         }
 
-        // Check if this is a cross-entity move
         const targetVenue = venues.find(v => v.id === venueId);
         if (!targetVenue) return;
 
-        const selectedGames = filteredAndSortedGames.filter(g => selectedGameIds.has(g.id));
-        const gameEntities = [...new Set(selectedGames.map(g => g.entityId))];
-        
-        const isCrossEntity = gameEntities.some(entityId => entityId !== targetVenue.entityId);
+        const selectedGameObjects = games.filter(g => selectedGameIds.has(g.id));
+        const gameEntities = [...new Set(selectedGameObjects.map(g => g.entityId))];
+        const isCrossEntity = gameEntities.some(id => id !== targetVenue.entityId);
 
         if (isCrossEntity) {
-            const targetEntityName = entities.find(e => e.id === targetVenue.entityId)?.entityName || 'Unknown';
-            const gameEntityNames = gameEntities.map(id => 
-                entities.find(e => e.id === id)?.entityName || 'Unknown'
-            );
-            
             setCrossEntityWarning({
                 show: true,
-                targetVenueEntity: targetEntityName,
-                gameEntities: gameEntityNames
+                targetVenueEntity: selectedEntities.find((e: { id: string; entityName?: string }) => e.id === targetVenue.entityId)?.entityName || 'Unknown',
+                gameEntities: gameEntities.map(id => selectedEntities.find((e: { id: string; entityName?: string }) => e.id === id)?.entityName || 'Unknown')
             });
         } else {
             setCrossEntityWarning({ show: false, targetVenueEntity: null, gameEntities: [] });
         }
     };
 
-    const handleReassignVenues = async () => {
-        if (!reassignTargetVenueId) {
-            showNotification('error', 'Please select a target venue');
-            return;
-        }
-
+    const handleReassignSubmit = async () => {
+        if (!reassignTargetVenueId) return;
         setIsProcessing(true);
-
         try {
             const gameIds = Array.from(selectedGameIds);
-
+            
             if (gameIds.length === 1) {
-                // Single game reassignment using gameService
                 const game = games.find(g => g.id === gameIds[0]);
-                
-                const input: ReassignGameVenueInput = {
+                await reassignGameVenue({
                     gameId: gameIds[0],
                     newVenueId: reassignTargetVenueId,
                     entityId: game?.entityId,
                     reassignEntity,
                     initiatedBy: 'USER'
-                };
-
-                const result = await reassignGameVenue(input);
-
-                if (result?.success) {
-                    if (result.status === 'QUEUED') {
-                        showNotification('info', `Large game queued for processing`, `Task ID: ${result.taskId}`);
-                    } else if (result.venueCloned) {
-                        showNotification('success', 
-                            'Venue reassigned (new venue created)', 
-                            `A copy of the venue was created for your entity`
-                        );
-                        fetchVenues(); // Refresh venues to show new clone
-                    } else {
-                        showNotification('success', 'Venue reassigned successfully');
-                    }
-                    fetchGames();
-                } else {
-                    showNotification('error', result?.message || 'Reassignment failed');
-                }
+                });
             } else {
-                // Bulk reassignment using gameService
-                // For bulk, use the first game's entity or the first selected entity
                 const firstGame = games.find(g => g.id === gameIds[0]);
-                const entityIdForBulk = firstGame?.entityId || selectedEntities[0]?.id;
-                
-                const input: BulkReassignGameVenuesInput = {
+                await bulkReassignGameVenues({
                     gameIds,
                     newVenueId: reassignTargetVenueId,
-                    entityId: entityIdForBulk,
+                    entityId: firstGame?.entityId || selectedEntities[0].id,
                     reassignEntity,
                     initiatedBy: 'USER'
-                };
-
-                const result = await bulkReassignGameVenues(input);
-
-                if (result?.success) {
-                    showNotification('info', 
-                        `${gameIds.length} games queued for reassignment`, 
-                        `Task ID: ${result.taskId}`
-                    );
-                    setTimeout(() => fetchGames(), 2000);
-                } else {
-                    showNotification('error', result?.message || 'Bulk reassignment failed');
-                }
+                });
             }
-
+            
             setSelectedGameIds(new Set());
             setSelectAll(false);
             setIsReassignModalOpen(false);
+            fetchGames();
         } catch (error) {
-            console.error('Error reassigning venues:', error);
-            showNotification('error', 'Failed to reassign venues');
+            console.error('Reassignment failed', error);
         } finally {
             setIsProcessing(false);
         }
-    };
-
-    // ===================================================================
-    // UTILITIES
-    // ===================================================================
-
-    const showNotification = (type: 'success' | 'error' | 'info' | 'warning', message: string, details?: string) => {
-        setNotification({ type, message, details });
-        setTimeout(() => setNotification(null), 6000);
-    };
-
-    const formatDateTime = (dateString: string | null) => {
-        if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-AU', {
-            day: '2-digit',
-            month: 'short',
-            year: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-    const handleSort = (field: SortField) => {
-        if (sortField === field) {
-            setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-        } else {
-            setSortField(field);
-            setSortDirection('desc');
-        }
-    };
-
-    const renderSortIcon = (field: SortField) => {
-        if (sortField !== field) {
-            return <ChevronUpIcon className="h-4 w-4 text-gray-300" />;
-        }
-        return sortDirection === 'asc'
-            ? <ChevronUpIcon className="h-4 w-4 text-indigo-600" />
-            : <ChevronDownIcon className="h-4 w-4 text-indigo-600" />;
-    };
-
-    const getTargetVenueInfo = () => {
-        if (!reassignTargetVenueId) return null;
-        return venues.find(v => v.id === reassignTargetVenueId);
-    };
-
-    const getVenueStatusConfig = (status: string) => {
-        return VENUE_STATUS_CONFIG[status] || VENUE_STATUS_CONFIG['UNASSIGNED'];
     };
 
     // ===================================================================
@@ -608,401 +720,352 @@ export const GameManagement = () => {
     // ===================================================================
 
     return (
-        <PageWrapper title="Game Management">
-            {/* Notification Toast */}
-            {notification && (
-                <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-md ${
-                    notification.type === 'success' ? 'bg-green-50 border border-green-200' :
-                    notification.type === 'error' ? 'bg-red-50 border border-red-200' :
-                    notification.type === 'warning' ? 'bg-amber-50 border border-amber-200' :
-                    'bg-blue-50 border border-blue-200'
-                }`}>
-                    <div className="flex items-start gap-3">
-                        {notification.type === 'success' && <CheckCircleIcon className="h-5 w-5 text-green-600" />}
-                        {notification.type === 'error' && <XMarkIcon className="h-5 w-5 text-red-600" />}
-                        {notification.type === 'warning' && <ExclamationTriangleIcon className="h-5 w-5 text-amber-600" />}
-                        {notification.type === 'info' && <InformationCircleIcon className="h-5 w-5 text-blue-600" />}
-                        <div className="flex-1">
-                            <p className={`text-sm font-medium ${
-                                notification.type === 'success' ? 'text-green-800' :
-                                notification.type === 'error' ? 'text-red-800' :
-                                notification.type === 'warning' ? 'text-amber-800' :
-                                'text-blue-800'
-                            }`}>{notification.message}</p>
-                            {notification.details && (
-                                <p className="text-xs text-gray-500 mt-1">{notification.details}</p>
-                            )}
-                        </div>
-                        <button onClick={() => setNotification(null)} className="text-gray-400 hover:text-gray-600">
-                            <XMarkIcon className="h-4 w-4" />
-                        </button>
-                    </div>
+        <div className="space-y-6">
+            
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-50">
+                        Game Management
+                    </h1>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Manage venues, recurring games, and assignment mismatches
+                    </p>
                 </div>
-            )}
-
-            {/* Filter Bar */}
-            <div className="bg-white rounded-lg shadow mb-6">
-                <div className="p-4 border-b flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        {/* Multi-Entity Selector */}
-                        <MultiEntitySelector showLabel={false} />
-
-                        {/* Venue Filter */}
-                        <select
-                            value={venueFilter}
-                            onChange={(e) => setVenueFilter(e.target.value as VenueFilterType)}
-                            className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        >
-                            <option value="all">All Games</option>
-                            <option value="needs_review">Needs Review</option>
-                            <option value="unassigned">Unassigned</option>
-                            <option value="auto_assigned">Auto Assigned</option>
-                            <option value="manually_assigned">Manually Assigned</option>
-                        </select>
-
-                        {/* Search */}
-                        <div className="relative">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search games..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm w-64"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => fetchGames()}
-                            disabled={loading || selectedEntities.length === 0}
-                            className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
-                            title="Refresh"
-                        >
-                            <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
-                        </button>
-                    </div>
+                
+                <div className="flex items-center gap-2 self-end sm:self-auto">
+                    {lastUpdated && (
+                        <span className="hidden sm:inline text-xs text-gray-400">
+                            Updated: {formatDateTimeAEST(lastUpdated)}
+                        </span>
+                    )}
+                    
+                    {/* === NEW: Add Game Button === */}
+                    <Button 
+                        size="sm"
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="gap-1"
+                    >
+                        <PlusIcon className="h-4 w-4" />
+                        <span className="hidden sm:inline">Add Game</span>
+                    </Button>
+                    
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0"
+                        onClick={() => fetchGames()} 
+                        isLoading={loading}
+                        title="Refresh Data"
+                    >
+                        <ArrowPathIcon className="h-4 w-4" />
+                    </Button>
                 </div>
-
-                {/* Selection Actions */}
-                {selectedGameIds.size > 0 && (
-                    <div className="p-3 bg-indigo-50 border-b flex items-center justify-between">
-                        <div className="text-sm text-indigo-700">
-                            {selectedGameIds.size} game{selectedGameIds.size !== 1 ? 's' : ''} selected
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setSelectedGameIds(new Set())}
-                                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
-                            >
-                                Clear Selection
-                            </button>
-                            <button
-                                onClick={handleOpenReassignModal}
-                                className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                            >
-                                Reassign Venue
-                            </button>
-                        </div>
-                    </div>
-                )}
             </div>
 
-            {/* Games Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="w-12 px-4 py-3">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectAll}
-                                        onChange={handleSelectAll}
-                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                    />
-                                </th>
-                                <th 
-                                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSort('gameStartDateTime')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Date {renderSortIcon('gameStartDateTime')}
-                                    </div>
-                                </th>
-                                <th 
-                                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSort('name')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Name {renderSortIcon('name')}
-                                    </div>
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Current Venue
-                                </th>
-                                <th 
-                                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSort('venueAssignmentStatus')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Status {renderSortIcon('venueAssignmentStatus')}
-                                    </div>
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Suggested
-                                </th>
-                                {/* Show Entity column when multiple entities selected */}
-                                {selectedEntities.length > 1 && (
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Entity
-                                    </th>
-                                )}
-                                <th 
-                                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSort('totalUniquePlayers')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Players {renderSortIcon('totalUniquePlayers')}
-                                    </div>
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Buy-in
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={selectedEntities.length > 1 ? 9 : 8} className="px-4 py-8 text-center text-gray-500">
-                                        <ArrowPathIcon className="h-6 w-6 animate-spin mx-auto mb-2" />
-                                        Loading games...
-                                    </td>
-                                </tr>
-                            ) : selectedEntities.length === 0 ? (
-                                <tr>
-                                    <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
-                                        Please select at least one entity to view games.
-                                    </td>
-                                </tr>
-                            ) : filteredAndSortedGames.length === 0 ? (
-                                <tr>
-                                    <td colSpan={selectedEntities.length > 1 ? 9 : 8} className="px-4 py-8 text-center text-gray-500">
-                                        No games found matching the current filters.
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredAndSortedGames.map((game) => {
-                                    const statusConfig = getVenueStatusConfig(game.venueAssignmentStatus);
-                                    
-                                    return (
-                                        <tr 
-                                            key={game.id} 
-                                            className={`hover:bg-gray-50 ${selectedGameIds.has(game.id) ? 'bg-indigo-50' : ''}`}
-                                        >
-                                            <td className="px-4 py-3">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedGameIds.has(game.id)}
-                                                    onChange={() => handleSelectGame(game.id)}
-                                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                                {formatDateTime(game.gameStartDateTime)}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-gray-900">
-                                                <div className="max-w-xs truncate" title={game.name}>
-                                                    {game.name}
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                                {game.venueName}
-                                            </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
-                                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusConfig.color}`}>
-                                                    {statusConfig.icon}
-                                                    {statusConfig.label}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                                                {game.suggestedVenueName || '-'}
-                                            </td>
-                                            {/* Entity column when multiple selected */}
-                                            {selectedEntities.length > 1 && (
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                                                    {game.entityName}
-                                                </td>
-                                            )}
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                                {game.totalUniquePlayers || 0}
-                                            </td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                                {formatCurrency(game.buyIn)}
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Load More */}
-                {nextToken && (
-                    <div className="px-4 py-3 bg-gray-50 border-t">
-                        <button
-                            onClick={() => fetchGames(true)}
-                            disabled={loading}
-                            className="text-sm text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
-                        >
-                            {loading ? 'Loading...' : 'Load more games'}
-                        </button>
-                    </div>
-                )}
+            {/* Tabs */}
+            <div className="border-b border-gray-200 dark:border-gray-800">
+                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                    <button
+                        onClick={() => setActiveTab('games')}
+                        className={cx(
+                            "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors",
+                            activeTab === 'games'
+                                ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                        )}
+                    >
+                        Individual Games
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('recurring')}
+                        className={cx(
+                            "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors",
+                            activeTab === 'recurring'
+                                ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                        )}
+                    >
+                        Recurring Games
+                    </button>
+                </nav>
             </div>
 
-            {/* Reassign Modal */}
-            {isReassignModalOpen && (
-                <div className="fixed inset-0 z-50 overflow-y-auto">
-                    <div className="flex min-h-screen items-center justify-center p-4">
-                        <div className="fixed inset-0 bg-black bg-opacity-30" onClick={() => setIsReassignModalOpen(false)} />
+            {/* --- INDIVIDUAL GAMES TAB --- */}
+            {activeTab === 'games' && (
+                <div className="space-y-4">
+                    {/* Filters Container */}
+                    <div className="bg-white dark:bg-gray-950 p-4 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm">
                         
-                        <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                Reassign Venue
-                            </h3>
-                            
-                            <p className="text-sm text-gray-500 mb-4">
-                                You are about to reassign {selectedGameIds.size} game{selectedGameIds.size !== 1 ? 's' : ''} to a new venue.
-                                {selectedGameIds.size > 50 && (
-                                    <span className="block mt-2 text-amber-600">
-                                        ⚠️ Large selection - this will be processed in the background.
-                                    </span>
-                                )}
-                            </p>
+                        {/* Mobile Filter Toggle */}
+                        <div className="sm:hidden flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filters</span>
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
+                            >
+                                <FunnelIcon className="h-4 w-4 mr-1" />
+                                {isMobileFiltersOpen ? 'Hide' : 'Show'}
+                            </Button>
+                        </div>
 
-                            {/* Venue Selection */}
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Target Venue
-                                </label>
-                                <select
-                                    value={reassignTargetVenueId}
-                                    onChange={(e) => handleVenueSelectionChange(e.target.value)}
-                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                >
-                                    <option value="">Select a venue...</option>
-                                    {venues
-                                        .filter(v => v.id !== UNASSIGNED_VENUE_ID)
-                                        .map(venue => (
-                                            <option key={venue.id} value={venue.id}>
-                                                {venue.name} ({venue.entityName || 'No entity'})
-                                            </option>
-                                        ))
-                                    }
-                                </select>
+                        <div className={cx(
+                            "flex flex-col sm:flex-row items-center gap-3",
+                            "transition-all duration-200 ease-in-out",
+                            isMobileFiltersOpen ? "block" : "hidden sm:flex"
+                        )}>
+                            <div className="w-full sm:flex-1 min-w-[200px] max-w-xs">
+                                <MultiEntitySelector showLabel={false} />
                             </div>
+                            
+                            <div className="w-full sm:w-48">
+                                <Select 
+                                    value={venueFilter} 
+                                    onChange={(e) => setVenueFilter(e.target.value as VenueFilterType)}
+                                >
+                                    <option value="all">All Games</option>
+                                    <option value="needs_review">Needs Review</option>
+                                    <option value="unassigned">Unassigned</option>
+                                    <option value="auto_assigned">Auto Assigned</option>
+                                    <option value="manually_assigned">Manually Assigned</option>
+                                </Select>
+                            </div>
+                            
+                            <div className="w-full sm:flex-1">
+                                <Input
+                                    type="search"
+                                    placeholder="Search by name or venue..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
 
-                            {/* Cross-Entity Warning */}
-                            {crossEntityWarning.show && (
-                                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                                    <div className="flex items-start gap-3">
-                                        <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                                        <div>
-                                            <h4 className="text-sm font-medium text-amber-800">
-                                                Cross-Entity Venue Selection
-                                            </h4>
-                                            <p className="text-sm text-amber-700 mt-1">
-                                                The selected venue belongs to <strong>{crossEntityWarning.targetVenueEntity}</strong>, 
-                                                but the selected game(s) belong to <strong>{crossEntityWarning.gameEntities.join(', ')}</strong>.
-                                            </p>
-                                            
-                                            {/* Entity Reassignment Option */}
-                                            <div className="mt-4 space-y-3">
-                                                <label className="flex items-start gap-3 p-3 bg-white rounded-lg border cursor-pointer hover:bg-gray-50">
-                                                    <input
-                                                        type="radio"
-                                                        name="entityOption"
-                                                        checked={reassignEntity}
-                                                        onChange={() => setReassignEntity(true)}
-                                                        className="mt-0.5 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
-                                                    />
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <ArrowsRightLeftIcon className="h-4 w-4 text-indigo-600" />
-                                                            <span className="text-sm font-medium text-gray-900">
-                                                                Also reassign entity
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-xs text-gray-500 mt-1">
-                                                            Move the game(s) to {crossEntityWarning.targetVenueEntity}. 
-                                                            All player stats will be updated for the new entity.
-                                                        </p>
-                                                    </div>
-                                                </label>
-                                                
-                                                <label className="flex items-start gap-3 p-3 bg-white rounded-lg border cursor-pointer hover:bg-gray-50">
-                                                    <input
-                                                        type="radio"
-                                                        name="entityOption"
-                                                        checked={!reassignEntity}
-                                                        onChange={() => setReassignEntity(false)}
-                                                        className="mt-0.5 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
-                                                    />
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <DocumentDuplicateIcon className="h-4 w-4 text-indigo-600" />
-                                                            <span className="text-sm font-medium text-gray-900">
-                                                                Keep current entity (create venue copy)
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-xs text-gray-500 mt-1">
-                                                            A copy of "{getTargetVenueInfo()?.name}" will be created for your entity. 
-                                                            Both entities can track games at this physical location separately.
-                                                        </p>
-                                                    </div>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Info about what will happen */}
-                            {reassignTargetVenueId && !crossEntityWarning.show && (
-                                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                    <div className="flex items-start gap-2">
-                                        <InformationCircleIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                                        <p className="text-sm text-blue-700">
-                                            Game(s) will be assigned to <strong>{getTargetVenueInfo()?.name}</strong>. 
-                                            All related player records will be updated automatically.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex justify-end gap-3 mt-6">
-                                <button
-                                    onClick={() => setIsReassignModalOpen(false)}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    {/* Batch Actions Bar */}
+                    {selectedGameIds.size > 0 && (
+                        <div className="flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-950/30 rounded-md border border-indigo-100 dark:border-indigo-900/50 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="flex items-center gap-2">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+                                    {selectedGameIds.size}
+                                </span>
+                                <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                                    games selected
+                                </span>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => {
+                                        setSelectedGameIds(new Set());
+                                        setSelectAll(false);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/50"
                                 >
                                     Cancel
-                                </button>
-                                <button
-                                    onClick={handleReassignVenues}
-                                    disabled={!reassignTargetVenueId || isProcessing}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                </Button>
+                                <Button 
+                                    size="sm"
+                                    onClick={handleReassignOpen}
                                 >
-                                    {isProcessing ? 'Processing...' : 'Reassign Venue'}
-                                </button>
+                                    Reassign Venue
+                                </Button>
                             </div>
                         </div>
-                    </div>
+                    )}
+
+                    {/* Data Table Card */}
+                    <Card className="overflow-hidden">
+                        <div className="-mx-4 sm:-mx-6">
+                            <DataTable 
+                                data={filteredGames} 
+                                columns={columns} 
+                            />
+                        </div>
+                        
+                        {/* Footer / Load More */}
+                        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+                            <span className="text-xs text-gray-500">
+                                Showing {filteredGames.length} records
+                            </span>
+                            {nextToken && (
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => fetchGames(true)}
+                                    isLoading={loading}
+                                >
+                                    Load More
+                                </Button>
+                            )}
+                        </div>
+                    </Card>
                 </div>
             )}
-        </PageWrapper>
+
+            {/* --- RECURRING GAMES TAB --- */}
+            {activeTab === 'recurring' && (
+                <RecurringGamesManager venues={venues} />
+            )}
+
+            {/* === NEW: Create Game Modal === */}
+            <GameEditorModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                mode="create"
+                entityId={selectedEntities.length === 1 ? selectedEntities[0].id : undefined}
+                entities={entityOptions}
+                venues={venueOptions}
+                recurringGames={recurringGameOptions}
+                series={seriesOptions}
+                onSaveSuccess={handleCreateSuccess}
+                onSaveError={(error) => console.error('Create failed:', error)}
+                showAdvanced={false}
+            />
+
+            {/* === NEW: Edit Game Modal === */}
+            {editingGame && (
+                <GameEditorModal
+                    isOpen={!!editingGame}
+                    onClose={() => setEditingGame(null)}
+                    mode="edit"
+                    existingGameId={editingGame.id}
+                    initialData={{
+                        name: editingGame.name,
+                        gameStartDateTime: editingGame.gameStartDateTime,
+                        gameStatus: editingGame.gameStatus as any,
+                        registrationStatus: editingGame.registrationStatus as any,
+                        venueId: editingGame.venueId,
+                        entityId: editingGame.entityId,
+                        buyIn: editingGame.buyIn,
+                        rake: editingGame.rake,
+                        gameVariant: editingGame.gameVariant as any,
+                        tournamentType: editingGame.tournamentType as any,
+                        hasGuarantee: editingGame.hasGuarantee || false,
+                        guaranteeAmount: editingGame.guaranteeAmount,
+                        startingStack: editingGame.startingStack,
+                        totalUniquePlayers: editingGame.totalUniquePlayers,
+                        totalInitialEntries: editingGame.totalInitialEntries,
+                        totalEntries: editingGame.totalEntries,
+                        totalRebuys: editingGame.totalRebuys,
+                        totalAddons: editingGame.totalAddons,
+                        prizepoolPaid: editingGame.prizepoolPaid,
+                        isSeries: editingGame.isSeries,
+                        seriesName: editingGame.seriesName,
+                        recurringGameId: editingGame.recurringGameId,
+                        venueAssignmentStatus: editingGame.venueAssignmentStatus as any,
+                        levels: [],
+                    }}
+                    entityId={editingGame.entityId}
+                    venueId={editingGame.venueId}
+                    entities={entityOptions}
+                    venues={venueOptions}
+                    recurringGames={recurringGameOptions}
+                    series={seriesOptions}
+                    onSaveSuccess={handleEditSuccess}
+                    onSaveError={(error) => console.error('Edit failed:', error)}
+                    showAdvanced={true}
+                />
+            )}
+
+            {/* Reassign Modal */}
+            <Modal
+                isOpen={isReassignModalOpen}
+                onClose={() => setIsReassignModalOpen(false)}
+                title="Reassign Venue"
+            >
+                <div className="space-y-4">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md border border-blue-100 dark:border-blue-900/50">
+                        <div className="flex gap-2">
+                            <InformationCircleIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0" />
+                            <p className="text-sm text-blue-700 dark:text-blue-300">
+                                You are reassigning <strong>{selectedGameIds.size}</strong> game{selectedGameIds.size !== 1 ? 's' : ''}.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Target Venue
+                        </label>
+                        <Select
+                            value={reassignTargetVenueId}
+                            onChange={(e) => handleVenueSelectionChange(e.target.value)}
+                        >
+                            <option value="">Select a venue...</option>
+                            {venues
+                                .filter(v => v.id !== UNASSIGNED_VENUE_ID)
+                                .map(venue => (
+                                    <option key={venue.id} value={venue.id}>
+                                        {venue.name} ({venue.entityName || 'No entity'})
+                                    </option>
+                                ))
+                            }
+                        </Select>
+                    </div>
+
+                    {crossEntityWarning.show && (
+                        <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-md">
+                            <div className="flex gap-3">
+                                <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0" />
+                                <div>
+                                    <h4 className="text-sm font-medium text-amber-800 dark:text-amber-400">
+                                        Cross-Entity Selection
+                                    </h4>
+                                    <p className="text-xs text-amber-700 dark:text-amber-500 mt-1">
+                                        Target: <strong>{crossEntityWarning.targetVenueEntity}</strong>
+                                        <br/>
+                                        Games: <strong>{crossEntityWarning.gameEntities.join(', ')}</strong>
+                                    </p>
+                                    
+                                    <div className="mt-3 space-y-3">
+                                        <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                checked={reassignEntity}
+                                                onChange={() => setReassignEntity(true)}
+                                                className="mt-1 text-indigo-600 focus:ring-indigo-500"
+                                            />
+                                            <span>
+                                                <span className="font-medium block text-gray-900 dark:text-gray-100">Move games to new entity</span>
+                                                <span className="text-xs text-gray-500">Player stats will move to {crossEntityWarning.targetVenueEntity}</span>
+                                            </span>
+                                        </label>
+                                        <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                checked={!reassignEntity}
+                                                onChange={() => setReassignEntity(false)}
+                                                className="mt-1 text-indigo-600 focus:ring-indigo-500"
+                                            />
+                                            <span>
+                                                <span className="font-medium block text-gray-900 dark:text-gray-100">Create venue copy</span>
+                                                <span className="text-xs text-gray-500">Keep games in current entity, create a copy of the venue</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <Button variant="secondary" onClick={() => setIsReassignModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            onClick={handleReassignSubmit}
+                            disabled={!reassignTargetVenueId}
+                            isLoading={isProcessing}
+                        >
+                            Reassign Venue
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+        </div>
     );
 };
 

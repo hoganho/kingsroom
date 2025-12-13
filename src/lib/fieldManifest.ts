@@ -101,6 +101,38 @@ export const fieldManifest: Record<string, FieldDefinition> = {
     isBaselineOptional: true 
   },
   
+  // === NEW: Recurring Game Fields ===
+  recurringGameId: { 
+    label: 'Recurring Game', 
+    group: 'Recurring Game', 
+    isProfileOptional: ["STATUS: SCHEDULED | REG: OPEN", "STATUS: RUNNING | REG: CLOSED", "STATUS: FINISHED | REG: CLOSED"] 
+  },
+  recurringGameAssignmentStatus: { 
+    label: 'Assignment Status', 
+    group: 'Recurring Game', 
+    isBaselineOptional: true 
+  },
+  recurringGameAssignmentConfidence: { 
+    label: 'Confidence', 
+    group: 'Recurring Game', 
+    isBaselineOptional: true 
+  },
+  deviationNotes: { 
+    label: 'Deviation Notes', 
+    group: 'Recurring Game', 
+    isBaselineOptional: true 
+  },
+  wasScheduledInstance: { 
+    label: 'Scheduled Instance', 
+    group: 'Recurring Game', 
+    isBaselineOptional: true 
+  },
+  instanceNumber: { 
+    label: 'Instance #', 
+    group: 'Recurring Game', 
+    isBaselineOptional: true 
+  },
+  
   // Structure & Player Data
   levels: { label: 'Levels', group: 'Structure & Player Data', isBaselineOptional: true },
   breaks: { label: 'Breaks', group: 'Structure & Player Data', isBaselineOptional: true },

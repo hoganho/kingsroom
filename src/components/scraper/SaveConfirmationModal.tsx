@@ -1037,8 +1037,8 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                                     ⚠ Warnings ({validationStatus.warnings.length})
                                 </h4>
                                 <ul className="text-sm text-yellow-700 list-disc list-inside">
-                                    {validationStatus.warnings.map((warning: string, idx: number) => (
-                                        <li key={idx}>{warning}</li>
+                                    {validationStatus.warnings.map((warning, idx) => (
+                                        <li key={idx}><strong>{warning.field}:</strong> {warning.message}</li>
                                     ))}
                                 </ul>
                             </div>

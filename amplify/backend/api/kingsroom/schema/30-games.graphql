@@ -1,0 +1,670 @@
+# 30-games.graphql
+# ==========================================
+
+type VenueMetricsSnapshot {
+  totalGamesHeld: Int
+  averageUniquePlayersPerGame: Float
+  averageEntriesPerGame: Float
+  gameNights: [String]
+  gamesIncluded: Int
+  gamesExcluded: Int
+  exclusionReasons: AWSJSON
+  status: VenueStatus
+}
+
+type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  # --- Core Identification ---
+  id: ID!
+  name: String!
+  gameType: GameType!
+  gameVariant: GameVariant!
+  gameStatus: GameStatus! @index(name: "byStatus", queryField: "gamesByStatus", sortKeyFields: ["gameStartDateTime"])
+
+  # --- Scheduling & Timestamps ---
+  gameStartDateTime: AWSDateTime!
+  gameEndDateTime: AWSDateTime
+  registrationStatus: RegistrationStatus @index(name: "byRegistrationStatus", queryField: "gamesByRegistrationStatus", sortKeyFields: ["gameStartDateTime"])
+  totalDuration: String
+  gameFrequency: GameFrequency
+
+  # --- Financials & Buy-in ---
+  buyIn: Float
+  rake: Float
+  venueFee: Float
+  startingStack: Int
+  hasGuarantee: Boolean
+  guaranteeAmount: Float
+
+  # --- Aggregates & Results ---
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  totalUniquePlayers: Int
+  totalRebuys: Int
+  totalAddons: Int
+  totalInitialEntries: Int
+  totalEntries: Int
+
+  # --- Calculated Financial Metrics (Simplified) ---
+  totalBuyInsCollected: Float
+  rakeRevenue: Float
+  prizepoolPlayerContributions: Float
+  prizepoolAddedValue: Float
+  prizepoolSurplus: Float
+  guaranteeOverlayCost: Float
+  gameProfit: Float
+
+  # --- Live Game Data ---
+  playersRemaining: Int
+  totalChipsInPlay: Float
+  averagePlayerStack: Float
+
+  # --- Categorization & Metadata ---
+  tournamentType: TournamentType
+  isRegular: Boolean
+  isSatellite: Boolean
+  gameTags: [String]
+  dealerDealt: Boolean
+
+  # --- Series Reference Fields ---
+  isSeries: Boolean
+  seriesName: String
+  isMainEvent: Boolean
+  eventNumber: Int
+  dayNumber: Int
+  flightLetter: String
+  finalDay: Boolean
+
+  # --- Multi-Day Consolidation Fields ---
+  parentGameId: ID @index(name: "byParentGame", sortKeyFields: ["gameStartDateTime"])
+  parentGame: Game @belongsTo(fields: ["parentGameId"])
+  childGames: [Game] @hasMany(indexName: "byParentGame", fields: ["id"])
+
+  consolidationType: String @default(value: "STANDARD") @index(name: "byConsolidationType", sortKeyFields: ["gameStartDateTime"])
+  consolidationKey: String @index(name: "byConsolidationKey", queryField: "gamesByConsolidationKey")
+
+  # --- Data Confidence ---
+  isPartialData: Boolean @default(value: "false")
+  missingFlightCount: Int
+  expectedTotalEntries: Int
+
+  # --- Query Optimisation Keys ---
+  gameDayOfWeek: String @index(name: "byDayOfWeek", sortKeyFields: ["gameStartDateTime"])
+  buyInBucket: String @index(name: "byBuyInBucket", sortKeyFields: ["gameStartDateTime"])
+  venueScheduleKey: String @index(name: "byVenueSchedule", sortKeyFields: ["gameStartDateTime"])
+  venueGameTypeKey: String @index(name: "byVenueGameType", sortKeyFields: ["gameStartDateTime"])
+  entityQueryKey: String @index(name: "byEntityQuery", sortKeyFields: ["gameStartDateTime"])
+  entityGameTypeKey: String @index(name: "byEntityGameType", sortKeyFields: ["gameStartDateTime"])
+
+  # --- Data Source ---
+  sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
+  tournamentId: Int
+  originalScrapedData: AWSJSON
+
+  # --- Edit Tracking ---
+  wasEdited: Boolean @default(value: "false")
+  lastEditedAt: AWSDateTime
+  lastEditedBy: String
+  editHistory: AWSJSON
+
+  # --- Venue & Series Tracking ---
+  venueAssignmentStatus: VenueAssignmentStatus @default(value: "PENDING_ASSIGNMENT")
+  requiresVenueAssignment: Boolean @default(value: "false")
+  suggestedVenueName: String
+  venueAssignmentConfidence: Float
+
+  seriesAssignmentStatus: SeriesAssignmentStatus @default(value: "NOT_SERIES")
+  seriesAssignmentConfidence: Float
+  suggestedSeriesName: String
+
+  # --- Structure Data ---
+  levels: AWSJSON
+
+  # --- Relationships ---
+  venueId: ID @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
+  venue: Venue @belongsTo(fields: ["venueId"])
+  tournamentSeriesId: ID @index(name: "byTournamentSeries", sortKeyFields: ["gameStartDateTime"])
+  tournamentSeries: TournamentSeries @belongsTo(fields: ["tournamentSeriesId"])
+  structure: TournamentStructure @hasOne
+  gameCost: GameCost @hasOne(fields: ["id"])
+  gameFinancialSnapshots: [GameFinancialSnapshot] @hasMany(indexName: "byGameFinancialSnapshot", fields: ["id"])
+  playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
+  playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
+
+  # Social Pulse Relationships
+  linkedSocialPosts: [SocialPost] @hasMany(indexName: "bySocialPostGame", fields: ["id"])
+
+  entityId: ID @index(name: "byEntityGame", sortKeyFields: ["gameStartDateTime"])
+             @index(name: "byEntityAndTournamentId", sortKeyFields: ["tournamentId"], queryField: "gamesByEntityAndTournamentId")
+  entity: Entity @belongsTo(fields: ["entityId"])
+
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+
+  # === RECURRING GAME RELATIONSHIP (NEW) ===
+  # Link to the canonical recurring game (if this is a regular game instance)
+  recurringGameId: ID 
+    @index(name: "byRecurringGame", sortKeyFields: ["gameStartDateTime"])
+  recurringGame: RecurringGame @belongsTo(fields: ["recurringGameId"])
+  
+  # === RECURRING GAME ASSIGNMENT (NEW) ===
+  recurringGameAssignmentConfidence: Float
+  recurringGameAssignmentStatus: RecurringGameAssignmentStatus 
+    @default(value: "PENDING_ASSIGNMENT")
+  
+  # === SCHEDULE TRACKING (NEW) ===
+  wasScheduledInstance: Boolean @default(value: "false")
+  deviationNotes: String
+  
+  # === INSTANCE METADATA (NEW) ===
+  instanceNumber: Int 
+  isReplacementInstance: Boolean @default(value: "false")
+  replacementReason: String
+}
+
+type TournamentStructure @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  levels: [TournamentLevel!]
+  breaks: [Break!]
+  gameId: ID! @index(name: "byGame")
+  game: Game @belongsTo(fields: ["gameId"])
+}
+
+type TournamentLevelData @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  levels: [TournamentLevel!]
+  gameId: ID! @index(name: "byGame")
+}
+
+type CashStructure @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  stakes: String!
+  minBuyIn: Float
+  maxBuyIn: Float
+  gameId: ID! @index(name: "byGame")
+}
+
+type RakeStructure @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  rakePercentage: Float
+  rakeCap: Float
+  gameId: ID! @index(name: "byGame")
+}
+
+type GameFinancialSnapshot
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  id: ID!
+
+  # === CORE RELATIONSHIPS ===
+  gameId: ID! @index(name: "byGameFinancialSnapshot")
+  game: Game @belongsTo(fields: ["gameId"])
+  gameCostId: ID
+
+  # === DENORMALIZED FILTERS ===
+  entityId: ID @index(name: "byEntityGameFinancialSnapshot", sortKeyFields: ["gameStartDateTime"])
+  venueId: ID @index(name: "byVenueGameFinancialSnapshot", sortKeyFields: ["gameStartDateTime"])
+  gameStartDateTime: AWSDateTime @index(name: "byGameStartDateFinancialSnapshot", sortKeyFields: ["netProfit"])
+
+  # === REVENUE SIDE (from Game model) ===
+  totalBuyInsCollected: Float @default(value: "0")
+  rakeRevenue: Float @default(value: "0")
+  venueFee: Float @default(value: "0")
+  totalRevenue: Float! @default(value: "0")
+  
+  # === PRIZEPOOL BREAKDOWN (from Game model) ===
+  prizepoolPlayerContributions: Float @default(value: "0")
+  prizepoolAddedValue: Float @default(value: "0")
+  prizepoolTotal: Float @default(value: "0")
+  prizepoolSurplus: Float @default(value: "0")
+
+  # === COST SIDE (from GameCost model) ===
+  totalDealerCost: Float @default(value: "0")
+  totalTournamentDirectorCost: Float @default(value: "0")
+  totalFloorStaffCost: Float @default(value: "0")
+  totalSecurityCost: Float @default(value: "0")
+  totalStaffCost: Float @default(value: "0")
+  totalPrizeContribution: Float @default(value: "0")
+  totalJackpotContribution: Float @default(value: "0")
+  totalGuaranteeOverlayCost: Float @default(value: "0")
+  totalAddedValueCost: Float @default(value: "0")
+  totalBountyCost: Float @default(value: "0")
+  totalDirectGameCost: Float @default(value: "0")
+  totalVenueRentalCost: Float @default(value: "0")
+  totalEquipmentRentalCost: Float @default(value: "0")
+  totalFoodBeverageCost: Float @default(value: "0")
+  totalMarketingCost: Float @default(value: "0")
+  totalStreamingCost: Float @default(value: "0")
+  totalOperationsCost: Float @default(value: "0")
+  totalInsuranceCost: Float @default(value: "0")
+  totalLicensingCost: Float @default(value: "0")
+  totalComplianceCost: Float @default(value: "0")
+  totalStaffTravelCost: Float @default(value: "0")
+  totalPlayerAccommodationCost: Float @default(value: "0")
+  totalPromotionCost: Float @default(value: "0")
+  totalOtherCost: Float @default(value: "0")
+  totalCost: Float! @default(value: "0")
+
+  # === PROFIT & DERIVED METRICS ===
+  gameProfit: Float @default(value: "0")
+  netProfit: Float! @default(value: "0")
+  profitMargin: Float
+  revenuePerPlayer: Float
+  costPerPlayer: Float
+  profitPerPlayer: Float
+  rakePerEntry: Float
+  dealerCostPerHour: Float
+  staffCostPerPlayer: Float
+  promoSpendPerPlayer: Float
+  guaranteeCoverageRate: Float
+  guaranteeMet: Boolean
+  
+  # Denormalized Game Data for Reporting
+  totalUniquePlayers: Int
+  totalEntries: Int
+  guaranteeAmount: Float
+  gameDurationMinutes: Int
+  gameType: GameType
+  tournamentType: TournamentType
+
+  # === METADATA ===
+  notes: String
+  snapshotType: SnapshotType @default(value: "AUTO")
+  isReconciled: Boolean @default(value: "false")
+  reconciledAt: AWSDateTime
+  reconciledBy: String
+
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type GameCost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  gameId: ID! @index(name: "byGameCost")
+  game: Game @belongsTo(fields: ["gameId"])
+
+  # --- Staff Costs ---
+  totalDealerCost: Float @default(value: "0")
+  totalTournamentDirectorCost: Float @default(value: "0")
+  totalFloorStaffCost: Float @default(value: "0")
+  totalSecurityCost: Float @default(value: "0")
+  
+  # --- Direct Game Costs ---
+  totalPrizeContribution: Float @default(value: "0")
+  totalJackpotContribution: Float @default(value: "0")
+  totalGuaranteeOverlayCost: Float @default(value: "0")
+  totalAddedValueCost: Float @default(value: "0")
+  totalBountyCost: Float @default(value: "0")
+  
+  # --- Venue & Equipment ---
+  totalVenueRentalCost: Float @default(value: "0")
+  totalEquipmentRentalCost: Float @default(value: "0")
+  
+  # --- Operations ---
+  totalFoodBeverageCost: Float @default(value: "0")
+  totalMarketingCost: Float @default(value: "0")
+  totalStreamingCost: Float @default(value: "0")
+  
+  # --- Compliance ---
+  totalInsuranceCost: Float @default(value: "0")
+  totalLicensingCost: Float @default(value: "0")
+  
+  # --- Travel ---
+  totalStaffTravelCost: Float @default(value: "0")
+  totalPlayerAccommodationCost: Float @default(value: "0")
+  
+  # --- Promotions & Other ---
+  totalPromotionCost: Float @default(value: "0")
+  totalOtherCost: Float @default(value: "0")
+  
+  # --- Aggregates ---
+  totalStaffCost: Float @default(value: "0")
+  totalDirectGameCost: Float @default(value: "0")
+  totalOperationsCost: Float @default(value: "0")
+  totalComplianceCost: Float @default(value: "0")
+  totalCost: Float! @default(value: "0")
+
+  # --- Line Items ---
+  lineItems: [GameCostLineItem] @hasMany(indexName: "byGameCost", fields: ["id"])
+
+  # --- Denormalized for Queries ---
+  entityId: ID @index(name: "byEntityCost", sortKeyFields: ["gameDate"])
+  venueId: ID @index(name: "byVenueCost", sortKeyFields: ["gameDate"])
+  gameDate: AWSDateTime @index(name: "byGameDateCost", sortKeyFields: ["totalCost"])
+
+  # --- Metadata ---
+  notes: String
+  isEstimate: Boolean @default(value: "false")
+  costStatus: CostStatus @default(value: "PENDING")
+
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type GameCostLineItem @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  gameCostId: ID! @index(name: "byGameCost")
+  gameCost: GameCost @belongsTo(fields: ["gameCostId"])
+
+  costItemId: ID! @index(name: "byCostItem")
+  costItem: GameCostItem @belongsTo(fields: ["costItemId"])
+  costType: CostItemType! @index(name: "byCostTypeLine", sortKeyFields: ["gameDate"])
+  rateType: CostItemRateType @default(value: "STANDARD")
+
+  # --- Amount Calculation ---
+  amount: Float!
+  quantity: Float @default(value: "1")
+  rate: Float
+  hours: Float
+  
+  # --- Staff-Specific ---
+  staffMemberId: ID
+  staffMemberName: String
+  
+  # --- Description ---
+  description: String
+  notes: String
+
+  # --- Denormalized for Queries ---
+  gameId: ID @index(name: "byGameLineItem")
+  entityId: ID @index(name: "byEntityLineItem", sortKeyFields: ["gameDate"])
+  venueId: ID @index(name: "byVenueLineItem", sortKeyFields: ["gameDate"])
+  gameDate: AWSDateTime
+
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type GameCostItem @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  name: String!
+  costType: CostItemType! @index(name: "byCostType", sortKeyFields: ["name"])
+  rateType: CostItemRateType
+  defaultRate: Float
+  isPerHour: Boolean @default(value: "false")
+  isActive: Boolean @default(value: "true")
+  description: String
+  lineItems: [GameCostLineItem] @hasMany(indexName: "byCostItem", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# --- Game Consolidation Preview Types ---
+
+type ConsolidationPreviewResult {
+  willConsolidate: Boolean!
+  reason: String!
+  consolidation: ConsolidationDetails
+  warnings: [String!]
+  detectedPattern: DetectedMultiDayPattern
+}
+
+type ConsolidationDetails {
+  consolidationKey: String!
+  keyStrategy: String!
+  parentExists: Boolean!
+  parentGameId: ID
+  parentName: String!
+  siblingCount: Int!
+  siblings: [ConsolidationSibling!]
+  projectedTotals: ProjectedConsolidationTotals
+}
+
+type ConsolidationSibling {
+  id: ID!
+  name: String!
+  dayNumber: Int
+  flightLetter: String
+  gameStatus: GameStatus
+  gameStartDateTime: AWSDateTime
+  totalUniquePlayers: Int
+  totalInitialEntries: Int
+  totalEntries: Int
+  finalDay: Boolean
+}
+
+type ProjectedConsolidationTotals {
+  totalUniquePlayers: Int
+  totalInitialEntries: Int
+  totalEntries: Int
+  totalRebuys: Int
+  totalAddons: Int
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  earliestStart: AWSDateTime
+  latestEnd: AWSDateTime
+  projectedStatus: GameStatus
+  isPartialData: Boolean
+  missingFlightCount: Int
+}
+
+type ReScrapeResult {
+  name: String
+  gameStartDateTime: AWSDateTime
+  gameEndDateTime: AWSDateTime
+  gameStatus: GameStatus
+  registrationStatus: RegistrationStatus
+  gameType: GameType
+  gameVariant: GameVariant
+  tournamentType: TournamentType
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  buyIn: Float
+  rake: Float
+  startingStack: Int
+  hasGuarantee: Boolean
+  guaranteeAmount: Float
+  totalUniquePlayers: Int
+  totalInitialEntries: Int
+  totalEntries: Int
+  totalRebuys: Int
+  totalAddons: Int
+  totalDuration: String
+  playersRemaining: Int
+  seriesName: String
+  gameTags: [String]
+  venueMatch: VenueMatch
+  existingGameId: ID
+  doNotScrape: Boolean
+  sourceUrl: AWSURL
+  tournamentId: Int
+  entityId: ID
+  s3Key: String
+  reScrapedAt: AWSDateTime
+}
+
+type EntityScrapingStatus {
+  entityId: ID!
+  entityName: String
+  lowestTournamentId: Int
+  highestTournamentId: Int
+  totalGamesStored: Int!
+  unfinishedGameCount: Int!
+  gaps: [GapRange!]!
+  gapSummary: GapSummary!
+  lastUpdated: AWSDateTime!
+  cacheAge: Int
+}
+
+type EntityVenueAssignmentSummary {
+  entityId: ID
+  entityName: String!
+  totalGames: Int
+  gamesWithVenue: Int
+  gamesNeedingVenue: Int
+}
+
+type VenueAssignmentSummary {
+  totalGames: Int
+  gamesWithVenue: Int
+  gamesNeedingVenue: Int
+  pendingAssignments: Int
+  byEntity: [EntityVenueAssignmentSummary]
+}
+
+type ReassignGameVenueResult {
+  success: Boolean!
+  status: String!
+  message: String
+  gameId: ID
+  taskId: ID
+  oldVenueId: ID
+  newVenueId: ID
+  oldEntityId: ID
+  newEntityId: ID
+  venueCloned: Boolean
+  clonedVenueId: ID
+  recordsUpdated: AWSJSON
+}
+
+type BulkReassignGameVenuesResult {
+  success: Boolean!
+  status: String!
+  message: String
+  taskId: ID
+  gameCount: Int
+  newVenueId: ID
+  reassignEntity: Boolean
+}
+
+type SaveGameResult {
+  success: Boolean!
+  gameId: ID
+  action: String!
+  message: String
+  warnings: [String]
+  playerProcessingQueued: Boolean
+  playerProcessingReason: String
+  venueAssignment: SaveVenueAssignmentInfo
+  seriesAssignment: SaveSeriesAssignmentInfo
+  fieldsUpdated: [String]
+  wasEdited: Boolean
+}
+
+input ReassignGameVenueInput {
+  gameId: ID!
+  newVenueId: ID!
+  entityId: ID!
+  reassignEntity: Boolean!
+  initiatedBy: String
+}
+
+input BulkReassignGameVenuesInput {
+  gameIds: [ID!]!
+  newVenueId: ID!
+  entityId: ID!
+  reassignEntity: Boolean!
+  initiatedBy: String
+}
+
+input ConsolidationPreviewInput {
+  gameData: GamePreviewDataInput!
+  existingGameId: ID
+  includeSiblingDetails: Boolean
+}
+
+input GamePreviewDataInput {
+  name: String!
+  tournamentId: Int
+  venueId: ID
+  entityId: ID
+  buyIn: Float
+  gameStatus: GameStatus
+  gameStartDateTime: AWSDateTime
+  tournamentSeriesId: ID
+  eventNumber: Int
+  dayNumber: Int
+  flightLetter: String
+  finalDay: Boolean
+  isSeries: Boolean
+  seriesName: String
+  isMainEvent: Boolean
+  totalUniquePlayers: Int
+  totalInitialEntries: Int
+  totalEntries: Int
+  totalRebuys: Int
+  totalAddons: Int
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  gameEndDateTime: AWSDateTime
+}
+
+input StartScraperJobInput {
+  triggerSource: ScraperJobTriggerSource!
+  maxGames: Int
+  targetURLs: [String]
+  startId: Int
+  endId: Int
+  isFullScan: Boolean
+  triggeredBy: String
+  entityId: ID
+  isSequential: Boolean
+}
+
+input SaveGameInput {
+  source: DataSourceInfoInput!
+  game: SaveGameDataInput!
+  players: SavePlayerDataInput
+  venue: VenueReferenceInput
+  series: SeriesReferenceInput
+  options: SaveProcessingOptionsInput
+  auditTrail: String
+}
+
+input SaveGameDataInput {
+  tournamentId: Int
+  existingGameId: ID
+  name: String!
+  gameType: GameType!
+  gameVariant: GameVariant
+  gameStatus: GameStatus!
+  gameStartDateTime: AWSDateTime!
+  gameEndDateTime: AWSDateTime
+  registrationStatus: RegistrationStatus
+  gameFrequency: GameFrequency
+  buyIn: Float
+  rake: Float
+  guaranteeAmount: Float
+  hasGuarantee: Boolean
+  startingStack: Int
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  totalUniquePlayers: Int
+  totalInitialEntries: Int
+  totalEntries: Int
+  totalRebuys: Int
+  totalAddons: Int
+  playersRemaining: Int
+  totalChipsInPlay: Float
+  averagePlayerStack: Float
+  totalDuration: String
+  totalBuyInsCollected: Float
+  rakeRevenue: Float
+  prizepoolPlayerContributions: Float
+  prizepoolAddedValue: Float
+  prizepoolSurplus: Float
+  guaranteeOverlayCost: Float
+  gameProfit: Float
+  tournamentType: TournamentType
+  isSeries: Boolean
+  seriesName: String
+  tournamentSeriesId: ID
+  isMainEvent: Boolean
+  eventNumber: Int
+  dayNumber: Int
+  flightLetter: String
+  finalDay: Boolean
+  isSatellite: Boolean
+  isRegular: Boolean
+  gameTags: [String]
+  levels: AWSJSON
+  venueFee: Float
+  venueAssignmentStatus: VenueAssignmentStatus
+  recurringGameId: ID
+  recurringGameAssignmentStatus: RecurringGameAssignmentStatus
+  recurringGameAssignmentConfidence: Float
+  wasScheduledInstance: Boolean
+  deviationNotes: String
+  instanceNumber: Int
+  isReplacementInstance: Boolean
+  replacementReason: String
+}
