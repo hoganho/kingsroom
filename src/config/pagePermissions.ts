@@ -1,18 +1,26 @@
 // src/config/pagePermissions.ts
-// Central configuration for all pages and their metadata
+// ============================================
+// CENTRALIZED PAGE PERMISSION CONFIGURATION
+// ============================================
+//
+// This file defines:
+// 1. ALL_PAGES - Complete registry of pages in the application
+// 2. DEFAULT_ROLE_PERMISSIONS - What each role can access by default
+// 3. hasPageAccess() - The single source of truth for page access checks
+//
+// Permission Priority (highest to lowest):
+// 1. SUPER_ADMIN role → Always has access to everything
+// 2. User's `allowedPages` array (if set) → Explicit override
+// 3. Role's default permissions → Fallback
+//
+// NOTE: Entity permissions (which data a user can see) are handled
+// separately in EntityContext.tsx. Page permissions only control
+// which routes are accessible.
+// ============================================
 
-export interface PageConfig {
-  path: string;
-  label: string;
-  description: string;
-  category: PageCategory;
-  requiredBaseRoles?: UserRole[]; // Minimum role required (can be overridden by allowedPages)
-  alwaysAllowed?: boolean; // Pages that are always accessible
-  icon?: string;
-  parentPath?: string; // For grouping in sidebar
-}
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'VENUE_MANAGER' | 'TOURNAMENT_DIRECTOR' | 'MARKETING';
 
-export type PageCategory = 
+export type PageCategory =
   | 'core'
   | 'players'
   | 'games'
@@ -23,9 +31,24 @@ export type PageCategory =
   | 'scraper'
   | 'debug';
 
-export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'VENUE_MANAGER' | 'TOURNAMENT_DIRECTOR' | 'MARKETING';
+export interface PageConfig {
+  path: string;
+  label: string;
+  description: string;
+  category: PageCategory;
+  icon?: string;
+  /** For nested routes - indicates the parent page in navigation */
+  parentPath?: string;
+  /** Pages that are always accessible regardless of permissions */
+  alwaysAllowed?: boolean;
+}
 
-// All available pages in the system
+// ============================================
+// PAGE REGISTRY
+// ============================================
+// Order matters! DefaultRoute redirects to the FIRST accessible page.
+// Keep commonly-accessed pages near the top.
+
 export const ALL_PAGES: PageConfig[] = [
   // Core Pages
   {
@@ -95,7 +118,7 @@ export const ALL_PAGES: PageConfig[] = [
 
   // Venues Section
   {
-    path: '/venues', // ✅ FIXED: Matches App.tsx route (was /venues/dashboard)
+    path: '/venues',
     label: 'Venues Dashboard',
     description: 'Venue overview and management',
     category: 'venues',
@@ -107,6 +130,15 @@ export const ALL_PAGES: PageConfig[] = [
     description: 'View venue details',
     category: 'venues',
     icon: 'BuildingOffice2Icon',
+    parentPath: '/venues',
+  },
+  {
+    path: '/venues/game',
+    label: 'Venue Game Details',
+    description: 'View venue game details',
+    category: 'venues',
+    icon: 'BuildingOffice2Icon',
+    parentPath: '/venues/details',
   },
 
   // Social Section
@@ -125,13 +157,12 @@ export const ALL_PAGES: PageConfig[] = [
     icon: 'MegaphoneIcon',
   },
 
-  // Settings Section
+  // Settings Section (Admin+)
   {
     path: '/settings/entity-management',
     label: 'Entity Management',
     description: 'Manage entities and organizations',
     category: 'settings',
-    requiredBaseRoles: ['SUPER_ADMIN'],
     icon: 'BuildingOffice2Icon',
   },
   {
@@ -139,7 +170,6 @@ export const ALL_PAGES: PageConfig[] = [
     label: 'Venue Management',
     description: 'Manage venue configurations',
     category: 'settings',
-    requiredBaseRoles: ['ADMIN', 'SUPER_ADMIN'],
     icon: 'BuildingOffice2Icon',
   },
   {
@@ -147,7 +177,6 @@ export const ALL_PAGES: PageConfig[] = [
     label: 'Game Management',
     description: 'Manage game venue assignments and entity reassignments',
     category: 'settings',
-    requiredBaseRoles: ['ADMIN', 'SUPER_ADMIN'],
     icon: 'BeakerIcon',
   },
   {
@@ -155,7 +184,6 @@ export const ALL_PAGES: PageConfig[] = [
     label: 'Series Management',
     description: 'Manage tournament series',
     category: 'settings',
-    requiredBaseRoles: ['ADMIN', 'SUPER_ADMIN'],
     icon: 'TrophyIcon',
   },
   {
@@ -163,7 +191,6 @@ export const ALL_PAGES: PageConfig[] = [
     label: 'Social Accounts',
     description: 'Manage social media accounts',
     category: 'settings',
-    requiredBaseRoles: ['ADMIN', 'SUPER_ADMIN'],
     icon: 'HashtagIcon',
   },
   {
@@ -171,54 +198,144 @@ export const ALL_PAGES: PageConfig[] = [
     label: 'User Management',
     description: 'Manage user accounts and permissions',
     category: 'settings',
-    requiredBaseRoles: ['SUPER_ADMIN'],
     icon: 'UsersIcon',
   },
 
-  // Scraper Section
+  // Scraper Section (SuperAdmin)
   {
     path: '/scraper/admin',
     label: 'Scraper Admin',
     description: 'Manage web scraping operations',
     category: 'scraper',
-    requiredBaseRoles: ['SUPER_ADMIN'],
     icon: 'WrenchIcon',
   },
 
-  // Debug Section
+  // Debug Section (SuperAdmin)
   {
     path: '/debug/games',
     label: 'Games Debug',
     description: 'Debug game data',
     category: 'debug',
-    requiredBaseRoles: ['SUPER_ADMIN'],
-    icon: 'BeakerIcon',
+    icon: 'BugAntIcon',
   },
   {
     path: '/debug/players',
     label: 'Players Debug',
     description: 'Debug player data',
     category: 'debug',
-    requiredBaseRoles: ['SUPER_ADMIN'],
-    icon: 'UserGroupIcon',
+    icon: 'BugAntIcon',
   },
   {
     path: '/debug/database-monitor',
     label: 'Database Monitor',
     description: 'Monitor database operations',
     category: 'debug',
-    requiredBaseRoles: ['SUPER_ADMIN'],
-    icon: 'BeakerIcon',
+    icon: 'BugAntIcon',
   },
 ];
 
-// Helper to get pages by category
-export const getPagesByCategory = (category: PageCategory): PageConfig[] => {
-  return ALL_PAGES.filter(page => page.category === category);
+// ============================================
+// DEFAULT ROLE PERMISSIONS
+// ============================================
+// These are used when a user does NOT have custom `allowedPages` set.
+// Once `allowedPages` is set (even to empty array), these are ignored.
+
+export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
+  SUPER_ADMIN: ALL_PAGES.map(p => p.path),
+  
+  ADMIN: [
+    '/home',
+    '/players/dashboard',
+    '/players/search',
+    '/players/profile',
+    '/series/dashboard',
+    '/games/dashboard',
+    '/games/search',
+    '/games/details',
+    '/venues',
+    '/venues/details',
+    '/venues/game',
+    '/social/pulse',
+    '/social/dashboard',
+    '/settings/venue-management',
+    '/settings/game-management',
+    '/settings/series-management',
+    '/settings/social-accounts',
+  ],
+  
+  VENUE_MANAGER: [
+    '/home',
+    '/players/dashboard',
+    '/players/search',
+    '/players/profile',
+    '/games/dashboard',
+    '/games/search',
+    '/games/details',
+    '/venues',
+    '/venues/details',
+    '/venues/game',
+    '/social/pulse',
+  ],
+  
+  TOURNAMENT_DIRECTOR: [
+    '/home',
+    '/players/dashboard',
+    '/players/search',
+    '/players/profile',
+    '/games/dashboard',
+    '/games/search',
+    '/games/details',
+    '/series/dashboard',
+  ],
+  
+  MARKETING: [
+    '/home',
+    '/players/dashboard',
+    '/players/search',
+    '/social/pulse',
+    '/social/dashboard',
+  ],
 };
 
-// Get all categories with their pages
-export const getGroupedPages = (): Record<PageCategory, PageConfig[]> => {
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Checks if a pathname matches a page path.
+ * Handles exact matches and nested routes (e.g., /players/profile/123 matches /players/profile)
+ */
+export function pathMatchesPage(pathname: string, pagePath: string): boolean {
+  const normalizedPath = pathname.replace(/\/$/, '') || '/';
+  const normalizedPagePath = pagePath.replace(/\/$/, '') || '/';
+
+  // Exact match
+  if (normalizedPath === normalizedPagePath) return true;
+
+  // Nested route match (e.g., /players/profile/123 matches /players/profile)
+  if (normalizedPath.startsWith(normalizedPagePath + '/')) return true;
+
+  return false;
+}
+
+/**
+ * Get a page config by path
+ */
+export function getPageConfig(pathname: string): PageConfig | undefined {
+  return ALL_PAGES.find(page => pathMatchesPage(pathname, page.path));
+}
+
+/**
+ * Get pages filtered by category
+ */
+export function getPagesByCategory(category: PageCategory): PageConfig[] {
+  return ALL_PAGES.filter(page => page.category === category);
+}
+
+/**
+ * Get all pages grouped by category
+ */
+export function getGroupedPages(): Record<PageCategory, PageConfig[]> {
   return ALL_PAGES.reduce((acc, page) => {
     if (!acc[page.category]) {
       acc[page.category] = [];
@@ -226,9 +343,9 @@ export const getGroupedPages = (): Record<PageCategory, PageConfig[]> => {
     acc[page.category].push(page);
     return acc;
   }, {} as Record<PageCategory, PageConfig[]>);
-};
+}
 
-// Category display names
+// Category display labels
 export const CATEGORY_LABELS: Record<PageCategory, string> = {
   core: 'Core',
   players: 'Players',
@@ -241,93 +358,126 @@ export const CATEGORY_LABELS: Record<PageCategory, string> = {
   debug: 'Debug',
 };
 
-// Default permissions by role
-export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
-  SUPER_ADMIN: ALL_PAGES.map(p => p.path), // All pages
-  ADMIN: ALL_PAGES
-    .filter(p => !p.requiredBaseRoles?.includes('SUPER_ADMIN'))
-    .map(p => p.path),
-  VENUE_MANAGER: [
-    '/home',
-    '/players/dashboard',
-    '/players/search',
-    '/games/dashboard',
-    '/games/search',
-    '/venues', // ✅ FIXED: Changed from /venues/dashboard
-    '/venues/details',
-    '/social/pulse',
-  ],
-  TOURNAMENT_DIRECTOR: [
-    '/home',
-    '/players/dashboard',
-    '/players/search',
-    '/games/dashboard',
-    '/games/search',
-    '/series/dashboard',
-  ],
-  MARKETING: [
-    '/home',
-    '/players/dashboard',
-    '/social/pulse',
-    '/social/dashboard',
-  ],
-};
+// ============================================
+// ACCESS CHECK - THE SINGLE SOURCE OF TRUTH
+// ============================================
 
-// Check if a path matches a page
-export const pathMatchesPage = (pathname: string, pagePath: string): boolean => {
-  const normalizedPath = pathname.replace(/\/$/, '') || '/';
-  const normalizedPagePath = pagePath.replace(/\/$/, '') || '/';
-
-  // Exact match
-  if (normalizedPath === normalizedPagePath) return true;
-  
-  // Nested route match (e.g. /players/search matches /players/search/123)
-  if (normalizedPath.startsWith(normalizedPagePath + '/')) return true;
-  
-  return false;
-};
-
-// Check if user has access to a specific path
-export const hasPageAccess = (
+/**
+ * Determines if a user can access a specific page.
+ * 
+ * @param pathname - The route path to check (e.g., "/venues/details")
+ * @param userRole - The user's role (e.g., "ADMIN")
+ * @param allowedPages - User's custom page permissions (null = use role defaults)
+ * @returns boolean - Whether access is granted
+ * 
+ * Logic:
+ * 1. SUPER_ADMIN always has access
+ * 2. If allowedPages is an array (even empty), use it exclusively
+ * 3. Otherwise, fall back to role's default permissions
+ */
+export function hasPageAccess(
   pathname: string,
-  userRole: string | undefined,
+  userRole: string | undefined | null,
   allowedPages?: string[] | null
-): boolean => {
-  // 1. ✅ MOVED UP: Super Admin Override (Case insensitive check)
-  // Super Admins should ALWAYS have access, even if the page isn't in config yet
-  if (userRole && userRole.toUpperCase() === 'SUPER_ADMIN') return true;
+): boolean {
+  // Normalize role for comparison
+  const normalizedRole = userRole?.toUpperCase() as UserRole | undefined;
 
-  // 2. Find the page config
-  const pageConfig = ALL_PAGES.find(page => pathMatchesPage(pathname, page.path));
-  
-  // If page is not tracked in our system, allow it (e.g. login, 404s, public routes)
+  // 1. SUPER_ADMIN bypass - always has full access
+  if (normalizedRole === 'SUPER_ADMIN') {
+    return true;
+  }
+
+  // 2. Find the page in our registry
+  const pageConfig = getPageConfig(pathname);
+
+  // If page isn't in our registry, only allow known public routes
   if (!pageConfig) {
-    // If it's a known public route or root, allow
     return pathname === '/' || pathname === '/login';
   }
-  
-  // 3. Check "Always Allowed" (Configured in ALL_PAGES)
-  if (pageConfig.alwaysAllowed) return true;
-  
-  // 4. Custom User Permissions (The "Configurable" Logic)
-  // If allowedPages is an Array (even empty), we MUST respect it.
+
+  // 3. Always allowed pages bypass permission checks
+  if (pageConfig.alwaysAllowed) {
+    return true;
+  }
+
+  // 4. Custom permissions take precedence (strict mode)
+  // If allowedPages is an Array (even empty []), we MUST use it exclusively
   if (Array.isArray(allowedPages)) {
     return allowedPages.some(allowed => pathMatchesPage(pathname, allowed));
   }
-  
-  // 5. Default Role Permissions Fallback
-  // Only reached if allowedPages is null/undefined
-  if (!userRole) return false;
 
-  // Normalize role to find in default map (handle SuperAdmin vs SUPER_ADMIN)
-  const normalizedRole = Object.keys(DEFAULT_ROLE_PERMISSIONS).find(
-    key => key.toUpperCase() === userRole.toUpperCase()
-  ) as UserRole | undefined;
-
-  if (normalizedRole) {
-    const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[normalizedRole];
-    return defaultPermissions.some(allowed => pathMatchesPage(pathname, allowed));
+  // 5. Fall back to role's default permissions
+  if (!normalizedRole) {
+    return false;
   }
 
-  return false;
-};
+  const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[normalizedRole];
+  if (!defaultPermissions) {
+    console.warn(`[pagePermissions] Unknown role: ${userRole}`);
+    return false;
+  }
+
+  return defaultPermissions.some(allowed => pathMatchesPage(pathname, allowed));
+}
+
+/**
+ * Get all accessible pages for a user.
+ * Used by navigation components to filter visible items.
+ */
+export function getAccessiblePages(
+  userRole: string | undefined | null,
+  allowedPages?: string[] | null
+): PageConfig[] {
+  const normalizedRole = userRole?.toUpperCase() as UserRole | undefined;
+
+  // SUPER_ADMIN gets everything
+  if (normalizedRole === 'SUPER_ADMIN') {
+    return ALL_PAGES;
+  }
+
+  // Custom permissions mode
+  if (Array.isArray(allowedPages)) {
+    return ALL_PAGES.filter(page =>
+      page.alwaysAllowed || allowedPages.some(allowed => pathMatchesPage(page.path, allowed))
+    );
+  }
+
+  // Default role permissions
+  if (!normalizedRole) {
+    // Still return alwaysAllowed pages even without a role
+    return ALL_PAGES.filter(page => page.alwaysAllowed);
+  }
+
+  const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[normalizedRole];
+  if (!defaultPermissions) {
+    return ALL_PAGES.filter(page => page.alwaysAllowed);
+  }
+
+  return ALL_PAGES.filter(page =>
+    page.alwaysAllowed || defaultPermissions.some(allowed => pathMatchesPage(page.path, allowed))
+  );
+}
+
+/**
+ * Find the first accessible page for a user.
+ * Used for smart redirects when user lands on / or an inaccessible page.
+ */
+export function getFirstAccessiblePage(
+  userRole: string | undefined | null,
+  allowedPages?: string[] | null
+): PageConfig | null {
+  const accessiblePages = getAccessiblePages(userRole, allowedPages);
+  return accessiblePages.length > 0 ? accessiblePages[0] : null;
+}
+
+/**
+ * Check if user has any page access at all.
+ * Used to determine if we should show "contact admin" screen.
+ */
+export function hasAnyPageAccess(
+  userRole: string | undefined | null,
+  allowedPages?: string[] | null
+): boolean {
+  return getAccessiblePages(userRole, allowedPages).length > 0;
+}

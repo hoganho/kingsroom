@@ -84,7 +84,10 @@ export const UserManagement = () => {
         variables: { limit: 100 },
       }) as { data: ListUsersResponse };
       
-      setUsers(response.data.listUsers.items || []);
+      // FIX: Filter out null/undefined items that can come from soft-deleted DynamoDB records
+      const items = response.data.listUsers.items || [];
+      const validUsers = items.filter((u): u is User => u != null && u.id != null);
+      setUsers(validUsers);
     } catch (err: any) {
       console.error('Error fetching users:', err);
       setError(err.message || 'Failed to fetch users');
@@ -102,11 +105,14 @@ export const UserManagement = () => {
   // Filter users
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
+      // Defensive check for null users
+      if (!user || !user.id) return false;
+      
       // Search filter
       const searchMatch = 
         searchTerm === '' ||
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (user.firstName && user.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (user.lastName && user.lastName.toLowerCase().includes(searchTerm.toLowerCase()));
       
@@ -157,21 +163,37 @@ export const UserManagement = () => {
   };
 
   const handleUserUpdated = (updatedUser: User) => {
+    if (!updatedUser?.id) {
+      console.warn('handleUserUpdated called with invalid user');
+      return;
+    }
     setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
     showSuccess('User updated successfully');
   };
 
   const handleUserCreated = (newUser: User) => {
+    if (!newUser?.id) {
+      console.warn('handleUserCreated called with invalid user');
+      return;
+    }
     setUsers(prev => [newUser, ...prev]);
     showSuccess('User created successfully');
   };
 
   const handlePermissionsUpdated = (updatedUser: User) => {
+    if (!updatedUser?.id) {
+      console.warn('handlePermissionsUpdated called with invalid user');
+      return;
+    }
     setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
     showSuccess('Permissions updated successfully');
   };
 
   const handleEntityPermissionsUpdated = (updatedUser: User) => {
+    if (!updatedUser?.id) {
+      console.warn('handleEntityPermissionsUpdated called with invalid user');
+      return;
+    }
     setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
     showSuccess('Entity permissions updated successfully');
   };
@@ -199,11 +221,11 @@ export const UserManagement = () => {
   // Access denied for non-super admins
   if (!isSuperAdmin) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg text-center max-w-md">
           <ShieldExclamationIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-          <p className="text-gray-600">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-2">Access Denied</h2>
+          <p className="text-gray-600 dark:text-gray-400">
             You don't have permission to access the User Management page. 
             Only Super Administrators can manage users.
           </p>
@@ -213,14 +235,14 @@ export const UserManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
+      <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">User Management</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Manage user accounts, roles, and permissions
               </p>
             </div>
@@ -238,18 +260,18 @@ export const UserManagement = () => {
       {/* Success/Error Messages */}
       {successMessage && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+          <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center gap-2">
             <CheckIcon className="h-5 w-5 text-green-500" />
-            <p className="text-sm text-green-700">{successMessage}</p>
+            <p className="text-sm text-green-700 dark:text-green-400">{successMessage}</p>
           </div>
         </div>
       )}
       
       {error && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
             <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
-            <p className="text-sm text-red-700">{error}</p>
+            <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
             <button onClick={() => setError(null)} className="ml-auto">
               <XMarkIcon className="h-4 w-4 text-red-500" />
             </button>
@@ -259,7 +281,7 @@ export const UserManagement = () => {
 
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="bg-white rounded-lg shadow-sm border p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border dark:border-gray-800 p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
             <div className="relative flex-1">
@@ -269,7 +291,7 @@ export const UserManagement = () => {
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
             
@@ -277,7 +299,7 @@ export const UserManagement = () => {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value as UserRole | 'ALL')}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-100"
             >
               <option value="ALL">All Roles</option>
               {Object.entries(ROLE_LABELS).map(([role, label]) => (
@@ -289,7 +311,7 @@ export const UserManagement = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'ACTIVE' | 'INACTIVE')}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-100"
             >
               <option value="ALL">All Status</option>
               <option value="ACTIVE">Active</option>
@@ -302,50 +324,50 @@ export const UserManagement = () => {
       {/* Users List */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         {loading ? (
-          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border dark:border-gray-800 p-8 text-center">
             <div className="animate-spin h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>
-            <p className="mt-4 text-gray-500">Loading users...</p>
+            <p className="mt-4 text-gray-500 dark:text-gray-400">Loading users...</p>
           </div>
         ) : filteredUsers.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border dark:border-gray-800 p-8 text-center">
             <UserCircleIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">No users found matching your criteria</p>
+            <p className="text-gray-500 dark:text-gray-400">No users found matching your criteria</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border dark:border-gray-800 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Role
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Pages
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Entities
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Last Login
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredUsers.map((user) => {
                     const entityAccess = getEntityAccessText(user);
                     
                     return (
-                      <tr key={user.id} className="hover:bg-gray-50">
+                      <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="h-10 w-10 flex-shrink-0">
@@ -356,21 +378,21 @@ export const UserManagement = () => {
                                   alt=""
                                 />
                               ) : (
-                                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                  <span className="text-indigo-600 font-medium text-sm">
-                                    {(user.firstName?.[0] || user.username[0]).toUpperCase()}
+                                <div className="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                                  <span className="text-indigo-600 dark:text-indigo-400 font-medium text-sm">
+                                    {(user.firstName?.[0] || user.username?.[0] || '?').toUpperCase()}
                                     {(user.lastName?.[0] || '').toUpperCase()}
                                   </span>
                                 </div>
                               )}
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                 {user.firstName && user.lastName 
                                   ? `${user.firstName} ${user.lastName}`
                                   : user.username}
                               </div>
-                              <div className="text-sm text-gray-500">{user.email}</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
                             </div>
                           </div>
                         </td>
@@ -385,8 +407,8 @@ export const UserManagement = () => {
                             disabled={actionLoading === user.id}
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
                               user.isActive !== false
-                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                : 'bg-red-100 text-red-800 hover:bg-red-200'
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
+                                : 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50'
                             }`}
                           >
                             {actionLoading === user.id ? (
@@ -399,13 +421,13 @@ export const UserManagement = () => {
                           </button>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
                             {user.allowedPages && user.allowedPages.length > 0 ? (
-                              <span className="text-indigo-600 font-medium">
+                              <span className="text-indigo-600 dark:text-indigo-400 font-medium">
                                 {user.allowedPages.length} pages
                               </span>
                             ) : (
-                              <span className="text-gray-400">Default</span>
+                              <span className="text-gray-400 dark:text-gray-500">Default</span>
                             )}
                           </div>
                         </td>
@@ -414,7 +436,7 @@ export const UserManagement = () => {
                             {entityAccess.text}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                           {user.lastLoginAt 
                             ? new Date(user.lastLoginAt).toLocaleDateString()
                             : 'Never'}
@@ -423,28 +445,28 @@ export const UserManagement = () => {
                           <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => setEditingUser(user)}
-                              className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                               title="Edit User"
                             >
                               <PencilSquareIcon className="h-5 w-5" />
                             </button>
                             <button
                               onClick={() => setPermissionsUser(user)}
-                              className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                              className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                               title="Edit Page Permissions"
                             >
                               <ShieldCheckIcon className="h-5 w-5" />
                             </button>
                             <button
                               onClick={() => setEntityPermissionsUser(user)}
-                              className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                               title="Edit Entity Permissions"
                             >
                               <BuildingOffice2Icon className="h-5 w-5" />
                             </button>
                             <button
                               onClick={() => setResetPasswordUser(user)}
-                              className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                              className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
                               title="Reset Password"
                             >
                               <KeyIcon className="h-5 w-5" />
@@ -459,7 +481,7 @@ export const UserManagement = () => {
             </div>
             
             {/* Results count */}
-            <div className="px-6 py-3 bg-gray-50 border-t text-sm text-gray-500">
+            <div className="px-6 py-3 bg-gray-50 dark:bg-gray-800 border-t dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
               Showing {filteredUsers.length} of {users.length} users
             </div>
           </div>

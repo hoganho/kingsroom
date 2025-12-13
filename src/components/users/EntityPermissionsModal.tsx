@@ -31,8 +31,7 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
   // Parse user's current entity permissions
   const parseEntityIds = (ids: string[] | null | undefined): string[] => {
     if (!ids) return [];
-    if (Array.isArray(ids)) return ids;
-    // Handle DynamoDB list format if needed
+    if (Array.isArray(ids)) return ids.filter((id): id is string => id != null);
     return [];
   };
 
@@ -116,17 +115,15 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
             defaultEntityId: defaultEntityId,
           },
         },
-      }) as any;
+      }) as { data: { adminUpdateUser: { success: boolean; message?: string; user?: User } } };
 
-      if (response.data?.adminUpdateUser?.success) {
-        onPermissionsUpdated({
-          ...user,
-          allowedEntityIds: entityIdsToSave,
-          defaultEntityId: defaultEntityId,
-        } as User);
+      const result = response.data.adminUpdateUser;
+      
+      if (result.success && result.user) {
+        onPermissionsUpdated(result.user);
         onClose();
       } else {
-        setError(response.data?.adminUpdateUser?.message || 'Failed to update permissions');
+        setError(result.message || 'Failed to update permissions');
       }
     } catch (err: any) {
       console.error('Error updating entity permissions:', err);
@@ -146,25 +143,25 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
         />
 
         {/* Modal */}
-        <div className="relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+        <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b">
+          <div className="flex items-center justify-between p-6 border-b dark:border-gray-800">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <BuildingOffice2Icon className="h-6 w-6 text-indigo-600" />
+              <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                <BuildingOffice2Icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
                   Entity Permissions
                 </h2>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {user.firstName} {user.lastName} ({user.username})
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
@@ -174,14 +171,14 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
           <div className="flex-1 overflow-y-auto p-6">
             {/* Error Message */}
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
                 <ExclamationTriangleIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
-                <p className="text-sm text-red-700">{error}</p>
+                <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
               </div>
             )}
 
             {/* Grant All Access Toggle */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -190,10 +187,10 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
                   className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                 />
                 <div>
-                  <span className="font-medium text-gray-900">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
                     Grant access to all entities
                   </span>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     User will automatically have access to any new entities created in the future.
                   </p>
                 </div>
@@ -205,22 +202,22 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
               <>
                 {/* Quick Actions */}
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-gray-700">
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Select Entities ({allowedEntityIds.size} selected)
                   </h3>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={selectAll}
-                      className="text-sm text-indigo-600 hover:text-indigo-800"
+                      className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
                     >
                       Select All
                     </button>
-                    <span className="text-gray-300">|</span>
+                    <span className="text-gray-300 dark:text-gray-600">|</span>
                     <button
                       type="button"
                       onClick={clearAll}
-                      className="text-sm text-gray-600 hover:text-gray-800"
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                     >
                       Clear All
                     </button>
@@ -233,7 +230,7 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
                     <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full" />
                   </div>
                 ) : allEntities.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     No entities available
                   </div>
                 ) : (
@@ -247,8 +244,8 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
                           key={entity.id}
                           className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
                             isAllowed
-                              ? 'bg-indigo-50 border-indigo-200'
-                              : 'bg-white border-gray-200 hover:bg-gray-50'
+                              ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800'
+                              : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                           }`}
                         >
                           <label className="flex items-center gap-3 cursor-pointer flex-1">
@@ -266,15 +263,15 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
                                   className="h-8 w-8 rounded object-cover"
                                 />
                               ) : (
-                                <div className="h-8 w-8 rounded bg-gray-200 flex items-center justify-center">
-                                  <BuildingOffice2Icon className="h-4 w-4 text-gray-500" />
+                                <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                  <BuildingOffice2Icon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                 </div>
                               )}
                               <div>
-                                <span className="font-medium text-gray-900">
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
                                   {entity.entityName}
                                 </span>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
                                   {entity.gameUrlDomain}
                                 </p>
                               </div>
@@ -288,10 +285,10 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
                             disabled={!isAllowed}
                             className={`p-2 rounded-lg transition-colors ${
                               isDefault
-                                ? 'text-yellow-500 bg-yellow-50'
+                                ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
                                 : isAllowed
-                                ? 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
-                                : 'text-gray-300 cursor-not-allowed'
+                                ? 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                                : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
                             }`}
                             title={isDefault ? 'Default entity' : 'Set as default'}
                           >
@@ -312,13 +309,13 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
             {/* Default Entity for Grant All Access */}
             {grantAllAccess && (
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Default Entity (optional)
                 </label>
                 <select
                   value={defaultEntityId || ''}
                   onChange={(e) => setDefaultEntityId(e.target.value || null)}
-                  className="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="w-full rounded-lg border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-100"
                 >
                   <option value="">No default (use first entity)</option>
                   {allEntities.map((entity) => (
@@ -327,18 +324,18 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
                     </option>
                   ))}
                 </select>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   The default entity will be pre-selected when the user logs in.
                 </p>
               </div>
             )}
 
             {/* Info Box */}
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="text-sm font-medium text-blue-800 mb-1">
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <h4 className="text-sm font-medium text-blue-800 dark:text-blue-400 mb-1">
                 How Entity Permissions Work
               </h4>
-              <ul className="text-sm text-blue-700 space-y-1">
+              <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                 <li>• Users can only view and manage data for their allowed entities</li>
                 <li>• The default entity (★) is pre-selected when they log in</li>
                 <li>• SUPER_ADMIN and ADMIN roles always have access to all entities</li>
@@ -348,17 +345,17 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between p-6 border-t bg-gray-50">
-            <div className="text-sm text-gray-500">
+          <div className="flex items-center justify-between p-6 border-t dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               {grantAllAccess ? (
-                <span className="text-green-600 font-medium">
+                <span className="text-green-600 dark:text-green-400 font-medium">
                   ✓ Full access to all entities
                 </span>
               ) : (
                 <>
                   {allowedEntityIds.size} of {allEntities.length} entities selected
                   {defaultEntityId && (
-                    <span className="ml-2 text-yellow-600">
+                    <span className="ml-2 text-yellow-600 dark:text-yellow-400">
                       • Default: {allEntities.find(e => e.id === defaultEntityId)?.entityName}
                     </span>
                   )}
@@ -370,7 +367,7 @@ export const EntityPermissionsModal: React.FC<EntityPermissionsModalProps> = ({
                 type="button"
                 onClick={onClose}
                 disabled={saving}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
               >
                 Cancel
               </button>

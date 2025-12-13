@@ -8,7 +8,8 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
-import { adminUpdateUserMutation, User } from '../../graphql/userManagement';import { 
+import { adminUpdateUserMutation, User } from '../../graphql/userManagement';
+import { 
   ALL_PAGES, 
   PageConfig, 
   PageCategory, 
@@ -37,10 +38,11 @@ const CATEGORY_ORDER: PageCategory[] = [
 
 export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: PagePermissionsModalProps) => {
   const client = generateClient();
+  
   // Initialize with user's current permissions, or default role permissions if none set
   const initialPages = useMemo(() => {
     if (user.allowedPages && user.allowedPages.length > 0) {
-      return new Set(user.allowedPages);
+      return new Set(user.allowedPages.filter((p): p is string => p != null));
     }
     return new Set(DEFAULT_ROLE_PERMISSIONS[user.role] || []);
   }, [user]);
@@ -57,7 +59,7 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
   const filteredGroupedPages = useMemo(() => {
     if (!searchTerm) return groupedPages;
     
-    const filtered: Record<PageCategory, PageConfig[]> = {} as any;
+    const filtered: Record<PageCategory, PageConfig[]> = {} as Record<PageCategory, PageConfig[]>;
     
     CATEGORY_ORDER.forEach(category => {
       const pages = groupedPages[category]?.filter(page =>
@@ -137,10 +139,16 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
             allowedPages: isDefault ? null : Array.from(selectedPages),
           },
         },
-      }) as { data: { updateUser: User } };
+      }) as { data: { adminUpdateUser: { success: boolean; message?: string; user?: User } } };
 
-      onPermissionsUpdated(response.data.updateUser);
-      onClose();
+      const result = response.data.adminUpdateUser;
+      
+      if (result.success && result.user) {
+        onPermissionsUpdated(result.user);
+        onClose();
+      } else {
+        setError(result.message || 'Failed to update permissions');
+      }
     } catch (err: any) {
       console.error('Error updating permissions:', err);
       setError(err.message || 'Failed to update permissions');
@@ -165,29 +173,29 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
         <div className="fixed inset-0 bg-black/50" onClick={onClose} />
         
         {/* Modal */}
-        <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+        <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
+          <div className="flex items-center justify-between p-4 border-b dark:border-gray-800 flex-shrink-0">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Edit Page Permissions</h2>
-              <p className="text-sm text-gray-500">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Edit Page Permissions</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {user.firstName && user.lastName 
                   ? `${user.firstName} ${user.lastName}` 
                   : user.username}
                 {' · '}
-                <span className="text-indigo-600">{user.role.replace('_', ' ')}</span>
+                <span className="text-indigo-600 dark:text-indigo-400">{user.role.replace('_', ' ')}</span>
               </p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
           </div>
 
           {/* Toolbar */}
-          <div className="p-4 border-b bg-gray-50 flex-shrink-0">
+          <div className="p-4 border-b dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex-shrink-0">
             <div className="flex flex-col sm:flex-row gap-3">
               {/* Search */}
               <div className="flex-1 relative">
@@ -197,7 +205,7 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
                   placeholder="Search pages..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-100"
                 />
               </div>
               
@@ -205,20 +213,20 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
               <div className="flex gap-2">
                 <button
                   onClick={resetToDefault}
-                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   <ArrowPathIcon className="h-4 w-4 mr-1" />
                   Reset to Default
                 </button>
                 <button
                   onClick={selectAll}
-                  className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Select All
                 </button>
                 <button
                   onClick={clearAll}
-                  className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Clear
                 </button>
@@ -227,11 +235,11 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
 
             {/* Stats */}
             <div className="mt-3 flex items-center gap-4 text-sm">
-              <span className="text-gray-600">
+              <span className="text-gray-600 dark:text-gray-400">
                 <strong>{selectedPages.size}</strong> of {ALL_PAGES.length} pages selected
               </span>
               {isDefault && (
-                <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">
+                <span className="inline-flex items-center px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 rounded-full text-xs">
                   <CheckIcon className="h-3 w-3 mr-1" />
                   Using default permissions
                 </span>
@@ -241,10 +249,10 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
 
           {/* Error */}
           {error && (
-            <div className="p-4 bg-red-50 border-b border-red-200 flex-shrink-0">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 flex-shrink-0">
               <div className="flex items-start gap-2">
                 <ExclamationTriangleIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
-                <span className="text-sm text-red-700">{error}</span>
+                <span className="text-sm text-red-700 dark:text-red-400">{error}</span>
               </div>
             </div>
           )}
@@ -260,9 +268,9 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
                 const someSelected = pages.some(p => selectedPages.has(p.path));
 
                 return (
-                  <div key={category} className="border rounded-lg overflow-hidden">
+                  <div key={category} className="border dark:border-gray-700 rounded-lg overflow-hidden">
                     {/* Category Header */}
-                    <div className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between">
+                    <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b dark:border-gray-700 flex items-center justify-between">
                       <label className="flex items-center gap-3 cursor-pointer">
                         <input
                           type="checkbox"
@@ -273,17 +281,17 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
                           onChange={() => toggleCategory(category)}
                           className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                         />
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
                           {CATEGORY_LABELS[category]}
                         </span>
                       </label>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
                         {pages.filter(p => selectedPages.has(p.path)).length} / {pages.length}
                       </span>
                     </div>
 
                     {/* Pages */}
-                    <div className="divide-y">
+                    <div className="divide-y dark:divide-gray-700">
                       {pages.map(page => {
                         const isSelected = selectedPages.has(page.path);
                         const isDefaultSelected = defaultPermissions.includes(page.path);
@@ -291,8 +299,8 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
                         return (
                           <label
                             key={page.path}
-                            className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors ${
-                              isSelected ? 'bg-indigo-50/50' : ''
+                            className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                              isSelected ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''
                             }`}
                           >
                             <input
@@ -304,22 +312,22 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className={`font-medium ${isSelected ? 'text-gray-900' : 'text-gray-600'}`}>
+                                <span className={`font-medium ${isSelected ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}`}>
                                   {page.label}
                                 </span>
                                 {page.alwaysAllowed && (
-                                  <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
+                                  <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded text-xs">
                                     Always On
                                   </span>
                                 )}
                                 {isDefaultSelected && !page.alwaysAllowed && (
-                                  <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                                  <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-xs">
                                     Default
                                   </span>
                                 )}
                               </div>
-                              <p className="text-sm text-gray-500 truncate">{page.description}</p>
-                              <code className="text-xs text-gray-400">{page.path}</code>
+                              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{page.description}</p>
+                              <code className="text-xs text-gray-400 dark:text-gray-500">{page.path}</code>
                             </div>
                           </label>
                         );
@@ -332,8 +340,8 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between p-4 border-t bg-gray-50 flex-shrink-0">
-            <p className="text-sm text-gray-500">
+          <div className="flex items-center justify-between p-4 border-t dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex-shrink-0">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {isDefault 
                 ? 'User will use default role permissions'
                 : 'User will use custom permissions'}
@@ -342,7 +350,7 @@ export const PagePermissionsModal = ({ user, onClose, onPermissionsUpdated }: Pa
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>
