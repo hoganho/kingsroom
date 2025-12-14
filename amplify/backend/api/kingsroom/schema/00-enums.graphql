@@ -446,3 +446,26 @@ enum BackgroundTaskStatus {
   CANCELLED
   PARTIAL_SUCCESS
 }
+
+# ===================================================================
+# ENRICHMENT RESOLUTION ENUMS
+# Used by gameDataEnricher to track resolution outcomes
+# ===================================================================
+
+enum SeriesResolutionStatus {
+  MATCHED_EXISTING      # Found existing TournamentSeries
+  CREATED_NEW           # Created new TournamentSeries
+  NOT_SERIES            # Game is not part of a series
+  SKIPPED               # Resolution was skipped (per options)
+  PENDING_REVIEW        # Needs manual review (low confidence)
+  FAILED                # Resolution failed (error)
+}
+
+enum RecurringResolutionStatus {
+  MATCHED_EXISTING      # Found existing RecurringGame
+  CREATED_NEW           # Created new RecurringGame
+  NOT_RECURRING         # Game is not recurring
+  SKIPPED               # Resolution was skipped (per options)
+  PENDING_REVIEW        # Needs manual review (low confidence)
+  FAILED                # Resolution failed (error)
+}

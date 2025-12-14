@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": 1765679436920,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1765679441244
+  },
+  {
+    "timestamp": 1765679437300,
+    "message": "START RequestId: c3fd1bba-2ae7-4666-87a4-a501dc1c079f Version: $LATEST\n",
+    "ingestionTime": 1765679441244
+  },
+  {
+    "timestamp": 1765679437302,
+    "message": "2025-12-14T02:30:37.302Z\tc3fd1bba-2ae7-4666-87a4-a501dc1c079f\tINFO\t[Consolidator] Handling previewConsolidation query\n",
+    "ingestionTime": 1765679441244
+  },
+  {
+    "timestamp": 1765679437323,
+    "message": "2025-12-14T02:30:37.323Z\tc3fd1bba-2ae7-4666-87a4-a501dc1c079f\tINFO\t[Consolidator:Preview] Analyzing: {\n  name: 'Colossus Series Wednesday Mega Satty (1kHr + Main) 3 package GTD 3 Mega Packages Guaranteed',\n  venueId: 'fd4f7fb1-67fd-4398-b4b4-d85722256d45',\n  buyIn: 250,\n  tournamentSeriesId: null,\n  eventNumber: null,\n  seriesName: 'Colossus Series',\n  isMainEvent: false,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  dayNumber: null,\n  flightLetter: null\n}\n",
+    "ingestionTime": 1765679441244
+  },
+  {
+    "timestamp": 1765679437341,
+    "message": "2025-12-14T02:30:37.341Z\tc3fd1bba-2ae7-4666-87a4-a501dc1c079f\tINFO\t[Consolidator:Preview] Strategy selected: {\n  willConsolidate: false,\n  strategy: null,\n  confidence: 0,\n  consolidationKey: null,\n  derivedParentName: 'Colossus Series Wednesday Mega Satty (1kHr + Main) 3 package GTD 3 Mega Packages Guaranteed'\n}\n",
+    "ingestionTime": 1765679441244
+  },
+  {
+    "timestamp": 1765679437383,
+    "message": "END RequestId: c3fd1bba-2ae7-4666-87a4-a501dc1c079f\n",
+    "ingestionTime": 1765679441244
+  },
+  {
+    "timestamp": 1765679437383,
+    "message": "REPORT RequestId: c3fd1bba-2ae7-4666-87a4-a501dc1c079f\tDuration: 82.04 ms\tBilled Duration: 460 ms\tMemory Size: 128 MB\tMax Memory Used: 94 MB\tInit Duration: 377.05 ms\t\n",
+    "ingestionTime": 1765679441244
+  }
+]

@@ -49,6 +49,9 @@ const AWS_REGION = process.env.REGION || 'ap-southeast-2';
 const SAVE_GAME_FUNCTION_NAME = process.env.SAVE_GAME_FUNCTION_NAME || 
     `saveGameFunction-${process.env.ENV || 'dev'}`;
 
+const GAME_DATA_ENRICHER_FUNCTION_NAME = process.env.FUNCTION_GAMEDATAENRICHER_NAME || 
+    `gameDataEnricher-${process.env.ENV || 'dev'}`;
+
 // ─────────────────────────────────────────────────────────────────────
 // VENUE & SERIES MATCHING
 // ─────────────────────────────────────────────────────────────────────

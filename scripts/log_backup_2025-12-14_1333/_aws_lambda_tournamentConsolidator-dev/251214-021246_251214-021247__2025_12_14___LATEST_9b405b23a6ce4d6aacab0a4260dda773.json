@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": 1765678366691,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1765678369047
+  },
+  {
+    "timestamp": 1765678367085,
+    "message": "START RequestId: 028b390e-343e-44de-a05f-09bcce982572 Version: $LATEST\n",
+    "ingestionTime": 1765678369047
+  },
+  {
+    "timestamp": 1765678367087,
+    "message": "2025-12-14T02:12:47.087Z\t028b390e-343e-44de-a05f-09bcce982572\tINFO\t[Consolidator] Handling previewConsolidation query\n",
+    "ingestionTime": 1765678369047
+  },
+  {
+    "timestamp": 1765678367108,
+    "message": "2025-12-14T02:12:47.108Z\t028b390e-343e-44de-a05f-09bcce982572\tINFO\t[Consolidator:Preview] Analyzing: {\n  name: 'Wednesday night CASH GAME',\n  venueId: 'fd4f7fb1-67fd-4398-b4b4-d85722256d45',\n  buyIn: null,\n  tournamentSeriesId: null,\n  eventNumber: null,\n  seriesName: '❌ MISSING',\n  isMainEvent: false,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  dayNumber: null,\n  flightLetter: null\n}\n",
+    "ingestionTime": 1765678369047
+  },
+  {
+    "timestamp": 1765678367110,
+    "message": "2025-12-14T02:12:47.110Z\t028b390e-343e-44de-a05f-09bcce982572\tINFO\t[Consolidator:Preview] Strategy selected: {\n  willConsolidate: false,\n  strategy: null,\n  confidence: 0,\n  consolidationKey: null,\n  derivedParentName: 'Wednesday night CASH GAME'\n}\n",
+    "ingestionTime": 1765678369047
+  },
+  {
+    "timestamp": 1765678367149,
+    "message": "END RequestId: 028b390e-343e-44de-a05f-09bcce982572\n",
+    "ingestionTime": 1765678369047
+  },
+  {
+    "timestamp": 1765678367149,
+    "message": "REPORT RequestId: 028b390e-343e-44de-a05f-09bcce982572\tDuration: 63.55 ms\tBilled Duration: 454 ms\tMemory Size: 128 MB\tMax Memory Used: 94 MB\tInit Duration: 390.21 ms\t\n",
+    "ingestionTime": 1765678369047
+  }
+]

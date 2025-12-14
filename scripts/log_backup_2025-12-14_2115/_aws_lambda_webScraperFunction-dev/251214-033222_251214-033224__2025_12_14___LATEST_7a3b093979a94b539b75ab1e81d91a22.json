@@ -1,0 +1,117 @@
+[
+  {
+    "timestamp": 1765683142652,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683143630,
+    "message": "START RequestId: 93b1b407-0152-479f-9551-be456fbb11a5 Version: $LATEST\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683143739,
+    "message": "2025-12-14T03:32:23.739Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[EntityResolver] No entity found for domain kingsroom.com.au\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683143739,
+    "message": "2025-12-14T03:32:23.739Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[Handler] Operation: fetchTournamentData, EntityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683143784,
+    "message": "2025-12-14T03:32:23.784Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[FetchOrchestrator] Starting fetch {\n  url: 'https://kingsroom.com.au/tournament/?id=936',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 936,\n  forceRefresh: false,\n  hasS3Key: true\n}\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683143784,
+    "message": "2025-12-14T03:32:23.784Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[CacheManager] Checking S3 cache: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/936/2025-12-11T10-59-32-035Z_tid936_ac7aa3d3.html\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144003,
+    "message": "2025-12-14T03:32:24.003Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[S3Client] Retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/936/2025-12-11T10-59-32-035Z_tid936_ac7aa3d3.html (83781 bytes)\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144003,
+    "message": "2025-12-14T03:32:24.003Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[CacheManager] ✅ S3 cache hit {\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/936/2025-12-11T10-59-32-035Z_tid936_ac7aa3d3.html',\n  contentLength: 83781\n}\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144016,
+    "message": "2025-12-14T03:32:24.016Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[CacheManager] Updated cache hit stats for https://kingsroom.com.au/tournament/?id=936\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144016,
+    "message": "2025-12-14T03:32:24.016Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[FetchOrchestrator] ✅ Cache hit - source: S3_CACHE {\n  url: 'https://kingsroom.com.au/tournament/?id=936',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 936\n}\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144169,
+    "message": "2025-12-14T03:32:24.169Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[ParseOrchestrator] Starting parse for tournament 936, forceRefresh: false\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144181,
+    "message": "2025-12-14T03:32:24.181Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[ParseOrchestrator] Reference data: 37 venues, 6 series titles\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144264,
+    "message": "2025-12-14T03:32:24.264Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[VenueMatcher] Exact match: \"Bella Vista Hotel\"\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144265,
+    "message": "2025-12-14T03:32:24.265Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[ParseOrchestrator] Completed. Found 33 keys, Status: FINISHED, DoNotScrape: false\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144304,
+    "message": "2025-12-14T03:32:24.304Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[Monitor] DDB_ERROR QueryCommand:error { error: 'The table does not have the specified index: byFingerprint' }\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144304,
+    "message": "2025-12-14T03:32:24.304Z\t93b1b407-0152-479f-9551-be456fbb11a5\tWARN\t[StructureFingerprint] Error tracking structure: The table does not have the specified index: byFingerprint\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144383,
+    "message": "2025-12-14T03:32:24.383Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[S3StorageManager] ✅ Updated with parsed data { dataChanged: false, isRescrape: false }\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144423,
+    "message": "2025-12-14T03:32:24.423Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[Monitor] DDB_ERROR PutCommand:error {\n  error: 'One or more parameter values were invalid: Type mismatch for Index Key scraperJobId Expected: S Actual: NULL IndexName: byScraperJob'\n}\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144424,
+    "message": "2025-12-14T03:32:24.424Z\t93b1b407-0152-479f-9551-be456fbb11a5\tWARN\t[ScrapeAttemptTracker] Failed to create attempt: One or more parameter values were invalid: Type mismatch for Index Key scraperJobId Expected: S Actual: NULL IndexName: byScraperJob\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144424,
+    "message": "2025-12-14T03:32:24.424Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[Handler] Completed in 792ms\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144424,
+    "message": "2025-12-14T03:32:24.424Z\t93b1b407-0152-479f-9551-be456fbb11a5\tINFO\t[Monitor] Flush: {\n  function: 'webScraperFunction',\n  entity: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  duration: 792,\n  ddbReads: 6,\n  ddbWrites: 3,\n  errors: 4,\n  operations: 4\n}\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144443,
+    "message": "END RequestId: 93b1b407-0152-479f-9551-be456fbb11a5\n",
+    "ingestionTime": 1765683150103
+  },
+  {
+    "timestamp": 1765683144443,
+    "message": "REPORT RequestId: 93b1b407-0152-479f-9551-be456fbb11a5\tDuration: 811.95 ms\tBilled Duration: 1787 ms\tMemory Size: 1024 MB\tMax Memory Used: 142 MB\tInit Duration: 974.61 ms\t\n",
+    "ingestionTime": 1765683150103
+  }
+]

@@ -3,14 +3,28 @@
  * Save Handler
  * ===================================================================
  * 
- * PASSTHROUGH to saveGameFunction Lambda.
+ * PASSTHROUGH to gameDataEnricher Lambda (with saveToDatabase: true).
  * 
  * This handler does NOT save directly to the Game table.
- * It builds a SaveGameInput payload and invokes saveGameFunction.
+ * It builds an EnrichGameDataInput payload and invokes gameDataEnricher,
+ * which enriches the data and then invokes saveGameFunction.
+ * 
+ * FLOW:
+ * webScraperFunction (save-handler)
+ *     │
+ *     ▼ EnrichGameDataInput { saveToDatabase: true }
+ * gameDataEnricher
+ *     │ (enriches: series, recurring, financials, query keys)
+ *     ▼ SaveGameInput
+ * saveGameFunction
+ *     │ (writes to DB)
+ *     ▼
+ * Game record saved
  * 
  * WHY:
- * - Single source of truth for all game saves
- * - saveGameFunction handles venue resolution, series creation, etc.
+ * - Single enrichment pipeline for all game saves
+ * - gameDataEnricher handles series resolution, recurring detection, etc.
+ * - saveGameFunction is now a pure writer
  * - webScraperFunction stays focused on fetch + parse
  * 
  * ===================================================================
@@ -18,8 +32,11 @@
 
 const { InvokeCommand } = require('@aws-sdk/client-lambda');
 const { QueryCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
-const { SAVE_GAME_FUNCTION_NAME } = require('../config/constants');
 const { getTableName } = require('../config/tables');
+
+// Function name - gameDataEnricher instead of saveGameFunction
+const GAME_DATA_ENRICHER_FUNCTION_NAME = process.env.FUNCTION_GAMEDATAENRICHER_NAME || 
+    `gameDataEnricher-${process.env.ENV || 'dev'}`;
 
 /**
  * Ensure date is in ISO format
@@ -113,7 +130,7 @@ const getTournamentIdFromUrl = (url) => {
 
 /**
  * Handle saveTournamentData operation
- * Delegates to saveGameFunction Lambda
+ * Delegates to gameDataEnricher Lambda (with saveToDatabase: true)
  * 
  * @param {object} options - Save options
  * @param {string} options.sourceUrl - Tournament URL
@@ -139,7 +156,7 @@ const handleSave = async (options, context) => {
     
     const { lambdaClient, ddbDocClient, monitoring } = context;
     
-    console.log(`[SaveHandler] Delegating save to saveGameFunction for ${sourceUrl}`);
+    console.log(`[SaveHandler] Delegating to gameDataEnricher for ${sourceUrl}`);
     
     // Parse data if string
     let parsedData;
@@ -155,8 +172,12 @@ const handleSave = async (options, context) => {
     // Extract player data
     const playerData = extractPlayerDataForProcessing(parsedData);
     
-    // Build SaveGameInput for saveGameFunction
-    const saveGameInput = {
+    // Build EnrichGameDataInput for gameDataEnricher
+    const enrichGameInput = {
+        // Required context
+        entityId,
+        
+        // Source information
         source: {
             type: 'SCRAPE',
             sourceId: sourceUrl,
@@ -164,6 +185,8 @@ const handleSave = async (options, context) => {
             fetchedAt: new Date().toISOString(),
             contentHash: parsedData.contentHash || null
         },
+        
+        // Core game data (enricher will calculate financials, query keys, etc.)
         game: {
             tournamentId,
             existingGameId: existingGameId || null,
@@ -174,42 +197,56 @@ const handleSave = async (options, context) => {
             gameStartDateTime: ensureISODate(parsedData.gameStartDateTime),
             gameEndDateTime: parsedData.gameEndDateTime ? ensureISODate(parsedData.gameEndDateTime) : null,
             registrationStatus: parsedData.registrationStatus || null,
+            gameFrequency: parsedData.gameFrequency || null,
+            
+            // Financials (raw inputs - enricher will calculate derived values)
             buyIn: parsedData.buyIn || 0,
             rake: parsedData.rake || 0,
             startingStack: parsedData.startingStack || 0,
             hasGuarantee: parsedData.hasGuarantee || false,
             guaranteeAmount: parsedData.guaranteeAmount || 0,
-            prizepoolPaid: parsedData.prizepoolPaid || 0,
-            prizepoolCalculated: parsedData.prizepoolCalculated || 0,
-            totalUniquePlayers: parsedData.totalUniquePlayers || 0,
+            
+            // Entry counts
+            totalUniquePlayers: parsedData.totalUniquePlayers || playerData.totalUniquePlayers || 0,
             totalInitialEntries: parsedData.totalInitialEntries || 0,
             totalEntries: parsedData.totalEntries || 0,
-            playersRemaining: parsedData.playersRemaining || null,
             totalRebuys: parsedData.totalRebuys || 0,
             totalAddons: parsedData.totalAddons || 0,
+            
+            // Results
+            prizepoolPaid: parsedData.prizepoolPaid || 0,
+            prizepoolCalculated: parsedData.prizepoolCalculated || 0,
+            playersRemaining: parsedData.playersRemaining || null,
+            totalChipsInPlay: parsedData.totalChipsInPlay || null,
+            averagePlayerStack: parsedData.averagePlayerStack || null,
             totalDuration: parsedData.totalDuration || null,
+            
+            // Classification
+            tournamentType: parsedData.tournamentType || null,
             isSatellite: parsedData.isSatellite || false,
             isSeries: parsedData.isSeries || false,
             isRegular: parsedData.isRegular || false,
             seriesName: parsedData.seriesName || null,
-            gameFrequency: parsedData.gameFrequency || null,
             gameTags: parsedData.gameTags || [],
             levels: parsedData.levels || [],
-            // Financial metrics
-            totalBuyInsCollected: parsedData.totalBuyInsCollected || null,
-            rakeRevenue: parsedData.rakeRevenue || null,
-            prizepoolPlayerContributions: parsedData.prizepoolPlayerContributions || null,
-            prizepoolAddedValue: parsedData.prizepoolAddedValue || null,
-            prizepoolSurplus: parsedData.prizepoolSurplus || null,
-            guaranteeOverlayCost: parsedData.guaranteeOverlayCost || null,
-            gameProfit: parsedData.gameProfit || null,
-            // Recurring game fields
+            
+            // Series event metadata (from name parsing)
+            isMainEvent: parsedData.isMainEvent || false,
+            eventNumber: parsedData.eventNumber || null,
+            dayNumber: parsedData.dayNumber || null,
+            flightLetter: parsedData.flightLetter || null,
+            finalDay: parsedData.finalDay || false,
+            
+            // Recurring game fields (if already known)
             recurringGameId: parsedData.recurringGameId || null,
             recurringGameAssignmentStatus: parsedData.recurringGameAssignmentStatus || 'PENDING_ASSIGNMENT',
             recurringGameAssignmentConfidence: parsedData.recurringGameAssignmentConfidence || 0
         },
+        
+        // Series information for resolution
         series: parsedData.isSeries ? {
             seriesId: parsedData.tournamentSeriesId || null,
+            seriesTitleId: parsedData.seriesTitleId || null,
             seriesName: parsedData.seriesName || null,
             suggestedSeriesId: parsedData.seriesMatch?.autoAssignedSeries?.id || null,
             confidence: parsedData.seriesMatch?.autoAssignedSeries?.score || 0,
@@ -220,33 +257,42 @@ const handleSave = async (options, context) => {
             finalDay: parsedData.finalDay || false,
             year: parsedData.seriesYear || new Date(parsedData.gameStartDateTime || new Date()).getFullYear()
         } : null,
+        
+        // Player data
         players: playerData.totalUniquePlayers > 0 ? {
             allPlayers: playerData.allPlayers,
             totalUniquePlayers: playerData.totalUniquePlayers,
             hasCompleteResults: playerData.hasCompleteResults
         } : null,
+        
+        // Venue information for resolution
         venue: {
             venueId: venueId || null,
             venueName: parsedData.venueName || null,
             suggestedVenueId: parsedData.venueMatch?.autoAssignedVenue?.id || null,
             confidence: parsedData.venueMatch?.suggestions?.[0]?.score || 0
         },
+        
+        // Options - KEY: saveToDatabase: true triggers save via saveGameFunction
         options: {
+            saveToDatabase: true,           // Enricher will invoke saveGameFunction
             skipPlayerProcessing: false,
             forceUpdate: !!existingGameId,
+            autoCreateSeries: true,         // Create TournamentSeries if not found
+            autoCreateRecurring: false,     // Don't auto-create RecurringGame
             doNotScrape,
             scraperJobId
         }
     };
     
-    // Invoke saveGameFunction Lambda
+    // Invoke gameDataEnricher Lambda
     try {
-        monitoring.trackOperation('INVOKE_SAVE_GAME', 'Game', tournamentId.toString(), { entityId });
+        monitoring.trackOperation('INVOKE_ENRICHER', 'Game', tournamentId.toString(), { entityId });
         
         const invokeCommand = new InvokeCommand({
-            FunctionName: SAVE_GAME_FUNCTION_NAME,
+            FunctionName: GAME_DATA_ENRICHER_FUNCTION_NAME,
             InvocationType: 'RequestResponse',
-            Payload: JSON.stringify({ input: saveGameInput })
+            Payload: JSON.stringify({ input: enrichGameInput })
         });
         
         const response = await lambdaClient.send(invokeCommand);
@@ -258,45 +304,61 @@ const handleSave = async (options, context) => {
             throw new Error(responsePayload.errorMessage);
         }
         
-        console.log(`[SaveHandler] saveGameFunction response:`, {
+        console.log(`[SaveHandler] gameDataEnricher response:`, {
             success: responsePayload.success,
-            action: responsePayload.action,
-            gameId: responsePayload.gameId,
-            playerProcessingQueued: responsePayload.playerProcessingQueued
+            validationValid: responsePayload.validation?.isValid,
+            saveAction: responsePayload.saveResult?.action,
+            gameId: responsePayload.saveResult?.gameId,
+            seriesStatus: responsePayload.enrichmentMetadata?.seriesResolution?.status,
+            recurringStatus: responsePayload.enrichmentMetadata?.recurringResolution?.status
         });
         
         if (!responsePayload.success) {
-            throw new Error(responsePayload.message || 'saveGameFunction failed');
+            const errors = responsePayload.validation?.errors?.map(e => e.message).join('; ') || 
+                          responsePayload.error || 
+                          'Unknown error';
+            throw new Error(`Enrichment failed: ${errors}`);
+        }
+        
+        // Extract save result (present when saveToDatabase: true)
+        const saveResult = responsePayload.saveResult;
+        if (!saveResult || !saveResult.success) {
+            throw new Error(saveResult?.message || 'Save failed after enrichment');
         }
         
         // Link S3Storage to game (if applicable)
-        if (responsePayload.success && responsePayload.gameId && parsedData.s3Key) {
+        if (saveResult.gameId && parsedData.s3Key) {
             await linkS3StorageToGame(
                 tournamentId,
                 entityId,
-                responsePayload.gameId,
-                responsePayload.action,
+                saveResult.gameId,
+                saveResult.action,
                 ddbDocClient
             );
         }
         
         // Return compatible response structure
         return {
-            id: responsePayload.gameId,
+            id: saveResult.gameId,
             name: parsedData.name,
             gameStatus: parsedData.gameStatus,
-            venueId: responsePayload.venueAssignment?.venueId,
+            venueId: saveResult.venueAssignment?.venueId || responsePayload.enrichedGame?.venueId,
             entityId,
             sourceUrl,
-            action: responsePayload.action,
-            playerProcessingQueued: responsePayload.playerProcessingQueued,
-            playerProcessingReason: responsePayload.playerProcessingReason,
-            fieldsUpdated: responsePayload.fieldsUpdated || []
+            action: saveResult.action,
+            playerProcessingQueued: saveResult.playerProcessingQueued,
+            playerProcessingReason: saveResult.playerProcessingReason,
+            fieldsUpdated: saveResult.fieldsUpdated || [],
+            // Additional enrichment info
+            seriesAssigned: responsePayload.enrichmentMetadata?.seriesResolution?.status === 'MATCHED_EXISTING' ||
+                           responsePayload.enrichmentMetadata?.seriesResolution?.status === 'CREATED_NEW',
+            seriesName: responsePayload.enrichedGame?.seriesName,
+            recurringGameAssigned: responsePayload.enrichmentMetadata?.recurringResolution?.status === 'MATCHED_EXISTING'
         };
         
     } catch (error) {
-        console.error(`[SaveHandler] Error invoking saveGameFunction:`, error);
-        monitoring.trackOperation('SAVE_GAME_ERROR', 'Game', tournamentId.toString(), {
+        console.error(`[SaveHandler] Error invoking gameDataEnricher:`, error);
+        monitoring.trackOperation('ENRICHER_ERROR', 'Game', tournamentId.toString(), {
             error: error.message,
             entityId
         });

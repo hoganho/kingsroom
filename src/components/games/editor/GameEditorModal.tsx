@@ -1,9 +1,9 @@
 // components/games/editor/GameEditorModal.tsx
 // Modal orchestrator - uses existing GameData and SaveGameInput types
+// UPDATED: Uses enrichGameData mutation instead of deprecated saveGame
 // UPDATED: Includes source selection step for create mode
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { generateClient } from 'aws-amplify/api';
 import type { GameData } from '../../../types/game';
 import type { 
   GameEditorMode,
@@ -22,26 +22,13 @@ import { GameEditorPreview } from './GameEditorPreview';
 import { Modal } from '../../ui/Modal';
 import { Button } from '../../ui/Button';
 
-// ===================================================================
-// GRAPHQL
-// ===================================================================
-
-const saveGameMutation = /* GraphQL */ `
-  mutation SaveGame($input: SaveGameInput!) {
-    saveGame(input: $input) {
-      success
-      gameId
-      action
-      message
-      warnings
-      playerProcessingQueued
-      venueAssignment { venueId status confidence }
-      seriesAssignment { tournamentSeriesId seriesName status confidence }
-      fieldsUpdated
-      wasEdited
-    }
-  }
-`;
+// Import enrichment service for saving
+import {
+  scrapedDataToEnrichInput,
+  enrichGameData,
+  getEnrichmentErrorMessage,
+} from '../../../services/enrichmentService';
+import type { ScrapedGameData } from '../../../API';
 
 // ===================================================================
 // PROPS
@@ -151,6 +138,50 @@ const SaveProgress: React.FC<SaveProgressProps> = ({ status, error, result, onRe
   }
   
   return null;
+};
+
+// ===================================================================
+// HELPER: Convert GameData to ScrapedGameData format for enrichment
+// ===================================================================
+
+const gameDataToScrapedFormat = (data: GameData): ScrapedGameData => {
+  return {
+    __typename: 'ScrapedGameData',
+    tournamentId: data.tournamentId || null,
+    name: data.name || '',
+    gameType: data.gameType || 'TOURNAMENT',
+    gameVariant: data.gameVariant || null,
+    gameStatus: data.gameStatus || 'SCHEDULED',
+    registrationStatus: data.registrationStatus || null,
+    gameStartDateTime: data.gameStartDateTime || new Date().toISOString(),
+    gameEndDateTime: data.gameEndDateTime || null,
+    buyIn: data.buyIn ?? 0,
+    rake: data.rake ?? 0,
+    hasGuarantee: data.hasGuarantee ?? false,
+    guaranteeAmount: data.guaranteeAmount ?? 0,
+    startingStack: data.startingStack ?? 0,
+    totalUniquePlayers: data.totalUniquePlayers ?? 0,
+    totalInitialEntries: data.totalInitialEntries ?? 0,
+    totalEntries: data.totalEntries ?? 0,
+    totalRebuys: data.totalRebuys ?? 0,
+    totalAddons: data.totalAddons ?? 0,
+    prizepoolPaid: data.prizepoolPaid ?? 0,
+    prizepoolCalculated: data.prizepoolCalculated ?? 0,
+    playersRemaining: (data as any).playersRemaining ?? null,
+    // Extended fields
+    venueFee: (data as any).venueFee ?? null,
+    tournamentType: (data as any).tournamentType || null,
+    isSeries: (data as any).isSeries ?? false,
+    seriesName: (data as any).seriesName || null,
+    isSatellite: (data as any).isSatellite ?? false,
+    isRegular: (data as any).isRegular ?? true,
+    gameTags: data.gameTags || [],
+    levels: data.levels || [],
+    entries: [],
+    results: [],
+    seating: [],
+    venueMatch: null,
+  } as unknown as ScrapedGameData;
 };
 
 // ===================================================================
@@ -264,95 +295,110 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({
     
     try {
       const { data, source, auditTrail } = editor.prepareSavePayload();
-      const client = generateClient();
       
-      const saveInput = {
-        source: {
-          type: source?.type || 'MANUAL',
-          sourceId: source?.sourceId || 'manual-entry',
-          entityId: source?.entityId || data.entityId || '',
-          fetchedAt: source?.fetchedAt || new Date().toISOString(),
-          wasEdited: source?.wasEdited || mode !== 'create',
-        },
-        game: {
-          existingGameId: existingGameId,
-          tournamentId: data.tournamentId,
-          name: data.name,
-          gameType: data.gameType || 'TOURNAMENT',
-          gameVariant: data.gameVariant,
-          gameStatus: data.gameStatus,
-          gameStartDateTime: data.gameStartDateTime,
-          gameEndDateTime: data.gameEndDateTime,
-          registrationStatus: data.registrationStatus,
-          gameFrequency: data.gameFrequency,
-          buyIn: data.buyIn,
-          rake: data.rake,
-          guaranteeAmount: data.guaranteeAmount,
-          hasGuarantee: data.hasGuarantee,
-          startingStack: data.startingStack,
-          prizepoolPaid: data.prizepoolPaid,
-          prizepoolCalculated: data.prizepoolCalculated,
-          totalUniquePlayers: data.totalUniquePlayers,
-          totalInitialEntries: data.totalInitialEntries,
-          totalEntries: data.totalEntries,
-          totalRebuys: data.totalRebuys,
-          totalAddons: data.totalAddons,
-          playersRemaining: data.playersRemaining,
-          totalBuyInsCollected: data.totalBuyInsCollected,
-          rakeRevenue: data.rakeRevenue,
-          prizepoolPlayerContributions: data.prizepoolPlayerContributions,
-          prizepoolAddedValue: data.prizepoolAddedValue,
-          prizepoolSurplus: data.prizepoolSurplus,
-          guaranteeOverlayCost: data.guaranteeOverlayCost,
-          gameProfit: data.gameProfit,
-          tournamentType: data.tournamentType,
-          isSeries: data.isSeries,
-          seriesName: data.seriesName,
-          tournamentSeriesId: data.tournamentSeriesId,
-          isMainEvent: data.isMainEvent,
-          eventNumber: data.eventNumber,
-          dayNumber: data.dayNumber,
-          flightLetter: data.flightLetter,
-          finalDay: data.finalDay,
-          isSatellite: data.isSatellite,
-          isRegular: data.isRegular,
-          gameTags: data.gameTags,
-          levels: data.levels ? JSON.stringify(data.levels) : undefined,
-          venueFee: data.venueFee,
-          venueAssignmentStatus: data.venueAssignmentStatus,
-          recurringGameId: data.recurringGameId,
-          recurringGameAssignmentStatus: data.recurringGameAssignmentStatus,
-          deviationNotes: data.deviationNotes,
-        },
-        venue: data.venueId ? { venueId: data.venueId, confidence: 1.0 } : undefined,
-        auditTrail,
-        options: { skipPlayerProcessing: false, forceUpdate: mode === 'edit' },
-      };
+      // Get the effective entity ID
+      const effectiveEntityId = source?.entityId || data.entityId || entityId;
       
-      const response = await client.graphql({
-        query: saveGameMutation,
-        variables: { input: saveInput },
+      if (!effectiveEntityId) {
+        throw new Error('Entity ID is required for saving');
+      }
+      
+      // Build source URL for tracking
+      const sourceUrl = source?.sourceId || `manual-entry-${Date.now()}`;
+      
+      console.log('[GameEditorModal] Saving via enrichment pipeline:', {
+        name: data.name,
+        entityId: effectiveEntityId,
+        venueId: data.venueId,
+        existingGameId,
+        mode,
       });
       
-      const result = (response as any).data?.saveGame as SaveGameResult;
+      // Convert GameData to ScrapedGameData format
+      const scrapedData = gameDataToScrapedFormat(data);
       
-      if (result?.success) {
-        setSaveResult(result);
-        setSaveStatus('success');
-        setModalStep('success');
-        onSaveSuccess?.(result);
-      } else {
-        throw new Error(result?.message || 'Save failed');
+      // Add extra fields that might be on the editor data
+      (scrapedData as any).tournamentSeriesId = (data as any).tournamentSeriesId || null;
+      (scrapedData as any).recurringGameId = (data as any).recurringGameId || null;
+      (scrapedData as any).isMainEvent = (data as any).isMainEvent ?? false;
+      (scrapedData as any).eventNumber = (data as any).eventNumber ?? null;
+      (scrapedData as any).dayNumber = (data as any).dayNumber ?? null;
+      (scrapedData as any).flightLetter = (data as any).flightLetter || null;
+      (scrapedData as any).finalDay = (data as any).finalDay ?? false;
+      (scrapedData as any).venueAssignmentStatus = (data as any).venueAssignmentStatus || null;
+      (scrapedData as any).recurringGameAssignmentStatus = (data as any).recurringGameAssignmentStatus || null;
+      (scrapedData as any).deviationNotes = (data as any).deviationNotes || null;
+      (scrapedData as any).gameFrequency = (data as any).gameFrequency || null;
+      
+      // Build enrichment input
+      const enrichInput = scrapedDataToEnrichInput(
+        scrapedData,
+        effectiveEntityId,
+        sourceUrl,
+        {
+          venueId: data.venueId || venueId || null,
+          existingGameId: existingGameId || null,
+          wasEdited: mode !== 'create' || !!auditTrail,
+        }
+      );
+      
+      // Set save options
+      enrichInput.options = {
+        ...enrichInput.options,
+        saveToDatabase: true,
+        forceUpdate: mode === 'edit' || !!existingGameId,
+        autoCreateSeries: true,
+        autoCreateRecurring: false,
+      };
+      
+      // Call enrichment pipeline
+      const enrichResult = await enrichGameData(enrichInput);
+      
+      if (!enrichResult.success) {
+        const errorMsg = getEnrichmentErrorMessage(enrichResult) || 'Enrichment failed';
+        throw new Error(errorMsg);
       }
+      
+      if (!enrichResult.saveResult) {
+        throw new Error('No save result returned from enrichment');
+      }
+      
+      // Map enrichment save result to expected SaveGameResult format
+      const result: SaveGameResult = {
+        success: enrichResult.saveResult.success,
+        gameId: enrichResult.saveResult.gameId || '',
+        action: enrichResult.saveResult.action as 'CREATED' | 'UPDATED' | 'NO_CHANGES',
+        message: enrichResult.saveResult.message || undefined,
+        warnings: enrichResult.saveResult.warnings || undefined,
+        playerProcessingQueued: enrichResult.saveResult.playerProcessingQueued || false,
+        venueAssignment: enrichResult.saveResult.venueAssignment ? {
+          venueId: enrichResult.saveResult.venueAssignment.venueId || '',
+          status: enrichResult.saveResult.venueAssignment.status || 'PENDING_ASSIGNMENT',
+          confidence: enrichResult.saveResult.venueAssignment.confidence || 0,
+        } : undefined,
+        fieldsUpdated: enrichResult.saveResult.fieldsUpdated || undefined,
+        wasEdited: mode !== 'create',
+      };
+      
+      setSaveResult(result);
+      setSaveStatus('success');
+      setModalStep('success');
+      onSaveSuccess?.(result);
+      
+      console.log('[GameEditorModal] Save successful:', {
+        gameId: result.gameId,
+        action: result.action,
+      });
+      
     } catch (error) {
-      console.error('Save error:', error);
+      console.error('[GameEditorModal] Save error:', error);
       const errMsg = error instanceof Error ? error.message : 'Save failed';
       setSaveError(errMsg);
       setSaveStatus('error');
       setModalStep('error');
       onSaveError?.(error as Error);
     }
-  }, [editor, mode, existingGameId, onSaveSuccess, onSaveError]);
+  }, [editor, mode, existingGameId, entityId, venueId, onSaveSuccess, onSaveError]);
   
   // ===================================================================
   // TITLE

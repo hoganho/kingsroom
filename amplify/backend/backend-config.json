@@ -116,6 +116,38 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "gameDataEnricher": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "gameFinancialsProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "gameIdTracker": {
       "build": true,
       "dependsOn": [
@@ -434,6 +466,38 @@
         {
           "category": "function",
           "resourceName": "entityVenueDashMetricCounter"
+        }
+      ]
+    },
+    "AMPLIFY_function_gameDataEnricher_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "gameDataEnricher"
+        }
+      ]
+    },
+    "AMPLIFY_function_gameDataEnricher_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "gameDataEnricher"
+        }
+      ]
+    },
+    "AMPLIFY_function_gameFinancialsProcessor_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "gameFinancialsProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_gameFinancialsProcessor_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "gameFinancialsProcessor"
         }
       ]
     },

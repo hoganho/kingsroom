@@ -536,9 +536,21 @@ type SaveGameResult {
   playerProcessingReason: String
   venueAssignment: SaveVenueAssignmentInfo
   seriesAssignment: SaveSeriesAssignmentInfo
+  recurringGameAssignment: SaveRecurringAssignmentInfo  # NEW: Recurring game assignment info
   fieldsUpdated: [String]
   wasEdited: Boolean
 }
+
+# NEW: Recurring game assignment result info
+type SaveRecurringAssignmentInfo {
+  recurringGameId: ID
+  recurringGameName: String
+  status: RecurringGameAssignmentStatus
+  confidence: Float
+  wasCreated: Boolean
+  inheritedGuarantee: Float
+}
+
 
 input ReassignGameVenueInput {
   gameId: ID!

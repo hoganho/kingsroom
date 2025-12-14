@@ -104,7 +104,9 @@ export type GameData = {
     totalDuration?: string | null;
     gameTags?: (string | null)[] | null;
     seriesName?: string | null;
-    
+    gameDayOfWeek?: string | null;
+    buyInBucket?: string | null;
+
     // === NEW RECURRING GAME FIELDS (ADD THESE) ===
     recurringGameId?: string | null;
     recurringGameAssignmentStatus?: RecurringGameAssignmentStatus;

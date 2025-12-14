@@ -1,20 +1,29 @@
-// src/components/scraper/SaveConfirmation/SaveConfirmationModal.tsx
-// OPTION B VERSION - Series management delegated to enhanced SeriesDetailsEditor
+// src/components/scraper/SaveConfirmationModal.tsx
+// ===================================================================
+// SIMPLIFIED VERSION - Enrichment happens in orchestrator, not here.
+// This modal just displays and allows editing of already-enriched data.
+// ===================================================================
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import type { GameData, EntityConfig } from '../../types/game';
 import type { TournamentSeries, TournamentSeriesTitle } from '../../types/series';
+import type { EnrichedGameData } from '../../types/enrichment';
 import type { ScrapedGameData } from '../../API';
 import { useGameDataEditor } from '../../hooks/useGameDataEditor';
-import { QuickDataEditor } from './SaveConfirmation/QuickDataEditor';
-import { SeriesDetailsEditor } from './SaveConfirmation/SeriesDetailsEditor';
-import { ConsolidationPreview } from './SaveConfirmation/ConsolidationPreview';
 import { useConsolidationPreview } from '../../hooks/useConsolidationPreview';
-import { formatCurrency } from '../../utils/generalHelpers';
+
+// Tab Components
+import { QuickEditTab } from './SaveConfirmation/QuickEditTab';
+import { RelationshipsTab } from './SaveConfirmation/RelationshipsTab';
+import { GroupingTab } from './SaveConfirmation/GroupingTab';
+import { AdvancedTab } from './SaveConfirmation/AdvancedTab';
+import { ValidationTab } from './SaveConfirmation/ValidationTab';
+import { DiffTab } from './SaveConfirmation/DiffTab';
+import { DebugTab } from './SaveConfirmation/DebugTab';
 
 // ===================================================================
-// GRAPHQL OPERATIONS
+// GRAPHQL OPERATIONS (for dropdowns only - no enrichment)
 // ===================================================================
 
 const getVenueName = /* GraphQL */ `
@@ -99,7 +108,28 @@ const listSeriesTitlesForDropdown = /* GraphQL */ `
     }
 `;
 
-// Mutations for creating new items
+const listRecurringGamesForDropdown = /* GraphQL */ `
+    query ListRecurringGamesForDropdown($filter: ModelRecurringGameFilterInput, $limit: Int, $nextToken: String) {
+        listRecurringGames(filter: $filter, limit: $limit, nextToken: $nextToken) {
+            items {
+                id
+                name
+                venueId
+                entityId
+                dayOfWeek
+                frequency
+                gameType
+                gameVariant
+                typicalBuyIn
+                typicalGuarantee
+                startTime
+                isActive
+            }
+            nextToken
+        }
+    }
+`;
+
 const createEntityMutation = /* GraphQL */ `
     mutation CreateEntity($input: CreateEntityInput!) {
         createEntity(input: $input) {
@@ -124,25 +154,18 @@ const createVenueMutation = /* GraphQL */ `
     }
 `;
 
-// Note: Series mutations moved to SeriesDetailsEditor-enhanced.tsx
-
 // ===================================================================
 // TYPES & INTERFACES
 // ===================================================================
 
-type ModalGameData = ScrapedGameData | GameData | {
-    name?: string | null;
-    gameStatus?: string | null;
-    gameStartDateTime?: string | null;
-    tournamentId?: number | null;
-    sourceUrl?: string | null;
-};
+// Accept multiple data shapes - the orchestrator may pass enriched or scraped data
+type GameDataInput = EnrichedGameData | ScrapedGameData | GameData;
 
 interface SaveConfirmationModalProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: (editedData: GameData) => void;
-    gameData?: ModalGameData;
+    gameData: GameDataInput;  // Accepts enriched, scraped, or game data
     venueId: string;
     sourceUrl: string;
     entityId?: string;
@@ -164,8 +187,24 @@ interface VenueOption {
     fee?: number | null;
 }
 
+// Local RecurringGame type that allows null for dayOfWeek (matches API)
+interface RecurringGame {
+    id: string;
+    name: string;
+    venueId: string;
+    entityId?: string | null;
+    dayOfWeek?: string | null;  // Allow null to match API type
+    frequency?: string | null;
+    gameType?: string | null;
+    gameVariant?: string | null;
+    typicalBuyIn?: number | null;
+    typicalGuarantee?: number | null;
+    startTime?: string | null;
+    isActive?: boolean | null;
+}
+
 // ===================================================================
-// UTILITY FUNCTIONS
+// TABS CONFIGURATION
 // ===================================================================
 
 const tabs: ModalTab[] = [
@@ -174,13 +213,15 @@ const tabs: ModalTab[] = [
     { id: 'grouping', label: 'Grouping', icon: '📦' },
     { id: 'advanced', label: 'Advanced', icon: '⚙️' },
     { id: 'validation', label: 'Validation', icon: '✓' },
-    { id: 'diff', label: 'Changes', icon: '📝' }
+    { id: 'diff', label: 'Changes', icon: '📝' },
+    { id: 'debug', label: 'Debug', icon: '🔍' },
 ];
 
 // ===================================================================
 // LAZY CLIENT INITIALIZATION
 // ===================================================================
 
+// Use 'any' to avoid TypeScript excessive stack depth error with Amplify types
 let clientInstance: any = null;
 
 const getClient = () => {
@@ -191,6 +232,16 @@ const getClient = () => {
 };
 
 // ===================================================================
+// HELPER: Safe property access for flexible input types
+// ===================================================================
+
+const getDataProperty = <T,>(data: GameDataInput | null | undefined, key: string, defaultValue: T): T => {
+    if (!data) return defaultValue;
+    const value = (data as Record<string, unknown>)[key];
+    return (value !== undefined && value !== null) ? value as T : defaultValue;
+};
+
+// ===================================================================
 // COMPONENT
 // ===================================================================
 
@@ -198,13 +249,17 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     isOpen, 
     onClose, 
     onConfirm, 
-    gameData, 
+    gameData,    // Already enriched by orchestrator
     venueId,
     sourceUrl,
     entityId,
     autoMode = false,
     skipConfirmation = false
 }) => {
+    
+    // ===============================================================
+    // STATE
+    // ===============================================================
     
     // Core state
     const [venueName, setVenueName] = useState<string>('');
@@ -221,18 +276,28 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     const [venues, setVenues] = useState<VenueOption[]>([]);
     const [series, setSeries] = useState<TournamentSeries[]>([]);
     const [seriesTitles, setSeriesTitles] = useState<TournamentSeriesTitle[]>([]);
+    const [recurringGames, setRecurringGames] = useState<RecurringGame[]>([]);
+    const [loadingRecurringGames, setLoadingRecurringGames] = useState(false);
     
-    // Selection state
-    const [selectedEntityId, setSelectedEntityId] = useState<string>(entityId || '');
-    const [selectedVenueId, setSelectedVenueId] = useState<string>(venueId || '');
-    const [selectedSeriesId, setSelectedSeriesId] = useState<string>('');
-    const [selectedSeriesTitleId, setSelectedSeriesTitleId] = useState<string>('');
+    // Selection state - initialized from enriched data (use helper for flexible access)
+    const [selectedEntityId, setSelectedEntityId] = useState<string>(
+        entityId || getDataProperty(gameData, 'entityId', '')
+    );
+    const [selectedVenueId, setSelectedVenueId] = useState<string>(
+        venueId || getDataProperty(gameData, 'venueId', '')
+    );
+    const [selectedSeriesId, setSelectedSeriesId] = useState<string>(
+        getDataProperty(gameData, 'tournamentSeriesId', '')
+    );
+    const [selectedSeriesTitleId, setSelectedSeriesTitleId] = useState<string>(
+        getDataProperty(gameData, 'seriesTitleId', '')
+    );
     
     // Creation state (for Entity/Venue only - Series handled by SeriesDetailsEditor)
     const [activeEntityCard, setActiveEntityCard] = useState<'entity' | 'venue' | null>(null);
     const [showCreateCard, setShowCreateCard] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
-    const [createError, setCreateError] = useState('');
+    const [createError, setCreateError] = useState<string | null>('');
     
     // New entity/venue creation state
     const [newEntityName, setNewEntityName] = useState('');
@@ -249,18 +314,23 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         parentName: null
     });
     
-    // Convert game data to GameData type
+    // ===============================================================
+    // INITIALIZE EDITOR WITH ENRICHED DATA
+    // ===============================================================
+    
+    // Data is already enriched - use it directly
     const initialData = useMemo(() => {
-        const data = gameData as any;
-        return {
-            ...data,
-            entityId: entityId || data?.entityId || '',
-            venueId: venueId || data?.venueId || '',
-            sourceUrl: sourceUrl || data?.sourceUrl || '',
-            levels: data?.levels || [],
-            hasGuarantee: data?.hasGuarantee || false
-        } as GameData;
-    }, [gameData, entityId, venueId, sourceUrl]);
+        if (!gameData) return {} as GameData;
+        // Cast through unknown to allow adding/overriding properties
+        const data = {
+            ...gameData,
+            entityId: entityId || getDataProperty(gameData, 'entityId', ''),
+            venueId: venueId || getDataProperty(gameData, 'venueId', ''),
+            levels: getDataProperty(gameData, 'levels', []),
+            hasGuarantee: getDataProperty(gameData, 'hasGuarantee', false)
+        } as unknown as GameData;
+        return data;
+    }, [gameData, entityId, venueId]);
     
     // Initialize the game data editor hook
     const editor = useGameDataEditor(initialData);
@@ -291,6 +361,10 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         }
     });
     
+    // ===============================================================
+    // EFFECTS - Load dropdown data
+    // ===============================================================
+    
     // Generate a venue number for new venues
     const generateVenueNumber = useCallback(() => {
         return Math.floor(Math.random() * 900000) + 100000;
@@ -299,22 +373,20 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     // Load venue name
     useEffect(() => {
         const loadVenueName = async () => {
-            if (!venueId) return;
+            const vid = selectedVenueId || venueId;
+            if (!vid) return;
             
             setLoadingVenue(true);
             try {
                 const result = await getClient().graphql({
                     query: getVenueName,
-                    variables: { id: venueId }
+                    variables: { id: vid }
                 }) as { data: { getVenue: { id: string; name: string; fee: number | null } | null } };
                 
                 const venue = result.data.getVenue;
                 if (venue) {
                     setVenueName(venue.name);
                     setVenueFee(venue.fee || null);
-                    if (venue.fee !== null && venue.fee !== undefined) {
-                        updateField('venueFee', venue.fee);
-                    }
                 }
             } catch (error) {
                 console.error('Error loading venue:', error);
@@ -324,7 +396,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         };
         
         loadVenueName();
-    }, [venueId]);
+    }, [selectedVenueId, venueId]);
     
     // Load entities
     useEffect(() => {
@@ -333,10 +405,10 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 const result = await getClient().graphql({
                     query: listEntitiesForDropdown,
                     variables: { limit: 100 }
-                }) as { data: { listEntities: { items: any[] } } };
+                }) as { data: { listEntities: { items: EntityConfig[] } } };
                 
                 const items = result.data.listEntities?.items || [];
-                setEntities(items.filter((item: any) => item && !item._deleted));
+                setEntities(items.filter((item) => item && !(item as unknown as Record<string, unknown>)._deleted));
             } catch (error) {
                 console.error('Error loading entities:', error);
             }
@@ -359,10 +431,10 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                         filter,
                         limit: 100 
                     }
-                }) as { data: { listVenues: { items: any[] } } };
+                }) as { data: { listVenues: { items: VenueOption[] } } };
                 
                 const items = result.data.listVenues?.items || [];
-                setVenues(items.filter((item: any) => item && !item._deleted));
+                setVenues(items.filter((item) => item && !(item as unknown as Record<string, unknown>)._deleted));
             } catch (error) {
                 console.error('Error loading venues:', error);
             }
@@ -373,6 +445,41 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         }
     }, [selectedEntityId, entities.length]);
     
+    // Load recurring games when venue changes
+    useEffect(() => {
+        const loadRecurringGames = async () => {
+            const currentVenueId = selectedVenueId || venueId;
+            
+            if (!currentVenueId) {
+                setRecurringGames([]);
+                return;
+            }
+            
+            setLoadingRecurringGames(true);
+            try {
+                const filter = {
+                    venueId: { eq: currentVenueId },
+                    isActive: { eq: true }
+                };
+                
+                const result = await getClient().graphql({
+                    query: listRecurringGamesForDropdown,
+                    variables: { filter, limit: 100 }
+                }) as { data: { listRecurringGames: { items: RecurringGame[] } } };
+                
+                const items = result.data.listRecurringGames?.items || [];
+                setRecurringGames(items.filter(item => item && !(item as unknown as Record<string, unknown>)._deleted));
+            } catch (error) {
+                console.error('Error loading recurring games:', error);
+                setRecurringGames([]);
+            } finally {
+                setLoadingRecurringGames(false);
+            }
+        };
+        
+        loadRecurringGames();
+    }, [selectedVenueId, venueId]);
+    
     // Load series and titles
     useEffect(() => {
         const loadSeriesData = async () => {
@@ -380,18 +487,18 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 const seriesResult = await getClient().graphql({
                     query: listSeriesForDropdown,
                     variables: { limit: 100 }
-                }) as { data: { listTournamentSeries: { items: any[] } } };
+                }) as { data: { listTournamentSeries: { items: TournamentSeries[] } } };
                 
                 const seriesItems = seriesResult.data.listTournamentSeries?.items || [];
-                setSeries(seriesItems.filter((item: any) => item && !item._deleted));
+                setSeries(seriesItems.filter((item) => item && !(item as unknown as Record<string, unknown>)._deleted));
                 
                 const titlesResult = await getClient().graphql({
                     query: listSeriesTitlesForDropdown,
                     variables: { limit: 100 }
-                }) as { data: { listTournamentSeriesTitles: { items: any[] } } };
+                }) as { data: { listTournamentSeriesTitles: { items: TournamentSeriesTitle[] } } };
                 
                 const titleItems = titlesResult.data.listTournamentSeriesTitles?.items || [];
-                setSeriesTitles(titleItems.filter((item: any) => item && !item._deleted));
+                setSeriesTitles(titleItems.filter((item) => item && !(item as unknown as Record<string, unknown>)._deleted));
             } catch (error) {
                 console.error('Error loading series data:', error);
             }
@@ -400,12 +507,17 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         loadSeriesData();
     }, []);
     
-    // Auto-save in auto mode
+    // Auto-confirm if skipConfirmation is enabled
     useEffect(() => {
-        if (autoMode && skipConfirmation && isOpen) {
+        if (autoMode && skipConfirmation && isOpen && gameData) {
             handleConfirm();
         }
-    }, [autoMode, skipConfirmation, isOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [autoMode, skipConfirmation, isOpen, gameData]);
+    
+    // ===============================================================
+    // HANDLERS
+    // ===============================================================
     
     // Auto-apply detected pattern suggestions
     const handleApplyDetectedPattern = useCallback(() => {
@@ -462,8 +574,9 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 setNewEntityDomain('');
                 setShowCreateCard(false);
             }
-        } catch (error: any) {
-            setCreateError(error.message || 'Failed to create entity');
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to create entity';
+            setCreateError(errorMessage);
         } finally {
             setIsCreating(false);
         }
@@ -502,8 +615,9 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 setNewVenueFee(null);
                 setShowCreateCard(false);
             }
-        } catch (error: any) {
-            setCreateError(error.message || 'Failed to create venue');
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to create venue';
+            setCreateError(errorMessage);
         } finally {
             setIsCreating(false);
         }
@@ -523,17 +637,25 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     const handleConfirm = async () => {
         setIsSaving(true);
         try {
-            // Build the save data with all series information
+            // The editedData already contains enriched values
+            // User may have modified some fields - those modifications are preserved
             const saveData: GameData = {
                 ...editedData,
-                // Series fields
+                // Ensure selection overrides are applied
                 tournamentSeriesId: selectedSeriesId || editedData.tournamentSeriesId || null,
                 seriesTitleId: selectedSeriesTitleId || editedData.seriesTitleId || null,
                 seriesName: editedData.seriesName || null,
-                // Entity/venue fields
                 entityId: selectedEntityId || editedData.entityId,
                 venueId: selectedVenueId || editedData.venueId
             };
+            
+            console.log('[SaveModal] Confirming save:', {
+                name: saveData.name,
+                recurringGameId: saveData.recurringGameId,
+                tournamentSeriesId: saveData.tournamentSeriesId,
+                entityId: saveData.entityId,
+                venueId: saveData.venueId
+            });
             
             onConfirm(saveData);
             
@@ -551,8 +673,8 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         const fixes: Partial<GameData> = {};
         
         if (!editedData.name) fixes.name = 'Tournament ' + new Date().getTime();
-        if (!editedData.gameStatus) fixes.gameStatus = 'SCHEDULED' as any;
-        if (!editedData.registrationStatus) fixes.registrationStatus = 'OPEN' as any;
+        if (!editedData.gameStatus) fixes.gameStatus = 'SCHEDULED' as GameData['gameStatus'];
+        if (!editedData.registrationStatus) fixes.registrationStatus = 'OPEN' as GameData['registrationStatus'];
         if (!editedData.tournamentId) fixes.tournamentId = Math.floor(Math.random() * 1000000);
         
         if (editedData.guaranteeAmount && editedData.guaranteeAmount > 0) {
@@ -562,565 +684,139 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         updateMultipleFields(fixes);
     };
     
+    // ===============================================================
+    // COMPUTED VALUES
+    // ===============================================================
+    
     // Filter series by selected venue
     const filteredSeries = useMemo(() => {
         if (!selectedVenueId) return series;
         return series.filter(s => s.venueId === selectedVenueId);
     }, [series, selectedVenueId]);
     
-    // Render tab content
+    // ===============================================================
+    // TAB CONTENT RENDERER
+    // ===============================================================
+    
     const renderTabContent = () => {
         switch(activeTab) {
             case 'quick':
                 return (
-                    <div className="p-4">
-                        {/* Venue Fee - editable */}
-                        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded">
-                            <div className="text-sm flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <span className="font-medium">Venue Fee:</span>
-                                    {isEditingVenueFee ? (
-                                        <span className="ml-2 inline-flex items-center gap-1">
-                                            <span>$</span>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                autoFocus
-                                                value={tempVenueFee}
-                                                onChange={(e) => setTempVenueFee(e.target.value)}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') {
-                                                        const newFee = tempVenueFee === '' ? null : parseFloat(tempVenueFee);
-                                                        updateField('venueFee', newFee);
-                                                        setVenueFee(newFee);
-                                                        setIsEditingVenueFee(false);
-                                                    } else if (e.key === 'Escape') {
-                                                        setIsEditingVenueFee(false);
-                                                    }
-                                                }}
-                                                className="w-24 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                            />
-                                            <button
-                                                onClick={() => {
-                                                    const newFee = tempVenueFee === '' ? null : parseFloat(tempVenueFee);
-                                                    updateField('venueFee', newFee);
-                                                    setVenueFee(newFee);
-                                                    setIsEditingVenueFee(false);
-                                                }}
-                                                className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
-                                            >
-                                                Save
-                                            </button>
-                                            <button
-                                                onClick={() => setIsEditingVenueFee(false)}
-                                                className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </span>
-                                    ) : (
-                                        <span className="ml-2 text-green-600 font-medium">
-                                            {formatCurrency(editedData.venueFee ?? venueFee ?? 0)}
-                                        </span>
-                                    )}
-                                </div>
-                                {!isEditingVenueFee && (
-                                    <button
-                                        onClick={() => {
-                                            const currentFee = editedData.venueFee ?? venueFee ?? 0;
-                                            setTempVenueFee(currentFee.toString());
-                                            setIsEditingVenueFee(true);
-                                        }}
-                                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                                    >
-                                        Edit
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                        
-                        {/* Show compact consolidation preview in quick tab */}
-                        {willConsolidate && consolidationInfo.parentName && (
-                            <div className="mb-3 p-2 bg-purple-50 border border-purple-200 rounded">
-                                <div className="text-sm flex items-center gap-2">
-                                    <span>📦</span>
-                                    <span>
-                                        Will group under: <strong>{consolidationInfo.parentName}</strong>
-                                    </span>
-                                    <button
-                                        onClick={() => setActiveTab('grouping')}
-                                        className="text-xs text-purple-600 hover:text-purple-700 underline ml-auto"
-                                    >
-                                        View Details
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                        
-                        <QuickDataEditor 
-                            editor={editor} 
-                            showAdvanced={showAdvanced} 
-                        />
-                    </div>
+                    <QuickEditTab
+                        editor={editor}
+                        editedData={editedData}
+                        showAdvanced={showAdvanced}
+                        venueFee={venueFee}
+                        isEditingVenueFee={isEditingVenueFee}
+                        tempVenueFee={tempVenueFee}
+                        setTempVenueFee={setTempVenueFee}
+                        setIsEditingVenueFee={setIsEditingVenueFee}
+                        setVenueFee={setVenueFee}
+                        willConsolidate={willConsolidate}
+                        consolidationInfo={consolidationInfo}
+                        onViewGrouping={() => setActiveTab('grouping')}
+                    />
                 );
                 
             case 'relationships':
                 return (
-                    <div className="p-4 space-y-4">
-                        {/* Entity Selection */}
-                        <div className="border rounded-lg p-4">
-                            <div className="flex justify-between items-center mb-3">
-                                <h3 className="font-semibold text-sm">🏢 Entity</h3>
-                                <button
-                                    onClick={() => {
-                                        setActiveEntityCard('entity');
-                                        setShowCreateCard(!showCreateCard || activeEntityCard !== 'entity');
-                                    }}
-                                    className="text-xs text-blue-600 hover:text-blue-700"
-                                >
-                                    + Create New
-                                </button>
-                            </div>
-                            
-                            <select
-                                value={selectedEntityId}
-                                onChange={(e) => {
-                                    setSelectedEntityId(e.target.value);
-                                    updateField('entityId', e.target.value);
-                                }}
-                                className="w-full px-2 py-1.5 text-sm border rounded"
-                            >
-                                <option value="">-- Select Entity --</option>
-                                {entities.map(entity => (
-                                    <option key={entity.id} value={entity.id}>
-                                        {entity.entityName} ({entity.gameUrlDomain})
-                                    </option>
-                                ))}
-                            </select>
-                            
-                            {activeEntityCard === 'entity' && showCreateCard && (
-                                <div className="mt-3 border rounded-lg p-3 bg-blue-50">
-                                    <h4 className="font-semibold text-sm mb-2">Create New Entity</h4>
-                                    <input
-                                        type="text"
-                                        value={newEntityName}
-                                        onChange={(e) => setNewEntityName(e.target.value)}
-                                        placeholder="Entity Name"
-                                        className="w-full px-2 py-1.5 text-sm border rounded mb-2"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={newEntityDomain}
-                                        onChange={(e) => setNewEntityDomain(e.target.value)}
-                                        placeholder="Domain (e.g., example.com)"
-                                        className="w-full px-2 py-1.5 text-sm border rounded mb-2"
-                                    />
-                                    {createError && (
-                                        <div className="text-red-600 text-xs mb-2">{createError}</div>
-                                    )}
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={handleCreateEntity}
-                                            disabled={isCreating}
-                                            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-                                        >
-                                            {isCreating ? 'Creating...' : 'Create'}
-                                        </button>
-                                        <button
-                                            onClick={() => setShowCreateCard(false)}
-                                            className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        
-                        {/* Venue Selection */}
-                        <div className="border rounded-lg p-4">
-                            <div className="flex justify-between items-center mb-3">
-                                <h3 className="font-semibold text-sm">📍 Venue</h3>
-                                <button
-                                    onClick={() => {
-                                        setActiveEntityCard('venue');
-                                        setShowCreateCard(!showCreateCard || activeEntityCard !== 'venue');
-                                    }}
-                                    className="text-xs text-blue-600 hover:text-blue-700"
-                                    disabled={!selectedEntityId}
-                                >
-                                    + Create New
-                                </button>
-                            </div>
-                            
-                            <select
-                                value={selectedVenueId}
-                                onChange={(e) => {
-                                    const venueIdVal = e.target.value;
-                                    setSelectedVenueId(venueIdVal);
-                                    updateField('venueId', venueIdVal);
-                                    
-                                    const selectedVenue = venues.find(v => v.id === venueIdVal);
-                                    if (selectedVenue) {
-                                        setVenueName(selectedVenue.name);
-                                        setVenueFee(selectedVenue.fee || null);
-                                    }
-                                }}
-                                className="w-full px-2 py-1.5 text-sm border rounded"
-                                disabled={!selectedEntityId}
-                            >
-                                <option value="">-- Select Venue --</option>
-                                {venues.map(venue => (
-                                    <option key={venue.id} value={venue.id}>
-                                        {venue.name} {venue.fee ? `($${venue.fee})` : ''}
-                                    </option>
-                                ))}
-                            </select>
-                            
-                            {activeEntityCard === 'venue' && showCreateCard && (
-                                <div className="mt-3 border rounded-lg p-3 bg-blue-50">
-                                    <h4 className="font-semibold text-sm mb-2">Create New Venue</h4>
-                                    <input
-                                        type="text"
-                                        value={newVenueName}
-                                        onChange={(e) => setNewVenueName(e.target.value)}
-                                        placeholder="Venue Name"
-                                        className="w-full px-2 py-1.5 text-sm border rounded mb-2"
-                                    />
-                                    <div className="mb-2">
-                                        <label className="text-xs font-medium text-gray-700 mb-1 block">
-                                            Venue Fee (Optional)
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={newVenueFee || ''}
-                                            onChange={(e) => setNewVenueFee(e.target.value ? parseFloat(e.target.value) : null)}
-                                            placeholder="0.00"
-                                            step="0.01"
-                                            className="w-full px-2 py-1.5 text-sm border rounded"
-                                        />
-                                    </div>
-                                    {createError && (
-                                        <div className="text-red-600 text-xs mb-2">{createError}</div>
-                                    )}
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={handleCreateVenue}
-                                            disabled={isCreating}
-                                            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-                                        >
-                                            {isCreating ? 'Creating...' : 'Create'}
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setShowCreateCard(false);
-                                                setNewVenueFee(null);
-                                            }}
-                                            className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                            
-                            {venueFee !== null && venueFee !== undefined && (
-                                <div className="mt-2 text-xs text-gray-600">
-                                    Selected venue has a fee of {formatCurrency(venueFee)}
-                                </div>
-                            )}
-                        </div>
-                        
-                        {/* Series Management - Delegated to Enhanced SeriesDetailsEditor */}
-                        <div className="border rounded-lg p-4">
-                            <div className="flex justify-between items-center mb-3">
-                                <h3 className="font-semibold text-sm">🎯 Tournament Series</h3>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        id="isSeries"
-                                        checked={editedData.isSeries || false}
-                                        onChange={(e) => updateField('isSeries', e.target.checked)}
-                                        className="h-4 w-4"
-                                    />
-                                    <label htmlFor="isSeries" className="text-xs text-gray-700">
-                                        Is Series Event
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            {/* Enhanced SeriesDetailsEditor handles all series management */}
-                            <SeriesDetailsEditor 
-                                editor={editor} 
-                                series={filteredSeries}
-                                seriesTitles={seriesTitles}
-                                venueId={selectedVenueId}
-                                onSeriesChange={(seriesId: string | null) => setSelectedSeriesId(seriesId || '')}
-                                onSeriesTitleChange={(titleId: string | null) => setSelectedSeriesTitleId(titleId || '')}
-                                onSeriesTitleCreated={handleSeriesTitleCreated}
-                                onSeriesInstanceCreated={handleSeriesInstanceCreated}
-                            />
-                        </div>
-                    </div>
+                    <RelationshipsTab
+                        editor={editor}
+                        editedData={editedData}
+                        entities={entities}
+                        selectedEntityId={selectedEntityId}
+                        setSelectedEntityId={setSelectedEntityId}
+                        venues={venues}
+                        selectedVenueId={selectedVenueId}
+                        setSelectedVenueId={setSelectedVenueId}
+                        venueFee={venueFee}
+                        setVenueFee={setVenueFee}
+                        setVenueName={setVenueName}
+                        filteredSeries={filteredSeries}
+                        seriesTitles={seriesTitles}
+                        selectedSeriesId={selectedSeriesId}
+                        setSelectedSeriesId={setSelectedSeriesId}
+                        selectedSeriesTitleId={selectedSeriesTitleId}
+                        setSelectedSeriesTitleId={setSelectedSeriesTitleId}
+                        showCreateCard={showCreateCard}
+                        setShowCreateCard={setShowCreateCard}
+                        activeEntityCard={activeEntityCard}
+                        setActiveEntityCard={setActiveEntityCard}
+                        newEntityName={newEntityName}
+                        setNewEntityName={setNewEntityName}
+                        newEntityDomain={newEntityDomain}
+                        setNewEntityDomain={setNewEntityDomain}
+                        handleCreateEntity={handleCreateEntity}
+                        newVenueName={newVenueName}
+                        setNewVenueName={setNewVenueName}
+                        newVenueFee={newVenueFee}
+                        setNewVenueFee={setNewVenueFee}
+                        handleCreateVenue={handleCreateVenue}
+                        isCreating={isCreating}
+                        createError={createError}
+                        handleSeriesTitleCreated={handleSeriesTitleCreated}
+                        handleSeriesInstanceCreated={handleSeriesInstanceCreated}
+                        recurringGames={recurringGames as any}  // Cast to handle dayOfWeek null vs undefined
+                        loadingRecurringGames={loadingRecurringGames}
+                    />
                 );
             
             case 'grouping':
                 return (
-                    <div className="p-4 space-y-4">
-                        <div className="text-sm text-gray-600 mb-4">
-                            <p>
-                                This preview shows how your tournament will be grouped with
-                                related flights when saved. Multi-day tournaments are
-                                automatically consolidated under a parent record.
-                            </p>
-                        </div>
-                        
-                        {/* Main Consolidation Preview Component */}
-                        <ConsolidationPreview
-                            gameData={editedData}
-                            showSiblingDetails={true}
-                            onConsolidationChange={(willConsolidateVal: boolean, parentName: string | null) => {
-                                setConsolidationInfo({ 
-                                    willConsolidate: willConsolidateVal, 
-                                    parentName 
-                                });
-                            }}
-                        />
-                        
-                        {/* Auto-apply detected patterns button */}
-                        {consolidationPreview?.detectedPattern?.isMultiDay && 
-                         consolidationPreview.detectedPattern.detectionSource === 'namePattern' && (
-                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-sm font-medium text-blue-900">
-                                            💡 Auto-detected Pattern
-                                        </div>
-                                        <div className="text-xs text-blue-700 mt-1">
-                                            We detected day/flight info from the name. 
-                                            Apply it to the fields for better accuracy?
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={handleApplyDetectedPattern}
-                                        className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-                                    >
-                                        Apply
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                        
-                        {/* Tips Section */}
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">
-                                💡 Tips for Better Grouping
-                            </h4>
-                            <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
-                                <li>
-                                    Set <strong>Tournament Series</strong> and <strong>Event Number</strong> for 
-                                    most reliable grouping
-                                </li>
-                                <li>
-                                    Set <strong>Day Number</strong> (1, 2, 3) and <strong>Flight Letter</strong> (A, B, C) 
-                                    to identify specific flights
-                                </li>
-                                <li>
-                                    Mark the final day with the <strong>Final Day</strong> checkbox to ensure 
-                                    results are synced correctly
-                                </li>
-                                <li>
-                                    Games with the same buy-in at the same venue with similar names will be 
-                                    grouped automatically
-                                </li>
-                            </ul>
-                        </div>
-                        
-                        {/* Quick Series Fields Editor */}
-                        {willConsolidate && (
-                            <div className="border rounded-lg p-4">
-                                <h4 className="text-sm font-medium text-gray-700 mb-3">
-                                    📋 Quick Series Fields
-                                </h4>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-700">Event Number</label>
-                                        <input
-                                            type="number"
-                                            value={editedData.eventNumber || ''}
-                                            onChange={(e) => updateField('eventNumber', e.target.value ? parseInt(e.target.value) : null)}
-                                            placeholder="e.g., 8"
-                                            className="w-full px-2 py-1 text-sm border rounded mt-1"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-700">Day Number</label>
-                                        <input
-                                            type="number"
-                                            value={editedData.dayNumber || ''}
-                                            onChange={(e) => updateField('dayNumber', e.target.value ? parseInt(e.target.value) : null)}
-                                            placeholder="e.g., 1, 2"
-                                            className="w-full px-2 py-1 text-sm border rounded mt-1"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-700">Flight Letter</label>
-                                        <select
-                                            value={editedData.flightLetter || ''}
-                                            onChange={(e) => updateField('flightLetter', e.target.value || null)}
-                                            className="w-full px-2 py-1 text-sm border rounded mt-1"
-                                        >
-                                            <option value="">-- None --</option>
-                                            {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map(letter => (
-                                                <option key={letter} value={letter}>{letter}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="flex items-center gap-2 pt-5">
-                                        <input
-                                            type="checkbox"
-                                            id="finalDayGrouping"
-                                            checked={editedData.finalDay || false}
-                                            onChange={(e) => updateField('finalDay', e.target.checked)}
-                                            className="h-4 w-4"
-                                        />
-                                        <label htmlFor="finalDayGrouping" className="text-sm">
-                                            🏁 Final Day
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    <GroupingTab
+                        editor={editor}
+                        editedData={editedData}
+                        willConsolidate={willConsolidate}
+                        consolidationInfo={consolidationInfo}
+                        setConsolidationInfo={setConsolidationInfo}
+                        consolidationPreview={consolidationPreview as any}  // Cast to handle detectionSource null vs string
+                        onApplyDetectedPattern={handleApplyDetectedPattern}
+                    />
                 );
                 
             case 'advanced':
-                return (
-                    <div className="p-4">
-                        <QuickDataEditor 
-                            editor={editor} 
-                            showAdvanced={true} 
-                        />
-                    </div>
-                );
+                return <AdvancedTab editor={editor} />;
                 
             case 'validation':
                 return (
-                    <div className="p-4">
-                        {/* Critical Issues */}
-                        {validationStatus.criticalMissing.length > 0 && (
-                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h4 className="font-semibold text-red-800">
-                                        ⚠ Critical Issues ({validationStatus.criticalMissing.length})
-                                    </h4>
-                                    <button
-                                        onClick={handleQuickFix}
-                                        className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
-                                    >
-                                        Auto-Fix
-                                    </button>
-                                </div>
-                                <ul className="text-sm text-red-700 list-disc list-inside">
-                                    {validationStatus.criticalMissing.map((field: string) => (
-                                        <li key={field}>{field} is required</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                        
-                        {/* Warnings */}
-                        {validationStatus.warnings.length > 0 && (
-                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                <h4 className="font-semibold text-yellow-800 mb-2">
-                                    ⚠ Warnings ({validationStatus.warnings.length})
-                                </h4>
-                                <ul className="text-sm text-yellow-700 list-disc list-inside">
-                                    {validationStatus.warnings.map((warning, idx) => (
-                                        <li key={idx}><strong>{warning.field}:</strong> {warning.message}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                        
-                        {/* Validation Status */}
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                            <h4 className="font-semibold text-gray-800 mb-3">Field Status</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <div className="text-gray-600">Required Fields</div>
-                                    <div className="text-2xl font-bold text-green-600">
-                                        {validationStatus.required.present}/{validationStatus.required.total}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-gray-600">Optional Fields</div>
-                                    <div className="text-2xl font-bold text-gray-600">
-                                        {validationStatus.optional.present}/{validationStatus.optional.total}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <ValidationTab
+                        validationStatus={validationStatus}
+                        onQuickFix={handleQuickFix}
+                    />
                 );
                 
             case 'diff':
-                const changedFields = getChangedFields();
                 return (
-                    <div className="p-4">
-                        {changedFields.length === 0 ? (
-                            <div className="text-center text-gray-500 py-8">
-                                No changes made yet
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="font-semibold text-sm">
-                                        {changedFields.length} Field{changedFields.length > 1 ? 's' : ''} Changed
-                                    </h3>
-                                    <button
-                                        onClick={resetAllChanges}
-                                        className="text-sm text-red-600 hover:text-red-700"
-                                    >
-                                        Reset All Changes
-                                    </button>
-                                </div>
-                                
-                                {changedFields.map((field: keyof GameData) => {
-                                    const fieldKey = String(field);
-                                    const oldValue = originalData[field];
-                                    const newValue = editedData[field];
-                                    
-                                    return (
-                                        <div key={fieldKey} className="border rounded p-3 bg-white">
-                                            <div className="font-medium text-sm mb-2">{fieldKey}</div>
-                                            <div className="grid grid-cols-2 gap-2 text-xs">
-                                                <div>
-                                                    <div className="text-gray-500 mb-1">Original</div>
-                                                    <div className="p-2 bg-red-50 rounded font-mono">
-                                                        {JSON.stringify(oldValue) || '(empty)'}
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <div className="text-gray-500 mb-1">New</div>
-                                                    <div className="p-2 bg-green-50 rounded font-mono">
-                                                        {JSON.stringify(newValue) || '(empty)'}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
+                    <DiffTab
+                        originalData={originalData}
+                        editedData={editedData}
+                        getChangedFields={getChangedFields}
+                        resetAllChanges={resetAllChanges}
+                    />
+                );
+                
+            case 'debug':
+                return (
+                    <DebugTab
+                        originalData={originalData}
+                        editedData={editedData}
+                        enrichedGame={gameData as EnrichedGameData}  // Cast for DebugTab
+                        entityId={selectedEntityId || entityId || ''}
+                        sourceUrl={sourceUrl}
+                        venueId={selectedVenueId}
+                        isLoading={false}
+                        error={null}
+                    />
                 );
                 
             default:
                 return null;
         }
     };
+    
+    // ===============================================================
+    // RENDER
+    // ===============================================================
     
     if (!isOpen || !gameData) return null;
 
@@ -1135,9 +831,32 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                         </h3>
                         <div className="text-xs text-gray-500 mt-1">
                             {editedData.name || 'Unnamed Tournament'} • {loadingVenue ? 'Loading...' : venueName || 'No venue selected'}
+                            <span className="ml-2 text-green-600">✓ Enriched</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        {/* Recurring badge */}
+                        {editedData.recurringGameId && (
+                            <span 
+                                className="px-2 py-1 bg-green-50 text-green-600 rounded text-xs font-medium cursor-pointer hover:bg-green-100"
+                                onClick={() => setActiveTab('relationships')}
+                                title="Click to view recurring game details"
+                            >
+                                🔄 {editedData.recurringGameAssignmentStatus === 'AUTO_ASSIGNED' ? 'Auto-' : ''}Recurring
+                            </span>
+                        )}
+                        
+                        {/* Series badge */}
+                        {editedData.tournamentSeriesId && (
+                            <span 
+                                className="px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs font-medium cursor-pointer hover:bg-blue-100"
+                                onClick={() => setActiveTab('relationships')}
+                                title="Click to view series details"
+                            >
+                                🏆 Series
+                            </span>
+                        )}
+                        
                         {/* Validation badge */}
                         {validationStatus.isValid ? (
                             <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
@@ -1193,6 +912,10 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             {/* Indicator dot on grouping tab when consolidation active */}
                             {tab.id === 'grouping' && willConsolidate && (
                                 <span className="ml-1 w-2 h-2 bg-purple-500 rounded-full inline-block" />
+                            )}
+                            {/* Indicator dot on relationships tab when recurring matched */}
+                            {tab.id === 'relationships' && editedData.recurringGameId && (
+                                <span className="ml-1 w-2 h-2 bg-green-500 rounded-full inline-block" />
                             )}
                         </button>
                     ))}

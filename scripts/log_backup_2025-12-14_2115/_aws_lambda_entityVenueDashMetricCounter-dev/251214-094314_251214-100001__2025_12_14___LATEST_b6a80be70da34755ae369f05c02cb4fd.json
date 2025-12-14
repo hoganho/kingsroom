@@ -1,0 +1,1012 @@
+[
+  {
+    "timestamp": 1765705394394,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1765705394670
+  },
+  {
+    "timestamp": 1765705394593,
+    "message": "2025-12-14T09:43:14.593Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765705394670
+  },
+  {
+    "timestamp": 1765705394596,
+    "message": "2025-12-14T09:43:14.596Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765705394670
+  },
+  {
+    "timestamp": 1765705394611,
+    "message": "INIT_REPORT Init Duration: 217.23 ms\tPhase: init\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705394690
+  },
+  {
+    "timestamp": 1765705502006,
+    "message": "2025-12-14T09:45:02.006Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765705502041
+  },
+  {
+    "timestamp": 1765705502007,
+    "message": "2025-12-14T09:45:02.007Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765705502041
+  },
+  {
+    "timestamp": 1765705502021,
+    "message": "INIT_REPORT Init Duration: 81.48 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705502061
+  },
+  {
+    "timestamp": 1765705502021,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765705502061
+  },
+  {
+    "timestamp": 1765705502026,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765705502061
+  },
+  {
+    "timestamp": 1765705502026,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 92.49 ms\tBilled Duration: 93 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705502061
+  },
+  {
+    "timestamp": 1765705555560,
+    "message": "2025-12-14T09:45:55.560Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765705555591
+  },
+  {
+    "timestamp": 1765705555561,
+    "message": "2025-12-14T09:45:55.561Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765705555591
+  },
+  {
+    "timestamp": 1765705555575,
+    "message": "INIT_REPORT Init Duration: 84.07 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705555605
+  },
+  {
+    "timestamp": 1765705555575,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765705555605
+  },
+  {
+    "timestamp": 1765705555580,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765705555605
+  },
+  {
+    "timestamp": 1765705555580,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 95.90 ms\tBilled Duration: 96 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705555605
+  },
+  {
+    "timestamp": 1765705613336,
+    "message": "2025-12-14T09:46:53.336Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765705613365
+  },
+  {
+    "timestamp": 1765705613337,
+    "message": "2025-12-14T09:46:53.337Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765705613365
+  },
+  {
+    "timestamp": 1765705613349,
+    "message": "INIT_REPORT Init Duration: 77.56 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705613379
+  },
+  {
+    "timestamp": 1765705613349,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765705613379
+  },
+  {
+    "timestamp": 1765705613354,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765705613379
+  },
+  {
+    "timestamp": 1765705613354,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 88.43 ms\tBilled Duration: 89 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705613379
+  },
+  {
+    "timestamp": 1765705677682,
+    "message": "2025-12-14T09:47:57.682Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765705677716
+  },
+  {
+    "timestamp": 1765705677683,
+    "message": "2025-12-14T09:47:57.683Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765705677716
+  },
+  {
+    "timestamp": 1765705677698,
+    "message": "INIT_REPORT Init Duration: 80.67 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705677733
+  },
+  {
+    "timestamp": 1765705677698,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765705677733
+  },
+  {
+    "timestamp": 1765705677702,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765705677733
+  },
+  {
+    "timestamp": 1765705677702,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 90.74 ms\tBilled Duration: 91 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705677733
+  },
+  {
+    "timestamp": 1765705743482,
+    "message": "2025-12-14T09:49:03.482Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765705743514
+  },
+  {
+    "timestamp": 1765705743483,
+    "message": "2025-12-14T09:49:03.483Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765705743514
+  },
+  {
+    "timestamp": 1765705743495,
+    "message": "INIT_REPORT Init Duration: 77.72 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705743542
+  },
+  {
+    "timestamp": 1765705743495,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765705743542
+  },
+  {
+    "timestamp": 1765705743501,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765705743542
+  },
+  {
+    "timestamp": 1765705743501,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 90.42 ms\tBilled Duration: 91 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705743542
+  },
+  {
+    "timestamp": 1765705798447,
+    "message": "2025-12-14T09:49:58.447Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765705798477
+  },
+  {
+    "timestamp": 1765705798448,
+    "message": "2025-12-14T09:49:58.448Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765705798477
+  },
+  {
+    "timestamp": 1765705798459,
+    "message": "INIT_REPORT Init Duration: 76.47 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705798491
+  },
+  {
+    "timestamp": 1765705798459,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765705798491
+  },
+  {
+    "timestamp": 1765705798464,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765705798491
+  },
+  {
+    "timestamp": 1765705798464,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 87.17 ms\tBilled Duration: 88 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705798491
+  },
+  {
+    "timestamp": 1765705861432,
+    "message": "2025-12-14T09:51:01.432Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765705861466
+  },
+  {
+    "timestamp": 1765705861436,
+    "message": "2025-12-14T09:51:01.436Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765705861466
+  },
+  {
+    "timestamp": 1765705861449,
+    "message": "INIT_REPORT Init Duration: 82.65 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705861481
+  },
+  {
+    "timestamp": 1765705861449,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765705861481
+  },
+  {
+    "timestamp": 1765705861454,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765705861481
+  },
+  {
+    "timestamp": 1765705861454,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 95.50 ms\tBilled Duration: 96 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705861481
+  },
+  {
+    "timestamp": 1765705932098,
+    "message": "2025-12-14T09:52:12.098Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765705932129
+  },
+  {
+    "timestamp": 1765705932099,
+    "message": "2025-12-14T09:52:12.099Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765705932129
+  },
+  {
+    "timestamp": 1765705932112,
+    "message": "INIT_REPORT Init Duration: 78.07 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705932146
+  },
+  {
+    "timestamp": 1765705932112,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765705932146
+  },
+  {
+    "timestamp": 1765705932116,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765705932146
+  },
+  {
+    "timestamp": 1765705932116,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 89.09 ms\tBilled Duration: 90 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705932146
+  },
+  {
+    "timestamp": 1765705997425,
+    "message": "2025-12-14T09:53:17.425Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765705997457
+  },
+  {
+    "timestamp": 1765705997425,
+    "message": "2025-12-14T09:53:17.425Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765705997457
+  },
+  {
+    "timestamp": 1765705997440,
+    "message": "INIT_REPORT Init Duration: 78.28 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705997474
+  },
+  {
+    "timestamp": 1765705997440,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765705997474
+  },
+  {
+    "timestamp": 1765705997443,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765705997474
+  },
+  {
+    "timestamp": 1765705997443,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 87.98 ms\tBilled Duration: 88 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765705997474
+  },
+  {
+    "timestamp": 1765706051979,
+    "message": "2025-12-14T09:54:11.979Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706052012
+  },
+  {
+    "timestamp": 1765706051980,
+    "message": "2025-12-14T09:54:11.980Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706052012
+  },
+  {
+    "timestamp": 1765706051996,
+    "message": "INIT_REPORT Init Duration: 82.05 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706052031
+  },
+  {
+    "timestamp": 1765706051996,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706052031
+  },
+  {
+    "timestamp": 1765706052001,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706052031
+  },
+  {
+    "timestamp": 1765706052001,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 94.40 ms\tBilled Duration: 95 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706052031
+  },
+  {
+    "timestamp": 1765706119869,
+    "message": "2025-12-14T09:55:19.869Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706119901
+  },
+  {
+    "timestamp": 1765706119870,
+    "message": "2025-12-14T09:55:19.870Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706119901
+  },
+  {
+    "timestamp": 1765706119881,
+    "message": "INIT_REPORT Init Duration: 76.26 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706119920
+  },
+  {
+    "timestamp": 1765706119881,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706119920
+  },
+  {
+    "timestamp": 1765706119887,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706119920
+  },
+  {
+    "timestamp": 1765706119887,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 90.42 ms\tBilled Duration: 91 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706119920
+  },
+  {
+    "timestamp": 1765706165318,
+    "message": "2025-12-14T09:56:05.318Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706165347
+  },
+  {
+    "timestamp": 1765706165319,
+    "message": "2025-12-14T09:56:05.319Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706165347
+  },
+  {
+    "timestamp": 1765706165331,
+    "message": "INIT_REPORT Init Duration: 83.11 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706165359
+  },
+  {
+    "timestamp": 1765706165331,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706165359
+  },
+  {
+    "timestamp": 1765706165335,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706165359
+  },
+  {
+    "timestamp": 1765706165335,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 92.50 ms\tBilled Duration: 93 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706165359
+  },
+  {
+    "timestamp": 1765706233776,
+    "message": "2025-12-14T09:57:13.776Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706233813
+  },
+  {
+    "timestamp": 1765706233778,
+    "message": "2025-12-14T09:57:13.778Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706233813
+  },
+  {
+    "timestamp": 1765706233790,
+    "message": "INIT_REPORT Init Duration: 76.92 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706233839
+  },
+  {
+    "timestamp": 1765706233790,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706233839
+  },
+  {
+    "timestamp": 1765706233794,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706233839
+  },
+  {
+    "timestamp": 1765706233794,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 88.48 ms\tBilled Duration: 89 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706233839
+  },
+  {
+    "timestamp": 1765706281940,
+    "message": "2025-12-14T09:58:01.940Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706281971
+  },
+  {
+    "timestamp": 1765706281940,
+    "message": "2025-12-14T09:58:01.940Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706281971
+  },
+  {
+    "timestamp": 1765706281955,
+    "message": "INIT_REPORT Init Duration: 78.82 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706281971
+  },
+  {
+    "timestamp": 1765706281955,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706281971
+  },
+  {
+    "timestamp": 1765706281959,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706281991
+  },
+  {
+    "timestamp": 1765706281959,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 89.21 ms\tBilled Duration: 90 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706281991
+  },
+  {
+    "timestamp": 1765706351134,
+    "message": "2025-12-14T09:59:11.134Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706351159
+  },
+  {
+    "timestamp": 1765706351135,
+    "message": "2025-12-14T09:59:11.135Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706351159
+  },
+  {
+    "timestamp": 1765706351147,
+    "message": "INIT_REPORT Init Duration: 81.62 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706351174
+  },
+  {
+    "timestamp": 1765706351147,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706351174
+  },
+  {
+    "timestamp": 1765706351152,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706351174
+  },
+  {
+    "timestamp": 1765706351152,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 94.37 ms\tBilled Duration: 95 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706351174
+  },
+  {
+    "timestamp": 1765706401957,
+    "message": "2025-12-14T10:00:01.957Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706401983
+  },
+  {
+    "timestamp": 1765706401958,
+    "message": "2025-12-14T10:00:01.958Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706401983
+  },
+  {
+    "timestamp": 1765706401970,
+    "message": "INIT_REPORT Init Duration: 80.62 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706401996
+  },
+  {
+    "timestamp": 1765706401970,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706401996
+  },
+  {
+    "timestamp": 1765706401973,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706401996
+  },
+  {
+    "timestamp": 1765706401973,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 91.15 ms\tBilled Duration: 92 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706401996
+  },
+  {
+    "timestamp": 1765706475721,
+    "message": "2025-12-14T10:01:15.721Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706475753
+  },
+  {
+    "timestamp": 1765706475722,
+    "message": "2025-12-14T10:01:15.722Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706475753
+  },
+  {
+    "timestamp": 1765706475735,
+    "message": "INIT_REPORT Init Duration: 79.86 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706475773
+  },
+  {
+    "timestamp": 1765706475735,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706475773
+  },
+  {
+    "timestamp": 1765706475741,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706475773
+  },
+  {
+    "timestamp": 1765706475741,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 94.37 ms\tBilled Duration: 95 ms\tMemory Size: 128 MB\tMax Memory Used: 76 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706475773
+  },
+  {
+    "timestamp": 1765706522748,
+    "message": "2025-12-14T10:02:02.748Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706522776
+  },
+  {
+    "timestamp": 1765706522748,
+    "message": "2025-12-14T10:02:02.748Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706522776
+  },
+  {
+    "timestamp": 1765706522762,
+    "message": "INIT_REPORT Init Duration: 78.37 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706522791
+  },
+  {
+    "timestamp": 1765706522762,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706522791
+  },
+  {
+    "timestamp": 1765706522766,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706522791
+  },
+  {
+    "timestamp": 1765706522766,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 89.28 ms\tBilled Duration: 90 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706522791
+  },
+  {
+    "timestamp": 1765706574437,
+    "message": "2025-12-14T10:02:54.437Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706574467
+  },
+  {
+    "timestamp": 1765706574438,
+    "message": "2025-12-14T10:02:54.438Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706574467
+  },
+  {
+    "timestamp": 1765706574450,
+    "message": "INIT_REPORT Init Duration: 77.89 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706574489
+  },
+  {
+    "timestamp": 1765706574450,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706574489
+  },
+  {
+    "timestamp": 1765706574454,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706574489
+  },
+  {
+    "timestamp": 1765706574454,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 86.84 ms\tBilled Duration: 87 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706574489
+  },
+  {
+    "timestamp": 1765706619934,
+    "message": "2025-12-14T10:03:39.934Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706619961
+  },
+  {
+    "timestamp": 1765706619935,
+    "message": "2025-12-14T10:03:39.935Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706619961
+  },
+  {
+    "timestamp": 1765706619946,
+    "message": "INIT_REPORT Init Duration: 74.55 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706619975
+  },
+  {
+    "timestamp": 1765706619946,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706619975
+  },
+  {
+    "timestamp": 1765706619951,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706619975
+  },
+  {
+    "timestamp": 1765706619951,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 86.42 ms\tBilled Duration: 87 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706619975
+  },
+  {
+    "timestamp": 1765706665513,
+    "message": "2025-12-14T10:04:25.513Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706665545
+  },
+  {
+    "timestamp": 1765706665514,
+    "message": "2025-12-14T10:04:25.514Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706665545
+  },
+  {
+    "timestamp": 1765706665525,
+    "message": "INIT_REPORT Init Duration: 75.28 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706665569
+  },
+  {
+    "timestamp": 1765706665525,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706665569
+  },
+  {
+    "timestamp": 1765706665530,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706665569
+  },
+  {
+    "timestamp": 1765706665530,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 85.41 ms\tBilled Duration: 86 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706665569
+  },
+  {
+    "timestamp": 1765706734547,
+    "message": "2025-12-14T10:05:34.547Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706734576
+  },
+  {
+    "timestamp": 1765706734547,
+    "message": "2025-12-14T10:05:34.547Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706734576
+  },
+  {
+    "timestamp": 1765706734560,
+    "message": "INIT_REPORT Init Duration: 76.36 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706734598
+  },
+  {
+    "timestamp": 1765706734560,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706734598
+  },
+  {
+    "timestamp": 1765706734564,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706734598
+  },
+  {
+    "timestamp": 1765706734564,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 87.43 ms\tBilled Duration: 88 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706734598
+  },
+  {
+    "timestamp": 1765706788301,
+    "message": "2025-12-14T10:06:28.301Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706788330
+  },
+  {
+    "timestamp": 1765706788302,
+    "message": "2025-12-14T10:06:28.302Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706788330
+  },
+  {
+    "timestamp": 1765706788313,
+    "message": "INIT_REPORT Init Duration: 75.28 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706788344
+  },
+  {
+    "timestamp": 1765706788313,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706788344
+  },
+  {
+    "timestamp": 1765706788320,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706788344
+  },
+  {
+    "timestamp": 1765706788320,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 88.18 ms\tBilled Duration: 89 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706788344
+  },
+  {
+    "timestamp": 1765706836263,
+    "message": "2025-12-14T10:07:16.263Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706836294
+  },
+  {
+    "timestamp": 1765706836264,
+    "message": "2025-12-14T10:07:16.264Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706836294
+  },
+  {
+    "timestamp": 1765706836276,
+    "message": "INIT_REPORT Init Duration: 76.23 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706836317
+  },
+  {
+    "timestamp": 1765706836276,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706836317
+  },
+  {
+    "timestamp": 1765706836280,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706836317
+  },
+  {
+    "timestamp": 1765706836280,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 87.53 ms\tBilled Duration: 88 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706836317
+  },
+  {
+    "timestamp": 1765706898485,
+    "message": "2025-12-14T10:08:18.485Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706898518
+  },
+  {
+    "timestamp": 1765706898485,
+    "message": "2025-12-14T10:08:18.485Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706898518
+  },
+  {
+    "timestamp": 1765706898498,
+    "message": "INIT_REPORT Init Duration: 79.78 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706898536
+  },
+  {
+    "timestamp": 1765706898498,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706898536
+  },
+  {
+    "timestamp": 1765706898504,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706898536
+  },
+  {
+    "timestamp": 1765706898504,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 91.86 ms\tBilled Duration: 92 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706898536
+  },
+  {
+    "timestamp": 1765706955170,
+    "message": "2025-12-14T10:09:15.170Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765706955199
+  },
+  {
+    "timestamp": 1765706955171,
+    "message": "2025-12-14T10:09:15.171Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765706955199
+  },
+  {
+    "timestamp": 1765706955183,
+    "message": "INIT_REPORT Init Duration: 76.64 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706955212
+  },
+  {
+    "timestamp": 1765706955183,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765706955212
+  },
+  {
+    "timestamp": 1765706955188,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765706955212
+  },
+  {
+    "timestamp": 1765706955188,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 88.16 ms\tBilled Duration: 89 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765706955212
+  },
+  {
+    "timestamp": 1765707022442,
+    "message": "2025-12-14T10:10:22.442Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765707022472
+  },
+  {
+    "timestamp": 1765707022443,
+    "message": "2025-12-14T10:10:22.443Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765707022472
+  },
+  {
+    "timestamp": 1765707022455,
+    "message": "INIT_REPORT Init Duration: 80.36 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707022494
+  },
+  {
+    "timestamp": 1765707022455,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765707022494
+  },
+  {
+    "timestamp": 1765707022459,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765707022494
+  },
+  {
+    "timestamp": 1765707022459,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 91.00 ms\tBilled Duration: 92 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707022494
+  },
+  {
+    "timestamp": 1765707069228,
+    "message": "2025-12-14T10:11:09.228Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765707069260
+  },
+  {
+    "timestamp": 1765707069229,
+    "message": "2025-12-14T10:11:09.229Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765707069260
+  },
+  {
+    "timestamp": 1765707069244,
+    "message": "INIT_REPORT Init Duration: 79.78 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707069276
+  },
+  {
+    "timestamp": 1765707069244,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765707069276
+  },
+  {
+    "timestamp": 1765707069248,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765707069276
+  },
+  {
+    "timestamp": 1765707069248,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 88.87 ms\tBilled Duration: 89 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707069276
+  },
+  {
+    "timestamp": 1765707127043,
+    "message": "2025-12-14T10:12:07.043Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765707127077
+  },
+  {
+    "timestamp": 1765707127043,
+    "message": "2025-12-14T10:12:07.043Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765707127077
+  },
+  {
+    "timestamp": 1765707127055,
+    "message": "INIT_REPORT Init Duration: 77.97 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707127094
+  },
+  {
+    "timestamp": 1765707127055,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765707127094
+  },
+  {
+    "timestamp": 1765707127059,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765707127094
+  },
+  {
+    "timestamp": 1765707127059,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 87.85 ms\tBilled Duration: 88 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707127094
+  },
+  {
+    "timestamp": 1765707185559,
+    "message": "2025-12-14T10:13:05.559Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765707185587
+  },
+  {
+    "timestamp": 1765707185560,
+    "message": "2025-12-14T10:13:05.560Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765707185587
+  },
+  {
+    "timestamp": 1765707185571,
+    "message": "INIT_REPORT Init Duration: 75.74 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707185600
+  },
+  {
+    "timestamp": 1765707185571,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765707185600
+  },
+  {
+    "timestamp": 1765707185574,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765707185600
+  },
+  {
+    "timestamp": 1765707185574,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 87.37 ms\tBilled Duration: 88 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707185600
+  },
+  {
+    "timestamp": 1765707237127,
+    "message": "2025-12-14T10:13:57.127Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765707237155
+  },
+  {
+    "timestamp": 1765707237127,
+    "message": "2025-12-14T10:13:57.127Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765707237155
+  },
+  {
+    "timestamp": 1765707237139,
+    "message": "INIT_REPORT Init Duration: 75.79 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707237176
+  },
+  {
+    "timestamp": 1765707237139,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765707237176
+  },
+  {
+    "timestamp": 1765707237142,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765707237176
+  },
+  {
+    "timestamp": 1765707237142,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 84.33 ms\tBilled Duration: 85 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707237176
+  },
+  {
+    "timestamp": 1765707286950,
+    "message": "2025-12-14T10:14:46.950Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765707286979
+  },
+  {
+    "timestamp": 1765707286951,
+    "message": "2025-12-14T10:14:46.951Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765707286979
+  },
+  {
+    "timestamp": 1765707286965,
+    "message": "INIT_REPORT Init Duration: 77.86 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707286996
+  },
+  {
+    "timestamp": 1765707286965,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765707286996
+  },
+  {
+    "timestamp": 1765707286968,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765707286996
+  },
+  {
+    "timestamp": 1765707286968,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 87.29 ms\tBilled Duration: 88 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707286996
+  },
+  {
+    "timestamp": 1765707348248,
+    "message": "2025-12-14T10:15:48.248Z\tundefined\tERROR\t(node:2) Warning: Failed to load the ES module: /var/task/index.js. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "ingestionTime": 1765707348278
+  },
+  {
+    "timestamp": 1765707348248,
+    "message": "2025-12-14T10:15:48.248Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.UserCodeSyntaxError\",\"errorMessage\":\"SyntaxError: Cannot use import statement outside a module\",\"stack\":[\"Runtime.UserCodeSyntaxError: SyntaxError: Cannot use import statement outside a module\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1189:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1765707348278
+  },
+  {
+    "timestamp": 1765707348260,
+    "message": "INIT_REPORT Init Duration: 75.55 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707348293
+  },
+  {
+    "timestamp": 1765707348260,
+    "message": "START RequestId: 78c154c5-8381-4609-8470-9124006ea23f Version: $LATEST\n",
+    "ingestionTime": 1765707348293
+  },
+  {
+    "timestamp": 1765707348266,
+    "message": "END RequestId: 78c154c5-8381-4609-8470-9124006ea23f\n",
+    "ingestionTime": 1765707348293
+  },
+  {
+    "timestamp": 1765707348266,
+    "message": "REPORT RequestId: 78c154c5-8381-4609-8470-9124006ea23f\tDuration: 88.20 ms\tBilled Duration: 89 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.UserCodeSyntaxError\n",
+    "ingestionTime": 1765707348293
+  }
+]

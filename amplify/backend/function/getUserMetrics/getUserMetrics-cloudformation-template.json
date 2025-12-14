@@ -282,12 +282,17 @@
           "Statement": [
             {
               "Action": [
-                "cloudwatch:GetMetricStatistics",
-                "cloudwatch:GetMetricData",
-                "cloudwatch:ListMetrics"
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Query"
               ],
               "Resource": [
-                "*"
+                "arn:aws:dynamodb:*:*:table/Game-*",
+                "arn:aws:dynamodb:*:*:table/GameCost-*",
+                "arn:aws:dynamodb:*:*:table/GameCost-*/index/*",
+                "arn:aws:dynamodb:*:*:table/GameFinancialSnapshot-*",
+                "arn:aws:dynamodb:*:*:table/GameFinancialSnapshot-*/index/*"
               ],
               "Effect": "Allow"
             }

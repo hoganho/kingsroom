@@ -1,8 +1,7 @@
 // src/hooks/scraper/useScrapeOrchestrator.ts
-// FINAL: All phases integrated (1-5)
-// - Phase 3: Unified save logic + doNotScrape pre-fetch handling
-// - Phase 4: State machine validation (via logging, not blocking)
-// - Phase 5: Status normalization + structured logging
+// ===================================================================
+// REFACTORED: Enrichment happens BEFORE modal/save decision
+// ===================================================================
 
 import { useCallback, useRef } from 'react';
 import { 
@@ -15,7 +14,7 @@ import {
 import { ScrapedGameData } from '../../API';
 import { UseProcessingStateResult } from './useProcessingState';
 import { UseErrorTrackingResult } from './useErrorTracking';
-import { fetchGameDataFromBackend, saveGameDataToBackend } from '../../services/gameService';
+import { fetchGameDataFromBackend } from '../../services/gameService';
 import { 
   checkCachedNotFoundGap, 
   checkCachedNotPublished,
@@ -30,11 +29,17 @@ import {
   shouldPauseForDecision,
 } from '../../utils/scraperErrorUtils';
 import { sanitizeGameDataForPlaceholder } from '../../utils/processingResultUtils';
-
-// Phase 5: Structured logging
 import { scraperLogger } from '../../utils/scraperLogger';
-// Phase 5: Status normalization
 import { normalizeGameStatus, isGameSkippable } from '../../utils/statusNormalization';
+import { 
+  enrichGameData,
+  scrapedDataToEnrichInput,
+  isEnrichmentSuccessful,
+  getEnrichmentErrorMessage,
+  enrichForPipeline,
+  type EnrichedGameDataWithContext,
+  type PipelineEnrichmentResult,
+} from '../../services/enrichmentService';
 
 // ===================================================================
 // TYPES
@@ -53,28 +58,24 @@ export interface OrchestratorConfig {
   maxId: string | null;
 }
 
-/** Result from save confirmation modal */
 export interface SaveConfirmationResult {
   action: 'save' | 'cancel';
   venueId?: string;
-  editedData?: ScrapedGameData;
+  editedData?: ScrapedGameData;  // Keep as ScrapedGameData for modal compatibility
 }
 
-/** Result from scrape options modal (for doNotScrape URLs) */
 export interface ScrapeOptionsResult {
   action: 'S3' | 'LIVE' | 'SKIP' | 'SAVE_PLACEHOLDER';
   s3Key?: string;
 }
 
 export interface OrchestratorCallbacks {
-  /** Called when save modal needs to open - returns result of modal */
   onNeedsSaveConfirmation: (
     tournamentId: number, 
-    parsedData: ScrapedGameData,
+    parsedData: ScrapedGameData,  // Pass as ScrapedGameData for backwards compat
     autoVenueId: string | undefined
   ) => Promise<SaveConfirmationResult>;
   
-  /** Called when error modal needs to open - returns user decision */
   onNeedsErrorDecision: (
     tournamentId: number,
     url: string,
@@ -83,7 +84,6 @@ export interface OrchestratorCallbacks {
     isRetryable: boolean
   ) => Promise<{ action: 'continue' | 'stop' | 'retry' }>;
   
-  /** Called when doNotScrape URL is encountered - returns user decision */
   onNeedsScrapeOptions: (
     tournamentId: number,
     url: string,
@@ -92,13 +92,8 @@ export interface OrchestratorCallbacks {
     hasS3Cache: boolean
   ) => Promise<ScrapeOptionsResult>;
   
-  /** Called when API key error occurs */
   onApiKeyError: (message: string) => void;
-  
-  /** Called when processing completes to refresh status */
   onProcessingComplete: () => Promise<void>;
-  
-  /** Called to update next ID after processing */
   onUpdateNextId: (newNextId: string) => void;
 }
 
@@ -118,14 +113,10 @@ const THROTTLE_DELAY_MS = 500;
 const MAX_RETRIES = 3;
 const INITIAL_BACKOFF_MS = 1000;
 
-// ===================================================================
-// HELPER FUNCTIONS
-// ===================================================================
-
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // ===================================================================
-// HOOK IMPLEMENTATION
+// HOOK
 // ===================================================================
 
 export const useScrapeOrchestrator = (
@@ -168,8 +159,8 @@ export const useScrapeOrchestrator = (
     url: string,
     forceRefresh: boolean,
     retries = MAX_RETRIES
-  ): Promise<any> => {
-    let lastError: any;
+  ): Promise<ScrapedGameData> => {
+    let lastError: Error | null = null;
     
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
@@ -177,9 +168,9 @@ export const useScrapeOrchestrator = (
           scraperLogger.info('RETRY_ATTEMPT', `Retry attempt ${attempt + 1}/${retries}`, { tournamentId });
         }
         return await fetchGameDataFromBackend(url, forceRefresh, scraperApiKey, entityId);
-      } catch (error: any) {
-        lastError = error;
-        const errorMessage = error?.message || error?.toString() || '';
+      } catch (error) {
+        lastError = error as Error;
+        const errorMessage = (error as Error)?.message || String(error);
         
         const isRateLimited = 
           errorMessage.includes('429') || 
@@ -204,14 +195,169 @@ export const useScrapeOrchestrator = (
   }, [scraperApiKey, entityId]);
 
   // =========================================================================
-  // UNIFIED CONFIRM AND SAVE (Phase 3)
+  // ENRICH PARSED DATA
+  // =========================================================================
+  
+  const enrichParsedData = useCallback(async (
+    tournamentId: number,
+    url: string,
+    parsedData: ScrapedGameData,
+    venueId: string | null
+  ): Promise<EnrichedGameDataWithContext> => {
+    console.log(`[Orchestrator] Enriching tournament ${tournamentId}`);
+    
+    try {
+      const result: PipelineEnrichmentResult = await enrichForPipeline(
+        parsedData,
+        entityId,
+        venueId,
+        url
+      );
+      
+      if (result.success) {
+        console.log(`[Orchestrator] Tournament ${tournamentId} enriched:`, {
+          recurringGameId: result.enrichedGame.recurringGameId || 'none',
+          recurringStatus: result.metadata.recurringResolution.status,
+          seriesId: result.enrichedGame.tournamentSeriesId || 'none',
+          seriesStatus: result.metadata.seriesResolution.status,
+          processingTimeMs: result.metadata.processingTimeMs
+        });
+      } else {
+        console.warn(`[Orchestrator] Enrichment incomplete for ${tournamentId}:`, {
+          errors: result.validation.errors
+        });
+      }
+      
+      return result.enrichedGame;
+      
+    } catch (error) {
+      console.warn(`[Orchestrator] Enrichment error for ${tournamentId}, using raw data:`, (error as Error).message);
+      
+      // Return original data with context fields
+      // Use nullish coalescing to handle null values
+      return {
+        // Required EnrichedGameData fields
+        name: parsedData.name || `Tournament ${tournamentId}`,
+        gameType: (parsedData.gameType as any) || 'TOURNAMENT',
+        gameStatus: (parsedData.gameStatus as any) || 'SCHEDULED',
+        gameStartDateTime: parsedData.gameStartDateTime || new Date().toISOString(),
+        
+        // Optional fields from parsedData - convert null to undefined where needed
+        tournamentId: parsedData.tournamentId,
+        gameVariant: parsedData.gameVariant as any,
+        buyIn: parsedData.buyIn ?? undefined,
+        rake: parsedData.rake ?? undefined,
+        hasGuarantee: parsedData.hasGuarantee,  // EnrichedGameDataWithContext allows null
+        guaranteeAmount: parsedData.guaranteeAmount ?? undefined,
+        totalUniquePlayers: parsedData.totalUniquePlayers ?? undefined,
+        totalEntries: parsedData.totalEntries ?? undefined,
+        prizepoolPaid: parsedData.prizepoolPaid ?? undefined,
+        levels: parsedData.levels,
+        
+        // Context fields - EnrichedGameDataWithContext allows null for these
+        sourceUrl: url,
+        entityId,
+        venueId: venueId ?? undefined,
+        venueMatch: parsedData.venueMatch,
+        s3Key: parsedData.s3Key,  // Allow null
+        entries: parsedData.entries,  // Allow null
+        results: parsedData.results,  // Allow null
+        seating: parsedData.seating,  // Allow null
+      };
+    }
+  }, [entityId]);
+
+  // =========================================================================
+  // SAVE VIA ENRICHMENT SERVICE
+  // =========================================================================
+
+  const saveViaEnrichment = useCallback(async (
+    tournamentId: number,
+    url: string,
+    gameData: ScrapedGameData | EnrichedGameDataWithContext,
+    venueId: string,
+    saveOptions: {
+      isPlaceholder?: boolean;
+      isNotPublished?: boolean;
+      autoCreateSeries?: boolean;
+      autoCreateRecurring?: boolean;
+    } = {}
+  ): Promise<{ success: boolean; gameId?: string; action?: string; error?: string }> => {
+    
+    const { 
+      isPlaceholder = false, 
+      isNotPublished = false,
+      autoCreateSeries = false,
+      autoCreateRecurring = false,
+    } = saveOptions;
+
+    try {
+      const enrichInput = scrapedDataToEnrichInput(gameData as ScrapedGameData, entityId, url);
+      
+      if (venueId) {
+        enrichInput.venue = {
+          venueId,
+          venueName: gameData.venueMatch?.autoAssignedVenue?.name || null,
+        };
+      }
+
+      enrichInput.options = {
+        saveToDatabase: true,
+        autoCreateSeries,
+        autoCreateRecurring,
+        skipSeriesResolution: isPlaceholder || isNotPublished,
+        skipRecurringResolution: isPlaceholder || isNotPublished,
+        skipFinancials: isPlaceholder || isNotPublished,
+        skipQueryKeys: false,
+      };
+
+      scraperLogger.info('ITEM_SAVING', 'Saving via enrichment service', { 
+        tournamentId,
+        payload: { hasVenue: !!venueId, isPlaceholder, isNotPublished }
+      });
+
+      const result = await enrichGameData(enrichInput);
+
+      if (isEnrichmentSuccessful(result)) {
+        const gameId = result.saveResult?.gameId || 'unknown';
+        const action = result.saveResult?.action || 'CREATE';
+        
+        scraperLogger.logSaveSuccess(
+          tournamentId, 
+          gameId, 
+          action === 'UPDATED' ? 'UPDATE' : 'CREATE'
+        );
+
+        return { success: true, gameId, action };
+      } else {
+        const errorMessage = getEnrichmentErrorMessage(result) || 'Enrichment validation failed';
+        
+        scraperLogger.error('ITEM_SAVE_ERROR', errorMessage, { 
+          tournamentId,
+          payload: { 
+            validationErrors: result.validation?.errors,
+            validationWarnings: result.validation?.warnings,
+          }
+        });
+
+        return { success: false, error: errorMessage };
+      }
+    } catch (error) {
+      const errorMessage = (error as Error)?.message || 'Unknown enrichment error';
+      scraperLogger.error('ITEM_SAVE_ERROR', errorMessage, { tournamentId });
+      return { success: false, error: errorMessage };
+    }
+  }, [entityId]);
+
+  // =========================================================================
+  // CONFIRM AND SAVE
   // =========================================================================
   
   const confirmAndSave = useCallback(async (
     tournamentId: number,
     url: string,
-    parsedData: ScrapedGameData,
-    options_: {
+    enrichedData: EnrichedGameDataWithContext,
+    saveOptions: {
       skipManualReviews: boolean;
       isNotPublished: boolean;
       isDoNotScrape?: boolean;
@@ -219,42 +365,42 @@ export const useScrapeOrchestrator = (
     }
   ): Promise<{ success: boolean; action: 'saved' | 'cancelled' | 'error'; message: string }> => {
     
-    const { skipManualReviews, isNotPublished, isDoNotScrape, forcePlaceholder } = options_;
+    const { skipManualReviews, isNotPublished, isDoNotScrape, forcePlaceholder } = saveOptions;
     
-    // Validation - allow null gameVariant only for NOT_PUBLISHED or placeholder saves
     const allowNullVariant = isNotPublished || forcePlaceholder;
-    if ((parsedData as any)._enumErrors?.length > 0 || (parsedData.gameVariant === null && !allowNullVariant)) {
+    const dataAsRecord = enrichedData as unknown as Record<string, unknown>;
+    const enumErrors = dataAsRecord._enumErrors as unknown[] | undefined;
+    if ((enumErrors && enumErrors.length > 0) || (enrichedData.gameVariant === null && !allowNullVariant)) {
       processingState.setResultError(tournamentId, 'Cannot save - invalid enum value', 'ENUM_VALIDATION');
       scraperLogger.error('ITEM_SAVE_ERROR', 'Invalid enum value', { tournamentId });
       return { success: false, action: 'error', message: 'Invalid enum value' };
     }
 
-    const autoVenueId = parsedData.venueMatch?.autoAssignedVenue?.id;
+    const autoVenueId = enrichedData.venueMatch?.autoAssignedVenue?.id;
     let venueIdToUse = '';
-    let dataToSave = parsedData;
+    let dataToSave: ScrapedGameData | EnrichedGameDataWithContext = enrichedData;
 
-    // Sanitize data for NOT_PUBLISHED or placeholder saves
     if (isNotPublished || forcePlaceholder) {
-      dataToSave = sanitizeGameDataForPlaceholder(parsedData);
+      dataToSave = sanitizeGameDataForPlaceholder(enrichedData as unknown as ScrapedGameData);
     }
 
     if (skipManualReviews) {
-      // Auto-save using best guess
       venueIdToUse = autoVenueId || defaultVenueId;
     } else {
-      // Set review status before modal
       const reviewMessage = isNotPublished || forcePlaceholder
         ? 'Review placeholder save...' 
         : isDoNotScrape 
         ? 'Review restricted tournament...'
         : 'Awaiting venue confirmation...';
-      processingState.setResultReview(tournamentId, reviewMessage, dataToSave);
+      
+      // Pass as ScrapedGameData for modal compatibility (the enriched data has all the fields)
+      processingState.setResultReview(tournamentId, reviewMessage, enrichedData as unknown as ScrapedGameData);
       scraperLogger.info('MODAL_OPEN', 'Opening save confirmation modal', { tournamentId });
       
-      // Open modal via callback
+      // Modal receives data with enrichment fields included
       const result = await onNeedsSaveConfirmation(
-        tournamentId,
-        dataToSave,
+        tournamentId, 
+        enrichedData as unknown as ScrapedGameData, 
         autoVenueId
       );
       
@@ -264,7 +410,7 @@ export const useScrapeOrchestrator = (
       });
       
       if (result.action === 'cancel') {
-        processingState.setResultSkipped(tournamentId, 'Cancelled by user', parsedData);
+        processingState.setResultSkipped(tournamentId, 'Cancelled by user', enrichedData as unknown as ScrapedGameData);
         scraperLogger.logSkipped(tournamentId, 'Cancelled by user');
         return { success: false, action: 'cancelled', message: 'Cancelled by user' };
       }
@@ -275,30 +421,41 @@ export const useScrapeOrchestrator = (
       }
     }
 
-    // Perform save
-    processingState.setResultSaving(tournamentId, dataToSave);
-    scraperLogger.info('ITEM_SAVING', 'Saving to database', { tournamentId });
+    processingState.setResultSaving(tournamentId, dataToSave as ScrapedGameData);
+    scraperLogger.info('ITEM_SAVING', 'Saving via enrichment service', { tournamentId });
     
-    try {
-      const saveResult = await saveGameDataToBackend(url, venueIdToUse, dataToSave, null, entityId);
+    const saveResult = await saveViaEnrichment(
+      tournamentId,
+      url,
+      dataToSave,
+      venueIdToUse,
+      {
+        isPlaceholder: forcePlaceholder,
+        isNotPublished,
+        autoCreateSeries: false,
+        autoCreateRecurring: false,
+      }
+    );
+
+    if (saveResult.success) {
       const isUpdate = saveResult.action === 'UPDATE';
       const message = isUpdate 
         ? `Updated game ${saveResult.gameId}` 
         : `Created game ${saveResult.gameId}`;
       
-      processingState.setResultSuccess(tournamentId, message, dataToSave, saveResult.gameId || undefined);
+      processingState.setResultSuccess(tournamentId, message, dataToSave as ScrapedGameData, saveResult.gameId || undefined);
       scraperLogger.logSaveSuccess(tournamentId, saveResult.gameId || 'unknown', isUpdate ? 'UPDATE' : 'CREATE');
       return { success: true, action: 'saved', message };
-    } catch (error: any) {
-      const errorMessage = `Save failed: ${error.message}`;
+    } else {
+      const errorMessage = `Save failed: ${saveResult.error || 'Unknown error'}`;
       processingState.setResultError(tournamentId, errorMessage, 'SAVE');
       scraperLogger.error('ITEM_SAVE_ERROR', errorMessage, { tournamentId });
       return { success: false, action: 'error', message: errorMessage };
     }
-  }, [processingState, defaultVenueId, entityId, onNeedsSaveConfirmation]);
+  }, [processingState, defaultVenueId, onNeedsSaveConfirmation, saveViaEnrichment]);
 
   // =========================================================================
-  // HANDLE DO NOT SCRAPE (Phase 3)
+  // HANDLE DO NOT SCRAPE
   // =========================================================================
   
   const handleDoNotScrape = useCallback(async (
@@ -307,31 +464,23 @@ export const useScrapeOrchestrator = (
     cachedStatus: { doNotScrape: boolean; gameStatus: string | null; hasS3Cache: boolean }
   ): Promise<'continue' | 'stop'> => {
     
-    // Phase 5: Use normalized status
     const normalizedStatus = normalizeGameStatus(cachedStatus.gameStatus);
     
     scraperLogger.logDoNotScrapeDetected(tournamentId, cachedStatus.gameStatus);
     
-    // If skipManualReviews is on, auto-handle based on gameStatus
     if (options.skipManualReviews) {
       if (isGameSkippable(cachedStatus.gameStatus)) {
-        // Auto-save as placeholder with complete data
-        const placeholderData: ScrapedGameData = {
-          __typename: "ScrapedGameData",
+        const placeholderData: EnrichedGameDataWithContext = {
           name: `Tournament ${tournamentId} (Restricted)`,
           tournamentId,
           sourceUrl: url,
+          entityId,
+          gameType: 'TOURNAMENT' as any,
           gameStatus: normalizedStatus as any,
+          gameStartDateTime: new Date().toISOString(),
           doNotScrape: true,
-          skipped: false,
-          // Required fields with sensible defaults
           gameVariant: 'NOT_PUBLISHED' as any,
           hasGuarantee: false,
-          isSeries: false,
-          isSatellite: false,
-          isRegular: false,
-          isMainEvent: false,
-          finalDay: false,
           buyIn: 0,
           rake: 0,
           guaranteeAmount: 0,
@@ -344,7 +493,7 @@ export const useScrapeOrchestrator = (
           results: [],
           seating: [],
           levels: [],
-        } as ScrapedGameData;
+        };
         
         scraperLogger.info('DO_NOT_SCRAPE_DECISION', 'Auto-saving as placeholder', { 
           tournamentId, 
@@ -359,14 +508,12 @@ export const useScrapeOrchestrator = (
         });
         return 'continue';
       } else {
-        // Skip entirely if doNotScrape but not skippable status
         processingState.setResultSkipped(tournamentId, 'Do Not Scrape (auto-skip)', undefined);
         scraperLogger.logSkipped(tournamentId, 'Do Not Scrape (auto-skip)');
         return 'continue';
       }
     }
     
-    // Manual mode - open ScrapeOptionsModal
     processingState.setResultReview(tournamentId, 'Restricted URL - choose action...', undefined);
     scraperLogger.info('MODAL_OPEN', 'Opening scrape options modal', { tournamentId });
     
@@ -390,23 +537,17 @@ export const useScrapeOrchestrator = (
         return 'continue';
         
       case 'SAVE_PLACEHOLDER': {
-        // Create complete placeholder data with all required fields
-        const placeholderData: ScrapedGameData = {
-          __typename: "ScrapedGameData",
+        const placeholderData: EnrichedGameDataWithContext = {
           name: `Tournament ${tournamentId} (Placeholder)`,
           tournamentId,
           sourceUrl: url,
+          entityId,
+          gameType: 'TOURNAMENT' as any,
           gameStatus: normalizedStatus as any,
+          gameStartDateTime: new Date().toISOString(),
           doNotScrape: true,
-          skipped: false,
-          // Required fields with sensible defaults
           gameVariant: 'NOT_PUBLISHED' as any,
           hasGuarantee: false,
-          isSeries: false,
-          isSatellite: false,
-          isRegular: false,
-          isMainEvent: false,
-          finalDay: false,
           buyIn: 0,
           rake: 0,
           guaranteeAmount: 0,
@@ -419,9 +560,8 @@ export const useScrapeOrchestrator = (
           results: [],
           seating: [],
           levels: [],
-        } as ScrapedGameData;
+        };
         
-        // User already confirmed intent - skip the save confirmation modal
         await confirmAndSave(tournamentId, url, placeholderData, {
           skipManualReviews: true,
           isNotPublished: true,
@@ -432,17 +572,11 @@ export const useScrapeOrchestrator = (
       }
         
       case 'S3':
-        // Fetch from S3 cache - will be handled in main loop with forceRefresh=false
-        return 'continue';
-        
       case 'LIVE':
-        // User wants to force scrape despite doNotScrape - proceed with fetch
-        return 'continue';
-        
       default:
         return 'continue';
     }
-  }, [options.skipManualReviews, processingState, onNeedsScrapeOptions, confirmAndSave]);
+  }, [entityId, options.skipManualReviews, processingState, onNeedsScrapeOptions, confirmAndSave]);
 
   // =========================================================================
   // HANDLE FETCH SUCCESS
@@ -453,45 +587,42 @@ export const useScrapeOrchestrator = (
     url: string,
     parsedData: ScrapedGameData
   ): Promise<void> => {
-    // Phase 5: Use normalized status
     const normalizedGameStatus = normalizeGameStatus(parsedData.gameStatus);
     const isNotPublished = normalizedGameStatus === 'NOT_PUBLISHED';
-    const isDoNotScrape = (parsedData as any).skipped && (parsedData as any).skipReason === 'DO_NOT_SCRAPE';
+    const dataAsRecord = parsedData as Record<string, unknown>;
+    const isDoNotScrape = dataAsRecord.skipped && dataAsRecord.skipReason === 'DO_NOT_SCRAPE';
 
     scraperLogger.logFetchSuccess(tournamentId, parsedData.s3Key ? 'S3_CACHE' : 'LIVE', parsedData.name);
 
-    // 1. Handle DO_NOT_SCRAPE response from Lambda
     if (isDoNotScrape && !options.ignoreDoNotScrape) {
       processingState.setResultSkipped(tournamentId, 'Do Not Scrape', parsedData);
       scraperLogger.logSkipped(tournamentId, 'Do Not Scrape (from Lambda)');
       return;
     }
 
-    // 2. Handle NOT_PUBLISHED
     if (isNotPublished) {
       if (scrapeFlow === 'scrape') {
         processingState.setResultSkipped(tournamentId, 'NOT_PUBLISHED', parsedData);
         scraperLogger.logSkipped(tournamentId, 'NOT_PUBLISHED');
         return;
       }
-      // Save as placeholder
-      await confirmAndSave(tournamentId, url, parsedData, {
+      const autoVenueId = parsedData.venueMatch?.autoAssignedVenue?.id;
+      const enrichedData = await enrichParsedData(tournamentId, url, parsedData, autoVenueId || defaultVenueId);
+      await confirmAndSave(tournamentId, url, enrichedData, {
         skipManualReviews: options.skipManualReviews,
         isNotPublished: true,
       });
       return;
     }
 
-    // 3. Handle In-Progress games (using normalized status)
     if (options.skipInProgress && (normalizedGameStatus === 'RUNNING' || normalizedGameStatus === 'SCHEDULED' || normalizedGameStatus === 'CLOCK_STOPPED')) {
       processingState.setResultSkipped(tournamentId, normalizedGameStatus, parsedData);
       scraperLogger.logSkipped(tournamentId, `In-progress: ${normalizedGameStatus}`);
       return;
     }
 
-    // 4. Scrape Only Mode - don't save
     if (scrapeFlow === 'scrape') {
-      const enumWarning = (parsedData as any)._enumErrorMessage;
+      const enumWarning = dataAsRecord._enumErrorMessage as string | undefined;
       if (enumWarning) {
         processingState.setResultWarning(tournamentId, `Scraped with warnings: ${enumWarning}`, parsedData);
       } else {
@@ -500,12 +631,17 @@ export const useScrapeOrchestrator = (
       return;
     }
 
-    // 5. Normal Save
-    await confirmAndSave(tournamentId, url, parsedData, {
+    // MAIN SAVE FLOW: ENRICH BEFORE SAVE
+    const autoVenueId = parsedData.venueMatch?.autoAssignedVenue?.id;
+    const venueIdForEnrichment = autoVenueId || defaultVenueId || null;
+    
+    const enrichedData = await enrichParsedData(tournamentId, url, parsedData, venueIdForEnrichment);
+    
+    await confirmAndSave(tournamentId, url, enrichedData, {
       skipManualReviews: options.skipManualReviews,
       isNotPublished: false,
     });
-  }, [options, scrapeFlow, processingState, confirmAndSave]);
+  }, [options, scrapeFlow, defaultVenueId, processingState, enrichParsedData, confirmAndSave]);
 
   // =========================================================================
   // HANDLE FETCH ERROR
@@ -515,7 +651,7 @@ export const useScrapeOrchestrator = (
     tournamentId: number,
     url: string,
     errorMsg: string,
-    parsedData: any
+    parsedData: ScrapedGameData | null
   ): Promise<void> => {
     const errorType = classifyError(errorMsg, parsedData);
     
@@ -527,7 +663,6 @@ export const useScrapeOrchestrator = (
       errorTracking.incrementGenericError();
     }
 
-    // Stop immediately on auth errors
     if (shouldStopImmediately(errorType)) {
       processingState.setResultError(tournamentId, `AUTH ERROR: ${errorMsg}`, errorType);
       scraperLogger.error('AUTH_ERROR', 'Authentication error - stopping', { tournamentId });
@@ -537,12 +672,10 @@ export const useScrapeOrchestrator = (
       return;
     }
 
-    // Auto-retry transient errors once
     if (isTransientError(errorType) && autoConfig.autoRetryTransientErrors && errorTracking.counters.consecutiveErrors === 1) {
       await delay(autoConfig.retryDelayMs);
     }
 
-    // Check if should pause for user decision
     if (shouldPauseForDecision(errorTracking.counters, autoConfig, errorType, idSelectionMode === 'auto') && !options.skipManualReviews) {
       processingState.pauseProcessing();
       scraperLogger.info('MODAL_OPEN', 'Opening error handling modal', { tournamentId });
@@ -594,7 +727,6 @@ export const useScrapeOrchestrator = (
       }
     });
 
-    // Stats for final logging
     const stats = { total: 0, success: 0, errors: 0, skipped: 0 };
 
     try {
@@ -604,7 +736,6 @@ export const useScrapeOrchestrator = (
       const processedIds = new Set<number>();
       const queuedIds = new Set<number>(initialQueue);
 
-      // Helper to extend frontier in auto mode
       const maybeExtendFrontier = (processedId: number) => {
         if (idSelectionMode !== 'auto' || signal.aborted || processedId !== autoFrontier) return;
         
@@ -633,7 +764,6 @@ export const useScrapeOrchestrator = (
         });
       };
 
-      // Main processing loop
       for (let i = 0; i < queue.length && !signal.aborted && shouldContinueRef.current; i++) {
         const tournamentId = queue[i];
         
@@ -645,22 +775,17 @@ export const useScrapeOrchestrator = (
 
         const url = `${baseUrl}${urlPath}${tournamentId}`;
 
-        // Ensure result exists for simplified view
         if (!processingState.results.some(r => r.id === tournamentId)) {
           processingState.addToQueue(tournamentId);
         }
 
-        // Check doNotScrape BEFORE FETCHING
         const cachedStatus = checkCachedDoNotScrape(cache, tournamentId);
         
         if (cachedStatus?.doNotScrape && !options.ignoreDoNotScrape) {
           const decision = await handleDoNotScrape(tournamentId, url, cachedStatus);
           
-          if (decision === 'stop') {
-            break;
-          }
+          if (decision === 'stop') break;
           
-          // Check if result was already set (skipped or saved)
           const currentResult = processingState.results.find(r => r.id === tournamentId);
           if (currentResult && ['skipped', 'success', 'error'].includes(currentResult.status)) {
             if (currentResult.status === 'skipped') stats.skipped++;
@@ -673,7 +798,6 @@ export const useScrapeOrchestrator = (
           }
         }
 
-        // Start fetching
         scraperLogger.logItemStart(tournamentId, url);
         processingState.setResultScraping(tournamentId);
 
@@ -687,7 +811,8 @@ export const useScrapeOrchestrator = (
             continue;
           }
           
-          const errorMsg = (parsedData as any).error || (parsedData as any).errorMessage;
+          const dataAsRecord = parsedData as Record<string, unknown>;
+          const errorMsg = (dataAsRecord.error || dataAsRecord.errorMessage) as string | undefined;
           if (errorMsg || parsedData.name === 'Error processing tournament') {
             await handleFetchError(tournamentId, url, errorMsg || 'Scraper Error', parsedData);
             stats.errors++;
@@ -698,7 +823,6 @@ export const useScrapeOrchestrator = (
           errorTracking.resetOnSuccess();
           await handleFetchSuccess(tournamentId, url, parsedData);
           
-          // Update stats based on final status
           const finalResult = processingState.results.find(r => r.id === tournamentId);
           if (finalResult?.status === 'success' || finalResult?.status === 'warning') stats.success++;
           else if (finalResult?.status === 'skipped') stats.skipped++;
@@ -706,27 +830,24 @@ export const useScrapeOrchestrator = (
           
           maybeExtendFrontier(tournamentId);
 
-        } catch (error: any) {
-          const errorMessage = error?.message || error?.toString?.() || 'Unknown error occurred';
+        } catch (error) {
+          const errorMessage = (error as Error)?.message || String(error) || 'Unknown error occurred';
           scraperLogger.error('PROCESSING_ERROR', `Error processing: ${errorMessage}`, { tournamentId });
           await handleFetchError(tournamentId, url, errorMessage, null);
           stats.errors++;
         }
         
-        // Throttle between requests
         if (i < queue.length - 1 && !signal.aborted && shouldContinueRef.current) {
           await delay(THROTTLE_DELAY_MS);
         }
       }
 
-      // Processing complete
       scraperLogger.logProcessingComplete(stats);
       await onProcessingComplete();
       
       if (!signal.aborted && shouldContinueRef.current) {
         processingState.stopProcessing();
         
-        // Update next ID for "Next ID" mode
         if (idSelectionMode === 'next' && processedIds.size > 0) {
           const maxProcessedId = Math.max(...processedIds);
           const newNextId = String(maxProcessedId + 1);
@@ -734,9 +855,9 @@ export const useScrapeOrchestrator = (
         }
       }
 
-    } catch (fatalError: any) {
-      scraperLogger.error('PROCESSING_ERROR', `FATAL: ${fatalError.message}`, { 
-        payload: { error: fatalError.message } 
+    } catch (fatalError) {
+      scraperLogger.error('PROCESSING_ERROR', `FATAL: ${(fatalError as Error).message}`, { 
+        payload: { error: (fatalError as Error).message } 
       });
       processingState.stopProcessing();
       throw fatalError;
@@ -747,9 +868,7 @@ export const useScrapeOrchestrator = (
     processingState, errorTracking, onProcessingComplete, onUpdateNextId
   ]);
 
-  return {
-    processQueue,
-  };
+  return { processQueue };
 };
 
 export default useScrapeOrchestrator;

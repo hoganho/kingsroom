@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": 1765687425653,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1765687433082
+  },
+  {
+    "timestamp": 1765687426030,
+    "message": "START RequestId: 13429aa3-5bef-4ffa-8f02-68b06f1bfd87 Version: $LATEST\n",
+    "ingestionTime": 1765687433082
+  },
+  {
+    "timestamp": 1765687426032,
+    "message": "2025-12-14T04:43:46.032Z\t13429aa3-5bef-4ffa-8f02-68b06f1bfd87\tINFO\t[Consolidator] Handling previewConsolidation query\n",
+    "ingestionTime": 1765687433082
+  },
+  {
+    "timestamp": 1765687426035,
+    "message": "2025-12-14T04:43:46.035Z\t13429aa3-5bef-4ffa-8f02-68b06f1bfd87\tINFO\t[Consolidator:Preview] Analyzing: {\n  name: 'Bella Vista Hotel Tuesdays',\n  venueId: '6316925d-1163-4b25-8d26-5728a03d99b8',\n  buyIn: 150,\n  tournamentSeriesId: null,\n  eventNumber: null,\n  seriesName: '❌ MISSING',\n  isMainEvent: false,\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  dayNumber: null,\n  flightLetter: null\n}\n",
+    "ingestionTime": 1765687433082
+  },
+  {
+    "timestamp": 1765687426073,
+    "message": "2025-12-14T04:43:46.073Z\t13429aa3-5bef-4ffa-8f02-68b06f1bfd87\tINFO\t[Consolidator:Preview] Strategy selected: {\n  willConsolidate: false,\n  strategy: null,\n  confidence: 0,\n  consolidationKey: null,\n  derivedParentName: 'Bella Vista Hotel Tuesdays'\n}\n",
+    "ingestionTime": 1765687433082
+  },
+  {
+    "timestamp": 1765687426095,
+    "message": "END RequestId: 13429aa3-5bef-4ffa-8f02-68b06f1bfd87\n",
+    "ingestionTime": 1765687433082
+  },
+  {
+    "timestamp": 1765687426096,
+    "message": "REPORT RequestId: 13429aa3-5bef-4ffa-8f02-68b06f1bfd87\tDuration: 64.93 ms\tBilled Duration: 439 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\tInit Duration: 373.74 ms\t\n",
+    "ingestionTime": 1765687433082
+  }
+]

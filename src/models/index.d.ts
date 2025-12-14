@@ -424,6 +424,24 @@ export enum BackgroundTaskStatus {
   PARTIAL_SUCCESS = "PARTIAL_SUCCESS"
 }
 
+export enum SeriesResolutionStatus {
+  MATCHED_EXISTING = "MATCHED_EXISTING",
+  CREATED_NEW = "CREATED_NEW",
+  NOT_SERIES = "NOT_SERIES",
+  SKIPPED = "SKIPPED",
+  PENDING_REVIEW = "PENDING_REVIEW",
+  FAILED = "FAILED"
+}
+
+export enum RecurringResolutionStatus {
+  MATCHED_EXISTING = "MATCHED_EXISTING",
+  CREATED_NEW = "CREATED_NEW",
+  NOT_RECURRING = "NOT_RECURRING",
+  SKIPPED = "SKIPPED",
+  PENDING_REVIEW = "PENDING_REVIEW",
+  FAILED = "FAILED"
+}
+
 type EagerVenueMetricsResult = {
   readonly success: boolean;
   readonly venuesProcessed?: number | null;
@@ -954,6 +972,7 @@ type EagerSaveGameResult = {
   readonly playerProcessingReason?: string | null;
   readonly venueAssignment?: SaveVenueAssignmentInfo | null;
   readonly seriesAssignment?: SaveSeriesAssignmentInfo | null;
+  readonly recurringGameAssignment?: SaveRecurringAssignmentInfo | null;
   readonly fieldsUpdated?: (string | null)[] | null;
   readonly wasEdited?: boolean | null;
 }
@@ -968,6 +987,7 @@ type LazySaveGameResult = {
   readonly playerProcessingReason?: string | null;
   readonly venueAssignment?: SaveVenueAssignmentInfo | null;
   readonly seriesAssignment?: SaveSeriesAssignmentInfo | null;
+  readonly recurringGameAssignment?: SaveRecurringAssignmentInfo | null;
   readonly fieldsUpdated?: (string | null)[] | null;
   readonly wasEdited?: boolean | null;
 }
@@ -975,6 +995,28 @@ type LazySaveGameResult = {
 export declare type SaveGameResult = LazyLoading extends LazyLoadingDisabled ? EagerSaveGameResult : LazySaveGameResult
 
 export declare const SaveGameResult: (new (init: ModelInit<SaveGameResult>) => SaveGameResult)
+
+type EagerSaveRecurringAssignmentInfo = {
+  readonly recurringGameId?: string | null;
+  readonly recurringGameName?: string | null;
+  readonly status?: RecurringGameAssignmentStatus | keyof typeof RecurringGameAssignmentStatus | null;
+  readonly confidence?: number | null;
+  readonly wasCreated?: boolean | null;
+  readonly inheritedGuarantee?: number | null;
+}
+
+type LazySaveRecurringAssignmentInfo = {
+  readonly recurringGameId?: string | null;
+  readonly recurringGameName?: string | null;
+  readonly status?: RecurringGameAssignmentStatus | keyof typeof RecurringGameAssignmentStatus | null;
+  readonly confidence?: number | null;
+  readonly wasCreated?: boolean | null;
+  readonly inheritedGuarantee?: number | null;
+}
+
+export declare type SaveRecurringAssignmentInfo = LazyLoading extends LazyLoadingDisabled ? EagerSaveRecurringAssignmentInfo : LazySaveRecurringAssignmentInfo
+
+export declare const SaveRecurringAssignmentInfo: (new (init: ModelInit<SaveRecurringAssignmentInfo>) => SaveRecurringAssignmentInfo)
 
 type EagerAssignGameResult = {
   readonly success: boolean;
@@ -1115,6 +1157,526 @@ type LazySearchRecurringGamesResult = {
 export declare type SearchRecurringGamesResult = LazyLoading extends LazyLoadingDisabled ? EagerSearchRecurringGamesResult : LazySearchRecurringGamesResult
 
 export declare const SearchRecurringGamesResult: (new (init: ModelInit<SearchRecurringGamesResult>) => SearchRecurringGamesResult)
+
+type EagerEnrichGameDataOutput = {
+  readonly success: boolean;
+  readonly validation: EnrichmentValidationResult;
+  readonly enrichedGame?: EnrichedGameData | null;
+  readonly enrichmentMetadata: EnrichmentMetadata;
+  readonly saveResult?: SaveGameResult | null;
+}
+
+type LazyEnrichGameDataOutput = {
+  readonly success: boolean;
+  readonly validation: EnrichmentValidationResult;
+  readonly enrichedGame?: EnrichedGameData | null;
+  readonly enrichmentMetadata: EnrichmentMetadata;
+  readonly saveResult?: SaveGameResult | null;
+}
+
+export declare type EnrichGameDataOutput = LazyLoading extends LazyLoadingDisabled ? EagerEnrichGameDataOutput : LazyEnrichGameDataOutput
+
+export declare const EnrichGameDataOutput: (new (init: ModelInit<EnrichGameDataOutput>) => EnrichGameDataOutput)
+
+type EagerEnrichmentValidationResult = {
+  readonly isValid: boolean;
+  readonly errors: EnrichmentValidationError[];
+  readonly warnings: EnrichmentValidationWarning[];
+}
+
+type LazyEnrichmentValidationResult = {
+  readonly isValid: boolean;
+  readonly errors: EnrichmentValidationError[];
+  readonly warnings: EnrichmentValidationWarning[];
+}
+
+export declare type EnrichmentValidationResult = LazyLoading extends LazyLoadingDisabled ? EagerEnrichmentValidationResult : LazyEnrichmentValidationResult
+
+export declare const EnrichmentValidationResult: (new (init: ModelInit<EnrichmentValidationResult>) => EnrichmentValidationResult)
+
+type EagerEnrichmentValidationError = {
+  readonly field: string;
+  readonly message: string;
+  readonly code?: string | null;
+}
+
+type LazyEnrichmentValidationError = {
+  readonly field: string;
+  readonly message: string;
+  readonly code?: string | null;
+}
+
+export declare type EnrichmentValidationError = LazyLoading extends LazyLoadingDisabled ? EagerEnrichmentValidationError : LazyEnrichmentValidationError
+
+export declare const EnrichmentValidationError: (new (init: ModelInit<EnrichmentValidationError>) => EnrichmentValidationError)
+
+type EagerEnrichmentValidationWarning = {
+  readonly field: string;
+  readonly message: string;
+  readonly code?: string | null;
+}
+
+type LazyEnrichmentValidationWarning = {
+  readonly field: string;
+  readonly message: string;
+  readonly code?: string | null;
+}
+
+export declare type EnrichmentValidationWarning = LazyLoading extends LazyLoadingDisabled ? EagerEnrichmentValidationWarning : LazyEnrichmentValidationWarning
+
+export declare const EnrichmentValidationWarning: (new (init: ModelInit<EnrichmentValidationWarning>) => EnrichmentValidationWarning)
+
+type EagerEnrichedGameData = {
+  readonly tournamentId?: number | null;
+  readonly existingGameId?: string | null;
+  readonly name: string;
+  readonly gameType: GameType | keyof typeof GameType;
+  readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
+  readonly gameStatus: GameStatus | keyof typeof GameStatus;
+  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
+  readonly gameStartDateTime: string;
+  readonly gameEndDateTime?: string | null;
+  readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
+  readonly buyIn?: number | null;
+  readonly rake?: number | null;
+  readonly venueFee?: number | null;
+  readonly startingStack?: number | null;
+  readonly hasGuarantee?: boolean | null;
+  readonly guaranteeAmount?: number | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly prizepoolSurplus?: number | null;
+  readonly guaranteeOverlayCost?: number | null;
+  readonly gameProfit?: number | null;
+  readonly prizepoolCalculated?: number | null;
+  readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
+  readonly totalEntries?: number | null;
+  readonly totalRebuys?: number | null;
+  readonly totalAddons?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly playersRemaining?: number | null;
+  readonly totalChipsInPlay?: number | null;
+  readonly averagePlayerStack?: number | null;
+  readonly totalDuration?: string | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly isSeries?: boolean | null;
+  readonly seriesName?: string | null;
+  readonly isSatellite?: boolean | null;
+  readonly isRegular?: boolean | null;
+  readonly gameTags?: (string | null)[] | null;
+  readonly venueId?: string | null;
+  readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly venueAssignmentConfidence?: number | null;
+  readonly suggestedVenueName?: string | null;
+  readonly tournamentSeriesId?: string | null;
+  readonly seriesTitleId?: string | null;
+  readonly seriesAssignmentStatus?: SeriesAssignmentStatus | keyof typeof SeriesAssignmentStatus | null;
+  readonly seriesAssignmentConfidence?: number | null;
+  readonly suggestedSeriesName?: string | null;
+  readonly isMainEvent?: boolean | null;
+  readonly eventNumber?: number | null;
+  readonly dayNumber?: number | null;
+  readonly flightLetter?: string | null;
+  readonly finalDay?: boolean | null;
+  readonly recurringGameId?: string | null;
+  readonly recurringGameAssignmentStatus?: RecurringGameAssignmentStatus | keyof typeof RecurringGameAssignmentStatus | null;
+  readonly recurringGameAssignmentConfidence?: number | null;
+  readonly wasScheduledInstance?: boolean | null;
+  readonly deviationNotes?: string | null;
+  readonly instanceNumber?: number | null;
+  readonly gameDayOfWeek?: string | null;
+  readonly buyInBucket?: string | null;
+  readonly venueScheduleKey?: string | null;
+  readonly venueGameTypeKey?: string | null;
+  readonly entityQueryKey?: string | null;
+  readonly entityGameTypeKey?: string | null;
+  readonly levels?: string | null;
+}
+
+type LazyEnrichedGameData = {
+  readonly tournamentId?: number | null;
+  readonly existingGameId?: string | null;
+  readonly name: string;
+  readonly gameType: GameType | keyof typeof GameType;
+  readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
+  readonly gameStatus: GameStatus | keyof typeof GameStatus;
+  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
+  readonly gameStartDateTime: string;
+  readonly gameEndDateTime?: string | null;
+  readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
+  readonly buyIn?: number | null;
+  readonly rake?: number | null;
+  readonly venueFee?: number | null;
+  readonly startingStack?: number | null;
+  readonly hasGuarantee?: boolean | null;
+  readonly guaranteeAmount?: number | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly prizepoolSurplus?: number | null;
+  readonly guaranteeOverlayCost?: number | null;
+  readonly gameProfit?: number | null;
+  readonly prizepoolCalculated?: number | null;
+  readonly totalUniquePlayers?: number | null;
+  readonly totalInitialEntries?: number | null;
+  readonly totalEntries?: number | null;
+  readonly totalRebuys?: number | null;
+  readonly totalAddons?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly playersRemaining?: number | null;
+  readonly totalChipsInPlay?: number | null;
+  readonly averagePlayerStack?: number | null;
+  readonly totalDuration?: string | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly isSeries?: boolean | null;
+  readonly seriesName?: string | null;
+  readonly isSatellite?: boolean | null;
+  readonly isRegular?: boolean | null;
+  readonly gameTags?: (string | null)[] | null;
+  readonly venueId?: string | null;
+  readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly venueAssignmentConfidence?: number | null;
+  readonly suggestedVenueName?: string | null;
+  readonly tournamentSeriesId?: string | null;
+  readonly seriesTitleId?: string | null;
+  readonly seriesAssignmentStatus?: SeriesAssignmentStatus | keyof typeof SeriesAssignmentStatus | null;
+  readonly seriesAssignmentConfidence?: number | null;
+  readonly suggestedSeriesName?: string | null;
+  readonly isMainEvent?: boolean | null;
+  readonly eventNumber?: number | null;
+  readonly dayNumber?: number | null;
+  readonly flightLetter?: string | null;
+  readonly finalDay?: boolean | null;
+  readonly recurringGameId?: string | null;
+  readonly recurringGameAssignmentStatus?: RecurringGameAssignmentStatus | keyof typeof RecurringGameAssignmentStatus | null;
+  readonly recurringGameAssignmentConfidence?: number | null;
+  readonly wasScheduledInstance?: boolean | null;
+  readonly deviationNotes?: string | null;
+  readonly instanceNumber?: number | null;
+  readonly gameDayOfWeek?: string | null;
+  readonly buyInBucket?: string | null;
+  readonly venueScheduleKey?: string | null;
+  readonly venueGameTypeKey?: string | null;
+  readonly entityQueryKey?: string | null;
+  readonly entityGameTypeKey?: string | null;
+  readonly levels?: string | null;
+}
+
+export declare type EnrichedGameData = LazyLoading extends LazyLoadingDisabled ? EagerEnrichedGameData : LazyEnrichedGameData
+
+export declare const EnrichedGameData: (new (init: ModelInit<EnrichedGameData>) => EnrichedGameData)
+
+type EagerEnrichmentMetadata = {
+  readonly seriesResolution?: SeriesResolutionMetadata | null;
+  readonly recurringResolution?: RecurringResolutionMetadata | null;
+  readonly venueResolution?: VenueResolutionMetadata | null;
+  readonly queryKeysGenerated: boolean;
+  readonly financialsCalculated: boolean;
+  readonly fieldsCompleted: string[];
+  readonly processingTimeMs?: number | null;
+}
+
+type LazyEnrichmentMetadata = {
+  readonly seriesResolution?: SeriesResolutionMetadata | null;
+  readonly recurringResolution?: RecurringResolutionMetadata | null;
+  readonly venueResolution?: VenueResolutionMetadata | null;
+  readonly queryKeysGenerated: boolean;
+  readonly financialsCalculated: boolean;
+  readonly fieldsCompleted: string[];
+  readonly processingTimeMs?: number | null;
+}
+
+export declare type EnrichmentMetadata = LazyLoading extends LazyLoadingDisabled ? EagerEnrichmentMetadata : LazyEnrichmentMetadata
+
+export declare const EnrichmentMetadata: (new (init: ModelInit<EnrichmentMetadata>) => EnrichmentMetadata)
+
+type EagerSeriesResolutionMetadata = {
+  readonly status: SeriesResolutionStatus | keyof typeof SeriesResolutionStatus;
+  readonly confidence?: number | null;
+  readonly matchedSeriesId?: string | null;
+  readonly matchedSeriesName?: string | null;
+  readonly matchedSeriesTitleId?: string | null;
+  readonly wasCreated: boolean;
+  readonly createdSeriesId?: string | null;
+  readonly matchReason?: string | null;
+}
+
+type LazySeriesResolutionMetadata = {
+  readonly status: SeriesResolutionStatus | keyof typeof SeriesResolutionStatus;
+  readonly confidence?: number | null;
+  readonly matchedSeriesId?: string | null;
+  readonly matchedSeriesName?: string | null;
+  readonly matchedSeriesTitleId?: string | null;
+  readonly wasCreated: boolean;
+  readonly createdSeriesId?: string | null;
+  readonly matchReason?: string | null;
+}
+
+export declare type SeriesResolutionMetadata = LazyLoading extends LazyLoadingDisabled ? EagerSeriesResolutionMetadata : LazySeriesResolutionMetadata
+
+export declare const SeriesResolutionMetadata: (new (init: ModelInit<SeriesResolutionMetadata>) => SeriesResolutionMetadata)
+
+type EagerRecurringResolutionMetadata = {
+  readonly status: RecurringResolutionStatus | keyof typeof RecurringResolutionStatus;
+  readonly confidence?: number | null;
+  readonly matchedRecurringGameId?: string | null;
+  readonly matchedRecurringGameName?: string | null;
+  readonly wasCreated: boolean;
+  readonly createdRecurringGameId?: string | null;
+  readonly inheritedFields?: string[] | null;
+  readonly matchReason?: string | null;
+}
+
+type LazyRecurringResolutionMetadata = {
+  readonly status: RecurringResolutionStatus | keyof typeof RecurringResolutionStatus;
+  readonly confidence?: number | null;
+  readonly matchedRecurringGameId?: string | null;
+  readonly matchedRecurringGameName?: string | null;
+  readonly wasCreated: boolean;
+  readonly createdRecurringGameId?: string | null;
+  readonly inheritedFields?: string[] | null;
+  readonly matchReason?: string | null;
+}
+
+export declare type RecurringResolutionMetadata = LazyLoading extends LazyLoadingDisabled ? EagerRecurringResolutionMetadata : LazyRecurringResolutionMetadata
+
+export declare const RecurringResolutionMetadata: (new (init: ModelInit<RecurringResolutionMetadata>) => RecurringResolutionMetadata)
+
+type EagerVenueResolutionMetadata = {
+  readonly status: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus;
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly venueFee?: number | null;
+  readonly confidence?: number | null;
+  readonly matchReason?: string | null;
+}
+
+type LazyVenueResolutionMetadata = {
+  readonly status: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus;
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly venueFee?: number | null;
+  readonly confidence?: number | null;
+  readonly matchReason?: string | null;
+}
+
+export declare type VenueResolutionMetadata = LazyLoading extends LazyLoadingDisabled ? EagerVenueResolutionMetadata : LazyVenueResolutionMetadata
+
+export declare const VenueResolutionMetadata: (new (init: ModelInit<VenueResolutionMetadata>) => VenueResolutionMetadata)
+
+type EagerCalculateGameFinancialsOutput = {
+  readonly success: boolean;
+  readonly gameId?: string | null;
+  readonly mode: string;
+  readonly calculatedCost?: GameCostCalculation | null;
+  readonly calculatedSnapshot?: GameFinancialSnapshotCalculation | null;
+  readonly summary?: FinancialsSummary | null;
+  readonly costSaveResult?: FinancialsSaveResult | null;
+  readonly snapshotSaveResult?: FinancialsSaveResult | null;
+  readonly processingTimeMs?: number | null;
+  readonly error?: string | null;
+}
+
+type LazyCalculateGameFinancialsOutput = {
+  readonly success: boolean;
+  readonly gameId?: string | null;
+  readonly mode: string;
+  readonly calculatedCost?: GameCostCalculation | null;
+  readonly calculatedSnapshot?: GameFinancialSnapshotCalculation | null;
+  readonly summary?: FinancialsSummary | null;
+  readonly costSaveResult?: FinancialsSaveResult | null;
+  readonly snapshotSaveResult?: FinancialsSaveResult | null;
+  readonly processingTimeMs?: number | null;
+  readonly error?: string | null;
+}
+
+export declare type CalculateGameFinancialsOutput = LazyLoading extends LazyLoadingDisabled ? EagerCalculateGameFinancialsOutput : LazyCalculateGameFinancialsOutput
+
+export declare const CalculateGameFinancialsOutput: (new (init: ModelInit<CalculateGameFinancialsOutput>) => CalculateGameFinancialsOutput)
+
+type EagerGameCostCalculation = {
+  readonly gameId?: string | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly gameDate?: string | null;
+  readonly totalDealerCost?: number | null;
+  readonly totalTournamentDirectorCost?: number | null;
+  readonly totalFloorStaffCost?: number | null;
+  readonly totalSecurityCost?: number | null;
+  readonly totalPrizeContribution?: number | null;
+  readonly totalJackpotContribution?: number | null;
+  readonly totalPromotionCost?: number | null;
+  readonly totalOtherCost?: number | null;
+  readonly totalCost?: number | null;
+  readonly dealerRatePerEntry?: number | null;
+  readonly entriesUsedForCalculation?: number | null;
+}
+
+type LazyGameCostCalculation = {
+  readonly gameId?: string | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly gameDate?: string | null;
+  readonly totalDealerCost?: number | null;
+  readonly totalTournamentDirectorCost?: number | null;
+  readonly totalFloorStaffCost?: number | null;
+  readonly totalSecurityCost?: number | null;
+  readonly totalPrizeContribution?: number | null;
+  readonly totalJackpotContribution?: number | null;
+  readonly totalPromotionCost?: number | null;
+  readonly totalOtherCost?: number | null;
+  readonly totalCost?: number | null;
+  readonly dealerRatePerEntry?: number | null;
+  readonly entriesUsedForCalculation?: number | null;
+}
+
+export declare type GameCostCalculation = LazyLoading extends LazyLoadingDisabled ? EagerGameCostCalculation : LazyGameCostCalculation
+
+export declare const GameCostCalculation: (new (init: ModelInit<GameCostCalculation>) => GameCostCalculation)
+
+type EagerGameFinancialSnapshotCalculation = {
+  readonly gameId?: string | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly totalUniquePlayers?: number | null;
+  readonly totalEntries?: number | null;
+  readonly guaranteeAmount?: number | null;
+  readonly gameDurationMinutes?: number | null;
+  readonly gameType?: GameType | keyof typeof GameType | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly venueFee?: number | null;
+  readonly totalRevenue?: number | null;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly prizepoolTotal?: number | null;
+  readonly prizepoolSurplus?: number | null;
+  readonly guaranteeOverlayCost?: number | null;
+  readonly guaranteeCoverageRate?: number | null;
+  readonly guaranteeMet?: boolean | null;
+  readonly totalCost?: number | null;
+  readonly totalDealerCost?: number | null;
+  readonly totalStaffCost?: number | null;
+  readonly gameProfit?: number | null;
+  readonly netProfit?: number | null;
+  readonly profitMargin?: number | null;
+  readonly revenuePerPlayer?: number | null;
+  readonly costPerPlayer?: number | null;
+  readonly profitPerPlayer?: number | null;
+  readonly rakePerEntry?: number | null;
+  readonly staffCostPerPlayer?: number | null;
+  readonly dealerCostPerHour?: number | null;
+}
+
+type LazyGameFinancialSnapshotCalculation = {
+  readonly gameId?: string | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly totalUniquePlayers?: number | null;
+  readonly totalEntries?: number | null;
+  readonly guaranteeAmount?: number | null;
+  readonly gameDurationMinutes?: number | null;
+  readonly gameType?: GameType | keyof typeof GameType | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly venueFee?: number | null;
+  readonly totalRevenue?: number | null;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly prizepoolTotal?: number | null;
+  readonly prizepoolSurplus?: number | null;
+  readonly guaranteeOverlayCost?: number | null;
+  readonly guaranteeCoverageRate?: number | null;
+  readonly guaranteeMet?: boolean | null;
+  readonly totalCost?: number | null;
+  readonly totalDealerCost?: number | null;
+  readonly totalStaffCost?: number | null;
+  readonly gameProfit?: number | null;
+  readonly netProfit?: number | null;
+  readonly profitMargin?: number | null;
+  readonly revenuePerPlayer?: number | null;
+  readonly costPerPlayer?: number | null;
+  readonly profitPerPlayer?: number | null;
+  readonly rakePerEntry?: number | null;
+  readonly staffCostPerPlayer?: number | null;
+  readonly dealerCostPerHour?: number | null;
+}
+
+export declare type GameFinancialSnapshotCalculation = LazyLoading extends LazyLoadingDisabled ? EagerGameFinancialSnapshotCalculation : LazyGameFinancialSnapshotCalculation
+
+export declare const GameFinancialSnapshotCalculation: (new (init: ModelInit<GameFinancialSnapshotCalculation>) => GameFinancialSnapshotCalculation)
+
+type EagerFinancialsSummary = {
+  readonly totalRevenue?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly totalCost?: number | null;
+  readonly totalDealerCost?: number | null;
+  readonly prizepoolTotal?: number | null;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly guaranteeMet?: boolean | null;
+  readonly guaranteeOverlayCost?: number | null;
+  readonly guaranteeCoverageRate?: number | null;
+  readonly gameProfit?: number | null;
+  readonly netProfit?: number | null;
+  readonly profitMargin?: number | null;
+  readonly revenuePerPlayer?: number | null;
+  readonly costPerPlayer?: number | null;
+  readonly profitPerPlayer?: number | null;
+  readonly rakePerEntry?: number | null;
+}
+
+type LazyFinancialsSummary = {
+  readonly totalRevenue?: number | null;
+  readonly rakeRevenue?: number | null;
+  readonly totalBuyInsCollected?: number | null;
+  readonly totalCost?: number | null;
+  readonly totalDealerCost?: number | null;
+  readonly prizepoolTotal?: number | null;
+  readonly prizepoolPlayerContributions?: number | null;
+  readonly prizepoolAddedValue?: number | null;
+  readonly guaranteeMet?: boolean | null;
+  readonly guaranteeOverlayCost?: number | null;
+  readonly guaranteeCoverageRate?: number | null;
+  readonly gameProfit?: number | null;
+  readonly netProfit?: number | null;
+  readonly profitMargin?: number | null;
+  readonly revenuePerPlayer?: number | null;
+  readonly costPerPlayer?: number | null;
+  readonly profitPerPlayer?: number | null;
+  readonly rakePerEntry?: number | null;
+}
+
+export declare type FinancialsSummary = LazyLoading extends LazyLoadingDisabled ? EagerFinancialsSummary : LazyFinancialsSummary
+
+export declare const FinancialsSummary: (new (init: ModelInit<FinancialsSummary>) => FinancialsSummary)
+
+type EagerFinancialsSaveResult = {
+  readonly action?: string | null;
+  readonly costId?: string | null;
+  readonly snapshotId?: string | null;
+  readonly error?: string | null;
+}
+
+type LazyFinancialsSaveResult = {
+  readonly action?: string | null;
+  readonly costId?: string | null;
+  readonly snapshotId?: string | null;
+  readonly error?: string | null;
+}
+
+export declare type FinancialsSaveResult = LazyLoading extends LazyLoadingDisabled ? EagerFinancialsSaveResult : LazyFinancialsSaveResult
+
+export declare const FinancialsSaveResult: (new (init: ModelInit<FinancialsSaveResult>) => FinancialsSaveResult)
 
 type EagerRefreshAllMetricsResult = {
   readonly success: boolean;

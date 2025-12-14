@@ -12656,6 +12656,28 @@ export const schema = {
                 "CANCELLED",
                 "PARTIAL_SUCCESS"
             ]
+        },
+        "SeriesResolutionStatus": {
+            "name": "SeriesResolutionStatus",
+            "values": [
+                "MATCHED_EXISTING",
+                "CREATED_NEW",
+                "NOT_SERIES",
+                "SKIPPED",
+                "PENDING_REVIEW",
+                "FAILED"
+            ]
+        },
+        "RecurringResolutionStatus": {
+            "name": "RecurringResolutionStatus",
+            "values": [
+                "MATCHED_EXISTING",
+                "CREATED_NEW",
+                "NOT_RECURRING",
+                "SKIPPED",
+                "PENDING_REVIEW",
+                "FAILED"
+            ]
         }
     },
     "nonModels": {
@@ -14010,6 +14032,15 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "recurringGameAssignment": {
+                    "name": "recurringGameAssignment",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "SaveRecurringAssignmentInfo"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "fieldsUpdated": {
                     "name": "fieldsUpdated",
                     "isArray": true,
@@ -14022,6 +14053,55 @@ export const schema = {
                     "name": "wasEdited",
                     "isArray": false,
                     "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SaveRecurringAssignmentInfo": {
+            "name": "SaveRecurringAssignmentInfo",
+            "fields": {
+                "recurringGameId": {
+                    "name": "recurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameName": {
+                    "name": "recurringGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "RecurringGameAssignmentStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "confidence": {
+                    "name": "confidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "wasCreated": {
+                    "name": "wasCreated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "inheritedGuarantee": {
+                    "name": "inheritedGuarantee",
+                    "isArray": false,
+                    "type": "Float",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -14356,6 +14436,1467 @@ export const schema = {
                 },
                 "nextToken": {
                     "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "EnrichGameDataOutput": {
+            "name": "EnrichGameDataOutput",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "validation": {
+                    "name": "validation",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "EnrichmentValidationResult"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "enrichedGame": {
+                    "name": "enrichedGame",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "EnrichedGameData"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "enrichmentMetadata": {
+                    "name": "enrichmentMetadata",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "EnrichmentMetadata"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "saveResult": {
+                    "name": "saveResult",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "SaveGameResult"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "EnrichmentValidationResult": {
+            "name": "EnrichmentValidationResult",
+            "fields": {
+                "isValid": {
+                    "name": "isValid",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "errors": {
+                    "name": "errors",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "EnrichmentValidationError"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "warnings": {
+                    "name": "warnings",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "EnrichmentValidationWarning"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                }
+            }
+        },
+        "EnrichmentValidationError": {
+            "name": "EnrichmentValidationError",
+            "fields": {
+                "field": {
+                    "name": "field",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "code": {
+                    "name": "code",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "EnrichmentValidationWarning": {
+            "name": "EnrichmentValidationWarning",
+            "fields": {
+                "field": {
+                    "name": "field",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "code": {
+                    "name": "code",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "EnrichedGameData": {
+            "name": "EnrichedGameData",
+            "fields": {
+                "tournamentId": {
+                    "name": "tournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "existingGameId": {
+                    "name": "existingGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameType": {
+                    "name": "gameType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameVariant": {
+                    "name": "gameVariant",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameVariant"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStatus": {
+                    "name": "gameStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "registrationStatus": {
+                    "name": "registrationStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "RegistrationStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameEndDateTime": {
+                    "name": "gameEndDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameFrequency": {
+                    "name": "gameFrequency",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameFrequency"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "buyIn": {
+                    "name": "buyIn",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rake": {
+                    "name": "rake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueFee": {
+                    "name": "venueFee",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startingStack": {
+                    "name": "startingStack",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasGuarantee": {
+                    "name": "hasGuarantee",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeAmount": {
+                    "name": "guaranteeAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalBuyInsCollected": {
+                    "name": "totalBuyInsCollected",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rakeRevenue": {
+                    "name": "rakeRevenue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolPlayerContributions": {
+                    "name": "prizepoolPlayerContributions",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolAddedValue": {
+                    "name": "prizepoolAddedValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolSurplus": {
+                    "name": "prizepoolSurplus",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeOverlayCost": {
+                    "name": "guaranteeOverlayCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameProfit": {
+                    "name": "gameProfit",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolCalculated": {
+                    "name": "prizepoolCalculated",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalUniquePlayers": {
+                    "name": "totalUniquePlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalInitialEntries": {
+                    "name": "totalInitialEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalEntries": {
+                    "name": "totalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalRebuys": {
+                    "name": "totalRebuys",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalAddons": {
+                    "name": "totalAddons",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolPaid": {
+                    "name": "prizepoolPaid",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersRemaining": {
+                    "name": "playersRemaining",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalChipsInPlay": {
+                    "name": "totalChipsInPlay",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "averagePlayerStack": {
+                    "name": "averagePlayerStack",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalDuration": {
+                    "name": "totalDuration",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentType": {
+                    "name": "tournamentType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "TournamentType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSeries": {
+                    "name": "isSeries",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesName": {
+                    "name": "seriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSatellite": {
+                    "name": "isSatellite",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isRegular": {
+                    "name": "isRegular",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameTags": {
+                    "name": "gameTags",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueAssignmentStatus": {
+                    "name": "venueAssignmentStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "VenueAssignmentStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueAssignmentConfidence": {
+                    "name": "venueAssignmentConfidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "suggestedVenueName": {
+                    "name": "suggestedVenueName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentSeriesId": {
+                    "name": "tournamentSeriesId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesTitleId": {
+                    "name": "seriesTitleId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesAssignmentStatus": {
+                    "name": "seriesAssignmentStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SeriesAssignmentStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesAssignmentConfidence": {
+                    "name": "seriesAssignmentConfidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "suggestedSeriesName": {
+                    "name": "suggestedSeriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isMainEvent": {
+                    "name": "isMainEvent",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "eventNumber": {
+                    "name": "eventNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dayNumber": {
+                    "name": "dayNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "flightLetter": {
+                    "name": "flightLetter",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "finalDay": {
+                    "name": "finalDay",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameId": {
+                    "name": "recurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameAssignmentStatus": {
+                    "name": "recurringGameAssignmentStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "RecurringGameAssignmentStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameAssignmentConfidence": {
+                    "name": "recurringGameAssignmentConfidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "wasScheduledInstance": {
+                    "name": "wasScheduledInstance",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "deviationNotes": {
+                    "name": "deviationNotes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "instanceNumber": {
+                    "name": "instanceNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameDayOfWeek": {
+                    "name": "gameDayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "buyInBucket": {
+                    "name": "buyInBucket",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueScheduleKey": {
+                    "name": "venueScheduleKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueGameTypeKey": {
+                    "name": "venueGameTypeKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityQueryKey": {
+                    "name": "entityQueryKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityGameTypeKey": {
+                    "name": "entityGameTypeKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "levels": {
+                    "name": "levels",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "EnrichmentMetadata": {
+            "name": "EnrichmentMetadata",
+            "fields": {
+                "seriesResolution": {
+                    "name": "seriesResolution",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "SeriesResolutionMetadata"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringResolution": {
+                    "name": "recurringResolution",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "RecurringResolutionMetadata"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueResolution": {
+                    "name": "venueResolution",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "VenueResolutionMetadata"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "queryKeysGenerated": {
+                    "name": "queryKeysGenerated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "financialsCalculated": {
+                    "name": "financialsCalculated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "fieldsCompleted": {
+                    "name": "fieldsCompleted",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "processingTimeMs": {
+                    "name": "processingTimeMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SeriesResolutionMetadata": {
+            "name": "SeriesResolutionMetadata",
+            "fields": {
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SeriesResolutionStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "confidence": {
+                    "name": "confidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchedSeriesId": {
+                    "name": "matchedSeriesId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchedSeriesName": {
+                    "name": "matchedSeriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchedSeriesTitleId": {
+                    "name": "matchedSeriesTitleId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "wasCreated": {
+                    "name": "wasCreated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdSeriesId": {
+                    "name": "createdSeriesId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchReason": {
+                    "name": "matchReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringResolutionMetadata": {
+            "name": "RecurringResolutionMetadata",
+            "fields": {
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "RecurringResolutionStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "confidence": {
+                    "name": "confidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchedRecurringGameId": {
+                    "name": "matchedRecurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchedRecurringGameName": {
+                    "name": "matchedRecurringGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "wasCreated": {
+                    "name": "wasCreated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdRecurringGameId": {
+                    "name": "createdRecurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "inheritedFields": {
+                    "name": "inheritedFields",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "matchReason": {
+                    "name": "matchReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "VenueResolutionMetadata": {
+            "name": "VenueResolutionMetadata",
+            "fields": {
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "VenueAssignmentStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueName": {
+                    "name": "venueName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueFee": {
+                    "name": "venueFee",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "confidence": {
+                    "name": "confidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchReason": {
+                    "name": "matchReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "CalculateGameFinancialsOutput": {
+            "name": "CalculateGameFinancialsOutput",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "mode": {
+                    "name": "mode",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "calculatedCost": {
+                    "name": "calculatedCost",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameCostCalculation"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "calculatedSnapshot": {
+                    "name": "calculatedSnapshot",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameFinancialSnapshotCalculation"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "summary": {
+                    "name": "summary",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "FinancialsSummary"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "costSaveResult": {
+                    "name": "costSaveResult",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "FinancialsSaveResult"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "snapshotSaveResult": {
+                    "name": "snapshotSaveResult",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "FinancialsSaveResult"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "processingTimeMs": {
+                    "name": "processingTimeMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GameCostCalculation": {
+            "name": "GameCostCalculation",
+            "fields": {
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameDate": {
+                    "name": "gameDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalDealerCost": {
+                    "name": "totalDealerCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTournamentDirectorCost": {
+                    "name": "totalTournamentDirectorCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalFloorStaffCost": {
+                    "name": "totalFloorStaffCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalSecurityCost": {
+                    "name": "totalSecurityCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPrizeContribution": {
+                    "name": "totalPrizeContribution",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalJackpotContribution": {
+                    "name": "totalJackpotContribution",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPromotionCost": {
+                    "name": "totalPromotionCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalOtherCost": {
+                    "name": "totalOtherCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dealerRatePerEntry": {
+                    "name": "dealerRatePerEntry",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entriesUsedForCalculation": {
+                    "name": "entriesUsedForCalculation",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GameFinancialSnapshotCalculation": {
+            "name": "GameFinancialSnapshotCalculation",
+            "fields": {
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalUniquePlayers": {
+                    "name": "totalUniquePlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalEntries": {
+                    "name": "totalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeAmount": {
+                    "name": "guaranteeAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameDurationMinutes": {
+                    "name": "gameDurationMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameType": {
+                    "name": "gameType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentType": {
+                    "name": "tournamentType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "TournamentType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalBuyInsCollected": {
+                    "name": "totalBuyInsCollected",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rakeRevenue": {
+                    "name": "rakeRevenue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueFee": {
+                    "name": "venueFee",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalRevenue": {
+                    "name": "totalRevenue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolPlayerContributions": {
+                    "name": "prizepoolPlayerContributions",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolAddedValue": {
+                    "name": "prizepoolAddedValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolTotal": {
+                    "name": "prizepoolTotal",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolSurplus": {
+                    "name": "prizepoolSurplus",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeOverlayCost": {
+                    "name": "guaranteeOverlayCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeCoverageRate": {
+                    "name": "guaranteeCoverageRate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeMet": {
+                    "name": "guaranteeMet",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalDealerCost": {
+                    "name": "totalDealerCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalStaffCost": {
+                    "name": "totalStaffCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameProfit": {
+                    "name": "gameProfit",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "netProfit": {
+                    "name": "netProfit",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "profitMargin": {
+                    "name": "profitMargin",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "revenuePerPlayer": {
+                    "name": "revenuePerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "costPerPlayer": {
+                    "name": "costPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "profitPerPlayer": {
+                    "name": "profitPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rakePerEntry": {
+                    "name": "rakePerEntry",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "staffCostPerPlayer": {
+                    "name": "staffCostPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dealerCostPerHour": {
+                    "name": "dealerCostPerHour",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "FinancialsSummary": {
+            "name": "FinancialsSummary",
+            "fields": {
+                "totalRevenue": {
+                    "name": "totalRevenue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rakeRevenue": {
+                    "name": "rakeRevenue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalBuyInsCollected": {
+                    "name": "totalBuyInsCollected",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalDealerCost": {
+                    "name": "totalDealerCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolTotal": {
+                    "name": "prizepoolTotal",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolPlayerContributions": {
+                    "name": "prizepoolPlayerContributions",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolAddedValue": {
+                    "name": "prizepoolAddedValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeMet": {
+                    "name": "guaranteeMet",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeOverlayCost": {
+                    "name": "guaranteeOverlayCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeCoverageRate": {
+                    "name": "guaranteeCoverageRate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameProfit": {
+                    "name": "gameProfit",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "netProfit": {
+                    "name": "netProfit",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "profitMargin": {
+                    "name": "profitMargin",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "revenuePerPlayer": {
+                    "name": "revenuePerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "costPerPlayer": {
+                    "name": "costPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "profitPerPlayer": {
+                    "name": "profitPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rakePerEntry": {
+                    "name": "rakePerEntry",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "FinancialsSaveResult": {
+            "name": "FinancialsSaveResult",
+            "fields": {
+                "action": {
+                    "name": "action",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "costId": {
+                    "name": "costId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "snapshotId": {
+                    "name": "snapshotId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -17414,5 +18955,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "34514a49925bf7147417649c2b2185a2"
+    "version": "61473fedbb11f684a605968b3855530a"
 };

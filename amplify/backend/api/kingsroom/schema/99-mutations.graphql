@@ -494,9 +494,6 @@ type Mutation {
   fetchTournamentData(url: AWSURL, s3Key: String, forceRefresh: Boolean, scraperApiKey: String, entityId: ID): ScrapedGameData
     @function(name: "webScraperFunction-${env}")
 
-  saveTournamentData(input: SaveTournamentInput!): Game
-    @function(name: "webScraperFunction-${env}")
-
   controlScraperOperation(operation: ScraperOperation!, entityId: ID): ScraperControlResponse
     @function(name: "autoScraper-${env}")
 
@@ -521,9 +518,6 @@ type Mutation {
   forceRefreshScrape(url: AWSURL!): ScrapedGameData
 
   clearURLCache(url: AWSURL!): Boolean
-
-  saveGame(input: SaveGameInput!): SaveGameResult!
-    @function(name: "saveGameFunction-${env}")
 
   recalculateVenueDetails(input: RecalculateVenueDetailsInput!): VenueMetricsResult
     @function(name: "venueDetailsUpdater-${env}")

@@ -30,6 +30,9 @@ import {
   useScraperModals,
 } from '../../hooks/scraper';
 import { useScrapeOrchestrator, ScrapeOptionsResult } from '../../hooks/scraper/useScrapeOrchestrator';
+import { 
+  EnrichedGameData,
+} from '../../services/enrichmentService';
 
 // --- Utils ---
 // Phase 5: Structured logging
@@ -133,22 +136,22 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
   const highestTournamentId = scrapingStatus?.highestTournamentId ?? bounds?.highestId;
 
   // --- Orchestrator Callbacks ---
-  const handleNeedsSaveConfirmation = useCallback(async (
-    _tournamentId: number,
-    parsedData: ScrapedGameData,
-    autoVenueId: string | undefined
-  ): Promise<{ action: 'save' | 'cancel'; venueId?: string; editedData?: ScrapedGameData }> => {
-    const result = await modals.saveConfirmation.openModal(
-      parsedData,
-      autoVenueId || defaultVenueId,
-      currentEntity?.id || ''
-    );
-    return {
-      action: result.action === 'cancel' ? 'cancel' : 'save',
-      venueId: result.venueId,
-      editedData: result.editedData,
-    };
-  }, [modals.saveConfirmation, defaultVenueId, currentEntity?.id]);
+const handleNeedsSaveConfirmation = useCallback(async (
+  _tournamentId: number,
+  parsedData: ScrapedGameData,
+  autoVenueId: string | undefined
+): Promise<{ action: 'save' | 'cancel'; venueId?: string; editedData?: ScrapedGameData }> => {  // Changed EnrichedGameData to ScrapedGameData
+  const result = await modals.saveConfirmation.openModal(
+    parsedData as unknown as ScrapedGameData,
+    autoVenueId || defaultVenueId,
+    currentEntity?.id || ''
+  );
+  return {
+    action: result.action === 'cancel' ? 'cancel' : 'save',
+    venueId: result.venueId,
+    editedData: result.editedData as ScrapedGameData | undefined,
+  };
+}, [modals.saveConfirmation, defaultVenueId, currentEntity?.id]);
 
   const handleNeedsErrorDecision = useCallback(async (
     tournamentId: number,
@@ -559,19 +562,19 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse }) => {
         <GameDetailsModal game={{ data: selectedGameDetails }} onClose={() => setSelectedGameDetails(null)} />
       )}
 
-      {modals.saveConfirmation.state && (
-        <SaveConfirmationModal
-          isOpen={true}
-          onClose={() => modals.saveConfirmation.cancel()}
-          onConfirm={(editedData: any) => modals.saveConfirmation.confirm(editedData.venueId || defaultVenueId, editedData)}
-          gameData={modals.saveConfirmation.state.gameData!}
-          venueId={modals.saveConfirmation.state.suggestedVenueId}
-          sourceUrl={`${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${modals.saveConfirmation.state.gameData?.tournamentId}`}
-          entityId={currentEntity.id}
-          autoMode={idSelectionMode === 'auto'}
-          skipConfirmation={options.skipManualReviews}
-        />
-      )}
+        {modals.saveConfirmation.state && (
+            <SaveConfirmationModal
+                isOpen={true}
+                onClose={() => modals.saveConfirmation.cancel()}
+                onConfirm={(editedData: any) => modals.saveConfirmation.confirm(editedData.venueId || defaultVenueId, editedData)}
+                gameData={modals.saveConfirmation.state.gameData as unknown as EnrichedGameData}  // Add cast
+                venueId={modals.saveConfirmation.state.suggestedVenueId}
+                sourceUrl={`${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${modals.saveConfirmation.state.gameData?.tournamentId}`}
+                entityId={currentEntity.id}
+                autoMode={idSelectionMode === 'auto'}
+                skipConfirmation={options.skipManualReviews}
+            />
+        )}
 
       {modals.error.state && (
         <ErrorHandlingModal

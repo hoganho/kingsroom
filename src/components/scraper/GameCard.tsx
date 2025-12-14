@@ -303,14 +303,16 @@ export const GameCard: React.FC<{
             </div>
 
             <HtmlModal isOpen={showHtmlModal} onClose={() => setShowHtmlModal(false)} html={rawHtml} gameId={game.id}/>
-            <SaveConfirmationModal 
-                isOpen={isConfirmModalOpen}
-                onClose={() => setIsConfirmModalOpen(false)}
-                onConfirm={handleConfirmSave}
-                gameData={game.data}
-                venueId={venueId}
-                sourceUrl={game.id}
-            />
+            {game.data && (
+                <SaveConfirmationModal 
+                    isOpen={isConfirmModalOpen}
+                    onClose={() => setIsConfirmModalOpen(false)}
+                    onConfirm={handleConfirmSave}
+                    gameData={game.data}
+                    venueId={venueId}
+                    sourceUrl={game.id}
+                />
+            )}
         </>
     );
 };

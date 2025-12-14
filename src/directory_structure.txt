@@ -26,6 +26,13 @@
 │   │   └── MultiEntitySelector.tsx
 │   ├── games
 │   │   ├── .DS_Store
+│   │   ├── editor
+│   │   │   ├── .DS_Store
+│   │   │   ├── GameEditorForm.tsx
+│   │   │   ├── GameEditorModal.tsx
+│   │   │   ├── GameEditorPreview.tsx
+│   │   │   ├── GameSourceSelector.tsx
+│   │   │   └── index.ts
 │   │   ├── GameCard.tsx
 │   │   └── recurring-games
 │   │       └── RecurringGameForm.tsx
@@ -135,6 +142,7 @@
 ├── graphql
 │   ├── .DS_Store
 │   ├── customQueries.ts
+│   ├── enrichmentOperations.ts
 │   ├── entityOperations.ts
 │   ├── mutations.ts
 │   ├── queries.ts
@@ -229,13 +237,17 @@
 │       ├── VenueGameDetails.tsx
 │       └── VenuesDashboard.tsx
 ├── services
+│   ├── enrichmentService.ts
+│   ├── financialsService.ts
 │   ├── gameService.ts
 │   ├── recurringGameService.ts
 │   └── scrapeURLService.ts
 ├── tags.json
 ├── types
+│   ├── enrichment.ts
 │   ├── entity.ts
 │   ├── game.ts
+│   ├── gameEditor.ts
 │   ├── scraper.ts
 │   ├── series.ts
 │   └── venue.ts
@@ -253,6 +265,6 @@
     ├── scraperLogger.ts
     └── statusNormalization.ts
 
-42 directories, 212 files
+43 directories, 223 files
 
 Function List:

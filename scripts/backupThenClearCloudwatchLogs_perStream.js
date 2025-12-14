@@ -118,6 +118,40 @@ async function getLogGroupsFromAmplifyFunctionDir() {
 }
 
 // ------------------------------------------------------------------
+// PRE-FLIGHT: COUNT STREAMS
+// ------------------------------------------------------------------
+
+async function countStreamsInGroup(logGroupName) {
+  let count = 0;
+  let nextToken;
+
+  try {
+    do {
+      const command = new DescribeLogStreamsCommand({
+        logGroupName,
+        nextToken,
+        limit: 50, // Maximize batch size for faster counting
+      });
+      
+      const response = await cwClient.send(command);
+      
+      if (response.logStreams) {
+        count += response.logStreams.length;
+      }
+      
+      nextToken = response.nextToken;
+    } while (nextToken);
+    
+    return count;
+  } catch (err) {
+    if (err.name === 'ResourceNotFoundException') {
+      return -1; // Indicates group doesn't exist
+    }
+    throw err;
+  }
+}
+
+// ------------------------------------------------------------------
 // BACKUP LOG GROUP
 // ------------------------------------------------------------------
 
@@ -225,18 +259,61 @@ async function main() {
     return;
   }
 
-  const LOG_GROUPS_TO_CLEAR =
-    await getLogGroupsFromAmplifyFunctionDir();
+  const foundGroups = await getLogGroupsFromAmplifyFunctionDir();
 
-  if (LOG_GROUPS_TO_CLEAR.length === 0) {
+  if (foundGroups.length === 0) {
     logger.info('No Amplify function folders found.');
     return;
   }
 
   logger.info(
-    `Discovered ${LOG_GROUPS_TO_CLEAR.length} log groups from:`
+    `Discovered ${foundGroups.length} potential log groups in: ${AMPLIFY_FUNCTION_DIR}`
   );
-  logger.info(AMPLIFY_FUNCTION_DIR);
+  logger.info('Analyzing stream counts (this may take a moment)...');
+
+  // New Step: Count streams for all groups
+  const groupsToProcess = [];
+  
+  // Header for table
+  console.log('\n------------------------------------------------------------');
+  console.log(
+    ' ' + 'LOG GROUP NAME'.padEnd(45) + ' | ' + 'STREAMS'
+  );
+  console.log('------------------------------------------------------------');
+
+  let totalStreamsAcrossAll = 0;
+
+  for (const groupName of foundGroups) {
+    const count = await countStreamsInGroup(groupName);
+    
+    let countDisplay;
+    if (count === -1) {
+      countDisplay = 'N/A (Not Found)';
+    } else {
+      countDisplay = count.toString();
+      groupsToProcess.push(groupName);
+      totalStreamsAcrossAll += count;
+    }
+
+    // Shorten name for display if needed
+    let displayName = groupName;
+    if (displayName.length > 43) {
+        displayName = '...' + displayName.slice(-40);
+    }
+    
+    console.log(` ${displayName.padEnd(45)} | ${countDisplay}`);
+  }
+  console.log('------------------------------------------------------------\n');
+
+  if (groupsToProcess.length === 0) {
+    logger.info('No active log groups found in CloudWatch. Exiting.');
+    return;
+  }
+
+  logger.warn(`Total Streams to process: ${totalStreamsAcrossAll}`);
+  if (totalStreamsAcrossAll > 1000) {
+    logger.warn('⚠️  High stream count detected. This operation may take a significant amount of time.');
+  }
 
   const now = new Date();
   const pad = (n) => n.toString().padStart(2, '0');
@@ -248,9 +325,6 @@ async function main() {
 
   await fs.mkdir(backupDirName, { recursive: true });
 
-  console.log('\nLog groups to be processed:');
-  LOG_GROUPS_TO_CLEAR.forEach((g) => console.log(`- ${g}`));
-
   const confirmation = await askQuestion(
     '\nType "proceed" to continue: '
   );
@@ -260,7 +334,8 @@ async function main() {
     return;
   }
 
-  for (const logGroupName of LOG_GROUPS_TO_CLEAR) {
+  // Iterate only over the groups that actually exist (count > -1)
+  for (const logGroupName of groupsToProcess) {
     try {
       logger.info(`\n--- ${logGroupName} ---`);
 

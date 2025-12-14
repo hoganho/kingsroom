@@ -1,6 +1,6 @@
 // services/gameService.ts
 // COMPLETE: Entity-aware game service with venue reassignment operations
-// UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
+// UPDATED: Now uses enrichGameData mutation instead of deprecated saveGame
 // REFACTORED: Removed hardcoded DEFAULT_ENTITY_ID - entityId is now required from calling context
 
 import { generateClient } from 'aws-amplify/api';
@@ -10,21 +10,21 @@ import { listEntities } from '../graphql/queries';
 import type { GameData } from '../types/game';
 import type { Entity } from '../API';
 import { 
-    prepareGameDataForSave,
     validateEditedGameData,
     calculateDerivedFields,
     createAuditTrail
 } from '../utils/gameDataValidation';
 import { 
     ScrapedGameData, 
-    GameType,
-    GameVariant,
-    GameStatus,
-    RegistrationStatus,
-    GameFrequency,
-    TournamentType,
     SaveGameResult
 } from '../API';
+
+// Import enrichment service for save operations
+import {
+    scrapedDataToEnrichInput,
+    enrichGameData,
+    getEnrichmentErrorMessage,
+} from './enrichmentService';
 
 // ===================================================================
 // CONSTANTS
@@ -37,30 +37,15 @@ import {
 const UNASSIGNED_VENUE_ID = '00000000-0000-0000-0000-000000000000';
 
 // ===================================================================
-// GRAPHQL MUTATIONS
+// GRAPHQL MUTATIONS & QUERIES
 // ===================================================================
 
-// GraphQL mutation for saving game data
-const saveGameMutation = /* GraphQL */ `
-    mutation SaveGame($input: SaveGameInput!) {
-        saveGame(input: $input) {
-            success
-            gameId
-            action
-            message
-            warnings
-            playerProcessingQueued
-            playerProcessingReason
-            venueAssignment {
-                venueId
-                venueName
-                status
-                confidence
-            }
-            fieldsUpdated
-        }
-    }
-`;
+// NOTE: saveGameMutation has been REMOVED - use enrichGameData instead
+// The enrichGameData mutation handles:
+// 1. Data validation
+// 2. Venue/Series/Recurring game resolution
+// 3. Financial calculations
+// 4. Saving to database
 
 // GraphQL mutation for single game venue reassignment
 const reassignGameVenueMutation = /* GraphQL */ `
@@ -286,154 +271,6 @@ export const fetchEntities = async (): Promise<Entity[]> => {
 };
 
 // ===================================================================
-// ENUM MAPPING HELPERS
-// ===================================================================
-
-const mapToGameType = (value: any): GameType | null => {
-    if (!value) return null;
-    const map: Record<string, GameType> = {
-        'TOURNAMENT': GameType.TOURNAMENT,
-        'CASH_GAME': GameType.CASH_GAME,
-    };
-    return map[value] || null;
-};
-
-const mapToGameVariant = (value: any): GameVariant | null => {
-    if (!value) return null;
-    const map: Record<string, GameVariant> = {
-        'NLH': GameVariant.NLHE,
-        'NLHE': GameVariant.NLHE,
-        'PLO': GameVariant.PLO,
-        'PLOM': GameVariant.PLOM,
-        'PLO5': GameVariant.PLO5,
-        'PLOM5': GameVariant.PLOM5,
-        'PLO6': GameVariant.PLO6,
-        'PLOM6': GameVariant.PLOM6,
-        'PLMIXED': GameVariant.PLMIXED,
-        'PLDC': GameVariant.PLDC,
-        'NLDC': GameVariant.NLDC,
-        'NOT_PUBLISHED': GameVariant.NOT_PUBLISHED,
-    };
-    return map[value] || null;
-};
-
-const mapToGameStatus = (value: any): GameStatus | null => {
-    return value ? value as GameStatus : null;
-};
-
-const mapToRegistrationStatus = (value: any): RegistrationStatus | null => {
-    return value ? value as RegistrationStatus : null;
-};
-
-const mapToGameFrequency = (value: any): GameFrequency | null => {
-    return value ? value as GameFrequency : null;
-};
-
-const mapToTournamentType = (value: any): TournamentType | null => {
-    return value ? value as TournamentType : null;
-};
-
-// ===================================================================
-// DATA HELPERS
-// ===================================================================
-
-/**
- * Create placeholder data for NOT_PUBLISHED games
- * FIX: Explicitly sets venueAssignmentStatus to 'AUTO_ASSIGNED'
- */
-const createNotPublishedPlaceholder = (
-    data: GameData | ScrapedGameData,
-    sourceUrl: string,
-    entityId: string
-): any => {
-    return {
-        ...data,
-        sourceUrl,
-        entityId,
-        name: data.name || `Tournament ${data.tournamentId} (Not Published)`,
-        gameStatus: 'NOT_PUBLISHED',
-        gameVariant: 'NOT_PUBLISHED',
-        // Force critical fields to valid values
-        buyIn: data.buyIn ?? 0,
-        rake: data.rake ?? 0,
-        guaranteeAmount: data.guaranteeAmount ?? 0,
-        hasGuarantee: false,
-        isSeries: false,
-        isSatellite: false,
-        isRegular: false,
-        // Zero out player stats to prevent validation errors
-        totalUniquePlayers: 0,
-        totalInitialEntries: 0,
-        totalEntries: 0,
-        totalRebuys: 0,
-        totalAddons: 0,
-        // Ensure arrays are empty
-        players: { allPlayers: [], totalUniquePlayers: 0, hasCompleteResults: false },
-        levels: [],
-        gameTags: [],
-        
-        // FIX: Explicitly set this so backend doesn't force 'MANUALLY_ASSIGNED'
-        venueAssignmentStatus: 'AUTO_ASSIGNED' 
-    };
-};
-
-/**
- * Extract player data for save input
- * FIX: Forces hasCompleteResults to be boolean (false) instead of undefined
- */
-const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
-    const allPlayers: any[] = [];
-    let totalPrizesPaid = 0;
-    
-    if (data.results && data.results.length > 0) {
-        data.results.forEach(r => {
-            allPlayers.push({
-                name: r.name,
-                rank: r.rank || null,
-                winnings: r.winnings || 0,
-                points: r.points || null,
-                isQualification: null,
-                rebuys: null,
-                addons: null
-            });
-            if (r.winnings) {
-                totalPrizesPaid += r.winnings;
-            }
-        });
-    }
-    
-    if (data.entries && data.entries.length > 0) {
-        const existingNames = new Set(allPlayers.map(p => p.name.toLowerCase()));
-        data.entries.forEach(e => {
-            if (!existingNames.has(e.name.toLowerCase())) {
-                allPlayers.push({
-                    name: e.name,
-                    rank: null,
-                    winnings: null,
-                    points: null,
-                    isQualification: null,
-                    rebuys: null,
-                    addons: null
-                });
-            }
-        });
-    }
-    
-    // Check if there are valid results (winnings > 0)
-    const hasResultsData = data.results && data.results.length > 0 && data.results.some(r => r.winnings && r.winnings > 0);
-
-    return {
-        allPlayers,
-        totalInitialEntries: data.totalInitialEntries || allPlayers.length,
-        totalEntries: data.totalEntries || allPlayers.length,
-        totalUniquePlayers: data.totalUniquePlayers || allPlayers.length,
-        // FIX: Use !! to ensure this is strictly true or false. Never undefined.
-        hasCompleteResults: !!hasResultsData,
-        totalPrizesPaid
-    };
-};
-
-// ===================================================================
 // GAME DATA FETCHING
 // ===================================================================
 
@@ -625,10 +462,14 @@ export const shouldAutoRefreshTournament = (data: ScrapedGameData | GameData | n
 // ===================================================================
 
 /**
- * Save game data to backend via unified saveGame mutation
+ * Save game data to backend via enrichGameData mutation
  * 
- * UPDATED: entityId is now REQUIRED - no fallback to hardcoded value
- * Callers must provide entityId from useEntity().currentEntity.id
+ * UPDATED: Now uses enrichGameData instead of deprecated saveGame mutation.
+ * The enrichment pipeline handles:
+ * - Data validation and normalization
+ * - Venue, series, and recurring game resolution
+ * - Financial calculations
+ * - Saving to database
  * 
  * @param sourceUrl - The source URL of the tournament
  * @param venueId - The venue ID (can be null for auto-assignment)
@@ -646,10 +487,10 @@ export const saveGameDataToBackend = async (
     options?: {
         wasEdited?: boolean;
         originalData?: any;
+        autoCreateSeries?: boolean;
+        autoCreateRecurring?: boolean;
     }
 ): Promise<SaveGameResult> => {
-    const client = generateClient();
-    
     // UPDATED: entityId is now required
     if (!entityId) {
         throw new Error(
@@ -658,197 +499,82 @@ export const saveGameDataToBackend = async (
         );
     }
     
-    const effectiveEntityId = entityId;
-    
-    // 1. Handle NOT_PUBLISHED status special case
-    let finalData: any = data;
-    if (data.gameStatus === 'NOT_PUBLISHED') {
-        console.log('[GameService] Creating NOT_PUBLISHED placeholder for tournament', data.tournamentId);
-        finalData = typeof createNotPublishedPlaceholder === 'function' 
-            ? createNotPublishedPlaceholder(data, sourceUrl, effectiveEntityId)
-            : { ...data, gameStatus: 'NOT_PUBLISHED' };
-    }
-    
-    // 2. Validate and prepare data if edited
-    let validationWarnings: string[] = [];
-    if (options?.wasEdited && finalData.gameStatus !== 'NOT_PUBLISHED') {
-        const prepared = prepareGameDataForSave(finalData as GameData);
-        finalData = prepared.data as any;
-        validationWarnings = prepared.warnings;
-    }
-    
-    // 3. Extract player data (uses fixed helper)
-    const playerData = extractPlayersForSaveInput(finalData);
-
-    // 4. Build the SaveGameInput
-    const saveGameInput = {
-        source: {
-            type: 'SCRAPE' as const,
-            sourceId: sourceUrl,
-            entityId: effectiveEntityId,
-            fetchedAt: new Date().toISOString(),
-            contentHash: (finalData as any).contentHash || null,
-            wasEdited: options?.wasEdited || false
-        },
-        game: {
-            tournamentId: finalData.tournamentId || null,
-            existingGameId: existingGameId || null,
-            name: finalData.name || `Tournament ${finalData.tournamentId}`,
-            gameType: mapToGameType(finalData.gameType) || GameType.TOURNAMENT,
-            gameVariant: mapToGameVariant(finalData.gameVariant),
-            gameStatus: mapToGameStatus(finalData.gameStatus),
-            gameStartDateTime: finalData.gameStartDateTime || new Date().toISOString(),
-            gameEndDateTime: finalData.gameEndDateTime || null,
-            registrationStatus: mapToRegistrationStatus(finalData.registrationStatus),
-            gameFrequency: mapToGameFrequency((finalData as any).gameFrequency),
-            
-            // Financial fields - Using ?? to prevent Null errors
-            buyIn: finalData.buyIn ?? 0,
-            rake: finalData.rake ?? 0,
-            guaranteeAmount: finalData.guaranteeAmount ?? 0,
-            hasGuarantee: finalData.hasGuarantee ?? false,
-            
-            // Simplified financial metrics (nullable)
-            totalBuyInsCollected: (finalData as any).totalBuyInsCollected ?? null,
-            rakeRevenue: (finalData as any).rakeRevenue ?? null,
-            prizepoolPlayerContributions: (finalData as any).prizepoolPlayerContributions ?? null,
-            prizepoolAddedValue: (finalData as any).prizepoolAddedValue ?? null,
-            prizepoolSurplus: (finalData as any).prizepoolSurplus ?? null,
-            guaranteeOverlayCost: (finalData as any).guaranteeOverlayCost ?? null,
-            gameProfit: (finalData as any).gameProfit ?? null,
-            
-            // Venue fee
-            venueFee: (finalData as any).venueFee ?? null,
-            
-            // Stats (Int! in schema -> must not be null)
-            startingStack: finalData.startingStack ?? 0,
-            prizepoolPaid: finalData.prizepoolPaid ?? 0,
-            prizepoolCalculated: finalData.prizepoolCalculated ?? 0,
-            totalUniquePlayers: finalData.totalUniquePlayers ?? 0,
-            totalInitialEntries: finalData.totalInitialEntries ?? 0,
-            totalEntries: finalData.totalEntries ?? 0,
-            totalRebuys: finalData.totalRebuys ?? 0,
-            totalAddons: finalData.totalAddons ?? 0,
-            
-            // Nullable stats
-            playersRemaining: (finalData as any).playersRemaining ?? null,
-            totalChipsInPlay: (finalData as any).totalChipsInPlay ?? null,
-            averagePlayerStack: (finalData as any).averagePlayerStack ?? null,
-            
-            // Tournament specifics
-            tournamentType: mapToTournamentType(finalData.tournamentType),
-            isSeries: (finalData as any).isSeries ?? false,
-            seriesName: (finalData as any).seriesName ?? null,
-            isSatellite: (finalData as any).isSatellite ?? false,
-            isRegular: (finalData as any).isRegular ?? false,
-            
-            // Series fields
-            tournamentSeriesId: (finalData as any).tournamentSeriesId || null,
-            isMainEvent: (finalData as any).isMainEvent ?? false,
-            eventNumber: (finalData as any).eventNumber ?? null,
-            dayNumber: (finalData as any).dayNumber ?? null,
-            flightLetter: (finalData as any).flightLetter || null,
-            finalDay: (finalData as any).finalDay ?? false,
-            
-            // === NEW: Recurring Game Fields ===
-            recurringGameId: (finalData as any).recurringGameId || null,
-            recurringGameAssignmentStatus: (finalData as any).recurringGameAssignmentStatus || 'PENDING_ASSIGNMENT',
-            recurringGameAssignmentConfidence: (finalData as any).recurringGameAssignmentConfidence || 0,
-            wasScheduledInstance: (finalData as any).wasScheduledInstance ?? false,
-            deviationNotes: (finalData as any).deviationNotes || null,
-            instanceNumber: (finalData as any).instanceNumber || null,
-            isReplacementInstance: (finalData as any).isReplacementInstance ?? false,
-            replacementReason: (finalData as any).replacementReason || null,
-            
-            // Other
-            gameTags: finalData.gameTags?.filter((tag: any) => tag !== null) || [],
-            totalDuration: (finalData as any).totalDuration || null,
-
-            // FIX: Pass assignment status directly (schema update required)
-            venueAssignmentStatus: (finalData as any).venueAssignmentStatus
-        },
-        players: playerData,
-        venue: {
-            venueId: venueId || null,
-            venueName: (finalData as any).venueName || null,
-            suggestedVenueId: (finalData as any).venueMatch?.autoAssignedVenue?.id || null,
-            confidence: (finalData as any).venueMatch?.autoAssignedVenue?.score || 0
-        },
-        series: (finalData as any).isSeries && (finalData as any).seriesName ? {
-            seriesId: null,
-            suggestedSeriesId: (finalData as any).seriesMatch?.seriesTitleId || (finalData as any).seriesTitleId || null,
-            seriesName: (finalData as any).seriesName,
-            year: (finalData as any).seriesYear || new Date(finalData.gameStartDateTime || new Date()).getFullYear(),
-            isMainEvent: (finalData as any).isMainEvent ?? false,
-            eventNumber: (finalData as any).eventNumber ?? null,
-            dayNumber: (finalData as any).dayNumber ?? null,
-            flightLetter: (finalData as any).flightLetter || null,
-            finalDay: (finalData as any).finalDay ?? false,
-            confidence: (finalData as any).seriesMatch?.score || 0.8
-        } : null,
-        options: {
-            skipPlayerProcessing: data.gameStatus === 'NOT_PUBLISHED',
-            forceUpdate: !!existingGameId || options?.wasEdited,
-            validateOnly: false,
-            doNotScrape: (finalData as any).doNotScrape || false
-        },
-    };
-    
-    // 5. Add Levels JSON
-    if (finalData.levels && Array.isArray(finalData.levels) && finalData.levels.length > 0) {
-        const validLevels = finalData.levels
-            .filter((level: any) => level && level.levelNumber != null)
-            .map((level: any) => ({
-                levelNumber: parseInt(level.levelNumber) || 0,
-                durationMinutes: parseInt(level.durationMinutes) || 0,
-                smallBlind: parseInt(level.smallBlind) || 0,
-                bigBlind: parseInt(level.bigBlind) || 0,
-                ante: level.ante != null ? parseInt(level.ante) : null
-            }));
-        
-        if (validLevels.length > 0) {
-            (saveGameInput.game as any).levels = JSON.stringify(validLevels);
-        }
-    }
-    
-    console.log('[GameService] Calling saveGame mutation:', {
+    console.log('[GameService] saveGameDataToBackend via enrichment pipeline:', {
         sourceUrl,
         venueId,
-        entityId: effectiveEntityId,
-        gameStatus: saveGameInput.game.gameStatus,
-        venueAssignmentStatus: (saveGameInput.game as any).venueAssignmentStatus,
-        hasCompleteResults: playerData.hasCompleteResults
+        entityId,
+        existingGameId,
+        name: data.name,
+        tournamentId: data.tournamentId,
+        wasEdited: options?.wasEdited,
     });
     
     try {
-        const response = await client.graphql({
-            query: saveGameMutation,
-            variables: { input: saveGameInput }
-        }) as GraphQLResult<any>;
+        // Convert ScrapedGameData/GameData to EnrichGameDataInput
+        const input = scrapedDataToEnrichInput(
+            data as ScrapedGameData,
+            entityId,
+            sourceUrl,
+            {
+                venueId,
+                existingGameId,
+                wasEdited: options?.wasEdited,
+            }
+        );
         
-        if (response.errors) {
-            console.error('[GameService] GraphQL errors:', response.errors);
-            throw new Error(response.errors[0]?.message || 'Failed to save game data');
-        }
+        // Set save options
+        input.options = {
+            ...input.options,
+            saveToDatabase: true,
+            forceUpdate: !!existingGameId || options?.wasEdited,
+            autoCreateSeries: options?.autoCreateSeries ?? true,
+            autoCreateRecurring: options?.autoCreateRecurring ?? false,
+        };
         
-        const result = response.data.saveGame as SaveGameResult;
-        
-        if (validationWarnings.length > 0) {
-            result.warnings = [...(result.warnings || []), ...validationWarnings];
-        }
-        
-        console.log('[GameService] Save result:', {
-            success: result.success,
-            action: result.action,
-            gameId: result.gameId
-        });
+        // Call enrichment pipeline
+        const result = await enrichGameData(input);
         
         if (!result.success) {
-            throw new Error(result.message || 'Save operation failed');
+            const errorMsg = getEnrichmentErrorMessage(result) || 'Enrichment failed';
+            console.error('[GameService] Enrichment failed:', {
+                errors: result.validation?.errors,
+                message: errorMsg,
+            });
+            throw new Error(errorMsg);
         }
         
-        return result;
-    } catch (error) {
+        if (!result.saveResult) {
+            throw new Error('No save result returned from enrichGameData');
+        }
+        
+        console.log('[GameService] Save via enrichment succeeded:', {
+            gameId: result.saveResult.gameId,
+            action: result.saveResult.action,
+            recurringGameId: result.enrichedGame?.recurringGameId,
+            tournamentSeriesId: result.enrichedGame?.tournamentSeriesId,
+        });
+        
+        // Map EnrichmentSaveResult to SaveGameResult format (add __typename)
+        return {
+            __typename: 'SaveGameResult' as const,
+            success: result.saveResult.success,
+            gameId: result.saveResult.gameId || null,
+            action: result.saveResult.action || null,
+            message: result.saveResult.message || null,
+            warnings: result.saveResult.warnings || null,
+            playerProcessingQueued: result.saveResult.playerProcessingQueued || null,
+            playerProcessingReason: result.saveResult.playerProcessingReason || null,
+            venueAssignment: result.saveResult.venueAssignment ? {
+                __typename: 'SaveVenueAssignmentInfo' as const,
+                venueId: result.saveResult.venueAssignment.venueId || null,
+                venueName: result.saveResult.venueAssignment.venueName || null,
+                status: result.saveResult.venueAssignment.status as any,
+                confidence: result.saveResult.venueAssignment.confidence || null,
+            } : null,
+            fieldsUpdated: result.saveResult.fieldsUpdated || null,
+        };
+        
+    } catch (error: any) {
         console.error('[GameService] Error saving game data:', error);
         throw error;
     }
