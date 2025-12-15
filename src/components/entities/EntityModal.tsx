@@ -1,10 +1,12 @@
 // src/components/entities/EntityModal.tsx
 // Modal component for adding/editing entities
 
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { ArrowUpTrayIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { Entity, EntityFormData } from '../../types/entity';
+import { useS3Upload, validateImageFile } from '../../hooks/useS3Upload';
 
 interface EntityModalProps {
   isOpen: boolean;
@@ -24,6 +26,13 @@ export const EntityModal = ({ isOpen, onClose, onSave, entity }: EntityModalProp
 
   const [errors, setErrors] = useState<Partial<EntityFormData>>({});
   const [exampleUrl, setExampleUrl] = useState('');
+  
+  // Logo upload state
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Use the S3 upload hook
+  const { upload, isUploading, error: uploadError, clearError } = useS3Upload();
 
   useEffect(() => {
     if (entity) {
@@ -34,6 +43,8 @@ export const EntityModal = ({ isOpen, onClose, onSave, entity }: EntityModalProp
         entityLogo: entity.entityLogo || '',
         isActive: entity.isActive,
       });
+      // Set logo preview if entity has an existing logo
+      setLogoPreview(entity.entityLogo || null);
     } else {
       setFormData({
         entityName: '',
@@ -42,9 +53,11 @@ export const EntityModal = ({ isOpen, onClose, onSave, entity }: EntityModalProp
         entityLogo: '',
         isActive: true,
       });
+      setLogoPreview(null);
     }
     setErrors({});
-  }, [entity, isOpen]);
+    clearError();
+  }, [entity, isOpen, clearError]);
 
   useEffect(() => {
     // Update example URL whenever domain or path changes
@@ -93,6 +106,52 @@ export const EntityModal = ({ isOpen, onClose, onSave, entity }: EntityModalProp
     if (errors[name as keyof EntityFormData]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
+  };
+
+  // Handle logo file selection and upload
+  const handleLogoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file before upload
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      return; // Hook will set the error
+    }
+
+    // Create a local preview immediately
+    const localPreview = URL.createObjectURL(file);
+    setLogoPreview(localPreview);
+
+    try {
+      const result = await upload(file, { path: 'entityLogo' });
+      
+      // Update form data with the S3 URL
+      setFormData(prev => ({ ...prev, entityLogo: result.url }));
+      setLogoPreview(result.url);
+      
+      // Clean up local preview
+      URL.revokeObjectURL(localPreview);
+      
+    } catch (err) {
+      // Error is already set by the hook
+      setLogoPreview(null);
+    }
+  };
+
+  // Handle logo removal
+  const handleRemoveLogo = () => {
+    setFormData(prev => ({ ...prev, entityLogo: '' }));
+    setLogoPreview(null);
+    clearError();
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Trigger file input click
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -163,6 +222,83 @@ export const EntityModal = ({ isOpen, onClose, onSave, entity }: EntityModalProp
                         )}
                       </div>
 
+                      {/* Entity Logo Upload */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Entity Logo
+                        </label>
+                        
+                        {/* Hidden file input */}
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/jpeg,image/png,image/gif,image/webp"
+                          onChange={handleLogoSelect}
+                          className="hidden"
+                        />
+                        
+                        <div className="flex items-start space-x-4">
+                          {/* Logo Preview / Placeholder */}
+                          <div className="flex-shrink-0">
+                            {logoPreview ? (
+                              <div className="relative">
+                                <img
+                                  src={logoPreview}
+                                  alt="Entity logo preview"
+                                  className="h-20 w-20 rounded-lg object-cover border border-gray-200"
+                                />
+                                {isUploading && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg">
+                                    <svg className="animate-spin h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="h-20 w-20 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white text-2xl font-medium">
+                                {formData.entityName ? formData.entityName.charAt(0).toUpperCase() : 'E'}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Upload/Remove Buttons */}
+                          <div className="flex flex-col space-y-2">
+                            <button
+                              type="button"
+                              onClick={handleUploadClick}
+                              disabled={isUploading}
+                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <ArrowUpTrayIcon className="h-4 w-4 mr-1.5" />
+                              {isUploading ? 'Uploading...' : 'Upload Logo'}
+                            </button>
+                            
+                            {logoPreview && (
+                              <button
+                                type="button"
+                                onClick={handleRemoveLogo}
+                                disabled={isUploading}
+                                className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <TrashIcon className="h-4 w-4 mr-1.5" />
+                                Remove
+                              </button>
+                            )}
+                            
+                            <p className="text-xs text-gray-500">
+                              JPEG, PNG, GIF, WebP. Max 5MB.
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Upload Error */}
+                        {uploadError && (
+                          <p className="mt-2 text-sm text-red-600">{uploadError}</p>
+                        )}
+                      </div>
+
                       {/* Game URL Domain */}
                       <div>
                         <label htmlFor="gameUrlDomain" className="block text-sm font-medium text-gray-700">
@@ -220,22 +356,6 @@ export const EntityModal = ({ isOpen, onClose, onSave, entity }: EntityModalProp
                         </div>
                       )}
 
-                      {/* Entity Logo (optional) */}
-                      <div>
-                        <label htmlFor="entityLogo" className="block text-sm font-medium text-gray-700">
-                          Entity Logo URL (Optional)
-                        </label>
-                        <input
-                          type="text"
-                          name="entityLogo"
-                          id="entityLogo"
-                          value={formData.entityLogo}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          placeholder="https://example.com/logo.png"
-                        />
-                      </div>
-
                       {/* Is Active Checkbox */}
                       <div className="relative flex items-start">
                         <div className="flex h-6 items-center">
@@ -260,7 +380,8 @@ export const EntityModal = ({ isOpen, onClose, onSave, entity }: EntityModalProp
                       <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                         <button
                           type="submit"
-                          className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
+                          disabled={isUploading}
+                          className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {entity ? 'Update' : 'Create'}
                         </button>

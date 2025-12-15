@@ -94,6 +94,20 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "seriesGameCount": {
+                    "name": "seriesGameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastSeriesGameAddedAt": {
+                    "name": "lastSeriesGameAddedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "scraperStates": {
                     "name": "scraperStates",
                     "isArray": true,
@@ -605,6 +619,20 @@ export const schema = {
                 },
                 "lastDataRefreshedAt": {
                     "name": "lastDataRefreshedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesGameCount": {
+                    "name": "seriesGameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastSeriesGameAddedAt": {
+                    "name": "lastSeriesGameAddedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
                     "isRequired": false,
@@ -2797,6 +2825,41 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "isSeries": {
+                    "name": "isSeries",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSeriesParent": {
+                    "name": "isSeriesParent",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "parentGameId": {
+                    "name": "parentGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entitySeriesKey": {
+                    "name": "entitySeriesKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueSeriesKey": {
+                    "name": "venueSeriesKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "notes": {
                     "name": "notes",
                     "isArray": false,
@@ -2894,6 +2957,26 @@ export const schema = {
                         "fields": [
                             "gameStartDateTime",
                             "netProfit"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntitySeriesKey",
+                        "fields": [
+                            "entitySeriesKey",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueSeriesKey",
+                        "fields": [
+                            "venueSeriesKey",
+                            "gameStartDateTime"
                         ]
                     }
                 },
@@ -19019,5 +19102,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "87a46fc8f4284383fce1be9f5ad303a7"
+    "version": "882b91735e2329aaf0fc973a66a4b8c3"
 };

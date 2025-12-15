@@ -122,7 +122,7 @@ const EntityManagement = () => {
     
     try {
       if (editingEntity) {
-        await client.graphql({
+        const response = await client.graphql({
           query: updateEntity,
           variables: { 
             input: { 
@@ -131,26 +131,46 @@ const EntityManagement = () => {
               ...cleanedData
             } 
           },
-        });
-        setSuccessMessage(`${entityData.entityName} has been updated successfully`);
+        }) as any;
+        
+        // Check if the update actually succeeded (data exists) even if there are partial errors
+        if (response.data?.updateEntity?.id) {
+          setSuccessMessage(`${entityData.entityName} has been updated successfully`);
+          setIsModalOpen(false);
+          fetchEntities();
+        } else {
+          throw new Error('Update failed - no data returned');
+        }
       } else {
-       
-        await client.graphql({
+        const response = await client.graphql({
           query: createEntity,
           variables: { 
             input: { 
               ...cleanedData
             } 
           },
-        });
-        setSuccessMessage(`${entityData.entityName} has been created successfully`);
+        }) as any;
+        
+        // Check if the create actually succeeded
+        if (response.data?.createEntity?.id) {
+          setSuccessMessage(`${entityData.entityName} has been created successfully`);
+          setIsModalOpen(false);
+          fetchEntities();
+        } else {
+          throw new Error('Create failed - no data returned');
+        }
       }
-      
-      setIsModalOpen(false);
-      fetchEntities();
-    } catch (err) {
-      console.error('Error saving entity:', err);
-      setError('Failed to save entity. Please ensure all required fields are filled correctly.');
+    } catch (err: any) {
+      // Check if it's a partial error where the data was actually saved
+      if (err.data?.updateEntity?.id || err.data?.createEntity?.id) {
+        console.warn('Entity saved with partial errors in nested data:', err.errors);
+        setSuccessMessage(`${entityData.entityName} has been saved successfully`);
+        setIsModalOpen(false);
+        fetchEntities();
+      } else {
+        console.error('Error saving entity:', err);
+        setError('Failed to save entity. Please ensure all required fields are filled correctly.');
+      }
     }
   };
   

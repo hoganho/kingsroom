@@ -3055,6 +3055,8 @@ type EagerEntity = {
   readonly venueCount?: number | null;
   readonly lastGameAddedAt?: string | null;
   readonly lastDataRefreshedAt?: string | null;
+  readonly seriesGameCount?: number | null;
+  readonly lastSeriesGameAddedAt?: string | null;
   readonly scraperStates?: (ScraperState | null)[] | null;
   readonly scraperJobs?: (ScraperJob | null)[] | null;
   readonly scrapeURLs?: (ScrapeURL | null)[] | null;
@@ -3086,6 +3088,8 @@ type LazyEntity = {
   readonly venueCount?: number | null;
   readonly lastGameAddedAt?: string | null;
   readonly lastDataRefreshedAt?: string | null;
+  readonly seriesGameCount?: number | null;
+  readonly lastSeriesGameAddedAt?: string | null;
   readonly scraperStates: AsyncCollection<ScraperState>;
   readonly scraperJobs: AsyncCollection<ScraperJob>;
   readonly scrapeURLs: AsyncCollection<ScrapeURL>;
@@ -3181,6 +3185,8 @@ type EagerVenue = {
   readonly gameCount?: number | null;
   readonly lastGameAddedAt?: string | null;
   readonly lastDataRefreshedAt?: string | null;
+  readonly seriesGameCount?: number | null;
+  readonly lastSeriesGameAddedAt?: string | null;
   readonly canonicalVenueId?: string | null;
   readonly assets?: (Asset | null)[] | null;
   readonly games?: (Game | null)[] | null;
@@ -3217,6 +3223,8 @@ type LazyVenue = {
   readonly gameCount?: number | null;
   readonly lastGameAddedAt?: string | null;
   readonly lastDataRefreshedAt?: string | null;
+  readonly seriesGameCount?: number | null;
+  readonly lastSeriesGameAddedAt?: string | null;
   readonly canonicalVenueId?: string | null;
   readonly assets: AsyncCollection<Asset>;
   readonly games: AsyncCollection<Game>;
@@ -3690,6 +3698,11 @@ type EagerGameFinancialSnapshot = {
   readonly gameDurationMinutes?: number | null;
   readonly gameType?: GameType | keyof typeof GameType | null;
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly isSeries?: boolean | null;
+  readonly isSeriesParent?: boolean | null;
+  readonly parentGameId?: string | null;
+  readonly entitySeriesKey?: string | null;
+  readonly venueSeriesKey?: string | null;
   readonly notes?: string | null;
   readonly snapshotType?: SnapshotType | keyof typeof SnapshotType | null;
   readonly isReconciled?: boolean | null;
@@ -3761,6 +3774,11 @@ type LazyGameFinancialSnapshot = {
   readonly gameDurationMinutes?: number | null;
   readonly gameType?: GameType | keyof typeof GameType | null;
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly isSeries?: boolean | null;
+  readonly isSeriesParent?: boolean | null;
+  readonly parentGameId?: string | null;
+  readonly entitySeriesKey?: string | null;
+  readonly venueSeriesKey?: string | null;
   readonly notes?: string | null;
   readonly snapshotType?: SnapshotType | keyof typeof SnapshotType | null;
   readonly isReconciled?: boolean | null;

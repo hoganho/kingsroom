@@ -102,6 +102,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -167,6 +169,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -237,6 +241,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
       venueCount
       lastGameAddedAt
       lastDataRefreshedAt
+      seriesGameCount
+      lastSeriesGameAddedAt
       scraperStates {
         items {
           id
@@ -281,6 +287,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -351,6 +359,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -419,6 +429,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -479,6 +491,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           gameCount
           lastGameAddedAt
           lastDataRefreshedAt
+          seriesGameCount
+          lastSeriesGameAddedAt
           canonicalVenueId
           assets {
             nextToken
@@ -540,6 +554,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -743,6 +759,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -865,6 +883,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -963,6 +983,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -988,6 +1010,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -1026,6 +1050,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -1068,6 +1094,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -1116,6 +1144,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -1136,6 +1166,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -1220,6 +1252,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -1364,6 +1398,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -1388,6 +1424,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -1534,6 +1572,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -1558,6 +1598,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -1620,6 +1662,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -1640,6 +1684,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -1782,6 +1828,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -1847,6 +1895,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -1917,6 +1967,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
       venueCount
       lastGameAddedAt
       lastDataRefreshedAt
+      seriesGameCount
+      lastSeriesGameAddedAt
       scraperStates {
         items {
           id
@@ -1961,6 +2013,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -2031,6 +2085,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -2099,6 +2155,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -2159,6 +2217,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           gameCount
           lastGameAddedAt
           lastDataRefreshedAt
+          seriesGameCount
+          lastSeriesGameAddedAt
           canonicalVenueId
           assets {
             nextToken
@@ -2220,6 +2280,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -2423,6 +2485,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -2545,6 +2609,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -2643,6 +2709,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -2668,6 +2736,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -2706,6 +2776,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -2748,6 +2820,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -2796,6 +2870,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -2816,6 +2892,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -2900,6 +2978,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -3044,6 +3124,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -3068,6 +3150,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -3214,6 +3298,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -3238,6 +3324,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -3300,6 +3388,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -3320,6 +3410,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -3478,6 +3570,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -3543,6 +3637,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -3613,6 +3709,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
       venueCount
       lastGameAddedAt
       lastDataRefreshedAt
+      seriesGameCount
+      lastSeriesGameAddedAt
       scraperStates {
         items {
           id
@@ -3657,6 +3755,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -3727,6 +3827,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -3795,6 +3897,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -3855,6 +3959,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           gameCount
           lastGameAddedAt
           lastDataRefreshedAt
+          seriesGameCount
+          lastSeriesGameAddedAt
           canonicalVenueId
           assets {
             nextToken
@@ -3916,6 +4022,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -4119,6 +4227,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -4241,6 +4351,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -4339,6 +4451,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -4364,6 +4478,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -4402,6 +4518,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -4444,6 +4562,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -4492,6 +4612,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -4512,6 +4634,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -4596,6 +4720,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -4740,6 +4866,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -4764,6 +4892,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -4910,6 +5040,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -4934,6 +5066,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -4996,6 +5130,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -5016,6 +5152,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -5161,6 +5299,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -5226,6 +5366,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -5296,6 +5438,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
       venueCount
       lastGameAddedAt
       lastDataRefreshedAt
+      seriesGameCount
+      lastSeriesGameAddedAt
       scraperStates {
         items {
           id
@@ -5340,6 +5484,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -5410,6 +5556,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -5478,6 +5626,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -5538,6 +5688,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           gameCount
           lastGameAddedAt
           lastDataRefreshedAt
+          seriesGameCount
+          lastSeriesGameAddedAt
           canonicalVenueId
           assets {
             nextToken
@@ -5599,6 +5751,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -5802,6 +5956,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -5924,6 +6080,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -6022,6 +6180,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -6047,6 +6207,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -6085,6 +6247,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -6127,6 +6291,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -6175,6 +6341,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -6195,6 +6363,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -6279,6 +6449,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -6423,6 +6595,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -6447,6 +6621,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -6593,6 +6769,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -6617,6 +6795,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -6679,6 +6859,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -6699,6 +6881,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -6844,6 +7028,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -6909,6 +7095,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -6979,6 +7167,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
       venueCount
       lastGameAddedAt
       lastDataRefreshedAt
+      seriesGameCount
+      lastSeriesGameAddedAt
       scraperStates {
         items {
           id
@@ -7023,6 +7213,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -7093,6 +7285,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -7161,6 +7355,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -7221,6 +7417,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           gameCount
           lastGameAddedAt
           lastDataRefreshedAt
+          seriesGameCount
+          lastSeriesGameAddedAt
           canonicalVenueId
           assets {
             nextToken
@@ -7282,6 +7480,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -7485,6 +7685,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -7607,6 +7809,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -7705,6 +7909,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -7730,6 +7936,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -7768,6 +7976,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -7810,6 +8020,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -7858,6 +8070,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -7878,6 +8092,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -7962,6 +8178,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -8106,6 +8324,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -8130,6 +8350,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -8276,6 +8498,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -8300,6 +8524,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -8362,6 +8588,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -8382,6 +8610,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -8524,6 +8754,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -8589,6 +8821,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -8659,6 +8893,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
       venueCount
       lastGameAddedAt
       lastDataRefreshedAt
+      seriesGameCount
+      lastSeriesGameAddedAt
       scraperStates {
         items {
           id
@@ -8703,6 +8939,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -8773,6 +9011,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -8841,6 +9081,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -8901,6 +9143,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           gameCount
           lastGameAddedAt
           lastDataRefreshedAt
+          seriesGameCount
+          lastSeriesGameAddedAt
           canonicalVenueId
           assets {
             nextToken
@@ -8962,6 +9206,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -9165,6 +9411,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -9287,6 +9535,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -9385,6 +9635,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -9410,6 +9662,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -9448,6 +9702,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -9490,6 +9746,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -9538,6 +9796,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -9558,6 +9818,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -9642,6 +9904,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -9786,6 +10050,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -9810,6 +10076,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -9956,6 +10224,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -9980,6 +10250,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -10042,6 +10314,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -10062,6 +10336,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -10217,6 +10493,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -10282,6 +10560,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -10352,6 +10632,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
       venueCount
       lastGameAddedAt
       lastDataRefreshedAt
+      seriesGameCount
+      lastSeriesGameAddedAt
       scraperStates {
         items {
           id
@@ -10396,6 +10678,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -10466,6 +10750,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -10534,6 +10820,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -10594,6 +10882,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           gameCount
           lastGameAddedAt
           lastDataRefreshedAt
+          seriesGameCount
+          lastSeriesGameAddedAt
           canonicalVenueId
           assets {
             nextToken
@@ -10655,6 +10945,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -10858,6 +11150,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -10980,6 +11274,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -11078,6 +11374,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -11103,6 +11401,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -11141,6 +11441,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -11183,6 +11485,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -11231,6 +11535,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -11251,6 +11557,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -11335,6 +11643,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -11479,6 +11789,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -11503,6 +11815,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -11649,6 +11963,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -11673,6 +11989,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -11735,6 +12053,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -11755,6 +12075,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -11910,6 +12232,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -11975,6 +12299,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -12045,6 +12371,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
       venueCount
       lastGameAddedAt
       lastDataRefreshedAt
+      seriesGameCount
+      lastSeriesGameAddedAt
       scraperStates {
         items {
           id
@@ -12089,6 +12417,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -12159,6 +12489,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -12227,6 +12559,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -12287,6 +12621,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           gameCount
           lastGameAddedAt
           lastDataRefreshedAt
+          seriesGameCount
+          lastSeriesGameAddedAt
           canonicalVenueId
           assets {
             nextToken
@@ -12348,6 +12684,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -12551,6 +12889,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -12673,6 +13013,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -12771,6 +13113,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -12796,6 +13140,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -12834,6 +13180,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -12876,6 +13224,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -12924,6 +13274,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -12944,6 +13296,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -13028,6 +13382,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -13172,6 +13528,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -13196,6 +13554,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -13342,6 +13702,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt
@@ -13366,6 +13728,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -13428,6 +13792,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             _version
             _deleted
             _lastChangedAt
@@ -13448,6 +13814,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameCount
             lastGameAddedAt
             lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
             canonicalVenueId
             entityId
             createdAt

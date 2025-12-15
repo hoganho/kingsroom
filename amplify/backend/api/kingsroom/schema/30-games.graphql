@@ -266,6 +266,26 @@ type GameFinancialSnapshot
   gameType: GameType
   tournamentType: TournamentType
 
+  # === SERIES FLAGS (for filtering/aggregation) ===
+  # isSeries: true if game is part of a tournament series
+  # Use for filtering: exclude series games from regular game aggregations
+  isSeries: Boolean @default(value: "false")
+
+  # isSeriesParent: true if this is the consolidated/parent record (no parentGameId)
+  # Use for aggregation: when including series data, only count parents to avoid double-counting
+  isSeriesParent: Boolean @default(value: "false")
+
+  # Reference to parent game (for child/flight games)
+  parentGameId: ID
+  
+  # === COMPOSITE QUERY KEYS (for efficient filtering) ===
+  # Format: "{entityId}#REGULAR" or "{entityId}#SERIES" 
+  # Enables efficient queries for series vs non-series games per entity
+  entitySeriesKey: String @index(name: "byEntitySeriesKey", sortKeyFields: ["gameStartDateTime"])
+  
+  # Format: "{venueId}#REGULAR" or "{venueId}#SERIES"
+  venueSeriesKey: String @index(name: "byVenueSeriesKey", sortKeyFields: ["gameStartDateTime"])
+
   # === METADATA ===
   notes: String
   snapshotType: SnapshotType @default(value: "AUTO")

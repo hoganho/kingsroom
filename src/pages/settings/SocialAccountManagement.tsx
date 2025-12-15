@@ -4,6 +4,7 @@ import { generateClient } from 'aws-amplify/api';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { SocialAccountTable } from '../../components/social/SocialAccountTable';
 import { SocialAccountModal } from '../../components/social/SocialAccountModal';
+import { ManualPostUploadTab } from '../../components/social/ManualPostUploadTab';
 import { DeleteConfirmationModal } from '../../components/entities/DeleteConfirmationModal';
 import { useSocialAccounts, SocialAccount, CreateSocialAccountInput, UpdateSocialAccountInput } from '../../hooks/useSocialAccounts';
 import { listEntities, listVenues } from '../../graphql/queries';
@@ -14,7 +15,9 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   ExclamationTriangleIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
+  UserGroupIcon,
+  ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 import { Loader2, Database } from 'lucide-react';
 
@@ -68,6 +71,9 @@ interface Venue {
 function hasGraphQLData<T>(response: unknown): response is { data: T } {
   return response !== null && typeof response === 'object' && 'data' in response;
 }
+
+// Tab type - NEW
+type TabType = 'accounts' | 'upload';
 
 // Full Sync Warning Modal
 interface FullSyncWarningModalProps {
@@ -194,6 +200,9 @@ const SocialAccountManagement = () => {
   // Use useMemo for client - prevents new instance on every render
   const client = useMemo(() => generateClient(), []);
   // Note: We don't filter by entity here - this page shows all social accounts
+  
+  // Tab state - NEW
+  const [activeTab, setActiveTab] = useState<TabType>('accounts');
   
   const {
     accounts,
@@ -546,78 +555,70 @@ const SocialAccountManagement = () => {
       title="Social Account Management"
       maxWidth="7xl"
       actions={
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleRefreshAll}
-            disabled={isRefreshingAll || accounts.length === 0}
-            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isRefreshingAll ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Refreshing...
-              </>
-            ) : (
-              <>
-                <ArrowPathIcon className="w-4 h-4 mr-2" />
-                Refresh All
-              </>
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={handleAddAccount}
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            <PlusIcon className="w-4 h-4 mr-2" />
-            Add Account
-          </button>
-        </div>
+        // Only show action buttons on accounts tab
+        activeTab === 'accounts' ? (
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleRefreshAll}
+              disabled={isRefreshingAll || accounts.length === 0}
+              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isRefreshingAll ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Refreshing...
+                </>
+              ) : (
+                <>
+                  <ArrowPathIcon className="w-4 h-4 mr-2" />
+                  Refresh All
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={handleAddAccount}
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              <PlusIcon className="w-4 h-4 mr-2" />
+              Add Account
+            </button>
+          </div>
+        ) : null
       }
     >
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-500">Total Accounts</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{accounts.length}</p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-500">Active</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">{activeAccounts}</p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-500">Scraping Enabled</p>
-          <p className="text-2xl font-bold text-indigo-600 mt-1">{scrapingEnabled}</p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-500">Full History</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">{fullySynced}</p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-500">Errors</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">{errorAccounts}</p>
-        </div>
-      </div>
-
-      {/* Info box */}
-      <div className="rounded-md bg-blue-50 p-4 mb-6">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
-          </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-blue-800">About Social Accounts</h3>
-            <div className="mt-2 text-sm text-blue-700">
-              <p>
-                Connect Facebook and Instagram pages to monitor posts and engagement.
-                Use <strong>"Fetch Posts"</strong> for incremental updates (only new posts since last fetch),
-                or <strong>"Full Sync"</strong> to fetch all historical posts for a new account.
-                Use the <strong>camera icon</strong> to refresh the page logo from Facebook.
-              </p>
-            </div>
-          </div>
-        </div>
+      {/* Tab Navigation - NEW */}
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="flex gap-8" aria-label="Tabs">
+          <button
+            onClick={() => setActiveTab('accounts')}
+            className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'accounts'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <UserGroupIcon className="w-5 h-5" />
+            Social Accounts
+            <span className={`ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium ${
+              activeTab === 'accounts' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-900'
+            }`}>
+              {accounts.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('upload')}
+            className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'upload'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <ArrowUpTrayIcon className="w-5 h-5" />
+            Manual Upload
+          </button>
+        </nav>
       </div>
 
       {/* Success Message */}
@@ -636,19 +637,76 @@ const SocialAccountManagement = () => {
         </div>
       )}
 
-      {/* Accounts Table */}
-      <SocialAccountTable
-        accounts={accounts}
-        loading={loading}
-        onEdit={handleEditAccount}
-        onDelete={handleDeleteClick}
-        onToggleScraping={handleToggleScraping}
-        onTriggerScrape={handleTriggerScrape}
-        onFullSync={handleFullSyncClick}
-        onRefreshLogo={handleRefreshLogo}
-        scrapingAccountId={scrapingAccountId}
-        refreshingLogoAccountId={refreshingLogoAccountId}
-      />
+      {/* Tab Content */}
+      {activeTab === 'accounts' && (
+        <>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-sm font-medium text-gray-500">Total Accounts</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{accounts.length}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-sm font-medium text-gray-500">Active</p>
+              <p className="text-2xl font-bold text-green-600 mt-1">{activeAccounts}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-sm font-medium text-gray-500">Scraping Enabled</p>
+              <p className="text-2xl font-bold text-indigo-600 mt-1">{scrapingEnabled}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-sm font-medium text-gray-500">Full History</p>
+              <p className="text-2xl font-bold text-blue-600 mt-1">{fullySynced}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-sm font-medium text-gray-500">Errors</p>
+              <p className="text-2xl font-bold text-red-600 mt-1">{errorAccounts}</p>
+            </div>
+          </div>
+
+          {/* Info box */}
+          <div className="rounded-md bg-blue-50 p-4 mb-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">About Social Accounts</h3>
+                <div className="mt-2 text-sm text-blue-700">
+                  <p>
+                    Connect Facebook and Instagram pages to monitor posts and engagement.
+                    Use <strong>"Fetch Posts"</strong> for incremental updates (only new posts since last fetch),
+                    or <strong>"Full Sync"</strong> to fetch all historical posts for a new account.
+                    Use the <strong>camera icon</strong> to refresh the page logo from Facebook.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Accounts Table */}
+          <SocialAccountTable
+            accounts={accounts}
+            loading={loading}
+            onEdit={handleEditAccount}
+            onDelete={handleDeleteClick}
+            onToggleScraping={handleToggleScraping}
+            onTriggerScrape={handleTriggerScrape}
+            onFullSync={handleFullSyncClick}
+            onRefreshLogo={handleRefreshLogo}
+            scrapingAccountId={scrapingAccountId}
+            refreshingLogoAccountId={refreshingLogoAccountId}
+          />
+        </>
+      )}
+
+      {/* Manual Upload Tab - NEW */}
+      {activeTab === 'upload' && (
+        <ManualPostUploadTab 
+          accounts={accounts}
+          entities={entities}
+        />
+      )}
 
       {/* Account Modal */}
       <SocialAccountModal

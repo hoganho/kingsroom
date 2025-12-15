@@ -20,7 +20,9 @@ type Venue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   gameCount: Int @default(value: "0")
   lastGameAddedAt: AWSDateTime
   lastDataRefreshedAt: AWSDateTime # Updated on any Game ADD/UPDATE for this venue
-
+  seriesGameCount: Int @default(value: "0")
+  lastSeriesGameAddedAt: AWSDateTime
+  
   # NEW: Links venue "clones" across entities to the same physical location
   # If null, this IS the canonical (original) venue
   # If set, points to the canonical venue ID for cross-entity analytics

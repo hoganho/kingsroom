@@ -23,7 +23,10 @@ Amplify Params - DO NOT EDIT *//**
  * GAME FINANCIALS PROCESSOR LAMBDA
  * ===================================================================
  * 
- * VERSION: 1.1.0
+ * VERSION: 1.2.0
+ * 
+ * CHANGELOG:
+ * - v1.2.0: Added isSeries and isSeriesParent flags for filtering/aggregation
  * 
  * TRIGGERS:
  * - DynamoDB Streams on Game table (INSERT, MODIFY events) → auto-saves
@@ -38,6 +41,11 @@ Amplify Params - DO NOT EDIT *//**
  * - Calculates GameCost (operational costs)
  * - Calculates GameFinancialSnapshot (reporting metrics)
  * - Supports preview for FE confirmation workflows
+ * 
+ * SERIES HANDLING:
+ * - isSeries: true if game is part of a tournament series
+ * - isSeriesParent: true if series game AND no parentGameId (consolidated record)
+ * - These flags enable proper filtering in aggregate queries
  * 
  * ARCHITECTURE:
  * ┌─────────────────────────────────────────────────────────────────┐
@@ -96,6 +104,32 @@ const shouldProcessGame = (game, eventName) => {
     if (game.gameStatus === 'NOT_PUBLISHED') return false;
     if (!game.entityId) return false;
     return ['INSERT', 'MODIFY'].includes(eventName);
+};
+
+/**
+ * Determine if a game is part of a tournament series
+ * @param {Object} game - Game data
+ * @returns {boolean}
+ */
+const determineIsSeries = (game) => {
+    return !!(game.isSeries === true || game.tournamentSeriesId);
+};
+
+/**
+ * Determine if a game is a series parent (consolidated record)
+ * A series parent is a game that:
+ * - IS part of a series
+ * - Does NOT have a parentGameId (it's not a flight/child)
+ * 
+ * This identifies the "top-level" record for multi-day events
+ * @param {Object} game - Game data
+ * @returns {boolean}
+ */
+const determineIsSeriesParent = (game) => {
+    const isSeries = determineIsSeries(game);
+    // If it's a series game and has no parent, it's the parent/consolidated record
+    // Also check finalDay as an additional indicator
+    return isSeries && !game.parentGameId;
 };
 
 // ===================================================================
@@ -235,6 +269,12 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         ? Math.round((totalDealerCost / (gameDurationMinutes / 60)) * 100) / 100 
         : null;
     
+    // ===================================================================
+    // SERIES FLAGS - For filtering and aggregation
+    // ===================================================================
+    const isSeries = determineIsSeries(game);
+    const isSeriesParent = determineIsSeriesParent(game);
+    
     return {
         gameId: game.id,
         entityId: game.entityId,
@@ -286,7 +326,31 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         profitPerPlayer,
         rakePerEntry,
         staffCostPerPlayer,
-        dealerCostPerHour
+        dealerCostPerHour,
+        
+        // ===================================================================
+        // SERIES FLAGS - NEW in v1.2.0
+        // ===================================================================
+        // isSeries: true if game is part of a tournament series
+        // Use to exclude series games from regular game aggregations
+        isSeries,
+        
+        // isSeriesParent: true if this is the consolidated/parent record
+        // Use to include only parent records when aggregating series data
+        // (avoids double-counting flights/days)
+        isSeriesParent,
+        
+        // Also store parentGameId for reference
+        parentGameId: game.parentGameId || null,
+        
+        // ===================================================================
+        // COMPOSITE QUERY KEYS - For efficient GSI queries
+        // ===================================================================
+        // Format: "{entityId}#REGULAR" or "{entityId}#SERIES"
+        entitySeriesKey: game.entityId ? `${game.entityId}#${isSeries ? 'SERIES' : 'REGULAR'}` : null,
+        
+        // Format: "{venueId}#REGULAR" or "{venueId}#SERIES"
+        venueSeriesKey: game.venueId ? `${game.venueId}#${isSeries ? 'SERIES' : 'REGULAR'}` : null
     };
 };
 
@@ -425,7 +489,7 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
                 ExpressionAttributeValues: expressionAttributeValues
             }));
             
-            console.log(`[FINANCIALS] ✅ Updated GameFinancialSnapshot ${existing.id}`);
+            console.log(`[FINANCIALS] ✅ Updated GameFinancialSnapshot ${existing.id} (isSeries: ${snapshotData.isSeries}, isSeriesParent: ${snapshotData.isSeriesParent})`);
             return { action: 'UPDATED', snapshotId: existing.id };
         }
 
@@ -443,7 +507,7 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
             }
         }));
         
-        console.log(`[FINANCIALS] ✅ Created GameFinancialSnapshot ${snapshotId}`);
+        console.log(`[FINANCIALS] ✅ Created GameFinancialSnapshot ${snapshotId} (isSeries: ${snapshotData.isSeries}, isSeriesParent: ${snapshotData.isSeriesParent})`);
         return { action: 'CREATED', snapshotId };
         
     } catch (error) {
@@ -468,7 +532,10 @@ const processGameFinancials = async (game, options = {}) => {
     const { saveToDatabase = false } = options;
     const startTime = Date.now();
     
-    console.log(`[FINANCIALS] Processing game ${game.id} (saveToDatabase: ${saveToDatabase})`);
+    // Log series status for debugging
+    const isSeries = determineIsSeries(game);
+    const isSeriesParent = determineIsSeriesParent(game);
+    console.log(`[FINANCIALS] Processing game ${game.id} (saveToDatabase: ${saveToDatabase}, isSeries: ${isSeries}, isSeriesParent: ${isSeriesParent})`);
     
     // Get existing cost record (for preserving manual entries)
     const existingCost = saveToDatabase ? await getExistingGameCost(game.id) : null;
@@ -519,7 +586,11 @@ const processGameFinancials = async (game, options = {}) => {
             revenuePerPlayer: snapshotData.revenuePerPlayer,
             costPerPlayer: snapshotData.costPerPlayer,
             profitPerPlayer: snapshotData.profitPerPlayer,
-            rakePerEntry: snapshotData.rakePerEntry
+            rakePerEntry: snapshotData.rakePerEntry,
+            
+            // Series flags (for FE awareness)
+            isSeries: snapshotData.isSeries,
+            isSeriesParent: snapshotData.isSeriesParent
         },
         
         // Save results (only populated when saveToDatabase is true)
@@ -630,6 +701,7 @@ const handleStreamEvent = async (event) => {
         processed: 0,
         skipped: 0,
         errors: 0,
+        seriesGames: 0,
         details: []
     };
     
@@ -657,6 +729,11 @@ const handleStreamEvent = async (event) => {
                 continue;
             }
             
+            // Track series games for logging
+            if (determineIsSeries(game)) {
+                results.seriesGames++;
+            }
+            
             // Stream events always save to database
             const result = await processGameFinancials(game, { saveToDatabase: true });
             
@@ -664,6 +741,8 @@ const handleStreamEvent = async (event) => {
             results.details.push({
                 gameId: game.id,
                 eventName,
+                isSeries: result.summary?.isSeries,
+                isSeriesParent: result.summary?.isSeriesParent,
                 cost: result.costSaveResult,
                 snapshot: result.snapshotSaveResult
             });
@@ -678,7 +757,7 @@ const handleStreamEvent = async (event) => {
         }
     }
     
-    console.log(`[FINANCIALS] Stream complete: ${results.processed} processed, ${results.skipped} skipped, ${results.errors} errors`);
+    console.log(`[FINANCIALS] Stream complete: ${results.processed} processed (${results.seriesGames} series), ${results.skipped} skipped, ${results.errors} errors`);
     
     return results;
 };
@@ -724,6 +803,8 @@ exports.batchProcess = async (event) => {
             const processResult = await processGameFinancials(result.Item, options);
             results.push({
                 gameId,
+                isSeries: processResult.summary?.isSeries,
+                isSeriesParent: processResult.summary?.isSeriesParent,
                 ...processResult
             });
             
@@ -735,6 +816,7 @@ exports.batchProcess = async (event) => {
     return {
         totalRequested: gameIds.length,
         processed: results.filter(r => r.success).length,
+        seriesGames: results.filter(r => r.isSeries).length,
         failed: results.filter(r => !r.success).length,
         results
     };

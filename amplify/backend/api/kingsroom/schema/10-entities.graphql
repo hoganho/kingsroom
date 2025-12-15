@@ -17,6 +17,8 @@ type Entity @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   venueCount: Int @default(value: "0")
   lastGameAddedAt: AWSDateTime
   lastDataRefreshedAt: AWSDateTime # Updated on any Game ADD/UPDATE
+  seriesGameCount: Int @default(value: "0")
+  lastSeriesGameAddedAt: AWSDateTime
 
   # Relationships
   scraperStates: [ScraperState] @hasMany(indexName: "byEntityScraperState", fields: ["id"])
