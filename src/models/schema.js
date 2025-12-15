@@ -190,6 +190,22 @@ export const schema = {
                         ]
                     }
                 },
+                "tournamentSeries": {
+                    "name": "tournamentSeries",
+                    "isArray": true,
+                    "type": {
+                        "model": "TournamentSeries"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "entity"
+                        ]
+                    }
+                },
                 "recurringGames": {
                     "name": "recurringGames",
                     "isArray": true,
@@ -4219,6 +4235,28 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
                 "seriesCategory": {
                     "name": "seriesCategory",
                     "isArray": false,
@@ -4411,6 +4449,16 @@ export const schema = {
                         "fields": [
                             "month",
                             "year"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityTournamentSeries",
+                        "queryField": "tournamentSeriesByEntityId",
+                        "fields": [
+                            "entityId"
                         ]
                     }
                 },
@@ -10876,6 +10924,13 @@ export const schema = {
                 },
                 "isPinned": {
                     "name": "isPinned",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isTournamentResult": {
+                    "name": "isTournamentResult",
                     "isArray": false,
                     "type": "Boolean",
                     "isRequired": false,
@@ -18964,5 +19019,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "0feac0607df48b417237bbc3b8b099dd"
+    "version": "87a46fc8f4284383fce1be9f5ad303a7"
 };

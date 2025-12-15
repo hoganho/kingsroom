@@ -1,7 +1,7 @@
 // src/components/entities/MultiEntitySelector.tsx
 // Multi-select entity dropdown for viewing pages
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useRef, useEffect } from 'react';
 import { Transition } from '@headlessui/react';
 import { ChevronUpDownIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
@@ -28,6 +28,28 @@ export const MultiEntitySelector: React.FC<MultiEntitySelectorProps> = ({
   } = useEntity();
   
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    // Add listener with a slight delay to prevent immediate trigger on the opening click
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   if (loading) {
     return (
@@ -40,12 +62,9 @@ export const MultiEntitySelector: React.FC<MultiEntitySelectorProps> = ({
     );
   }
 
-  if (entities.length === 0) {
-    return (
-      <div className={`text-sm text-gray-500 ${className}`}>
-        No entities available
-      </div>
-    );
+  // Don't render if user has only one entity or no entities
+  if (entities.length <= 1) {
+    return null;
   }
 
   const isAllSelected = selectedEntities.length === entities.length;
@@ -58,7 +77,7 @@ export const MultiEntitySelector: React.FC<MultiEntitySelectorProps> = ({
     : `${selectedEntities.length} entities selected`;
 
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
+    <div className={`flex items-center space-x-2 ${className}`} ref={dropdownRef}>
       {showLabel && (
         <span className="text-sm font-medium text-gray-700">Entities:</span>
       )}
@@ -178,6 +197,11 @@ export const MultiEntitySelector: React.FC<MultiEntitySelectorProps> = ({
 // Quick toggle buttons for common selections
 export const EntityQuickFilters: React.FC = () => {
   const { entities, selectedEntities, setSelectedEntities, selectAllEntities } = useEntity();
+  
+  // Don't render if user has only one entity
+  if (entities.length <= 1) {
+    return null;
+  }
   
   const presets = [
     { label: 'All', action: selectAllEntities },

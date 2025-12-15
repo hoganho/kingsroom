@@ -3,7 +3,7 @@
 // UPDATED: Uses enrichGameData mutation instead of deprecated saveGame
 // UPDATED: Includes source selection step for create mode
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { GameData } from '../../../types/game';
 import type { 
   GameEditorMode,
@@ -278,6 +278,22 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({
     shouldInitializeEditor ? computedInitialData : {},
     shouldInitializeEditor ? config : undefined
   );
+  
+  // ===================================================================
+  // SYNC TEMPLATE DATA TO EDITOR
+  // ===================================================================
+  
+  // When source selection changes in create mode, apply template data to the editor
+  // This is needed because the hook's internal state was initialized before source was selected
+  useEffect(() => {
+    if (mode === 'create' && sourceSelection?.templateData && Object.keys(sourceSelection.templateData).length > 0) {
+      console.log('[GameEditorModal] Applying template data to editor:', sourceSelection.templateData);
+      
+      // Use the hook's built-in applyTemplate method
+      editor.applyTemplate(sourceSelection.templateData);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceSelection]); // Only re-run when sourceSelection changes
   
   // ===================================================================
   // HANDLERS

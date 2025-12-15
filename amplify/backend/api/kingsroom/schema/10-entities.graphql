@@ -25,6 +25,7 @@ type Entity @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   venues: [Venue] @hasMany(indexName: "byEntityVenue", fields: ["id"])
   games: [Game] @hasMany(indexName: "byEntityGame", fields: ["id"])
   assets: [Asset] @hasMany(indexName: "byEntityAsset", fields: ["id"])
+  tournamentSeries: [TournamentSeries] @hasMany(indexName: "byEntityTournamentSeries", fields: ["id"])
 
   # === NEW RELATIONSHIPS ===
   recurringGames: [RecurringGame] @hasMany(indexName: "byEntityRecurringGame", fields: ["id"])

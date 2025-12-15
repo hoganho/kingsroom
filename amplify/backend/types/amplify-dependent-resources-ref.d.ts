@@ -89,6 +89,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
+    "recurringGameStreamTrigger": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "s3ManagementFunction": {
       "Arn": "string",
       "LambdaExecutionRole": "string",

@@ -74,6 +74,7 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   status: SocialPostStatus! @default(value: "ACTIVE") @index(name: "byPostStatus", queryField: "socialPostsByPostStatus", sortKeyFields: ["postedAt"])
   isPromotional: Boolean @default(value: "false")
   isPinned: Boolean @default(value: "false")
+  isTournamentResult: Boolean @default(value: "false")
   isTournamentRelated: Boolean @default(value: "false")
   tags: [String]
   sentiment: String

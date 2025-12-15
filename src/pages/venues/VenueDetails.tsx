@@ -5,7 +5,6 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, Grid, Text, Metric } from '@tremor/react';
 import {
   ArrowLeftIcon,
-  BuildingOffice2Icon,
   MapPinIcon,
   CalendarIcon,
   TrophyIcon,
@@ -68,6 +67,7 @@ const getVenueQuery = /* GraphQL */ `
       venueNumber
       aliases
       entityId
+      logo
     }
   }
 `;
@@ -148,6 +148,7 @@ interface VenueInfo {
   venueNumber?: string | null;
   aliases?: string[] | null;
   entityId?: string | null;
+  logo?: string | null;
 }
 
 interface ScheduleGroupStats {
@@ -178,6 +179,10 @@ interface GameRowData {
 
 function isValidGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
   const game = snapshot.game;
+  
+  // Explicitly exclude NOT_PUBLISHED games
+  if (game?.gameStatus === 'NOT_PUBLISHED') return false;
+  
   return (
     !!game &&
     game.gameStatus === 'FINISHED' &&
@@ -579,7 +584,7 @@ const PAGE_LIMIT = 500;
 export const VenueDetails: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { selectedEntities, loading: entityLoading } = useEntity();
+  const { selectedEntities, entities, loading: entityLoading } = useEntity();
 
   // Get venueId from URL params (standardized parameter name)
   const venueId = searchParams.get('venueId');
@@ -591,6 +596,10 @@ export const VenueDetails: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'games' | 'analytics'>('overview');
+
+  // Determine if we should show the entity selector (only if user has more than 1 entity)
+  // Note: entities is already filtered by user permissions in EntityContext
+  const showEntitySelector = entities && entities.length > 1;
 
   // Fetch venue info and financial snapshots
   useEffect(() => {
@@ -693,6 +702,13 @@ export const VenueDetails: React.FC = () => {
 
   const gameRows = useMemo(() => buildGameRowData(snapshots), [snapshots]);
 
+  // Handle row click to navigate to game details (same as RecurringGame card)
+  const handleGameRowClick = (row: GameRowData) => {
+    if (venue) {
+      navigate(`/venues/game?venueId=${venue.id}&gameTypeKey=${encodeURIComponent(row.gameTypeKey)}`);
+    }
+  };
+
   // Table columns
   const columns = useMemo<ColumnDef<GameRowData>[]>(
     () => [
@@ -711,7 +727,7 @@ export const VenueDetails: React.FC = () => {
         header: 'Game',
         accessorKey: 'name',
         cell: ({ row }) => (
-          <span className="font-medium" title={row.original.name}>
+          <span className="font-medium text-indigo-600 hover:text-indigo-800" title={row.original.name}>
             {row.original.name.length > 35
               ? row.original.name.substring(0, 35) + '...'
               : row.original.name}
@@ -787,15 +803,7 @@ export const VenueDetails: React.FC = () => {
   const profitColor = globalStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600';
 
   return (
-    <PageWrapper
-      title={venue.name}
-      actions={
-        <div className="flex items-center gap-4">
-          <MultiEntitySelector />
-          <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
-        </div>
-      }
-    >
+    <PageWrapper title={venue.name}>
       {/* Back Navigation */}
       <button
         onClick={() => navigate('/venues/dashboard')}
@@ -805,13 +813,32 @@ export const VenueDetails: React.FC = () => {
         Back to Dashboard
       </button>
 
-      {/* Venue Header */}
+      {/* ============ FILTERS - Same layout as VenuesDashboard ============ */}
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {showEntitySelector && (
+          <div className="w-full sm:flex-1 sm:max-w-xs">
+            <MultiEntitySelector />
+          </div>
+        )}
+        <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
+      </div>
+
+      {/* Venue Header - Updated with Logo Display (SocialAccountTable style) */}
       <Card className="mb-6">
         <div className="flex items-center">
-          <div className="flex-shrink-0">
-            <div className="h-14 w-14 rounded-lg bg-indigo-100 flex items-center justify-center">
-              <BuildingOffice2Icon className="h-8 w-8 text-indigo-600" />
-            </div>
+          {/* Venue Logo / Avatar - SocialAccountTable pattern */}
+          <div className="flex-shrink-0 h-14 w-14 relative">
+            {venue.logo ? (
+              <img
+                src={venue.logo}
+                alt={venue.name}
+                className="h-14 w-14 rounded-full object-cover"
+              />
+            ) : (
+              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white text-xl font-medium">
+                {venue.name.charAt(0)}
+              </div>
+            )}
           </div>
           <div className="ml-5 flex-1">
             <h2 className="text-xl font-bold text-gray-900">
@@ -941,7 +968,11 @@ export const VenueDetails: React.FC = () => {
               <h3 className="text-sm font-semibold text-gray-700 mb-3">
                 Game History ({gameRows.length} games)
               </h3>
-              <DataTable<GameRowData> data={gameRows} columns={columns} />
+              <DataTable<GameRowData> 
+                data={gameRows} 
+                columns={columns} 
+                onRowClick={handleGameRowClick}
+              />
             </div>
           )}
 

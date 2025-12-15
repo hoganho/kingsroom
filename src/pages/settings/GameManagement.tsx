@@ -9,7 +9,6 @@ import { cx, formatCurrency, formatDateTimeAEST } from '../../lib/utils';
 // --- UI Components ---
 import { Card } from '../../components/ui/Card'; 
 import { DataTable } from '../../components/ui/DataTable';
-import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
@@ -28,6 +27,7 @@ import {
     FunnelIcon,
     PlusIcon,
     PencilSquareIcon,
+    CheckIcon,
 } from '@heroicons/react/24/outline';
 
 // --- Context & Services ---
@@ -387,10 +387,13 @@ export const GameManagement = () => {
                 ? { entityId: { eq: selectedEntities[0].id } }
                 : { or: entityFilters };
 
+            // Always exclude NOT_PUBLISHED games
+            const notPublishedFilter = { gameStatus: { ne: 'NOT_PUBLISHED' } };
+
             if (statusConditions.length > 0) {
-                filter = { and: [entityCondition, { or: statusConditions }] };
+                filter = { and: [entityCondition, { or: statusConditions }, notPublishedFilter] };
             } else {
-                filter = entityCondition;
+                filter = { and: [entityCondition, notPublishedFilter] };
             }
 
             const response: any = await getClient().graphql({
@@ -589,40 +592,35 @@ export const GameManagement = () => {
             ),
         },
         {
+            accessorKey: 'recurringGameId',
+            header: 'Recurring',
+            cell: ({ getValue }) => (
+                getValue() ? (
+                    <CheckIcon className="h-5 w-5 text-green-600" />
+                ) : null
+            ),
+        },
+        {
             accessorKey: 'venueName',
             header: 'Venue',
             cell: ({ getValue }) => <span className="text-gray-700 dark:text-gray-300">{getValue() as string}</span>
         },
         {
-            accessorKey: 'venueAssignmentStatus',
-            header: 'Status',
-            cell: ({ getValue }) => {
-                const status = getValue() as string;
-                let variant: 'success' | 'warning' | 'error' | 'default' | 'neutral' = 'default';
-                if (status === 'MANUALLY_ASSIGNED') variant = 'success';
-                if (status === 'AUTO_ASSIGNED') variant = 'neutral';
-                if (status === 'PENDING_ASSIGNMENT') variant = 'warning';
-                if (status === 'UNASSIGNED') variant = 'error';
-                
-                return <Badge variant={variant}>{status?.replace('_', ' ') || 'UNKNOWN'}</Badge>;
-            }
-        },
-        {
-            accessorKey: 'suggestedVenueName',
-            header: 'Suggested',
-            cell: ({ getValue }) => <span className="text-gray-500 italic">{getValue() as string || '-'}</span>
+            accessorKey: 'buyIn',
+            header: 'Buy-In',
+            cell: ({ getValue }) => formatCurrency(getValue() as number),
         },
         {
             accessorKey: 'totalUniquePlayers',
-            header: 'Players',
+            header: 'Unique Players',
             cell: ({ getValue }) => (getValue() as number)?.toLocaleString() || 0,
         },
         {
-            accessorKey: 'buyIn',
-            header: 'Buy-in',
-            cell: ({ getValue }) => formatCurrency(getValue() as number),
+            accessorKey: 'totalEntries',
+            header: 'Entries',
+            cell: ({ getValue }) => (getValue() as number)?.toLocaleString() || 0,
         },
-        // === NEW: Actions column ===
+        // === Actions column ===
         {
             id: 'actions',
             header: '',

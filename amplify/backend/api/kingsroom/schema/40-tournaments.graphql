@@ -15,6 +15,8 @@ type TournamentSeries @model(subscriptions: null) @auth(rules: [{ allow: private
   year: Int! @index(name: "byYear", sortKeyFields: ["name"])
   quarter: Int @index(name: "byQuarter", sortKeyFields: ["year"])
   month: Int @index(name: "byMonth", sortKeyFields: ["year"])
+  entityId: ID @index(name: "byEntityTournamentSeries", queryField: "tournamentSeriesByEntityId")
+  entity: Entity @belongsTo(fields: ["entityId"])
   seriesCategory: SeriesCategory! @default(value: "REGULAR") @index(name: "bySeriesCategory", sortKeyFields: ["year"])
   holidayType: HolidayType @index(name: "byHolidayType", sortKeyFields: ["year"])
   status: SeriesStatus!

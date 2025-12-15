@@ -170,7 +170,14 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
 
     useEffect(() => {
         if (isOpen && initialData) {
-            setFormData({ ...DEFAULT_FORM, ...initialData });
+            // Ensure array fields are never null (database may return null instead of [])
+            const safeInitialData = {
+                ...initialData,
+                aliases: initialData.aliases ?? [],
+                tags: initialData.tags ?? [],
+                socialMediaHashtags: initialData.socialMediaHashtags ?? [],
+            };
+            setFormData({ ...DEFAULT_FORM, ...safeInitialData });
         } else if (isOpen) {
             // For new games, pre-select the current entity from context
             setFormData({ 
@@ -504,7 +511,7 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                                             Add
                                         </button>
                                     </div>
-                                    {formData.aliases.length > 0 && (
+                                    {(formData.aliases?.length ?? 0) > 0 && (
                                         <div className="flex flex-wrap gap-2 mt-2">
                                             {formData.aliases.map((alias, idx) => (
                                                 <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-sm">
@@ -581,7 +588,7 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                                             Add
                                         </button>
                                     </div>
-                                    {formData.tags.length > 0 && (
+                                    {(formData.tags?.length ?? 0) > 0 && (
                                         <div className="flex flex-wrap gap-2 mt-2">
                                             {formData.tags.map((tag, idx) => (
                                                 <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-sm">
@@ -681,7 +688,7 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                                             Add
                                         </button>
                                     </div>
-                                    {formData.socialMediaHashtags.length > 0 && (
+                                    {(formData.socialMediaHashtags?.length ?? 0) > 0 && (
                                         <div className="flex flex-wrap gap-2 mt-2">
                                             {formData.socialMediaHashtags.map((hashtag, idx) => (
                                                 <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">

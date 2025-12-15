@@ -11,9 +11,10 @@ export interface DataTableProps<T> {
   data: T[]
   columns: ColumnDef<T, any>[]
   className?: string
+  onRowClick?: (row: T) => void
 }
 
-export function DataTable<T>({ data, columns, className }: DataTableProps<T>) {
+export function DataTable<T>({ data, columns, className, onRowClick }: DataTableProps<T>) {
   const table = useReactTable<T>({
     data,
     columns,
@@ -53,7 +54,11 @@ export function DataTable<T>({ data, columns, className }: DataTableProps<T>) {
           {rows.map((row) => (
             <tr
               key={row.id}
-              className="hover:bg-gray-50 dark:hover:bg-gray-900/50"
+              onClick={() => onRowClick?.(row.original)}
+              className={cx(
+                "hover:bg-gray-50 dark:hover:bg-gray-900/50",
+                onRowClick && "cursor-pointer"
+              )}
             >
               {row.getVisibleCells().map((cell) => {
                 const cellRenderer = cell.column.columnDef.cell

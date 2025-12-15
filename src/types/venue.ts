@@ -13,7 +13,8 @@ export interface VenueFormData {
   country?: string | null;
   aliases: string[];
   entityId: string | null;
-  fee?: number | null;  // NEW - Venue fee per game
+  fee?: number | null;  // Venue fee per game
+  logo?: string | null;  // Venue logo URL (S3)
 }
 
 /**
@@ -32,7 +33,8 @@ export interface Venue {
     id: string;
     entityName: string;
   } | null;
-  fee?: number | null;  // NEW - Venue fee per game
+  fee?: number | null;  // Venue fee per game
+  logo?: string | null;  // Venue logo URL (S3)
   _version?: number;
   _deleted?: boolean | null;
   _lastChangedAt?: number;

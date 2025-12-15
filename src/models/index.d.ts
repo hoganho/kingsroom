@@ -3061,6 +3061,7 @@ type EagerEntity = {
   readonly venues?: (Venue | null)[] | null;
   readonly games?: (Game | null)[] | null;
   readonly assets?: (Asset | null)[] | null;
+  readonly tournamentSeries?: (TournamentSeries | null)[] | null;
   readonly recurringGames?: (RecurringGame | null)[] | null;
   readonly entityMetrics?: (EntityMetrics | null)[] | null;
   readonly venueMetrics?: (VenueMetrics | null)[] | null;
@@ -3091,6 +3092,7 @@ type LazyEntity = {
   readonly venues: AsyncCollection<Venue>;
   readonly games: AsyncCollection<Game>;
   readonly assets: AsyncCollection<Asset>;
+  readonly tournamentSeries: AsyncCollection<TournamentSeries>;
   readonly recurringGames: AsyncCollection<RecurringGame>;
   readonly entityMetrics: AsyncCollection<EntityMetrics>;
   readonly venueMetrics: AsyncCollection<VenueMetrics>;
@@ -4124,6 +4126,8 @@ type EagerTournamentSeries = {
   readonly year: number;
   readonly quarter?: number | null;
   readonly month?: number | null;
+  readonly entityId?: string | null;
+  readonly entity?: Entity | null;
   readonly seriesCategory: SeriesCategory | keyof typeof SeriesCategory;
   readonly holidayType?: HolidayType | keyof typeof HolidayType | null;
   readonly status: SeriesStatus | keyof typeof SeriesStatus;
@@ -4152,6 +4156,8 @@ type LazyTournamentSeries = {
   readonly year: number;
   readonly quarter?: number | null;
   readonly month?: number | null;
+  readonly entityId?: string | null;
+  readonly entity: AsyncItem<Entity | undefined>;
   readonly seriesCategory: SeriesCategory | keyof typeof SeriesCategory;
   readonly holidayType?: HolidayType | keyof typeof HolidayType | null;
   readonly status: SeriesStatus | keyof typeof SeriesStatus;
@@ -5915,6 +5921,7 @@ type EagerSocialPost = {
   readonly status: SocialPostStatus | keyof typeof SocialPostStatus;
   readonly isPromotional?: boolean | null;
   readonly isPinned?: boolean | null;
+  readonly isTournamentResult?: boolean | null;
   readonly isTournamentRelated?: boolean | null;
   readonly tags?: (string | null)[] | null;
   readonly sentiment?: string | null;
@@ -5964,6 +5971,7 @@ type LazySocialPost = {
   readonly status: SocialPostStatus | keyof typeof SocialPostStatus;
   readonly isPromotional?: boolean | null;
   readonly isPinned?: boolean | null;
+  readonly isTournamentResult?: boolean | null;
   readonly isTournamentRelated?: boolean | null;
   readonly tags?: (string | null)[] | null;
   readonly sentiment?: string | null;

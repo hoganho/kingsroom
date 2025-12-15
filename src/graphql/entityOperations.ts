@@ -151,23 +151,6 @@ export const entityQueries = {
 // =========================================================================
 
 export const entityAwareOperations = {
-  // Uses existing saveTournamentData mutation
-  saveTournamentDataWithEntity: /* GraphQL */ `
-    mutation SaveTournamentDataWithEntity($input: SaveTournamentInput!) {
-      saveTournamentData(input: $input) {
-        id
-        name
-        entityId
-        gameStartDateTime
-        gameStatus
-        venueId
-        venue {
-          id
-          name
-        }
-      }
-    }
-  `,
 
   // Fixed: fetchTournamentData doesn't accept entityId
   fetchTournamentDataForEntity: /* GraphQL */ `

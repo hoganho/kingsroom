@@ -594,6 +594,16 @@ exports.handler = async (event) => {
             };
         }
         
+        // Skip NOT_PUBLISHED games
+        if (game.gameStatus === 'NOT_PUBLISHED') {
+            console.log(`[FINANCIALS] Skipping NOT_PUBLISHED game: ${game.id}`);
+            return {
+                success: false,
+                skipped: true,
+                error: 'Game is NOT_PUBLISHED - financial processing skipped'
+            };
+        }
+        
         // Process financials
         return await processGameFinancials(game, { saveToDatabase });
         
@@ -702,6 +712,12 @@ exports.batchProcess = async (event) => {
             
             if (!result.Item) {
                 results.push({ gameId, error: 'Game not found' });
+                continue;
+            }
+            
+            // Skip NOT_PUBLISHED games
+            if (result.Item.gameStatus === 'NOT_PUBLISHED') {
+                results.push({ gameId, skipped: true, error: 'Game is NOT_PUBLISHED' });
                 continue;
             }
             

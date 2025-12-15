@@ -50,20 +50,60 @@ export const listVenuesShallow = /* GraphQL */ `
         id
         venueNumber
         name
-        aliases
         address
         city
         country
         fee
-        createdAt
-        updatedAt
+        aliases
         entityId
+        logo
+        isSpecial
         _version
         _deleted
-        _lastChangedAt
       }
       nextToken
-      startedAt
+    }
+  }
+`;
+
+export const getVenueWithLogo = /* GraphQL */ `
+  query GetVenueWithLogo($id: ID!) {
+    getVenue(id: $id) {
+      id
+      venueNumber
+      name
+      address
+      city
+      country
+      fee
+      aliases
+      entityId
+      logo
+      isSpecial
+      gameCount
+      lastGameAddedAt
+      lastDataRefreshedAt
+      canonicalVenueId
+      _version
+      _deleted
+    }
+  }
+`;
+
+export const listVenuesForDashboard = /* GraphQL */ `
+  query ListVenuesForDashboard(
+    $filter: ModelVenueFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listVenues(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        entityId
+        logo
+      }
+      nextToken
     }
   }
 `;

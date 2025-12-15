@@ -111,7 +111,11 @@
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/gameFinancialsProcessor-396d6235554b59413233-build.zip"
+          "s3Key": "amplify-builds/gameFinancialsProcessor-6f45626570354433574f-build.zip"
+        },
+        "recurringGameStreamTrigger": {
+          "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
+          "s3Key": "amplify-builds/recurringGameStreamTrigger-4e565651584578554d30-build.zip"
         }
       },
       "api": {

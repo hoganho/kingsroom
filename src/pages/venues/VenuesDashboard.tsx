@@ -139,6 +139,9 @@ function getTimeRangeBounds(range: TimeRangeKey): { from: string | null; to: str
 function isValidGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
   const game = snapshot.game
 
+  // Explicitly exclude NOT_PUBLISHED games
+  if (game?.gameStatus === "NOT_PUBLISHED") return false
+
   const checks = {
     hasGame: !!game,
     gameStatus: game?.gameStatus,
@@ -370,7 +373,7 @@ const PAGE_LIMIT = 500
 
 export default function VenuesDashboard() {
   const navigate = useNavigate()
-  const { selectedEntities, loading: entityLoading } = useEntity()
+  const { selectedEntities, entities, loading: entityLoading } = useEntity()
 
   const [timeRange, setTimeRange] = useState<TimeRangeKey>("ALL")
   const [venues, setVenues] = useState<Venue[]>([])
@@ -381,7 +384,30 @@ export default function VenuesDashboard() {
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0)
   
   // State to track filtering per entity (Key: EntityID, Value: boolean isHidden)
-  const [hideEmptyVenuesMap, setHideEmptyVenuesMap] = useState<Record<string, boolean>>({})
+  // DEFAULT: Hide empty venues is ON (true)
+  const [hideEmptyVenuesMap, setHideEmptyVenuesMap] = useState<Record<string, boolean>>(() => {
+    // Initialize with true for all selected entities
+    const initial: Record<string, boolean> = {}
+    selectedEntities.forEach(e => { initial[e.id] = true })
+    return initial
+  })
+
+  // Update hideEmptyVenuesMap when selectedEntities changes to default new entities to true
+  useEffect(() => {
+    setHideEmptyVenuesMap(prev => {
+      const updated = { ...prev }
+      selectedEntities.forEach(e => {
+        if (!(e.id in updated)) {
+          updated[e.id] = true // Default to hiding empty venues
+        }
+      })
+      return updated
+    })
+  }, [selectedEntities])
+
+  // Determine if we should show the entity selector (only if user has more than 1 entity)
+  // Note: entities is already filtered by user permissions in EntityContext
+  const showEntitySelector = entities && entities.length > 1
 
   // ---- Data Loading ----
   const loadData = useCallback(async () => {
@@ -473,6 +499,11 @@ export default function VenuesDashboard() {
     return buildVenueStats(venues, snapshots)
   }, [venues, snapshots])
 
+  // Handle row click to navigate to venue details (same as VenueCard)
+  const handleRowClick = (row: VenueSummaryStats) => {
+    navigate(`/venues/details?venueId=${row.venueId}`)
+  }
+
   // Columns for DataTable
   const columns = useMemo<ColumnDef<VenueSummaryStats>[]>(
     () => [
@@ -492,7 +523,9 @@ export default function VenuesDashboard() {
                 <BuildingOffice2Icon className="w-4 h-4" />
               </div>
             )}
-            <span>{row.original.venueName}</span>
+            <span className="text-indigo-600 hover:text-indigo-800 font-medium">
+              {row.original.venueName}
+            </span>
           </div>
         )
       },
@@ -558,9 +591,11 @@ export default function VenuesDashboard() {
           </h1>
         </div>
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="w-full sm:flex-1 sm:max-w-xs">
-            <MultiEntitySelector />
-          </div>
+          {showEntitySelector && (
+            <div className="w-full sm:flex-1 sm:max-w-xs">
+              <MultiEntitySelector />
+            </div>
+          )}
           <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
         </div>
         <div className="mt-8 py-20 text-center">
@@ -613,9 +648,11 @@ export default function VenuesDashboard() {
 
       {/* ============ FILTERS ============ */}
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="w-full sm:flex-1 sm:max-w-xs">
-          <MultiEntitySelector />
-        </div>
+        {showEntitySelector && (
+          <div className="w-full sm:flex-1 sm:max-w-xs">
+            <MultiEntitySelector />
+          </div>
+        )}
         <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
       </div>
 
@@ -675,8 +712,8 @@ export default function VenuesDashboard() {
               const entityVenues = venueStats.filter(v => v.entityId === entity.id);
               if (entityVenues.length === 0) return null;
 
-              // Determine logic for this entity's filter
-              const isHidingEmpty = hideEmptyVenuesMap[entity.id] ?? false;
+              // Determine logic for this entity's filter (default to true = hiding empty)
+              const isHidingEmpty = hideEmptyVenuesMap[entity.id] ?? true;
               
               const displayedVenues = isHidingEmpty 
                 ? entityVenues.filter(v => v.totalGames > 0)
@@ -811,7 +848,11 @@ export default function VenuesDashboard() {
                 All Venue Metrics
               </h2>
               <div className="-mx-4 sm:-mx-6">
-                <DataTable data={venueStats} columns={columns} />
+                <DataTable 
+                  data={venueStats} 
+                  columns={columns} 
+                  onRowClick={handleRowClick}
+                />
               </div>
             </Card>
           </div>

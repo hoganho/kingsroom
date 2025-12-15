@@ -10,7 +10,12 @@ import { DeleteConfirmationModal } from '../../components/venues/DeleteConfirmat
 import * as APITypes from '../../API';
 import { VenueFormData } from '../../types/venue';
 import { PageWrapper } from '../../components/layout/PageWrapper';
-import { ChevronUpIcon, ChevronDownIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { 
+  ChevronUpIcon, 
+  ChevronDownIcon, 
+  PencilIcon, 
+  TrashIcon
+} from '@heroicons/react/24/outline';
 import { formatCurrency } from '../../utils/generalHelpers';
 
 type Venue = APITypes.Venue;
@@ -52,13 +57,11 @@ const VenueManagement = () => {
   // ✅ FIX: Regular functions, not useCallback with unstable dependencies
   const fetchEntities = async () => {
     try {
-      // FIX: Remove <Generic> from call, cast result with 'as' instead
       const response = (await getClient().graphql({
         query: listEntitiesShallow
       })) as GraphQLResult<APITypes.ListEntitiesShallowQuery>;
 
         if ('data' in response && response.data?.listEntities) {
-        // Added ?. after listEntities to handle potential null/undefined
         const entityItems = (response.data.listEntities?.items as Entity[]) || [];
         
         const sortedEntities = entityItems
@@ -71,10 +74,9 @@ const VenueManagement = () => {
     }
   };
 
-const fetchVenues = async () => {
+  const fetchVenues = async () => {
     console.log('[VenueManagement] Fetching venues...');
     try {
-      // FIX: Remove <Generic> from call, cast result with 'as' instead
       const response = (await getClient().graphql({
         query: listVenuesShallow,
         variables: {
@@ -93,7 +95,9 @@ const fetchVenues = async () => {
           console.log('[VenueManagement] Sample venue data:', {
             name: venueItems[0].name,
             fee: venueItems[0].fee,
-            hasFeeProp: 'fee' in venueItems[0]
+            logo: venueItems[0].logo,
+            hasFeeProp: 'fee' in venueItems[0],
+            hasLogoProp: 'logo' in venueItems[0]
           });
         }
 
@@ -219,6 +223,7 @@ const fetchVenues = async () => {
   const handleEditVenue = (venue: Venue) => {
     console.log('[VenueManagement] Editing venue:', venue);
     console.log('[VenueManagement] Venue fee:', venue.fee);
+    console.log('[VenueManagement] Venue logo:', venue.logo);
     setEditingVenue(venue);
     setIsModalOpen(true);
   };
@@ -236,9 +241,10 @@ const fetchVenues = async () => {
   const handleSaveVenue = async (venueData: VenueFormData) => {
     console.log('[VenueManagement] Saving venue data:', venueData);
     console.log('[VenueManagement] Fee value:', venueData.fee, 'Type:', typeof venueData.fee);
+    console.log('[VenueManagement] Logo value:', venueData.logo);
     
     try {
-      const { name, address, city, country, aliases, entityId, fee } = venueData;
+      const { name, address, city, country, aliases, entityId, fee, logo } = venueData;
 
       if (editingVenue) {
         const updateInput = {
@@ -251,6 +257,7 @@ const fetchVenues = async () => {
           aliases: aliases.length > 0 ? aliases : null,
           entityId: entityId || null,
           fee: fee !== null && fee !== undefined ? fee : null,
+          logo: logo || null,
           venueNumber: editingVenue.venueNumber
         };
         
@@ -271,6 +278,7 @@ const fetchVenues = async () => {
           aliases: aliases.length > 0 ? aliases : null,
           entityId: entityId || null,
           fee: fee !== null && fee !== undefined ? fee : null,
+          logo: logo || null,
           venueNumber: nextVenueNumber
         };
         
@@ -350,68 +358,85 @@ const fetchVenues = async () => {
     }
   };
 
+  // Stats
+  const venuesWithLogos = venues.filter(v => v.logo).length;
+  const venuesWithFees = venues.filter(v => v.fee != null && v.fee > 0).length;
+
   return (
     <PageWrapper
       title="Venue Management"
-      maxWidth="7xl"
       actions={
         <button
-          type="button"
           onClick={handleAddVenue}
-          className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
+          className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
           Add Venue
         </button>
       }
     >
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Manage Venues</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Add, edit, and manage venue information, entity association, and per-game fees.
-          </p>
-          {nextVenueNumber && (
-            <p className="mt-1 text-xs text-gray-500">
-              Next venue will be assigned ID: {nextVenueNumber}
-            </p>
-          )}
+      {/* Stats Cards - similar to SocialAccountManagement */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <p className="text-sm font-medium text-gray-500">Total Venues</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{venues.length}</p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <p className="text-sm font-medium text-gray-500">With Logos</p>
+          <p className="text-2xl font-bold text-indigo-600 mt-1">{venuesWithLogos}</p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <p className="text-sm font-medium text-gray-500">With Fees</p>
+          <p className="text-2xl font-bold text-green-600 mt-1">{venuesWithFees}</p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <p className="text-sm font-medium text-gray-500">Entities</p>
+          <p className="text-2xl font-bold text-blue-600 mt-1">{entities.length}</p>
         </div>
       </div>
 
+      {/* Error display */}
       {error && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-600 text-sm">{error}</p>
-          <button 
-            onClick={() => setError(null)} 
-            className="mt-2 text-sm text-red-800 underline hover:no-underline"
-          >
-            Dismiss
-          </button>
+        <div className="mb-4 rounded-md bg-red-50 p-4">
+          <div className="flex">
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">{error}</h3>
+            </div>
+            <div className="ml-auto pl-3">
+              <button
+                onClick={() => setError(null)}
+                className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100"
+              >
+                <span className="sr-only">Dismiss</span>
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Entity Filter Section */}
-      <div className="mt-6 mb-4">
-        <div className="flex items-center justify-between">
+      {/* Filters */}
+      <div className="mb-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <button
-            type="button"
             onClick={() => setShowEntityFilter(!showEntityFilter)}
-            className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-indigo-600"
+            className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-medium shadow-sm ring-1 ring-inset ${
+              selectedEntityIds.size > 0
+                ? 'bg-indigo-50 text-indigo-700 ring-indigo-200'
+                : 'bg-white text-gray-700 ring-gray-300 hover:bg-gray-50'
+            }`}
           >
-            <span>Filter by Entity</span>
-            <ChevronDownIcon 
-              className={`ml-1 h-4 w-4 transition-transform ${showEntityFilter ? 'rotate-180' : ''}`} 
-            />
+            Entity Filter
             {selectedEntityIds.size > 0 && (
-              <span className="ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800">
-                {selectedEntityIds.size} selected
+              <span className="ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                {selectedEntityIds.size}
               </span>
             )}
           </button>
 
           {selectedEntityIds.size > 0 && (
             <button
-              type="button"
               onClick={clearFilters}
               className="text-sm text-gray-500 hover:text-gray-700"
             >
@@ -462,14 +487,14 @@ const fetchVenues = async () => {
                   </div>
                 </th>
 
-                {/* Name - Sortable */}
+                {/* Venue Name with Logo - Combined like SocialAccountTable */}
                 <th
                   scope="col"
                   className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center gap-1">
-                    Name
+                    Venue
                     {renderSortIcon('name')}
                   </div>
                 </th>
@@ -546,9 +571,33 @@ const fetchVenues = async () => {
                       {venue.venueNumber ?? '—'}
                     </td>
 
-                    {/* Name */}
-                    <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                      {venue.name}
+                    {/* Venue Name with Logo - SocialAccountTable style */}
+                    <td className="px-3 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10 relative">
+                          {venue.logo ? (
+                            <img
+                              src={venue.logo}
+                              alt={venue.name}
+                              className="h-10 w-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white font-medium">
+                              {venue.name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {venue.name}
+                          </div>
+                          {venue.address && (
+                            <div className="text-sm text-gray-500 truncate max-w-[200px]">
+                              {venue.address}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </td>
 
                     {/* Entity */}
@@ -574,7 +623,7 @@ const fetchVenues = async () => {
                     <td className="px-3 py-4 text-sm text-gray-500">
                       {venue.aliases && venue.aliases.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
-                          {venue.aliases.filter(Boolean).slice(0, 3).map((alias, idx) => (
+                          {venue.aliases.filter(Boolean).slice(0, 2).map((alias, idx) => (
                             <span
                               key={idx}
                               className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600"
@@ -582,9 +631,9 @@ const fetchVenues = async () => {
                               {alias}
                             </span>
                           ))}
-                          {venue.aliases.filter(Boolean).length > 3 && (
+                          {venue.aliases.filter(Boolean).length > 2 && (
                             <span className="text-xs text-gray-400">
-                              +{venue.aliases.filter(Boolean).length - 3} more
+                              +{venue.aliases.filter(Boolean).length - 2}
                             </span>
                           )}
                         </div>

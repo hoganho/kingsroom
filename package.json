@@ -14,7 +14,7 @@
     "@aws-sdk/client-cloudwatch": "^3.922.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.931.0",
     "@aws-sdk/client-dynamodb": "^3.932.0",
-    "@aws-sdk/client-s3": "^3.930.0",
+    "@aws-sdk/client-s3": "^3.948.0",
     "@aws-sdk/lib-dynamodb": "^3.932.0",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",

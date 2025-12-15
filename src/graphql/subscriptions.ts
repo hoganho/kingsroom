@@ -760,6 +760,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             year
             quarter
             month
+            entityId
             seriesCategory
             holidayType
             status
@@ -990,6 +991,96 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeries {
+        items {
+          id
+          name
+          year
+          quarter
+          month
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesCategory
+          holidayType
+          status
+          startDate
+          endDate
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            seriesCategory
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -2349,6 +2440,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             year
             quarter
             month
+            entityId
             seriesCategory
             holidayType
             status
@@ -2579,6 +2671,96 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeries {
+        items {
+          id
+          name
+          year
+          quarter
+          month
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesCategory
+          holidayType
+          status
+          startDate
+          endDate
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            seriesCategory
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -3954,6 +4136,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             year
             quarter
             month
+            entityId
             seriesCategory
             holidayType
             status
@@ -4184,6 +4367,96 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeries {
+        items {
+          id
+          name
+          year
+          quarter
+          month
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesCategory
+          holidayType
+          status
+          startDate
+          endDate
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            seriesCategory
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -5546,6 +5819,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             year
             quarter
             month
+            entityId
             seriesCategory
             holidayType
             status
@@ -5776,6 +6050,96 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeries {
+        items {
+          id
+          name
+          year
+          quarter
+          month
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesCategory
+          holidayType
+          status
+          startDate
+          endDate
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            seriesCategory
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -7138,6 +7502,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             year
             quarter
             month
+            entityId
             seriesCategory
             holidayType
             status
@@ -7368,6 +7733,96 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeries {
+        items {
+          id
+          name
+          year
+          quarter
+          month
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesCategory
+          holidayType
+          status
+          startDate
+          endDate
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            seriesCategory
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -8727,6 +9182,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             year
             quarter
             month
+            entityId
             seriesCategory
             holidayType
             status
@@ -8957,6 +9413,96 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeries {
+        items {
+          id
+          name
+          year
+          quarter
+          month
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesCategory
+          holidayType
+          status
+          startDate
+          endDate
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            seriesCategory
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -10329,6 +10875,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             year
             quarter
             month
+            entityId
             seriesCategory
             holidayType
             status
@@ -10559,6 +11106,96 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeries {
+        items {
+          id
+          name
+          year
+          quarter
+          month
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesCategory
+          holidayType
+          status
+          startDate
+          endDate
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            seriesCategory
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -11931,6 +12568,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             year
             quarter
             month
+            entityId
             seriesCategory
             holidayType
             status
@@ -12161,6 +12799,96 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeries {
+        items {
+          id
+          name
+          year
+          quarter
+          month
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesCategory
+          holidayType
+          status
+          startDate
+          endDate
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            seriesCategory
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
