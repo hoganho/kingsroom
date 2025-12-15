@@ -1,0 +1,2 @@
+__typename,userAgent,_lastChangedAt,ds_pk,action,createdAt,ds_sk,_version,_ttl,userId,updatedAt,details,id,resource
+UserAuditLog,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",1765757469660,UserAuditLog-sjyzke3u45golhnttlco6bpcua-dev:2025-12-15,VIEW_PAGE,2025-12-15T00:11:09.635Z,00:11:09.660:93214ed4-8c17-46f5-aa06-96e3f9a6cb97:1,1,1765759269,39ce5458-e0d1-7094-efba-ccb13d75c186,2025-12-15T00:11:09.635Z,,93214ed4-8c17-46f5-aa06-96e3f9a6cb97,/debug/database-monitor

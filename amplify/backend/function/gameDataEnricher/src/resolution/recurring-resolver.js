@@ -1,13 +1,50 @@
 /**
  * recurring-resolver.js
+ * ENHANCED: Better disambiguation for multiple games at same venue on same night
+ * 
  * Recurring game detection, matching, and creation logic
- * Adapted from existing recurring-game-resolution.js
+ * Handles:
+ * - Matching incoming games to existing recurring game templates
+ * - Scoring with gameVariant, buyIn, time, and tournamentType
+ * - Ambiguity detection when multiple candidates score similarly
+ * - Field inheritance (guarantee, etc.) from templates
+ * - Auto-creation of new recurring games
  */
 
 const { v4: uuidv4 } = require('uuid');
 const stringSimilarity = require('string-similarity');
 const { getDocClient, getTableName, QueryCommand, PutCommand } = require('../utils/db-client');
 const { DAYS_OF_WEEK, VALIDATION_THRESHOLDS } = require('../utils/constants');
+
+// ===================================================================
+// CONSTANTS
+// ===================================================================
+
+const SCORING_WEIGHTS = {
+  NAME_EXACT: 60,
+  NAME_CONTAINS: 50,
+  NAME_FUZZY_MAX: 60,
+  VARIANT_MATCH: 15,
+  BUYIN_EXACT: 25,
+  BUYIN_CLOSE: 20,      // Within 5%
+  BUYIN_NEAR: 10,       // Within 15%
+  BUYIN_FAR: 5,         // Within 30%
+  BUYIN_MISMATCH: -10,  // More than 30% different
+  TIME_EXACT: 15,       // Within 15 minutes
+  TIME_CLOSE: 12,       // Within 30 minutes
+  TIME_NEAR: 8,         // Within 60 minutes
+  TIME_FAR: 3,          // Within 120 minutes
+  TIME_MISMATCH: -5,    // More than 120 minutes
+  TOURNAMENT_TYPE_MATCH: 10,
+  TOURNAMENT_TYPE_MISMATCH: -15,
+  GUARANTEE_MISMATCH: -5,
+};
+
+const MATCH_THRESHOLDS = {
+  HIGH_CONFIDENCE: VALIDATION_THRESHOLDS?.RECURRING_MATCH_THRESHOLD || 75,
+  MEDIUM_CONFIDENCE: 50,
+  AMBIGUITY_MARGIN: 10,  // If top 2 scores within this margin, flag as ambiguous
+};
 
 // ===================================================================
 // HELPER FUNCTIONS
@@ -29,37 +66,69 @@ const getDayOfWeek = (isoDate) => {
 };
 
 /**
- * Get time as minutes from midnight
+ * Get time as minutes from midnight (UTC)
  */
 const getTimeAsMinutes = (isoDate) => {
-  if (!isoDate) return 0;
-  const d = new Date(isoDate);
-  return d.getUTCHours() * 60 + d.getUTCMinutes();
+  if (!isoDate) return null;
+  try {
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return null;
+    return d.getUTCHours() * 60 + d.getUTCMinutes();
+  } catch (error) {
+    return null;
+  }
 };
 
 /**
- * Format time from ISO date
+ * Format time from ISO date as HH:MM
  */
 const formatTimeFromISO = (isoDate) => {
   if (!isoDate) return null;
-  const d = new Date(isoDate);
-  const hours = d.getUTCHours().toString().padStart(2, '0');
-  const minutes = d.getUTCMinutes().toString().padStart(2, '0');
-  return `${hours}:${minutes}`;
+  try {
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return null;
+    const hours = d.getUTCHours().toString().padStart(2, '0');
+    const minutes = d.getUTCMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
+ * Parse time string (HH:MM) to minutes from midnight
+ */
+const parseTimeToMinutes = (timeStr) => {
+  if (!timeStr) return null;
+  try {
+    const [h, m] = timeStr.split(':').map(Number);
+    if (isNaN(h) || isNaN(m)) return null;
+    return h * 60 + m;
+  } catch (error) {
+    return null;
+  }
 };
 
 /**
  * Normalize game name for comparison
+ * Strips buy-in amounts, guarantee text, tournament types, and special characters
  */
 const normalizeGameName = (name) => {
   if (!name) return '';
   return name.toLowerCase()
-    .replace(/\$[0-9,]+(k)?\s*(gtd|guaranteed)/gi, '')
+    // Remove dollar amounts with optional "k" and "gtd/guaranteed"
+    .replace(/\$[0-9,]+(k)?\s*(gtd|guaranteed)?/gi, '')
+    // Remove standalone gtd/guaranteed
     .replace(/\b(gtd|guaranteed)\b/gi, '')
-    .replace(/\b(weekly|monthly|annual)\b/gi, '')
-    .replace(/\b(rebuy|re-entry|freezeout|entry)\b.*$/gi, '')
+    // Remove frequency words
+    .replace(/\b(weekly|monthly|annual|daily)\b/gi, '')
+    // Remove tournament structure words at end
+    .replace(/\b(rebuy|re-entry|freezeout|knockout|bounty|turbo|hyper|deepstack)\b.*$/gi, '')
+    // Remove leading dollar amount
     .replace(/^\$[0-9]+\s+/, '')
+    // Remove special characters except spaces
     .replace(/[^a-z0-9\s]/g, '')
+    // Collapse multiple spaces
     .replace(/\s+/g, ' ')
     .trim();
 };
@@ -69,6 +138,7 @@ const normalizeGameName = (name) => {
  */
 const generateRecurringDisplayName = (rawName) => {
   const clean = normalizeGameName(rawName);
+  // Title case each word
   return clean.replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
 };
 
@@ -102,64 +172,343 @@ const inheritFieldsFromTemplate = (game, recurringGame, gameUpdates) => {
     console.log(`[RECURRING] Inheriting guarantee $${recurringGame.typicalGuarantee} from template "${recurringGame.name}"`);
   }
   
-  // Future: Add other field inheritance here
-  // Examples:
-  // - typicalBuyIn -> buyIn (if missing)
-  // - startTime validation/correction
-  // - gameVariant confirmation
+  // Inherit buy-in if missing (less common but useful)
+  if ((!game.buyIn || game.buyIn === 0) && recurringGame.typicalBuyIn) {
+    gameUpdates.buyIn = recurringGame.typicalBuyIn;
+    inheritedFields.push('buyIn');
+    console.log(`[RECURRING] Inheriting buy-in $${recurringGame.typicalBuyIn} from template "${recurringGame.name}"`);
+  }
+  
+  // Inherit game variant if missing
+  if (!game.gameVariant && recurringGame.gameVariant) {
+    gameUpdates.gameVariant = recurringGame.gameVariant;
+    inheritedFields.push('gameVariant');
+    console.log(`[RECURRING] Inheriting gameVariant ${recurringGame.gameVariant} from template "${recurringGame.name}"`);
+  }
   
   return inheritedFields;
 };
 
 // ===================================================================
-// SCORING LOGIC
+// SCORING LOGIC (ENHANCED)
 // ===================================================================
 
 /**
  * Calculate match score between game and recurring game candidate
+ * 
+ * ENHANCED: Better disambiguation for multiple games at same venue on same night
+ * - gameVariant as hard filter + bonus
+ * - Tighter buy-in windows with penalties
+ * - Time proximity with stricter windows
+ * - Tournament type matching
+ * - Guarantee sanity check
+ * 
+ * @param {Object} gameInput - The incoming game to match
+ * @param {Object} candidate - The recurring game candidate
+ * @returns {Object} { score, bonuses, penalties, disqualified, reason }
  */
 const calculateMatchScore = (gameInput, candidate) => {
   let score = 0;
+  const bonuses = [];
+  const penalties = [];
   
-  // Hard filters
-  if (candidate.gameType && candidate.gameType !== gameInput.gameType) return 0;
-  if (candidate.gameVariant && gameInput.gameVariant && candidate.gameVariant !== gameInput.gameVariant) return 0;
+  // ==========================================
+  // HARD FILTERS (instant disqualification)
+  // ==========================================
+  
+  // Game type must match (TOURNAMENT vs CASH_GAME)
+  if (candidate.gameType && gameInput.gameType && candidate.gameType !== gameInput.gameType) {
+    return {
+      score: 0,
+      bonuses: [],
+      penalties: [],
+      disqualified: true,
+      reason: 'gameType_mismatch'
+    };
+  }
+  
+  // Game variant MUST match if both are specified
+  // This is critical for venues with multiple games (PLO vs NLHE on same night)
+  if (candidate.gameVariant && gameInput.gameVariant) {
+    if (candidate.gameVariant !== gameInput.gameVariant) {
+      return {
+        score: 0,
+        bonuses: [],
+        penalties: [],
+        disqualified: true,
+        reason: 'gameVariant_mismatch'
+      };
+    }
+    // Exact variant match is a strong signal
+    score += SCORING_WEIGHTS.VARIANT_MATCH;
+    bonuses.push(`variant_match:+${SCORING_WEIGHTS.VARIANT_MATCH}`);
+  }
+  
+  // ==========================================
+  // NAME SIMILARITY (0-60 points)
+  // ==========================================
   
   const inputName = normalizeGameName(gameInput.name);
   const candidateName = normalizeGameName(candidate.name);
   
-  // Name similarity (80 pts)
-  if (inputName.includes(candidateName)) {
-    score += 80;
-  } else {
-    const sim = stringSimilarity.compareTwoStrings(inputName, candidateName);
-    score += (sim * 80);
+  if (inputName && candidateName) {
+    // Check for exact or contains match first
+    if (inputName === candidateName) {
+      score += SCORING_WEIGHTS.NAME_EXACT;
+      bonuses.push(`name_exact:+${SCORING_WEIGHTS.NAME_EXACT}`);
+    } else if (inputName.includes(candidateName) || candidateName.includes(inputName)) {
+      score += SCORING_WEIGHTS.NAME_CONTAINS;
+      bonuses.push(`name_contains:+${SCORING_WEIGHTS.NAME_CONTAINS}`);
+    } else {
+      // Fuzzy match using string-similarity
+      const sim = stringSimilarity.compareTwoStrings(inputName, candidateName);
+      const nameScore = Math.round(sim * SCORING_WEIGHTS.NAME_FUZZY_MAX);
+      score += nameScore;
+      bonuses.push(`name_fuzzy(${(sim * 100).toFixed(0)}%):+${nameScore}`);
+    }
   }
   
-  // Buy-in proximity (20 pts)
-  if (candidate.typicalBuyIn > 0 && gameInput.buyIn > 0) {
-    const diff = Math.abs(candidate.typicalBuyIn - gameInput.buyIn);
-    const pctDiff = diff / ((candidate.typicalBuyIn + gameInput.buyIn) / 2);
+  // ==========================================
+  // BUY-IN MATCH (with penalties for mismatch)
+  // ==========================================
+  
+  const candidateBuyIn = candidate.typicalBuyIn || 0;
+  const gameBuyIn = gameInput.buyIn || 0;
+  
+  if (candidateBuyIn > 0 && gameBuyIn > 0) {
+    const diff = Math.abs(candidateBuyIn - gameBuyIn);
+    const avgBuyIn = (candidateBuyIn + gameBuyIn) / 2;
+    const pctDiff = diff / avgBuyIn;
     
-    if (pctDiff < 0.1) score += 20;
-    else if (pctDiff < 0.25) score += 10;
-  } else if (candidate.typicalBuyIn === 0 && gameInput.buyIn === 0) {
-    score += 20;
-  } else if (!candidate.typicalBuyIn) {
-    score += 10;
+    if (diff === 0) {
+      // Exact match - strongest signal for disambiguation
+      score += SCORING_WEIGHTS.BUYIN_EXACT;
+      bonuses.push(`buyIn_exact:+${SCORING_WEIGHTS.BUYIN_EXACT}`);
+    } else if (pctDiff < 0.05) {
+      // Within 5% (e.g., $50 vs $52)
+      score += SCORING_WEIGHTS.BUYIN_CLOSE;
+      bonuses.push(`buyIn_close(<5%):+${SCORING_WEIGHTS.BUYIN_CLOSE}`);
+    } else if (pctDiff < 0.15) {
+      // Within 15%
+      score += SCORING_WEIGHTS.BUYIN_NEAR;
+      bonuses.push(`buyIn_near(<15%):+${SCORING_WEIGHTS.BUYIN_NEAR}`);
+    } else if (pctDiff < 0.30) {
+      // Within 30% - marginal match
+      score += SCORING_WEIGHTS.BUYIN_FAR;
+      bonuses.push(`buyIn_far(<30%):+${SCORING_WEIGHTS.BUYIN_FAR}`);
+    } else {
+      // Different buy-in level - strong signal this is wrong match
+      score += SCORING_WEIGHTS.BUYIN_MISMATCH; // negative
+      penalties.push(`buyIn_mismatch(${(pctDiff * 100).toFixed(0)}%):${SCORING_WEIGHTS.BUYIN_MISMATCH}`);
+    }
+  } else if (candidateBuyIn === 0 && gameBuyIn === 0) {
+    // Both zero/null - neutral, slight bonus
+    score += 5;
+    bonuses.push('buyIn_both_zero:+5');
+  } else if (candidateBuyIn === 0) {
+    // Template has no buy-in set - can't use for matching
+    // No bonus or penalty
   }
   
-  // Time proximity (10 pts)
-  if (candidate.startTime) {
-    const [h, m] = candidate.startTime.split(':').map(Number);
-    const candidateMinutes = h * 60 + m;
-    const gameMinutes = getTimeAsMinutes(gameInput.gameStartDateTime);
-    const diff = Math.abs(gameMinutes - candidateMinutes);
+  // ==========================================
+  // TIME PROXIMITY (with penalties for mismatch)
+  // ==========================================
+  
+  const candidateMinutes = parseTimeToMinutes(candidate.startTime);
+  const gameMinutes = getTimeAsMinutes(gameInput.gameStartDateTime);
+  
+  if (candidateMinutes !== null && gameMinutes !== null) {
+    const diffMinutes = Math.abs(gameMinutes - candidateMinutes);
     
-    if (diff <= 60) score += 10;
+    if (diffMinutes <= 15) {
+      // Within 15 minutes - very likely same game
+      score += SCORING_WEIGHTS.TIME_EXACT;
+      bonuses.push(`time_exact(${diffMinutes}min):+${SCORING_WEIGHTS.TIME_EXACT}`);
+    } else if (diffMinutes <= 30) {
+      // Within 30 minutes
+      score += SCORING_WEIGHTS.TIME_CLOSE;
+      bonuses.push(`time_close(${diffMinutes}min):+${SCORING_WEIGHTS.TIME_CLOSE}`);
+    } else if (diffMinutes <= 60) {
+      // Within 1 hour
+      score += SCORING_WEIGHTS.TIME_NEAR;
+      bonuses.push(`time_near(${diffMinutes}min):+${SCORING_WEIGHTS.TIME_NEAR}`);
+    } else if (diffMinutes <= 120) {
+      // Within 2 hours - could be different game
+      score += SCORING_WEIGHTS.TIME_FAR;
+      bonuses.push(`time_far(${diffMinutes}min):+${SCORING_WEIGHTS.TIME_FAR}`);
+    } else {
+      // More than 2 hours apart - likely different game
+      score += SCORING_WEIGHTS.TIME_MISMATCH; // negative
+      penalties.push(`time_mismatch(${diffMinutes}min):${SCORING_WEIGHTS.TIME_MISMATCH}`);
+    }
   }
   
-  return score;
+  // ==========================================
+  // TOURNAMENT TYPE BONUS/PENALTY
+  // ==========================================
+  
+  if (candidate.tournamentType && gameInput.tournamentType) {
+    if (candidate.tournamentType === gameInput.tournamentType) {
+      score += SCORING_WEIGHTS.TOURNAMENT_TYPE_MATCH;
+      bonuses.push(`tournamentType_match:+${SCORING_WEIGHTS.TOURNAMENT_TYPE_MATCH}`);
+    } else {
+      // Different tournament types (REBUY vs FREEZEOUT) - penalty
+      score += SCORING_WEIGHTS.TOURNAMENT_TYPE_MISMATCH; // negative
+      penalties.push(`tournamentType_mismatch:${SCORING_WEIGHTS.TOURNAMENT_TYPE_MISMATCH}`);
+    }
+  }
+  
+  // ==========================================
+  // GUARANTEE SANITY CHECK
+  // ==========================================
+  
+  const candidateGtd = candidate.typicalGuarantee || 0;
+  const gameGtd = gameInput.guaranteeAmount || 0;
+  
+  if (candidateGtd > 0 && gameGtd > 0) {
+    const gtdDiff = Math.abs(candidateGtd - gameGtd);
+    const gtdAvg = (candidateGtd + gameGtd) / 2;
+    const gtdPct = gtdDiff / gtdAvg;
+    
+    if (gtdPct > 0.5) {
+      // More than 50% difference in guarantee - suspicious
+      score += SCORING_WEIGHTS.GUARANTEE_MISMATCH; // negative
+      penalties.push(`guarantee_mismatch(${(gtdPct * 100).toFixed(0)}%):${SCORING_WEIGHTS.GUARANTEE_MISMATCH}`);
+    }
+  }
+  
+  // Ensure score is not negative
+  score = Math.max(0, score);
+  
+  return {
+    score,
+    bonuses,
+    penalties,
+    disqualified: false,
+    reason: score >= MATCH_THRESHOLDS.HIGH_CONFIDENCE ? 'high_confidence' 
+          : score >= MATCH_THRESHOLDS.MEDIUM_CONFIDENCE ? 'medium_confidence' 
+          : 'low_confidence'
+  };
+};
+
+/**
+ * Find best match among candidates with ambiguity detection
+ * 
+ * @param {Object} gameInput - The incoming game
+ * @param {Array} candidates - Array of recurring game candidates
+ * @returns {Object} { match, score, isAmbiguous, metadata }
+ */
+const findBestMatch = (gameInput, candidates) => {
+  if (!candidates || candidates.length === 0) {
+    return {
+      match: null,
+      score: 0,
+      isAmbiguous: false,
+      metadata: {
+        reason: 'no_candidates',
+        candidatesScored: 0,
+        topScores: []
+      }
+    };
+  }
+  
+  // Score all candidates
+  const scoredCandidates = candidates.map(candidate => {
+    const result = calculateMatchScore(gameInput, candidate);
+    return {
+      candidate,
+      ...result
+    };
+  });
+  
+  // Filter out disqualified candidates
+  const qualifiedCandidates = scoredCandidates.filter(c => !c.disqualified);
+  
+  if (qualifiedCandidates.length === 0) {
+    // All candidates were disqualified
+    const disqualifyReasons = scoredCandidates.map(c => ({
+      name: c.candidate.name,
+      reason: c.reason
+    }));
+    
+    return {
+      match: null,
+      score: 0,
+      isAmbiguous: false,
+      metadata: {
+        reason: 'all_disqualified',
+        disqualifyReasons,
+        candidatesScored: scoredCandidates.length,
+        topScores: []
+      }
+    };
+  }
+  
+  // Sort by score descending
+  qualifiedCandidates.sort((a, b) => b.score - a.score);
+  
+  const best = qualifiedCandidates[0];
+  const secondBest = qualifiedCandidates[1];
+  
+  // Check for ambiguity - if top 2 scores are very close, flag it
+  const isAmbiguous = secondBest && 
+    (best.score - secondBest.score) < MATCH_THRESHOLDS.AMBIGUITY_MARGIN && 
+    best.score >= MATCH_THRESHOLDS.MEDIUM_CONFIDENCE;
+  
+  if (isAmbiguous) {
+    console.warn(`[RECURRING] ⚠️ AMBIGUOUS MATCH! Top 2 candidates within ${MATCH_THRESHOLDS.AMBIGUITY_MARGIN} points:`, {
+      game: gameInput.name,
+      first: { 
+        name: best.candidate.name, 
+        score: best.score,
+        buyIn: best.candidate.typicalBuyIn,
+        time: best.candidate.startTime
+      },
+      second: { 
+        name: secondBest.candidate.name, 
+        score: secondBest.score,
+        buyIn: secondBest.candidate.typicalBuyIn,
+        time: secondBest.candidate.startTime
+      }
+    });
+  }
+  
+  // Log detailed scoring
+  console.log(`[RECURRING] Match scoring for "${gameInput.name}":`, {
+    bestMatch: best.candidate.name,
+    bestScore: best.score,
+    bonuses: best.bonuses.join(', '),
+    penalties: best.penalties.join(', ') || 'none',
+    isAmbiguous,
+    candidatesScored: qualifiedCandidates.length
+  });
+  
+  // Build top scores for metadata
+  const topScores = qualifiedCandidates.slice(0, 5).map(c => ({
+    id: c.candidate.id,
+    name: c.candidate.name,
+    score: c.score,
+    buyIn: c.candidate.typicalBuyIn,
+    time: c.candidate.startTime,
+    bonuses: c.bonuses,
+    penalties: c.penalties
+  }));
+  
+  return {
+    match: best.score >= MATCH_THRESHOLDS.MEDIUM_CONFIDENCE ? best.candidate : null,
+    score: best.score,
+    isAmbiguous,
+    scoringDetails: {
+      bonuses: best.bonuses,
+      penalties: best.penalties
+    },
+    metadata: {
+      reason: best.reason,
+      candidatesScored: qualifiedCandidates.length,
+      disqualifiedCount: scoredCandidates.length - qualifiedCandidates.length,
+      topScores
+    }
+  };
 };
 
 // ===================================================================
@@ -190,9 +539,10 @@ const createRecurringGame = async (data) => {
     entityId: data.entityId,
     dayOfWeek: data.dayOfWeek,
     'dayOfWeek#name': dayOfWeekNameKey,
-    frequency: 'WEEKLY',
+    frequency: data.frequency || 'WEEKLY',
     gameType: data.gameType || 'TOURNAMENT',
     gameVariant: data.gameVariant || 'NLHE',
+    tournamentType: data.tournamentType || null,
     startTime: data.startTime || null,
     typicalBuyIn: parseFloat(data.typicalBuyIn) || 0,
     typicalGuarantee: parseFloat(data.typicalGuarantee) || 0,
@@ -209,7 +559,7 @@ const createRecurringGame = async (data) => {
       TableName: tableName,
       Item: newGame
     }));
-    console.log(`[RECURRING] Created new game: ${newGame.name} (${newGame.id})`);
+    console.log(`[RECURRING] ✅ Created new recurring game: "${newGame.name}" (${newGame.id})`);
     return newGame;
   } catch (error) {
     console.error('[RECURRING] Error creating game:', error);
@@ -239,7 +589,11 @@ const getRecurringGamesByVenueAndDay = async (venueId, dayOfWeek) => {
         ':active': true
       }
     }));
-    return result.Items || [];
+    
+    const items = result.Items || [];
+    console.log(`[RECURRING] Found ${items.length} candidate(s) for ${dayOfWeek} at venue ${venueId.substring(0, 8)}...`);
+    
+    return items;
   } catch (error) {
     console.error('[RECURRING] Error querying by venue and day:', error);
     return [];
@@ -253,6 +607,8 @@ const getRecurringGamesByVenueAndDay = async (venueId, dayOfWeek) => {
 /**
  * Resolve recurring game assignment for a game
  * 
+ * ENHANCED: Uses improved scoring with ambiguity detection
+ * 
  * @param {Object} params
  * @param {Object} params.game - Game data
  * @param {string} params.entityId - Entity ID
@@ -262,9 +618,14 @@ const getRecurringGamesByVenueAndDay = async (venueId, dayOfWeek) => {
 const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }) => {
   const venueId = game.venueId;
   
-  // Validation
+  console.log(`[RECURRING] Resolving assignment for: "${game.name}"`);
+  
+  // ==========================================
+  // VALIDATION
+  // ==========================================
+  
   if (!venueId) {
-    console.log('[RECURRING] No venueId provided, skipping resolution');
+    console.log('[RECURRING] ⏭️ Skipping: No venueId provided');
     return {
       gameUpdates: {
         recurringGameAssignmentStatus: 'NOT_RECURRING',
@@ -280,7 +641,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
   }
   
   if (!game.gameStartDateTime) {
-    console.log('[RECURRING] No gameStartDateTime provided, skipping resolution');
+    console.log('[RECURRING] ⏭️ Skipping: No gameStartDateTime provided');
     return {
       gameUpdates: {
         recurringGameAssignmentStatus: 'NOT_RECURRING',
@@ -296,7 +657,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
   }
   
   if (!game.gameVariant) {
-    console.log('[RECURRING] No gameVariant provided, skipping resolution');
+    console.log('[RECURRING] ⏭️ Skipping: No gameVariant provided');
     return {
       gameUpdates: {
         recurringGameAssignmentStatus: 'NOT_RECURRING',
@@ -313,6 +674,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
   
   // Series games are typically not recurring
   if (game.isSeries) {
+    console.log('[RECURRING] ⏭️ Skipping: Game is part of a series');
     return {
       gameUpdates: {
         recurringGameAssignmentStatus: 'NOT_RECURRING',
@@ -330,7 +692,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
   const dayOfWeek = getDayOfWeek(game.gameStartDateTime);
   
   if (!dayOfWeek) {
-    console.warn('[RECURRING] Could not determine day of week from:', game.gameStartDateTime);
+    console.warn('[RECURRING] ⚠️ Could not determine day of week from:', game.gameStartDateTime);
     return {
       gameUpdates: {
         recurringGameAssignmentStatus: 'NOT_RECURRING',
@@ -345,82 +707,92 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
     };
   }
   
+  // ==========================================
+  // QUERY AND MATCH
+  // ==========================================
+  
   try {
     // Query candidates
     const candidates = await getRecurringGamesByVenueAndDay(venueId, dayOfWeek);
     
-    console.log(`[RECURRING] Found ${candidates.length} candidates for ${dayOfWeek} at venue ${venueId.substring(0, 8)}...`);
-    
-    // Score and match
+    // Find best match using enhanced scoring
     if (candidates.length > 0) {
-      let bestMatch = null;
-      let bestScore = -1;
-      
-      for (const candidate of candidates) {
-        const score = calculateMatchScore(game, candidate);
-        if (score > bestScore) {
-          bestScore = score;
-          bestMatch = candidate;
-        }
-      }
+      const matchResult = findBestMatch(game, candidates);
       
       // High confidence match
-      if (bestMatch && bestScore >= VALIDATION_THRESHOLDS.RECURRING_MATCH_THRESHOLD) {
+      if (matchResult.match && matchResult.score >= MATCH_THRESHOLDS.HIGH_CONFIDENCE) {
+        const confidence = Math.min(matchResult.score / 100, 0.99);
+        
         const gameUpdates = {
-          recurringGameId: bestMatch.id,
-          recurringGameAssignmentStatus: 'AUTO_ASSIGNED',
-          recurringGameAssignmentConfidence: Math.min(bestScore / 100, 0.99)
+          recurringGameId: matchResult.match.id,
+          recurringGameAssignmentStatus: matchResult.isAmbiguous ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED',
+          recurringGameAssignmentConfidence: confidence
         };
         
         // Inherit fields from template (including guarantee)
-        const inheritedFields = inheritFieldsFromTemplate(game, bestMatch, gameUpdates);
+        const inheritedFields = inheritFieldsFromTemplate(game, matchResult.match, gameUpdates);
+        
+        console.log(`[RECURRING] ✅ High confidence match: "${matchResult.match.name}" (score: ${matchResult.score})`);
         
         return {
           gameUpdates,
           metadata: {
             status: 'MATCHED_EXISTING',
-            confidence: Math.min(bestScore / 100, 0.99),
-            matchedRecurringGameId: bestMatch.id,
-            matchedRecurringGameName: bestMatch.name,
+            confidence,
+            matchedRecurringGameId: matchResult.match.id,
+            matchedRecurringGameName: matchResult.match.name,
             wasCreated: false,
             inheritedFields,
-            matchReason: 'score_match',
-            templateGuarantee: bestMatch.typicalGuarantee || null
+            matchReason: matchResult.isAmbiguous ? 'high_score_ambiguous' : 'score_match',
+            isAmbiguous: matchResult.isAmbiguous,
+            templateGuarantee: matchResult.match.typicalGuarantee || null,
+            scoringDetails: matchResult.scoringDetails,
+            topCandidates: matchResult.metadata.topScores
           }
         };
       }
       
       // Medium confidence - pending review
-      // Still inherit guarantee since the match is likely correct
-      if (bestMatch && bestScore >= 50) {
+      if (matchResult.match && matchResult.score >= MATCH_THRESHOLDS.MEDIUM_CONFIDENCE) {
+        const confidence = matchResult.score / 100;
+        
         const gameUpdates = {
-          recurringGameId: bestMatch.id,
+          recurringGameId: matchResult.match.id,
           recurringGameAssignmentStatus: 'PENDING_ASSIGNMENT',
-          recurringGameAssignmentConfidence: bestScore / 100
+          recurringGameAssignmentConfidence: confidence
         };
         
-        // Inherit fields from template (including guarantee)
-        // Even at medium confidence, we want the guarantee for financial calculations
-        // The assignment may be pending review but the guarantee is still valuable data
-        const inheritedFields = inheritFieldsFromTemplate(game, bestMatch, gameUpdates);
+        // Inherit fields from template even at medium confidence
+        const inheritedFields = inheritFieldsFromTemplate(game, matchResult.match, gameUpdates);
+        
+        console.log(`[RECURRING] ⚠️ Medium confidence match: "${matchResult.match.name}" (score: ${matchResult.score})`);
         
         return {
           gameUpdates,
           metadata: {
             status: 'MATCHED_EXISTING',
-            confidence: bestScore / 100,
-            matchedRecurringGameId: bestMatch.id,
-            matchedRecurringGameName: bestMatch.name,
+            confidence,
+            matchedRecurringGameId: matchResult.match.id,
+            matchedRecurringGameName: matchResult.match.name,
             wasCreated: false,
             inheritedFields,
             matchReason: 'low_confidence_match',
-            templateGuarantee: bestMatch.typicalGuarantee || null
+            isAmbiguous: matchResult.isAmbiguous,
+            templateGuarantee: matchResult.match.typicalGuarantee || null,
+            scoringDetails: matchResult.scoringDetails,
+            topCandidates: matchResult.metadata.topScores
           }
         };
       }
+      
+      // No match above threshold
+      console.log(`[RECURRING] ❌ No match above threshold (best score: ${matchResult.score})`);
     }
     
-    // Auto-create new recurring game
+    // ==========================================
+    // AUTO-CREATE NEW RECURRING GAME
+    // ==========================================
+    
     if (autoCreate && game.name) {
       const displayName = generateRecurringDisplayName(game.name);
       
@@ -433,10 +805,13 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
             dayOfWeek: dayOfWeek,
             gameType: game.gameType,
             gameVariant: game.gameVariant,
+            tournamentType: game.tournamentType,
             typicalBuyIn: game.buyIn,
             typicalGuarantee: game.guaranteeAmount,
             startTime: formatTimeFromISO(game.gameStartDateTime)
           });
+          
+          console.log(`[RECURRING] ✅ Auto-created new recurring game: "${newGame.name}"`);
           
           return {
             gameUpdates: {
@@ -457,12 +832,17 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
             }
           };
         } catch (err) {
-          console.error('[RECURRING] Failed to auto-create:', err);
+          console.error('[RECURRING] Failed to auto-create recurring game:', err);
         }
       }
     }
     
-    // No match found
+    // ==========================================
+    // NO MATCH FOUND
+    // ==========================================
+    
+    console.log(`[RECURRING] ⏭️ No recurring game match for "${game.name}"`);
+    
     return {
       gameUpdates: {
         recurringGameAssignmentStatus: 'NOT_RECURRING',
@@ -473,7 +853,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
         confidence: 0,
         wasCreated: false,
         inheritedFields: [],
-        matchReason: 'no_match'
+        matchReason: candidates.length > 0 ? 'no_match_above_threshold' : 'no_candidates'
       }
     };
     
@@ -489,7 +869,8 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
         confidence: 0,
         wasCreated: false,
         inheritedFields: [],
-        matchReason: 'error'
+        matchReason: 'error',
+        error: error.message
       }
     };
   }
@@ -500,9 +881,25 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
 // ===================================================================
 
 module.exports = {
+  // Main resolver
   resolveRecurringAssignment,
-  normalizeGameName,
+  
+  // Scoring functions (exported for testing)
   calculateMatchScore,
+  findBestMatch,
+  
+  // Helpers
+  normalizeGameName,
   getDayOfWeek,
-  inheritFieldsFromTemplate
+  getTimeAsMinutes,
+  formatTimeFromISO,
+  inheritFieldsFromTemplate,
+  
+  // Database operations
+  createRecurringGame,
+  getRecurringGamesByVenueAndDay,
+  
+  // Constants (for external configuration)
+  SCORING_WEIGHTS,
+  MATCH_THRESHOLDS
 };

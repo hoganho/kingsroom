@@ -3764,6 +3764,15 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "tournamentType": {
+                    "name": "tournamentType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "TournamentType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "typicalBuyIn": {
                     "name": "typicalBuyIn",
                     "isArray": false,
@@ -18955,5 +18964,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "61473fedbb11f684a605968b3855530a"
+    "version": "0feac0607df48b417237bbc3b8b099dd"
 };

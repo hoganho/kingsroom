@@ -2,11 +2,87 @@
  * financials.js
  * Financial metric calculations for games
  * 
+ * ENHANCED: Smart guarantee inference from prizepoolPaid
+ * 
  * SIMPLIFIED MODEL:
  *   Revenue: rakeRevenue = rake × entriesForRake
  *   Cost: guaranteeOverlayCost = max(0, guarantee - playerContributions)
  *   Profit: gameProfit = rakeRevenue - guaranteeOverlayCost
+ * 
+ * GUARANTEE INFERENCE:
+ *   If prizepoolPaid > prizepoolPlayerContributions (even by $1),
+ *   the venue clearly paid an overlay to meet a guarantee.
+ *   We infer the guarantee from the actual payout.
+ * 
+ * Example:
+ *   - 8 players × ($150 buy-in - $25 rake) = $1,000 player contributions
+ *   - prizepoolPaid = $6,000 (scraped from results)
+ *   - Discrepancy = $5,000 → obvious overlay → guarantee was $6,000
  */
+
+// ===================================================================
+// CONSTANTS
+// ===================================================================
+
+// Minimum discrepancy to infer a guarantee (accounts for minor rounding only)
+// Any meaningful difference indicates a guarantee
+const GUARANTEE_INFERENCE_MIN_DISCREPANCY = 1; // $1 minimum
+
+// ===================================================================
+// GUARANTEE INFERENCE
+// ===================================================================
+
+/**
+ * Infer guarantee from actual payout data
+ * 
+ * If prizepoolPaid exceeds player contributions at all,
+ * the venue clearly paid an overlay to meet a guarantee.
+ * 
+ * @param {Object} gameData - Game data including prizepoolPaid
+ * @param {number} prizepoolPlayerContributions - Calculated player contributions
+ * @returns {Object|null} Inferred guarantee data or null
+ */
+const inferGuaranteeFromPayout = (gameData, prizepoolPlayerContributions) => {
+  const { prizepoolPaid, hasGuarantee, guaranteeAmount } = gameData;
+  
+  // Skip if already has valid guarantee data
+  if (hasGuarantee === true && guaranteeAmount > 0) {
+    return null;
+  }
+  
+  // Skip if no prizepoolPaid data
+  if (!prizepoolPaid || prizepoolPaid <= 0) {
+    return null;
+  }
+  
+  // Skip if no player contributions to compare
+  if (!prizepoolPlayerContributions || prizepoolPlayerContributions <= 0) {
+    return null;
+  }
+  
+  // Calculate discrepancy
+  const discrepancy = prizepoolPaid - prizepoolPlayerContributions;
+  
+  // If payout exceeds contributions by any meaningful amount, there was a guarantee
+  if (discrepancy >= GUARANTEE_INFERENCE_MIN_DISCREPANCY) {
+    console.log(`[FINANCIALS] 💡 Inferring guarantee from prizepoolPaid:`, {
+      prizepoolPaid,
+      prizepoolPlayerContributions,
+      discrepancy,
+      inferredGuarantee: prizepoolPaid,
+      reason: 'Payout exceeds player contributions - venue paid overlay'
+    });
+    
+    return {
+      hasGuarantee: true,
+      guaranteeAmount: prizepoolPaid, // Guarantee was at least the amount paid
+      inferredOverlay: discrepancy,
+      wasInferred: true
+    };
+  }
+  
+  return null;
+};
 
 // ===================================================================
 // MAIN CALCULATION FUNCTION
@@ -14,6 +90,8 @@
 
 /**
  * Calculate all financial metrics for a game
+ * 
+ * ENHANCED: Now infers guarantee from prizepoolPaid if not explicitly set
  * 
  * @param {Object} gameData - Game data object with financial inputs
  * @returns {Object} Calculated financial fields
@@ -26,8 +104,9 @@ const calculateFinancials = (gameData) => {
     totalRebuys = 0,
     totalAddons = 0,
     totalEntries: inputTotalEntries,
-    guaranteeAmount = 0,
-    hasGuarantee
+    guaranteeAmount: inputGuaranteeAmount = 0,
+    hasGuarantee: inputHasGuarantee,
+    prizepoolPaid
   } = gameData;
   
   const result = {};
@@ -70,6 +149,29 @@ const calculateFinancials = (gameData) => {
   // Total player contributions to prizepool
   const prizepoolPlayerContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
   result.prizepoolPlayerContributions = prizepoolPlayerContributions;
+  
+  // ===================================================================
+  // GUARANTEE - Explicit or Inferred from Payout
+  // ===================================================================
+  
+  let hasGuarantee = inputHasGuarantee;
+  let guaranteeAmount = inputGuaranteeAmount;
+  let guaranteeWasInferred = false;
+  
+  // Try to infer guarantee from prizepoolPaid if not explicitly set
+  const inferred = inferGuaranteeFromPayout(gameData, prizepoolPlayerContributions);
+  
+  if (inferred) {
+    hasGuarantee = inferred.hasGuarantee;
+    guaranteeAmount = inferred.guaranteeAmount;
+    guaranteeWasInferred = true;
+    
+    // Include inference metadata in result
+    result.guaranteeWasInferred = true;
+    result.inferredGuaranteeAmount = inferred.guaranteeAmount;
+    result.hasGuarantee = true;
+    result.guaranteeAmount = inferred.guaranteeAmount;
+  }
   
   // ===================================================================
   // GUARANTEE IMPACT
@@ -116,6 +218,22 @@ const calculateFinancials = (gameData) => {
   // Calculate prizepool if not set
   if (!gameData.prizepoolCalculated && prizepoolPlayerContributions > 0) {
     result.prizepoolCalculated = prizepoolPlayerContributions + prizepoolAddedValue;
+  }
+  
+  // ===================================================================
+  // LOGGING
+  // ===================================================================
+  
+  if (guaranteeWasInferred) {
+    console.log(`[FINANCIALS] ⚠️ Guarantee INFERRED from payout data:`, {
+      prizepoolPaid,
+      prizepoolPlayerContributions,
+      inferredGuarantee: guaranteeAmount,
+      guaranteeOverlayCost,
+      rakeRevenue,
+      gameProfit,
+      isUnderwater: gameProfit < 0
+    });
   }
   
   return result;
@@ -167,7 +285,6 @@ const calculateGameProfit = (rakeRevenue, guaranteeOverlayCost) => {
  * Check if financial calculations would produce valid results
  */
 const canCalculateFinancials = (gameData) => {
-  // Need at least buy-in to calculate anything meaningful
   return gameData.buyIn !== undefined && gameData.buyIn !== null && gameData.buyIn > 0;
 };
 
@@ -177,15 +294,51 @@ const canCalculateFinancials = (gameData) => {
 const getFinancialSummary = (gameData) => {
   const financials = calculateFinancials(gameData);
   
+  const hasGuarantee = financials.hasGuarantee ?? gameData.hasGuarantee;
+  const guaranteeAmount = financials.guaranteeAmount ?? gameData.guaranteeAmount;
+  
   return {
     ...financials,
     profitMargin: financials.rakeRevenue > 0 
       ? (financials.gameProfit / financials.rakeRevenue * 100).toFixed(1) + '%'
       : 'N/A',
-    guaranteeMet: gameData.hasGuarantee && gameData.guaranteeAmount > 0
+    guaranteeMet: hasGuarantee && guaranteeAmount > 0
       ? financials.guaranteeOverlayCost === 0
       : null,
     isUnderwater: financials.gameProfit < 0
+  };
+};
+
+/**
+ * Detect if game likely had a guarantee based on payout data
+ */
+const detectLikelyGuarantee = (gameData) => {
+  const prizepoolPlayerContributions = calculatePrizepoolPlayerContributions(
+    gameData.buyIn,
+    gameData.rake,
+    gameData.totalInitialEntries,
+    gameData.totalRebuys,
+    gameData.totalAddons
+  );
+  
+  const inferred = inferGuaranteeFromPayout(gameData, prizepoolPlayerContributions);
+  
+  if (inferred) {
+    return {
+      likelyHadGuarantee: true,
+      inferredAmount: inferred.guaranteeAmount,
+      inferredOverlay: inferred.inferredOverlay,
+      prizepoolPaid: gameData.prizepoolPaid,
+      prizepoolPlayerContributions,
+      discrepancy: gameData.prizepoolPaid - prizepoolPlayerContributions
+    };
+  }
+  
+  return {
+    likelyHadGuarantee: false,
+    prizepoolPaid: gameData.prizepoolPaid,
+    prizepoolPlayerContributions,
+    discrepancy: (gameData.prizepoolPaid || 0) - prizepoolPlayerContributions
   };
 };
 
@@ -200,5 +353,8 @@ module.exports = {
   calculateGuaranteeOverlayCost,
   calculateGameProfit,
   canCalculateFinancials,
-  getFinancialSummary
+  getFinancialSummary,
+  inferGuaranteeFromPayout,
+  detectLikelyGuarantee,
+  GUARANTEE_INFERENCE_MIN_DISCREPANCY
 };

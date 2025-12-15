@@ -8,9 +8,15 @@ export interface RecurringGame {
     id: string;
     name: string;
     venueId: string;
-    dayOfWeek?: string;
-    gameVariant?: string;
-    typicalBuyIn?: number;
+    entityId?: string | null;
+    dayOfWeek?: string | null;
+    frequency?: string | null;
+    gameType?: string | null;
+    gameVariant?: string | null;
+    typicalBuyIn?: number | null;
+    typicalGuarantee?: number | null;  // ✅ ADDED: Was missing!
+    startTime?: string | null;
+    isActive?: boolean | null;
 }
 
 interface RecurringGameEditorProps {
@@ -40,10 +46,10 @@ export const RecurringGameEditor: React.FC<RecurringGameEditorProps> = ({
     // Handle selection change
     const handleSelection = useCallback((id: string | null) => {
         if (!id) {
-            // Unassign
+            // Unassign - clear recurring game fields but DON'T clear guarantee
+            // (user may have manually set it)
             updateMultipleFields({
                 recurringGameId: null,
-                // Cast to any to bypass strict type checking if enum isn't fully propagated yet
                 recurringGameAssignmentStatus: 'NOT_RECURRING' as any,
                 recurringGameAssignmentConfidence: 0,
                 wasScheduledInstance: false,
@@ -54,22 +60,43 @@ export const RecurringGameEditor: React.FC<RecurringGameEditorProps> = ({
 
         const game = availableRecurringGames.find(g => g.id === id);
         if (game) {
-            // Manual Assignment
-            updateMultipleFields({
+            // Build update payload
+            const updates: Record<string, any> = {
                 recurringGameId: game.id,
                 recurringGameAssignmentStatus: 'MANUALLY_ASSIGNED' as any,
                 recurringGameAssignmentConfidence: 1.0,
                 wasScheduledInstance: true,
-                // Auto-populate deviation notes if buy-ins differ
-                deviationNotes: (game.typicalBuyIn && editedData.buyIn && game.typicalBuyIn !== editedData.buyIn)
-                    ? `Manual: Buy-in ${editedData.buyIn} vs Typical ${game.typicalBuyIn}`
-                    : null
-            });
+            };
+
+            // ✅ ADDED: Inherit typicalGuarantee if game doesn't have one set
+            if (game.typicalGuarantee && game.typicalGuarantee > 0) {
+                const currentGuarantee = editedData.guaranteeAmount || 0;
+                if (currentGuarantee === 0) {
+                    updates.guaranteeAmount = game.typicalGuarantee;
+                    updates.hasGuarantee = true;
+                    console.log(`[RecurringGameEditor] Inheriting guarantee $${game.typicalGuarantee} from "${game.name}"`);
+                }
+            }
+
+            // Auto-populate deviation notes if buy-ins differ
+            if (game.typicalBuyIn && editedData.buyIn && game.typicalBuyIn !== editedData.buyIn) {
+                updates.deviationNotes = `Manual: Buy-in $${editedData.buyIn} vs Typical $${game.typicalBuyIn}`;
+            }
+
+            updateMultipleFields(updates);
+            
+            // ✅ ADDED: Trigger financial recalculation after inheritance
+            // The updateMultipleFields will update state, and useGameDataEditor
+            // should auto-calculate derived fields. If not, we can call recalculateDerived
+            // but that requires a slight delay due to React batching.
+            setTimeout(() => {
+                editor.recalculateDerived();
+            }, 0);
         }
-    }, [availableRecurringGames, editedData.buyIn, updateMultipleFields]);
+    }, [availableRecurringGames, editedData.buyIn, editedData.guaranteeAmount, updateMultipleFields, editor]);
 
     // Helper to format currency
-    const fmt = (val?: number) => val ? `$${val}` : '-';
+    const fmt = (val?: number | null) => val ? `$${val.toLocaleString()}` : '-';
 
     return (
         <div className="space-y-4">
@@ -82,20 +109,52 @@ export const RecurringGameEditor: React.FC<RecurringGameEditorProps> = ({
                             <span className={`text-xs px-2 py-0.5 rounded ${
                                 editedData.recurringGameAssignmentStatus === 'AUTO_ASSIGNED' ? 'bg-blue-100 text-blue-700' :
                                 editedData.recurringGameAssignmentStatus === 'MANUALLY_ASSIGNED' ? 'bg-green-100 text-green-700' :
+                                editedData.recurringGameAssignmentStatus === 'PENDING_ASSIGNMENT' ? 'bg-yellow-100 text-yellow-700' :
                                 'bg-gray-100 text-gray-600'
                             }`}>
-                                {String(editedData.recurringGameAssignmentStatus).replace('_', ' ')}
+                                {String(editedData.recurringGameAssignmentStatus).replace(/_/g, ' ')}
                             </span>
                         )}
                     </h3>
                 </div>
 
-                {/* Info Banner if Auto-Assigned */}
-                {editedData.recurringGameAssignmentStatus === 'AUTO_ASSIGNED' && selectedRecurringGame && (
-                    <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                        <div className="font-medium">💡 Auto-Matched: {selectedRecurringGame.name}</div>
+                {/* Info Banner if Auto-Assigned or Pending */}
+                {(editedData.recurringGameAssignmentStatus === 'AUTO_ASSIGNED' || 
+                  editedData.recurringGameAssignmentStatus === 'PENDING_ASSIGNMENT') && selectedRecurringGame && (
+                    <div className={`mb-3 p-3 rounded-lg text-sm ${
+                        editedData.recurringGameAssignmentStatus === 'AUTO_ASSIGNED' 
+                            ? 'bg-blue-50 border border-blue-200 text-blue-800'
+                            : 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+                    }`}>
+                        <div className="font-medium">
+                            💡 {editedData.recurringGameAssignmentStatus === 'AUTO_ASSIGNED' ? 'Auto-Matched' : 'Pending Review'}: {selectedRecurringGame.name}
+                        </div>
+                        <div className="text-xs opacity-75 mt-1 flex flex-wrap gap-3">
+                            <span>Confidence: {Math.round((editedData.recurringGameAssignmentConfidence || 0) * 100)}%</span>
+                            {selectedRecurringGame.typicalBuyIn && (
+                                <span>Typical Buy-in: {fmt(selectedRecurringGame.typicalBuyIn)}</span>
+                            )}
+                            {selectedRecurringGame.typicalGuarantee && (
+                                <span>Typical Guarantee: {fmt(selectedRecurringGame.typicalGuarantee)}</span>
+                            )}
+                        </div>
+                        {/* Show inheritance info */}
+                        {selectedRecurringGame.typicalGuarantee && editedData.guaranteeAmount === selectedRecurringGame.typicalGuarantee && (
+                            <div className="text-xs mt-2 text-green-700 bg-green-50 px-2 py-1 rounded inline-block">
+                                ✓ Guarantee inherited from template
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Warning if recurringGameId is set but no matching game found */}
+                {editedData.recurringGameId && !selectedRecurringGame && (
+                    <div className="mb-3 p-3 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-800">
+                        <div className="font-medium">⚠️ Recurring Game Not Found</div>
                         <div className="text-xs opacity-75 mt-1">
-                            Confidence: {Math.round((editedData.recurringGameAssignmentConfidence || 0) * 100)}%
+                            ID: {editedData.recurringGameId}
+                            <br />
+                            The linked recurring game may not be loaded or may have been deleted.
                         </div>
                     </div>
                 )}
@@ -115,14 +174,22 @@ export const RecurringGameEditor: React.FC<RecurringGameEditorProps> = ({
                             {filteredRecurringGames.map(rg => (
                                 <option key={rg.id} value={rg.id}>
                                     {rg.name} ({rg.dayOfWeek || '?'}) - {fmt(rg.typicalBuyIn)}
+                                    {rg.typicalGuarantee ? ` / ${fmt(rg.typicalGuarantee)} GTD` : ''}
                                 </option>
                             ))}
                         </select>
+                        {/* Show count of available options */}
+                        <div className="text-xs text-gray-400 mt-1">
+                            {filteredRecurringGames.length} recurring games available
+                            {venueId && filteredRecurringGames.length < availableRecurringGames.length && (
+                                <span> (filtered by venue)</span>
+                            )}
+                        </div>
                     </div>
 
                     {/* Metadata Fields (Only show if assigned) */}
                     {editedData.recurringGameId && (
-                        <div className="grid grid-cols-2 gap-3 pt-2">
+                        <div className="grid grid-cols-2 gap-3 pt-2 border-t">
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">
                                     Deviation Notes
@@ -130,7 +197,7 @@ export const RecurringGameEditor: React.FC<RecurringGameEditorProps> = ({
                                 <input
                                     type="text"
                                     value={editedData.deviationNotes || ''}
-                                    onChange={(e) => editor.updateField('deviationNotes', e.target.value)}
+                                    onChange={(e) => editor.updateField('deviationNotes', e.target.value || null)}
                                     placeholder="e.g. Special Holiday Edition"
                                     className="w-full px-2 py-1 text-sm border rounded"
                                 />

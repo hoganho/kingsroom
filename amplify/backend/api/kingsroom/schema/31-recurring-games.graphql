@@ -38,6 +38,7 @@ type RecurringGame
   # === GAME CHARACTERISTICS ===
   gameType: GameType! @default(value: "TOURNAMENT")
   gameVariant: GameVariant!
+  tournamentType: TournamentType
   
   # Typical values
   typicalBuyIn: Float

@@ -52,7 +52,7 @@
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-79797436595334484352-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-5741394950496873334c-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -107,11 +107,11 @@
         },
         "gameDataEnricher": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/gameDataEnricher-53486130573756776957-build.zip"
+          "s3Key": "amplify-builds/gameDataEnricher-433465574d5243666639-build.zip"
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/gameFinancialsProcessor-702f6644684e7841716a-build.zip"
+          "s3Key": "amplify-builds/gameFinancialsProcessor-396d6235554b59413233-build.zip"
         }
       },
       "api": {

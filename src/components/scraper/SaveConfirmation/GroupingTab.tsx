@@ -1,60 +1,23 @@
 // src/components/scraper/SaveConfirmation/GroupingTab.tsx
-// Grouping tab for multi-day tournament consolidation
+// Simplified grouping tab for multi-day tournament consolidation
+// Event structure fields are now ONLY in SeriesDetailsEditor (no duplicates)
 
 import React from 'react';
-import type { GameData } from '../../../types/game';
-import type { UseGameDataEditorReturn } from '../../../hooks/useGameDataEditor';
+import { useSaveConfirmationContext } from './SaveConfirmationContext';
 import { ConsolidationPreview } from './ConsolidationPreview';
-
-// ===================================================================
-// TYPES
-// ===================================================================
-
-interface ConsolidationInfo {
-  willConsolidate: boolean;
-  parentName: string | null;
-}
-
-interface DetectedPattern {
-  isMultiDay: boolean;
-  detectionSource: string;
-  dayNumber?: number | null;
-  flightLetter?: string | null;
-  eventNumber?: number | null;
-  finalDay?: boolean;
-}
-
-interface ConsolidationPreviewData {
-  detectedPattern?: DetectedPattern;
-}
-
-interface GroupingTabProps {
-  editor: UseGameDataEditorReturn;
-  editedData: GameData;
-  willConsolidate: boolean;
-  consolidationInfo: ConsolidationInfo;
-  setConsolidationInfo: (info: ConsolidationInfo) => void;
-  consolidationPreview: ConsolidationPreviewData | null;
-  onApplyDetectedPattern: () => void;
-}
 
 // ===================================================================
 // COMPONENT
 // ===================================================================
 
-export const GroupingTab: React.FC<GroupingTabProps> = ({
-  editor,
-  editedData,
-  willConsolidate,
-  setConsolidationInfo,
-  consolidationPreview,
-  onApplyDetectedPattern,
-}) => {
-  const { updateField } = editor;
-
+export const GroupingTab: React.FC = () => {
+  const { editor, consolidation, actions } = useSaveConfirmationContext();
+  const { editedData } = editor;
+  
   return (
     <div className="p-4 space-y-4">
-      <div className="text-sm text-gray-600 mb-4">
+      {/* Header */}
+      <div className="text-sm text-gray-600">
         <p>
           This preview shows how your tournament will be grouped with
           related flights when saved. Multi-day tournaments are
@@ -62,21 +25,16 @@ export const GroupingTab: React.FC<GroupingTabProps> = ({
         </p>
       </div>
       
-      {/* Main Consolidation Preview Component */}
+      {/* Main Consolidation Preview */}
       <ConsolidationPreview
         gameData={editedData}
         showSiblingDetails={true}
-        onConsolidationChange={(willConsolidateVal: boolean, parentName: string | null) => {
-          setConsolidationInfo({ 
-            willConsolidate: willConsolidateVal, 
-            parentName 
-          });
-        }}
+        onConsolidationChange={() => {}} // Handled by context
       />
       
       {/* Auto-apply detected patterns button */}
-      {consolidationPreview?.detectedPattern?.isMultiDay && 
-       consolidationPreview.detectedPattern.detectionSource === 'namePattern' && (
+      {consolidation.preview?.detectedPattern?.isMultiDay && 
+       consolidation.preview.detectedPattern.detectionSource === 'namePattern' && (
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -87,14 +45,41 @@ export const GroupingTab: React.FC<GroupingTabProps> = ({
                 We detected day/flight info from the name. 
                 Apply it to the fields for better accuracy?
               </div>
+              {consolidation.preview.detectedPattern.parsedDayNumber && (
+                <div className="text-xs text-blue-600 mt-1">
+                  Day: {consolidation.preview.detectedPattern.parsedDayNumber}
+                  {consolidation.preview.detectedPattern.parsedFlightLetter && 
+                    `, Flight: ${consolidation.preview.detectedPattern.parsedFlightLetter}`}
+                  {consolidation.preview.detectedPattern.isFinalDay && ' (Final Day)'}
+                </div>
+              )}
             </div>
             <button
-              onClick={onApplyDetectedPattern}
+              type="button"
+              onClick={actions.applyDetectedPattern}
               className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Apply
             </button>
           </div>
+        </div>
+      )}
+      
+      {/* Current Structure Summary */}
+      {(editedData.eventNumber || editedData.dayNumber || editedData.flightLetter || editedData.finalDay) && (
+        <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+          <div className="text-sm font-medium text-green-800 mb-1">
+            Current Event Structure
+          </div>
+          <div className="text-sm text-green-700">
+            {editedData.eventNumber && <span>Event #{editedData.eventNumber} </span>}
+            {editedData.dayNumber && <span>• Day {editedData.dayNumber} </span>}
+            {editedData.flightLetter && <span>• Flight {editedData.flightLetter} </span>}
+            {editedData.finalDay && <span>• 🏁 Final Day</span>}
+          </div>
+          <p className="text-xs text-green-600 mt-2">
+            Edit these fields in the <strong>Links → Series</strong> section.
+          </p>
         </div>
       )}
       
@@ -105,7 +90,7 @@ export const GroupingTab: React.FC<GroupingTabProps> = ({
         </h4>
         <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
           <li>
-            Set <strong>Tournament Series</strong> and <strong>Event Number</strong> for 
+            Set <strong>Tournament Series</strong> and <strong>Event Number</strong> in the Links tab for 
             most reliable grouping
           </li>
           <li>
@@ -123,58 +108,15 @@ export const GroupingTab: React.FC<GroupingTabProps> = ({
         </ul>
       </div>
       
-      {/* Quick Series Fields Editor */}
-      {willConsolidate && (
-        <div className="border rounded-lg p-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">
-            📋 Quick Series Fields
-          </h4>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-gray-700">Event Number</label>
-              <input
-                type="number"
-                value={editedData.eventNumber || ''}
-                onChange={(e) => updateField('eventNumber', e.target.value ? parseInt(e.target.value) : null)}
-                placeholder="e.g., 8"
-                className="w-full px-2 py-1 text-sm border rounded mt-1"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-700">Day Number</label>
-              <input
-                type="number"
-                value={editedData.dayNumber || ''}
-                onChange={(e) => updateField('dayNumber', e.target.value ? parseInt(e.target.value) : null)}
-                placeholder="e.g., 1, 2"
-                className="w-full px-2 py-1 text-sm border rounded mt-1"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-700">Flight Letter</label>
-              <select
-                value={editedData.flightLetter || ''}
-                onChange={(e) => updateField('flightLetter', e.target.value || null)}
-                className="w-full px-2 py-1 text-sm border rounded mt-1"
-              >
-                <option value="">-- None --</option>
-                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map(letter => (
-                  <option key={letter} value={letter}>{letter}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-center gap-2 pt-5">
-              <input
-                type="checkbox"
-                id="finalDayGrouping"
-                checked={editedData.finalDay || false}
-                onChange={(e) => updateField('finalDay', e.target.checked)}
-                className="h-4 w-4"
-              />
-              <label htmlFor="finalDayGrouping" className="text-sm">
-                🏁 Final Day
-              </label>
-            </div>
+      {/* Not consolidating message */}
+      {!consolidation.willConsolidate && !consolidation.isLoading && (
+        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+          <div className="text-gray-400 text-3xl mb-2">📄</div>
+          <div className="text-sm text-gray-600">
+            This tournament will be saved as a standalone game.
+          </div>
+          <div className="text-xs text-gray-500 mt-1">
+            No multi-day pattern detected. Add event structure info if this is part of a multi-day tournament.
           </div>
         </div>
       )}

@@ -1,0 +1,2 @@
+__typename,_lastChangedAt,tournamentSeriesTitleId,endDate,status,numberOfEvents,createdAt,name,_version,updatedAt,venueId,startDate,year,seriesCategory,id
+TournamentSeries,1765591147231,b68d1a08-afaa-49ec-97f1-f51e56c2b956,2023-02-25T19:00:00.000Z,LIVE,6,2025-12-12T11:32:27.758Z,Signature Series 2023,1,2025-12-13T01:59:07.231Z,fd4f7fb1-67fd-4398-b4b4-d85722256d45,2023-02-23T17:00:00.000Z,2023,REGULAR,1b74da3b-e36e-455b-a3c0-1099e411d52c

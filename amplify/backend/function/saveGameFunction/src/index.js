@@ -276,7 +276,7 @@ const updateScrapeURL = async (sourceUrl, gameId, gameStatus, doNotScrape = fals
         // Check if exists
         const existingResult = await monitoredDdbDocClient.send(new QueryCommand({
             TableName: scrapeURLTable,
-            IndexName: 'byUrl',
+            IndexName: 'byURL',
             KeyConditionExpression: '#url = :url',
             ExpressionAttributeNames: { '#url': 'url' },
             ExpressionAttributeValues: { ':url': sourceUrl }
@@ -364,7 +364,10 @@ const queueForPDP = async (game, input) => {
                 players: input.players.allPlayers,
                 gameStatus: game.gameStatus,
                 gameStartDateTime: game.gameStartDateTime
-            })
+            }),
+            // ADD THESE TWO LINES FOR FIFO QUEUE:
+            MessageGroupId: game.id,  // Group by gameId for ordering
+            MessageDeduplicationId: `${game.id}-${Date.now()}`  // Prevent duplicates
         }));
         console.log(`[SAVE-GAME] Queued ${input.players.allPlayers.length} players for processing`);
     } catch (error) {
@@ -607,11 +610,6 @@ exports.handler = async (event) => {
     
     // Handle both direct invocation and GraphQL resolver invocation
     const input = event.arguments?.input || event.input || event;
-    
-    // Set entity ID for monitoring
-    if (input.source?.entityId) {
-        monitoring.setEntityId(input.source.entityId);
-    }
 
     try {
         // Validate input structure

@@ -3985,6 +3985,7 @@ type EagerRecurringGame = {
   readonly frequency: GameFrequency | keyof typeof GameFrequency;
   readonly gameType: GameType | keyof typeof GameType;
   readonly gameVariant: GameVariant | keyof typeof GameVariant;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly typicalBuyIn?: number | null;
   readonly typicalRake?: number | null;
   readonly typicalStartingStack?: number | null;
@@ -4038,6 +4039,7 @@ type LazyRecurringGame = {
   readonly frequency: GameFrequency | keyof typeof GameFrequency;
   readonly gameType: GameType | keyof typeof GameType;
   readonly gameVariant: GameVariant | keyof typeof GameVariant;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly typicalBuyIn?: number | null;
   readonly typicalRake?: number | null;
   readonly typicalStartingStack?: number | null;

@@ -886,6 +886,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -1060,6 +1061,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           frequency
           gameType
           gameVariant
+          tournamentType
           typicalBuyIn
           typicalRake
           typicalStartingStack
@@ -1331,6 +1333,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -2472,6 +2475,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -2646,6 +2650,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           frequency
           gameType
           gameVariant
+          tournamentType
           typicalBuyIn
           typicalRake
           typicalStartingStack
@@ -2917,6 +2922,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -4074,6 +4080,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -4248,6 +4255,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           frequency
           gameType
           gameVariant
+          tournamentType
           typicalBuyIn
           typicalRake
           typicalStartingStack
@@ -4519,6 +4527,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -5663,6 +5672,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -5837,6 +5847,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           frequency
           gameType
           gameVariant
+          tournamentType
           typicalBuyIn
           typicalRake
           typicalStartingStack
@@ -6108,6 +6119,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -7252,6 +7264,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -7426,6 +7439,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           frequency
           gameType
           gameVariant
+          tournamentType
           typicalBuyIn
           typicalRake
           typicalStartingStack
@@ -7697,6 +7711,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -8838,6 +8853,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -9012,6 +9028,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           frequency
           gameType
           gameVariant
+          tournamentType
           typicalBuyIn
           typicalRake
           typicalStartingStack
@@ -9283,6 +9300,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -10437,6 +10455,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -10611,6 +10630,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           frequency
           gameType
           gameVariant
+          tournamentType
           typicalBuyIn
           typicalRake
           typicalStartingStack
@@ -10882,6 +10902,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -12036,6 +12057,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack
@@ -12210,6 +12232,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           frequency
           gameType
           gameVariant
+          tournamentType
           typicalBuyIn
           typicalRake
           typicalStartingStack
@@ -12481,6 +12504,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             frequency
             gameType
             gameVariant
+            tournamentType
             typicalBuyIn
             typicalRake
             typicalStartingStack

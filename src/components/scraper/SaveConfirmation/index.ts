@@ -1,22 +1,23 @@
 // src/components/scraper/SaveConfirmation/index.ts
-// Barrel export for SaveConfirmation components
+// REFACTORED: Updated exports for new tab structure
 
 // Main modal
-export { SaveConfirmationModal } from '../SaveConfirmationModal';
+export { SaveConfirmationModal, default } from '../SaveConfirmationModal';
 
-// Tab components
-export { QuickEditTab } from './QuickEditTab';
-export { RelationshipsTab } from './RelationshipsTab';
+// Context
+export { SaveConfirmationProvider, useSaveConfirmationContext } from './SaveConfirmationContext';
+export type { SaveConfirmationContextValue, VenueOption, RecurringGame } from './SaveConfirmationContext';
+
+// New tabs
+export { DataTab } from './DataTab';
+export { LinksTab } from './LinksTab';
 export { GroupingTab } from './GroupingTab';
-export { AdvancedTab } from './AdvancedTab';
-export { ValidationTab } from './ValidationTab';
-export { DiffTab } from './DiffTab';
-export { DebugTab } from './DebugTab';
+export { ReviewTab } from './ReviewTab';
 
-// Existing components
-export { QuickDataEditor } from './QuickDataEditor';
-export { SeriesDetailsEditor } from './SeriesDetailsEditor';
-export { ConsolidationPreview } from './ConsolidationPreview';
+// Kept components
 export { EditableField } from './EditableField';
+export { FieldSection, FIELD_SECTIONS } from './FieldSection';
+export type { FieldSectionConfig } from './FieldSection';
 export { RecurringGameEditor } from './RecurringGameEditor';
-export { TemplatePicker } from './TemplatePicker';
+export { ConsolidationPreview, ConsolidationBadge } from './ConsolidationPreview';
+export { SeriesDetailsEditor } from './SeriesDetailsEditor';

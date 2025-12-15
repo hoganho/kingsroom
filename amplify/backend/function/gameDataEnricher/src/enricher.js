@@ -2,6 +2,8 @@
  * enricher.js
  * Main enrichment orchestration
  * 
+ * PATCHED: Enhanced financial calculations with guarantee inference
+ * 
  * This is the core of the enricher - it coordinates:
  * 1. Validation
  * 2. Data completion
@@ -9,7 +11,7 @@
  * 4. Series resolution
  * 5. Recurring game resolution
  * 6. Query key computation
- * 7. Financial calculations
+ * 7. Financial calculations (with guarantee inference from prizepoolPaid)
  * 8. (Optional) Save to database via saveGameFunction
  */
 
@@ -60,6 +62,7 @@ const enrichGameData = async (input) => {
       venueResolution: null,
       queryKeysGenerated: false,
       financialsCalculated: false,
+      guaranteeWasInferred: false,  // NEW: Track if guarantee was inferred
       fieldsCompleted: [],
       processingTimeMs: 0
     },
@@ -173,33 +176,33 @@ const enrichGameData = async (input) => {
     // 5. RECURRING GAME RESOLUTION
     // =========================================================
     if (!options.skipRecurringResolution && enrichedGame.venueId && !enrichedGame.isSeries) {
-    console.log('[ENRICHER] Step 5: Recurring game resolution');
-    
-    const recurringResult = await resolveRecurringAssignment({
+      console.log('[ENRICHER] Step 5: Recurring game resolution');
+      
+      const recurringResult = await resolveRecurringAssignment({
         game: enrichedGame,
         entityId,
         autoCreate: options.autoCreateRecurring === true
-    });
-    
-    // Apply recurring updates to game
-    enrichedGame = { ...enrichedGame, ...recurringResult.gameUpdates };
-    result.enrichmentMetadata.recurringResolution = recurringResult.metadata;
-    
-    // Track inherited fields (e.g., guaranteeAmount from typicalGuarantee)
-    if (recurringResult.metadata.inheritedFields && recurringResult.metadata.inheritedFields.length > 0) {
+      });
+      
+      // Apply recurring updates to game
+      enrichedGame = { ...enrichedGame, ...recurringResult.gameUpdates };
+      result.enrichmentMetadata.recurringResolution = recurringResult.metadata;
+      
+      // Track inherited fields (e.g., guaranteeAmount from typicalGuarantee)
+      if (recurringResult.metadata.inheritedFields && recurringResult.metadata.inheritedFields.length > 0) {
         result.enrichmentMetadata.fieldsCompleted.push(...recurringResult.metadata.inheritedFields);
         console.log(`[ENRICHER] Inherited ${recurringResult.metadata.inheritedFields.length} fields from recurring template: ${recurringResult.metadata.inheritedFields.join(', ')}`);
-    }
+      }
     } else {
-    console.log('[ENRICHER] Step 5: Recurring game resolution SKIPPED');
-    result.enrichmentMetadata.recurringResolution = {
+      console.log('[ENRICHER] Step 5: Recurring game resolution SKIPPED');
+      result.enrichmentMetadata.recurringResolution = {
         status: 'SKIPPED',
         confidence: 0,
         wasCreated: false,
         inheritedFields: [],
         matchReason: options.skipRecurringResolution ? 'option_disabled' : 
                     enrichedGame.isSeries ? 'is_series' : 'no_venue'
-    };
+      };
     }
     
     // =========================================================
@@ -216,14 +219,75 @@ const enrichGameData = async (input) => {
     }
     
     // =========================================================
-    // 7. FINANCIAL CALCULATIONS
+    // 7. FINANCIAL CALCULATIONS (ENHANCED)
     // =========================================================
     if (!options.skipFinancials) {
       console.log('[ENRICHER] Step 7: Financial calculations');
       
+      // Store original guarantee state for comparison
+      const hadGuaranteeBefore = enrichedGame.hasGuarantee === true && enrichedGame.guaranteeAmount > 0;
+      
+      // Calculate financials (includes guarantee inference from prizepoolPaid)
       const financials = calculateFinancials(enrichedGame);
-      enrichedGame = { ...enrichedGame, ...financials };
+      
+      // Apply all financial fields
+      enrichedGame.totalEntries = financials.totalEntries ?? enrichedGame.totalEntries;
+      enrichedGame.rakeRevenue = financials.rakeRevenue;
+      enrichedGame.totalBuyInsCollected = financials.totalBuyInsCollected;
+      enrichedGame.prizepoolPlayerContributions = financials.prizepoolPlayerContributions;
+      enrichedGame.guaranteeOverlayCost = financials.guaranteeOverlayCost;
+      enrichedGame.prizepoolAddedValue = financials.prizepoolAddedValue;
+      enrichedGame.prizepoolSurplus = financials.prizepoolSurplus;
+      enrichedGame.gameProfit = financials.gameProfit;
+      
+      // Apply calculated prizepool if returned
+      if (financials.prizepoolCalculated !== undefined) {
+        enrichedGame.prizepoolCalculated = financials.prizepoolCalculated;
+      }
+      
+      // =====================================================
+      // CRITICAL: Apply inferred guarantee back to game data
+      // =====================================================
+      if (financials.guaranteeWasInferred) {
+        console.log(`[ENRICHER] 💡 Guarantee INFERRED from prizepoolPaid:`, {
+          prizepoolPaid: enrichedGame.prizepoolPaid,
+          prizepoolPlayerContributions: financials.prizepoolPlayerContributions,
+          inferredGuarantee: financials.guaranteeAmount,
+          inferredOverlay: financials.guaranteeOverlayCost,
+          gameProfit: financials.gameProfit
+        });
+        
+        // Apply inferred guarantee to game data
+        enrichedGame.hasGuarantee = true;
+        enrichedGame.guaranteeAmount = financials.guaranteeAmount;
+        
+        // Track in metadata
+        result.enrichmentMetadata.guaranteeWasInferred = true;
+        result.enrichmentMetadata.fieldsCompleted.push('hasGuarantee', 'guaranteeAmount');
+        
+        // Add warning so user knows this was inferred
+        result.validation.warnings.push({
+          field: 'guaranteeAmount',
+          message: `Guarantee of $${financials.guaranteeAmount} inferred from prizepoolPaid ($${enrichedGame.prizepoolPaid}) exceeding player contributions ($${financials.prizepoolPlayerContributions}). Overlay cost: $${financials.guaranteeOverlayCost}`,
+          code: 'GUARANTEE_INFERRED'
+        });
+      }
+      
       result.enrichmentMetadata.financialsCalculated = true;
+      
+      // Log financial summary
+      console.log('[ENRICHER] Financial summary:', {
+        hasGuarantee: enrichedGame.hasGuarantee,
+        guaranteeAmount: enrichedGame.guaranteeAmount,
+        prizepoolPlayerContributions: enrichedGame.prizepoolPlayerContributions,
+        prizepoolPaid: enrichedGame.prizepoolPaid,
+        guaranteeOverlayCost: enrichedGame.guaranteeOverlayCost,
+        rakeRevenue: enrichedGame.rakeRevenue,
+        gameProfit: enrichedGame.gameProfit,
+        isUnderwater: enrichedGame.gameProfit < 0,
+        wasInferred: financials.guaranteeWasInferred || false
+      });
+      
     } else {
       console.log('[ENRICHER] Step 7: Financial calculations SKIPPED');
     }
