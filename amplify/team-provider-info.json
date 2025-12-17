@@ -19,7 +19,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/autoScraper-4964732b546161333672-build.zip"
+          "s3Key": "amplify-builds/autoScraper-4d4a5a64476d6d713974-build.zip"
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -52,11 +52,11 @@
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-5741394950496873334c-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-6b704a524b4456776d52-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/scraperManagement-75456f77436d52535534-build.zip"
+          "s3Key": "amplify-builds/scraperManagement-4d4e61597a6a484c454a-build.zip"
         },
         "socialFetcher": {
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
@@ -77,7 +77,7 @@
           "scraperS3Bucket": "pokerpro-scraper-storage",
           "saveGameFunctionName": "saveGameFunction-dev",
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-4b6b53795a7778385976-build.zip"
+          "s3Key": "amplify-builds/webScraperFunction-4752477670556d304d58-build.zip"
         },
         "userManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
@@ -107,7 +107,7 @@
         },
         "gameDataEnricher": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",
-          "s3Key": "amplify-builds/gameDataEnricher-433465574d5243666639-build.zip"
+          "s3Key": "amplify-builds/gameDataEnricher-456d6d4a4a747336424f-build.zip"
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-dev-b2d2b-deployment",

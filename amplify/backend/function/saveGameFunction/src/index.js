@@ -358,16 +358,26 @@ const queueForPDP = async (game, input) => {
         await sqsClient.send(new SendMessageCommand({
             QueueUrl: PLAYER_PROCESSOR_QUEUE_URL,
             MessageBody: JSON.stringify({
-                gameId: game.id,
-                entityId: input.source.entityId,
-                venueId: game.venueId,
-                players: input.players.allPlayers,
-                gameStatus: game.gameStatus,
-                gameStartDateTime: game.gameStartDateTime
+                game: {
+                    id: game.id,
+                    entityId: input.source.entityId,
+                    venueId: game.venueId,
+                    gameStatus: game.gameStatus,
+                    gameStartDateTime: game.gameStartDateTime,
+                    gameEndDateTime: game.gameEndDateTime,
+                    buyIn: game.buyIn,
+                    totalUniquePlayers: game.totalUniquePlayers,
+                    venueAssignmentStatus: game.venueAssignmentStatus
+                },
+                players: {
+                    allPlayers: input.players.allPlayers,
+                    totalUniquePlayers: input.players.totalUniquePlayers || input.players.allPlayers.length,
+                    hasCompleteResults: input.players.hasCompleteResults,
+                    totalPrizesPaid: input.players.totalPrizesPaid || 0
+                }
             }),
-            // ADD THESE TWO LINES FOR FIFO QUEUE:
-            MessageGroupId: game.id,  // Group by gameId for ordering
-            MessageDeduplicationId: `${game.id}-${Date.now()}`  // Prevent duplicates
+            MessageGroupId: game.id,
+            MessageDeduplicationId: `${game.id}-${Date.now()}`
         }));
         console.log(`[SAVE-GAME] Queued ${input.players.allPlayers.length} players for processing`);
     } catch (error) {

@@ -16,16 +16,16 @@ export {
 
 export { 
   useScraperModals,
-} from './useModalResolver';
-
-export { 
-  useScrapeOrchestrator,
-  type OrchestratorConfig,
-  type OrchestratorCallbacks,
-  type OrchestratorResult,
+  useSaveConfirmationModal,
+  useErrorModal,
+  useScrapeOptionsModal,
+  useModalResolver,
+  type SaveConfirmationModalState,
   type SaveConfirmationResult,
+  type ErrorModalState,
+  type ScrapeOptionsModalState,
   type ScrapeOptionsResult,
-} from './useScrapeOrchestrator';
+} from './useModalResolver';
 
 // Phase 4: State machine
 export {
@@ -37,3 +37,10 @@ export {
   type TransitionResult,
   type StateMachineHelpers,
 } from './useResultStateMachine';
+
+// NEW: Single-ID processing hook (replaces useScrapeOrchestrator for single mode)
+export {
+  useSingleScrape,
+  type UseSingleScrapeConfig,
+  type UseSingleScrapeResult,
+} from './useSingleScrape';

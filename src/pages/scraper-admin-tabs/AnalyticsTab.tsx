@@ -1,9 +1,8 @@
 // src/pages/scraper-admin-tabs/AnalyticsTab.tsx
-// Analytics Tab - Simplified version without CloudWatch integration
+// Analytics Tab - UPDATED with graceful error handling
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import type { GraphQLResult } from '@aws-amplify/api-graphql';
 import {
     Activity, AlertTriangle,
     Clock, XCircle, BarChart,
@@ -21,7 +20,7 @@ import {
 import type { ScraperJob, ScrapeURL } from '../../API';
 
 // ===================================================================
-// Analytics Tab Component (CloudWatch removed)
+// Analytics Tab Component
 // ===================================================================
 
 export const AnalyticsTab: React.FC = () => {
@@ -29,6 +28,7 @@ export const AnalyticsTab: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [timeRange, setTimeRange] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
+    const [backendUnavailable, setBackendUnavailable] = useState(false);
     
     // Metrics Data
     const [systemMetrics, setSystemMetrics] = useState<any>(null);
@@ -37,69 +37,112 @@ export const AnalyticsTab: React.FC = () => {
     const [recommendations, setRecommendations] = useState<string[]>([]);
     
     // ===================================================================
-    // Load Analytics Data (without CloudWatch)
+    // Load Analytics Data
     // ===================================================================
     
     const loadAnalytics = useCallback(async () => {
         setLoading(true);
         
         try {
-            // Load recent jobs for analysis
-            const jobsResponse = await client.graphql({
-                query: getScraperJobsReport,
-                variables: { limit: 100 }
-            }) as any;
+            let jobs: ScraperJob[] = [];
+            let problematicUrls: ScrapeURL[] = [];
             
-            const jobs = (jobsResponse as GraphQLResult<any>).data.getScraperJobsReport.items;
+            // Load recent jobs for analysis
+            try {
+                const jobsResponse = await client.graphql({
+                    query: getScraperJobsReport,
+                    variables: { limit: 100 }
+                }) as any;
+                
+                if (jobsResponse.data?.getScraperJobsReport?.items) {
+                    jobs = jobsResponse.data.getScraperJobsReport.items;
+                    setBackendUnavailable(false);
+                } else if (jobsResponse.errors?.length) {
+                    const isLambdaError = jobsResponse.errors.some((e: any) => 
+                        e.errorType?.includes('Lambda') || e.message?.includes('Lambda')
+                    );
+                    if (isLambdaError) {
+                        setBackendUnavailable(true);
+                    }
+                    console.warn('Jobs query errors:', jobsResponse.errors);
+                }
+            } catch (jobsError: any) {
+                console.warn('Could not load jobs:', jobsError);
+                if (jobsError?.message?.includes('Lambda')) {
+                    setBackendUnavailable(true);
+                }
+            }
             
             // Load problematic URLs
-            const urlsResponse = await client.graphql({
-                query: searchScrapeURLs,
-                variables: { limit: 100 }
-            }) as any;
+            try {
+                const urlsResponse = await client.graphql({
+                    query: searchScrapeURLs,
+                    variables: { limit: 100 }
+                }) as any;
+                
+                if (urlsResponse.data?.searchScrapeURLs?.items) {
+                    problematicUrls = urlsResponse.data.searchScrapeURLs.items;
+                }
+            } catch (urlsError) {
+                console.warn('Could not load URLs:', urlsError);
+            }
             
-            const problematicUrls = (urlsResponse as GraphQLResult<any>).data.searchScrapeURLs?.items || [];
-            
-            // Analyze the data
-            const analysis = analyzeScraperPerformance(jobs, problematicUrls);
-            
-            // Calculate simple metrics
-            const metrics = {
-                totalJobs: jobs.length,
-                failureRate: ErrorAnalyzer.generateErrorReport(jobs).errorRate,
-                activeURLs: problematicUrls.filter((u: ScrapeURL) => u.status === 'ACTIVE').length,
-                successRate: analysis.trends.successRateTrend,
-                averageProcessingTime: jobs.length > 0 ? jobs.reduce((acc: number, j: ScraperJob) => acc + (j.averageScrapingTime || 0), 0) / jobs.length : 0,
-                peakHour: ScraperAnalytics.identifyPeakTimes(jobs).peakHour,
-            };
-            
-            setSystemMetrics(metrics);
-            
-            // Get performance trends
-            const trends = analysis.trends;
-            const performance = [
-                { label: 'Job Volume Trend', value: trends.volumeTrend, trend: 'stable', change: 0 },
-                { label: 'Success Rate Trend', value: trends.successRateTrend, trend: 'stable', change: 0 },
-                { label: 'Performance Trend', value: trends.performanceTrend, trend: 'stable', change: 0 },
-            ];
-            setPerformanceData(performance);
-            
-            // Identify issues
-            const issues = Object.entries(analysis.urlHealth.recommendations).map(([url, recs]) => ({
-                title: `Issue with ${url.substring(0, 50)}...`,
-                description: recs.join(', '),
-                severity: 'medium',
-                affectedURLs: 1,
-            }));
-            setIssuesList(issues);
-            
-            // Generate recommendations
-            const recs = [
-                ...analysis.jobMetrics.recommendations,
-                ...analysis.errorAnalysis.recommendations,
-            ];
-            // Get unique recommendations
-            setRecommendations([...new Set(recs)]);
+            // If we have any data, analyze it
+            if (jobs.length > 0 || problematicUrls.length > 0) {
+                // Analyze the data
+                const analysis = analyzeScraperPerformance(jobs, problematicUrls);
+                
+                // Calculate simple metrics
+                const metrics = {
+                    totalJobs: jobs.length,
+                    failureRate: jobs.length > 0 ? ErrorAnalyzer.generateErrorReport(jobs).errorRate : 0,
+                    activeURLs: problematicUrls.filter((u: ScrapeURL) => u.status === 'ACTIVE').length,
+                    successRate: analysis.trends.successRateTrend,
+                    averageProcessingTime: jobs.length > 0 ? jobs.reduce((acc: number, j: ScraperJob) => acc + (j.averageScrapingTime || 0), 0) / jobs.length : 0,
+                    peakHour: jobs.length > 0 ? ScraperAnalytics.identifyPeakTimes(jobs).peakHour : 'N/A',
+                };
+                
+                setSystemMetrics(metrics);
+                
+                // Get performance trends
+                const trends = analysis.trends;
+                const performance = [
+                    { label: 'Job Volume Trend', value: trends.volumeTrend, trend: 'stable', change: 0 },
+                    { label: 'Success Rate Trend', value: trends.successRateTrend, trend: 'stable', change: 0 },
+                    { label: 'Performance Trend', value: trends.performanceTrend, trend: 'stable', change: 0 },
+                ];
+                setPerformanceData(performance);
+                
+                // Identify issues
+                const issues = Object.entries(analysis.urlHealth.recommendations).map(([url, recs]) => ({
+                    title: `Issue with ${url.substring(0, 50)}...`,
+                    description: (recs as string[]).join(', '),
+                    severity: 'medium',
+                    affectedURLs: 1,
+                }));
+                setIssuesList(issues);
+                
+                // Generate recommendations
+                const recs = [
+                    ...analysis.jobMetrics.recommendations,
+                    ...analysis.errorAnalysis.recommendations,
+                ];
+                // Get unique recommendations
+                setRecommendations([...new Set(recs)]);
+            } else {
+                // No data available
+                setSystemMetrics({
+                    totalJobs: 0,
+                    failureRate: 0,
+                    activeURLs: 0,
+                    successRate: 'N/A',
+                    averageProcessingTime: 0,
+                    peakHour: 'N/A',
+                });
+                setPerformanceData([]);
+                setIssuesList([]);
+                setRecommendations([]);
+            }
             
         } catch (error) {
             console.error('Failed to load analytics:', error);
@@ -175,21 +218,22 @@ export const AnalyticsTab: React.FC = () => {
             <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
-                        <p className="text-gray-600 mt-1">Performance metrics from database analysis</p>
+                        <h2 className="text-xl font-semibold">Scraper Analytics</h2>
+                        <p className="text-sm text-gray-500">Performance insights and recommendations</p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex items-center gap-2">
                         <button
                             onClick={handleRefresh}
                             disabled={refreshing}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded disabled:opacity-50"
+                            title="Refresh"
                         >
-                            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
                         </button>
                         <button
                             onClick={exportReport}
-                            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            disabled={!systemMetrics}
+                            className="flex items-center gap-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm disabled:opacity-50"
                         >
                             <Download className="h-4 w-4" />
                             Export
@@ -197,21 +241,20 @@ export const AnalyticsTab: React.FC = () => {
                     </div>
                 </div>
                 
-                {/* CloudWatch Notice */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <div className="flex items-start gap-3">
-                        <Info className="h-5 w-5 text-blue-600 mt-0.5" />
-                        <div className="flex-1">
-                            <p className="text-sm font-medium text-blue-900">Performance Mode Active</p>
-                            <p className="text-sm text-blue-700 mt-1">
-                                CloudWatch tracking has been temporarily disabled to improve application performance. 
-                                Analytics shown here are based on database queries only.
+                {/* Backend Unavailable Warning */}
+                {backendUnavailable && (
+                    <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
+                        <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-sm text-yellow-800 font-medium">Limited Data Available</p>
+                            <p className="text-xs text-yellow-700">
+                                The scraperManagement Lambda may not be deployed. Analytics are based on available local data.
                             </p>
                         </div>
                     </div>
-                </div>
+                )}
                 
-                {/* Time Range Selector */}
+                {/* Time Range Filter */}
                 <div className="flex gap-2">
                     {(['1h', '24h', '7d', '30d'] as const).map((range) => (
                         <button
@@ -240,7 +283,7 @@ export const AnalyticsTab: React.FC = () => {
                         <div>
                             <p className="text-sm text-gray-600">Total Jobs</p>
                             <p className="text-2xl font-bold">
-                                {systemMetrics?.totalJobs || 0}
+                                {systemMetrics?.totalJobs ?? '-'}
                             </p>
                         </div>
                         <Activity className="h-8 w-8 text-blue-500" />
@@ -253,7 +296,7 @@ export const AnalyticsTab: React.FC = () => {
                         <div>
                             <p className="text-sm text-gray-600">Avg Processing Time</p>
                             <p className="text-2xl font-bold">
-                                {systemMetrics?.averageProcessingTime?.toFixed(2) || 0}s
+                                {systemMetrics?.averageProcessingTime?.toFixed(2) ?? '-'}s
                             </p>
                         </div>
                         <Clock className="h-8 w-8 text-indigo-500" />
@@ -266,7 +309,7 @@ export const AnalyticsTab: React.FC = () => {
                         <div>
                             <p className="text-sm text-gray-600">Failure Rate</p>
                             <p className="text-2xl font-bold">
-                                {systemMetrics?.failureRate?.toFixed(1) || 0}%
+                                {systemMetrics?.failureRate?.toFixed(1) ?? '-'}%
                             </p>
                         </div>
                         <XCircle className="h-8 w-8 text-red-500" />
@@ -279,7 +322,7 @@ export const AnalyticsTab: React.FC = () => {
                         <div>
                             <p className="text-sm text-gray-600">Problematic Active URLs</p>
                             <p className="text-2xl font-bold">
-                                {systemMetrics?.activeURLs || 0}
+                                {systemMetrics?.activeURLs ?? '-'}
                             </p>
                         </div>
                         <Eye className="h-8 w-8 text-purple-500" />
@@ -375,6 +418,17 @@ export const AnalyticsTab: React.FC = () => {
                 </div>
             )}
             
+            {/* No Data State */}
+            {systemMetrics?.totalJobs === 0 && !backendUnavailable && (
+                <div className="bg-gray-50 p-8 rounded-lg border border-gray-200 text-center">
+                    <Info className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-700">No Analytics Data Yet</h3>
+                    <p className="text-sm text-gray-500 mt-2">
+                        Start some scraping jobs to generate analytics data.
+                    </p>
+                </div>
+            )}
+            
             {/* AWS CloudWatch Note */}
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-2">
@@ -388,3 +442,5 @@ export const AnalyticsTab: React.FC = () => {
         </div>
     );
 };
+
+export default AnalyticsTab;

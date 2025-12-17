@@ -1,5 +1,5 @@
 // src/pages/scraper-admin-tabs/OverviewTab.tsx
-// REFACTORED: Added Coverage Info block to the top
+// REFACTORED: Fixed field names to match Lambda response, added graceful error handling
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -10,6 +10,7 @@ import {
     CheckCircle,
     Database,
     TrendingUp,
+    AlertTriangle,
 } from 'lucide-react';
 // Import from auto-generated queries
 import { 
@@ -23,29 +24,26 @@ import { useEntity } from '../../contexts/EntityContext';
 import { useGameIdTracking } from '../../hooks/useGameIdTracking';
 
 
-// Define ScraperMetrics if not in API types
+// ScraperMetrics matches GraphQL ScraperMetrics type
 interface ScraperMetrics {
+    timeRange: string;
+    entityId: string | null;
     totalJobs: number;
-    successfulJobs: number;
+    successfulJobs: number;     // GraphQL field name
     failedJobs: number;
+    runningJobs: number;
+    totalURLsScraped: number;   // GraphQL field name
+    totalNewGames: number;
+    totalUpdatedGames: number;
+    totalErrors: number;
+    totalS3Hits: number;
     averageJobDuration: number;
-    totalURLsScraped: number;
     successRate: number;
-    topErrors?: Array<{
-        errorType: string;
-        count: number;
-        urls: string[];
-    }>;
-    hourlyActivity?: Array<{
-        hour: string;
-        jobCount: number;
-        urlsScraped: number;
-        successRate: number;
-    }>;
+    s3CacheRate: number;
 }
 
 // ===================================================================
-// NEW: Coverage Info Component
+// Coverage Info Component
 // ===================================================================
 const CoverageInfo: React.FC = () => {
     const { currentEntity } = useEntity();
@@ -59,7 +57,7 @@ const CoverageInfo: React.FC = () => {
       if (currentEntity?.id) {
         loadGapAnalysis();
       }
-    }, [currentEntity?.id, getScrapingStatus]); // Added getScrapingStatus to dep array
+    }, [currentEntity?.id]);
   
     const loadGapAnalysis = useCallback(async () => {
       if (!currentEntity?.id) return;
@@ -132,7 +130,7 @@ const CoverageInfo: React.FC = () => {
         
         {scrapingStatus.gaps && scrapingStatus.gaps.length > 0 && (
           <p className="text-xs text-purple-700 mt-3">
-            💡 Go to the **Scrape** tab to fill {scrapingStatus.gapSummary.totalGaps} detected gap(s).
+            💡 Go to the <strong>Scrape</strong> tab to fill {scrapingStatus.gapSummary.totalGaps} detected gap(s).
           </p>
         )}
       </div>
@@ -149,44 +147,53 @@ export const OverviewTab: React.FC = () => {
     const [recentJobs, setRecentJobs] = useState<ScraperJob[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [metricsUnavailable, setMetricsUnavailable] = useState(false);
 
     const loadMetrics = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
             
-            // Load metrics
-            const metricsResponse = await client.graphql({
-                query: getScraperMetrics,
-                variables: { timeRange: TimeRange.LAST_24_HOURS }
-            }) as any;
-            
-            if (metricsResponse.errors) {
-                console.error('GraphQL error loading metrics:', metricsResponse.errors);
-                throw new Error(metricsResponse.errors[0].message);
-            }
-            
-            if (metricsResponse.data?.getScraperMetrics) {
-                setMetrics(metricsResponse.data.getScraperMetrics);
+            // Load metrics - handle errors gracefully
+            try {
+                const metricsResponse = await client.graphql({
+                    query: getScraperMetrics,
+                    variables: { timeRange: TimeRange.LAST_24_HOURS }
+                }) as any;
+                
+                if (metricsResponse.data?.getScraperMetrics) {
+                    setMetrics(metricsResponse.data.getScraperMetrics);
+                    setMetricsUnavailable(false);
+                } else if (metricsResponse.errors?.length) {
+                    console.warn('Metrics query returned errors:', metricsResponse.errors);
+                    setMetricsUnavailable(true);
+                    // Don't fail completely - just mark metrics as unavailable
+                }
+            } catch (metricsError: any) {
+                console.warn('Could not load metrics:', metricsError);
+                setMetricsUnavailable(true);
+                // Continue to load jobs even if metrics fail
             }
 
             // Load recent jobs
-            const jobsResponse = await client.graphql({
-                query: getScraperJobsReport,
-                variables: { limit: 5 }
-            }) as any;
-            
-            if (jobsResponse.errors) {
-                console.error('GraphQL error loading jobs:', jobsResponse.errors);
-                throw new Error(jobsResponse.errors[0].message);
+            try {
+                const jobsResponse = await client.graphql({
+                    query: getScraperJobsReport,
+                    variables: { limit: 5 }
+                }) as any;
+                
+                if (jobsResponse.data?.getScraperJobsReport) {
+                    setRecentJobs(jobsResponse.data.getScraperJobsReport.items || []);
+                } else if (jobsResponse.errors?.length) {
+                    console.warn('Jobs query returned errors:', jobsResponse.errors);
+                }
+            } catch (jobsError) {
+                console.warn('Could not load jobs:', jobsError);
             }
             
-            if (jobsResponse.data?.getScraperJobsReport) {
-                setRecentJobs(jobsResponse.data.getScraperJobsReport.items || []);
-            }
         } catch (error: any) {
-            console.error('Error loading metrics:', error);
-            setError(error.message || 'An unknown error occurred while loading metrics.');
+            console.error('Error loading overview data:', error);
+            setError(error.message || 'An unknown error occurred while loading data.');
         } finally {
             setLoading(false);
         }
@@ -198,7 +205,7 @@ export const OverviewTab: React.FC = () => {
         return () => clearInterval(interval);
     }, [loadMetrics]);
 
-    if (loading && !metrics && !error) {
+    if (loading && !metrics && recentJobs.length === 0 && !error) {
         return (
             <div className="flex justify-center items-center h-64">
                 <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
@@ -206,64 +213,85 @@ export const OverviewTab: React.FC = () => {
         );
     }
 
-    if (error) {
-        return (
-            <div className="bg-red-50 border border-red-300 rounded-lg p-6 text-center">
-                <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-red-800">Failed to Load Overview</h3>
-                <p className="text-sm text-red-700 mt-2 mb-4">
-                    The backend function may be missing or misconfigured.
-                </p>
-                <p className="text-xs text-red-600 bg-red-100 p-2 rounded font-mono">
-                    {error}
-                </p>
-                <button
-                    onClick={loadMetrics}
-                    className="mt-4 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700"
-                >
-                    Try Again
-                </button>
-            </div>
-        );
-    }
-
     return (
         <div className="space-y-6">
-            {/* --- 1. COVERAGE INFO (Moved from old tabs) --- */}
+            {/* --- 1. COVERAGE INFO --- */}
             <CoverageInfo />
+            
+            {/* Backend Unavailable Warning */}
+            {metricsUnavailable && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <p className="text-sm text-yellow-800 font-medium">Metrics Backend Unavailable</p>
+                        <p className="text-xs text-yellow-700 mt-1">
+                            The scraperManagement Lambda may not be deployed yet. Deploy the updated Lambda to see metrics.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* --- 2. Metrics Cards --- */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <MetricCard
                     title="Total Jobs (24h)"
-                    value={metrics?.totalJobs || 0}
+                    value={metrics?.totalJobs ?? '-'}
                     icon={<Activity className="h-5 w-5" />}
                     color="blue"
                 />
                 <MetricCard
                     title="Success Rate"
-                    value={`${Math.round(metrics?.successRate || 0)}%`}
+                    value={metrics ? `${Math.round(metrics.successRate || 0)}%` : '-'}
                     icon={<CheckCircle className="h-5 w-5" />}
                     color="green"
                 />
                 <MetricCard
-                    title="URLs Scraped"
-                    value={metrics?.totalURLsScraped || 0}
+                    title="URLs Processed"
+                    value={metrics?.totalURLsScraped ?? '-'}
                     icon={<Database className="h-5 w-5" />}
                     color="purple"
                 />
                 <MetricCard
                     title="Failed Jobs"
-                    value={metrics?.failedJobs || 0}
+                    value={metrics?.failedJobs ?? '-'}
                     icon={<AlertCircle className="h-5 w-5" />}
                     color="red"
                 />
             </div>
+            
+            {/* --- 2b. Additional Metrics Row --- */}
+            {metrics && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <p className="text-xs text-gray-500 uppercase">New Games</p>
+                        <p className="text-2xl font-bold text-green-600">{metrics.totalNewGames}</p>
+                    </div>
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <p className="text-xs text-gray-500 uppercase">Updated Games</p>
+                        <p className="text-2xl font-bold text-blue-600">{metrics.totalUpdatedGames}</p>
+                    </div>
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <p className="text-xs text-gray-500 uppercase">S3 Cache Rate</p>
+                        <p className="text-2xl font-bold text-purple-600">{metrics.s3CacheRate}%</p>
+                    </div>
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <p className="text-xs text-gray-500 uppercase">Avg Duration</p>
+                        <p className="text-2xl font-bold text-gray-700">{metrics.averageJobDuration}s</p>
+                    </div>
+                </div>
+            )}
 
             {/* --- 3. Recent Jobs Table --- */}
             <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
+                <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                     <h3 className="text-lg font-semibold">Recent Jobs</h3>
+                    <button
+                        onClick={loadMetrics}
+                        disabled={loading}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded disabled:opacity-50"
+                    >
+                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    </button>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -293,13 +321,13 @@ export const OverviewTab: React.FC = () => {
                             {recentJobs.map((job) => (
                                 <tr key={job.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {job.jobId?.slice(0, 8)}...
+                                        {(job.jobId || job.id)?.slice(0, 8)}...
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <JobStatusBadge status={job.status} />
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {job.triggerSource}
+                                        {job.triggerSource || 'MANUAL'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {job.totalURLsProcessed || 0}
@@ -308,7 +336,7 @@ export const OverviewTab: React.FC = () => {
                                         {Math.round(job.successRate || 0)}%
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {new Date(job.startTime).toLocaleTimeString()}
+                                        {job.startTime ? new Date(job.startTime).toLocaleTimeString() : '-'}
                                     </td>
                                 </tr>
                             ))}
@@ -316,7 +344,9 @@ export const OverviewTab: React.FC = () => {
                     </table>
                     {recentJobs.length === 0 && (
                         <div className="p-8 text-center text-gray-500">
-                            No recent jobs found.
+                            {metricsUnavailable 
+                                ? 'Deploy the scraperManagement Lambda to see job history.'
+                                : 'No recent jobs found. Start a scrape job from the Scrape tab.'}
                         </div>
                     )}
                 </div>
@@ -324,3 +354,5 @@ export const OverviewTab: React.FC = () => {
         </div>
     );
 };
+
+export default OverviewTab;

@@ -86,7 +86,7 @@ exports.handler = async (event) => {
             entityId,
             forceRefresh: args.forceRefresh || false,
             overrideDoNotScrape: args.overrideDoNotScrape || false,
-            scraperJobId: args.scraperJobId || args.jobId || null,
+            scraperJobId: args.scraperJobId || args.jobId || "MANUAL_RUN",
             scraperApiKey: args.scraperApiKey || process.env.SCRAPERAPI_KEY || null
         };
         

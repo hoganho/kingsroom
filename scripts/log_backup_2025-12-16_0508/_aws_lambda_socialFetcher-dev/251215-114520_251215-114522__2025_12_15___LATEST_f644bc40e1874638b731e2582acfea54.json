@@ -1,0 +1,62 @@
+[
+  {
+    "timestamp": 1765799120664,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799121131,
+    "message": "START RequestId: d5bf7468-2356-4104-ba2b-c01c9e45c497 Version: $LATEST\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799121201,
+    "message": "2025-12-15T11:45:21.201Z\td5bf7468-2356-4104-ba2b-c01c9e45c497\tINFO\tEvent: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"syncPageInfo\",\n  \"arguments\": {\n    \"socialAccountId\": \"ecefabae-4f56-4648-85ac-7458244277d2\",\n    \"forceRefresh\": false\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"39ce5458-e0d1-7094-efba-ccb13d75c186\",\n      \"cognito:groups\": [\n        \"SUPER_ADMIN\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_pG33mCkAm\",\n      \"client_id\": \"6s7upekvr9ajtjosj597q61dd1\",\n      \"origin_jti\": \"b1a6aae2-8a7d-4066-8a07-83b169ae6ebf\",\n      \"event_id\": \"3fdc6139-4041-4ffc-95b6-ea4f83cc4535\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1765408620,\n      \"exp\": 1765800517,\n      \"iat\": 1765796917,\n      \"jti\": \"4d06ab0c-ea9c-45d7-8067-ee5cecbd5a83\",\n      \"username\": \"39ce5458-e0d1-7094-efba-ccb13d75c186\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"SUPER_ADMIN\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_pG33mCkAm\",\n    \"sourceIp\": [\n      \"185.218.127.194\"\n    ],\n    \"sub\": \"39ce5458-e0d1-7094-efba-ccb13d75c186\",\n    \"username\": \"39ce5458-e0d1-7094-efba-ccb13d75c186\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"185.218.127.194,15.158.196.68\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"60787772-9bec-4156-a52d-73bd6e246cb9\",\n      \"via\": \"2.0 3d6cc8b8181827550cd5e0ea9e5e7814.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"305\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.9\",\n      \"host\": \"ahjhople4vepna7paukam5wukq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"136787\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"185.218.127.194\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-693ff4d0-7093bbad5eb92e781aef5bec\",\n      \"x-amz-cf-id\": \"BzniL3eiWPkmfIBrrR-lf_WNJ_OuDyu0eZ8jpqpXKp2jT6nBRSRofA==\",\n      \"authorization\": \"eyJraWQiOiJ4V2J6R1BXSmhGSmYrWmE3RGNUc3RjaGRrQ1NkNk1udHpoMk9iT240bFprPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiIzOWNlNTQ1OC1lMGQxLTcwOTQtZWZiYS1jY2IxM2Q3NWMxODYiLCJjb2duaXRvOmdyb3VwcyI6WyJTVVBFUl9BRE1JTiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfcEczM21Da0FtIiwiY2xpZW50X2lkIjoiNnM3dXBla3ZyOWFqdGpvc2o1OTdxNjFkZDEiLCJvcmlnaW5fanRpIjoiYjFhNmFhZTItOGE3ZC00MDY2LThhMDctODNiMTY5YWU2ZWJmIiwiZXZlbnRfaWQiOiIzZmRjNjEzOS00MDQxLTRmZmMtOTViNi1lYTRmODNjYzQ1MzUiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzY1NDA4NjIwLCJleHAiOjE3NjU4MDA1MTcsImlhdCI6MTc2NTc5NjkxNywianRpIjoiNGQwNmFiMGMtZWE5Yy00NWQ3LTgwNjctZWU1Y2VjYmQ1YTgzIiwidXNlcm5hbWUiOiIzOWNlNTQ1OC1lMGQxLTcwOTQtZWZiYS1jY2IxM2Q3NWMxODYifQ.QbU4-TGjySIS-ewSKuJ4du4LQF2SIXuTV8vxYBMOn4Ryeg3EPG4yTworlE79efS-yxTk0hCsy9qmywRBR4xaamYNO6QOS_5FI5DVPs9_bV79VQ5ameMyHwhF1uDzrWLzH6kneQzmEXHQVU3dRP5pdza4-1eWxYcY3kttskX69PxY9Y4tjAqTLikg4Fu2UPlae0c5dwMdiS8Wtt7DJc7bAJUYYE72XVKt-E5giXuv4aAAOYbtK1mOJws7Fq_THpYjIXazBdWrdAYznWGN3JbMwq24IVnsTqrOHw99IJMUenR8kFS8rkodtDG5DI2EQRYeCOdtylTA4Ytd7il_rcm4kA\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Brave\\\";v=\\\"143\\\", \\\"Chromium\\\";v=\\\"143\\\", \\\"Not A(Brand\\\";v=\\\"24\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799121240,
+    "message": "2025-12-15T11:45:21.240Z\td5bf7468-2356-4104-ba2b-c01c9e45c497\tINFO\tSyncing page info for account: ecefabae-4f56-4648-85ac-7458244277d2 Options: { forceRefresh: false }\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799121240,
+    "message": "2025-12-15T11:45:21.240Z\td5bf7468-2356-4104-ba2b-c01c9e45c497\tINFO\tGetting social account: ecefabae-4f56-4648-85ac-7458244277d2\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799121241,
+    "message": "2025-12-15T11:45:21.241Z\td5bf7468-2356-4104-ba2b-c01c9e45c497\tINFO\tTable: SocialAccount-sjyzke3u45golhnttlco6bpcua-dev\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799122063,
+    "message": "2025-12-15T11:45:22.063Z\td5bf7468-2356-4104-ba2b-c01c9e45c497\tINFO\tAccount found: yes\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799122063,
+    "message": "2025-12-15T11:45:22.063Z\td5bf7468-2356-4104-ba2b-c01c9e45c497\tINFO\tFetching page info: v19.0/kings.natan\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799122506,
+    "message": "2025-12-15T11:45:22.506Z\td5bf7468-2356-4104-ba2b-c01c9e45c497\tERROR\tFacebook API error: {\n  message: \"Unsupported get request. Object with ID 'kings.natan' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https://developers.facebook.com/docs/graph-api\",\n  type: 'GraphMethodException',\n  code: 100,\n  error_subcode: 33,\n  fbtrace_id: 'Ao0bA2c53Li6X4EIL-NylSb'\n}\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799122506,
+    "message": "2025-12-15T11:45:22.506Z\td5bf7468-2356-4104-ba2b-c01c9e45c497\tERROR\tError syncing page info: Error: Unsupported get request. Object with ID 'kings.natan' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https://developers.facebook.com/docs/graph-api\n    at fetchPageInfo (/var/task/index.js:478:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async syncPageInfo (/var/task/index.js:250:22)\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799122541,
+    "message": "END RequestId: d5bf7468-2356-4104-ba2b-c01c9e45c497\n",
+    "ingestionTime": 1765799124610
+  },
+  {
+    "timestamp": 1765799122541,
+    "message": "REPORT RequestId: d5bf7468-2356-4104-ba2b-c01c9e45c497\tDuration: 1409.91 ms\tBilled Duration: 1874 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\tInit Duration: 464.05 ms\t\n",
+    "ingestionTime": 1765799124610
+  }
+]

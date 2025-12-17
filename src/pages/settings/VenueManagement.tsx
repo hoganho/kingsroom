@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { GraphQLResult } from '@aws-amplify/api';
 import { listVenuesShallow, listEntitiesShallow } from '../../graphql/customQueries';
-import { createVenue, updateVenue, deleteVenue } from '../../graphql/mutations';
+import { updateVenueShallow, createVenueShallow } from '../../graphql/customMutations';
+import { deleteVenue } from '../../graphql/mutations';
 import { VenueModal } from '../../components/venues/VenueModal';
 import { DeleteConfirmationModal } from '../../components/venues/DeleteConfirmationModal';
 import * as APITypes from '../../API';
@@ -264,7 +265,7 @@ const VenueManagement = () => {
         console.log('[VenueManagement] Update mutation input:', updateInput);
         
         const result = await getClient().graphql({
-          query: updateVenue,
+          query: updateVenueShallow,
           variables: { input: updateInput },
         });
         
@@ -285,7 +286,7 @@ const VenueManagement = () => {
         console.log('[VenueManagement] Create mutation input:', createInput);
         
         const result = await getClient().graphql({
-          query: createVenue,
+          query: createVenueShallow,
           variables: { input: createInput },
         });
         

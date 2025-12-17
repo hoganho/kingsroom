@@ -1,0 +1,287 @@
+[
+  {
+    "timestamp": 1765804856431,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1765804858038
+  },
+  {
+    "timestamp": 1765804856834,
+    "message": "START RequestId: 2607ee0f-54e9-4ce0-ace8-ab2f8d2bf266 Version: $LATEST\n",
+    "ingestionTime": 1765804858038
+  },
+  {
+    "timestamp": 1765804856835,
+    "message": "2025-12-15T13:20:56.835Z\t2607ee0f-54e9-4ce0-ace8-ab2f8d2bf266\tINFO\t[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)\n",
+    "ingestionTime": 1765804858038
+  },
+  {
+    "timestamp": 1765804858256,
+    "message": "2025-12-15T13:20:58.256Z\t2607ee0f-54e9-4ce0-ace8-ab2f8d2bf266\tINFO\t[SAVE-GAME] ✅ Created game: 6acfb8e6-3753-4c94-bdc2-b896a703ed9c\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804858697,
+    "message": "END RequestId: 2607ee0f-54e9-4ce0-ace8-ab2f8d2bf266\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804858697,
+    "message": "REPORT RequestId: 2607ee0f-54e9-4ce0-ace8-ab2f8d2bf266\tDuration: 1862.80 ms\tBilled Duration: 2262 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\tInit Duration: 399.09 ms\t\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804861205,
+    "message": "2025-12-15T13:21:01.205Z\t8a738977-5dfa-4767-ba1b-2bc97fefdb8d\tINFO\t[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804861205,
+    "message": "START RequestId: 8a738977-5dfa-4767-ba1b-2bc97fefdb8d Version: $LATEST\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804861376,
+    "message": "2025-12-15T13:21:01.376Z\t8a738977-5dfa-4767-ba1b-2bc97fefdb8d\tINFO\t[SAVE-GAME] ✅ Created game: d7c3fdd4-c7f7-40b5-bb96-2e4b8ae41c52\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804861556,
+    "message": "END RequestId: 8a738977-5dfa-4767-ba1b-2bc97fefdb8d\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804861556,
+    "message": "REPORT RequestId: 8a738977-5dfa-4767-ba1b-2bc97fefdb8d\tDuration: 350.19 ms\tBilled Duration: 351 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804863137,
+    "message": "START RequestId: b5ac9e80-8556-40ce-988d-9a2759e45f18 Version: $LATEST\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804863138,
+    "message": "2025-12-15T13:21:03.138Z\tb5ac9e80-8556-40ce-988d-9a2759e45f18\tINFO\t[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804863256,
+    "message": "2025-12-15T13:21:03.256Z\tb5ac9e80-8556-40ce-988d-9a2759e45f18\tINFO\t[SAVE-GAME] ✅ Created game: ae828108-1125-4388-bd7f-0f31e7417b7f\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804863436,
+    "message": "END RequestId: b5ac9e80-8556-40ce-988d-9a2759e45f18\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804863436,
+    "message": "REPORT RequestId: b5ac9e80-8556-40ce-988d-9a2759e45f18\tDuration: 298.07 ms\tBilled Duration: 299 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804866545,
+    "message": "2025-12-15T13:21:06.545Z\te8218425-2113-4d87-a2ee-60d009597c18\tINFO\t[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804866545,
+    "message": "START RequestId: e8218425-2113-4d87-a2ee-60d009597c18 Version: $LATEST\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804866635,
+    "message": "2025-12-15T13:21:06.635Z\te8218425-2113-4d87-a2ee-60d009597c18\tINFO\t[SAVE-GAME] ✅ Created game: 2323f382-7d2b-441f-9c84-475c941d28c0\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804866897,
+    "message": "2025-12-15T13:21:06.897Z\te8218425-2113-4d87-a2ee-60d009597c18\tINFO\t[SAVE-GAME] Queued 25 players for processing\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804866976,
+    "message": "END RequestId: e8218425-2113-4d87-a2ee-60d009597c18\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804866976,
+    "message": "REPORT RequestId: e8218425-2113-4d87-a2ee-60d009597c18\tDuration: 430.31 ms\tBilled Duration: 431 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765804867271
+  },
+  {
+    "timestamp": 1765804869086,
+    "message": "START RequestId: 30ef1704-ede2-486a-8403-f9e49324a497 Version: $LATEST\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804869087,
+    "message": "2025-12-15T13:21:09.087Z\t30ef1704-ede2-486a-8403-f9e49324a497\tINFO\t[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804869176,
+    "message": "2025-12-15T13:21:09.176Z\t30ef1704-ede2-486a-8403-f9e49324a497\tINFO\t[SAVE-GAME] ✅ Created game: 7376f9bb-744b-44fe-bd28-b1495e95519b\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804869315,
+    "message": "2025-12-15T13:21:09.315Z\t30ef1704-ede2-486a-8403-f9e49324a497\tINFO\t[SAVE-GAME] Queued 62 players for processing\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804869397,
+    "message": "END RequestId: 30ef1704-ede2-486a-8403-f9e49324a497\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804869397,
+    "message": "REPORT RequestId: 30ef1704-ede2-486a-8403-f9e49324a497\tDuration: 310.08 ms\tBilled Duration: 311 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804871600,
+    "message": "2025-12-15T13:21:11.600Z\tfd611c9c-cce6-492d-80b6-664e0992977c\tINFO\t[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804871600,
+    "message": "START RequestId: fd611c9c-cce6-492d-80b6-664e0992977c Version: $LATEST\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804871675,
+    "message": "2025-12-15T13:21:11.675Z\tfd611c9c-cce6-492d-80b6-664e0992977c\tINFO\t[SAVE-GAME] ✅ Created game: 0700adf5-5ad8-4111-b344-52f51b8ae4e4\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804871816,
+    "message": "2025-12-15T13:21:11.816Z\tfd611c9c-cce6-492d-80b6-664e0992977c\tINFO\t[SAVE-GAME] Queued 78 players for processing\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804871877,
+    "message": "END RequestId: fd611c9c-cce6-492d-80b6-664e0992977c\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804871877,
+    "message": "REPORT RequestId: fd611c9c-cce6-492d-80b6-664e0992977c\tDuration: 276.95 ms\tBilled Duration: 277 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804873867,
+    "message": "2025-12-15T13:21:13.867Z\tceddd0fd-e177-47b5-9ffd-f9475ca7fb7b\tINFO\t[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804873867,
+    "message": "START RequestId: ceddd0fd-e177-47b5-9ffd-f9475ca7fb7b Version: $LATEST\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804873956,
+    "message": "2025-12-15T13:21:13.956Z\tceddd0fd-e177-47b5-9ffd-f9475ca7fb7b\tINFO\t[SAVE-GAME] ✅ Created game: 89badac4-568a-42e6-9c41-24e66e892b87\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804874116,
+    "message": "2025-12-15T13:21:14.116Z\tceddd0fd-e177-47b5-9ffd-f9475ca7fb7b\tINFO\t[SAVE-GAME] Queued 78 players for processing\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804874177,
+    "message": "END RequestId: ceddd0fd-e177-47b5-9ffd-f9475ca7fb7b\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804874177,
+    "message": "REPORT RequestId: ceddd0fd-e177-47b5-9ffd-f9475ca7fb7b\tDuration: 310.09 ms\tBilled Duration: 311 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804876406,
+    "message": "2025-12-15T13:21:16.406Z\t7923e5ef-e57b-4ba2-a96d-8f9d1af2bebc\tINFO\t[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804876406,
+    "message": "START RequestId: 7923e5ef-e57b-4ba2-a96d-8f9d1af2bebc Version: $LATEST\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804876516,
+    "message": "2025-12-15T13:21:16.516Z\t7923e5ef-e57b-4ba2-a96d-8f9d1af2bebc\tINFO\t[SAVE-GAME] ✅ Created game: cec71967-5c39-44c4-b8b8-a4feaf039c24\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804876656,
+    "message": "2025-12-15T13:21:16.656Z\t7923e5ef-e57b-4ba2-a96d-8f9d1af2bebc\tINFO\t[SAVE-GAME] Queued 30 players for processing\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804876716,
+    "message": "END RequestId: 7923e5ef-e57b-4ba2-a96d-8f9d1af2bebc\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804876716,
+    "message": "REPORT RequestId: 7923e5ef-e57b-4ba2-a96d-8f9d1af2bebc\tDuration: 309.95 ms\tBilled Duration: 310 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765804878104
+  },
+  {
+    "timestamp": 1765804878724,
+    "message": "START RequestId: 6b48e1ea-392c-49c4-a3b2-2365d56cead7 Version: $LATEST\n",
+    "ingestionTime": 1765804887738
+  },
+  {
+    "timestamp": 1765804878725,
+    "message": "2025-12-15T13:21:18.725Z\t6b48e1ea-392c-49c4-a3b2-2365d56cead7\tINFO\t[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)\n",
+    "ingestionTime": 1765804887738
+  },
+  {
+    "timestamp": 1765804878815,
+    "message": "2025-12-15T13:21:18.815Z\t6b48e1ea-392c-49c4-a3b2-2365d56cead7\tINFO\t[SAVE-GAME] ✅ Created game: 00f55845-6825-4a41-9a70-c2acbac0e40e\n",
+    "ingestionTime": 1765804887738
+  },
+  {
+    "timestamp": 1765804878975,
+    "message": "2025-12-15T13:21:18.975Z\t6b48e1ea-392c-49c4-a3b2-2365d56cead7\tINFO\t[SAVE-GAME] Queued 18 players for processing\n",
+    "ingestionTime": 1765804887738
+  },
+  {
+    "timestamp": 1765804879056,
+    "message": "END RequestId: 6b48e1ea-392c-49c4-a3b2-2365d56cead7\n",
+    "ingestionTime": 1765804887738
+  },
+  {
+    "timestamp": 1765804879056,
+    "message": "REPORT RequestId: 6b48e1ea-392c-49c4-a3b2-2365d56cead7\tDuration: 331.26 ms\tBilled Duration: 332 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765804887738
+  },
+  {
+    "timestamp": 1765804881149,
+    "message": "2025-12-15T13:21:21.149Z\te21233a5-1079-4630-855d-e726e6d96179\tINFO\t[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)\n",
+    "ingestionTime": 1765804887738
+  },
+  {
+    "timestamp": 1765804881149,
+    "message": "START RequestId: e21233a5-1079-4630-855d-e726e6d96179 Version: $LATEST\n",
+    "ingestionTime": 1765804887738
+  },
+  {
+    "timestamp": 1765804881276,
+    "message": "2025-12-15T13:21:21.276Z\te21233a5-1079-4630-855d-e726e6d96179\tINFO\t[SAVE-GAME] ✅ Created game: 646ff523-b877-4f7e-bdd8-8a7561089360\n",
+    "ingestionTime": 1765804887738
+  },
+  {
+    "timestamp": 1765804881456,
+    "message": "END RequestId: e21233a5-1079-4630-855d-e726e6d96179\n",
+    "ingestionTime": 1765804887738
+  },
+  {
+    "timestamp": 1765804881456,
+    "message": "REPORT RequestId: e21233a5-1079-4630-855d-e726e6d96179\tDuration: 306.57 ms\tBilled Duration: 307 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1765804887738
+  }
+]
