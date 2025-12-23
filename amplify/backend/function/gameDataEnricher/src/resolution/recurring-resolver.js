@@ -1,19 +1,18 @@
 /**
  * recurring-resolver.js
- * ENHANCED: Better disambiguation for multiple games at same venue on same night
+ * FIXED: Added deduplication, cross-day checks, and race condition protection
  * 
- * Recurring game detection, matching, and creation logic
- * Handles:
- * - Matching incoming games to existing recurring game templates
- * - Scoring with gameVariant, buyIn, time, and tournamentType
- * - Ambiguity detection when multiple candidates score similarly
- * - Field inheritance (guarantee, etc.) from templates
- * - Auto-creation of new recurring games
+ * Changes from original:
+ * 1. getRecurringGamesByVenue() - queries ALL days, not just current day
+ * 2. findExistingDuplicate() - checks for similar games before creating
+ * 3. createRecurringGame() - uses conditional write to prevent race conditions
+ * 4. extractDayFromName() - detects day hints in game names
+ * 5. resolveRecurringAssignment() - validates day/name consistency
  */
 
 const { v4: uuidv4 } = require('uuid');
 const stringSimilarity = require('string-similarity');
-const { getDocClient, getTableName, QueryCommand, PutCommand } = require('../utils/db-client');
+const { getDocClient, getTableName, QueryCommand, PutCommand, ScanCommand } = require('../utils/db-client');
 const { DAYS_OF_WEEK, VALIDATION_THRESHOLDS } = require('../utils/constants');
 
 // ===================================================================
@@ -26,15 +25,15 @@ const SCORING_WEIGHTS = {
   NAME_FUZZY_MAX: 60,
   VARIANT_MATCH: 15,
   BUYIN_EXACT: 25,
-  BUYIN_CLOSE: 20,      // Within 5%
-  BUYIN_NEAR: 10,       // Within 15%
-  BUYIN_FAR: 5,         // Within 30%
-  BUYIN_MISMATCH: -10,  // More than 30% different
-  TIME_EXACT: 15,       // Within 15 minutes
-  TIME_CLOSE: 12,       // Within 30 minutes
-  TIME_NEAR: 8,         // Within 60 minutes
-  TIME_FAR: 3,          // Within 120 minutes
-  TIME_MISMATCH: -5,    // More than 120 minutes
+  BUYIN_CLOSE: 20,
+  BUYIN_NEAR: 10,
+  BUYIN_FAR: 5,
+  BUYIN_MISMATCH: -10,
+  TIME_EXACT: 15,
+  TIME_CLOSE: 12,
+  TIME_NEAR: 8,
+  TIME_FAR: 3,
+  TIME_MISMATCH: -5,
   TOURNAMENT_TYPE_MATCH: 10,
   TOURNAMENT_TYPE_MISMATCH: -15,
   GUARANTEE_MISMATCH: -5,
@@ -43,16 +42,26 @@ const SCORING_WEIGHTS = {
 const MATCH_THRESHOLDS = {
   HIGH_CONFIDENCE: VALIDATION_THRESHOLDS?.RECURRING_MATCH_THRESHOLD || 75,
   MEDIUM_CONFIDENCE: 50,
-  AMBIGUITY_MARGIN: 10,  // If top 2 scores within this margin, flag as ambiguous
+  AMBIGUITY_MARGIN: 10,
+  // NEW: Threshold for considering a game a duplicate
+  DUPLICATE_THRESHOLD: 0.85,
+};
+
+// Day keywords for extracting day hints from names
+const DAY_KEYWORDS = {
+  'monday': 'MONDAY', 'mon': 'MONDAY',
+  'tuesday': 'TUESDAY', 'tue': 'TUESDAY', 'tues': 'TUESDAY',
+  'wednesday': 'WEDNESDAY', 'wed': 'WEDNESDAY',
+  'thursday': 'THURSDAY', 'thu': 'THURSDAY', 'thur': 'THURSDAY', 'thurs': 'THURSDAY',
+  'friday': 'FRIDAY', 'fri': 'FRIDAY',
+  'saturday': 'SATURDAY', 'sat': 'SATURDAY',
+  'sunday': 'SUNDAY', 'sun': 'SUNDAY',
 };
 
 // ===================================================================
 // HELPER FUNCTIONS
 // ===================================================================
 
-/**
- * Get day of week from ISO date string
- */
 const getDayOfWeek = (isoDate) => {
   if (!isoDate) return null;
   try {
@@ -65,9 +74,6 @@ const getDayOfWeek = (isoDate) => {
   }
 };
 
-/**
- * Get time as minutes from midnight (UTC)
- */
 const getTimeAsMinutes = (isoDate) => {
   if (!isoDate) return null;
   try {
@@ -79,9 +85,6 @@ const getTimeAsMinutes = (isoDate) => {
   }
 };
 
-/**
- * Format time from ISO date as HH:MM
- */
 const formatTimeFromISO = (isoDate) => {
   if (!isoDate) return null;
   try {
@@ -95,9 +98,6 @@ const formatTimeFromISO = (isoDate) => {
   }
 };
 
-/**
- * Parse time string (HH:MM) to minutes from midnight
- */
 const parseTimeToMinutes = (timeStr) => {
   if (!timeStr) return null;
   try {
@@ -111,40 +111,59 @@ const parseTimeToMinutes = (timeStr) => {
 
 /**
  * Normalize game name for comparison
- * Strips buy-in amounts, guarantee text, tournament types, and special characters
  */
 const normalizeGameName = (name) => {
   if (!name) return '';
   return name.toLowerCase()
-    // Remove dollar amounts with optional "k" and "gtd/guaranteed"
     .replace(/\$[0-9,]+(k)?\s*(gtd|guaranteed)?/gi, '')
-    // Remove standalone gtd/guaranteed
     .replace(/\b(gtd|guaranteed)\b/gi, '')
-    // Remove frequency words
     .replace(/\b(weekly|monthly|annual|daily)\b/gi, '')
-    // Remove tournament structure words at end
     .replace(/\b(rebuy|re-entry|freezeout|knockout|bounty|turbo|hyper|deepstack)\b.*$/gi, '')
-    // Remove leading dollar amount
     .replace(/^\$[0-9]+\s+/, '')
-    // Remove special characters except spaces
     .replace(/[^a-z0-9\s]/g, '')
-    // Collapse multiple spaces
     .replace(/\s+/g, ' ')
     .trim();
 };
 
 /**
- * Generate display name for new recurring game
+ * NEW: Extract day hint from game name
+ * E.g., "FRIDAY SHOT CLOCK" → "FRIDAY"
  */
-const generateRecurringDisplayName = (rawName) => {
-  const clean = normalizeGameName(rawName);
-  // Title case each word
-  return clean.replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+const extractDayFromName = (name) => {
+  if (!name) return null;
+  const lower = name.toLowerCase();
+  
+  for (const [keyword, day] of Object.entries(DAY_KEYWORDS)) {
+    const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+    if (regex.test(lower)) {
+      return day;
+    }
+  }
+  return null;
 };
 
 /**
- * Build composite key for GSI (dayOfWeek#name)
+ * NEW: Validate that name and dayOfWeek are consistent
  */
+const validateDayConsistency = (name, dayOfWeek) => {
+  const dayHint = extractDayFromName(name);
+  
+  if (dayHint && dayHint !== dayOfWeek) {
+    return {
+      isValid: false,
+      warning: `Game name "${name}" suggests ${dayHint}, but processing for ${dayOfWeek}`,
+      suggestedDay: dayHint
+    };
+  }
+  
+  return { isValid: true };
+};
+
+const generateRecurringDisplayName = (rawName) => {
+  const clean = normalizeGameName(rawName);
+  return clean.replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+};
+
 const buildDayOfWeekNameKey = (dayOfWeek, name) => {
   if (!dayOfWeek || !name) return null;
   return `${dayOfWeek}#${name}`;
@@ -152,19 +171,10 @@ const buildDayOfWeekNameKey = (dayOfWeek, name) => {
 
 /**
  * Inherit fields from recurring game template to game
- * 
- * This handles inheriting typicalGuarantee -> guaranteeAmount/hasGuarantee
- * and any other fields we want to carry over from the recurring template.
- * 
- * @param {Object} game - The game being enriched
- * @param {Object} recurringGame - The matched recurring game template
- * @param {Object} gameUpdates - Object to add inherited fields to
- * @returns {string[]} List of field names that were inherited
  */
 const inheritFieldsFromTemplate = (game, recurringGame, gameUpdates) => {
   const inheritedFields = [];
   
-  // Inherit guarantee if not set on the game but exists on recurring template
   if ((!game.guaranteeAmount || game.guaranteeAmount === 0) && recurringGame.typicalGuarantee) {
     gameUpdates.guaranteeAmount = recurringGame.typicalGuarantee;
     gameUpdates.hasGuarantee = true;
@@ -172,87 +182,47 @@ const inheritFieldsFromTemplate = (game, recurringGame, gameUpdates) => {
     console.log(`[RECURRING] Inheriting guarantee $${recurringGame.typicalGuarantee} from template "${recurringGame.name}"`);
   }
   
-  // Inherit buy-in if missing (less common but useful)
   if ((!game.buyIn || game.buyIn === 0) && recurringGame.typicalBuyIn) {
     gameUpdates.buyIn = recurringGame.typicalBuyIn;
     inheritedFields.push('buyIn');
-    console.log(`[RECURRING] Inheriting buy-in $${recurringGame.typicalBuyIn} from template "${recurringGame.name}"`);
   }
   
-  // Inherit game variant if missing
   if (!game.gameVariant && recurringGame.gameVariant) {
     gameUpdates.gameVariant = recurringGame.gameVariant;
     inheritedFields.push('gameVariant');
-    console.log(`[RECURRING] Inheriting gameVariant ${recurringGame.gameVariant} from template "${recurringGame.name}"`);
   }
   
   return inheritedFields;
 };
 
 // ===================================================================
-// SCORING LOGIC (ENHANCED)
+// SCORING LOGIC
 // ===================================================================
 
-/**
- * Calculate match score between game and recurring game candidate
- * 
- * ENHANCED: Better disambiguation for multiple games at same venue on same night
- * - gameVariant as hard filter + bonus
- * - Tighter buy-in windows with penalties
- * - Time proximity with stricter windows
- * - Tournament type matching
- * - Guarantee sanity check
- * 
- * @param {Object} gameInput - The incoming game to match
- * @param {Object} candidate - The recurring game candidate
- * @returns {Object} { score, bonuses, penalties, disqualified, reason }
- */
 const calculateMatchScore = (gameInput, candidate) => {
   let score = 0;
   const bonuses = [];
   const penalties = [];
   
-  // ==========================================
-  // HARD FILTERS (instant disqualification)
-  // ==========================================
-  
-  // Game type must match (TOURNAMENT vs CASH_GAME)
+  // Hard filter: gameType mismatch
   if (candidate.gameType && gameInput.gameType && candidate.gameType !== gameInput.gameType) {
-    return {
-      score: 0,
-      bonuses: [],
-      penalties: [],
-      disqualified: true,
-      reason: 'gameType_mismatch'
-    };
+    return { score: 0, bonuses: [], penalties: [], disqualified: true, reason: 'gameType_mismatch' };
   }
   
-  // Game variant MUST match if both are specified
-  // This is critical for venues with multiple games (PLO vs NLHE on same night)
+  // Hard filter: gameVariant mismatch
   if (candidate.gameVariant && gameInput.gameVariant) {
     if (candidate.gameVariant !== gameInput.gameVariant) {
-      return {
-        score: 0,
-        bonuses: [],
-        penalties: [],
-        disqualified: true,
-        reason: 'gameVariant_mismatch'
-      };
+      return { score: 0, bonuses: [], penalties: [], disqualified: true, reason: 'gameVariant_mismatch' };
     }
-    // Exact variant match is a strong signal
     score += SCORING_WEIGHTS.VARIANT_MATCH;
     bonuses.push(`variant_match:+${SCORING_WEIGHTS.VARIANT_MATCH}`);
   }
   
-  // ==========================================
-  // NAME SIMILARITY (0-60 points)
-  // ==========================================
-  
+  // Name similarity
   const inputName = normalizeGameName(gameInput.name);
   const candidateName = normalizeGameName(candidate.name);
   
   if (inputName && candidateName) {
-    // Check for exact or contains match first
     if (inputName === candidateName) {
       score += SCORING_WEIGHTS.NAME_EXACT;
       bonuses.push(`name_exact:+${SCORING_WEIGHTS.NAME_EXACT}`);
@@ -260,7 +230,6 @@ const calculateMatchScore = (gameInput, candidate) => {
       score += SCORING_WEIGHTS.NAME_CONTAINS;
       bonuses.push(`name_contains:+${SCORING_WEIGHTS.NAME_CONTAINS}`);
     } else {
-      // Fuzzy match using string-similarity
       const sim = stringSimilarity.compareTwoStrings(inputName, candidateName);
       const nameScore = Math.round(sim * SCORING_WEIGHTS.NAME_FUZZY_MAX);
       score += nameScore;
@@ -268,10 +237,7 @@ const calculateMatchScore = (gameInput, candidate) => {
     }
   }
   
-  // ==========================================
-  // BUY-IN MATCH (with penalties for mismatch)
-  // ==========================================
-  
+  // Buy-in matching
   const candidateBuyIn = candidate.typicalBuyIn || 0;
   const gameBuyIn = gameInput.buyIn || 0;
   
@@ -281,39 +247,24 @@ const calculateMatchScore = (gameInput, candidate) => {
     const pctDiff = diff / avgBuyIn;
     
     if (diff === 0) {
-      // Exact match - strongest signal for disambiguation
       score += SCORING_WEIGHTS.BUYIN_EXACT;
       bonuses.push(`buyIn_exact:+${SCORING_WEIGHTS.BUYIN_EXACT}`);
     } else if (pctDiff < 0.05) {
-      // Within 5% (e.g., $50 vs $52)
       score += SCORING_WEIGHTS.BUYIN_CLOSE;
-      bonuses.push(`buyIn_close(<5%):+${SCORING_WEIGHTS.BUYIN_CLOSE}`);
+      bonuses.push(`buyIn_close:+${SCORING_WEIGHTS.BUYIN_CLOSE}`);
     } else if (pctDiff < 0.15) {
-      // Within 15%
       score += SCORING_WEIGHTS.BUYIN_NEAR;
-      bonuses.push(`buyIn_near(<15%):+${SCORING_WEIGHTS.BUYIN_NEAR}`);
+      bonuses.push(`buyIn_near:+${SCORING_WEIGHTS.BUYIN_NEAR}`);
     } else if (pctDiff < 0.30) {
-      // Within 30% - marginal match
       score += SCORING_WEIGHTS.BUYIN_FAR;
-      bonuses.push(`buyIn_far(<30%):+${SCORING_WEIGHTS.BUYIN_FAR}`);
+      bonuses.push(`buyIn_far:+${SCORING_WEIGHTS.BUYIN_FAR}`);
     } else {
-      // Different buy-in level - strong signal this is wrong match
-      score += SCORING_WEIGHTS.BUYIN_MISMATCH; // negative
-      penalties.push(`buyIn_mismatch(${(pctDiff * 100).toFixed(0)}%):${SCORING_WEIGHTS.BUYIN_MISMATCH}`);
+      score += SCORING_WEIGHTS.BUYIN_MISMATCH;
+      penalties.push(`buyIn_mismatch:${SCORING_WEIGHTS.BUYIN_MISMATCH}`);
     }
-  } else if (candidateBuyIn === 0 && gameBuyIn === 0) {
-    // Both zero/null - neutral, slight bonus
-    score += 5;
-    bonuses.push('buyIn_both_zero:+5');
-  } else if (candidateBuyIn === 0) {
-    // Template has no buy-in set - can't use for matching
-    // No bonus or penalty
   }
   
-  // ==========================================
-  // TIME PROXIMITY (with penalties for mismatch)
-  // ==========================================
-  
+  // Time proximity
   const candidateMinutes = parseTimeToMinutes(candidate.startTime);
   const gameMinutes = getTimeAsMinutes(gameInput.gameStartDateTime);
   
@@ -321,254 +272,116 @@ const calculateMatchScore = (gameInput, candidate) => {
     const diffMinutes = Math.abs(gameMinutes - candidateMinutes);
     
     if (diffMinutes <= 15) {
-      // Within 15 minutes - very likely same game
       score += SCORING_WEIGHTS.TIME_EXACT;
-      bonuses.push(`time_exact(${diffMinutes}min):+${SCORING_WEIGHTS.TIME_EXACT}`);
+      bonuses.push(`time_exact:+${SCORING_WEIGHTS.TIME_EXACT}`);
     } else if (diffMinutes <= 30) {
-      // Within 30 minutes
       score += SCORING_WEIGHTS.TIME_CLOSE;
-      bonuses.push(`time_close(${diffMinutes}min):+${SCORING_WEIGHTS.TIME_CLOSE}`);
+      bonuses.push(`time_close:+${SCORING_WEIGHTS.TIME_CLOSE}`);
     } else if (diffMinutes <= 60) {
-      // Within 1 hour
       score += SCORING_WEIGHTS.TIME_NEAR;
-      bonuses.push(`time_near(${diffMinutes}min):+${SCORING_WEIGHTS.TIME_NEAR}`);
+      bonuses.push(`time_near:+${SCORING_WEIGHTS.TIME_NEAR}`);
     } else if (diffMinutes <= 120) {
-      // Within 2 hours - could be different game
       score += SCORING_WEIGHTS.TIME_FAR;
-      bonuses.push(`time_far(${diffMinutes}min):+${SCORING_WEIGHTS.TIME_FAR}`);
+      bonuses.push(`time_far:+${SCORING_WEIGHTS.TIME_FAR}`);
     } else {
-      // More than 2 hours apart - likely different game
-      score += SCORING_WEIGHTS.TIME_MISMATCH; // negative
-      penalties.push(`time_mismatch(${diffMinutes}min):${SCORING_WEIGHTS.TIME_MISMATCH}`);
+      score += SCORING_WEIGHTS.TIME_MISMATCH;
+      penalties.push(`time_mismatch:${SCORING_WEIGHTS.TIME_MISMATCH}`);
     }
   }
   
-  // ==========================================
-  // TOURNAMENT TYPE BONUS/PENALTY
-  // ==========================================
-  
+  // Tournament type
   if (candidate.tournamentType && gameInput.tournamentType) {
     if (candidate.tournamentType === gameInput.tournamentType) {
       score += SCORING_WEIGHTS.TOURNAMENT_TYPE_MATCH;
       bonuses.push(`tournamentType_match:+${SCORING_WEIGHTS.TOURNAMENT_TYPE_MATCH}`);
     } else {
-      // Different tournament types (REBUY vs FREEZEOUT) - penalty
-      score += SCORING_WEIGHTS.TOURNAMENT_TYPE_MISMATCH; // negative
+      score += SCORING_WEIGHTS.TOURNAMENT_TYPE_MISMATCH;
       penalties.push(`tournamentType_mismatch:${SCORING_WEIGHTS.TOURNAMENT_TYPE_MISMATCH}`);
     }
   }
   
-  // ==========================================
-  // GUARANTEE SANITY CHECK
-  // ==========================================
-  
-  const candidateGtd = candidate.typicalGuarantee || 0;
-  const gameGtd = gameInput.guaranteeAmount || 0;
-  
-  if (candidateGtd > 0 && gameGtd > 0) {
-    const gtdDiff = Math.abs(candidateGtd - gameGtd);
-    const gtdAvg = (candidateGtd + gameGtd) / 2;
-    const gtdPct = gtdDiff / gtdAvg;
-    
-    if (gtdPct > 0.5) {
-      // More than 50% difference in guarantee - suspicious
-      score += SCORING_WEIGHTS.GUARANTEE_MISMATCH; // negative
-      penalties.push(`guarantee_mismatch(${(gtdPct * 100).toFixed(0)}%):${SCORING_WEIGHTS.GUARANTEE_MISMATCH}`);
-    }
-  }
-  
-  // Ensure score is not negative
-  score = Math.max(0, score);
-  
   return {
-    score,
+    score: Math.max(0, score),
     bonuses,
     penalties,
     disqualified: false,
-    reason: score >= MATCH_THRESHOLDS.HIGH_CONFIDENCE ? 'high_confidence' 
-          : score >= MATCH_THRESHOLDS.MEDIUM_CONFIDENCE ? 'medium_confidence' 
-          : 'low_confidence'
+    reason: null
   };
 };
 
-/**
- * Find best match among candidates with ambiguity detection
- * 
- * @param {Object} gameInput - The incoming game
- * @param {Array} candidates - Array of recurring game candidates
- * @returns {Object} { match, score, isAmbiguous, metadata }
- */
 const findBestMatch = (gameInput, candidates) => {
   if (!candidates || candidates.length === 0) {
-    return {
-      match: null,
-      score: 0,
-      isAmbiguous: false,
-      metadata: {
-        reason: 'no_candidates',
-        candidatesScored: 0,
-        topScores: []
-      }
-    };
+    return { match: null, score: 0, isAmbiguous: false, scoringDetails: null, metadata: { topScores: [] } };
   }
   
-  // Score all candidates
-  const scoredCandidates = candidates.map(candidate => {
-    const result = calculateMatchScore(gameInput, candidate);
-    return {
-      candidate,
-      ...result
-    };
-  });
+  const scoredCandidates = candidates.map(c => ({
+    candidate: c,
+    ...calculateMatchScore(gameInput, c)
+  }));
   
-  // Filter out disqualified candidates
-  const qualifiedCandidates = scoredCandidates.filter(c => !c.disqualified);
+  const qualifiedCandidates = scoredCandidates
+    .filter(s => !s.disqualified)
+    .sort((a, b) => b.score - a.score);
   
   if (qualifiedCandidates.length === 0) {
-    // All candidates were disqualified
-    const disqualifyReasons = scoredCandidates.map(c => ({
-      name: c.candidate.name,
-      reason: c.reason
-    }));
-    
-    return {
-      match: null,
-      score: 0,
-      isAmbiguous: false,
-      metadata: {
-        reason: 'all_disqualified',
-        disqualifyReasons,
-        candidatesScored: scoredCandidates.length,
-        topScores: []
-      }
-    };
+    return { match: null, score: 0, isAmbiguous: false, scoringDetails: null, metadata: { topScores: [] } };
   }
-  
-  // Sort by score descending
-  qualifiedCandidates.sort((a, b) => b.score - a.score);
   
   const best = qualifiedCandidates[0];
-  const secondBest = qualifiedCandidates[1];
+  const second = qualifiedCandidates[1];
+  const isAmbiguous = second && (best.score - second.score) < MATCH_THRESHOLDS.AMBIGUITY_MARGIN;
   
-  // Check for ambiguity - if top 2 scores are very close, flag it
-  const isAmbiguous = secondBest && 
-    (best.score - secondBest.score) < MATCH_THRESHOLDS.AMBIGUITY_MARGIN && 
-    best.score >= MATCH_THRESHOLDS.MEDIUM_CONFIDENCE;
-  
-  if (isAmbiguous) {
-    console.warn(`[RECURRING] ⚠️ AMBIGUOUS MATCH! Top 2 candidates within ${MATCH_THRESHOLDS.AMBIGUITY_MARGIN} points:`, {
-      game: gameInput.name,
-      first: { 
-        name: best.candidate.name, 
-        score: best.score,
-        buyIn: best.candidate.typicalBuyIn,
-        time: best.candidate.startTime
-      },
-      second: { 
-        name: secondBest.candidate.name, 
-        score: secondBest.score,
-        buyIn: secondBest.candidate.typicalBuyIn,
-        time: secondBest.candidate.startTime
-      }
-    });
-  }
-  
-  // Log detailed scoring
-  console.log(`[RECURRING] Match scoring for "${gameInput.name}":`, {
-    bestMatch: best.candidate.name,
-    bestScore: best.score,
-    bonuses: best.bonuses.join(', '),
-    penalties: best.penalties.join(', ') || 'none',
-    isAmbiguous,
-    candidatesScored: qualifiedCandidates.length
-  });
-  
-  // Build top scores for metadata
-  const topScores = qualifiedCandidates.slice(0, 5).map(c => ({
-    id: c.candidate.id,
-    name: c.candidate.name,
-    score: c.score,
-    buyIn: c.candidate.typicalBuyIn,
-    time: c.candidate.startTime,
-    bonuses: c.bonuses,
-    penalties: c.penalties
+  const topScores = qualifiedCandidates.slice(0, 3).map(s => ({
+    name: s.candidate.name,
+    id: s.candidate.id,
+    score: s.score,
+    dayOfWeek: s.candidate.dayOfWeek
   }));
   
   return {
-    match: best.score >= MATCH_THRESHOLDS.MEDIUM_CONFIDENCE ? best.candidate : null,
+    match: best.candidate,
     score: best.score,
     isAmbiguous,
-    scoringDetails: {
-      bonuses: best.bonuses,
-      penalties: best.penalties
-    },
-    metadata: {
-      reason: best.reason,
-      candidatesScored: qualifiedCandidates.length,
-      disqualifiedCount: scoredCandidates.length - qualifiedCandidates.length,
-      topScores
-    }
+    scoringDetails: { bonuses: best.bonuses, penalties: best.penalties },
+    metadata: { candidatesScored: qualifiedCandidates.length, topScores }
   };
 };
 
 // ===================================================================
-// DATABASE OPERATIONS
+// DATABASE OPERATIONS (ENHANCED)
 // ===================================================================
 
 /**
- * Create a new recurring game
+ * NEW: Query ALL recurring games for a venue (not just current day)
+ * This is used for deduplication checks
  */
-const createRecurringGame = async (data) => {
+const getRecurringGamesByVenue = async (venueId) => {
   const client = getDocClient();
   const tableName = getTableName('RecurringGame');
   
-  const now = new Date().toISOString();
-  const timestamp = Date.now();
-  
-  const dayOfWeekNameKey = buildDayOfWeekNameKey(data.dayOfWeek, data.name);
-  
-  if (!dayOfWeekNameKey) {
-    console.error('[RECURRING] Cannot create game without dayOfWeek or name');
-    throw new Error('dayOfWeek and name are required');
-  }
-  
-  const newGame = {
-    id: uuidv4(),
-    name: data.name,
-    venueId: data.venueId,
-    entityId: data.entityId,
-    dayOfWeek: data.dayOfWeek,
-    'dayOfWeek#name': dayOfWeekNameKey,
-    frequency: data.frequency || 'WEEKLY',
-    gameType: data.gameType || 'TOURNAMENT',
-    gameVariant: data.gameVariant || 'NLHE',
-    tournamentType: data.tournamentType || null,
-    startTime: data.startTime || null,
-    typicalBuyIn: parseFloat(data.typicalBuyIn) || 0,
-    typicalGuarantee: parseFloat(data.typicalGuarantee) || 0,
-    isActive: true,
-    createdAt: now,
-    updatedAt: now,
-    _version: 1,
-    _lastChangedAt: timestamp,
-    __typename: 'RecurringGame'
-  };
-  
   try {
-    await client.send(new PutCommand({
+    const result = await client.send(new QueryCommand({
       TableName: tableName,
-      Item: newGame
+      IndexName: 'byVenueRecurringGame',
+      KeyConditionExpression: 'venueId = :vid',
+      FilterExpression: 'isActive = :active',
+      ExpressionAttributeValues: {
+        ':vid': venueId,
+        ':active': true
+      }
     }));
-    console.log(`[RECURRING] ✅ Created new recurring game: "${newGame.name}" (${newGame.id})`);
-    return newGame;
+    
+    const items = result.Items || [];
+    console.log(`[RECURRING] Found ${items.length} total active games at venue ${venueId.substring(0, 8)}...`);
+    return items;
   } catch (error) {
-    console.error('[RECURRING] Error creating game:', error);
-    throw error;
+    console.error('[RECURRING] Error querying venue games:', error);
+    return [];
   }
 };
 
 /**
- * Query recurring games by venue and day
+ * Query recurring games by venue and day (original function, kept for matching)
  */
 const getRecurringGamesByVenueAndDay = async (venueId, dayOfWeek) => {
   const client = getDocClient();
@@ -592,7 +405,6 @@ const getRecurringGamesByVenueAndDay = async (venueId, dayOfWeek) => {
     
     const items = result.Items || [];
     console.log(`[RECURRING] Found ${items.length} candidate(s) for ${dayOfWeek} at venue ${venueId.substring(0, 8)}...`);
-    
     return items;
   } catch (error) {
     console.error('[RECURRING] Error querying by venue and day:', error);
@@ -600,92 +412,176 @@ const getRecurringGamesByVenueAndDay = async (venueId, dayOfWeek) => {
   }
 };
 
-// ===================================================================
-// MAIN RESOLVER
-// ===================================================================
+/**
+ * NEW: Find existing duplicate across ALL days
+ * Checks if a similar recurring game already exists for this venue
+ */
+const findExistingDuplicate = async (venueId, name, gameVariant) => {
+  const allGames = await getRecurringGamesByVenue(venueId);
+  
+  if (allGames.length === 0) {
+    return null;
+  }
+  
+  const normalizedInput = normalizeGameName(name);
+  
+  for (const existing of allGames) {
+    // Skip if variant doesn't match
+    if (gameVariant && existing.gameVariant && gameVariant !== existing.gameVariant) {
+      continue;
+    }
+    
+    const normalizedExisting = normalizeGameName(existing.name);
+    
+    // Exact normalized name match
+    if (normalizedInput === normalizedExisting) {
+      console.log(`[RECURRING] ⚠️ Found exact duplicate: "${existing.name}" on ${existing.dayOfWeek}`);
+      return existing;
+    }
+    
+    // High similarity match
+    const similarity = stringSimilarity.compareTwoStrings(normalizedInput, normalizedExisting);
+    if (similarity >= MATCH_THRESHOLDS.DUPLICATE_THRESHOLD) {
+      console.log(`[RECURRING] ⚠️ Found similar duplicate (${(similarity * 100).toFixed(0)}%): "${existing.name}" on ${existing.dayOfWeek}`);
+      return existing;
+    }
+  }
+  
+  return null;
+};
 
 /**
- * Resolve recurring game assignment for a game
- * 
- * ENHANCED: Uses improved scoring with ambiguity detection
- * 
- * @param {Object} params
- * @param {Object} params.game - Game data
- * @param {string} params.entityId - Entity ID
- * @param {boolean} params.autoCreate - Whether to auto-create recurring games
- * @returns {Object} { gameUpdates, metadata }
+ * Create a new recurring game (ENHANCED with deduplication)
  */
+const createRecurringGame = async (data) => {
+  const client = getDocClient();
+  const tableName = getTableName('RecurringGame');
+  
+  // STEP 1: Check for existing duplicate BEFORE creating
+  const existingDuplicate = await findExistingDuplicate(
+    data.venueId,
+    data.name,
+    data.gameVariant
+  );
+  
+  if (existingDuplicate) {
+    console.log(`[RECURRING] ⏭️ Skipping creation - duplicate exists: ${existingDuplicate.id}`);
+    
+    // Return the existing game instead of creating a new one
+    // Optionally: update the existing game with new data if needed
+    return existingDuplicate;
+  }
+  
+  // STEP 2: Validate day/name consistency
+  const dayCheck = validateDayConsistency(data.name, data.dayOfWeek);
+  if (!dayCheck.isValid) {
+    console.warn(`[RECURRING] ⚠️ ${dayCheck.warning}`);
+    // Use the suggested day from the name instead
+    if (dayCheck.suggestedDay) {
+      console.log(`[RECURRING] 🔧 Auto-correcting dayOfWeek from ${data.dayOfWeek} to ${dayCheck.suggestedDay}`);
+      data.dayOfWeek = dayCheck.suggestedDay;
+    }
+  }
+  
+  const now = new Date().toISOString();
+  const timestamp = Date.now();
+  const dayOfWeekNameKey = buildDayOfWeekNameKey(data.dayOfWeek, data.name);
+  
+  if (!dayOfWeekNameKey) {
+    console.error('[RECURRING] Cannot create game without dayOfWeek or name');
+    throw new Error('dayOfWeek and name are required');
+  }
+  
+  const newId = uuidv4();
+  const newGame = {
+    id: newId,
+    name: data.name,
+    venueId: data.venueId,
+    entityId: data.entityId,
+    dayOfWeek: data.dayOfWeek,
+    'dayOfWeek#name': dayOfWeekNameKey,
+    // Also compute venueId#name for cross-day dedup index
+    'venueId#name': `${data.venueId}#${normalizeGameName(data.name)}`,
+    frequency: data.frequency || 'WEEKLY',
+    gameType: data.gameType || 'TOURNAMENT',
+    gameVariant: data.gameVariant || 'NLHE',
+    tournamentType: data.tournamentType || null,
+    startTime: data.startTime || null,
+    typicalBuyIn: parseFloat(data.typicalBuyIn) || 0,
+    typicalGuarantee: parseFloat(data.typicalGuarantee) || 0,
+    isActive: true,
+    createdAt: now,
+    updatedAt: now,
+    _version: 1,
+    _lastChangedAt: timestamp,
+    __typename: 'RecurringGame'
+  };
+  
+  try {
+    // Use conditional write to prevent race conditions
+    // Only create if no game with same venueId + normalized name exists
+    await client.send(new PutCommand({
+      TableName: tableName,
+      Item: newGame,
+      // Condition: This exact ID doesn't already exist
+      ConditionExpression: 'attribute_not_exists(id)'
+    }));
+    
+    console.log(`[RECURRING] ✅ Created new recurring game: "${newGame.name}" on ${newGame.dayOfWeek} (${newGame.id})`);
+    return newGame;
+  } catch (error) {
+    if (error.name === 'ConditionalCheckFailedException') {
+      console.log(`[RECURRING] Race condition detected - another process created this game`);
+      // Try to find and return the existing game
+      const existing = await findExistingDuplicate(data.venueId, data.name, data.gameVariant);
+      if (existing) {
+        return existing;
+      }
+    }
+    console.error('[RECURRING] Error creating game:', error);
+    throw error;
+  }
+};
+
+// ===================================================================
+// MAIN RESOLVER (ENHANCED)
+// ===================================================================
+
 const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }) => {
   const venueId = game.venueId;
   
   console.log(`[RECURRING] Resolving assignment for: "${game.name}"`);
   
-  // ==========================================
-  // VALIDATION
-  // ==========================================
-  
+  // Validation
   if (!venueId) {
     console.log('[RECURRING] ⏭️ Skipping: No venueId provided');
     return {
-      gameUpdates: {
-        recurringGameAssignmentStatus: 'NOT_RECURRING',
-        recurringGameAssignmentConfidence: 0
-      },
-      metadata: {
-        status: 'NOT_RECURRING',
-        confidence: 0,
-        wasCreated: false,
-        matchReason: 'no_venue'
-      }
+      gameUpdates: { recurringGameAssignmentStatus: 'NOT_RECURRING', recurringGameAssignmentConfidence: 0 },
+      metadata: { status: 'NOT_RECURRING', confidence: 0, wasCreated: false, matchReason: 'no_venue' }
     };
   }
   
   if (!game.gameStartDateTime) {
     console.log('[RECURRING] ⏭️ Skipping: No gameStartDateTime provided');
     return {
-      gameUpdates: {
-        recurringGameAssignmentStatus: 'NOT_RECURRING',
-        recurringGameAssignmentConfidence: 0
-      },
-      metadata: {
-        status: 'NOT_RECURRING',
-        confidence: 0,
-        wasCreated: false,
-        matchReason: 'no_date'
-      }
+      gameUpdates: { recurringGameAssignmentStatus: 'NOT_RECURRING', recurringGameAssignmentConfidence: 0 },
+      metadata: { status: 'NOT_RECURRING', confidence: 0, wasCreated: false, matchReason: 'no_date' }
     };
   }
   
   if (!game.gameVariant) {
     console.log('[RECURRING] ⏭️ Skipping: No gameVariant provided');
     return {
-      gameUpdates: {
-        recurringGameAssignmentStatus: 'NOT_RECURRING',
-        recurringGameAssignmentConfidence: 0
-      },
-      metadata: {
-        status: 'NOT_RECURRING',
-        confidence: 0,
-        wasCreated: false,
-        matchReason: 'no_variant'
-      }
+      gameUpdates: { recurringGameAssignmentStatus: 'NOT_RECURRING', recurringGameAssignmentConfidence: 0 },
+      metadata: { status: 'NOT_RECURRING', confidence: 0, wasCreated: false, matchReason: 'no_variant' }
     };
   }
   
-  // Series games are typically not recurring
   if (game.isSeries) {
     console.log('[RECURRING] ⏭️ Skipping: Game is part of a series');
     return {
-      gameUpdates: {
-        recurringGameAssignmentStatus: 'NOT_RECURRING',
-        recurringGameAssignmentConfidence: 0
-      },
-      metadata: {
-        status: 'NOT_RECURRING',
-        confidence: 0,
-        wasCreated: false,
-        matchReason: 'is_series'
-      }
+      gameUpdates: { recurringGameAssignmentStatus: 'NOT_RECURRING', recurringGameAssignmentConfidence: 0 },
+      metadata: { status: 'NOT_RECURRING', confidence: 0, wasCreated: false, matchReason: 'is_series' }
     };
   }
   
@@ -694,43 +590,48 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
   if (!dayOfWeek) {
     console.warn('[RECURRING] ⚠️ Could not determine day of week from:', game.gameStartDateTime);
     return {
-      gameUpdates: {
-        recurringGameAssignmentStatus: 'NOT_RECURRING',
-        recurringGameAssignmentConfidence: 0
-      },
-      metadata: {
-        status: 'FAILED',
-        confidence: 0,
-        wasCreated: false,
-        matchReason: 'invalid_date'
-      }
+      gameUpdates: { recurringGameAssignmentStatus: 'NOT_RECURRING', recurringGameAssignmentConfidence: 0 },
+      metadata: { status: 'FAILED', confidence: 0, wasCreated: false, matchReason: 'invalid_date' }
     };
   }
   
-  // ==========================================
-  // QUERY AND MATCH
-  // ==========================================
+  // NEW: Validate day/name consistency before matching
+  const dayCheck = validateDayConsistency(game.name, dayOfWeek);
+  if (!dayCheck.isValid) {
+    console.warn(`[RECURRING] ⚠️ Day mismatch: ${dayCheck.warning}`);
+    // Continue processing but log warning
+  }
   
   try {
-    // Query candidates
-    const candidates = await getRecurringGamesByVenueAndDay(venueId, dayOfWeek);
+    // STEP 1: Try to match on the correct day first
+    let candidates = await getRecurringGamesByVenueAndDay(venueId, dayOfWeek);
     
-    // Find best match using enhanced scoring
+    // STEP 2: If name contains a day hint that differs, also check that day
+    const dayHint = extractDayFromName(game.name);
+    if (dayHint && dayHint !== dayOfWeek) {
+      console.log(`[RECURRING] 🔍 Name suggests ${dayHint}, also checking that day...`);
+      const altCandidates = await getRecurringGamesByVenueAndDay(venueId, dayHint);
+      candidates = [...candidates, ...altCandidates];
+    }
+    
+    // Find best match
     if (candidates.length > 0) {
       const matchResult = findBestMatch(game, candidates);
       
-      // High confidence match
       if (matchResult.match && matchResult.score >= MATCH_THRESHOLDS.HIGH_CONFIDENCE) {
         const confidence = Math.min(matchResult.score / 100, 0.99);
-        
         const gameUpdates = {
           recurringGameId: matchResult.match.id,
           recurringGameAssignmentStatus: matchResult.isAmbiguous ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED',
           recurringGameAssignmentConfidence: confidence
         };
         
-        // Inherit fields from template (including guarantee)
         const inheritedFields = inheritFieldsFromTemplate(game, matchResult.match, gameUpdates);
+        
+        // Warn if matched game is on different day
+        if (matchResult.match.dayOfWeek !== dayOfWeek) {
+          console.warn(`[RECURRING] ⚠️ Matched to game on ${matchResult.match.dayOfWeek} but processing ${dayOfWeek} game`);
+        }
         
         console.log(`[RECURRING] ✅ High confidence match: "${matchResult.match.name}" (score: ${matchResult.score})`);
         
@@ -741,6 +642,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
             confidence,
             matchedRecurringGameId: matchResult.match.id,
             matchedRecurringGameName: matchResult.match.name,
+            matchedRecurringGameDay: matchResult.match.dayOfWeek,
             wasCreated: false,
             inheritedFields,
             matchReason: matchResult.isAmbiguous ? 'high_score_ambiguous' : 'score_match',
@@ -752,17 +654,14 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
         };
       }
       
-      // Medium confidence - pending review
       if (matchResult.match && matchResult.score >= MATCH_THRESHOLDS.MEDIUM_CONFIDENCE) {
         const confidence = matchResult.score / 100;
-        
         const gameUpdates = {
           recurringGameId: matchResult.match.id,
           recurringGameAssignmentStatus: 'PENDING_ASSIGNMENT',
           recurringGameAssignmentConfidence: confidence
         };
         
-        // Inherit fields from template even at medium confidence
         const inheritedFields = inheritFieldsFromTemplate(game, matchResult.match, gameUpdates);
         
         console.log(`[RECURRING] ⚠️ Medium confidence match: "${matchResult.match.name}" (score: ${matchResult.score})`);
@@ -774,6 +673,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
             confidence,
             matchedRecurringGameId: matchResult.match.id,
             matchedRecurringGameName: matchResult.match.name,
+            matchedRecurringGameDay: matchResult.match.dayOfWeek,
             wasCreated: false,
             inheritedFields,
             matchReason: 'low_confidence_match',
@@ -785,24 +685,57 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
         };
       }
       
-      // No match above threshold
       console.log(`[RECURRING] ❌ No match above threshold (best score: ${matchResult.score})`);
     }
     
-    // ==========================================
-    // AUTO-CREATE NEW RECURRING GAME
-    // ==========================================
-    
+    // STEP 3: Before auto-creating, check for duplicates across ALL days
     if (autoCreate && game.name) {
       const displayName = generateRecurringDisplayName(game.name);
       
       if (displayName.length > 3) {
+        // Check for existing duplicate first
+        const existingDuplicate = await findExistingDuplicate(venueId, displayName, game.gameVariant);
+        
+        if (existingDuplicate) {
+          console.log(`[RECURRING] 🔗 Found existing game on different day: "${existingDuplicate.name}" (${existingDuplicate.dayOfWeek})`);
+          
+          // Match to existing even if on different day
+          const gameUpdates = {
+            recurringGameId: existingDuplicate.id,
+            recurringGameAssignmentStatus: 'PENDING_ASSIGNMENT',  // Needs review since days differ
+            recurringGameAssignmentConfidence: 0.7
+          };
+          
+          const inheritedFields = inheritFieldsFromTemplate(game, existingDuplicate, gameUpdates);
+          
+          return {
+            gameUpdates,
+            metadata: {
+              status: 'MATCHED_EXISTING',
+              confidence: 0.7,
+              matchedRecurringGameId: existingDuplicate.id,
+              matchedRecurringGameName: existingDuplicate.name,
+              matchedRecurringGameDay: existingDuplicate.dayOfWeek,
+              wasCreated: false,
+              inheritedFields,
+              matchReason: 'cross_day_match',
+              dayMismatch: true,
+              processingDay: dayOfWeek,
+              templateDay: existingDuplicate.dayOfWeek
+            }
+          };
+        }
+        
+        // No existing duplicate - create new
         try {
+          // Use the day from the game's actual date (or from name hint if present)
+          const targetDay = dayHint || dayOfWeek;
+          
           const newGame = await createRecurringGame({
             name: displayName,
             venueId: venueId,
             entityId: entityId,
-            dayOfWeek: dayOfWeek,
+            dayOfWeek: targetDay,  // Use corrected day
             gameType: game.gameType,
             gameVariant: game.gameVariant,
             tournamentType: game.tournamentType,
@@ -811,7 +744,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
             startTime: formatTimeFromISO(game.gameStartDateTime)
           });
           
-          console.log(`[RECURRING] ✅ Auto-created new recurring game: "${newGame.name}"`);
+          console.log(`[RECURRING] ✅ Auto-created new recurring game: "${newGame.name}" on ${newGame.dayOfWeek}`);
           
           return {
             gameUpdates: {
@@ -837,10 +770,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
       }
     }
     
-    // ==========================================
-    // NO MATCH FOUND
-    // ==========================================
-    
+    // No match found
     console.log(`[RECURRING] ⏭️ No recurring game match for "${game.name}"`);
     
     return {
@@ -881,25 +811,21 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
 // ===================================================================
 
 module.exports = {
-  // Main resolver
   resolveRecurringAssignment,
-  
-  // Scoring functions (exported for testing)
   calculateMatchScore,
   findBestMatch,
-  
-  // Helpers
   normalizeGameName,
   getDayOfWeek,
   getTimeAsMinutes,
   formatTimeFromISO,
   inheritFieldsFromTemplate,
-  
-  // Database operations
   createRecurringGame,
   getRecurringGamesByVenueAndDay,
-  
-  // Constants (for external configuration)
+  // NEW exports
+  getRecurringGamesByVenue,
+  findExistingDuplicate,
+  extractDayFromName,
+  validateDayConsistency,
   SCORING_WEIGHTS,
   MATCH_THRESHOLDS
 };

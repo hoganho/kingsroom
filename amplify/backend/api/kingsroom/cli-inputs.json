@@ -13,6 +13,9 @@
         "expirationTime": 365,
         "apiKeyExpirationDate": "2026-11-30T19:02:34.381Z",
         "keyDescription": "KingsRoom-Guest"
+      },      
+      {
+        "mode": "AWS_IAM"
       }
     ],
     "conflictResolution": {

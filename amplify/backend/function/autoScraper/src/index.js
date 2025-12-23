@@ -21,29 +21,35 @@
 Amplify Params - DO NOT EDIT */
 
 // autoScraper Lambda
-// UPDATED v4.0.0:
+// UPDATED v4.3.0:
+// - Modularized: GraphQL queries, prefetch cache, and scraping engine extracted
+// - Added real-time game streaming via publishGameProcessed mutation
+// - Events published after each game is processed (fire-and-forget pattern)
+// - FIXED: Duration calculation now uses local jobStartTime instead of stale state
+// - FIXED: Renamed totalProcessed -> totalURLsProcessed to match frontend expectations
 // - Added `executeJob` operation for scraperManagement integration
 // - Configurable thresholds via job payload (not just env vars)
 // - Job record created by scraperManagement, updated by autoScraper
 // - Added `cancelJob` operation to handle cancellation signals
 // - Progress updates published more frequently for real-time UI
 
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { 
-    DynamoDBClient, 
-    QueryCommand, 
-    PutCommand, 
-    UpdateCommand, 
+    DynamoDBDocumentClient,
     GetCommand,
-    ScanCommand
-} = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+    PutCommand,
+    UpdateCommand
+} = require("@aws-sdk/lib-dynamodb");
 const { v4: uuidv4 } = require('uuid');
 
 // AppSync Client
 const { URL } = require('url');
-const https = require('https');
-const { default: fetch, Request } = require('node-fetch');
+const fetch = require('node-fetch');
 const aws4 = require('aws4');
+
+// Extracted modules
+const { PUBLISH_GAME_PROCESSED } = require('./graphql/queries');
+const { performScrapingEnhanced } = require('./engine/scrapingEngine');
 
 // Initialize AWS clients
 const ddbClient = new DynamoDBClient({});
@@ -52,20 +58,18 @@ const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 // Lambda Monitoring
 const { LambdaMonitoring } = require('./lambda-monitoring'); 
 
-// Environment variables and constants
+// ===================================================================
+// CONFIGURATION
+// ===================================================================
+
 const LAMBDA_TIMEOUT = parseInt(process.env.AWS_LAMBDA_TIMEOUT || '270', 10) * 1000;
 const LAMBDA_TIMEOUT_BUFFER = 45000;
-const UPDATE_CHECK_INTERVAL_MS = parseInt(process.env.UPDATE_CHECK_INTERVAL_MS || '3600000', 10);
 
 // Default thresholds (can be overridden by job config)
 const DEFAULT_MAX_CONSECUTIVE_BLANKS = parseInt(process.env.MAX_CONSECUTIVE_BLANKS || '5', 10);
 const DEFAULT_MAX_CONSECUTIVE_ERRORS = parseInt(process.env.MAX_CONSECUTIVE_ERRORS || '3', 10);
 const DEFAULT_MAX_CONSECUTIVE_NOT_FOUND = parseInt(process.env.MAX_CONSECUTIVE_NOT_FOUND || '10', 10);
 const DEFAULT_MAX_TOTAL_ERRORS = parseInt(process.env.MAX_TOTAL_ERRORS || '15', 10);
-
-// Prefetch configuration
-const PREFETCH_BATCH_SIZE = 100;
-const PREFETCH_BUFFER = 20;
 
 // Progress update frequency (publish every N items)
 const PROGRESS_UPDATE_FREQUENCY = 5;
@@ -135,25 +139,32 @@ async function callGraphQL(query, variables, entityId = null) {
     
     if (entityId) monitoring.entityId = entityId;
     
-    const request = new Request(endpoint.href, {
+    const body = JSON.stringify({ query, variables });
+    
+    const requestOptions = {
+        host: endpoint.host,
+        path: endpoint.pathname || '/graphql',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'host': endpoint.host
         },
-        body: JSON.stringify({ query, variables })
-    });
+        body: body,
+        service: 'appsync',
+        region: AWS_REGION
+    };
 
-    const credentials = {
+    aws4.sign(requestOptions, {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
         sessionToken: process.env.AWS_SESSION_TOKEN,
-    };
-    
-    const signedRequest = aws4.sign(request, credentials);
+    });
     
     try {
-        const response = await fetch(signedRequest);
+        const response = await fetch(endpoint.href, {
+            method: 'POST',
+            headers: requestOptions.headers,
+            body: body
+        });
         const responseBody = await response.json();
 
         if (responseBody.errors) {
@@ -168,62 +179,63 @@ async function callGraphQL(query, variables, entityId = null) {
     }
 }
 
-// GraphQL Mutations
-const FETCH_TOURNAMENT_DATA = /* GraphQL */ `
-    mutation FetchTournamentData($url: AWSURL, $forceRefresh: Boolean, $entityId: ID, $scraperApiKey: String) {
-        fetchTournamentData(url: $url, forceRefresh: $forceRefresh, entityId: $entityId, scraperApiKey: $scraperApiKey) {
-            name
-            gameStatus
-            tournamentId
-            sourceUrl
-            existingGameId
-            doNotScrape
-            venueMatch {
-                autoAssignedVenue {
-                    id
-                    name
-                }
-            }
-            results { rank }
-            gameStartDateTime
-            gameEndDateTime
-            registrationStatus
-            gameType
-            gameVariant
-            tournamentType
-            prizepoolPaid
-            prizepoolCalculated
-            buyIn
-            rake
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            totalUniquePlayers
-            totalInitialEntries
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            entityId
-            s3Key
-            source
-            contentHash
-            fetchedAt
-        }
-    }
-`;
+// ===================================================================
+// GAME EVENT PUBLISHING (for real-time streaming)
+// ===================================================================
 
-const SAVE_TOURNAMENT_DATA = /* GraphQL */ `
-    mutation SaveTournamentData($input: SaveTournamentInput!) {
-        saveTournamentData(input: $input) {
-            id
-            name
-            gameStatus
-            venueId
-        }
+async function publishGameProcessedEvent(jobId, entityId, tournamentId, url, result) {
+    console.log(`[publishGameProcessedEvent] Publishing event for ID ${tournamentId}, action: ${result.action}`);
+
+    const event = {
+        jobId,
+        entityId,
+        tournamentId,
+        url,
+        action: result.action,
+        message: result.message || null,
+        errorMessage: result.errorMessage || null,
+        processedAt: new Date().toISOString(),
+        durationMs: result.durationMs || null,
+        dataSource: result.dataSource || null,
+        s3Key: result.s3Key || null,
+        gameData: result.parsedData ? {
+            name: result.parsedData.name || null,
+            gameStatus: result.parsedData.gameStatus || null,
+            registrationStatus: result.parsedData.registrationStatus || null,
+            gameStartDateTime: result.parsedData.gameStartDateTime || null,
+            gameEndDateTime: result.parsedData.gameEndDateTime || null,
+            buyIn: result.parsedData.buyIn ?? null,
+            rake: result.parsedData.rake ?? null,
+            guaranteeAmount: result.parsedData.guaranteeAmount ?? null,
+            prizepoolPaid: result.parsedData.prizepoolPaid ?? null,
+            totalEntries: result.parsedData.totalEntries ?? null,
+            totalUniquePlayers: result.parsedData.totalUniquePlayers ?? null,
+            totalRebuys: result.parsedData.totalRebuys ?? null,
+            totalAddons: result.parsedData.totalAddons ?? null,
+            gameType: result.parsedData.gameType || null,
+            gameVariant: result.parsedData.gameVariant || null,
+            tournamentType: result.parsedData.tournamentType || null,
+            gameTags: result.parsedData.gameTags || null,
+            venueId: result.parsedData.venueMatch?.autoAssignedVenue?.id || null,
+            venueName: result.parsedData.venueMatch?.autoAssignedVenue?.name || null,
+            doNotScrape: result.parsedData.doNotScrape ?? null,
+            existingGameId: result.parsedData.existingGameId || null,
+        } : null,
+        saveResult: result.saveResult ? {
+            success: result.saveResult.success ?? true,
+            gameId: result.saveResult.gameId || null,
+            action: result.saveResult.action || null,
+            message: result.saveResult.message || null,
+        } : null,
+    };
+
+    try {
+        await callGraphQL(PUBLISH_GAME_PROCESSED, { jobId, event }, entityId);
+        console.log(`[publishGameProcessedEvent] Success for ID ${tournamentId}`); 
+    } catch (error) {
+        console.warn(`[publishGameProcessedEvent] Failed to publish event for ID ${tournamentId}:`, error.message);
     }
-`;
+}
 
 // ===================================================================
 // SCRAPER STATE MANAGEMENT
@@ -241,7 +253,6 @@ async function getOrCreateScraperState(entityId) {
             return result.Item;
         }
         
-        // Create new state
         const now = new Date().toISOString();
         const newState = {
             id: stateId,
@@ -301,7 +312,7 @@ async function updateScraperState(stateId, updates) {
 }
 
 // ===================================================================
-// SCRAPER JOB MANAGEMENT (Updated for scraperManagement integration)
+// SCRAPER JOB MANAGEMENT
 // ===================================================================
 
 async function getScraperJob(jobId) {
@@ -330,7 +341,6 @@ async function updateScraperJob(jobId, updates) {
         expressionAttributeValues[placeholder] = updates[key];
     });
     
-    // Always update timestamps
     updateExpressions.push('updatedAt = :updatedAt');
     expressionAttributeValues[':updatedAt'] = new Date().toISOString();
     
@@ -357,7 +367,6 @@ async function updateScraperJob(jobId, updates) {
     await monitoredDdbDocClient.send(new UpdateCommand(params));
 }
 
-// Legacy: Create job (used by triggerAutoScraping, not executeJob)
 async function createScraperJob(entityId, triggerSource, triggeredBy, options = {}) {
     const now = new Date().toISOString();
     const job = {
@@ -367,7 +376,7 @@ async function createScraperJob(entityId, triggerSource, triggeredBy, options = 
         triggerSource,
         triggeredBy,
         startTime: now,
-        totalProcessed: 0,
+        totalURLsProcessed: 0,
         newGamesScraped: 0,
         gamesUpdated: 0,
         gamesSkipped: 0,
@@ -392,458 +401,76 @@ async function createScraperJob(entityId, triggerSource, triggeredBy, options = 
 }
 
 // ===================================================================
+// ENTITY LOOKUP (for URL building)
+// ===================================================================
+
+const entityCache = new Map();
+
+async function getEntity(entityId) {
+    if (entityCache.has(entityId)) {
+        return entityCache.get(entityId);
+    }
+    
+    try {
+        const entityTable = getTableName('Entity');
+        const result = await monitoredDdbDocClient.send(new GetCommand({
+            TableName: entityTable,
+            Key: { id: entityId }
+        }));
+        
+        if (result.Item) {
+            entityCache.set(entityId, result.Item);
+            return result.Item;
+        }
+        
+        throw new Error(`Entity not found: ${entityId}`);
+    } catch (error) {
+        console.error(`[getEntity] Error fetching entity ${entityId}:`, error);
+        throw error;
+    }
+}
+
+// ===================================================================
 // URL BUILDING
 // ===================================================================
 
-const buildTournamentUrl = (entityId, tournamentId) => {
-    // TODO: Look up entity config for URL pattern
-    return `https://kingsroom.com.au/dashboard/tournament/view?id=${tournamentId}`;
-};
-
-// ===================================================================
-// SCRAPEURL PREFETCH CACHE
-// ===================================================================
-
-class ScrapeURLPrefetchCache {
-    constructor(entityId) {
-        this.entityId = entityId;
-        this.cache = new Map();
-        this.cacheRangeStart = null;
-        this.cacheRangeEnd = null;
-        this.stats = { prefetchCount: 0, cacheHits: 0, cacheMisses: 0 };
+async function buildTournamentUrl(entityId, tournamentId) {
+    const entity = await getEntity(entityId);
+    
+    if (!entity.gameUrlDomain || !entity.gameUrlPath) {
+        throw new Error(`Entity ${entityId} missing gameUrlDomain or gameUrlPath`);
     }
     
-    async getStatus(tournamentId) {
-        if (this._needsPrefetch(tournamentId)) {
-            await this._prefetchBatch(tournamentId);
-        }
-        
-        if (this.cache.has(tournamentId)) {
-            this.stats.cacheHits++;
-            return this.cache.get(tournamentId);
-        }
-        
-        this.stats.cacheMisses++;
-        return { found: false };
-    }
-    
-    _needsPrefetch(tournamentId) {
-        if (this.cacheRangeStart === null) return true;
-        if (tournamentId < this.cacheRangeStart) return true;
-        if (tournamentId > this.cacheRangeEnd - PREFETCH_BUFFER) return true;
-        return false;
-    }
-    
-    async _prefetchBatch(startId) {
-        const endId = startId + PREFETCH_BATCH_SIZE - 1;
-        
-        try {
-            const result = await monitoredDdbDocClient.send(new QueryCommand({
-                TableName: scrapeURLTable,
-                IndexName: 'byEntityScrapeURL',
-                KeyConditionExpression: 'entityId = :entityId',
-                FilterExpression: 'tournamentId BETWEEN :startId AND :endId',
-                ExpressionAttributeValues: {
-                    ':entityId': this.entityId,
-                    ':startId': startId,
-                    ':endId': endId
-                }
-            }));
-            
-            // Clear old entries
-            if (this.cacheRangeStart !== null && startId > this.cacheRangeStart) {
-                for (const id of this.cache.keys()) {
-                    if (id < startId - PREFETCH_BUFFER) {
-                        this.cache.delete(id);
-                    }
-                }
-            }
-            
-            // Populate cache
-            for (const item of (result.Items || [])) {
-                this.cache.set(item.tournamentId, {
-                    found: true,
-                    lastScrapeStatus: item.lastScrapeStatus || null,
-                    gameStatus: item.gameStatus || null,
-                    doNotScrape: item.doNotScrape || false,
-                    status: item.status || null
-                });
-            }
-            
-            this.cacheRangeStart = startId;
-            this.cacheRangeEnd = endId;
-            this.stats.prefetchCount++;
-            
-        } catch (error) {
-            console.error(`[ScrapeURLPrefetch] Error: ${error.message}`);
-            throw error;
-        }
-    }
-    
-    getStats() {
-        return { ...this.stats, cacheSize: this.cache.size };
-    }
+    return `${entity.gameUrlDomain}${entity.gameUrlPath}${tournamentId}`;
 }
 
 // ===================================================================
-// SKIP LOGIC
+// SCRAPING ENGINE CONTEXT
 // ===================================================================
 
-function shouldSkipNotPublished(scrapeURLStatus, options) {
-    if (!options.skipNotPublished) return false;
-    return scrapeURLStatus.found && scrapeURLStatus.gameStatus === 'NOT_PUBLISHED';
-}
-
-function shouldSkipNotFoundGap(scrapeURLStatus, options) {
-    if (!options.skipNotFoundGaps) return false;
-    if (!scrapeURLStatus.found) return false;
-    
-    const status = (scrapeURLStatus.lastScrapeStatus || '').toUpperCase();
-    return status === 'NOT_FOUND' || status === 'BLANK' || status === 'NOT_IN_USE';
-}
-
-function isNotFoundResponse(parsedData) {
-    if (!parsedData) return false;
-    const status = parsedData.gameStatus;
-    return status === 'NOT_FOUND' || status === 'NOT_IN_USE' || status === 'NOT_PUBLISHED';
-}
-
-// ===================================================================
-// MAIN SCRAPING ENGINE (with configurable thresholds)
-// ===================================================================
-
-async function performScrapingEnhanced(entityId, scraperState, jobId, options = {}) {
-    const startTime = Date.now();
-    
-    // Extract thresholds from options (passed from scraperManagement) with defaults
-    const MAX_CONSECUTIVE_NOT_FOUND = options.maxConsecutiveNotFound || DEFAULT_MAX_CONSECUTIVE_NOT_FOUND;
-    const MAX_CONSECUTIVE_ERRORS = options.maxConsecutiveErrors || DEFAULT_MAX_CONSECUTIVE_ERRORS;
-    const MAX_CONSECUTIVE_BLANKS = options.maxConsecutiveBlanks || DEFAULT_MAX_CONSECUTIVE_BLANKS;
-    const MAX_TOTAL_ERRORS = options.maxTotalErrors || DEFAULT_MAX_TOTAL_ERRORS;
-    
-    console.log(`[ScrapingEngine] Using thresholds: NOT_FOUND=${MAX_CONSECUTIVE_NOT_FOUND}, ERRORS=${MAX_CONSECUTIVE_ERRORS}, BLANKS=${MAX_CONSECUTIVE_BLANKS}, TOTAL_ERRORS=${MAX_TOTAL_ERRORS}`);
-    
-    const results = {
-        totalProcessed: 0,
-        newGamesScraped: 0,
-        gamesUpdated: 0,
-        gamesSkipped: 0,
-        errors: 0,
-        blanks: 0,
-        notFoundCount: 0,
-        s3CacheHits: 0,
-        consecutiveBlanks: 0,
-        consecutiveNotFound: 0,
-        consecutiveErrors: 0,
-        currentId: null,
-        lastProcessedId: scraperState.lastScannedId,
-        stopReason: STOP_REASON.COMPLETED,
-        lastErrorMessage: null,
+/**
+ * Build context object with all dependencies for the scraping engine
+ */
+function buildScrapingContext() {
+    return {
+        callGraphQL,
+        getEntity,
+        buildTournamentUrl,
+        getScraperJob,
+        updateScraperJob,
+        updateScraperState,
+        publishGameProcessedEvent,
+        ddbDocClient: monitoredDdbDocClient,
+        scrapeURLTable,
+        STOP_REASON,
+        LAMBDA_TIMEOUT,
+        LAMBDA_TIMEOUT_BUFFER,
+        PROGRESS_UPDATE_FREQUENCY,
+        DEFAULT_MAX_CONSECUTIVE_NOT_FOUND,
+        DEFAULT_MAX_CONSECUTIVE_ERRORS,
+        DEFAULT_MAX_CONSECUTIVE_BLANKS,
+        DEFAULT_MAX_TOTAL_ERRORS
     };
-    
-    // Determine ID range based on mode
-    let currentId, endId;
-    const mode = options.mode || 'bulk';
-    
-    switch (mode) {
-        case 'bulk':
-            currentId = (options.startId || scraperState.lastScannedId) + 1;
-            endId = currentId + (options.bulkCount || 10) - 1;
-            break;
-        case 'range':
-            currentId = options.startId || scraperState.lastScannedId + 1;
-            endId = options.endId || currentId + 100;
-            break;
-        case 'auto':
-            currentId = scraperState.lastScannedId + 1;
-            endId = options.maxId || currentId + 10000; // High default for auto
-            break;
-        case 'gaps':
-            // Special handling below
-            break;
-        case 'refresh':
-            // TODO: Implement refresh mode
-            break;
-        default:
-            currentId = scraperState.lastScannedId + 1;
-            endId = currentId + (options.maxGames || 100);
-    }
-    
-    const maxId = options.maxId || null;
-    
-    // Handle gaps mode specially
-    if (mode === 'gaps' && options.gapIds?.length > 0) {
-        return await processGapIds(entityId, jobId, options.gapIds, options);
-    }
-    
-    // Initialize prefetch cache
-    let prefetchCache = null;
-    if (options.skipNotPublished || options.skipNotFoundGaps) {
-        prefetchCache = new ScrapeURLPrefetchCache(entityId);
-    }
-    
-    console.log(`[ScrapingEngine] Starting ${mode} mode: ID ${currentId} to ${endId}${maxId ? `, maxId: ${maxId}` : ''}`);
-    
-    // Main scraping loop
-    while (currentId <= endId) {
-        results.currentId = currentId;
-        
-        // Check cancellation (job status changed to STOPPED_MANUAL)
-        if (results.totalProcessed % 10 === 0) {
-            const job = await getScraperJob(jobId);
-            if (job?.status === 'STOPPED_MANUAL') {
-                console.log(`[ScrapingEngine] Job cancelled by user at ID ${currentId}`);
-                results.stopReason = STOP_REASON.MANUAL;
-                break;
-            }
-        }
-        
-        // Check Max ID
-        if (maxId && currentId > maxId) {
-            console.log(`[ScrapingEngine] Reached Max ID (${maxId})`);
-            results.stopReason = STOP_REASON.MAX_ID;
-            break;
-        }
-        
-        // Check timeout
-        if (Date.now() - startTime > (LAMBDA_TIMEOUT - LAMBDA_TIMEOUT_BUFFER)) {
-            console.log(`[ScrapingEngine] Approaching timeout at ID ${currentId}`);
-            results.stopReason = STOP_REASON.TIMEOUT;
-            break;
-        }
-        
-        const url = buildTournamentUrl(entityId, currentId);
-        results.lastProcessedId = currentId;
-
-        // Skip checks using prefetch cache
-        if (prefetchCache) {
-            try {
-                const scrapeURLStatus = await prefetchCache.getStatus(currentId);
-                
-                if (shouldSkipNotPublished(scrapeURLStatus, options)) {
-                    results.gamesSkipped++;
-                    currentId++;
-                    continue;
-                }
-                
-                if (shouldSkipNotFoundGap(scrapeURLStatus, options)) {
-                    results.gamesSkipped++;
-                    currentId++;
-                    continue;
-                }
-            } catch (error) {
-                console.warn(`[ScrapingEngine] Prefetch error, continuing: ${error.message}`);
-            }
-        }
-        
-        results.totalProcessed++;
-
-        try {
-            // Fetch via AppSync
-            const fetchData = await callGraphQL(FETCH_TOURNAMENT_DATA, {
-                url: url,
-                forceRefresh: options.forceRefresh || false,
-                entityId: entityId
-            });
-            const parsedData = fetchData.fetchTournamentData;
-
-            if (parsedData.source === 'S3_CACHE' || parsedData.source === 'HTTP_304_CACHE') {
-                results.s3CacheHits++;
-            }
-
-            // Check response type
-            const isNotFound = isNotFoundResponse(parsedData);
-            
-            if (isNotFound) {
-                results.consecutiveBlanks++;
-                results.consecutiveNotFound++;
-                results.blanks++;
-                results.notFoundCount++;
-                results.consecutiveErrors = 0; // Reset on successful fetch
-                
-                console.log(`[ScrapingEngine] ID ${currentId}: ${parsedData.gameStatus} (consecutive: ${results.consecutiveNotFound}/${MAX_CONSECUTIVE_NOT_FOUND})`);
-                
-                if (results.consecutiveNotFound >= MAX_CONSECUTIVE_NOT_FOUND && mode !== 'gaps') {
-                    console.log(`[ScrapingEngine] NOT_FOUND threshold reached: ${results.consecutiveNotFound}`);
-                    results.stopReason = STOP_REASON.NOT_FOUND;
-                    break;
-                }
-                
-                if (results.consecutiveBlanks >= MAX_CONSECUTIVE_BLANKS && mode !== 'gaps') {
-                    console.log(`[ScrapingEngine] BLANKS threshold reached: ${results.consecutiveBlanks}`);
-                    results.stopReason = STOP_REASON.BLANKS;
-                    break;
-                }
-                
-            } else {
-                // Valid game data
-                results.consecutiveBlanks = 0;
-                results.consecutiveNotFound = 0;
-                results.consecutiveErrors = 0;
-                
-                // Save if enabled
-                if (options.saveToDatabase !== false) {
-                    const venueId = parsedData.venueMatch?.autoAssignedVenue?.id || options.defaultVenueId;
-                    
-                    if (!venueId) {
-                        console.warn(`[ScrapingEngine] No venue for ID ${currentId}, skipping save`);
-                        results.gamesSkipped++;
-                    } else {
-                        try {
-                            const saveResult = await callGraphQL(SAVE_TOURNAMENT_DATA, {
-                                input: {
-                                    url: url,
-                                    venueId: venueId,
-                                    parsedData: parsedData,
-                                    entityId: entityId
-                                }
-                            });
-                            
-                            if (parsedData.existingGameId) {
-                                results.gamesUpdated++;
-                            } else {
-                                results.newGamesScraped++;
-                            }
-                        } catch (saveError) {
-                            console.error(`[ScrapingEngine] Save error for ID ${currentId}:`, saveError);
-                            results.errors++;
-                        }
-                    }
-                } else {
-                    // Scrape-only mode
-                    results.newGamesScraped++;
-                }
-            }
-            
-        } catch (error) {
-            console.error(`[ScrapingEngine] Error at ID ${currentId}:`, error.message);
-            results.errors++;
-            results.consecutiveErrors++;
-            results.lastErrorMessage = error.message;
-            
-            // Reset not-found counters on error
-            results.consecutiveNotFound = 0;
-            results.consecutiveBlanks = 0;
-            
-            if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                console.log(`[ScrapingEngine] ERRORS threshold reached: ${results.consecutiveErrors}`);
-                results.stopReason = STOP_REASON.ERROR;
-                break;
-            }
-            
-            if (results.errors >= MAX_TOTAL_ERRORS) {
-                console.log(`[ScrapingEngine] TOTAL ERRORS threshold reached: ${results.errors}`);
-                results.stopReason = STOP_REASON.ERROR;
-                results.lastErrorMessage = `Total errors exceeded: ${results.errors}`;
-                break;
-            }
-        }
-
-        // Publish progress update
-        if (results.totalProcessed % PROGRESS_UPDATE_FREQUENCY === 0) {
-            await updateScraperJob(jobId, {
-                totalProcessed: results.totalProcessed,
-                currentId: currentId,
-                newGamesScraped: results.newGamesScraped,
-                gamesUpdated: results.gamesUpdated,
-                gamesSkipped: results.gamesSkipped,
-                errors: results.errors,
-                notFoundCount: results.notFoundCount,
-                blanks: results.blanks,
-                s3CacheHits: results.s3CacheHits,
-                consecutiveNotFound: results.consecutiveNotFound,
-                consecutiveErrors: results.consecutiveErrors,
-                consecutiveBlanks: results.consecutiveBlanks,
-            });
-        }
-
-        currentId++;
-    }
-    
-    // Update scraper state
-    await updateScraperState(scraperState.id, {
-        lastScannedId: results.lastProcessedId,
-        consecutiveBlankCount: results.consecutiveBlanks,
-        consecutiveNotFoundCount: results.consecutiveNotFound,
-        totalScraped: (scraperState.totalScraped || 0) + results.newGamesScraped,
-        totalErrors: (scraperState.totalErrors || 0) + results.errors
-    });
-    
-    if (prefetchCache) {
-        console.log(`[ScrapingEngine] Prefetch stats:`, prefetchCache.getStats());
-    }
-    
-    return results;
-}
-
-// Process specific gap IDs
-async function processGapIds(entityId, jobId, gapIds, options) {
-    console.log(`[ScrapingEngine] Processing ${gapIds.length} gap IDs`);
-    
-    const results = {
-        totalProcessed: 0,
-        newGamesScraped: 0,
-        gamesUpdated: 0,
-        gamesSkipped: 0,
-        errors: 0,
-        blanks: 0,
-        notFoundCount: 0,
-        s3CacheHits: 0,
-        consecutiveErrors: 0,
-        stopReason: STOP_REASON.COMPLETED,
-        lastErrorMessage: null,
-    };
-    
-    for (const tournamentId of gapIds) {
-        const url = buildTournamentUrl(entityId, tournamentId);
-        results.totalProcessed++;
-        
-        try {
-            const fetchData = await callGraphQL(FETCH_TOURNAMENT_DATA, {
-                url: url,
-                forceRefresh: options.forceRefresh || false,
-                entityId: entityId
-            });
-            const parsedData = fetchData.fetchTournamentData;
-            
-            if (parsedData.source === 'S3_CACHE' || parsedData.source === 'HTTP_304_CACHE') {
-                results.s3CacheHits++;
-            }
-            
-            if (isNotFoundResponse(parsedData)) {
-                results.notFoundCount++;
-                results.blanks++;
-            } else if (options.saveToDatabase !== false) {
-                const venueId = parsedData.venueMatch?.autoAssignedVenue?.id || options.defaultVenueId;
-                if (venueId) {
-                    await callGraphQL(SAVE_TOURNAMENT_DATA, {
-                        input: { url, venueId, parsedData, entityId }
-                    });
-                    results.newGamesScraped++;
-                }
-            }
-            
-            results.consecutiveErrors = 0;
-            
-        } catch (error) {
-            console.error(`[ScrapingEngine] Gap error at ID ${tournamentId}:`, error.message);
-            results.errors++;
-            results.consecutiveErrors++;
-        }
-        
-        // Progress update
-        if (results.totalProcessed % PROGRESS_UPDATE_FREQUENCY === 0) {
-            await updateScraperJob(jobId, {
-                totalProcessed: results.totalProcessed,
-                currentId: tournamentId,
-                newGamesScraped: results.newGamesScraped,
-                errors: results.errors,
-                notFoundCount: results.notFoundCount,
-            });
-        }
-    }
-    
-    return results;
 }
 
 // ===================================================================
@@ -870,112 +497,80 @@ async function controlScraperOperation(operation, entityId) {
             await updateScraperState(scraperState.id, { enabled: false });
             return { success: true, message: 'Scraper disabled', state: await getOrCreateScraperState(entityId) };
             
-        case 'STATUS':
-            return { success: true, state: scraperState };
-            
         case 'RESET':
             await updateScraperState(scraperState.id, {
-                lastScannedId: 1,
+                lastScannedId: 0,
                 consecutiveBlankCount: 0,
                 consecutiveNotFoundCount: 0,
-                totalScraped: 0,
-                totalErrors: 0,
                 isRunning: false
             });
             return { success: true, message: 'Scraper reset', state: await getOrCreateScraperState(entityId) };
             
+        case 'STATUS':
         default:
-            throw new Error(`Unknown control operation: ${operation}`);
+            return { success: true, state: scraperState };
     }
 }
 
 // ===================================================================
-// NEW: executeJob - Entry point from scraperManagement
+// EXECUTE JOB (from scraperManagement)
 // ===================================================================
 
 async function executeJob(event) {
-    const {
-        jobId,
-        entityId,
-        mode = 'bulk',
-        
-        // Scrape options
-        useS3 = true,
-        forceRefresh = false,
-        skipNotPublished = true,
-        skipNotFoundGaps = true,
-        skipInProgress = false,
-        ignoreDoNotScrape = false,
-        
-        // Save options
-        saveToDatabase = true,
-        defaultVenueId,
-        
-        // Mode params
-        bulkCount,
-        startId,
-        endId,
-        maxId,
-        gapIds,
-        
-        // Thresholds (from scraperManagement/frontend)
-        maxConsecutiveNotFound,
-        maxConsecutiveErrors,
-        maxConsecutiveBlanks,
-        maxTotalErrors,
-    } = event;
-
-    if (!jobId) {
-        throw new Error('executeJob requires jobId');
-    }
-    if (!entityId) {
-        throw new Error('executeJob requires entityId');
+    const { jobId, entityId } = event;
+    
+    if (!jobId || !entityId) {
+        return { success: false, error: 'jobId and entityId required' };
     }
 
-    console.log(`[executeJob] Starting job ${jobId} for entity ${entityId}, mode: ${mode}`);
-    console.log(`[executeJob] Thresholds: NOT_FOUND=${maxConsecutiveNotFound}, ERRORS=${maxConsecutiveErrors}, BLANKS=${maxConsecutiveBlanks}`);
-
-    monitoring.entityId = entityId;
-
-    // Get scraper state
+    console.log(`[executeJob] Starting job ${jobId} for entity ${entityId}`);
+    
+    const jobStartTime = Date.now();
+    
+    const job = await getScraperJob(jobId);
+    if (!job) {
+        return { success: false, error: `Job ${jobId} not found` };
+    }
+    
     const scraperState = await getOrCreateScraperState(entityId);
     
-    // Mark as running
     await updateScraperState(scraperState.id, {
         isRunning: true,
-        lastRunStartTime: new Date().toISOString(),
+        lastRunStartTime: new Date(jobStartTime).toISOString(),
         currentJobId: jobId
     });
-
+    
+    await updateScraperJob(jobId, { status: 'RUNNING' });
+    
     try {
-        // Execute scraping with all passed options
+        const ctx = buildScrapingContext();
+        
         const results = await performScrapingEnhanced(entityId, scraperState, jobId, {
-            mode,
-            useS3,
-            forceRefresh,
-            skipNotPublished,
-            skipNotFoundGaps,
-            skipInProgress,
-            ignoreDoNotScrape,
-            saveToDatabase,
-            defaultVenueId,
-            bulkCount,
-            startId,
-            endId,
-            maxId,
-            gapIds,
-            maxConsecutiveNotFound,
-            maxConsecutiveErrors,
-            maxConsecutiveBlanks,
-            maxTotalErrors,
-        });
-
-        // Update job with final results
+            mode: job.mode || 'bulk',
+            bulkCount: job.bulkCount,
+            startId: job.startId,
+            endId: job.endId,
+            maxId: job.maxId,
+            gapIds: job.gapIds,
+            forceRefresh: job.forceRefresh,
+            skipNotPublished: job.skipNotPublished,
+            skipNotFoundGaps: job.skipNotFoundGaps,
+            saveToDatabase: job.saveToDatabase !== false,
+            defaultVenueId: job.defaultVenueId,
+            maxConsecutiveNotFound: job.maxConsecutiveNotFound,
+            maxConsecutiveErrors: job.maxConsecutiveErrors,
+            maxConsecutiveBlanks: job.maxConsecutiveBlanks,
+            maxTotalErrors: job.maxTotalErrors,
+        }, ctx);
+        
+        const jobEndTime = Date.now();
+        const durationSeconds = Math.floor((jobEndTime - jobStartTime) / 1000);
+        
         const finalStatus = results.stopReason || STOP_REASON.COMPLETED;
+        
         await updateScraperJob(jobId, {
             status: finalStatus,
-            totalProcessed: results.totalProcessed,
-            currentId: results.lastProcessedId,
+            totalURLsProcessed: results.totalProcessed,
             newGamesScraped: results.newGamesScraped,
             gamesUpdated: results.gamesUpdated,
             gamesSkipped: results.gamesSkipped,
@@ -988,8 +583,8 @@ async function executeJob(event) {
             consecutiveBlanks: results.consecutiveBlanks,
             stopReason: results.stopReason !== STOP_REASON.COMPLETED ? results.stopReason : null,
             lastErrorMessage: results.lastErrorMessage,
-            endTime: new Date().toISOString(),
-            durationSeconds: Math.floor((Date.now() - new Date(scraperState.lastRunStartTime || Date.now()).getTime()) / 1000)
+            endTime: new Date(jobEndTime).toISOString(),
+            durationSeconds: durationSeconds
         });
 
         console.log(`[executeJob] Job ${jobId} completed: ${finalStatus}`);
@@ -999,23 +594,27 @@ async function executeJob(event) {
             success: finalStatus === STOP_REASON.COMPLETED,
             jobId,
             status: finalStatus,
-            results
+            results,
+            durationSeconds
         };
 
     } catch (error) {
         console.error(`[executeJob] Job ${jobId} failed:`, error);
         
+        const jobEndTime = Date.now();
+        const durationSeconds = Math.floor((jobEndTime - jobStartTime) / 1000);
+        
         await updateScraperJob(jobId, {
             status: 'FAILED',
             stopReason: 'FAILED',
             lastErrorMessage: error.message,
-            endTime: new Date().toISOString()
+            endTime: new Date(jobEndTime).toISOString(),
+            durationSeconds: durationSeconds
         });
 
         throw error;
 
     } finally {
-        // Mark as not running
         await updateScraperState(scraperState.id, {
             isRunning: false,
             lastRunEndTime: new Date().toISOString(),
@@ -1025,7 +624,7 @@ async function executeJob(event) {
 }
 
 // ===================================================================
-// NEW: cancelJob - Handle cancellation from scraperManagement
+// CANCEL JOB
 // ===================================================================
 
 async function cancelJob(event) {
@@ -1036,10 +635,6 @@ async function cancelJob(event) {
     }
 
     console.log(`[cancelJob] Marking job ${jobId} for cancellation`);
-    
-    // The job status is already set to STOPPED_MANUAL by scraperManagement
-    // The running executeJob will check this and stop
-    // This is just an acknowledgment
     
     return {
         success: true,
@@ -1055,15 +650,14 @@ exports.handler = async (event) => {
     console.log('[AutoScraper] Event:', JSON.stringify(event, null, 2));
     
     const isEventBridge = event.source === 'aws.events' || event['detail-type'];
-    const isAppSync = !!event.fieldName;
     
     try {
-        // NEW: Handle executeJob operation (from scraperManagement)
+        // Handle executeJob operation (from scraperManagement)
         if (event.operation === 'executeJob') {
             return await executeJob(event);
         }
         
-        // NEW: Handle cancelJob operation
+        // Handle cancelJob operation
         if (event.operation === 'cancelJob') {
             return await cancelJob(event);
         }
@@ -1096,9 +690,12 @@ exports.handler = async (event) => {
                 return { success: false, message: 'Scraper is disabled', state: scraperState };
             }
             
+            const jobStartTime = Date.now();
+            const jobStartTimeISO = new Date(jobStartTime).toISOString();
+            
             await updateScraperState(scraperState.id, {
                 isRunning: true,
-                lastRunStartTime: new Date().toISOString()
+                lastRunStartTime: jobStartTimeISO
             });
             
             const triggerSource = isEventBridge ? 'SCHEDULED' : (args.triggerSource || 'MANUAL');
@@ -1112,6 +709,8 @@ exports.handler = async (event) => {
                 endId: args.endId
             });
 
+            const ctx = buildScrapingContext();
+            
             const scrapeResults = await performScrapingEnhanced(entityId, scraperState, job.id, {
                 mode: 'bulk',
                 maxGames: args.maxGames,
@@ -1122,15 +721,25 @@ exports.handler = async (event) => {
                 forceRefresh: args.forceRefresh,
                 skipNotPublished: args.skipNotPublished,
                 skipNotFoundGaps: args.skipNotFoundGaps
-            });
+            }, ctx);
             
             const jobStatus = scrapeResults.stopReason || STOP_REASON.COMPLETED;
             
+            const jobEndTime = Date.now();
+            const durationSeconds = Math.floor((jobEndTime - jobStartTime) / 1000);
+            
             await updateScraperJob(job.id, {
-                ...scrapeResults,
+                totalURLsProcessed: scrapeResults.totalProcessed,
+                newGamesScraped: scrapeResults.newGamesScraped,
+                gamesUpdated: scrapeResults.gamesUpdated,
+                gamesSkipped: scrapeResults.gamesSkipped,
+                errors: scrapeResults.errors,
+                blanks: scrapeResults.blanks,
+                notFoundCount: scrapeResults.notFoundCount,
+                s3CacheHits: scrapeResults.s3CacheHits,
                 status: jobStatus,
-                endTime: new Date().toISOString(),
-                durationSeconds: Math.floor((Date.now() - new Date(job.startTime).getTime()) / 1000)
+                endTime: new Date(jobEndTime).toISOString(),
+                durationSeconds: durationSeconds
             });
             
             await updateScraperState(scraperState.id, {
@@ -1143,7 +752,8 @@ exports.handler = async (event) => {
                 jobId: job.id,
                 state: await getOrCreateScraperState(entityId),
                 results: scrapeResults,
-                stopReason: jobStatus
+                stopReason: jobStatus,
+                durationSeconds: durationSeconds
             };
         }
         

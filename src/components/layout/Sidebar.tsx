@@ -10,11 +10,13 @@ import {
   TrophyIcon,
   BeakerIcon,
   BuildingOffice2Icon,
+  BuildingLibraryIcon,
   WrenchIcon,
   HashtagIcon,
   UsersIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  ChartBarIcon,
   MegaphoneIcon,
   BugAntIcon,
 } from "@heroicons/react/24/outline"
@@ -78,6 +80,12 @@ const mainNavigation: NavItem[] = [
     requiredPaths: ["/venues", "/venues/details"],
   },
   {
+    name: "Entities",
+    href: "/entities",
+    icon: BuildingLibraryIcon,
+    requiredPaths: ["/entities"],
+  },
+  {
     name: "Social",
     icon: MegaphoneIcon,
     requiredPaths: ["/social/pulse", "/social/dashboard"],
@@ -93,6 +101,7 @@ const settingsNavigation: NavItem[] = [
   { name: "Venue Management", href: "/settings/venue-management", icon: BuildingOffice2Icon, requiredPaths: ["/settings/venue-management"] },
   { name: "Game Management", href: "/settings/game-management", icon: BeakerIcon, requiredPaths: ["/settings/game-management"] },
   { name: "Series Management", href: "/settings/series-management", icon: TrophyIcon, requiredPaths: ["/settings/series-management"] },
+  { name: 'Metrics Management', href: '/settings/metrics-management', icon: ChartBarIcon, requiredPaths: ["/settings/series-management"] },
   { name: "Social Accounts", href: "/settings/social-accounts", icon: HashtagIcon, requiredPaths: ["/settings/social-accounts"] },
   { name: "User Management", href: "/settings/user-management", icon: UsersIcon, requiredPaths: ["/settings/user-management"] },
 ]

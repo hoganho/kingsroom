@@ -10,9 +10,9 @@
     - Added separate seriesGameCount for tracking series games
     - MODIFY events now handle transitions (regular ↔ series)
 */
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { unmarshall } from "@aws-sdk/util-dynamodb";
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
+const { unmarshall } = require("@aws-sdk/util-dynamodb");
 
 const client = new DynamoDBClient({ region: "ap-southeast-2" });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -20,7 +20,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 const ENTITY_TABLE = process.env.STORAGE_ENTITY_NAME; 
 const VENUE_TABLE = process.env.STORAGE_VENUE_NAME;
 
-export const handler = async (event) => {
+exports.handler = async (event) => {
   const promises = event.Records.map(async (record) => {
     // Determine source table based on Event Source ARN (Game or Venue table triggered this?)
     const sourceArn = record.eventSourceARN || "";

@@ -1,0 +1,157 @@
+[
+  {
+    "timestamp": 1766461832023,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766461833030
+  },
+  {
+    "timestamp": 1766461832425,
+    "message": "START RequestId: 356f76d0-868f-461a-81eb-2f6738c99a2a Version: $LATEST\n",
+    "ingestionTime": 1766461833030
+  },
+  {
+    "timestamp": 1766461832432,
+    "message": "2025-12-23T03:50:32.432Z\t356f76d0-868f-461a-81eb-2f6738c99a2a\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1766461833030
+  },
+  {
+    "timestamp": 1766461832454,
+    "message": "2025-12-23T03:50:32.454Z\t356f76d0-868f-461a-81eb-2f6738c99a2a\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1766461833030
+  },
+  {
+    "timestamp": 1766461832455,
+    "message": "2025-12-23T03:50:32.455Z\t356f76d0-868f-461a-81eb-2f6738c99a2a\tINFO\t[Consolidator] Skipping non-multi-day: Bella Vista Hotel Tuesdays (f28370dc-16da-4ae3-ba36-2b2e713bcdb1)\n",
+    "ingestionTime": 1766461833030
+  },
+  {
+    "timestamp": 1766461832533,
+    "message": "END RequestId: 356f76d0-868f-461a-81eb-2f6738c99a2a\n",
+    "ingestionTime": 1766461833030
+  },
+  {
+    "timestamp": 1766461832533,
+    "message": "REPORT RequestId: 356f76d0-868f-461a-81eb-2f6738c99a2a\tDuration: 107.18 ms\tBilled Duration: 506 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\tInit Duration: 398.63 ms\t\n",
+    "ingestionTime": 1766461833030
+  },
+  {
+    "timestamp": 1766461833808,
+    "message": "START RequestId: 9b00f0f8-5774-47de-a5e3-1763268ff905 Version: $LATEST\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461833809,
+    "message": "2025-12-23T03:50:33.809Z\t9b00f0f8-5774-47de-a5e3-1763268ff905\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461833809,
+    "message": "2025-12-23T03:50:33.809Z\t9b00f0f8-5774-47de-a5e3-1763268ff905\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461833810,
+    "message": "2025-12-23T03:50:33.810Z\t9b00f0f8-5774-47de-a5e3-1763268ff905\tINFO\t[Consolidator] Skipping non-multi-day: Bella Vista Hotel Tuesdays (de6619d5-6d96-4e78-a193-e0e072bb8ca6)\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461833813,
+    "message": "END RequestId: 9b00f0f8-5774-47de-a5e3-1763268ff905\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461833814,
+    "message": "REPORT RequestId: 9b00f0f8-5774-47de-a5e3-1763268ff905\tDuration: 4.85 ms\tBilled Duration: 5 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461835306,
+    "message": "2025-12-23T03:50:35.306Z\t3bcd5645-d56c-49c7-a443-a039b9cabdaa\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461835306,
+    "message": "2025-12-23T03:50:35.306Z\t3bcd5645-d56c-49c7-a443-a039b9cabdaa\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461835306,
+    "message": "START RequestId: 3bcd5645-d56c-49c7-a443-a039b9cabdaa Version: $LATEST\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461835307,
+    "message": "2025-12-23T03:50:35.307Z\t3bcd5645-d56c-49c7-a443-a039b9cabdaa\tINFO\t[Consolidator] Skipping non-multi-day: Thursdays Grind St.George Leagues Thursday Weekly $120 rebuy until 9:40pm (f8449229-3024-4f58-8ea5-a812df8675cf)\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461835312,
+    "message": "END RequestId: 3bcd5645-d56c-49c7-a443-a039b9cabdaa\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461835312,
+    "message": "REPORT RequestId: 3bcd5645-d56c-49c7-a443-a039b9cabdaa\tDuration: 6.33 ms\tBilled Duration: 7 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461836558,
+    "message": "START RequestId: 2427f368-f11b-4351-a36f-5208d3bc5a2b Version: $LATEST\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461836559,
+    "message": "2025-12-23T03:50:36.559Z\t2427f368-f11b-4351-a36f-5208d3bc5a2b\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461836559,
+    "message": "2025-12-23T03:50:36.559Z\t2427f368-f11b-4351-a36f-5208d3bc5a2b\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461836559,
+    "message": "2025-12-23T03:50:36.559Z\t2427f368-f11b-4351-a36f-5208d3bc5a2b\tINFO\t[Consolidator] Skipping non-multi-day: Thursdays Grind St.George Leagues Thursday Weekly $120 rebuy until 9:40pm (eb844a71-455d-408c-acd2-1dab474f5550)\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461836573,
+    "message": "END RequestId: 2427f368-f11b-4351-a36f-5208d3bc5a2b\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461836573,
+    "message": "REPORT RequestId: 2427f368-f11b-4351-a36f-5208d3bc5a2b\tDuration: 14.31 ms\tBilled Duration: 15 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461837806,
+    "message": "START RequestId: 588def75-3928-4e96-8e28-e27138fccbaa Version: $LATEST\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461837807,
+    "message": "2025-12-23T03:50:37.807Z\t588def75-3928-4e96-8e28-e27138fccbaa\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461837807,
+    "message": "2025-12-23T03:50:37.807Z\t588def75-3928-4e96-8e28-e27138fccbaa\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461837807,
+    "message": "2025-12-23T03:50:37.807Z\t588def75-3928-4e96-8e28-e27138fccbaa\tINFO\t[Consolidator] Skipping non-multi-day: St George Leagues Thursday Grind Thursday Weekly $120 rebuy until 9:40pm (cb963e64-270a-4869-845e-de585a8ee1d4)\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461837812,
+    "message": "END RequestId: 588def75-3928-4e96-8e28-e27138fccbaa\n",
+    "ingestionTime": 1766461842829
+  },
+  {
+    "timestamp": 1766461837812,
+    "message": "REPORT RequestId: 588def75-3928-4e96-8e28-e27138fccbaa\tDuration: 2.08 ms\tBilled Duration: 3 ms\tMemory Size: 128 MB\tMax Memory Used: 95 MB\t\n",
+    "ingestionTime": 1766461842829
+  }
+]

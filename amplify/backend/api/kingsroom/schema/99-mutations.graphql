@@ -201,7 +201,7 @@ type RefreshResponse {
   status: String!
 }
 
-type SaveSeriesAssignmentInfo {
+type SaveSeriesAssignmentInfo @aws_iam @aws_cognito_user_pools {
   tournamentSeriesId: ID
   seriesName: String
   status: SeriesAssignmentStatus
@@ -315,6 +315,9 @@ type Query {
 
   fetchUpdateCandidates: [String!]
     @function(name: "webScraperFunction-${env}")
+
+  getScraperJob(id: ID, jobId: String): ScraperJob
+    @function(name: "scraperManagementFunction-${env}")
 
   getScraperJobsReport(
     entityId: ID              # NEW: Filter by single entity
@@ -492,6 +495,8 @@ type Mutation {
 
   # --- Scraper Controls ---
   fetchTournamentData(url: AWSURL, s3Key: String, forceRefresh: Boolean, scraperApiKey: String, entityId: ID): ScrapedGameData
+    @aws_iam
+    @aws_cognito_user_pools
     @function(name: "webScraperFunction-${env}")
 
   controlScraperOperation(operation: ScraperOperation!, entityId: ID): ScraperControlResponse
@@ -521,6 +526,12 @@ type Mutation {
 
   recalculateVenueDetails(input: RecalculateVenueDetailsInput!): VenueMetricsResult
     @function(name: "venueDetailsUpdater-${env}")
+
+  # Publish game processing event (called by autoScraper Lambda)
+  # Uses @aws_iam for Lambda access - no resolver Lambda needed, this is a passthrough
+  publishGameProcessed(jobId: ID!, event: GameProcessedEventInput!): GameProcessedEvent
+    @aws_iam
+    @aws_cognito_user_pools
 
   # --- Venue Assignment ---
   assignVenueToGame(gameId: ID!, venueId: ID!): VenueAssignmentResult
@@ -556,8 +567,15 @@ type Mutation {
 
 type Subscription {
   onScraperJobUpdate(jobId: String): ScraperJob
-    @aws_subscribe(mutations: ["startScraperJob", "cancelScraperJob"])
+    @aws_subscribe(mutations: ["cancelScraperJob"])
 
   onScrapeURLStatusChange(url: AWSURL): ScrapeURL
-    @aws_subscribe(mutations: ["modifyScrapeURLStatus", "bulkModifyScrapeURLs"])
+    @aws_subscribe(mutations: ["modifyScrapeURLStatus"])
+
+  # Subscribe to game processing events for a specific job
+  # Filter by jobId to only receive events for the job you're tracking
+  onGameProcessed(jobId: ID!): GameProcessedEvent
+    @aws_subscribe(mutations: ["publishGameProcessed"])
+    @aws_iam
+    @aws_cognito_user_pools
 }

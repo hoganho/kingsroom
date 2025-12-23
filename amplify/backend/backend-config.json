@@ -163,12 +163,6 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "getDatabaseMetrics": {
-      "build": true,
-      "dependsOn": [],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
     "getModelCount": {
       "build": true,
       "dependsOn": [
@@ -243,6 +237,22 @@
       "service": "Lambda"
     },
     "recurringGameStreamTrigger": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "refreshAllMetrics": {
       "build": true,
       "dependsOn": [
         {
@@ -379,6 +389,17 @@
     },
     "userLastActiveUpdater": {
       "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
@@ -533,22 +554,6 @@
         }
       ]
     },
-    "AMPLIFY_function_getDatabaseMetrics_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "getDatabaseMetrics"
-        }
-      ]
-    },
-    "AMPLIFY_function_getDatabaseMetrics_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "getDatabaseMetrics"
-        }
-      ]
-    },
     "AMPLIFY_function_getModelCount_deploymentBucketName": {
       "usedBy": [
         {
@@ -626,6 +631,22 @@
         {
           "category": "function",
           "resourceName": "recurringGameStreamTrigger"
+        }
+      ]
+    },
+    "AMPLIFY_function_refreshAllMetrics_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "refreshAllMetrics"
+        }
+      ]
+    },
+    "AMPLIFY_function_refreshAllMetrics_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "refreshAllMetrics"
         }
       ]
     },
@@ -766,14 +787,6 @@
       ]
     },
     "AMPLIFY_function_userLastActiveUpdater_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "userLastActiveUpdater"
-        }
-      ]
-    },
-    "AMPLIFY_function_userLastActiveUpdater_userTable": {
       "usedBy": [
         {
           "category": "function",

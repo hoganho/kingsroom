@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp": 1766480086542,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766480088033
+  },
+  {
+    "timestamp": 1766480086905,
+    "message": "START RequestId: 0ebd7f74-6462-4c86-b2f6-b325c8a89c96 Version: $LATEST\n",
+    "ingestionTime": 1766480088033
+  },
+  {
+    "timestamp": 1766480086907,
+    "message": "2025-12-23T08:54:46.907Z\t0ebd7f74-6462-4c86-b2f6-b325c8a89c96\tINFO\t[FINANCIALS] Processing 1 stream records\n",
+    "ingestionTime": 1766480088033
+  },
+  {
+    "timestamp": 1766480086939,
+    "message": "2025-12-23T08:54:46.939Z\t0ebd7f74-6462-4c86-b2f6-b325c8a89c96\tINFO\t[FINANCIALS] Stream complete: 0 processed (0 series, 0 recurring), 1 skipped, 0 errors\n",
+    "ingestionTime": 1766480088033
+  },
+  {
+    "timestamp": 1766480086942,
+    "message": "END RequestId: 0ebd7f74-6462-4c86-b2f6-b325c8a89c96\n",
+    "ingestionTime": 1766480088033
+  },
+  {
+    "timestamp": 1766480086942,
+    "message": "REPORT RequestId: 0ebd7f74-6462-4c86-b2f6-b325c8a89c96\tDuration: 35.76 ms\tBilled Duration: 396 ms\tMemory Size: 128 MB\tMax Memory Used: 94 MB\tInit Duration: 360.14 ms\t\n",
+    "ingestionTime": 1766480088033
+  }
+]

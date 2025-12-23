@@ -1,5 +1,22 @@
 # 80-scrapers.graphql
 # ==========================================
+# 
+# DEPENDENCIES:
+# - 00-enums.graphql: ScraperJobStatus, ScrapeAttemptStatus, ScrapeURLStatus, etc.
+# - 30-games.graphql: SaveGameResult, SaveGameInput, SaveGameDataInput
+# - Other files: SavePlayerDataInput, VenueReferenceInput, SaveProcessingOptionsInput, SaveVenueAssignmentInfo
+#
+# NOTE: This file should NOT redefine types that exist in other schema files.
+# The following types are defined ELSEWHERE and must NOT be duplicated here:
+# - SavePlayerDataInput
+# - VenueReferenceInput  
+# - SaveProcessingOptionsInput
+# - SaveVenueAssignmentInfo
+# ==========================================
+
+# =============================================================================
+# MODELS
+# =============================================================================
 
 type ScraperJob @model(queries: { list: null }) @auth(rules: [{ allow: private }]) {
   id: ID!
@@ -26,6 +43,17 @@ type ScraperJob @model(queries: { list: null }) @auth(rules: [{ allow: private }
   errorMessages: [String]
   failedURLs: [String]
   urlResults: [ScraperJobURLResult]
+  
+  # Progress tracking (written by Lambda)
+  currentId: Int
+  stopReason: String
+  lastErrorMessage: String
+  notFoundCount: Int
+  s3CacheHits: Int
+  consecutiveNotFound: Int
+  consecutiveErrors: Int
+  consecutiveBlanks: Int
+
   scrapeAttempts: [ScrapeAttempt] @hasMany(indexName: "byScraperJob", fields: ["id"])
   entityId: ID @index(name: "byEntityScraperJob", sortKeyFields: ["startTime"])
   entity: Entity @belongsTo(fields: ["entityId"])
@@ -70,7 +98,6 @@ type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules:
   entity: Entity @belongsTo(fields: ["entityId"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
-
   etag: String
   lastModifiedHeader: String
   contentHash: String
@@ -141,12 +168,15 @@ type ScraperState @model(subscriptions: null) @auth(rules: [{ allow: private }])
 
 type ScrapeStructure @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
-  fields: [String]!
+  fingerprint: String! @index(name: "byFingerprint", queryField: "scrapeStructuresByFingerprint")
   structureLabel: String!
-  occurrenceCount: Int!
+  foundKeys: [String]!
+  keyCount: Int
+  hitCount: Int! @default(value: "1")
   firstSeenAt: AWSDateTime!
   lastSeenAt: AWSDateTime!
   exampleUrl: AWSURL
+  isActive: Boolean @default(value: "true")
 }
 
 type DataSync @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
@@ -182,7 +212,6 @@ type S3Storage @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   registrationStatus: String @index(name: "byS3RegistrationStatus", queryField: "s3StorageByRegistrationStatus", sortKeyFields: ["scrapedAt"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
-
   isParsed: Boolean @default(value: "false")
   parsedDataHash: String
   extractedFields: [String]
@@ -193,6 +222,10 @@ type S3Storage @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   dataChangedAt: AWSDateTime
   dataChangeCount: Int @default(value: "0")
 }
+
+# =============================================================================
+# NON-MODEL RESPONSE TYPES
+# =============================================================================
 
 type ScraperControlResponse {
   success: Boolean!
@@ -268,7 +301,11 @@ type ScrapedGameSummary {
   error: String
 }
 
-type ScrapedGameData {
+# =============================================================================
+# SCRAPED DATA TYPES (with IAM auth for Lambda access)
+# =============================================================================
+
+type ScrapedGameData @aws_iam @aws_cognito_user_pools {
   name: String!
   gameStartDateTime: String
   gameEndDateTime: String
@@ -339,18 +376,13 @@ type ScrapedGameData {
   guaranteeOverlayCost: Float
   gameProfit: Float
   venueAssignmentStatus: VenueAssignmentStatus
-
-  # Primary error message from Lambda
   error: String
-  # Alternative error message field (some responses use this)
   errorMessage: String
-  # Status indicator: 'SUCCESS', 'ERROR', 'SKIPPED', etc.
   status: String
-  # HTTP status code from scraper (200, 401, 403, 404, 429, 500, etc.)
   httpStatus: Int
 }
 
-type ScrapedTournamentLevel {
+type ScrapedTournamentLevel @aws_iam @aws_cognito_user_pools {
   levelNumber: Int!
   durationMinutes: Int
   smallBlind: Int
@@ -358,23 +390,23 @@ type ScrapedTournamentLevel {
   ante: Int
 }
 
-type ScrapedBreak {
+type ScrapedBreak @aws_iam @aws_cognito_user_pools {
   levelNumberBeforeBreak: Int!
   durationMinutes: Int
 }
 
-type ScrapedPlayerEntry {
+type ScrapedPlayerEntry @aws_iam @aws_cognito_user_pools {
   name: String!
 }
 
-type ScrapedPlayerSeating {
+type ScrapedPlayerSeating @aws_iam @aws_cognito_user_pools {
   name: String!
   table: Int
   seat: Int
   playerStack: Int
 }
 
-type ScrapedPlayerResult {
+type ScrapedPlayerResult @aws_iam @aws_cognito_user_pools {
   rank: Int!
   name: String!
   winnings: Float
@@ -382,34 +414,38 @@ type ScrapedPlayerResult {
   isQualification: Boolean
 }
 
-type ScrapedTable {
+type ScrapedTable @aws_iam @aws_cognito_user_pools {
   tableName: String!
   seats: [ScrapedTableSeatData!]
 }
 
-type ScrapedTableSeatData {
+type ScrapedTableSeatData @aws_iam @aws_cognito_user_pools {
   seat: Int!
   isOccupied: Boolean!
   playerName: String
   playerStack: Int
 }
 
-type ScrapedVenueMatch {
+type ScrapedVenueMatch @aws_iam @aws_cognito_user_pools {
   autoAssignedVenue: ScrapedVenueMatchDetails
   suggestions: [ScrapedVenueMatchDetails!]
 }
 
-type ScrapedVenueMatchDetails {
+type ScrapedVenueMatchDetails @aws_iam @aws_cognito_user_pools {
   id: ID!
   name: String!
   score: Float!
 }
 
+# =============================================================================
+# REPORT & LIST TYPES
+# =============================================================================
+
 type ScraperJobsReport {
   items: [ScraperJob]
   nextToken: String
-  totalCount: Int           # Optional
-  entitySummary: [EntityJobSummary]  # NEW: Optional per-entity breakdown
+  totalCount: Int
+  entitySummary: [EntityJobSummary]
 }
 
 type GapRange {
@@ -477,8 +513,12 @@ type ScraperJobConnection {
 type ScrapeURLConnection {
   items: [ScrapeURL]
   nextToken: String
-  totalCount: Int           # Optional: for showing total matching records
+  totalCount: Int
 }
+
+# =============================================================================
+# LEGACY INPUT TYPES (for frontend direct saves)
+# =============================================================================
 
 input SaveTournamentInput {
   sourceUrl: AWSURL!

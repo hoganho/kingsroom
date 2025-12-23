@@ -42,6 +42,14 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
       error
       __typename
     }
+    currentId
+    stopReason
+    lastErrorMessage
+    notFoundCount
+    s3CacheHits
+    consecutiveNotFound
+    consecutiveErrors
+    consecutiveBlanks
     scrapeAttempts {
       items {
         id
@@ -82,6 +90,14 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -339,6 +355,14 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -694,6 +718,38 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             seriesAssignmentConfidence
             suggestedSeriesName
             levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
             venueId
             tournamentSeriesId
             entityId
@@ -744,6 +800,38 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           seriesAssignmentConfidence
           suggestedSeriesName
           levels
+          sessionMode
+          variant
+          bettingStructure
+          speedType
+          tableSize
+          maxPlayers
+          dealType
+          buyInTier
+          entryStructure
+          bountyType
+          bountyAmount
+          bountyPercentage
+          tournamentPurpose
+          stackDepth
+          lateRegistration
+          payoutStructure
+          scheduleType
+          isShootout
+          isSurvivor
+          isFlipAndGo
+          isWinTheButton
+          isAnteOnly
+          isBigBlindAnte
+          cashGameType
+          cashRakeType
+          hasBombPots
+          hasRunItTwice
+          hasStraddle
+          mixedGameRotation
+          classificationSource
+          classificationConfidence
+          lastClassifiedAt
           venueId
           venue {
             id
@@ -1111,6 +1199,11 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             startedAt
             __typename
           }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -1260,13 +1353,17 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             __typename
           }
           timeRange
+          seriesType
           totalVenues
           activeVenues
           inactiveVenues
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalEntries
           totalUniquePlayers
           totalReentries
@@ -1302,12 +1399,14 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           topVenuesByRevenue
           topVenuesByAttendance
           topRecurringGames
+          topTournamentSeries
           calculatedAt
           calculatedBy
           calculationDurationMs
           snapshotsIncluded
           venuesIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           createdAt
@@ -1328,10 +1427,14 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           venueId
           venueName
           timeRange
+          seriesType
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalTournaments
           totalCashGames
           totalNLHE
@@ -1368,6 +1471,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           peakAttendanceDay
           topRecurringGames
           topBuyInLevels
+          topTournamentSeries
           profitTrend
           profitTrendPercent
           attendanceTrend
@@ -1382,6 +1486,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           calculationDurationMs
           snapshotsIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           venue {
@@ -1500,6 +1605,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           }
           recurringGameName
           timeRange
+          seriesType
           totalInstances
           scheduledInstances
           actualInstances
@@ -1584,6 +1690,116 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             venueDetailsId
             __typename
           }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeriesMetrics {
+        items {
+          id
+          entityId
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            quarter
+            month
+            entityId
+            seriesCategory
+            holidayType
+            status
+            startDate
+            endDate
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesName
+          timeRange
+          seriesType
+          totalEvents
+          totalFlights
+          uniqueVenues
+          mainEventCount
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          mainEventTotalEntries
+          regularSeriesPlayers
+          occasionalSeriesPlayers
+          oneTimeSeriesPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntriesPerEvent
+          avgUniquePlayersPerEvent
+          avgPrizepoolPerEvent
+          avgRevenuePerEvent
+          avgProfitPerEvent
+          mainEventAvgEntries
+          stdDevEntries
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          profitMargin
+          firstEventDate
+          firstEventDaysAgo
+          latestEventDate
+          latestEventDaysAgo
+          seriesDurationDays
+          profitability
+          consistency
+          overallHealth
+          topEventsByEntries
+          topEventsByProfit
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          parentSnapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
           entity {
             id
             entityName
@@ -1808,6 +2024,14 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -2065,6 +2289,14 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -2420,6 +2652,38 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             seriesAssignmentConfidence
             suggestedSeriesName
             levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
             venueId
             tournamentSeriesId
             entityId
@@ -2470,6 +2734,38 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           seriesAssignmentConfidence
           suggestedSeriesName
           levels
+          sessionMode
+          variant
+          bettingStructure
+          speedType
+          tableSize
+          maxPlayers
+          dealType
+          buyInTier
+          entryStructure
+          bountyType
+          bountyAmount
+          bountyPercentage
+          tournamentPurpose
+          stackDepth
+          lateRegistration
+          payoutStructure
+          scheduleType
+          isShootout
+          isSurvivor
+          isFlipAndGo
+          isWinTheButton
+          isAnteOnly
+          isBigBlindAnte
+          cashGameType
+          cashRakeType
+          hasBombPots
+          hasRunItTwice
+          hasStraddle
+          mixedGameRotation
+          classificationSource
+          classificationConfidence
+          lastClassifiedAt
           venueId
           venue {
             id
@@ -2837,6 +3133,11 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             startedAt
             __typename
           }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -2986,13 +3287,17 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             __typename
           }
           timeRange
+          seriesType
           totalVenues
           activeVenues
           inactiveVenues
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalEntries
           totalUniquePlayers
           totalReentries
@@ -3028,12 +3333,14 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           topVenuesByRevenue
           topVenuesByAttendance
           topRecurringGames
+          topTournamentSeries
           calculatedAt
           calculatedBy
           calculationDurationMs
           snapshotsIncluded
           venuesIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           createdAt
@@ -3054,10 +3361,14 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           venueId
           venueName
           timeRange
+          seriesType
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalTournaments
           totalCashGames
           totalNLHE
@@ -3094,6 +3405,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           peakAttendanceDay
           topRecurringGames
           topBuyInLevels
+          topTournamentSeries
           profitTrend
           profitTrendPercent
           attendanceTrend
@@ -3108,6 +3420,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           calculationDurationMs
           snapshotsIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           venue {
@@ -3226,6 +3539,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           }
           recurringGameName
           timeRange
+          seriesType
           totalInstances
           scheduledInstances
           actualInstances
@@ -3310,6 +3624,116 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             venueDetailsId
             __typename
           }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeriesMetrics {
+        items {
+          id
+          entityId
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            quarter
+            month
+            entityId
+            seriesCategory
+            holidayType
+            status
+            startDate
+            endDate
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesName
+          timeRange
+          seriesType
+          totalEvents
+          totalFlights
+          uniqueVenues
+          mainEventCount
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          mainEventTotalEntries
+          regularSeriesPlayers
+          occasionalSeriesPlayers
+          oneTimeSeriesPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntriesPerEvent
+          avgUniquePlayersPerEvent
+          avgPrizepoolPerEvent
+          avgRevenuePerEvent
+          avgProfitPerEvent
+          mainEventAvgEntries
+          stdDevEntries
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          profitMargin
+          firstEventDate
+          firstEventDaysAgo
+          latestEventDate
+          latestEventDaysAgo
+          seriesDurationDays
+          profitability
+          consistency
+          overallHealth
+          topEventsByEntries
+          topEventsByProfit
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          parentSnapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
           entity {
             id
             entityName
@@ -3474,6 +3898,57 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
   APITypes.OnScrapeURLStatusChangeSubscriptionVariables,
   APITypes.OnScrapeURLStatusChangeSubscription
 >;
+export const onGameProcessed = /* GraphQL */ `subscription OnGameProcessed($jobId: ID!) {
+  onGameProcessed(jobId: $jobId) {
+    jobId
+    entityId
+    tournamentId
+    url
+    action
+    message
+    errorMessage
+    processedAt
+    durationMs
+    dataSource
+    s3Key
+    gameData {
+      name
+      gameStatus
+      registrationStatus
+      gameStartDateTime
+      gameEndDateTime
+      buyIn
+      rake
+      guaranteeAmount
+      prizepoolPaid
+      totalEntries
+      totalUniquePlayers
+      totalRebuys
+      totalAddons
+      gameType
+      gameVariant
+      tournamentType
+      gameTags
+      venueId
+      venueName
+      doNotScrape
+      existingGameId
+      __typename
+    }
+    saveResult {
+      success
+      gameId
+      action
+      message
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnGameProcessedSubscriptionVariables,
+  APITypes.OnGameProcessedSubscription
+>;
 export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob(
   $filter: ModelSubscriptionScraperJobFilterInput
 ) {
@@ -3510,6 +3985,14 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
       error
       __typename
     }
+    currentId
+    stopReason
+    lastErrorMessage
+    notFoundCount
+    s3CacheHits
+    consecutiveNotFound
+    consecutiveErrors
+    consecutiveBlanks
     scrapeAttempts {
       items {
         id
@@ -3550,6 +4033,14 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -3807,6 +4298,14 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -4162,6 +4661,38 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             seriesAssignmentConfidence
             suggestedSeriesName
             levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
             venueId
             tournamentSeriesId
             entityId
@@ -4212,6 +4743,38 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           seriesAssignmentConfidence
           suggestedSeriesName
           levels
+          sessionMode
+          variant
+          bettingStructure
+          speedType
+          tableSize
+          maxPlayers
+          dealType
+          buyInTier
+          entryStructure
+          bountyType
+          bountyAmount
+          bountyPercentage
+          tournamentPurpose
+          stackDepth
+          lateRegistration
+          payoutStructure
+          scheduleType
+          isShootout
+          isSurvivor
+          isFlipAndGo
+          isWinTheButton
+          isAnteOnly
+          isBigBlindAnte
+          cashGameType
+          cashRakeType
+          hasBombPots
+          hasRunItTwice
+          hasStraddle
+          mixedGameRotation
+          classificationSource
+          classificationConfidence
+          lastClassifiedAt
           venueId
           venue {
             id
@@ -4579,6 +5142,11 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             startedAt
             __typename
           }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -4728,13 +5296,17 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             __typename
           }
           timeRange
+          seriesType
           totalVenues
           activeVenues
           inactiveVenues
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalEntries
           totalUniquePlayers
           totalReentries
@@ -4770,12 +5342,14 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           topVenuesByRevenue
           topVenuesByAttendance
           topRecurringGames
+          topTournamentSeries
           calculatedAt
           calculatedBy
           calculationDurationMs
           snapshotsIncluded
           venuesIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           createdAt
@@ -4796,10 +5370,14 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           venueId
           venueName
           timeRange
+          seriesType
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalTournaments
           totalCashGames
           totalNLHE
@@ -4836,6 +5414,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           peakAttendanceDay
           topRecurringGames
           topBuyInLevels
+          topTournamentSeries
           profitTrend
           profitTrendPercent
           attendanceTrend
@@ -4850,6 +5429,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           calculationDurationMs
           snapshotsIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           venue {
@@ -4968,6 +5548,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           }
           recurringGameName
           timeRange
+          seriesType
           totalInstances
           scheduledInstances
           actualInstances
@@ -5052,6 +5633,116 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             venueDetailsId
             __typename
           }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeriesMetrics {
+        items {
+          id
+          entityId
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            quarter
+            month
+            entityId
+            seriesCategory
+            holidayType
+            status
+            startDate
+            endDate
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesName
+          timeRange
+          seriesType
+          totalEvents
+          totalFlights
+          uniqueVenues
+          mainEventCount
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          mainEventTotalEntries
+          regularSeriesPlayers
+          occasionalSeriesPlayers
+          oneTimeSeriesPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntriesPerEvent
+          avgUniquePlayersPerEvent
+          avgPrizepoolPerEvent
+          avgRevenuePerEvent
+          avgProfitPerEvent
+          mainEventAvgEntries
+          stdDevEntries
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          profitMargin
+          firstEventDate
+          firstEventDaysAgo
+          latestEventDate
+          latestEventDaysAgo
+          seriesDurationDays
+          profitability
+          consistency
+          overallHealth
+          topEventsByEntries
+          topEventsByProfit
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          parentSnapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
           entity {
             id
             entityName
@@ -5239,6 +5930,14 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
       error
       __typename
     }
+    currentId
+    stopReason
+    lastErrorMessage
+    notFoundCount
+    s3CacheHits
+    consecutiveNotFound
+    consecutiveErrors
+    consecutiveBlanks
     scrapeAttempts {
       items {
         id
@@ -5279,6 +5978,14 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -5536,6 +6243,14 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -5891,6 +6606,38 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             seriesAssignmentConfidence
             suggestedSeriesName
             levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
             venueId
             tournamentSeriesId
             entityId
@@ -5941,6 +6688,38 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           seriesAssignmentConfidence
           suggestedSeriesName
           levels
+          sessionMode
+          variant
+          bettingStructure
+          speedType
+          tableSize
+          maxPlayers
+          dealType
+          buyInTier
+          entryStructure
+          bountyType
+          bountyAmount
+          bountyPercentage
+          tournamentPurpose
+          stackDepth
+          lateRegistration
+          payoutStructure
+          scheduleType
+          isShootout
+          isSurvivor
+          isFlipAndGo
+          isWinTheButton
+          isAnteOnly
+          isBigBlindAnte
+          cashGameType
+          cashRakeType
+          hasBombPots
+          hasRunItTwice
+          hasStraddle
+          mixedGameRotation
+          classificationSource
+          classificationConfidence
+          lastClassifiedAt
           venueId
           venue {
             id
@@ -6308,6 +7087,11 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             startedAt
             __typename
           }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -6457,13 +7241,17 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             __typename
           }
           timeRange
+          seriesType
           totalVenues
           activeVenues
           inactiveVenues
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalEntries
           totalUniquePlayers
           totalReentries
@@ -6499,12 +7287,14 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           topVenuesByRevenue
           topVenuesByAttendance
           topRecurringGames
+          topTournamentSeries
           calculatedAt
           calculatedBy
           calculationDurationMs
           snapshotsIncluded
           venuesIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           createdAt
@@ -6525,10 +7315,14 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           venueId
           venueName
           timeRange
+          seriesType
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalTournaments
           totalCashGames
           totalNLHE
@@ -6565,6 +7359,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           peakAttendanceDay
           topRecurringGames
           topBuyInLevels
+          topTournamentSeries
           profitTrend
           profitTrendPercent
           attendanceTrend
@@ -6579,6 +7374,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           calculationDurationMs
           snapshotsIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           venue {
@@ -6697,6 +7493,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           }
           recurringGameName
           timeRange
+          seriesType
           totalInstances
           scheduledInstances
           actualInstances
@@ -6781,6 +7578,116 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             venueDetailsId
             __typename
           }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeriesMetrics {
+        items {
+          id
+          entityId
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            quarter
+            month
+            entityId
+            seriesCategory
+            holidayType
+            status
+            startDate
+            endDate
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesName
+          timeRange
+          seriesType
+          totalEvents
+          totalFlights
+          uniqueVenues
+          mainEventCount
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          mainEventTotalEntries
+          regularSeriesPlayers
+          occasionalSeriesPlayers
+          oneTimeSeriesPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntriesPerEvent
+          avgUniquePlayersPerEvent
+          avgPrizepoolPerEvent
+          avgRevenuePerEvent
+          avgProfitPerEvent
+          mainEventAvgEntries
+          stdDevEntries
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          profitMargin
+          firstEventDate
+          firstEventDaysAgo
+          latestEventDate
+          latestEventDaysAgo
+          seriesDurationDays
+          profitability
+          consistency
+          overallHealth
+          topEventsByEntries
+          topEventsByProfit
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          parentSnapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
           entity {
             id
             entityName
@@ -6968,6 +7875,14 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
       error
       __typename
     }
+    currentId
+    stopReason
+    lastErrorMessage
+    notFoundCount
+    s3CacheHits
+    consecutiveNotFound
+    consecutiveErrors
+    consecutiveBlanks
     scrapeAttempts {
       items {
         id
@@ -7008,6 +7923,14 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -7265,6 +8188,14 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -7620,6 +8551,38 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             seriesAssignmentConfidence
             suggestedSeriesName
             levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
             venueId
             tournamentSeriesId
             entityId
@@ -7670,6 +8633,38 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           seriesAssignmentConfidence
           suggestedSeriesName
           levels
+          sessionMode
+          variant
+          bettingStructure
+          speedType
+          tableSize
+          maxPlayers
+          dealType
+          buyInTier
+          entryStructure
+          bountyType
+          bountyAmount
+          bountyPercentage
+          tournamentPurpose
+          stackDepth
+          lateRegistration
+          payoutStructure
+          scheduleType
+          isShootout
+          isSurvivor
+          isFlipAndGo
+          isWinTheButton
+          isAnteOnly
+          isBigBlindAnte
+          cashGameType
+          cashRakeType
+          hasBombPots
+          hasRunItTwice
+          hasStraddle
+          mixedGameRotation
+          classificationSource
+          classificationConfidence
+          lastClassifiedAt
           venueId
           venue {
             id
@@ -8037,6 +9032,11 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             startedAt
             __typename
           }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -8186,13 +9186,17 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             __typename
           }
           timeRange
+          seriesType
           totalVenues
           activeVenues
           inactiveVenues
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalEntries
           totalUniquePlayers
           totalReentries
@@ -8228,12 +9232,14 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           topVenuesByRevenue
           topVenuesByAttendance
           topRecurringGames
+          topTournamentSeries
           calculatedAt
           calculatedBy
           calculationDurationMs
           snapshotsIncluded
           venuesIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           createdAt
@@ -8254,10 +9260,14 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           venueId
           venueName
           timeRange
+          seriesType
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalTournaments
           totalCashGames
           totalNLHE
@@ -8294,6 +9304,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           peakAttendanceDay
           topRecurringGames
           topBuyInLevels
+          topTournamentSeries
           profitTrend
           profitTrendPercent
           attendanceTrend
@@ -8308,6 +9319,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           calculationDurationMs
           snapshotsIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           venue {
@@ -8426,6 +9438,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           }
           recurringGameName
           timeRange
+          seriesType
           totalInstances
           scheduledInstances
           actualInstances
@@ -8510,6 +9523,116 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             venueDetailsId
             __typename
           }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeriesMetrics {
+        items {
+          id
+          entityId
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            quarter
+            month
+            entityId
+            seriesCategory
+            holidayType
+            status
+            startDate
+            endDate
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesName
+          timeRange
+          seriesType
+          totalEvents
+          totalFlights
+          uniqueVenues
+          mainEventCount
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          mainEventTotalEntries
+          regularSeriesPlayers
+          occasionalSeriesPlayers
+          oneTimeSeriesPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntriesPerEvent
+          avgUniquePlayersPerEvent
+          avgPrizepoolPerEvent
+          avgRevenuePerEvent
+          avgProfitPerEvent
+          mainEventAvgEntries
+          stdDevEntries
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          profitMargin
+          firstEventDate
+          firstEventDaysAgo
+          latestEventDate
+          latestEventDaysAgo
+          seriesDurationDays
+          profitability
+          consistency
+          overallHealth
+          topEventsByEntries
+          topEventsByProfit
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          parentSnapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
           entity {
             id
             entityName
@@ -8734,6 +9857,14 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -8991,6 +10122,14 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -9346,6 +10485,38 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             seriesAssignmentConfidence
             suggestedSeriesName
             levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
             venueId
             tournamentSeriesId
             entityId
@@ -9396,6 +10567,38 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           seriesAssignmentConfidence
           suggestedSeriesName
           levels
+          sessionMode
+          variant
+          bettingStructure
+          speedType
+          tableSize
+          maxPlayers
+          dealType
+          buyInTier
+          entryStructure
+          bountyType
+          bountyAmount
+          bountyPercentage
+          tournamentPurpose
+          stackDepth
+          lateRegistration
+          payoutStructure
+          scheduleType
+          isShootout
+          isSurvivor
+          isFlipAndGo
+          isWinTheButton
+          isAnteOnly
+          isBigBlindAnte
+          cashGameType
+          cashRakeType
+          hasBombPots
+          hasRunItTwice
+          hasStraddle
+          mixedGameRotation
+          classificationSource
+          classificationConfidence
+          lastClassifiedAt
           venueId
           venue {
             id
@@ -9763,6 +10966,11 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             startedAt
             __typename
           }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -9912,13 +11120,17 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             __typename
           }
           timeRange
+          seriesType
           totalVenues
           activeVenues
           inactiveVenues
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalEntries
           totalUniquePlayers
           totalReentries
@@ -9954,12 +11166,14 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           topVenuesByRevenue
           topVenuesByAttendance
           topRecurringGames
+          topTournamentSeries
           calculatedAt
           calculatedBy
           calculationDurationMs
           snapshotsIncluded
           venuesIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           createdAt
@@ -9980,10 +11194,14 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           venueId
           venueName
           timeRange
+          seriesType
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalTournaments
           totalCashGames
           totalNLHE
@@ -10020,6 +11238,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           peakAttendanceDay
           topRecurringGames
           topBuyInLevels
+          topTournamentSeries
           profitTrend
           profitTrendPercent
           attendanceTrend
@@ -10034,6 +11253,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           calculationDurationMs
           snapshotsIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           venue {
@@ -10152,6 +11372,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           }
           recurringGameName
           timeRange
+          seriesType
           totalInstances
           scheduledInstances
           actualInstances
@@ -10236,6 +11457,116 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             venueDetailsId
             __typename
           }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeriesMetrics {
+        items {
+          id
+          entityId
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            quarter
+            month
+            entityId
+            seriesCategory
+            holidayType
+            status
+            startDate
+            endDate
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesName
+          timeRange
+          seriesType
+          totalEvents
+          totalFlights
+          uniqueVenues
+          mainEventCount
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          mainEventTotalEntries
+          regularSeriesPlayers
+          occasionalSeriesPlayers
+          oneTimeSeriesPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntriesPerEvent
+          avgUniquePlayersPerEvent
+          avgPrizepoolPerEvent
+          avgRevenuePerEvent
+          avgProfitPerEvent
+          mainEventAvgEntries
+          stdDevEntries
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          profitMargin
+          firstEventDate
+          firstEventDaysAgo
+          latestEventDate
+          latestEventDaysAgo
+          seriesDurationDays
+          profitability
+          consistency
+          overallHealth
+          topEventsByEntries
+          topEventsByProfit
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          parentSnapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
           entity {
             id
             entityName
@@ -10473,6 +11804,14 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -10730,6 +12069,14 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -11085,6 +12432,38 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             seriesAssignmentConfidence
             suggestedSeriesName
             levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
             venueId
             tournamentSeriesId
             entityId
@@ -11135,6 +12514,38 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           seriesAssignmentConfidence
           suggestedSeriesName
           levels
+          sessionMode
+          variant
+          bettingStructure
+          speedType
+          tableSize
+          maxPlayers
+          dealType
+          buyInTier
+          entryStructure
+          bountyType
+          bountyAmount
+          bountyPercentage
+          tournamentPurpose
+          stackDepth
+          lateRegistration
+          payoutStructure
+          scheduleType
+          isShootout
+          isSurvivor
+          isFlipAndGo
+          isWinTheButton
+          isAnteOnly
+          isBigBlindAnte
+          cashGameType
+          cashRakeType
+          hasBombPots
+          hasRunItTwice
+          hasStraddle
+          mixedGameRotation
+          classificationSource
+          classificationConfidence
+          lastClassifiedAt
           venueId
           venue {
             id
@@ -11502,6 +12913,11 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             startedAt
             __typename
           }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -11651,13 +13067,17 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             __typename
           }
           timeRange
+          seriesType
           totalVenues
           activeVenues
           inactiveVenues
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalEntries
           totalUniquePlayers
           totalReentries
@@ -11693,12 +13113,14 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           topVenuesByRevenue
           topVenuesByAttendance
           topRecurringGames
+          topTournamentSeries
           calculatedAt
           calculatedBy
           calculationDurationMs
           snapshotsIncluded
           venuesIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           createdAt
@@ -11719,10 +13141,14 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           venueId
           venueName
           timeRange
+          seriesType
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalTournaments
           totalCashGames
           totalNLHE
@@ -11759,6 +13185,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           peakAttendanceDay
           topRecurringGames
           topBuyInLevels
+          topTournamentSeries
           profitTrend
           profitTrendPercent
           attendanceTrend
@@ -11773,6 +13200,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           calculationDurationMs
           snapshotsIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           venue {
@@ -11891,6 +13319,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           }
           recurringGameName
           timeRange
+          seriesType
           totalInstances
           scheduledInstances
           actualInstances
@@ -11975,6 +13404,116 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             venueDetailsId
             __typename
           }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeriesMetrics {
+        items {
+          id
+          entityId
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            quarter
+            month
+            entityId
+            seriesCategory
+            holidayType
+            status
+            startDate
+            endDate
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesName
+          timeRange
+          seriesType
+          totalEvents
+          totalFlights
+          uniqueVenues
+          mainEventCount
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          mainEventTotalEntries
+          regularSeriesPlayers
+          occasionalSeriesPlayers
+          oneTimeSeriesPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntriesPerEvent
+          avgUniquePlayersPerEvent
+          avgPrizepoolPerEvent
+          avgRevenuePerEvent
+          avgProfitPerEvent
+          mainEventAvgEntries
+          stdDevEntries
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          profitMargin
+          firstEventDate
+          firstEventDaysAgo
+          latestEventDate
+          latestEventDaysAgo
+          seriesDurationDays
+          profitability
+          consistency
+          overallHealth
+          topEventsByEntries
+          topEventsByProfit
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          parentSnapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
           entity {
             id
             entityName
@@ -12212,6 +13751,14 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -12469,6 +14016,14 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             error
             __typename
           }
+          currentId
+          stopReason
+          lastErrorMessage
+          notFoundCount
+          s3CacheHits
+          consecutiveNotFound
+          consecutiveErrors
+          consecutiveBlanks
           scrapeAttempts {
             nextToken
             startedAt
@@ -12824,6 +14379,38 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             seriesAssignmentConfidence
             suggestedSeriesName
             levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
             venueId
             tournamentSeriesId
             entityId
@@ -12874,6 +14461,38 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           seriesAssignmentConfidence
           suggestedSeriesName
           levels
+          sessionMode
+          variant
+          bettingStructure
+          speedType
+          tableSize
+          maxPlayers
+          dealType
+          buyInTier
+          entryStructure
+          bountyType
+          bountyAmount
+          bountyPercentage
+          tournamentPurpose
+          stackDepth
+          lateRegistration
+          payoutStructure
+          scheduleType
+          isShootout
+          isSurvivor
+          isFlipAndGo
+          isWinTheButton
+          isAnteOnly
+          isBigBlindAnte
+          cashGameType
+          cashRakeType
+          hasBombPots
+          hasRunItTwice
+          hasStraddle
+          mixedGameRotation
+          classificationSource
+          classificationConfidence
+          lastClassifiedAt
           venueId
           venue {
             id
@@ -13241,6 +14860,11 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             startedAt
             __typename
           }
+          metrics {
+            nextToken
+            startedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -13390,13 +15014,17 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             __typename
           }
           timeRange
+          seriesType
           totalVenues
           activeVenues
           inactiveVenues
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalEntries
           totalUniquePlayers
           totalReentries
@@ -13432,12 +15060,14 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           topVenuesByRevenue
           topVenuesByAttendance
           topRecurringGames
+          topTournamentSeries
           calculatedAt
           calculatedBy
           calculationDurationMs
           snapshotsIncluded
           venuesIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           createdAt
@@ -13458,10 +15088,14 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           venueId
           venueName
           timeRange
+          seriesType
           totalGames
+          totalSeriesGames
+          totalRegularGames
           totalRecurringGames
           totalOneOffGames
           totalActiveRecurringGameTypes
+          totalActiveTournamentSeries
           totalTournaments
           totalCashGames
           totalNLHE
@@ -13498,6 +15132,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           peakAttendanceDay
           topRecurringGames
           topBuyInLevels
+          topTournamentSeries
           profitTrend
           profitTrendPercent
           attendanceTrend
@@ -13512,6 +15147,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           calculationDurationMs
           snapshotsIncluded
           recurringGamesIncluded
+          tournamentSeriesIncluded
           dateRangeStart
           dateRangeEnd
           venue {
@@ -13630,6 +15266,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           }
           recurringGameName
           timeRange
+          seriesType
           totalInstances
           scheduledInstances
           actualInstances
@@ -13714,6 +15351,116 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             venueDetailsId
             __typename
           }
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tournamentSeriesMetrics {
+        items {
+          id
+          entityId
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            quarter
+            month
+            entityId
+            seriesCategory
+            holidayType
+            status
+            startDate
+            endDate
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          seriesName
+          timeRange
+          seriesType
+          totalEvents
+          totalFlights
+          uniqueVenues
+          mainEventCount
+          totalEntries
+          totalUniquePlayers
+          totalReentries
+          totalAddons
+          mainEventTotalEntries
+          regularSeriesPlayers
+          occasionalSeriesPlayers
+          oneTimeSeriesPlayers
+          totalPrizepool
+          totalRevenue
+          totalCost
+          totalProfit
+          avgEntriesPerEvent
+          avgUniquePlayersPerEvent
+          avgPrizepoolPerEvent
+          avgRevenuePerEvent
+          avgProfitPerEvent
+          mainEventAvgEntries
+          stdDevEntries
+          minEntries
+          maxEntries
+          medianEntries
+          entriesCV
+          profitMargin
+          firstEventDate
+          firstEventDaysAgo
+          latestEventDate
+          latestEventDaysAgo
+          seriesDurationDays
+          profitability
+          consistency
+          overallHealth
+          topEventsByEntries
+          topEventsByProfit
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          snapshotsIncluded
+          parentSnapshotsIncluded
+          dateRangeStart
+          dateRangeEnd
           entity {
             id
             entityName

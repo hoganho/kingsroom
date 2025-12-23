@@ -17,7 +17,7 @@
 
 type Player @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
-  primaryEntityId: ID @index(name: "byPrimaryEntity")
+  primaryEntityId: ID @index(name: "byPrimaryEntity", queryField: "playersByEntity")
   firstName: String!
   lastName: String!
   phone: String @index(name: "byPhone", queryField: "playerByPhone")

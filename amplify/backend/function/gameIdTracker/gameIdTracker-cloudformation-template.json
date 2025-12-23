@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.2\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.3\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -528,9 +528,9 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/byEntityAndTournamentId",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/byStatus"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/byEntityAndTournamentId",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/byStatus"
               ],
               "Effect": "Allow"
             },
@@ -540,8 +540,8 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-dev/index/byEntityScraperState"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-staging/index/byEntityScraperState"
               ],
               "Effect": "Allow"
             },
@@ -550,7 +550,7 @@
                 "dynamodb:GetItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-staging"
               ],
               "Effect": "Allow"
             },

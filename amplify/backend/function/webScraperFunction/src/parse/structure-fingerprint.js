@@ -6,12 +6,14 @@
  * Tracks HTML structure patterns to detect changes in website layout.
  * Generates fingerprints from found keys and structure labels.
  * 
+ * REQUIRES: ScrapeStructure model with byFingerprint GSI on fingerprint field
+ * 
  * ===================================================================
  */
 
 const crypto = require('crypto');
 const { QueryCommand, PutCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const { getTableName } = require('../config/tables');
 
 /**
@@ -81,7 +83,7 @@ const processStructureFingerprint = async (foundKeys, structureLabel, url, conte
     try {
         const scrapeStructureTable = getTableName('ScrapeStructure');
         
-        // Check for existing structure
+        // Query by fingerprint using GSI
         const queryResult = await ddbDocClient.send(new QueryCommand({
             TableName: scrapeStructureTable,
             IndexName: 'byFingerprint',
@@ -124,7 +126,7 @@ const processStructureFingerprint = async (foundKeys, structureLabel, url, conte
         }
         
         // New structure - create record
-        const structureId = uuidv4();
+        const structureId = randomUUID();
         
         const newRecord = {
             id: structureId,

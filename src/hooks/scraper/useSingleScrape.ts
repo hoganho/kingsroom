@@ -42,7 +42,7 @@ export interface UseSingleScrapeResult {
   
   // Actions
   scrape: (tournamentId: number) => Promise<ScrapedGameData | null>;
-  save: (venueId: string, editedData?: ScrapedGameData) => Promise<{ success: boolean; gameId?: string }>;
+  save: (venueId: string, editedData?: ScrapedGameData, overrideUrl?: string, overrideTournamentId?: number) => Promise<{ success: boolean; gameId?: string }>;
   reset: () => void;
   
   // Enriched data (available after scrape)
@@ -233,13 +233,29 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
   
   const save = useCallback(async (
     venueId: string, 
-    editedData?: ScrapedGameData
+    editedData?: ScrapedGameData,
+    overrideUrl?: string,
+    overrideTournamentId?: number
   ): Promise<{ success: boolean; gameId?: string }> => {
-    if (!result || !result.parsedData) {
+    // Use overrides if provided (to avoid stale closure issues), otherwise fall back to result state
+    const urlToUse = overrideUrl || result?.url;
+    const idToUse = overrideTournamentId ?? result?.id;
+    
+    if (!urlToUse || idToUse === undefined) {
+      console.warn('[useSingleScrape] save() called but missing url or id', { 
+        hasOverrideUrl: !!overrideUrl, 
+        hasResultUrl: !!result?.url,
+        overrideTournamentId,
+        resultId: result?.id 
+      });
       return { success: false };
     }
 
-    const dataToSave = editedData || result.parsedData;
+    const dataToSave = editedData || result?.parsedData;
+    if (!dataToSave) {
+      console.warn('[useSingleScrape] save() called but no data to save (no editedData and no result.parsedData)');
+      return { success: false };
+    }
     
     setResult(prev => prev ? {
       ...prev,
@@ -249,11 +265,11 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
     } : null);
     
     setIsProcessing(true);
-    scraperLogger.info('ITEM_SAVING', 'Saving tournament', { tournamentId: result.id });
+    scraperLogger.info('ITEM_SAVING', 'Saving tournament', { tournamentId: idToUse });
 
     try {
       const saveResult = await saveGameDataToBackend(
-        result.url,
+        urlToUse,
         venueId,
         dataToSave,
         null, // existingGameId - let backend determine
@@ -271,7 +287,7 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
         selectedVenueId: venueId,
       } : null);
 
-      scraperLogger.logSaveSuccess(result.id, gameId || 'unknown', action === 'UPDATED' ? 'UPDATE' : 'CREATE');
+      scraperLogger.logSaveSuccess(idToUse, gameId || 'unknown', action === 'UPDATED' ? 'UPDATE' : 'CREATE');
       setIsProcessing(false);
       
       return { success: true, gameId };
@@ -286,7 +302,7 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
         errorType: 'SAVE',
       } : null);
 
-      scraperLogger.error('ITEM_SAVE_ERROR', errorMessage, { tournamentId: result.id });
+      scraperLogger.error('ITEM_SAVE_ERROR', errorMessage, { tournamentId: idToUse });
       setIsProcessing(false);
       
       return { success: false };

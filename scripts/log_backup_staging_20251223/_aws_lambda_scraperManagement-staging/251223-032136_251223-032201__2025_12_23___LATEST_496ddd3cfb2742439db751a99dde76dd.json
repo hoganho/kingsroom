@@ -1,0 +1,237 @@
+[
+  {
+    "timestamp": 1766460096608,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460097038,
+    "message": "START RequestId: 0af44894-8560-4969-82cb-b8ef3e364acb Version: $LATEST\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460097260,
+    "message": "2025-12-23T03:21:37.260Z\t0af44894-8560-4969-82cb-b8ef3e364acb\tINFO\tScraperManagement invoked: {\"typeName\":\"Query\",\"fieldName\":\"getScraperMetrics\",\"arguments\":{\"entityId\":null,\"entityIds\":null,\"timeRange\":\"LAST_24_HOURS\"},\"identity\":{\"claims\":{\"origin_jti\":\"dbbd6413-b622-461d-92cc-bcb3ccdb7e0d\",\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"event_id\":\"091c9acb-0605-400f-bd58-08997f52cbd2\",\"token_use\":\"access\",\"scope\":\"aws.cognito.signin.user.admin\",\"auth_time\":1766195715,\"iss\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"exp\":1766461861,\"iat\":1766458261,\"client_id\":\"7rfq631ta70a5i17dc4n4tljjv\",\"jti\":\"755ff4b4-e148-4de9-9bbe-2a60328772dd\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"defaultAuthStrategy\":\"ALLOW\",\"groups\":null,\"issuer\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"sourceIp\":[\"89.46.250.198\"],\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"source\":null,\"request\":{\"headers\":{\"x-forwarded-for\":\"89.46.250.198,15.158.16.136\",\"sec-ch-ua-mobile\":\"?0\",\"cloudfront-viewer-country\":\"GB\",\"cloudfront-is-tablet-viewer\":\"false\",\"x-amzn-requestid\":\"fd3e316b-bb10-4941-a7d2-8d0e4729e2b1\",\"via\":\"2.0 1872df29670137f21773bdb80da38e36.cloudfront.net (CloudFront)\",\"cloudfront-forwarded-proto\":\"https\",\"origin\":\"http://localhost:5173\",\"content-length\":\"736\",\"x-forwarded-proto\":\"https\",\"accept-language\":\"en-GB,en;q=0.9\",\"host\":\"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\"sec-gpc\":\"1\",\"user-agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\",\"cloudfront-is-mobile-viewer\":\"false\",\"accept\":\"*/*\",\"priority\":\"u=1, i\",\"cloudfront-viewer-asn\":\"25369\",\"cloudfront-is-smarttv-viewer\":\"false\",\"x-amzn-appsync-is-vpce-request\":\"false\",\"accept-encoding\":\"gzip, deflate, br, zstd\",\"x-amzn-account-id\":\"495599763953\",\"referer\":\"http://localhost:5173/\",\"x-amzn-remote-ip\":\"89.46.250.198\",\"content-type\":\"application/json; charset=UTF-8\",\"sec-fetch-mode\":\"cors\",\"x-amzn-trace-id\":\"Root=1-694a0ac0-556ca4a34f47753268282b23\",\"x-amz-cf-id\":\"PTJeiDCURZEWPW38gIwUkQylpOVdv_GA1zptvLpqHouuXjCUxF8YuA==\",\"authorization\":\"eyJraWQiOiJqR3JXaThlR0hDMmNXYTRFVmVwMEZyU3hJXC9nV3hBcUVhYTBENmNLNHBLYz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfaDNtT2VIckNRIiwiY2xpZW50X2lkIjoiN3JmcTYzMXRhNzBhNWkxN2RjNG40dGxqanYiLCJvcmlnaW5fanRpIjoiZGJiZDY0MTMtYjYyMi00NjFkLTkyY2MtYmNiM2NjZGI3ZTBkIiwiZXZlbnRfaWQiOiIwOTFjOWFjYi0wNjA1LTQwMGYtYmQ1OC0wODk5N2Y1MmNiZDIiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzY2MTk1NzE1LCJleHAiOjE3NjY0NjE4NjEsImlhdCI6MTc2NjQ1ODI2MSwianRpIjoiNzU1ZmY0YjQtZTE0OC00ZGU5LTliYmUtMmE2MDMyODc3MmRkIiwidXNlcm5hbWUiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEifQ.PyrB_IrxAOrWfIp1HYhfAoXDS9Bo_5yQyeIXJj6bVncComHMhCUSEbTY1B3N0QbUmjeqLo5wn9ezRhIZu7RoBYDP-jGloKEZqWbqj8YL-3c1apSVTyYb8fjvMDtBJqy9Rsr4Hmr75qwLAzhyUr9G04kyeKe0t3TA4YYYbbsEgXEDfcdlGb4_vg8xhh9UmFpFb8GWo0qk-RPNaF7gCBNcgPB6U5OFRVAgWvuS_nrFx70OEEGJ7kiJIs64EqcTdvPiidD_h1HYqcnB_Ea_hFZ1UBB9kj8XFbzSapXTrUNOT2aDt6kaPQ0deRRNzH2HSaLyK86iYl38LzbC84d_RnwXvw\",\"sec-fetch-dest\":\"empty\",\"x-amz-user-agent\":\"aws-amplify/6.15.7 api/1 framework/1\",\"sec-ch-ua-platform\":\"\\\"macOS\\\"\",\"cloudfront-is-desktop-viewer\":\"true\",\"sec-fetch-site\":\"cross-site\",\"sec-ch-ua\":\"\\\"Brave\\\";v=\\\"143\\\", \\\"Chromium\\\";v=\\\"143\\\", \\\"Not A(Brand\\\";v=\\\"24\\\"\",\"x-forwarded-port\":\"443\"},\"domainName\":null},\"prev\":{\"result\":{}}}\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460097300,
+    "message": "2025-12-23T03:21:37.300Z\t0af44894-8560-4969-82cb-b8ef3e364acb\tINFO\tGetting scraper metrics for: { timeRange: 'LAST_24_HOURS', entityId: null }\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460098242,
+    "message": "2025-12-23T03:21:38.242Z\t0af44894-8560-4969-82cb-b8ef3e364acb\tINFO\t[ScraperManagement] Flushing monitoring metrics...\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460098502,
+    "message": "END RequestId: 0af44894-8560-4969-82cb-b8ef3e364acb\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460098502,
+    "message": "REPORT RequestId: 0af44894-8560-4969-82cb-b8ef3e364acb\tDuration: 1463.15 ms\tBilled Duration: 1891 ms\tMemory Size: 128 MB\tMax Memory Used: 100 MB\tInit Duration: 427.37 ms\t\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100250,
+    "message": "2025-12-23T03:21:40.250Z\t267e7841-c098-4e51-9970-7713784ec824\tINFO\tScraperManagement invoked: {\"typeName\":\"Query\",\"fieldName\":\"getScraperJobsReport\",\"arguments\":{\"entityId\":null,\"entityIds\":null,\"status\":null,\"limit\":5,\"nextToken\":null},\"identity\":{\"claims\":{\"origin_jti\":\"dbbd6413-b622-461d-92cc-bcb3ccdb7e0d\",\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"event_id\":\"091c9acb-0605-400f-bd58-08997f52cbd2\",\"token_use\":\"access\",\"scope\":\"aws.cognito.signin.user.admin\",\"auth_time\":1766195715,\"iss\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"exp\":1766461861,\"iat\":1766458261,\"client_id\":\"7rfq631ta70a5i17dc4n4tljjv\",\"jti\":\"755ff4b4-e148-4de9-9bbe-2a60328772dd\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"defaultAuthStrategy\":\"ALLOW\",\"groups\":null,\"issuer\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"sourceIp\":[\"89.46.250.198\"],\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"source\":null,\"request\":{\"headers\":{\"x-forwarded-for\":\"89.46.250.198,15.158.16.175\",\"sec-ch-ua-mobile\":\"?0\",\"cloudfront-viewer-country\":\"GB\",\"cloudfront-is-tablet-viewer\":\"false\",\"x-amzn-requestid\":\"58a48997-d513-4161-8ff1-99b9a90a33d5\",\"via\":\"2.0 1872df29670137f21773bdb80da38e36.cloudfront.net (CloudFront)\",\"cloudfront-forwarded-proto\":\"https\",\"origin\":\"http://localhost:5173\",\"content-length\":\"24111\",\"x-forwarded-proto\":\"https\",\"accept-language\":\"en-GB,en;q=0.9\",\"host\":\"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\"sec-gpc\":\"1\",\"user-agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\",\"cloudfront-is-mobile-viewer\":\"false\",\"accept\":\"*/*\",\"priority\":\"u=1, i\",\"cloudfront-viewer-asn\":\"25369\",\"cloudfront-is-smarttv-viewer\":\"false\",\"x-amzn-appsync-is-vpce-request\":\"false\",\"accept-encoding\":\"gzip, deflate, br, zstd\",\"x-amzn-account-id\":\"495599763953\",\"referer\":\"http://localhost:5173/\",\"x-amzn-remote-ip\":\"89.46.250.198\",\"content-type\":\"application/json; charset=UTF-8\",\"sec-fetch-mode\":\"cors\",\"x-amzn-trace-id\":\"Root=1-694a0ac4-14d8d93764823b5b0eabec11\",\"x-amz-cf-id\":\"stgjb8uE-eLOVcISFBHKlrt1dOMpuPUl4yltVsyOwnNhAJ9G6sgK3g==\",\"authorization\":\"eyJraWQiOiJqR3JXaThlR0hDMmNXYTRFVmVwMEZyU3hJXC9nV3hBcUVhYTBENmNLNHBLYz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfaDNtT2VIckNRIiwiY2xpZW50X2lkIjoiN3JmcTYzMXRhNzBhNWkxN2RjNG40dGxqanYiLCJvcmlnaW5fanRpIjoiZGJiZDY0MTMtYjYyMi00NjFkLTkyY2MtYmNiM2NjZGI3ZTBkIiwiZXZlbnRfaWQiOiIwOTFjOWFjYi0wNjA1LTQwMGYtYmQ1OC0wODk5N2Y1MmNiZDIiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzY2MTk1NzE1LCJleHAiOjE3NjY0NjE4NjEsImlhdCI6MTc2NjQ1ODI2MSwianRpIjoiNzU1ZmY0YjQtZTE0OC00ZGU5LTliYmUtMmE2MDMyODc3MmRkIiwidXNlcm5hbWUiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEifQ.PyrB_IrxAOrWfIp1HYhfAoXDS9Bo_5yQyeIXJj6bVncComHMhCUSEbTY1B3N0QbUmjeqLo5wn9ezRhIZu7RoBYDP-jGloKEZqWbqj8YL-3c1apSVTyYb8fjvMDtBJqy9Rsr4Hmr75qwLAzhyUr9G04kyeKe0t3TA4YYYbbsEgXEDfcdlGb4_vg8xhh9UmFpFb8GWo0qk-RPNaF7gCBNcgPB6U5OFRVAgWvuS_nrFx70OEEGJ7kiJIs64EqcTdvPiidD_h1HYqcnB_Ea_hFZ1UBB9kj8XFbzSapXTrUNOT2aDt6kaPQ0deRRNzH2HSaLyK86iYl38LzbC84d_RnwXvw\",\"sec-fetch-dest\":\"empty\",\"x-amz-user-agent\":\"aws-amplify/6.15.7 api/1 framework/1\",\"sec-ch-ua-platform\":\"\\\"macOS\\\"\",\"cloudfront-is-desktop-viewer\":\"true\",\"sec-fetch-site\":\"cross-site\",\"sec-ch-ua\":\"\\\"Brave\\\";v=\\\"143\\\", \\\"Chromium\\\";v=\\\"143\\\", \\\"Not A(Brand\\\";v=\\\"24\\\"\",\"x-forwarded-port\":\"443\"},\"domainName\":null},\"prev\":{\"result\":{}}}\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100250,
+    "message": "START RequestId: 267e7841-c098-4e51-9970-7713784ec824 Version: $LATEST\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100251,
+    "message": "2025-12-23T03:21:40.251Z\t267e7841-c098-4e51-9970-7713784ec824\tINFO\tGetting scraper jobs report: { entityId: null, status: null, limit: 5, nextToken: null }\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100301,
+    "message": "2025-12-23T03:21:40.301Z\t267e7841-c098-4e51-9970-7713784ec824\tINFO\t[ScraperManagement] Flushing monitoring metrics...\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100361,
+    "message": "END RequestId: 267e7841-c098-4e51-9970-7713784ec824\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100361,
+    "message": "REPORT RequestId: 267e7841-c098-4e51-9970-7713784ec824\tDuration: 110.14 ms\tBilled Duration: 111 ms\tMemory Size: 128 MB\tMax Memory Used: 100 MB\t\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100430,
+    "message": "START RequestId: 69b5a127-b77d-4c1f-86e2-2175be0fbda8 Version: $LATEST\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100431,
+    "message": "2025-12-23T03:21:40.431Z\t69b5a127-b77d-4c1f-86e2-2175be0fbda8\tINFO\tScraperManagement invoked: {\"typeName\":\"Query\",\"fieldName\":\"getScraperJobsReport\",\"arguments\":{\"entityId\":null,\"entityIds\":null,\"status\":null,\"limit\":5,\"nextToken\":null},\"identity\":{\"claims\":{\"origin_jti\":\"dbbd6413-b622-461d-92cc-bcb3ccdb7e0d\",\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"event_id\":\"091c9acb-0605-400f-bd58-08997f52cbd2\",\"token_use\":\"access\",\"scope\":\"aws.cognito.signin.user.admin\",\"auth_time\":1766195715,\"iss\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"exp\":1766461861,\"iat\":1766458261,\"client_id\":\"7rfq631ta70a5i17dc4n4tljjv\",\"jti\":\"755ff4b4-e148-4de9-9bbe-2a60328772dd\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"defaultAuthStrategy\":\"ALLOW\",\"groups\":null,\"issuer\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"sourceIp\":[\"89.46.250.198\"],\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"source\":null,\"request\":{\"headers\":{\"x-forwarded-for\":\"89.46.250.198,15.158.16.142\",\"sec-ch-ua-mobile\":\"?0\",\"cloudfront-viewer-country\":\"GB\",\"cloudfront-is-tablet-viewer\":\"false\",\"x-amzn-requestid\":\"308c4592-6b4e-496e-8fb7-9b1ea8e78beb\",\"via\":\"2.0 1872df29670137f21773bdb80da38e36.cloudfront.net (CloudFront)\",\"cloudfront-forwarded-proto\":\"https\",\"origin\":\"http://localhost:5173\",\"content-length\":\"24111\",\"x-forwarded-proto\":\"https\",\"accept-language\":\"en-GB,en;q=0.9\",\"host\":\"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\"sec-gpc\":\"1\",\"user-agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\",\"cloudfront-is-mobile-viewer\":\"false\",\"accept\":\"*/*\",\"priority\":\"u=1, i\",\"cloudfront-viewer-asn\":\"25369\",\"cloudfront-is-smarttv-viewer\":\"false\",\"x-amzn-appsync-is-vpce-request\":\"false\",\"accept-encoding\":\"gzip, deflate, br, zstd\",\"x-amzn-account-id\":\"495599763953\",\"referer\":\"http://localhost:5173/\",\"x-amzn-remote-ip\":\"89.46.250.198\",\"content-type\":\"application/json; charset=UTF-8\",\"sec-fetch-mode\":\"cors\",\"x-amzn-trace-id\":\"Root=1-694a0ac4-138098223dd13541274c7e91\",\"x-amz-cf-id\":\"h6nDK3iAGs6JU27U7K1hb2IL46G911Mw2mGZRDYF8_OoAp_qx1Jnhw==\",\"authorization\":\"eyJraWQiOiJqR3JXaThlR0hDMmNXYTRFVmVwMEZyU3hJXC9nV3hBcUVhYTBENmNLNHBLYz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfaDNtT2VIckNRIiwiY2xpZW50X2lkIjoiN3JmcTYzMXRhNzBhNWkxN2RjNG40dGxqanYiLCJvcmlnaW5fanRpIjoiZGJiZDY0MTMtYjYyMi00NjFkLTkyY2MtYmNiM2NjZGI3ZTBkIiwiZXZlbnRfaWQiOiIwOTFjOWFjYi0wNjA1LTQwMGYtYmQ1OC0wODk5N2Y1MmNiZDIiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzY2MTk1NzE1LCJleHAiOjE3NjY0NjE4NjEsImlhdCI6MTc2NjQ1ODI2MSwianRpIjoiNzU1ZmY0YjQtZTE0OC00ZGU5LTliYmUtMmE2MDMyODc3MmRkIiwidXNlcm5hbWUiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEifQ.PyrB_IrxAOrWfIp1HYhfAoXDS9Bo_5yQyeIXJj6bVncComHMhCUSEbTY1B3N0QbUmjeqLo5wn9ezRhIZu7RoBYDP-jGloKEZqWbqj8YL-3c1apSVTyYb8fjvMDtBJqy9Rsr4Hmr75qwLAzhyUr9G04kyeKe0t3TA4YYYbbsEgXEDfcdlGb4_vg8xhh9UmFpFb8GWo0qk-RPNaF7gCBNcgPB6U5OFRVAgWvuS_nrFx70OEEGJ7kiJIs64EqcTdvPiidD_h1HYqcnB_Ea_hFZ1UBB9kj8XFbzSapXTrUNOT2aDt6kaPQ0deRRNzH2HSaLyK86iYl38LzbC84d_RnwXvw\",\"sec-fetch-dest\":\"empty\",\"x-amz-user-agent\":\"aws-amplify/6.15.7 api/1 framework/1\",\"sec-ch-ua-platform\":\"\\\"macOS\\\"\",\"cloudfront-is-desktop-viewer\":\"true\",\"sec-fetch-site\":\"cross-site\",\"sec-ch-ua\":\"\\\"Brave\\\";v=\\\"143\\\", \\\"Chromium\\\";v=\\\"143\\\", \\\"Not A(Brand\\\";v=\\\"24\\\"\",\"x-forwarded-port\":\"443\"},\"domainName\":null},\"prev\":{\"result\":{}}}\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100431,
+    "message": "2025-12-23T03:21:40.431Z\t69b5a127-b77d-4c1f-86e2-2175be0fbda8\tINFO\tGetting scraper jobs report: { entityId: null, status: null, limit: 5, nextToken: null }\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100461,
+    "message": "2025-12-23T03:21:40.461Z\t69b5a127-b77d-4c1f-86e2-2175be0fbda8\tINFO\t[ScraperManagement] Flushing monitoring metrics...\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100523,
+    "message": "END RequestId: 69b5a127-b77d-4c1f-86e2-2175be0fbda8\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460100523,
+    "message": "REPORT RequestId: 69b5a127-b77d-4c1f-86e2-2175be0fbda8\tDuration: 91.67 ms\tBilled Duration: 92 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1766460103097
+  },
+  {
+    "timestamp": 1766460103792,
+    "message": "START RequestId: 6c29da62-a517-4a2a-a87c-5bc70dd45da8 Version: $LATEST\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460103793,
+    "message": "2025-12-23T03:21:43.793Z\t6c29da62-a517-4a2a-a87c-5bc70dd45da8\tINFO\tScraperManagement invoked: {\"typeName\":\"Query\",\"fieldName\":\"getScraperJobsReport\",\"arguments\":{\"entityId\":null,\"entityIds\":null,\"status\":null,\"limit\":20,\"nextToken\":null},\"identity\":{\"claims\":{\"origin_jti\":\"dbbd6413-b622-461d-92cc-bcb3ccdb7e0d\",\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"event_id\":\"091c9acb-0605-400f-bd58-08997f52cbd2\",\"token_use\":\"access\",\"scope\":\"aws.cognito.signin.user.admin\",\"auth_time\":1766195715,\"iss\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"exp\":1766461861,\"iat\":1766458261,\"client_id\":\"7rfq631ta70a5i17dc4n4tljjv\",\"jti\":\"755ff4b4-e148-4de9-9bbe-2a60328772dd\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"defaultAuthStrategy\":\"ALLOW\",\"groups\":null,\"issuer\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"sourceIp\":[\"89.46.250.198\"],\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"source\":null,\"request\":{\"headers\":{\"x-forwarded-for\":\"89.46.250.198,15.158.16.178\",\"sec-ch-ua-mobile\":\"?0\",\"cloudfront-viewer-country\":\"GB\",\"cloudfront-is-tablet-viewer\":\"false\",\"x-amzn-requestid\":\"6daadefc-b9ba-448c-84f0-3ace864351ac\",\"via\":\"2.0 1872df29670137f21773bdb80da38e36.cloudfront.net (CloudFront)\",\"cloudfront-forwarded-proto\":\"https\",\"origin\":\"http://localhost:5173\",\"content-length\":\"24129\",\"x-forwarded-proto\":\"https\",\"accept-language\":\"en-GB,en;q=0.9\",\"host\":\"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\"sec-gpc\":\"1\",\"user-agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\",\"cloudfront-is-mobile-viewer\":\"false\",\"accept\":\"*/*\",\"priority\":\"u=1, i\",\"cloudfront-viewer-asn\":\"25369\",\"cloudfront-is-smarttv-viewer\":\"false\",\"x-amzn-appsync-is-vpce-request\":\"false\",\"accept-encoding\":\"gzip, deflate, br, zstd\",\"x-amzn-account-id\":\"495599763953\",\"referer\":\"http://localhost:5173/\",\"x-amzn-remote-ip\":\"89.46.250.198\",\"content-type\":\"application/json; charset=UTF-8\",\"sec-fetch-mode\":\"cors\",\"x-amzn-trace-id\":\"Root=1-694a0ac7-32a0ed5961f466b636bbed98\",\"x-amz-cf-id\":\"_hMP1xJsKmQhlIOWsQGCQ1OCDrOzVpuX8IuGBguk9diyxiVn904vjw==\",\"authorization\":\"eyJraWQiOiJqR3JXaThlR0hDMmNXYTRFVmVwMEZyU3hJXC9nV3hBcUVhYTBENmNLNHBLYz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfaDNtT2VIckNRIiwiY2xpZW50X2lkIjoiN3JmcTYzMXRhNzBhNWkxN2RjNG40dGxqanYiLCJvcmlnaW5fanRpIjoiZGJiZDY0MTMtYjYyMi00NjFkLTkyY2MtYmNiM2NjZGI3ZTBkIiwiZXZlbnRfaWQiOiIwOTFjOWFjYi0wNjA1LTQwMGYtYmQ1OC0wODk5N2Y1MmNiZDIiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzY2MTk1NzE1LCJleHAiOjE3NjY0NjE4NjEsImlhdCI6MTc2NjQ1ODI2MSwianRpIjoiNzU1ZmY0YjQtZTE0OC00ZGU5LTliYmUtMmE2MDMyODc3MmRkIiwidXNlcm5hbWUiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEifQ.PyrB_IrxAOrWfIp1HYhfAoXDS9Bo_5yQyeIXJj6bVncComHMhCUSEbTY1B3N0QbUmjeqLo5wn9ezRhIZu7RoBYDP-jGloKEZqWbqj8YL-3c1apSVTyYb8fjvMDtBJqy9Rsr4Hmr75qwLAzhyUr9G04kyeKe0t3TA4YYYbbsEgXEDfcdlGb4_vg8xhh9UmFpFb8GWo0qk-RPNaF7gCBNcgPB6U5OFRVAgWvuS_nrFx70OEEGJ7kiJIs64EqcTdvPiidD_h1HYqcnB_Ea_hFZ1UBB9kj8XFbzSapXTrUNOT2aDt6kaPQ0deRRNzH2HSaLyK86iYl38LzbC84d_RnwXvw\",\"sec-fetch-dest\":\"empty\",\"x-amz-user-agent\":\"aws-amplify/6.15.7 api/1 framework/1\",\"sec-ch-ua-platform\":\"\\\"macOS\\\"\",\"cloudfront-is-desktop-viewer\":\"true\",\"sec-fetch-site\":\"cross-site\",\"sec-ch-ua\":\"\\\"Brave\\\";v=\\\"143\\\", \\\"Chromium\\\";v=\\\"143\\\", \\\"Not A(Brand\\\";v=\\\"24\\\"\",\"x-forwarded-port\":\"443\"},\"domainName\":null},\"prev\":{\"result\":{}}}\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460103793,
+    "message": "2025-12-23T03:21:43.793Z\t6c29da62-a517-4a2a-a87c-5bc70dd45da8\tINFO\tGetting scraper jobs report: { entityId: null, status: null, limit: 20, nextToken: null }\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460103801,
+    "message": "2025-12-23T03:21:43.801Z\t6c29da62-a517-4a2a-a87c-5bc70dd45da8\tINFO\t[ScraperManagement] Flushing monitoring metrics...\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460103861,
+    "message": "END RequestId: 6c29da62-a517-4a2a-a87c-5bc70dd45da8\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460103861,
+    "message": "REPORT RequestId: 6c29da62-a517-4a2a-a87c-5bc70dd45da8\tDuration: 67.64 ms\tBilled Duration: 68 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460104307,
+    "message": "START RequestId: f5e9bfca-fcac-45a9-a067-ccf104f66f3b Version: $LATEST\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460104308,
+    "message": "2025-12-23T03:21:44.308Z\tf5e9bfca-fcac-45a9-a067-ccf104f66f3b\tINFO\tScraperManagement invoked: {\"typeName\":\"Query\",\"fieldName\":\"getScraperJobsReport\",\"arguments\":{\"entityId\":null,\"entityIds\":null,\"status\":null,\"limit\":20,\"nextToken\":null},\"identity\":{\"claims\":{\"origin_jti\":\"dbbd6413-b622-461d-92cc-bcb3ccdb7e0d\",\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"event_id\":\"091c9acb-0605-400f-bd58-08997f52cbd2\",\"token_use\":\"access\",\"scope\":\"aws.cognito.signin.user.admin\",\"auth_time\":1766195715,\"iss\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"exp\":1766461861,\"iat\":1766458261,\"client_id\":\"7rfq631ta70a5i17dc4n4tljjv\",\"jti\":\"755ff4b4-e148-4de9-9bbe-2a60328772dd\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"defaultAuthStrategy\":\"ALLOW\",\"groups\":null,\"issuer\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"sourceIp\":[\"89.46.250.198\"],\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"source\":null,\"request\":{\"headers\":{\"x-forwarded-for\":\"89.46.250.198,15.158.16.180\",\"sec-ch-ua-mobile\":\"?0\",\"cloudfront-viewer-country\":\"GB\",\"cloudfront-is-tablet-viewer\":\"false\",\"x-amzn-requestid\":\"dbec1987-9912-4d40-8988-0c9bb2c7f0ff\",\"via\":\"2.0 1872df29670137f21773bdb80da38e36.cloudfront.net (CloudFront)\",\"cloudfront-forwarded-proto\":\"https\",\"origin\":\"http://localhost:5173\",\"content-length\":\"24129\",\"x-forwarded-proto\":\"https\",\"accept-language\":\"en-GB,en;q=0.9\",\"host\":\"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\"sec-gpc\":\"1\",\"user-agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\",\"cloudfront-is-mobile-viewer\":\"false\",\"accept\":\"*/*\",\"priority\":\"u=1, i\",\"cloudfront-viewer-asn\":\"25369\",\"cloudfront-is-smarttv-viewer\":\"false\",\"x-amzn-appsync-is-vpce-request\":\"false\",\"accept-encoding\":\"gzip, deflate, br, zstd\",\"x-amzn-account-id\":\"495599763953\",\"referer\":\"http://localhost:5173/\",\"x-amzn-remote-ip\":\"89.46.250.198\",\"content-type\":\"application/json; charset=UTF-8\",\"sec-fetch-mode\":\"cors\",\"x-amzn-trace-id\":\"Root=1-694a0ac8-05fed905776fb60662b6b4c1\",\"x-amz-cf-id\":\"TA0ul6gRnPgGjCz5FKOIGg1bHneVdg-7exvwroMEKZS6S4RaFvgUww==\",\"authorization\":\"eyJraWQiOiJqR3JXaThlR0hDMmNXYTRFVmVwMEZyU3hJXC9nV3hBcUVhYTBENmNLNHBLYz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfaDNtT2VIckNRIiwiY2xpZW50X2lkIjoiN3JmcTYzMXRhNzBhNWkxN2RjNG40dGxqanYiLCJvcmlnaW5fanRpIjoiZGJiZDY0MTMtYjYyMi00NjFkLTkyY2MtYmNiM2NjZGI3ZTBkIiwiZXZlbnRfaWQiOiIwOTFjOWFjYi0wNjA1LTQwMGYtYmQ1OC0wODk5N2Y1MmNiZDIiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzY2MTk1NzE1LCJleHAiOjE3NjY0NjE4NjEsImlhdCI6MTc2NjQ1ODI2MSwianRpIjoiNzU1ZmY0YjQtZTE0OC00ZGU5LTliYmUtMmE2MDMyODc3MmRkIiwidXNlcm5hbWUiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEifQ.PyrB_IrxAOrWfIp1HYhfAoXDS9Bo_5yQyeIXJj6bVncComHMhCUSEbTY1B3N0QbUmjeqLo5wn9ezRhIZu7RoBYDP-jGloKEZqWbqj8YL-3c1apSVTyYb8fjvMDtBJqy9Rsr4Hmr75qwLAzhyUr9G04kyeKe0t3TA4YYYbbsEgXEDfcdlGb4_vg8xhh9UmFpFb8GWo0qk-RPNaF7gCBNcgPB6U5OFRVAgWvuS_nrFx70OEEGJ7kiJIs64EqcTdvPiidD_h1HYqcnB_Ea_hFZ1UBB9kj8XFbzSapXTrUNOT2aDt6kaPQ0deRRNzH2HSaLyK86iYl38LzbC84d_RnwXvw\",\"sec-fetch-dest\":\"empty\",\"x-amz-user-agent\":\"aws-amplify/6.15.7 api/1 framework/1\",\"sec-ch-ua-platform\":\"\\\"macOS\\\"\",\"cloudfront-is-desktop-viewer\":\"true\",\"sec-fetch-site\":\"cross-site\",\"sec-ch-ua\":\"\\\"Brave\\\";v=\\\"143\\\", \\\"Chromium\\\";v=\\\"143\\\", \\\"Not A(Brand\\\";v=\\\"24\\\"\",\"x-forwarded-port\":\"443\"},\"domainName\":null},\"prev\":{\"result\":{}}}\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460104308,
+    "message": "2025-12-23T03:21:44.308Z\tf5e9bfca-fcac-45a9-a067-ccf104f66f3b\tINFO\tGetting scraper jobs report: { entityId: null, status: null, limit: 20, nextToken: null }\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460104341,
+    "message": "2025-12-23T03:21:44.341Z\tf5e9bfca-fcac-45a9-a067-ccf104f66f3b\tINFO\t[ScraperManagement] Flushing monitoring metrics...\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460104421,
+    "message": "END RequestId: f5e9bfca-fcac-45a9-a067-ccf104f66f3b\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460104421,
+    "message": "REPORT RequestId: f5e9bfca-fcac-45a9-a067-ccf104f66f3b\tDuration: 113.57 ms\tBilled Duration: 114 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1766460112809
+  },
+  {
+    "timestamp": 1766460118038,
+    "message": "START RequestId: ca09fd41-3720-4b8b-9582-8b83adee0388 Version: $LATEST\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460118039,
+    "message": "2025-12-23T03:21:58.039Z\tca09fd41-3720-4b8b-9582-8b83adee0388\tINFO\tScraperManagement invoked: {\"typeName\":\"Mutation\",\"fieldName\":\"startScraperJob\",\"arguments\":{\"input\":{\"entityId\":\"42101695-1332-48e3-963b-3c6ad4e909a0\",\"mode\":\"multiId\",\"triggerSource\":\"MANUAL\",\"triggeredBy\":\"scraper-admin-ui\",\"useS3\":true,\"forceRefresh\":false,\"skipNotPublished\":true,\"skipNotFoundGaps\":true,\"skipInProgress\":false,\"ignoreDoNotScrape\":false,\"saveToDatabase\":true,\"defaultVenueId\":\"fd4f7fb1-67fd-4398-b4b4-d85722256d45\",\"gapIds\":[936,1011,1027,1054,1220],\"maxConsecutiveNotFound\":10,\"maxConsecutiveErrors\":3,\"maxConsecutiveBlanks\":5,\"maxTotalErrors\":15}},\"identity\":{\"claims\":{\"origin_jti\":\"dbbd6413-b622-461d-92cc-bcb3ccdb7e0d\",\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"event_id\":\"091c9acb-0605-400f-bd58-08997f52cbd2\",\"token_use\":\"access\",\"scope\":\"aws.cognito.signin.user.admin\",\"auth_time\":1766195715,\"iss\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"exp\":1766461861,\"iat\":1766458261,\"client_id\":\"7rfq631ta70a5i17dc4n4tljjv\",\"jti\":\"755ff4b4-e148-4de9-9bbe-2a60328772dd\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"defaultAuthStrategy\":\"ALLOW\",\"groups\":null,\"issuer\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"sourceIp\":[\"89.46.250.198\"],\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"source\":null,\"request\":{\"headers\":{\"x-forwarded-for\":\"89.46.250.198,15.158.16.145\",\"sec-ch-ua-mobile\":\"?0\",\"cloudfront-viewer-country\":\"GB\",\"cloudfront-is-tablet-viewer\":\"false\",\"x-amzn-requestid\":\"6acf2fb9-ee95-4913-bf82-c78f53e9c78b\",\"via\":\"2.0 1872df29670137f21773bdb80da38e36.cloudfront.net (CloudFront)\",\"cloudfront-forwarded-proto\":\"https\",\"origin\":\"http://localhost:5173\",\"content-length\":\"46694\",\"x-forwarded-proto\":\"https\",\"accept-language\":\"en-GB,en;q=0.9\",\"host\":\"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\"sec-gpc\":\"1\",\"user-agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\",\"cloudfront-is-mobile-viewer\":\"false\",\"accept\":\"*/*\",\"priority\":\"u=1, i\",\"cloudfront-viewer-asn\":\"25369\",\"cloudfront-is-smarttv-viewer\":\"false\",\"x-amzn-appsync-is-vpce-request\":\"false\",\"accept-encoding\":\"gzip, deflate, br, zstd\",\"x-amzn-account-id\":\"495599763953\",\"referer\":\"http://localhost:5173/\",\"x-amzn-remote-ip\":\"89.46.250.198\",\"content-type\":\"application/json; charset=UTF-8\",\"sec-fetch-mode\":\"cors\",\"x-amzn-trace-id\":\"Root=1-694a0ad5-76440dc478bb254371569a5a\",\"x-amz-cf-id\":\"JaHtbrf1q_rmbiA85srHzbuv6EcVTIS7821ycnT6yRVS9b2P83JsFQ==\",\"authorization\":\"eyJraWQiOiJqR3JXaThlR0hDMmNXYTRFVmVwMEZyU3hJXC9nV3hBcUVhYTBENmNLNHBLYz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfaDNtT2VIckNRIiwiY2xpZW50X2lkIjoiN3JmcTYzMXRhNzBhNWkxN2RjNG40dGxqanYiLCJvcmlnaW5fanRpIjoiZGJiZDY0MTMtYjYyMi00NjFkLTkyY2MtYmNiM2NjZGI3ZTBkIiwiZXZlbnRfaWQiOiIwOTFjOWFjYi0wNjA1LTQwMGYtYmQ1OC0wODk5N2Y1MmNiZDIiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzY2MTk1NzE1LCJleHAiOjE3NjY0NjE4NjEsImlhdCI6MTc2NjQ1ODI2MSwianRpIjoiNzU1ZmY0YjQtZTE0OC00ZGU5LTliYmUtMmE2MDMyODc3MmRkIiwidXNlcm5hbWUiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEifQ.PyrB_IrxAOrWfIp1HYhfAoXDS9Bo_5yQyeIXJj6bVncComHMhCUSEbTY1B3N0QbUmjeqLo5wn9ezRhIZu7RoBYDP-jGloKEZqWbqj8YL-3c1apSVTyYb8fjvMDtBJqy9Rsr4Hmr75qwLAzhyUr9G04kyeKe0t3TA4YYYbbsEgXEDfcdlGb4_vg8xhh9UmFpFb8GWo0qk-RPNaF7gCBNcgPB6U5OFRVAgWvuS_nrFx70OEEGJ7kiJIs64EqcTdvPiidD_h1HYqcnB_Ea_hFZ1UBB9kj8XFbzSapXTrUNOT2aDt6kaPQ0deRRNzH2HSaLyK86iYl38LzbC84d_RnwXvw\",\"sec-fetch-dest\":\"empty\",\"x-amz-user-agent\":\"aws-amplify/6.15.7 api/1 framework/1\",\"sec-ch-ua-platform\":\"\\\"macOS\\\"\",\"cloudfront-is-desktop-viewer\":\"true\",\"sec-fetch-site\":\"cross-site\",\"sec-ch-ua\":\"\\\"Brave\\\";v=\\\"143\\\", \\\"Chromium\\\";v=\\\"143\\\", \\\"Not A(Brand\\\";v=\\\"24\\\"\",\"x-forwarded-port\":\"443\"},\"domainName\":null},\"prev\":{\"result\":{}}}\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460118039,
+    "message": "2025-12-23T03:21:58.039Z\tca09fd41-3720-4b8b-9582-8b83adee0388\tINFO\tStarting scraper job with input: {\n  \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n  \"mode\": \"multiId\",\n  \"triggerSource\": \"MANUAL\",\n  \"triggeredBy\": \"scraper-admin-ui\",\n  \"useS3\": true,\n  \"forceRefresh\": false,\n  \"skipNotPublished\": true,\n  \"skipNotFoundGaps\": true,\n  \"skipInProgress\": false,\n  \"ignoreDoNotScrape\": false,\n  \"saveToDatabase\": true,\n  \"defaultVenueId\": \"fd4f7fb1-67fd-4398-b4b4-d85722256d45\",\n  \"gapIds\": [\n    936,\n    1011,\n    1027,\n    1054,\n    1220\n  ],\n  \"maxConsecutiveNotFound\": 10,\n  \"maxConsecutiveErrors\": 3,\n  \"maxConsecutiveBlanks\": 5,\n  \"maxTotalErrors\": 15\n}\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460118160,
+    "message": "2025-12-23T03:21:58.160Z\tca09fd41-3720-4b8b-9582-8b83adee0388\tINFO\t[startScraperJob] Created job record: 37732c97-10aa-470e-bb56-fd0095375eae\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460118161,
+    "message": "2025-12-23T03:21:58.161Z\tca09fd41-3720-4b8b-9582-8b83adee0388\tINFO\t[startScraperJob] Invoking autoScraper (autoScraper-staging) asynchronously\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460118161,
+    "message": "2025-12-23T03:21:58.161Z\tca09fd41-3720-4b8b-9582-8b83adee0388\tINFO\t[startScraperJob] Payload: {\n  \"operation\": \"executeJob\",\n  \"jobId\": \"37732c97-10aa-470e-bb56-fd0095375eae\",\n  \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n  \"mode\": \"multiId\",\n  \"useS3\": true,\n  \"forceRefresh\": false,\n  \"skipNotPublished\": true,\n  \"skipNotFoundGaps\": true,\n  \"skipInProgress\": false,\n  \"ignoreDoNotScrape\": false,\n  \"saveToDatabase\": true,\n  \"defaultVenueId\": \"fd4f7fb1-67fd-4398-b4b4-d85722256d45\",\n  \"gapIds\": [\n    936,\n    1011,\n    1027,\n    1054,\n    1220\n  ],\n  \"maxConsecutiveNotFound\": 10,\n  \"maxConsecutiveErrors\": 3,\n  \"maxConsecutiveBlanks\": 5,\n  \"maxTotalErrors\": 15\n}\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460118321,
+    "message": "2025-12-23T03:21:58.321Z\tca09fd41-3720-4b8b-9582-8b83adee0388\tINFO\t[startScraperJob] autoScraper invoked asynchronously for job 37732c97-10aa-470e-bb56-fd0095375eae\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460118360,
+    "message": "2025-12-23T03:21:58.360Z\tca09fd41-3720-4b8b-9582-8b83adee0388\tINFO\t[ScraperManagement] Flushing monitoring metrics...\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460118521,
+    "message": "END RequestId: ca09fd41-3720-4b8b-9582-8b83adee0388\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460118521,
+    "message": "REPORT RequestId: ca09fd41-3720-4b8b-9582-8b83adee0388\tDuration: 482.60 ms\tBilled Duration: 483 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460121667,
+    "message": "2025-12-23T03:22:01.667Z\t682451d2-7bfc-48f6-b6f4-10c8de64c257\tINFO\tScraperManagement invoked: {\"typeName\":\"Query\",\"fieldName\":\"getScraperJobsReport\",\"arguments\":{\"entityId\":null,\"entityIds\":null,\"status\":null,\"limit\":50,\"nextToken\":null},\"identity\":{\"claims\":{\"origin_jti\":\"dbbd6413-b622-461d-92cc-bcb3ccdb7e0d\",\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"event_id\":\"091c9acb-0605-400f-bd58-08997f52cbd2\",\"token_use\":\"access\",\"scope\":\"aws.cognito.signin.user.admin\",\"auth_time\":1766195715,\"iss\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"exp\":1766461861,\"iat\":1766458261,\"client_id\":\"7rfq631ta70a5i17dc4n4tljjv\",\"jti\":\"755ff4b4-e148-4de9-9bbe-2a60328772dd\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"defaultAuthStrategy\":\"ALLOW\",\"groups\":null,\"issuer\":\"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_h3mOeHrCQ\",\"sourceIp\":[\"89.46.250.198\"],\"sub\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\",\"username\":\"690e14b8-b0b1-7096-cd66-f58fbd2e842a\"},\"source\":null,\"request\":{\"headers\":{\"x-forwarded-for\":\"89.46.250.198,15.158.16.140\",\"sec-ch-ua-mobile\":\"?0\",\"cloudfront-viewer-country\":\"GB\",\"cloudfront-is-tablet-viewer\":\"false\",\"x-amzn-requestid\":\"9ebb0ef7-f5a9-4df4-8c82-416902eaf092\",\"via\":\"2.0 1872df29670137f21773bdb80da38e36.cloudfront.net (CloudFront)\",\"cloudfront-forwarded-proto\":\"https\",\"origin\":\"http://localhost:5173\",\"content-length\":\"24112\",\"x-forwarded-proto\":\"https\",\"accept-language\":\"en-GB,en;q=0.9\",\"host\":\"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\"sec-gpc\":\"1\",\"user-agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\",\"cloudfront-is-mobile-viewer\":\"false\",\"accept\":\"*/*\",\"priority\":\"u=1, i\",\"cloudfront-viewer-asn\":\"25369\",\"cloudfront-is-smarttv-viewer\":\"false\",\"x-amzn-appsync-is-vpce-request\":\"false\",\"accept-encoding\":\"gzip, deflate, br, zstd\",\"x-amzn-account-id\":\"495599763953\",\"referer\":\"http://localhost:5173/\",\"x-amzn-remote-ip\":\"89.46.250.198\",\"content-type\":\"application/json; charset=UTF-8\",\"sec-fetch-mode\":\"cors\",\"x-amzn-trace-id\":\"Root=1-694a0ad9-616b869b53dbff390e45b8b2\",\"x-amz-cf-id\":\"Xsa880GeshNjsOiUATxMG3SQt2_5yMvIigF2G94hiQeIqmJF2RTlxA==\",\"authorization\":\"eyJraWQiOiJqR3JXaThlR0hDMmNXYTRFVmVwMEZyU3hJXC9nV3hBcUVhYTBENmNLNHBLYz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfaDNtT2VIckNRIiwiY2xpZW50X2lkIjoiN3JmcTYzMXRhNzBhNWkxN2RjNG40dGxqanYiLCJvcmlnaW5fanRpIjoiZGJiZDY0MTMtYjYyMi00NjFkLTkyY2MtYmNiM2NjZGI3ZTBkIiwiZXZlbnRfaWQiOiIwOTFjOWFjYi0wNjA1LTQwMGYtYmQ1OC0wODk5N2Y1MmNiZDIiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzY2MTk1NzE1LCJleHAiOjE3NjY0NjE4NjEsImlhdCI6MTc2NjQ1ODI2MSwianRpIjoiNzU1ZmY0YjQtZTE0OC00ZGU5LTliYmUtMmE2MDMyODc3MmRkIiwidXNlcm5hbWUiOiI2OTBlMTRiOC1iMGIxLTcwOTYtY2Q2Ni1mNThmYmQyZTg0MmEifQ.PyrB_IrxAOrWfIp1HYhfAoXDS9Bo_5yQyeIXJj6bVncComHMhCUSEbTY1B3N0QbUmjeqLo5wn9ezRhIZu7RoBYDP-jGloKEZqWbqj8YL-3c1apSVTyYb8fjvMDtBJqy9Rsr4Hmr75qwLAzhyUr9G04kyeKe0t3TA4YYYbbsEgXEDfcdlGb4_vg8xhh9UmFpFb8GWo0qk-RPNaF7gCBNcgPB6U5OFRVAgWvuS_nrFx70OEEGJ7kiJIs64EqcTdvPiidD_h1HYqcnB_Ea_hFZ1UBB9kj8XFbzSapXTrUNOT2aDt6kaPQ0deRRNzH2HSaLyK86iYl38LzbC84d_RnwXvw\",\"sec-fetch-dest\":\"empty\",\"x-amz-user-agent\":\"aws-amplify/6.15.7 api/1 framework/1\",\"sec-ch-ua-platform\":\"\\\"macOS\\\"\",\"cloudfront-is-desktop-viewer\":\"true\",\"sec-fetch-site\":\"cross-site\",\"sec-ch-ua\":\"\\\"Brave\\\";v=\\\"143\\\", \\\"Chromium\\\";v=\\\"143\\\", \\\"Not A(Brand\\\";v=\\\"24\\\"\",\"x-forwarded-port\":\"443\"},\"domainName\":null},\"prev\":{\"result\":{}}}\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460121667,
+    "message": "START RequestId: 682451d2-7bfc-48f6-b6f4-10c8de64c257 Version: $LATEST\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460121668,
+    "message": "2025-12-23T03:22:01.668Z\t682451d2-7bfc-48f6-b6f4-10c8de64c257\tINFO\tGetting scraper jobs report: { entityId: null, status: null, limit: 50, nextToken: null }\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460121682,
+    "message": "2025-12-23T03:22:01.682Z\t682451d2-7bfc-48f6-b6f4-10c8de64c257\tINFO\t[ScraperManagement] Flushing monitoring metrics...\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460121781,
+    "message": "END RequestId: 682451d2-7bfc-48f6-b6f4-10c8de64c257\n",
+    "ingestionTime": 1766460127056
+  },
+  {
+    "timestamp": 1766460121781,
+    "message": "REPORT RequestId: 682451d2-7bfc-48f6-b6f4-10c8de64c257\tDuration: 113.34 ms\tBilled Duration: 114 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1766460127056
+  }
+]

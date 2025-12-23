@@ -1,6 +1,13 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "dynamodb:GetRecords",
+      "dynamodb:GetShardIterator", 
+      "dynamodb:DescribeStream",
+      "dynamodb:ListStreams"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:495599763953:table/RecurringGame-*/stream/*"
+    ]
   }
 ]

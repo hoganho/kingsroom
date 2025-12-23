@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.2\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.3\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -987,8 +987,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/*"
               ],
               "Effect": "Allow"
             },
@@ -998,8 +998,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1009,7 +1009,7 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1021,12 +1021,12 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byTournamentSeriesTitle",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byYear",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byName",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byMonth",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byQuarter"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byTournamentSeriesTitle",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byYear",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byName",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byMonth",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byQuarter"
               ],
               "Effect": "Allow"
             },
@@ -1039,7 +1039,7 @@
                 "dynamodb:Scan"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1051,8 +1051,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1061,7 +1061,7 @@
                 "dynamodb:PutItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1071,7 +1071,7 @@
                 "dynamodb:PutItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1083,8 +1083,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-dev/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-staging/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1096,8 +1096,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-dev/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-staging/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1109,8 +1109,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*-dev/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*-staging/index/*"
               ],
               "Effect": "Allow"
             },

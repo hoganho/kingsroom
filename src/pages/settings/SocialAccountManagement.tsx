@@ -7,7 +7,22 @@ import { SocialAccountModal } from '../../components/social/SocialAccountModal';
 import { ManualPostUploadTab } from '../../components/social/ManualPostUploadTab';
 import { DeleteConfirmationModal } from '../../components/entities/DeleteConfirmationModal';
 import { useSocialAccounts, SocialAccount, CreateSocialAccountInput, UpdateSocialAccountInput } from '../../hooks/useSocialAccounts';
-import { listEntities, listVenues } from '../../graphql/queries';
+import { listEntities } from '../../graphql/queries';
+
+// Custom lightweight query that doesn't fetch nested relationships
+// Avoids errors from RecurringGame records with missing _version/_lastChangedAt
+const listVenuesSimple = /* GraphQL */ `
+  query ListVenuesSimple($limit: Int, $nextToken: String) {
+    listVenues(limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        entityId
+      }
+      nextToken
+    }
+  }
+`;
 import { 
   InformationCircleIcon, 
   PlusIcon,
@@ -248,7 +263,7 @@ const SocialAccountManagement = () => {
         
         const [entitiesResponse, venuesResponse] = await Promise.all([
           client.graphql({ query: listEntities, variables: { limit: 100 } }),
-          client.graphql({ query: listVenues, variables: { limit: 500 } }),
+          client.graphql({ query: listVenuesSimple, variables: { limit: 500 } }),
         ]);
 
         if (hasGraphQLData<{ listEntities: { items: Entity[] } }>(entitiesResponse)) {

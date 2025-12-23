@@ -2,11 +2,15 @@
  * enricher.js
  * Main enrichment orchestration
  * 
- * PATCHED: Enhanced financial calculations with guarantee inference
+ * UPDATED: v2.0.0
+ * - Added classification field derivation (variant, bettingStructure, buyInTier, sessionMode)
+ * - Uses entryStructure (not tournamentStructure) to avoid @model conflict
+ * - Uses cashRakeType (not rakeStructure) to avoid @model conflict
  * 
  * This is the core of the enricher - it coordinates:
  * 1. Validation
  * 2. Data completion
+ * 2b. Classification derivation (NEW)
  * 3. Venue resolution
  * 4. Series resolution
  * 5. Recurring game resolution
@@ -24,10 +28,87 @@ const { resolveRecurringAssignment } = require('./resolution/recurring-resolver'
 const { computeQueryKeys } = require('./computation/query-keys');
 const { calculateFinancials } = require('./computation/financials');
 
+// Classification derivation utilities
+const { 
+  VARIANT_MAPPING, 
+  getNewVariantFromOld, 
+  deriveBuyInTier,
+  SessionMode,
+  ClassificationSource,
+  PokerVariant,
+  BettingStructure
+} = require('./utils/constants');
+
 // Lambda client for invoking saveGameFunction
 const lambdaClient = new LambdaClient({
   region: process.env.AWS_REGION || 'ap-southeast-2'
 });
+
+// ===================================================================
+// CLASSIFICATION DERIVATION
+// ===================================================================
+
+/**
+ * Derive classification fields from existing game data
+ * Only sets fields that are not already present (preserves scraper values)
+ * 
+ * @param {Object} game - Game data with at least gameVariant, gameType, buyIn
+ * @returns {Object} Object with derived classification fields to merge
+ */
+const deriveClassificationFields = (game) => {
+  const updates = {};
+  
+  // --- Session Mode (from gameType) ---
+  if (!game.sessionMode && game.gameType) {
+    updates.sessionMode = game.gameType === 'CASH_GAME' ? SessionMode.CASH : SessionMode.TOURNAMENT;
+  }
+  
+  // --- Variant + Betting Structure (from gameVariant) ---
+  if (game.gameVariant && (!game.variant || !game.bettingStructure)) {
+    const mapping = VARIANT_MAPPING[game.gameVariant];
+    if (mapping) {
+      if (!game.variant) {
+        updates.variant = mapping.variant;
+      }
+      if (!game.bettingStructure && mapping.bettingStructure) {
+        updates.bettingStructure = mapping.bettingStructure;
+      }
+    } else {
+      // Fallback for unknown variants
+      if (!game.variant) {
+        updates.variant = PokerVariant.OTHER;
+      }
+    }
+  }
+  
+  // --- Buy-In Tier (from buyIn amount) ---
+  if (!game.buyInTier && game.buyIn !== undefined) {
+    updates.buyInTier = deriveBuyInTier(game.buyIn);
+  }
+  
+  // --- Classification Source ---
+  // Set to DERIVED if we're deriving any fields and source not already set
+  if (!game.classificationSource && Object.keys(updates).length > 0) {
+    updates.classificationSource = ClassificationSource.DERIVED;
+    updates.lastClassifiedAt = new Date().toISOString();
+  }
+  
+  // --- Default Values for Tournament Games ---
+  if (game.gameType === 'TOURNAMENT' || game.sessionMode === 'TOURNAMENT') {
+    // Only set defaults if not already present (from scraper)
+    if (!game.bountyType && !updates.bountyType) {
+      // Don't default bountyType - let it stay null if not detected
+    }
+    if (!game.speedType && !updates.speedType) {
+      // Don't default speedType - let it stay null if not detected
+    }
+    if (!game.entryStructure && !updates.entryStructure) {
+      // Don't default entryStructure - let it stay null if not detected
+    }
+  }
+  
+  return updates;
+};
 
 // ===================================================================
 // MAIN ENRICHMENT FUNCTION
@@ -102,12 +183,26 @@ const enrichGameData = async (input) => {
     result.enrichmentMetadata.fieldsCompleted = completionResult.fieldsCompleted;
     
     // Complete series metadata from name parsing
-    if (enrichedGame.isSeries || series) {
+    if (enrichedGame.gameType === 'TOURNAMENT') {
       const seriesMetadata = completeSeriesMetadata(enrichedGame);
       enrichedGame = { ...enrichedGame, ...seriesMetadata };
       if (Object.keys(seriesMetadata).length > 0) {
         result.enrichmentMetadata.fieldsCompleted.push(...Object.keys(seriesMetadata));
       }
+    }
+    
+    // =========================================================
+    // 2b. CLASSIFICATION DERIVATION
+    // =========================================================
+    // Derive classification fields if not already set by scraper
+    console.log('[ENRICHER] Step 2b: Classification derivation');
+    
+    const classificationUpdates = deriveClassificationFields(enrichedGame);
+    if (Object.keys(classificationUpdates).length > 0) {
+      enrichedGame = { ...enrichedGame, ...classificationUpdates };
+      result.enrichmentMetadata.fieldsCompleted.push(...Object.keys(classificationUpdates));
+      console.log(`[ENRICHER] Derived ${Object.keys(classificationUpdates).length} classification fields:`, 
+        Object.keys(classificationUpdates).join(', '));
     }
     
     // =========================================================
@@ -149,26 +244,60 @@ const enrichGameData = async (input) => {
     // =========================================================
     // 4. SERIES RESOLUTION
     // =========================================================
-    if (!options.skipSeriesResolution && (enrichedGame.isSeries || series)) {
-      console.log('[ENRICHER] Step 4: Series resolution');
+    const shouldAttemptSeriesResolution = 
+      !options.skipSeriesResolution && 
+      enrichedGame.gameType === 'TOURNAMENT';
+    
+    if (shouldAttemptSeriesResolution) {
+      console.log('[ENRICHER] Step 4: Series resolution (checking all tournaments)');
+      
+      // Get venues for name cleanup (optional but improves matching)
+      const venues = result.enrichmentMetadata.venueResolution?.venueId 
+        ? [{ id: result.enrichmentMetadata.venueResolution.venueId, 
+             name: result.enrichmentMetadata.venueResolution.venueName }]
+        : [];
       
       const seriesResult = await resolveSeriesAssignment({
         game: enrichedGame,
         entityId,
         seriesInput: series || {},
-        autoCreate: options.autoCreateSeries !== false
+        autoCreate: options.autoCreateSeries !== false,
+        venues  // Pass venues for better name matching
       });
       
-      // Apply series updates to game
+      // Apply series updates to game (including isSeries determination)
       enrichedGame = { ...enrichedGame, ...seriesResult.gameUpdates };
       result.enrichmentMetadata.seriesResolution = seriesResult.metadata;
-    } else {
-      console.log('[ENRICHER] Step 4: Series resolution SKIPPED');
+      
+      // Log the result
+      if (enrichedGame.isSeries) {
+        console.log(`[ENRICHER] ✅ Series detected: ${enrichedGame.seriesName || 'unknown'}`, {
+          status: enrichedGame.seriesAssignmentStatus,
+          tournamentSeriesId: enrichedGame.tournamentSeriesId,
+          dayNumber: enrichedGame.dayNumber,
+          flightLetter: enrichedGame.flightLetter,
+          eventNumber: enrichedGame.eventNumber
+        });
+      } else {
+        console.log('[ENRICHER] No series detected for this tournament');
+      }
+      
+    } else if (options.skipSeriesResolution) {
+      console.log('[ENRICHER] Step 4: Series resolution SKIPPED (disabled by option)');
       result.enrichmentMetadata.seriesResolution = {
         status: 'SKIPPED',
         confidence: 0,
         wasCreated: false,
-        matchReason: options.skipSeriesResolution ? 'option_disabled' : 'not_series'
+        matchReason: 'option_disabled'
+      };
+    } else {
+      // Not a tournament - skip series resolution
+      console.log('[ENRICHER] Step 4: Series resolution SKIPPED (not a tournament)');
+      result.enrichmentMetadata.seriesResolution = {
+        status: 'SKIPPED',
+        confidence: 0,
+        wasCreated: false,
+        matchReason: 'not_tournament'
       };
     }
     
@@ -424,5 +553,6 @@ const invokeSaveGameFunction = async (saveInput) => {
 
 module.exports = {
   enrichGameData,
-  invokeSaveGameFunction
+  invokeSaveGameFunction,
+  deriveClassificationFields
 };

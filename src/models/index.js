@@ -309,7 +309,14 @@ const ScraperJobStatus = {
   "COMPLETED": "COMPLETED",
   "FAILED": "FAILED",
   "CANCELLED": "CANCELLED",
-  "TIMEOUT": "TIMEOUT"
+  "TIMEOUT": "TIMEOUT",
+  "STOPPED_TIMEOUT": "STOPPED_TIMEOUT",
+  "STOPPED_BLANKS": "STOPPED_BLANKS",
+  "STOPPED_NOT_FOUND": "STOPPED_NOT_FOUND",
+  "STOPPED_ERROR": "STOPPED_ERROR",
+  "STOPPED_MANUAL": "STOPPED_MANUAL",
+  "STOPPED_NO_VENUE": "STOPPED_NO_VENUE",
+  "STOPPED_MAX_ID": "STOPPED_MAX_ID"
 };
 
 const ScrapeUrlStatus = {
@@ -323,6 +330,7 @@ const ScrapeUrlStatus = {
 const ScrapeAttemptStatus = {
   "SUCCESS": "SUCCESS",
   "FAILED": "FAILED",
+  "ERROR": "ERROR",
   "SKIPPED_DONOTSCRAPE": "SKIPPED_DONOTSCRAPE",
   "SKIPPED_VENUE": "SKIPPED_VENUE",
   "BLANK": "BLANK",
@@ -352,6 +360,16 @@ const ScraperOperation = {
   "DISABLE": "DISABLE",
   "STATUS": "STATUS",
   "RESET": "RESET"
+};
+
+const ScraperJobMode = {
+  "SINGLE": "single",
+  "BULK": "bulk",
+  "RANGE": "range",
+  "GAPS": "gaps",
+  "AUTO": "auto",
+  "REFRESH": "refresh",
+  "MULTI_ID": "multiId"
 };
 
 const SocialPlatform = {
@@ -442,7 +460,211 @@ const RecurringResolutionStatus = {
   "FAILED": "FAILED"
 };
 
-const { Entity, BackgroundTask, Venue, VenueDetails, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, GameFinancialSnapshot, GameCost, GameCostLineItem, GameCostItem, RecurringGame, TournamentSeriesTitle, TournamentSeries, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, EntityMetrics, VenueMetrics, RecurringGameMetrics, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperState, ScrapeStructure, DataSync, S3Storage, SocialAccount, SocialPost, SocialScrapeAttempt, SocialScheduledPost, User, UserPreference, UserAuditLog, Staff, Asset, VenueMetricsResult, VenueMetricsUpdateResult, VenueMetricsPreview, VenueMatch, AllCountsResult, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, SaveVenueAssignmentInfo, VenueMetricsSnapshot, ConsolidationPreviewResult, ConsolidationDetails, ConsolidationSibling, ProjectedConsolidationTotals, ReScrapeResult, EntityScrapingStatus, EntityVenueAssignmentSummary, VenueAssignmentSummary, ReassignGameVenueResult, BulkReassignGameVenuesResult, SaveGameResult, SaveRecurringAssignmentInfo, AssignGameResult, DetectRecurringGamesResult, BulkAssignResult, RecurringGameWithStats, RecurringGamePlayerSummary, SearchRecurringGamesResult, EnrichGameDataOutput, EnrichmentValidationResult, EnrichmentValidationError, EnrichmentValidationWarning, EnrichedGameData, EnrichmentMetadata, SeriesResolutionMetadata, RecurringResolutionMetadata, VenueResolutionMetadata, CalculateGameFinancialsOutput, GameCostCalculation, GameFinancialSnapshotCalculation, FinancialsSummary, FinancialsSaveResult, RefreshAllMetricsResult, MetricsUpdateResult, EntityDashboard, VenueDashboard, RecurringGameReport, TrendAnalysis, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, ScraperJobURLResult, ScraperMetrics, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails, ScraperJobsReport, GapRange, GapSummary, S3VersionHistory, CachingStatsResponse, S3ContentResponse, S3StorageHistoryResponse, S3StorageListResponse, S3StorageConnection, ScraperJobConnection, ScrapeURLConnection, SocialFeedConnection, SocialPostConnection, SocialAccountConnection, SocialAccountMetrics, SocialScrapeResult, UserManagementResponse, UsersConnection, UserMetricsSummary, DetectedMultiDayPattern, ResetPasswordResponse, ErrorMetric, HourlyMetric, EntityScraperMetrics, EntityJobSummary, TournamentIdBounds, CacheActivityLog, TournamentLevel, Break, ClientMetricResponse, DatabaseMetric, DatabaseMetricsResponse, GamesNeedingVenueResponse, GetReassignmentStatusResult, BackgroundTaskInfo, SyncPageInfoResult, RefreshResponse, SaveSeriesAssignmentInfo, UnfinishedGamesConnection } = initSchema(schema);
+const SessionMode = {
+  "CASH": "CASH",
+  "TOURNAMENT": "TOURNAMENT"
+};
+
+const PokerVariant = {
+  "HOLD_EM": "HOLD_EM",
+  "HOLD_EM_SHORT_DECK": "HOLD_EM_SHORT_DECK",
+  "OMAHA_HI": "OMAHA_HI",
+  "OMAHA_HILO": "OMAHA_HILO",
+  "OMAHA5_HI": "OMAHA5_HI",
+  "OMAHA5_HILO": "OMAHA5_HILO",
+  "OMAHA6_HI": "OMAHA6_HI",
+  "OMAHA6_HILO": "OMAHA6_HILO",
+  "STUD_HI": "STUD_HI",
+  "STUD_HILO": "STUD_HILO",
+  "RAZZ": "RAZZ",
+  "DRAW_2_7_TRIPLE": "DRAW_2_7_TRIPLE",
+  "DRAW_2_7_SINGLE": "DRAW_2_7_SINGLE",
+  "DRAW_5_CARD": "DRAW_5_CARD",
+  "BADUGI": "BADUGI",
+  "MIXED_HORSE": "MIXED_HORSE",
+  "MIXED_8_GAME": "MIXED_8GAME",
+  "MIXED_HOSE": "MIXED_HOSE",
+  "MIXED_RASH": "MIXED_RASH",
+  "MIXED_DEALERS_CHOICE": "MIXED_DEALERS_CHOICE",
+  "MIXED_ROTATION": "MIXED_ROTATION",
+  "MIXED_OTHER": "MIXED_OTHER",
+  "COURCHEVEL": "COURCHEVEL",
+  "IRISH": "IRISH",
+  "PINEAPPLE": "PINEAPPLE",
+  "CRAZY_PINEAPPLE": "CRAZY_PINEAPPLE",
+  "OTHER": "OTHER",
+  "NOT_SPECIFIED": "NOT_SPECIFIED"
+};
+
+const BettingStructure = {
+  "NO_LIMIT": "NO_LIMIT",
+  "POT_LIMIT": "POT_LIMIT",
+  "FIXED_LIMIT": "FIXED_LIMIT",
+  "SPREAD_LIMIT": "SPREAD_LIMIT",
+  "CAP_LIMIT": "CAP_LIMIT",
+  "MIXED_LIMIT": "MIXED_LIMIT"
+};
+
+const SpeedType = {
+  "SLOW": "SLOW",
+  "REGULAR": "REGULAR",
+  "TURBO": "TURBO",
+  "HYPER": "HYPER",
+  "SUPER_TURBO": "SUPER_TURBO"
+};
+
+const TableSize = {
+  "HEADS_UP": "HEADS_UP",
+  "SHORT_HANDED": "SHORT_HANDED",
+  "FULL_RING": "FULL_RING"
+};
+
+const DealType = {
+  "LIVE_DEALER": "LIVE_DEALER",
+  "AUTO_SHUFFLER": "AUTO_SHUFFLER",
+  "ELECTRONIC": "ELECTRONIC",
+  "SELF_DEALT": "SELF_DEALT"
+};
+
+const BuyInTier = {
+  "FREEROLL": "FREEROLL",
+  "MICRO": "MICRO",
+  "LOW": "LOW",
+  "MID": "MID",
+  "HIGH": "HIGH",
+  "SUPER_HIGH": "SUPER_HIGH",
+  "ULTRA_HIGH": "ULTRA_HIGH"
+};
+
+const EntryStructure = {
+  "FREEZEOUT": "FREEZEOUT",
+  "SINGLE_REBUY": "SINGLE_REBUY",
+  "UNLIMITED_REBUY": "UNLIMITED_REBUY",
+  "RE_ENTRY": "RE_ENTRY",
+  "UNLIMITED_RE_ENTRY": "UNLIMITED_RE_ENTRY",
+  "ADD_ON_ONLY": "ADD_ON_ONLY",
+  "REBUY_ADDON": "REBUY_ADDON"
+};
+
+const BountyType = {
+  "NONE": "NONE",
+  "STANDARD": "STANDARD",
+  "PROGRESSIVE": "PROGRESSIVE",
+  "MYSTERY": "MYSTERY",
+  "SUPER_KNOCKOUT": "SUPER_KNOCKOUT",
+  "TOTAL_KNOCKOUT": "TOTAL_KNOCKOUT"
+};
+
+const TournamentPurpose = {
+  "STANDARD": "STANDARD",
+  "SATELLITE": "SATELLITE",
+  "MEGA_SATELLITE": "MEGA_SATELLITE",
+  "SUPER_SATELLITE": "SUPER_SATELLITE",
+  "QUALIFIER": "QUALIFIER",
+  "STEP_SATELLITE": "STEP_SATELLITE",
+  "FREEROLL": "FREEROLL",
+  "CHARITY": "CHARITY",
+  "LEAGUE_POINTS": "LEAGUE_POINTS",
+  "LAST_LONGER": "LAST_LONGER",
+  "PROMOTIONAL": "PROMOTIONAL"
+};
+
+const StackDepth = {
+  "SHALLOW": "SHALLOW",
+  "STANDARD": "STANDARD",
+  "DEEP": "DEEP",
+  "MEGA": "MEGA",
+  "SUPER": "SUPER"
+};
+
+const LateRegistration = {
+  "NONE": "NONE",
+  "STANDARD": "STANDARD",
+  "EXTENDED": "EXTENDED",
+  "UNLIMITED": "UNLIMITED"
+};
+
+const PayoutStructure = {
+  "STANDARD": "STANDARD",
+  "FLAT": "FLAT",
+  "WINNER_TAKE_ALL": "WINNER_TAKE_ALL",
+  "FIFTY_FIFTY": "FIFTY_FIFTY",
+  "TOP_HEAVY": "TOP_HEAVY",
+  "SATELLITE_TICKETS": "SATELLITE_TICKETS",
+  "MILESTONE": "MILESTONE",
+  "PROGRESSIVE": "PROGRESSIVE"
+};
+
+const TournamentScheduleType = {
+  "ONE_OFF": "ONE_OFF",
+  "RECURRING": "RECURRING",
+  "SERIES_EVENT": "SERIES_EVENT",
+  "SPECIAL_EVENT": "SPECIAL_EVENT",
+  "FESTIVAL_EVENT": "FESTIVAL_EVENT",
+  "AD_HOC": "AD_HOC"
+};
+
+const CashGameType = {
+  "STANDARD": "STANDARD",
+  "CAPPED": "CAPPED",
+  "UNCAPPED": "UNCAPPED",
+  "BOMB_POT": "BOMB_POT",
+  "DOUBLE_BOARD": "DOUBLE_BOARD",
+  "MANDATORY_STRADDLE": "MANDATORY_STRADDLE",
+  "STRADDLE_OPTIONAL": "STRADDLE_OPTIONAL",
+  "ANTE_GAME": "ANTE_GAME",
+  "MUST_MOVE": "MUST_MOVE",
+  "SHORT_DECK": "SHORT_DECK"
+};
+
+const CashRakeType = {
+  "NO_RAKE": "NO_RAKE",
+  "POT_PERCENTAGE": "POT_PERCENTAGE",
+  "POT_PERCENTAGE_CAPPED": "POT_PERCENTAGE_CAPPED",
+  "TIME_RAKE": "TIME_RAKE",
+  "JACKPOT_DROP": "JACKPOT_DROP",
+  "PROMOTIONAL": "PROMOTIONAL",
+  "SUBSCRIPTION": "SUBSCRIPTION"
+};
+
+const MixedGameComponent = {
+  "NLHE": "NLHE",
+  "LHE": "LHE",
+  "PLO": "PLO",
+  "PLO8": "PLO8",
+  "LO8": "LO8",
+  "STUD": "STUD",
+  "STUD8": "STUD8",
+  "RAZZ": "RAZZ",
+  "TRIPLE_DRAW": "TRIPLE_DRAW",
+  "SINGLE_DRAW": "SINGLE_DRAW",
+  "BADUGI": "BADUGI",
+  "NL_DRAW": "NL_DRAW",
+  "COURCHEVEL": "COURCHEVEL",
+  "SHORT_DECK": "SHORT_DECK",
+  "BIG_O": "BIG_O",
+  "OTHER": "OTHER"
+};
+
+const ClassificationSource = {
+  "SCRAPED": "SCRAPED",
+  "DERIVED": "DERIVED",
+  "INFERRED": "INFERRED",
+  "INHERITED": "INHERITED",
+  "MANUAL": "MANUAL",
+  "MIGRATED": "MIGRATED"
+};
+
+const GameProcessedAction = {
+  "CREATED": "CREATED",
+  "UPDATED": "UPDATED",
+  "SKIPPED": "SKIPPED",
+  "ERROR": "ERROR",
+  "NOT_FOUND": "NOT_FOUND",
+  "NOT_PUBLISHED": "NOT_PUBLISHED"
+};
+
+const { Entity, BackgroundTask, Venue, VenueDetails, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, GameFinancialSnapshot, GameCost, GameCostLineItem, GameCostItem, RecurringGame, TournamentSeriesTitle, TournamentSeries, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, EntityMetrics, VenueMetrics, RecurringGameMetrics, TournamentSeriesMetrics, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperState, ScrapeStructure, DataSync, S3Storage, SocialAccount, SocialPost, SocialScrapeAttempt, SocialScheduledPost, User, UserPreference, UserAuditLog, Staff, Asset, VenueMetricsResult, VenueMetricsUpdateResult, VenueMetricsPreview, VenueMatch, AllCountsResult, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, SaveVenueAssignmentInfo, VenueMetricsSnapshot, ConsolidationPreviewResult, ConsolidationDetails, ConsolidationSibling, ProjectedConsolidationTotals, ReScrapeResult, EntityScrapingStatus, EntityVenueAssignmentSummary, VenueAssignmentSummary, ReassignGameVenueResult, BulkReassignGameVenuesResult, SaveGameResult, SaveRecurringAssignmentInfo, AssignGameResult, DetectRecurringGamesResult, BulkAssignResult, RecurringGameWithStats, RecurringGamePlayerSummary, SearchRecurringGamesResult, EnrichGameDataOutput, EnrichmentValidationResult, EnrichmentValidationError, EnrichmentValidationWarning, EnrichedGameData, EnrichmentMetadata, SeriesResolutionMetadata, RecurringResolutionMetadata, VenueResolutionMetadata, CalculateGameFinancialsOutput, GameCostCalculation, GameFinancialSnapshotCalculation, FinancialsSummary, FinancialsSaveResult, RefreshAllMetricsResult, MetricsBySeriesType, SeriesTypeBreakdown, MetricsUpdateResult, EntityDashboard, VenueDashboard, RecurringGameReport, TournamentSeriesReport, SeriesVsRegularComparison, TrendAnalysis, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, ScraperJobURLResult, ScraperMetrics, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails, ScraperJobsReport, GapRange, GapSummary, S3VersionHistory, CachingStatsResponse, S3ContentResponse, S3StorageHistoryResponse, S3StorageListResponse, S3StorageConnection, ScraperJobConnection, ScrapeURLConnection, GameProcessedEvent, GameProcessedData, GameSaveResult, SocialFeedConnection, SocialPostConnection, SocialAccountConnection, SocialAccountMetrics, SocialScrapeResult, UserManagementResponse, UsersConnection, UserMetricsSummary, DetectedMultiDayPattern, ResetPasswordResponse, ErrorMetric, HourlyMetric, EntityScraperMetrics, EntityJobSummary, TournamentIdBounds, CacheActivityLog, TournamentLevel, Break, ClientMetricResponse, DatabaseMetric, DatabaseMetricsResponse, GamesNeedingVenueResponse, GetReassignmentStatusResult, BackgroundTaskInfo, SyncPageInfoResult, RefreshResponse, SaveSeriesAssignmentInfo, UnfinishedGamesConnection } = initSchema(schema);
 
 export {
   Entity,
@@ -478,6 +700,7 @@ export {
   EntityMetrics,
   VenueMetrics,
   RecurringGameMetrics,
+  TournamentSeriesMetrics,
   ScraperJob,
   ScrapeURL,
   ScrapeAttempt,
@@ -533,6 +756,7 @@ export {
   ScrapeAttemptStatus,
   TimeRange,
   ScraperOperation,
+  ScraperJobMode,
   SocialPlatform,
   SocialAccountStatus,
   SocialPostType,
@@ -543,6 +767,25 @@ export {
   BackgroundTaskStatus,
   SeriesResolutionStatus,
   RecurringResolutionStatus,
+  SessionMode,
+  PokerVariant,
+  BettingStructure,
+  SpeedType,
+  TableSize,
+  DealType,
+  BuyInTier,
+  EntryStructure,
+  BountyType,
+  TournamentPurpose,
+  StackDepth,
+  LateRegistration,
+  PayoutStructure,
+  TournamentScheduleType,
+  CashGameType,
+  CashRakeType,
+  MixedGameComponent,
+  ClassificationSource,
+  GameProcessedAction,
   VenueMetricsResult,
   VenueMetricsUpdateResult,
   VenueMetricsPreview,
@@ -586,10 +829,14 @@ export {
   FinancialsSummary,
   FinancialsSaveResult,
   RefreshAllMetricsResult,
+  MetricsBySeriesType,
+  SeriesTypeBreakdown,
   MetricsUpdateResult,
   EntityDashboard,
   VenueDashboard,
   RecurringGameReport,
+  TournamentSeriesReport,
+  SeriesVsRegularComparison,
   TrendAnalysis,
   ScraperControlResponse,
   ScraperStateData,
@@ -620,6 +867,9 @@ export {
   S3StorageConnection,
   ScraperJobConnection,
   ScrapeURLConnection,
+  GameProcessedEvent,
+  GameProcessedData,
+  GameSaveResult,
   SocialFeedConnection,
   SocialPostConnection,
   SocialAccountConnection,

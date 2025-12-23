@@ -8,7 +8,7 @@ import { randomUUID } from "crypto";
 
 const REGION = process.env.AWS_REGION || "ap-southeast-2";
 const TABLE_NAME =
-  process.env.TABLE_NAME || "RecurringGame-sjyzke3u45golhnttlco6bpcua-dev";
+  process.env.TABLE_NAME || "RecurringGame-fosb7ek5argnhctz4odpt52eia-staging";
 const DRY_RUN = process.env.DRY_RUN === "1";
 
 const ddbClient = new DynamoDBClient({ region: REGION });

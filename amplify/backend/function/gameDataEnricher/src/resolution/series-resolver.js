@@ -1,19 +1,302 @@
 /**
- * series-resolver.js
- * Series detection, matching, and creation logic
- * Adapted from existing series-resolution.js
+ * series-resolver.js (MERGED)
+ * 
+ * Complete series detection, matching, and resolution logic.
+ * 
+ * MERGED FROM:
+ * - series-matcher.js (database matching, pattern detection, detail extraction)
+ * - series-resolver.js (temporal matching, series creation, assignment)
+ * 
+ * DETECTION ORDER:
+ * 1. Database matching against TournamentSeriesTitle (exact + fuzzy)
+ * 2. Pattern-based detection (WSOP, WPT, etc.)
+ * 3. Keyword heuristics (championship, series, festival, etc.)
+ * 4. Temporal matching to find/create TournamentSeries instance
+ * 5. Extract series details (dayNumber, flightLetter, eventNumber, etc.)
  */
 
 const { v4: uuidv4 } = require('uuid');
+const stringSimilarity = require('string-similarity');
 const { getDocClient, getTableName, QueryCommand, GetCommand, PutCommand, UpdateCommand, ScanCommand } = require('../utils/db-client');
 const { SERIES_KEYWORDS, STRUCTURE_KEYWORDS, HOLIDAY_PATTERNS, VALIDATION_THRESHOLDS } = require('../utils/constants');
 
+// Series match threshold for fuzzy matching
+const SERIES_MATCH_THRESHOLD = 0.7;
+
 // ===================================================================
-// HEURISTIC HELPERS
+// SERIES DETAIL EXTRACTION (from series-matcher.js)
 // ===================================================================
 
 /**
- * Determines if a game is definitively a series based on name/structure
+ * Extract series details from tournament name
+ * Parses dayNumber, flightLetter, eventNumber, isMainEvent, finalDay, seriesYear
+ * 
+ * @param {string} tournamentName - Tournament name to analyze
+ * @returns {object} Extracted series details
+ */
+const extractSeriesDetails = (tournamentName) => {
+  if (!tournamentName) return {};
+  
+  const details = {};
+  
+  // Extract year (2020-2029)
+  const yearMatch = tournamentName.match(/20[2-3]\d/);
+  if (yearMatch) {
+    details.seriesYear = parseInt(yearMatch[0]);
+  }
+  
+  // Detect main event
+  details.isMainEvent = /\bmain\s*event\b/i.test(tournamentName);
+  
+  // Extract day number
+  for (const pattern of [/\bDay\s*(\d+)/i, /\bD(\d+)\b/, /\b(\d+)[A-Z]\b/]) {
+    const match = tournamentName.match(pattern);
+    if (match) {
+      details.dayNumber = parseInt(match[1]);
+      break;
+    }
+  }
+  
+  // Extract flight letter
+  for (const pattern of [/\bFlight\s*([A-Z])/i, /\b\d+([A-Z])\b/, /\b([A-Z])\b(?=\s*(?:Flight|Starting))/i]) {
+    const match = tournamentName.match(pattern);
+    if (match) {
+      details.flightLetter = match[1].toUpperCase();
+      break;
+    }
+  }
+  
+  // Extract event number
+  for (const pattern of [/\bEvent\s*#?\s*(\d+)/i, /\bEv(?:ent)?\.?\s*#?\s*(\d+)/i, /\b#(\d+)\s*[-:]/i]) {
+    const match = tournamentName.match(pattern);
+    if (match) {
+      details.eventNumber = parseInt(match[1]);
+      break;
+    }
+  }
+  
+  // Detect final day
+  if (/\bFinal\s*(Day|Table)?\b/i.test(tournamentName)) {
+    details.dayNumber = details.dayNumber || 99;
+    details.finalDay = true;
+  }
+  
+  if (/\bFT\b/.test(tournamentName)) {
+    details.finalDay = true;
+  }
+  
+  // Day 2+ without flight letter typically means final day
+  if (details.dayNumber && details.dayNumber >= 2 && !details.flightLetter) {
+    if (!/Flight/i.test(tournamentName)) {
+      details.finalDay = true;
+    }
+  }
+  
+  return details;
+};
+
+/**
+ * Clean name for series matching - removes venue names and poker jargon
+ * 
+ * @param {string} name - Name to clean
+ * @param {array} venues - Venues to remove from matching
+ * @returns {string} Cleaned name
+ */
+const cleanupNameForSeriesMatching = (name, venues = []) => {
+  if (!name) return '';
+  
+  let cleanedName = ` ${name.replace(/[^a-zA-Z0-9\s]/g, '')} `;
+  
+  // Remove poker jargon
+  const jargonRegexes = [
+    /\b(Event|Flight|Day)\s+[a-zA-Z0-9]*\d[a-zA-Z0-9]*\b/gi,
+    /\bMain Event\b/gi,
+    /\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/gi,
+    /\b\d+\s*x\s*Re-?entry\b/gi,
+    /\$\d+[kK]?\s*(GTD|Guaranteed)?\b/gi,
+  ];
+  
+  jargonRegexes.forEach(regex => {
+    cleanedName = cleanedName.replace(regex, ' ');
+  });
+  
+  // Remove venue names when matching series
+  venues.forEach(venue => {
+    [venue.name, ...(venue.aliases || [])].forEach(venueName => {
+      const cleanedVenueName = venueName.replace(/[^a-zA-Z0-9\s]/g, '');
+      cleanedName = cleanedName.replace(new RegExp(`\\b${cleanedVenueName}\\b`, 'gi'), ' ');
+    });
+  });
+  
+  return cleanedName.replace(/\s+/g, ' ').trim();
+};
+
+// ===================================================================
+// DATABASE MATCHING (from series-matcher.js)
+// ===================================================================
+
+/**
+ * Get all series titles from database
+ * 
+ * @returns {array} Array of TournamentSeriesTitle objects
+ */
+const getAllSeriesTitles = async () => {
+  const client = getDocClient();
+  const tableName = getTableName('TournamentSeriesTitle');
+  
+  try {
+    const result = await client.send(new ScanCommand({
+      TableName: tableName,
+      ProjectionExpression: 'id, title, aliases, seriesCategory'
+    }));
+    return result.Items || [];
+  } catch (error) {
+    console.error('[SERIES] Error fetching series titles:', error);
+    return [];
+  }
+};
+
+/**
+ * Match tournament name against TournamentSeriesTitle database
+ * Uses exact substring matching first, then fuzzy matching
+ * 
+ * @param {string} gameName - Tournament name to match
+ * @param {array} seriesTitles - Array of TournamentSeriesTitle objects
+ * @param {array} venues - Array of venue objects for cleanup
+ * @returns {object|null} Match result or null
+ */
+const matchAgainstDatabase = (gameName, seriesTitles = [], venues = []) => {
+  if (!gameName || !seriesTitles.length) return null;
+  
+  const upperCaseGameName = gameName.toUpperCase();
+  
+  // Step 1: Exact substring matching
+  for (const series of seriesTitles) {
+    const namesToCheck = [series.title, ...(series.aliases || [])];
+    
+    for (const seriesName of namesToCheck) {
+      if (upperCaseGameName.includes(seriesName.toUpperCase())) {
+        console.log(`[SERIES] Database exact match: "${series.title}"`);
+        return {
+          matched: true,
+          seriesTitle: series.title,
+          seriesTitleId: series.id,
+          seriesCategory: series.seriesCategory || 'REGULAR',
+          confidence: 1.0,
+          matchType: 'DATABASE_EXACT'
+        };
+      }
+    }
+  }
+  
+  // Step 2: Fuzzy matching
+  const cleanedGameName = cleanupNameForSeriesMatching(gameName, venues);
+  
+  const allNamesToMatch = seriesTitles.flatMap(series =>
+    [series.title, ...(series.aliases || [])].map(name => ({
+      seriesId: series.id,
+      seriesTitle: series.title,
+      seriesCategory: series.seriesCategory,
+      matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase()
+    }))
+  );
+  
+  if (allNamesToMatch.length === 0) return null;
+  
+  const { bestMatch } = stringSimilarity.findBestMatch(
+    cleanedGameName.toLowerCase(),
+    allNamesToMatch.map(s => s.matchName)
+  );
+  
+  if (bestMatch && bestMatch.rating >= SERIES_MATCH_THRESHOLD) {
+    const matchedSeries = allNamesToMatch.find(s => s.matchName === bestMatch.target);
+    
+    if (matchedSeries) {
+      console.log(`[SERIES] Database fuzzy match: "${matchedSeries.seriesTitle}" (score: ${bestMatch.rating.toFixed(2)})`);
+      return {
+        matched: true,
+        seriesTitle: matchedSeries.seriesTitle,
+        seriesTitleId: matchedSeries.seriesId,
+        seriesCategory: matchedSeries.seriesCategory || 'REGULAR',
+        confidence: bestMatch.rating,
+        matchType: 'DATABASE_FUZZY'
+      };
+    }
+  }
+  
+  return null;
+};
+
+// ===================================================================
+// PATTERN-BASED DETECTION (from series-matcher.js)
+// ===================================================================
+
+/**
+ * Known series patterns - major poker tours and common series names
+ */
+const SERIES_PATTERNS = [
+  // Major tours
+  /\bWSOP\b/i,
+  /\bWPT\b/i,
+  /\bEPT\b/i,
+  /\bAPT\b/i,
+  /\bANZPT\b/i,
+  /\bAPPT\b/i,
+  /\bWSOPC\b/i,
+  
+  // Common series names
+  /\bChampionship\s+Series\b/i,
+  /\bSpring\s+Championship/i,
+  /\bSummer\s+Series\b/i,
+  /\bFall\s+Series\b/i,
+  /\bWinter\s+Series\b/i,
+  /\bFestival\s+of\s+Poker\b/i,
+  /\bPoker\s+Championships?\b/i,
+  /\b(Mini|Mega|Grand)\s+Series\b/i,
+  /\bMasters\s+Series\b/i,
+  /\bHigh\s+Roller\s+Series\b/i,
+  /\bSuper\s+Series\b/i,
+  /\bDeepstack\s+Series\b/i,
+  /\bClassic\s+Series\b/i,
+];
+
+/**
+ * Detect series from known patterns
+ * 
+ * @param {string} gameName - Tournament name to check
+ * @returns {object|null} Match result or null
+ */
+const matchAgainstPatterns = (gameName) => {
+  if (!gameName) return null;
+  
+  for (const pattern of SERIES_PATTERNS) {
+    if (pattern.test(gameName)) {
+      const match = gameName.match(pattern);
+      const seriesName = match ? match[0] : null;
+      
+      console.log(`[SERIES] Pattern match: "${seriesName}"`);
+      return {
+        matched: true,
+        seriesName,
+        seriesTitleId: null, // No database entry
+        confidence: 0.9,
+        matchType: 'PATTERN'
+      };
+    }
+  }
+  
+  return null;
+};
+
+// ===================================================================
+// HEURISTIC DETECTION (original series-resolver.js)
+// ===================================================================
+
+/**
+ * Detect series signal from keywords and structure
+ * 
+ * @param {string} name - Tournament name
+ * @returns {object} Detection result with isSeries and confidence
  */
 const detectSeriesSignal = (name) => {
   if (!name) return { isSeries: false, confidence: 0 };
@@ -21,12 +304,12 @@ const detectSeriesSignal = (name) => {
   const lowerName = name.toLowerCase();
   
   // Structural indicators (definitive)
-  if (STRUCTURE_KEYWORDS.some(k => lowerName.includes(k))) {
+  if (STRUCTURE_KEYWORDS && STRUCTURE_KEYWORDS.some(k => lowerName.includes(k))) {
     return { isSeries: true, confidence: 1.0, reason: 'STRUCTURE_INDICATOR' };
   }
   
   // Keyword match
-  if (SERIES_KEYWORDS.some(k => lowerName.includes(k))) {
+  if (SERIES_KEYWORDS && SERIES_KEYWORDS.some(k => lowerName.includes(k))) {
     return { isSeries: true, confidence: 0.9, reason: 'KEYWORD_MATCH' };
   }
   
@@ -44,9 +327,13 @@ const detectSeriesSignal = (name) => {
 
 /**
  * Detect holiday context from date
+ * 
+ * @param {Date} dateObj - Date to check
+ * @returns {string|null} Holiday name or null
  */
 const detectHolidayContext = (dateObj) => {
-  if (!dateObj) return null;
+  if (!dateObj || !HOLIDAY_PATTERNS) return null;
+  
   const month = dateObj.getMonth();
   const day = dateObj.getDate();
   
@@ -64,7 +351,7 @@ const detectHolidayContext = (dateObj) => {
 };
 
 // ===================================================================
-// NAME NORMALIZATION
+// NAME NORMALIZATION & SIMILARITY
 // ===================================================================
 
 const normalizeSeriesName = (name) => {
@@ -253,86 +540,36 @@ const getSeriesTitleById = async (titleId) => {
   }
 };
 
-const findSeriesTitleByName = async (seriesName) => {
-  if (!seriesName) return null;
-  
-  const client = getDocClient();
-  const tableName = getTableName('TournamentSeriesTitle');
-  
-  try {
-    const result = await client.send(new ScanCommand({ TableName: tableName }));
-    const titles = result.Items || [];
-    
-    let bestMatch = null;
-    let bestScore = 0;
-    
-    for (const title of titles) {
-      const titleScore = calculateNameSimilarity(seriesName, title.title);
-      if (titleScore > bestScore) {
-        bestScore = titleScore;
-        bestMatch = title;
-      }
-      if (title.aliases && Array.isArray(title.aliases)) {
-        for (const alias of title.aliases) {
-          const aliasScore = calculateNameSimilarity(seriesName, alias);
-          if (aliasScore > bestScore) {
-            bestScore = aliasScore;
-            bestMatch = title;
-          }
-        }
-      }
-    }
-    
-    if (bestScore >= VALIDATION_THRESHOLDS.SERIES_NAME_SIMILARITY_THRESHOLD) {
-      console.log(`[SERIES] Title match: "${bestMatch.title}" with score ${bestScore}`);
-      return bestMatch;
-    }
-    return null;
-  } catch (error) {
-    console.error('[SERIES] Error searching series title by name:', error);
-    return null;
-  }
-};
-
 const createTournamentSeries = async (seriesData) => {
   const client = getDocClient();
   const tableName = getTableName('TournamentSeries');
   
   const now = new Date().toISOString();
-  const timestamp = Date.now();
-  
   const newSeries = {
     id: uuidv4(),
-    name: seriesData.name,
-    year: seriesData.year,
-    seriesCategory: seriesData.seriesCategory || 'REGULAR',
+    ...seriesData,
     status: 'SCHEDULED',
-    tournamentSeriesTitleId: seriesData.tournamentSeriesTitleId,
     numberOfEvents: 0,
     createdAt: now,
     updatedAt: now,
+    __typename: 'TournamentSeries',
     _version: 1,
-    _lastChangedAt: timestamp,
-    __typename: 'TournamentSeries'
+    _lastChangedAt: Date.now(),
+    _deleted: null
   };
   
-  if (seriesData.quarter) newSeries.quarter = seriesData.quarter;
-  if (seriesData.month) newSeries.month = seriesData.month;
-  if (seriesData.holidayType) newSeries.holidayType = seriesData.holidayType;
-  if (seriesData.startDate) newSeries.startDate = seriesData.startDate;
-  if (seriesData.venueId) newSeries.venueId = seriesData.venueId;
+  // Remove null/undefined values
+  const cleanedSeries = Object.fromEntries(
+    Object.entries(newSeries).filter(([_, v]) => v !== null && v !== undefined)
+  );
   
-  try {
-    await client.send(new PutCommand({
-      TableName: tableName,
-      Item: newSeries
-    }));
-    console.log(`[SERIES] Created new TournamentSeries: ${newSeries.name} (${newSeries.id})`);
-    return newSeries;
-  } catch (error) {
-    console.error('[SERIES] Error creating TournamentSeries:', error);
-    throw error;
-  }
+  await client.send(new PutCommand({
+    TableName: tableName,
+    Item: cleanedSeries
+  }));
+  
+  console.log(`[SERIES] Created new TournamentSeries: ${newSeries.name} (${newSeries.id})`);
+  return newSeries;
 };
 
 const generateSeriesName = (titleName, year, month = null, quarter = null) => {
@@ -349,33 +586,50 @@ const generateSeriesName = (titleName, year, month = null, quarter = null) => {
 };
 
 // ===================================================================
-// MAIN RESOLVER
+// MAIN RESOLVER (MERGED)
 // ===================================================================
 
 /**
  * Resolve series assignment for a game
+ * 
+ * NEW DETECTION ORDER:
+ * 1. If tournamentSeriesId provided → Use it
+ * 2. Database matching against TournamentSeriesTitle
+ * 3. Pattern-based detection (WSOP, WPT, etc.)
+ * 4. Keyword heuristics
+ * 5. Temporal matching to find/create instance
+ * 6. Extract series details (dayNumber, flightLetter, etc.)
  * 
  * @param {Object} params
  * @param {Object} params.game - Game data
  * @param {string} params.entityId - Entity ID
  * @param {Object} params.seriesInput - Series input from caller
  * @param {boolean} params.autoCreate - Whether to auto-create series
+ * @param {array} params.venues - Venues for name cleanup (optional)
  * @returns {Object} { gameUpdates, metadata }
  */
-const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoCreate = true }) => {
+const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoCreate = true, venues = [] }) => {
   const gameStartDateTime = game.gameStartDateTime;
   const venueId = game.venueId;
-  const seriesName = seriesInput.seriesName || game.seriesName;
-  const seriesTitleId = seriesInput.seriesTitleId;
+  const gameName = game.name;
+  const inputSeriesName = seriesInput.seriesName || game.seriesName;
+  const inputSeriesTitleId = seriesInput.seriesTitleId;
   const providedSeriesId = seriesInput.tournamentSeriesId;
   
-  // If series ID already provided, just use it
+  console.log(`[SERIES] Resolving series for: "${gameName}"`);
+  
+  // ===== STEP 1: If series ID already provided, use it =====
   if (providedSeriesId) {
+    console.log(`[SERIES] Using provided tournamentSeriesId: ${providedSeriesId}`);
+    const details = extractSeriesDetails(gameName);
+    
     return {
       gameUpdates: {
         tournamentSeriesId: providedSeriesId,
         seriesAssignmentStatus: 'MANUALLY_ASSIGNED',
-        seriesAssignmentConfidence: 1.0
+        seriesAssignmentConfidence: 1.0,
+        isSeries: true,
+        ...details
       },
       metadata: {
         status: 'MATCHED_EXISTING',
@@ -390,10 +644,12 @@ const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoC
   // Extract temporal components
   const temporal = extractTemporalComponents(gameStartDateTime);
   if (!temporal) {
+    console.log('[SERIES] Invalid date, cannot resolve series');
     return {
       gameUpdates: {
         seriesAssignmentStatus: 'PENDING_ASSIGNMENT',
-        seriesAssignmentConfidence: 0
+        seriesAssignmentConfidence: 0,
+        isSeries: false
       },
       metadata: {
         status: 'FAILED',
@@ -406,14 +662,66 @@ const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoC
   
   const { year, month, quarter } = temporal;
   
-  // Check heuristic signals
-  const heuristicSignal = detectSeriesSignal(seriesName || game.name);
+  // ===== STEP 2: Database matching against TournamentSeriesTitle =====
+  console.log('[SERIES] Step 2: Trying database matching...');
+  const seriesTitles = await getAllSeriesTitles();
+  const dbMatch = matchAgainstDatabase(gameName, seriesTitles, venues);
+  
+  if (dbMatch && dbMatch.matched) {
+    console.log(`[SERIES] Database match found: ${dbMatch.seriesTitle}`);
+    
+    // Find or create the specific TournamentSeries instance
+    const result = await resolveSeriesInstance({
+      seriesTitleId: dbMatch.seriesTitleId,
+      seriesTitle: dbMatch.seriesTitle,
+      seriesCategory: dbMatch.seriesCategory,
+      gameName,
+      gameStartDateTime,
+      venueId,
+      year,
+      month,
+      quarter,
+      autoCreate,
+      matchConfidence: dbMatch.confidence,
+      matchType: dbMatch.matchType
+    });
+    
+    return result;
+  }
+  
+  // ===== STEP 3: Pattern-based detection =====
+  console.log('[SERIES] Step 3: Trying pattern detection...');
+  const patternMatch = matchAgainstPatterns(gameName);
+  
+  if (patternMatch && patternMatch.matched) {
+    console.log(`[SERIES] Pattern match found: ${patternMatch.seriesName}`);
+    
+    // Try to find existing series by name
+    const result = await resolveSeriesFromName({
+      seriesName: patternMatch.seriesName,
+      gameName,
+      gameStartDateTime,
+      venueId,
+      year,
+      month,
+      quarter,
+      autoCreate,
+      matchConfidence: patternMatch.confidence,
+      matchType: 'PATTERN'
+    });
+    
+    return result;
+  }
+  
+  // ===== STEP 4: Keyword heuristics =====
+  console.log('[SERIES] Step 4: Trying keyword heuristics...');
+  const heuristicSignal = detectSeriesSignal(inputSeriesName || gameName);
   
   if (heuristicSignal.isSeries) {
-    console.log(`[SERIES] Detected Heuristic Signal: ${heuristicSignal.reason}`);
+    console.log(`[SERIES] Heuristic signal detected: ${heuristicSignal.reason}`);
     
     const holidayName = detectHolidayContext(new Date(gameStartDateTime));
-    let generatedSeriesName = normalizeSeriesName(seriesName || game.name);
+    let generatedSeriesName = normalizeSeriesName(inputSeriesName || gameName);
     let category = 'SPECIAL';
     
     if (holidayName) {
@@ -427,207 +735,213 @@ const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoC
       category = 'SPECIAL';
     }
     
-    // Search for existing series
-    const yearSeries = await getSeriesByYear(year);
-    let bestCandidate = null;
-    let bestScore = 0;
-    
-    for (const s of yearSeries) {
-      const sim = calculateNameSimilarity(generatedSeriesName, s.name);
-      if (sim > bestScore) {
-        bestScore = sim;
-        bestCandidate = s;
-      }
-    }
-    
-    if (bestCandidate && bestScore >= 75) {
-      return {
-        gameUpdates: {
-          tournamentSeriesId: bestCandidate.id,
-          seriesName: bestCandidate.name,
-          seriesAssignmentStatus: 'AUTO_ASSIGNED',
-          seriesAssignmentConfidence: 0.95,
-          isSeries: true
-        },
-        metadata: {
-          status: 'MATCHED_EXISTING',
-          confidence: 0.95,
-          matchedSeriesId: bestCandidate.id,
-          matchedSeriesName: bestCandidate.name,
-          wasCreated: false,
-          matchReason: 'heuristic_match'
-        }
-      };
-    }
-    
-    // Auto-create if enabled
-    if (autoCreate) {
-      try {
-        const displaySeriesName = generatedSeriesName.charAt(0).toUpperCase() + generatedSeriesName.slice(1);
-        const newSeries = await createTournamentSeries({
-          name: displaySeriesName,
-          year,
-          seriesCategory: category,
-          tournamentSeriesTitleId: null,
-          venueId: venueId || null,
-          startDate: gameStartDateTime
-        });
-        
-        return {
-          gameUpdates: {
-            tournamentSeriesId: newSeries.id,
-            seriesName: newSeries.name,
-            seriesAssignmentStatus: 'AUTO_ASSIGNED',
-            seriesAssignmentConfidence: 0.9,
-            isSeries: true
-          },
-          metadata: {
-            status: 'CREATED_NEW',
-            confidence: 0.9,
-            matchedSeriesId: newSeries.id,
-            matchedSeriesName: newSeries.name,
-            wasCreated: true,
-            createdSeriesId: newSeries.id,
-            matchReason: 'heuristic_creation'
-          }
-        };
-      } catch (err) {
-        console.error('[SERIES] Heuristic creation failed:', err);
-      }
-    }
-  }
-  
-  // Standard title/name lookup
-  if (!seriesName && !seriesTitleId) {
-    return {
-      gameUpdates: {
-        seriesAssignmentStatus: 'NOT_SERIES',
-        seriesAssignmentConfidence: 0,
-        isSeries: false
-      },
-      metadata: {
-        status: 'NOT_SERIES',
-        confidence: 0,
-        wasCreated: false,
-        matchReason: 'no_series_info'
-      }
-    };
-  }
-  
-  // Find series title
-  let seriesTitle = null;
-  if (seriesTitleId) {
-    seriesTitle = await getSeriesTitleById(seriesTitleId);
-  }
-  if (!seriesTitle && seriesName) {
-    seriesTitle = await findSeriesTitleByName(seriesName);
-  }
-  
-  // Get candidate series
-  let candidateSeries = [];
-  if (seriesTitle) {
-    candidateSeries = await getSeriesInstancesByTitleId(seriesTitle.id);
-  }
-  
-  if (seriesName) {
-    const yearSeries = await getSeriesByYear(year);
-    const nameCandidates = yearSeries.filter(s => {
-      const sim = calculateNameSimilarity(seriesName, s.name);
-      return sim >= 70;
+    const result = await resolveSeriesFromName({
+      seriesName: generatedSeriesName,
+      seriesCategory: category,
+      gameName,
+      gameStartDateTime,
+      venueId,
+      year,
+      month,
+      quarter,
+      autoCreate,
+      matchConfidence: heuristicSignal.confidence,
+      matchType: 'HEURISTIC'
     });
     
-    for (const c of nameCandidates) {
-      if (!candidateSeries.find(existing => existing.id === c.id)) {
-        candidateSeries.push(c);
-      }
-    }
+    return result;
   }
   
-  // Find best temporal match
-  const match = findBestTemporalMatch(candidateSeries, gameStartDateTime, venueId, seriesName);
+  // ===== STEP 5: No match found =====
+  console.log('[SERIES] No series detected');
+  return {
+    gameUpdates: {
+      seriesAssignmentStatus: 'NOT_SERIES',
+      seriesAssignmentConfidence: 0,
+      isSeries: false
+    },
+    metadata: {
+      status: 'NOT_SERIES',
+      confidence: 0,
+      wasCreated: false,
+      matchReason: 'no_match_found'
+    }
+  };
+};
+
+/**
+ * Resolve to a specific TournamentSeries instance when we have a seriesTitleId
+ */
+const resolveSeriesInstance = async ({
+  seriesTitleId,
+  seriesTitle,
+  seriesCategory,
+  gameName,
+  gameStartDateTime,
+  venueId,
+  year,
+  month,
+  quarter,
+  autoCreate,
+  matchConfidence,
+  matchType
+}) => {
+  const details = extractSeriesDetails(gameName);
   
-  if (match && match.score >= 60) {
+  // Find existing instances for this title
+  const seriesInstances = await getSeriesInstancesByTitleId(seriesTitleId);
+  
+  // Find best temporal match
+  const temporalMatch = findBestTemporalMatch(seriesInstances, gameStartDateTime, venueId, seriesTitle);
+  
+  if (temporalMatch && temporalMatch.score >= 60) {
+    console.log(`[SERIES] Matched to existing instance: ${temporalMatch.series.name}`);
     return {
       gameUpdates: {
-        tournamentSeriesId: match.series.id,
-        seriesName: match.series.name,
+        tournamentSeriesId: temporalMatch.series.id,
+        seriesName: temporalMatch.series.name,
+        tournamentSeriesTitleId: seriesTitleId,
         seriesAssignmentStatus: 'AUTO_ASSIGNED',
-        seriesAssignmentConfidence: match.confidence,
-        isSeries: true
+        seriesAssignmentConfidence: Math.min(matchConfidence, temporalMatch.confidence),
+        isSeries: true,
+        ...details
       },
       metadata: {
         status: 'MATCHED_EXISTING',
-        confidence: match.confidence,
-        matchedSeriesId: match.series.id,
-        matchedSeriesName: match.series.name,
-        matchedSeriesTitleId: seriesTitle?.id,
+        confidence: temporalMatch.confidence,
+        matchedSeriesId: temporalMatch.series.id,
+        matchedSeriesName: temporalMatch.series.name,
+        matchedSeriesTitleId: seriesTitleId,
         wasCreated: false,
-        matchReason: 'temporal_match'
+        matchReason: `${matchType.toLowerCase()}_temporal_match`
       }
     };
   }
   
-  // Auto-create if we have a title
-  if (autoCreate && seriesTitle) {
-    // Check for same-year candidate first to avoid duplicates
-    if (candidateSeries.length > 0) {
-      let bestCandidate = null;
-      let bestScore = -1;
-      
-      for (const candidate of candidateSeries) {
-        let score = calculateTemporalProximity(gameStartDateTime, candidate);
-        if (seriesName) {
-          const sim = calculateNameSimilarity(seriesName, candidate.name);
-          score += (sim / 5);
-        }
-        if (score > bestScore) {
-          bestScore = score;
-          bestCandidate = candidate;
-        }
-      }
-      
-      if (bestCandidate && bestCandidate.year === year) {
-        console.log(`[SERIES] Avoided duplicate. Matched to ${bestCandidate.name} (Score: ${bestScore})`);
-        return {
-          gameUpdates: {
-            tournamentSeriesId: bestCandidate.id,
-            seriesName: bestCandidate.name,
-            seriesAssignmentStatus: 'AUTO_ASSIGNED',
-            seriesAssignmentConfidence: 0.75,
-            isSeries: true
-          },
-          metadata: {
-            status: 'MATCHED_EXISTING',
-            confidence: 0.75,
-            matchedSeriesId: bestCandidate.id,
-            matchedSeriesName: bestCandidate.name,
-            wasCreated: false,
-            matchReason: 'duplicate_avoidance'
-          }
-        };
-      }
-    }
-    
-    // Create new series
-    const sameYearSeries = candidateSeries.filter(s => s.year === year);
-    const useMonth = sameYearSeries.length > 0;
-    const useQuarter = !useMonth && candidateSeries.length > 0;
-    
-    const newSeriesName = generateSeriesName(
-      seriesTitle.title,
-      year,
-      useMonth ? month : null,
-      useQuarter ? quarter : null
-    );
+  // Auto-create new instance if enabled
+  if (autoCreate) {
+    const newSeriesName = generateSeriesName(seriesTitle, year);
     
     try {
       const newSeries = await createTournamentSeries({
         name: newSeriesName,
         year,
-        quarter: useQuarter || useMonth ? quarter : null,
-        month: useMonth ? month : null,
-        seriesCategory: seriesTitle.seriesCategory || 'REGULAR',
-        tournamentSeriesTitleId: seriesTitle.id,
+        seriesCategory: seriesCategory || 'REGULAR',
+        tournamentSeriesTitleId: seriesTitleId,
+        venueId: venueId || null,
+        startDate: gameStartDateTime
+      });
+      
+      return {
+        gameUpdates: {
+          tournamentSeriesId: newSeries.id,
+          seriesName: newSeries.name,
+          tournamentSeriesTitleId: seriesTitleId,
+          seriesAssignmentStatus: 'AUTO_ASSIGNED',
+          seriesAssignmentConfidence: matchConfidence * 0.95,
+          isSeries: true,
+          ...details
+        },
+        metadata: {
+          status: 'CREATED_NEW',
+          confidence: matchConfidence * 0.95,
+          matchedSeriesId: newSeries.id,
+          matchedSeriesName: newSeries.name,
+          matchedSeriesTitleId: seriesTitleId,
+          wasCreated: true,
+          createdSeriesId: newSeries.id,
+          matchReason: `${matchType.toLowerCase()}_new_instance`
+        }
+      };
+    } catch (error) {
+      console.error('[SERIES] Failed to create series instance:', error);
+    }
+  }
+  
+  // Could not create - return pending
+  return {
+    gameUpdates: {
+      seriesName: seriesTitle,
+      tournamentSeriesTitleId: seriesTitleId,
+      seriesAssignmentStatus: 'PENDING_ASSIGNMENT',
+      seriesAssignmentConfidence: matchConfidence,
+      suggestedSeriesName: `${seriesTitle} ${year}`,
+      isSeries: true,
+      ...details
+    },
+    metadata: {
+      status: 'PENDING',
+      confidence: matchConfidence,
+      matchedSeriesTitleId: seriesTitleId,
+      wasCreated: false,
+      matchReason: `${matchType.toLowerCase()}_no_instance`
+    }
+  };
+};
+
+/**
+ * Resolve series when we only have a name (no seriesTitleId)
+ */
+const resolveSeriesFromName = async ({
+  seriesName,
+  seriesCategory = 'SPECIAL',
+  gameName,
+  gameStartDateTime,
+  venueId,
+  year,
+  month,
+  quarter,
+  autoCreate,
+  matchConfidence,
+  matchType
+}) => {
+  const details = extractSeriesDetails(gameName);
+  
+  // Search for existing series by year and name similarity
+  const yearSeries = await getSeriesByYear(year);
+  let bestCandidate = null;
+  let bestScore = 0;
+  
+  for (const s of yearSeries) {
+    const sim = calculateNameSimilarity(seriesName, s.name);
+    if (sim > bestScore) {
+      bestScore = sim;
+      bestCandidate = s;
+    }
+  }
+  
+  if (bestCandidate && bestScore >= 75) {
+    console.log(`[SERIES] Matched to existing by name: ${bestCandidate.name} (score: ${bestScore})`);
+    return {
+      gameUpdates: {
+        tournamentSeriesId: bestCandidate.id,
+        seriesName: bestCandidate.name,
+        seriesAssignmentStatus: 'AUTO_ASSIGNED',
+        seriesAssignmentConfidence: Math.min(matchConfidence, bestScore / 100),
+        isSeries: true,
+        ...details
+      },
+      metadata: {
+        status: 'MATCHED_EXISTING',
+        confidence: bestScore / 100,
+        matchedSeriesId: bestCandidate.id,
+        matchedSeriesName: bestCandidate.name,
+        wasCreated: false,
+        matchReason: `${matchType.toLowerCase()}_name_match`
+      }
+    };
+  }
+  
+  // Auto-create if enabled
+  if (autoCreate) {
+    const displaySeriesName = seriesName.charAt(0).toUpperCase() + seriesName.slice(1);
+    
+    try {
+      const newSeries = await createTournamentSeries({
+        name: displaySeriesName,
+        year,
+        seriesCategory,
+        tournamentSeriesTitleId: null,
         venueId: venueId || null,
         startDate: gameStartDateTime
       });
@@ -637,39 +951,40 @@ const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoC
           tournamentSeriesId: newSeries.id,
           seriesName: newSeries.name,
           seriesAssignmentStatus: 'AUTO_ASSIGNED',
-          seriesAssignmentConfidence: 0.9,
-          isSeries: true
+          seriesAssignmentConfidence: matchConfidence * 0.9,
+          isSeries: true,
+          ...details
         },
         metadata: {
           status: 'CREATED_NEW',
-          confidence: 0.9,
+          confidence: matchConfidence * 0.9,
           matchedSeriesId: newSeries.id,
           matchedSeriesName: newSeries.name,
-          matchedSeriesTitleId: seriesTitle.id,
           wasCreated: true,
           createdSeriesId: newSeries.id,
-          matchReason: 'title_based_creation'
+          matchReason: `${matchType.toLowerCase()}_creation`
         }
       };
-    } catch (error) {
-      console.error('[SERIES] Failed to create:', error);
+    } catch (err) {
+      console.error('[SERIES] Creation failed:', err);
     }
   }
   
-  // Fallback - pending assignment
+  // Could not create - return pending
   return {
     gameUpdates: {
-      seriesName: seriesName,
+      seriesName,
       seriesAssignmentStatus: 'PENDING_ASSIGNMENT',
-      seriesAssignmentConfidence: 0,
+      seriesAssignmentConfidence: matchConfidence,
       suggestedSeriesName: seriesName,
-      isSeries: true
+      isSeries: true,
+      ...details
     },
     metadata: {
-      status: 'FAILED',
-      confidence: 0,
+      status: 'PENDING',
+      confidence: matchConfidence,
       wasCreated: false,
-      matchReason: 'no_match_found'
+      matchReason: `${matchType.toLowerCase()}_no_create`
     }
   };
 };
@@ -679,9 +994,24 @@ const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoC
 // ===================================================================
 
 module.exports = {
+  // Main resolver
   resolveSeriesAssignment,
+  
+  // Detection functions
   detectSeriesSignal,
+  matchAgainstDatabase,
+  matchAgainstPatterns,
+  extractSeriesDetails,
+  
+  // Utilities
   normalizeSeriesName,
   calculateNameSimilarity,
-  extractTemporalComponents
+  extractTemporalComponents,
+  cleanupNameForSeriesMatching,
+  
+  // Database operations (for testing)
+  getAllSeriesTitles,
+  getSeriesInstancesByTitleId,
+  getSeriesByYear,
+  createTournamentSeries
 };

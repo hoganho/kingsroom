@@ -287,7 +287,7 @@ async function startScraperJob({ input }, event) {
             maxTotalErrors,
             
             // Progress counters (initialized)
-            totalProcessed: 0,
+            totalURLsProcessed: 0,
             currentId: null,
             newGamesScraped: 0,
             gamesUpdated: 0,
@@ -718,7 +718,7 @@ async function getScraperMetrics({ timeRange, entityId }) {
         const failedJobs = jobs.filter(j => j.status === 'FAILED' || j.status === 'TIMEOUT' || j.status?.startsWith('STOPPED')).length;
         const runningJobs = jobs.filter(j => j.status === 'QUEUED').length;
         
-        const totalProcessed = jobs.reduce((sum, j) => sum + (j.totalProcessed || 0), 0);
+        const totalURLsProcessed = jobs.reduce((sum, j) => sum + (j.totalURLsProcessed || 0), 0);
         const totalNewGames = jobs.reduce((sum, j) => sum + (j.newGamesScraped || 0), 0);
         const totalUpdatedGames = jobs.reduce((sum, j) => sum + (j.gamesUpdated || 0), 0);
         const totalErrors = jobs.reduce((sum, j) => sum + (j.errors || 0), 0);
@@ -729,7 +729,7 @@ async function getScraperMetrics({ timeRange, entityId }) {
         const averageJobDuration = finishedJobs.length > 0 ? totalDuration / finishedJobs.length : 0;
         
         const successRate = totalJobs > 0 ? (completedJobs / totalJobs) * 100 : 0;
-        const s3CacheRate = totalProcessed > 0 ? (totalS3Hits / totalProcessed) * 100 : 0;
+        const s3CacheRate = totalURLsProcessed > 0 ? (totalS3Hits / totalURLsProcessed) * 100 : 0;
         
         // Return fields matching GraphQL ScraperMetrics type
         return {
@@ -739,7 +739,7 @@ async function getScraperMetrics({ timeRange, entityId }) {
             successfulJobs: completedJobs,      // Schema expects 'successfulJobs'
             failedJobs,
             runningJobs,
-            totalURLsScraped: totalProcessed,   // Schema expects 'totalURLsScraped'
+            totalURLsScraped: totalURLsProcessed,   // Schema expects 'totalURLsScraped'
             totalNewGames,
             totalUpdatedGames,
             totalErrors,

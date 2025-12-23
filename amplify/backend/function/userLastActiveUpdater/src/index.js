@@ -1,4 +1,14 @@
-// amplify/backend/function/userLastActiveUpdater/src/index.js
+/* Amplify Params - DO NOT EDIT
+	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
+	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+	API_KINGSROOM_GRAPHQLAPIKEYOUTPUT
+	API_KINGSROOM_USERAUDITLOGTABLE_ARN
+	API_KINGSROOM_USERAUDITLOGTABLE_NAME
+	API_KINGSROOM_USERTABLE_ARN
+	API_KINGSROOM_USERTABLE_NAME
+	ENV
+	REGION
+Amplify Params - DO NOT EDIT */// amplify/backend/function/userLastActiveUpdater/src/index.js
 // 
 // DynamoDB Stream Trigger: Updates User.lastActiveAt when UserAuditLog entries are created
 // 

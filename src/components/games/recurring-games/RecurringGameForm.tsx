@@ -1,53 +1,41 @@
 // src/components/games/recurring-games/RecurringGameForm.tsx
+// ENHANCED: Added day/name consistency validation and duplicate warnings
 import React, { useState, useEffect, useMemo } from 'react';
-import { XMarkIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChevronDownIcon, ChevronUpIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { GameVariant, GameType, GameFrequency } from '../../../API';
+import { 
+    checkForDuplicates,
+    type DuplicateCheckResult 
+} from '../../../services/recurringGameService';
 
-// Types matching your Schema - expanded to include all available fields
+// Types matching your Schema
 interface RecurringGameFormData {
-    // === IDENTIFICATION ===
     name: string;
     displayName: string;
     description: string;
     aliases: string[];
-    
-    // === RELATIONSHIPS ===
     entityId: string;
     venueId: string;
-    
-    // === SCHEDULE INFORMATION ===
     dayOfWeek: string;
     startTime: string;
     endTime: string;
     frequency: GameFrequency;
-    
-    // === GAME CHARACTERISTICS ===
     gameType: GameType;
     gameVariant: GameVariant;
-    
-    // Typical values
     typicalBuyIn: number;
     typicalRake: number;
     typicalStartingStack: number;
     typicalGuarantee: number;
-    
-    // === STATUS & TRACKING ===
     isActive: boolean;
     isPaused: boolean;
     pausedReason: string;
-    
-    // === CATEGORIZATION ===
     isSignature: boolean;
     isBeginnerFriendly: boolean;
     isBounty: boolean;
     tags: string[];
-    
-    // === MARKETING ===
     marketingDescription: string;
     imageUrl: string;
     socialMediaHashtags: string[];
-    
-    // === METADATA ===
     notes: string;
     adminNotes: string;
 }
@@ -70,57 +58,64 @@ interface RecurringGameFormProps {
     initialData?: Partial<RecurringGameFormData>;
     venues: Venue[];
     entities: Entity[];
-    currentEntityId?: string; // Pre-selected entity from context
+    currentEntityId?: string;
     isSubmitting: boolean;
 }
 
 const DEFAULT_FORM: RecurringGameFormData = {
-    // Identification
     name: '',
     displayName: '',
     description: '',
     aliases: [],
-    
-    // Relationships
     entityId: '',
     venueId: '',
-    
-    // Schedule
-    dayOfWeek: 'MONDAY',
+    dayOfWeek: '', // Changed from 'MONDAY' to empty - force user to select
     startTime: '19:00',
     endTime: '',
     frequency: GameFrequency.WEEKLY,
-    
-    // Game Characteristics
     gameType: GameType.TOURNAMENT,
     gameVariant: GameVariant.NLHE,
     typicalBuyIn: 0,
     typicalRake: 0,
     typicalStartingStack: 10000,
     typicalGuarantee: 0,
-    
-    // Status
     isActive: true,
     isPaused: false,
     pausedReason: '',
-    
-    // Categorization
     isSignature: false,
     isBeginnerFriendly: false,
     isBounty: false,
     tags: [],
-    
-    // Marketing
     marketingDescription: '',
     imageUrl: '',
     socialMediaHashtags: [],
-    
-    // Metadata
     notes: '',
     adminNotes: ''
 };
 
 const DAYS_OF_WEEK = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+
+// Day keywords for extraction (duplicated here for client-side validation)
+const DAY_KEYWORDS: Record<string, string> = {
+    'monday': 'MONDAY', 'mon': 'MONDAY',
+    'tuesday': 'TUESDAY', 'tue': 'TUESDAY', 'tues': 'TUESDAY',
+    'wednesday': 'WEDNESDAY', 'wed': 'WEDNESDAY',
+    'thursday': 'THURSDAY', 'thu': 'THURSDAY', 'thur': 'THURSDAY', 'thurs': 'THURSDAY',
+    'friday': 'FRIDAY', 'fri': 'FRIDAY',
+    'saturday': 'SATURDAY', 'sat': 'SATURDAY',
+    'sunday': 'SUNDAY', 'sun': 'SUNDAY',
+};
+
+// Client-side day extraction
+const extractDayFromNameLocal = (name: string): string | null => {
+    if (!name) return null;
+    const lower = name.toLowerCase();
+    for (const [keyword, day] of Object.entries(DAY_KEYWORDS)) {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+        if (regex.test(lower)) return day;
+    }
+    return null;
+};
 
 // Collapsible Section Component
 const CollapsibleSection: React.FC<{
@@ -153,6 +148,23 @@ const CollapsibleSection: React.FC<{
     );
 };
 
+// Warning Banner Component
+const WarningBanner: React.FC<{ message: string; onDismiss?: () => void }> = ({ message, onDismiss }) => (
+    <div className="rounded-md bg-yellow-50 p-4 border border-yellow-200">
+        <div className="flex">
+            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400 flex-shrink-0" />
+            <div className="ml-3 flex-1">
+                <p className="text-sm text-yellow-700">{message}</p>
+            </div>
+            {onDismiss && (
+                <button onClick={onDismiss} className="ml-3 text-yellow-500 hover:text-yellow-600">
+                    <XMarkIcon className="h-5 w-5" />
+                </button>
+            )}
+        </div>
+    </div>
+);
+
 export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
     isOpen,
     onClose,
@@ -165,12 +177,16 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
 }) => {
     const [formData, setFormData] = useState<RecurringGameFormData>(DEFAULT_FORM);
     const [aliasInput, setAliasInput] = useState('');
-    const [tagInput, setTagInput] = useState('');
-    const [hashtagInput, setHashtagInput] = useState('');
+    
+    // NEW: Validation state
+    const [dayWarning, setDayWarning] = useState<string | null>(null);
+    const [duplicateWarning, setDuplicateWarning] = useState<DuplicateCheckResult | null>(null);
+    const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
+    const [acknowledgedWarnings, setAcknowledgedWarnings] = useState(false);
 
+    // Initialize form
     useEffect(() => {
         if (isOpen && initialData) {
-            // Ensure array fields are never null (database may return null instead of [])
             const safeInitialData = {
                 ...initialData,
                 aliases: initialData.aliases ?? [],
@@ -178,14 +194,83 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                 socialMediaHashtags: initialData.socialMediaHashtags ?? [],
             };
             setFormData({ ...DEFAULT_FORM, ...safeInitialData });
+            setDayWarning(null);
+            setDuplicateWarning(null);
+            setAcknowledgedWarnings(false);
         } else if (isOpen) {
-            // For new games, pre-select the current entity from context
             setFormData({ 
                 ...DEFAULT_FORM, 
                 entityId: currentEntityId || '' 
             });
+            setDayWarning(null);
+            setDuplicateWarning(null);
+            setAcknowledgedWarnings(false);
         }
     }, [isOpen, initialData, currentEntityId]);
+
+    // NEW: Auto-detect day from name and show warning if mismatch
+    useEffect(() => {
+        if (!formData.name) {
+            setDayWarning(null);
+            return;
+        }
+        
+        const detectedDay = extractDayFromNameLocal(formData.name);
+        
+        if (detectedDay) {
+            if (!formData.dayOfWeek) {
+                // Auto-select the detected day
+                setFormData(prev => ({ ...prev, dayOfWeek: detectedDay }));
+                setDayWarning(null);
+            } else if (detectedDay !== formData.dayOfWeek) {
+                // Mismatch detected
+                setDayWarning(
+                    `The name "${formData.name}" suggests ${detectedDay}, but you selected ${formData.dayOfWeek}. ` +
+                    `This may cause issues with game matching.`
+                );
+            } else {
+                setDayWarning(null);
+            }
+        } else {
+            setDayWarning(null);
+        }
+    }, [formData.name, formData.dayOfWeek]);
+
+    // NEW: Check for duplicates when venue/name/variant changes
+    useEffect(() => {
+        const checkDuplicates = async () => {
+            if (!formData.venueId || !formData.name || formData.name.length < 3) {
+                setDuplicateWarning(null);
+                return;
+            }
+            
+            // Don't check duplicates when editing existing game
+            if (initialData?.name === formData.name && initialData?.venueId === formData.venueId) {
+                setDuplicateWarning(null);
+                return;
+            }
+            
+            setIsCheckingDuplicates(true);
+            try {
+                const result = await checkForDuplicates(
+                    formData.venueId,
+                    formData.name,
+                    formData.dayOfWeek,
+                    formData.gameVariant
+                );
+                setDuplicateWarning(result.hasDuplicate ? result : null);
+            } catch (error) {
+                console.error('Error checking duplicates:', error);
+                setDuplicateWarning(null);
+            } finally {
+                setIsCheckingDuplicates(false);
+            }
+        };
+        
+        // Debounce the check
+        const timeout = setTimeout(checkDuplicates, 500);
+        return () => clearTimeout(timeout);
+    }, [formData.venueId, formData.name, formData.dayOfWeek, formData.gameVariant, initialData]);
 
     // Filter venues based on selected entity
     const filteredVenues = useMemo(() => {
@@ -197,6 +282,20 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Require acknowledgment if there are warnings
+        if ((dayWarning || duplicateWarning) && !acknowledgedWarnings) {
+            const confirmMessage = [
+                dayWarning ? `Day mismatch: ${dayWarning}` : '',
+                duplicateWarning?.suggestion || ''
+            ].filter(Boolean).join('\n\n');
+            
+            if (!window.confirm(`Warning:\n\n${confirmMessage}\n\nDo you want to proceed anyway?`)) {
+                return;
+            }
+            setAcknowledgedWarnings(true);
+        }
+        
         await onSubmit(formData);
     };
 
@@ -221,6 +320,8 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
     const labelClass = "block text-sm font-medium text-gray-700";
     const checkboxLabelClass = "ml-2 block text-sm text-gray-900";
 
+    const hasWarnings = dayWarning || duplicateWarning;
+
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex min-h-screen items-center justify-center p-4">
@@ -241,13 +342,27 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                     <div className="flex-1 overflow-y-auto p-6">
                         <form id="recurring-game-form" onSubmit={handleSubmit} className="space-y-6">
                             
+                            {/* === WARNINGS === */}
+                            {dayWarning && (
+                                <WarningBanner 
+                                    message={dayWarning} 
+                                    onDismiss={() => setDayWarning(null)}
+                                />
+                            )}
+                            
+                            {duplicateWarning && (
+                                <WarningBanner 
+                                    message={duplicateWarning.suggestion || 'A similar recurring game may already exist.'}
+                                />
+                            )}
+                            
                             {/* === CORE INFO (Always visible) === */}
                             <div className="space-y-4">
                                 <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
                                     Core Information
                                 </h4>
                                 
-                                {/* Entity & Name */}
+                                {/* Entity & Venue */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className={labelClass}>Entity *</label>
@@ -257,7 +372,7 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                                             onChange={(e) => setFormData({ 
                                                 ...formData, 
                                                 entityId: e.target.value,
-                                                venueId: '' // Reset venue when entity changes
+                                                venueId: ''
                                             })}
                                             className={inputClass}
                                         >
@@ -270,51 +385,64 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                                         </select>
                                     </div>
                                     <div>
-                                        <label className={labelClass}>Name *</label>
-                                        <input
-                                            type="text"
+                                        <label className={labelClass}>Venue *</label>
+                                        <select
                                             required
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            value={formData.venueId}
+                                            onChange={(e) => setFormData({ ...formData, venueId: e.target.value })}
                                             className={inputClass}
-                                            placeholder="e.g. Tuesday Night NLHE"
-                                        />
+                                            disabled={!formData.entityId}
+                                        >
+                                            <option value="">Select Venue</option>
+                                            {filteredVenues.map(venue => (
+                                                <option key={venue.id} value={venue.id}>
+                                                    {venue.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
-
-                                {/* Venue */}
+                                
+                                {/* Name with validation indicator */}
                                 <div>
-                                    <label className={labelClass}>Venue *</label>
-                                    <select
+                                    <label className={labelClass}>
+                                        Name *
+                                        {isCheckingDuplicates && (
+                                            <span className="ml-2 text-xs text-gray-400">Checking for duplicates...</span>
+                                        )}
+                                    </label>
+                                    <input
+                                        type="text"
                                         required
-                                        value={formData.venueId}
-                                        onChange={(e) => setFormData({ ...formData, venueId: e.target.value })}
-                                        className={inputClass}
-                                        disabled={!formData.entityId}
-                                    >
-                                        <option value="">
-                                            {formData.entityId ? 'Select Venue' : 'Select an entity first'}
-                                        </option>
-                                        {filteredVenues.map(v => (
-                                            <option key={v.id} value={v.id}>{v.name}</option>
-                                        ))}
-                                    </select>
-                                    {formData.entityId && filteredVenues.length === 0 && (
-                                        <p className="mt-1 text-xs text-amber-600">
-                                            No venues found for this entity
-                                        </p>
-                                    )}
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        className={`${inputClass} ${dayWarning || duplicateWarning ? 'border-yellow-400' : ''}`}
+                                        placeholder="e.g. Friday Night NLHE, Tuesday Turbos"
+                                    />
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        Tip: Include the day of week in the name (e.g., "Friday Night Poker") for better matching.
+                                    </p>
                                 </div>
 
-                                {/* Schedule */}
-                                <div className="grid grid-cols-3 gap-4">
+                                {/* Day & Time - Day is now REQUIRED and has visual indicator */}
+                                <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className={labelClass}>Day of Week</label>
+                                        <label className={labelClass}>
+                                            Day of Week *
+                                            {formData.dayOfWeek && extractDayFromNameLocal(formData.name) === formData.dayOfWeek && (
+                                                <span className="ml-2 text-xs text-green-600">✓ Matches name</span>
+                                            )}
+                                        </label>
                                         <select
+                                            required
                                             value={formData.dayOfWeek}
-                                            onChange={(e) => setFormData({ ...formData, dayOfWeek: e.target.value })}
-                                            className={inputClass}
+                                            onChange={(e) => {
+                                                setFormData({ ...formData, dayOfWeek: e.target.value });
+                                                setAcknowledgedWarnings(false);
+                                            }}
+                                            className={`${inputClass} ${dayWarning ? 'border-yellow-400 bg-yellow-50' : ''}`}
                                         >
+                                            <option value="">Select Day</option>
                                             {DAYS_OF_WEEK.map(day => (
                                                 <option key={day} value={day}>
                                                     {day.charAt(0) + day.slice(1).toLowerCase()}
@@ -331,32 +459,20 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                                             className={inputClass}
                                         />
                                     </div>
-                                    <div>
-                                        <label className={labelClass}>Frequency</label>
-                                        <select
-                                            value={formData.frequency}
-                                            onChange={(e) => setFormData({ ...formData, frequency: e.target.value as GameFrequency })}
-                                            className={inputClass}
-                                        >
-                                            {Object.values(GameFrequency).map(f => (
-                                                <option key={f} value={f}>{f}</option>
-                                            ))}
-                                        </select>
-                                    </div>
                                 </div>
 
                                 {/* Game Type & Variant */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className={labelClass}>Game Type</label>
+                                        <label className={labelClass}>Game Type *</label>
                                         <select
+                                            required
                                             value={formData.gameType}
                                             onChange={(e) => setFormData({ ...formData, gameType: e.target.value as GameType })}
                                             className={inputClass}
                                         >
-                                            {Object.values(GameType).map(t => (
-                                                <option key={t} value={t}>{t}</option>
-                                            ))}
+                                            <option value="TOURNAMENT">Tournament</option>
+                                            <option value="CASH_GAME">Cash Game</option>
                                         </select>
                                     </div>
                                     <div>
@@ -364,12 +480,18 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                                         <select
                                             required
                                             value={formData.gameVariant}
-                                            onChange={(e) => setFormData({ ...formData, gameVariant: e.target.value as GameVariant })}
+                                            onChange={(e) => {
+                                                setFormData({ ...formData, gameVariant: e.target.value as GameVariant });
+                                                setAcknowledgedWarnings(false);
+                                            }}
                                             className={inputClass}
                                         >
-                                            {Object.values(GameVariant).map(v => (
-                                                <option key={v} value={v}>{v}</option>
-                                            ))}
+                                            <option value="NLHE">No Limit Hold'em</option>
+                                            <option value="PLO">Pot Limit Omaha</option>
+                                            <option value="PLOM">PLO Mixed (Hi/Lo)</option>
+                                            <option value="LHE">Limit Hold'em</option>
+                                            <option value="MIXED">Mixed Games</option>
+                                            <option value="OTHER">Other</option>
                                         </select>
                                     </div>
                                 </div>
@@ -377,337 +499,112 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                                 {/* Buy-in & Guarantee */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className={labelClass}>Typical Buy-in</label>
-                                        <div className="relative mt-1 rounded-md shadow-sm">
-                                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                                <span className="text-gray-500 sm:text-sm">$</span>
-                                            </div>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="1"
-                                                value={formData.typicalBuyIn || ''}
-                                                onChange={(e) => setFormData({ ...formData, typicalBuyIn: parseFloat(e.target.value) || 0 })}
-                                                className="block w-full rounded-md border-gray-300 pl-7 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            />
-                                        </div>
+                                        <label className={labelClass}>Typical Buy-In ($)</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="1"
+                                            value={formData.typicalBuyIn}
+                                            onChange={(e) => setFormData({ ...formData, typicalBuyIn: parseFloat(e.target.value) || 0 })}
+                                            className={inputClass}
+                                            placeholder="150"
+                                        />
                                     </div>
                                     <div>
-                                        <label className={labelClass}>Typical Guarantee</label>
-                                        <div className="relative mt-1 rounded-md shadow-sm">
-                                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                                <span className="text-gray-500 sm:text-sm">$</span>
-                                            </div>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="1"
-                                                value={formData.typicalGuarantee || ''}
-                                                onChange={(e) => setFormData({ ...formData, typicalGuarantee: parseFloat(e.target.value) || 0 })}
-                                                className="block w-full rounded-md border-gray-300 pl-7 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            />
-                                        </div>
+                                        <label className={labelClass}>Typical Guarantee ($)</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="100"
+                                            value={formData.typicalGuarantee}
+                                            onChange={(e) => setFormData({ ...formData, typicalGuarantee: parseFloat(e.target.value) || 0 })}
+                                            className={inputClass}
+                                            placeholder="5000"
+                                        />
                                     </div>
                                 </div>
 
-                                {/* Status Toggles */}
-                                <div className="flex flex-wrap gap-6">
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.isActive}
-                                            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                        />
-                                        <span className={checkboxLabelClass}>Active</span>
-                                    </label>
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.isSignature}
-                                            onChange={(e) => setFormData({ ...formData, isSignature: e.target.checked })}
-                                            className="h-4 w-4 rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
-                                        />
-                                        <span className={checkboxLabelClass}>Signature Event</span>
-                                    </label>
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.isBounty}
-                                            onChange={(e) => setFormData({ ...formData, isBounty: e.target.checked })}
-                                            className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                                        />
-                                        <span className={checkboxLabelClass}>Bounty</span>
-                                    </label>
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.isBeginnerFriendly}
-                                            onChange={(e) => setFormData({ ...formData, isBeginnerFriendly: e.target.checked })}
-                                            className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                        />
-                                        <span className={checkboxLabelClass}>Beginner Friendly</span>
-                                    </label>
-                                </div>
+                                {/* Signature Game Checkbox */}
+                                <label className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.isSignature}
+                                        onChange={(e) => setFormData({ ...formData, isSignature: e.target.checked })}
+                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span className={checkboxLabelClass}>Signature Event (featured game)</span>
+                                </label>
                             </div>
 
-                            {/* === EXTENDED DETAILS (Collapsible) === */}
-                            <CollapsibleSection title="Extended Details" defaultOpen={false}>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className={labelClass}>Display Name</label>
-                                        <input
-                                            type="text"
-                                            value={formData.displayName}
-                                            onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                                            className={inputClass}
-                                            placeholder="Public-facing name"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className={labelClass}>End Time</label>
-                                        <input
-                                            type="time"
-                                            value={formData.endTime}
-                                            onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                                            className={inputClass}
-                                        />
-                                    </div>
+                            {/* === ADDITIONAL SECTIONS (Collapsible) === */}
+                            
+                            <CollapsibleSection title="Display & Description" defaultOpen={false}>
+                                <div>
+                                    <label className={labelClass}>Display Name</label>
+                                    <input
+                                        type="text"
+                                        value={formData.displayName}
+                                        onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                                        className={inputClass}
+                                        placeholder="Optional: Friendly display name"
+                                    />
                                 </div>
-
                                 <div>
                                     <label className={labelClass}>Description</label>
                                     <textarea
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        rows={2}
+                                        rows={3}
                                         className={inputClass}
                                         placeholder="Brief description of this recurring game"
                                     />
                                 </div>
-
-                                {/* Aliases */}
-                                <div>
-                                    <label className={labelClass}>Aliases</label>
-                                    <div className="flex gap-2 mt-1">
-                                        <input
-                                            type="text"
-                                            value={aliasInput}
-                                            onChange={(e) => setAliasInput(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    e.preventDefault();
-                                                    addToArray('aliases', aliasInput, () => setAliasInput(''));
-                                                }
-                                            }}
-                                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            placeholder="Add alias and press Enter"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => addToArray('aliases', aliasInput, () => setAliasInput(''))}
-                                            className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm"
-                                        >
-                                            Add
-                                        </button>
-                                    </div>
-                                    {(formData.aliases?.length ?? 0) > 0 && (
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                            {formData.aliases.map((alias, idx) => (
-                                                <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-sm">
-                                                    {alias}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeFromArray('aliases', idx)}
-                                                        className="text-gray-400 hover:text-gray-600"
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
                             </CollapsibleSection>
 
-                            {/* === GAME SPECS (Collapsible) === */}
-                            <CollapsibleSection title="Game Specifications" defaultOpen={false}>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className={labelClass}>Typical Rake</label>
-                                        <div className="relative mt-1 rounded-md shadow-sm">
-                                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                                <span className="text-gray-500 sm:text-sm">$</span>
-                                            </div>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="1"
-                                                value={formData.typicalRake || ''}
-                                                onChange={(e) => setFormData({ ...formData, typicalRake: parseFloat(e.target.value) || 0 })}
-                                                className="block w-full rounded-md border-gray-300 pl-7 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className={labelClass}>Typical Starting Stack</label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            step="1000"
-                                            value={formData.typicalStartingStack || ''}
-                                            onChange={(e) => setFormData({ ...formData, typicalStartingStack: parseInt(e.target.value) || 0 })}
-                                            className={inputClass}
-                                            placeholder="e.g. 10000"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Tags */}
-                                <div>
-                                    <label className={labelClass}>Tags</label>
-                                    <div className="flex gap-2 mt-1">
-                                        <input
-                                            type="text"
-                                            value={tagInput}
-                                            onChange={(e) => setTagInput(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    e.preventDefault();
-                                                    addToArray('tags', tagInput, () => setTagInput(''));
-                                                }
-                                            }}
-                                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            placeholder="Add tag and press Enter"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => addToArray('tags', tagInput, () => setTagInput(''))}
-                                            className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm"
-                                        >
-                                            Add
-                                        </button>
-                                    </div>
-                                    {(formData.tags?.length ?? 0) > 0 && (
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                            {formData.tags.map((tag, idx) => (
-                                                <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-sm">
-                                                    {tag}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeFromArray('tags', idx)}
-                                                        className="text-indigo-400 hover:text-indigo-600"
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </CollapsibleSection>
-
-                            {/* === PAUSE STATUS (Collapsible) === */}
-                            <CollapsibleSection title="Pause Status" defaultOpen={false}>
-                                <div className="space-y-4">
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.isPaused}
-                                            onChange={(e) => setFormData({ ...formData, isPaused: e.target.checked })}
-                                            className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                                        />
-                                        <span className={checkboxLabelClass}>Currently Paused</span>
-                                    </label>
-                                    
-                                    {formData.isPaused && (
-                                        <div>
-                                            <label className={labelClass}>Pause Reason</label>
-                                            <input
-                                                type="text"
-                                                value={formData.pausedReason}
-                                                onChange={(e) => setFormData({ ...formData, pausedReason: e.target.value })}
-                                                className={inputClass}
-                                                placeholder="e.g. Venue renovation, seasonal break"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </CollapsibleSection>
-
-                            {/* === MARKETING (Collapsible) === */}
-                            <CollapsibleSection title="Marketing" defaultOpen={false}>
-                                <div>
-                                    <label className={labelClass}>Marketing Description</label>
-                                    <textarea
-                                        value={formData.marketingDescription}
-                                        onChange={(e) => setFormData({ ...formData, marketingDescription: e.target.value })}
-                                        rows={3}
-                                        className={inputClass}
-                                        placeholder="Description for promotional materials"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className={labelClass}>Image URL</label>
+                            <CollapsibleSection title="Aliases (for matching)" defaultOpen={false}>
+                                <p className="text-xs text-gray-500 mb-2">
+                                    Add alternative names that should match to this recurring game.
+                                </p>
+                                <div className="flex gap-2">
                                     <input
-                                        type="url"
-                                        value={formData.imageUrl}
-                                        onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                                        className={inputClass}
-                                        placeholder="https://..."
+                                        type="text"
+                                        value={aliasInput}
+                                        onChange={(e) => setAliasInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                addToArray('aliases', aliasInput, () => setAliasInput(''));
+                                            }
+                                        }}
+                                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                        placeholder="e.g. Friday Nite Poker"
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => addToArray('aliases', aliasInput, () => setAliasInput(''))}
+                                        className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm"
+                                    >
+                                        Add
+                                    </button>
                                 </div>
-
-                                {/* Social Media Hashtags */}
-                                <div>
-                                    <label className={labelClass}>Social Media Hashtags</label>
-                                    <div className="flex gap-2 mt-1">
-                                        <input
-                                            type="text"
-                                            value={hashtagInput}
-                                            onChange={(e) => setHashtagInput(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    e.preventDefault();
-                                                    const hashtag = hashtagInput.startsWith('#') ? hashtagInput : `#${hashtagInput}`;
-                                                    addToArray('socialMediaHashtags', hashtag, () => setHashtagInput(''));
-                                                }
-                                            }}
-                                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            placeholder="#poker #tournament"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                const hashtag = hashtagInput.startsWith('#') ? hashtagInput : `#${hashtagInput}`;
-                                                addToArray('socialMediaHashtags', hashtag, () => setHashtagInput(''));
-                                            }}
-                                            className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm"
-                                        >
-                                            Add
-                                        </button>
+                                {(formData.aliases?.length ?? 0) > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {formData.aliases.map((alias, idx) => (
+                                            <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                                                {alias}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeFromArray('aliases', idx)}
+                                                    className="text-gray-400 hover:text-gray-600"
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        ))}
                                     </div>
-                                    {(formData.socialMediaHashtags?.length ?? 0) > 0 && (
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                            {formData.socialMediaHashtags.map((hashtag, idx) => (
-                                                <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                                                    {hashtag}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeFromArray('socialMediaHashtags', idx)}
-                                                        className="text-blue-400 hover:text-blue-600"
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                                )}
                             </CollapsibleSection>
 
-                            {/* === NOTES (Collapsible) === */}
                             <CollapsibleSection title="Notes" defaultOpen={false}>
                                 <div>
                                     <label className={labelClass}>Internal Notes</label>
@@ -735,23 +632,32 @@ export const RecurringGameForm: React.FC<RecurringGameFormProps> = ({
                     </div>
 
                     {/* Footer - Fixed at bottom */}
-                    <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            disabled={isSubmitting}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            form="recurring-game-form"
-                            disabled={isSubmitting}
-                            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-                        >
-                            {isSubmitting ? 'Saving...' : 'Save'}
-                        </button>
+                    <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+                        <div className="text-sm text-gray-500">
+                            {hasWarnings && !acknowledgedWarnings && (
+                                <span className="text-yellow-600">
+                                    ⚠️ Please review warnings above
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                disabled={isSubmitting}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                form="recurring-game-form"
+                                disabled={isSubmitting || (!formData.dayOfWeek)}
+                                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+                            >
+                                {isSubmitting ? 'Saving...' : 'Save'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

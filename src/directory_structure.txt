@@ -52,6 +52,7 @@
 │   │   ├── .DS_Store
 │   │   ├── admin
 │   │   │   ├── .DS_Store
+│   │   │   ├── BatchJobProgress.tsx
 │   │   │   ├── CollapsibleSection.tsx
 │   │   │   ├── ErrorHandlingModal.tsx
 │   │   │   ├── index.ts
@@ -73,10 +74,17 @@
 │   │   ├── PlayerResults.tsx
 │   │   ├── PlayerSeating.tsx
 │   │   ├── SaveConfirmation
+│   │   │   ├── .DS_Store
 │   │   │   ├── ConsolidationPreview.tsx
+│   │   │   ├── DataTab.tsx
 │   │   │   ├── EditableField.tsx
-│   │   │   ├── QuickDataEditor.tsx
+│   │   │   ├── FieldSection.tsx
+│   │   │   ├── GroupingTab.tsx
+│   │   │   ├── index.ts
+│   │   │   ├── LinksTab.tsx
 │   │   │   ├── RecurringGameEditor.tsx
+│   │   │   ├── ReviewTab.tsx
+│   │   │   ├── SaveConfirmationContext.tsx
 │   │   │   ├── SeriesDetailsEditor.tsx
 │   │   │   └── TemplatePicker.tsx
 │   │   ├── SaveConfirmationModal.tsx
@@ -93,6 +101,7 @@
 │   ├── social
 │   │   ├── .DS_Store
 │   │   ├── index.ts
+│   │   ├── ManualPostUploadTab.tsx
 │   │   ├── SocialAccountModal.tsx
 │   │   └── SocialAccountTable.tsx
 │   ├── ui
@@ -130,6 +139,7 @@
 │   │   └── UserEditModal.tsx
 │   └── venues
 │       ├── DeleteConfirmationModal.tsx
+│       ├── VenueLogo.tsx
 │       ├── VenueModal.tsx
 │       └── VenueTable.tsx
 ├── config
@@ -141,6 +151,7 @@
 ├── directory_structure.txt
 ├── graphql
 │   ├── .DS_Store
+│   ├── customMutations.ts
 │   ├── customQueries.ts
 │   ├── enrichmentOperations.ts
 │   ├── entityOperations.ts
@@ -152,13 +163,18 @@
 │   └── userManagement.ts
 ├── hooks
 │   ├── .DS_Store
+│   ├── enrichment
+│   │   ├── index.ts
+│   │   ├── useEnrichmentPreview.ts
+│   │   └── useFinancialsPreview.ts
 │   ├── scraper
 │   │   ├── index.ts
+│   │   ├── useBatchJobMonitor.ts
 │   │   ├── useErrorTracking.ts
 │   │   ├── useModalResolver.ts
 │   │   ├── useProcessingState.ts
 │   │   ├── useResultStateMachine.ts
-│   │   └── useScrapeOrchestrator.ts
+│   │   └── useSingleScrape.ts
 │   ├── social
 │   │   └── index.ts
 │   ├── useActivityLogger.tsx
@@ -167,9 +183,11 @@
 │   ├── useGameDataEditor.ts
 │   ├── useGameIdTracking.ts
 │   ├── useGameTracker.ts
+│   ├── useS3Upload.ts
 │   ├── useScraperManagement.ts
 │   ├── useSocialAccounts.ts
 │   ├── useSocialPosts.ts
+│   ├── useSocialPostUpload.ts
 │   ├── useURLManagement.ts
 │   └── useUserPermissions.ts
 ├── index.css
@@ -225,6 +243,7 @@
 │   │   ├── .DS_Store
 │   │   ├── EntityManagement.tsx
 │   │   ├── GameManagement.tsx
+│   │   ├── MetricsManagement.tsx
 │   │   ├── SeriesManagement.tsx
 │   │   ├── SocialAccountManagement.tsx
 │   │   ├── UserManagement.tsx
@@ -250,6 +269,7 @@
 │   ├── gameEditor.ts
 │   ├── scraper.ts
 │   ├── series.ts
+│   ├── socialPostUpload.ts
 │   └── venue.ts
 └── utils
     ├── .DS_Store
@@ -263,8 +283,9 @@
     ├── scraperAnalytics.ts
     ├── scraperErrorUtils.ts
     ├── scraperLogger.ts
+    ├── socialPostParser.ts
     └── statusNormalization.ts
 
-43 directories, 223 files
+44 directories, 243 files
 
 Function List:

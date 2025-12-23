@@ -47,12 +47,16 @@ import VenuesDashboard from './pages/venues/VenuesDashboard';
 import { VenueDetails } from './pages/venues/VenueDetails';
 import { VenueGameDetails } from './pages/venues/VenueGameDetails';
 
+// Entity Pages
+import { EntityDashboard } from './pages/entities/EntityDashboard';
+
 // Settings Pages (Admin/SuperAdmin)
 import EntityManagement from './pages/settings/EntityManagement';
 import VenueManagement from './pages/settings/VenueManagement';
 import GameManagement from './pages/settings/GameManagement';
 import { SeriesManagementPage } from './pages/settings/SeriesManagement';
 import { UserManagement } from './pages/settings/UserManagement';
+import MetricsManagement from './pages/settings/MetricsManagement';
 
 // Scraper Pages (SuperAdmin)
 import { ScraperAdminPage } from './pages/scraper/ScraperAdmin';
@@ -402,11 +406,15 @@ const AuthenticatedRoutes = () => {
             <Route path="/social/pulse" element={<SocialPulse />} />
             <Route path="/social/dashboard" element={<SocialDashboard />} />
 
+            {/* Entities */}
+            <Route path="/entities" element={<EntityDashboard />} />
+
             {/* Settings (Admin/SuperAdmin) */}
             <Route path="/settings/entity-management" element={<EntityManagement />} />
             <Route path="/settings/venue-management" element={<VenueManagement />} />
             <Route path="/settings/game-management" element={<GameManagement />} />
             <Route path="/settings/series-management" element={<SeriesManagementPage />} />
+            <Route path="/settings/metrics-management" element={<MetricsManagement />} />
             <Route path="/settings/social-accounts" element={<SocialAccountManagement />} />
             <Route path="/settings/user-management" element={<UserManagement />} />
 

@@ -1,0 +1,67 @@
+[
+  {
+    "timestamp": 1766480086455,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480086808,
+    "message": "START RequestId: 41215eee-daf4-447e-b031-5ec53c8d1f6a Version: $LATEST\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480086840,
+    "message": "2025-12-23T08:54:46.840Z\t41215eee-daf4-447e-b031-5ec53c8d1f6a\tINFO\t[METRICS] REMOVE regular game 3002e822-9947-43fc-a9cb-17170c066bf5 - decrementing gameCount\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480087840,
+    "message": "2025-12-23T08:54:47.840Z\t41215eee-daf4-447e-b031-5ec53c8d1f6a\tERROR\tError updating undefined [ID: 42101695-1332-48e3-963b-3c6ad4e909a0]: ValidationException: 1 validation error detected: Value null at 'tableName' failed to satisfy constraint: Member must not be null\n    at ProtocolLib.getErrorSchemaOrThrowBaseException (/var/task/node_modules/@aws-sdk/core/dist-cjs/submodules/protocols/index.js:69:67)\n    at AwsJson1_0Protocol.handleError (/var/task/node_modules/@aws-sdk/core/dist-cjs/submodules/protocols/index.js:774:65)\n    at AwsJson1_0Protocol.deserializeResponse (/var/task/node_modules/@smithy/core/dist-cjs/submodules/protocols/index.js:473:24)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/task/node_modules/@smithy/core/dist-cjs/submodules/schema/index.js:26:24\n    at async /var/task/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:107:34\n    at async /var/task/node_modules/@smithy/core/dist-cjs/index.js:121:20\n    at async /var/task/node_modules/@smithy/middleware-retry/dist-cjs/index.js:254:46\n    at async /var/task/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:5:26\n    at async updateStats (/var/task/index.js:250:5) {\n  '$fault': 'client',\n  '$retryable': undefined,\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: 'GJIHM7U8T7N5L3EJOO13PFL5V3VV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.validate#ValidationException'\n}\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480087920,
+    "message": "2025-12-23T08:54:47.920Z\t41215eee-daf4-447e-b031-5ec53c8d1f6a\tERROR\tError updating undefined [ID: fd4f7fb1-67fd-4398-b4b4-d85722256d45]: ValidationException: 1 validation error detected: Value null at 'tableName' failed to satisfy constraint: Member must not be null\n    at ProtocolLib.getErrorSchemaOrThrowBaseException (/var/task/node_modules/@aws-sdk/core/dist-cjs/submodules/protocols/index.js:69:67)\n    at AwsJson1_0Protocol.handleError (/var/task/node_modules/@aws-sdk/core/dist-cjs/submodules/protocols/index.js:774:65)\n    at AwsJson1_0Protocol.deserializeResponse (/var/task/node_modules/@smithy/core/dist-cjs/submodules/protocols/index.js:473:24)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/task/node_modules/@smithy/core/dist-cjs/submodules/schema/index.js:26:24\n    at async /var/task/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:107:34\n    at async /var/task/node_modules/@smithy/core/dist-cjs/index.js:121:20\n    at async /var/task/node_modules/@smithy/middleware-retry/dist-cjs/index.js:254:46\n    at async /var/task/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:5:26\n    at async updateStats (/var/task/index.js:250:5) {\n  '$fault': 'client',\n  '$retryable': undefined,\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: 'IH31G5NGB64PTL0A6MTB4061GJVV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.validate#ValidationException'\n}\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480087960,
+    "message": "END RequestId: 41215eee-daf4-447e-b031-5ec53c8d1f6a\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480087960,
+    "message": "REPORT RequestId: 41215eee-daf4-447e-b031-5ec53c8d1f6a\tDuration: 1151.80 ms\tBilled Duration: 1501 ms\tMemory Size: 128 MB\tMax Memory Used: 97 MB\tInit Duration: 349.09 ms\t\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480087965,
+    "message": "START RequestId: fdd3d7f0-acb7-4e0c-846c-a6c1f89be40a Version: $LATEST\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480087966,
+    "message": "2025-12-23T08:54:47.966Z\tfdd3d7f0-acb7-4e0c-846c-a6c1f89be40a\tINFO\t[METRICS] REMOVE regular game daf248d1-7c82-4415-b4f5-de7a7cabd399 - decrementing gameCount\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480088021,
+    "message": "2025-12-23T08:54:48.021Z\tfdd3d7f0-acb7-4e0c-846c-a6c1f89be40a\tERROR\tError updating undefined [ID: 42101695-1332-48e3-963b-3c6ad4e909a0]: ValidationException: 1 validation error detected: Value null at 'tableName' failed to satisfy constraint: Member must not be null\n    at ProtocolLib.getErrorSchemaOrThrowBaseException (/var/task/node_modules/@aws-sdk/core/dist-cjs/submodules/protocols/index.js:69:67)\n    at AwsJson1_0Protocol.handleError (/var/task/node_modules/@aws-sdk/core/dist-cjs/submodules/protocols/index.js:774:65)\n    at AwsJson1_0Protocol.deserializeResponse (/var/task/node_modules/@smithy/core/dist-cjs/submodules/protocols/index.js:473:24)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/task/node_modules/@smithy/core/dist-cjs/submodules/schema/index.js:26:24\n    at async /var/task/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:107:34\n    at async /var/task/node_modules/@smithy/core/dist-cjs/index.js:121:20\n    at async /var/task/node_modules/@smithy/middleware-retry/dist-cjs/index.js:254:46\n    at async /var/task/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:5:26\n    at async updateStats (/var/task/index.js:250:5) {\n  '$fault': 'client',\n  '$retryable': undefined,\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: '479H3POG0LBJ2TMH0VCQF20283VV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.validate#ValidationException'\n}\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480088100,
+    "message": "2025-12-23T08:54:48.100Z\tfdd3d7f0-acb7-4e0c-846c-a6c1f89be40a\tERROR\tError updating undefined [ID: fd4f7fb1-67fd-4398-b4b4-d85722256d45]: ValidationException: 1 validation error detected: Value null at 'tableName' failed to satisfy constraint: Member must not be null\n    at ProtocolLib.getErrorSchemaOrThrowBaseException (/var/task/node_modules/@aws-sdk/core/dist-cjs/submodules/protocols/index.js:69:67)\n    at AwsJson1_0Protocol.handleError (/var/task/node_modules/@aws-sdk/core/dist-cjs/submodules/protocols/index.js:774:65)\n    at AwsJson1_0Protocol.deserializeResponse (/var/task/node_modules/@smithy/core/dist-cjs/submodules/protocols/index.js:473:24)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/task/node_modules/@smithy/core/dist-cjs/submodules/schema/index.js:26:24\n    at async /var/task/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:107:34\n    at async /var/task/node_modules/@smithy/core/dist-cjs/index.js:121:20\n    at async /var/task/node_modules/@smithy/middleware-retry/dist-cjs/index.js:254:46\n    at async /var/task/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:5:26\n    at async updateStats (/var/task/index.js:250:5) {\n  '$fault': 'client',\n  '$retryable': undefined,\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: '8KUQOBN3RSAA0N1GDIRTPNTBV7VV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.validate#ValidationException'\n}\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480088120,
+    "message": "END RequestId: fdd3d7f0-acb7-4e0c-846c-a6c1f89be40a\n",
+    "ingestionTime": 1766480090132
+  },
+  {
+    "timestamp": 1766480088120,
+    "message": "REPORT RequestId: fdd3d7f0-acb7-4e0c-846c-a6c1f89be40a\tDuration: 154.11 ms\tBilled Duration: 155 ms\tMemory Size: 128 MB\tMax Memory Used: 98 MB\t\n",
+    "ingestionTime": 1766480090132
+  }
+]

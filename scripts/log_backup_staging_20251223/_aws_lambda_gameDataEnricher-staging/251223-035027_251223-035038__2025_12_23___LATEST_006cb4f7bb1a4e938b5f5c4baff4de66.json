@@ -1,0 +1,757 @@
+[
+  {
+    "timestamp": 1766461827701,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461828132,
+    "message": "START RequestId: e0c0b1d3-79f0-4b64-b50b-cff445444b6a Version: $LATEST\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461828208,
+    "message": "2025-12-23T03:50:28.208Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Handler invoked\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461828248,
+    "message": "2025-12-23T03:50:28.248Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"enrichGameData\",\n  \"arguments\": {\n    \"input\": {\n      \"game\": {\n        \"tournamentId\": 936,\n        \"name\": \"Bella Vista Hotel Tuesdays\",\n        \"gameType\": \"TOURNAMENT\",\n        \"gameVariant\": \"NLHE\",\n        \"gameStatus\": \"FINISHED\",\n        \"registrationStatus\": \"CLOSED\",\n        \"gameStartDateTime\": \"2025-05-27T18:30:00.000Z\",\n        \"buyIn\": 150,\n        \"rake\": 25,\n        \"startingStack\": 40000,\n        \"hasGuarantee\": false,\n        \"guaranteeAmount\": 0,\n        \"totalUniquePlayers\": 8,\n        \"totalInitialEntries\": 8,\n        \"totalEntries\": 8,\n        \"totalRebuys\": 0,\n        \"totalAddons\": 0,\n        \"prizepoolPaid\": 6000,\n        \"prizepoolCalculated\": 1000,\n        \"totalDuration\": \"Total Time\",\n        \"tournamentType\": \"REBUY\",\n        \"isSeries\": false,\n        \"isSatellite\": false,\n        \"isRegular\": false,\n        \"gameTags\": [\n          \"Re-Entry\"\n        ],\n        \"isMainEvent\": false,\n        \"finalDay\": false\n      },\n      \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n      \"source\": {\n        \"type\": \"SCRAPE\",\n        \"sourceId\": \"https://kingsroom.com.au/tournament/?id=936\",\n        \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n        \"fetchedAt\": \"2025-12-23T03:50:27.306Z\",\n        \"contentHash\": \"ac7aa3d3c491a717a958034c5ae836c9dd05e56757358f91daa43cda3e1d2900\",\n        \"wasEdited\": false\n      },\n      \"venue\": {\n        \"venueId\": \"6316925d-1163-4b25-8d26-5728a03d99b8\",\n        \"suggestedVenueId\": \"6316925d-1163-4b25-8d26-5728a03d99b8\",\n        \"confidence\": 0\n      },\n      \"options\": {\n        \"saveToDatabase\": true,\n        \"autoCreateSeries\": true,\n        \"autoCreateRecurring\": false\n      }\n    }\n  },\n  \"identity\": {\n    \"accountId\": \"495599763953\",\n    \"cognitoIdentityAuthProvider\": null,\n    \"cognitoIdentityAuthType\": null,\n    \"cognitoIdentityId\": null,\n    \"cognitoIdentityPoolId\": null,\n    \"sourceIp\": [\n      \"54.206.88.95\"\n    ],\n    \"userArn\": \"arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRolea17fa191-staging/autoScraper-staging\",\n    \"username\": \"AROAXGZAMIHYTYAA7NWP3:autoScraper-staging\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"54.206.88.95,130.176.212.45\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"a1d02034-f406-45eb-8982-0d14e2411376\",\n      \"via\": \"1.1 82008a7e089b84e7f0a6d8d139a4e3de.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"content-length\": \"1594\",\n      \"x-forwarded-proto\": \"https\",\n      \"host\": \"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"user-agent\": \"node-fetch/1.0 (+https://github.com/bitinn/node-fetch)\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"x-amz-date\": \"20251223T035027Z\",\n      \"cloudfront-viewer-asn\": \"16509\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip,deflate\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"x-amz-security-token\": \"IQoJb3JpZ2luX2VjEDwaDmFwLXNvdXRoZWFzdC0yIkcwRQIgZ050BPnqoyz2VUivzyck8XFGW+5pEQEgFna1utyaDOoCIQDONkoh+iheSo9N7Pg+w9qyy0pGn5/xPdRmFZsu/MVDwCr/AggFEAAaDDQ5NTU5OTc2Mzk1MyIMTJjzznjf4BPAFnVoKtwCSgwczl/101wWLp09yNTqNQax/h9PqcEwaEuMNz5jqyLwHf/7k9br//BX0aIR58Bdp3Lx9TexQcWeV5FdDoz+FLwyML8r/J5gADwTJvKUf1mGfX3F5cxqK+fSDVCYsqUk9mx9O3cIdyaAWf1JvBwcLOUzJhN+Gm/j6MVbyo4hPDmveh0GpcAAV3DYt7dPnTykVTWniWuV4IP3RfEUyD7UM8mKO42gRs+if/08+stNuF7geGfbZzgMkxCfDY5UZl11D59IxeSzom7UfZZ3ax7MxnRhrLyLsjlo3ruyFzx+nBq62fiqFpv2fyexpYzISRGSe5rWsKqWjZK/aDNqVtOaSx/40yxOCdjKnST+TETis8zDIf88NWfxtpsVqEklLdtRmaU3FXF0FwV2x6tNP5cFdQZ6mkgBVXSeqRjwp3IQ5/0NynF3Px/2pCU0I5ZIYgLox+uFOg7IiNQwCYd7MP6iqMoGOp4BFU9ApkAdgbCLj1b5bbXDMpK7ZDgdgZF8xA2mnh4UxpKlLE2NxKhQirZdPzKK5OAaQpWeuaAOl9bWgiR0s2EL5yxi5iB2tB9n/rKZrQXlFSGpTCMqSnJrR9qyxTejHA38zc1mj8vW3iUlOniJ4kv6DuAOjeD74HThAFUV8FPIJRz2PKfNDAODA4Lwql6JTJOiQGSovd0EpX43E+ILQ+s=\",\n      \"x-amzn-remote-ip\": \"54.206.88.95\",\n      \"content-type\": \"application/json\",\n      \"x-amz-cf-id\": \"BnEAT55mRIA9YxFUc16EqJpb6nRZovl7i7ufo83UaaFXUtt04cAA_Q==\",\n      \"x-amzn-trace-id\": \"Root=1-694a1183-0cabb57e4a1d3ca732fd05c1\",\n      \"authorization\": \"AWS4-HMAC-SHA256 Credential=ASIAXGZAMIHYQPMHKHLE/20251223/ap-southeast-2/appsync/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-amz-security-token, Signature=0eb1c89e55b9dc951772fa5bb1c5b52b8401222122f8bcfdf768b1a4cfebe050\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461828287,
+    "message": "2025-12-23T03:50:28.287Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Step 1: Validation\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461828288,
+    "message": "2025-12-23T03:50:28.288Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Step 2: Data completion\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461828289,
+    "message": "2025-12-23T03:50:28.289Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Step 2b: Classification derivation\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461828289,
+    "message": "2025-12-23T03:50:28.289Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Derived 6 classification fields: sessionMode, variant, bettingStructure, buyInTier, classificationSource, lastClassifiedAt\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461828289,
+    "message": "2025-12-23T03:50:28.289Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Step 3: Venue resolution\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829308,
+    "message": "2025-12-23T03:50:29.308Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Step 4: Series resolution (checking all tournaments)\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829308,
+    "message": "2025-12-23T03:50:29.308Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[SERIES] Resolving series for: \"Bella Vista Hotel Tuesdays\"\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829308,
+    "message": "2025-12-23T03:50:29.308Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[SERIES] Step 2: Trying database matching...\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829490,
+    "message": "2025-12-23T03:50:29.490Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[SERIES] Step 3: Trying pattern detection...\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829547,
+    "message": "2025-12-23T03:50:29.547Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[SERIES] Step 4: Trying keyword heuristics...\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829547,
+    "message": "2025-12-23T03:50:29.547Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[SERIES] No series detected\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829547,
+    "message": "2025-12-23T03:50:29.547Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] No series detected for this tournament\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829547,
+    "message": "2025-12-23T03:50:29.547Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Step 5: Recurring game resolution\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829548,
+    "message": "2025-12-23T03:50:29.548Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[RECURRING] Resolving assignment for: \"Bella Vista Hotel Tuesdays\"\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829648,
+    "message": "2025-12-23T03:50:29.648Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[RECURRING] Found 1 candidate(s) for TUESDAY at venue 6316925d...\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829649,
+    "message": "2025-12-23T03:50:29.649Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[RECURRING] Inheriting guarantee $6000 from template \"Bella Vista Hotel Tuesdays\"\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829649,
+    "message": "2025-12-23T03:50:29.649Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[RECURRING] ✅ High confidence match: \"Bella Vista Hotel Tuesdays\" (score: 115)\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829650,
+    "message": "2025-12-23T03:50:29.650Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Inherited 2 fields from recurring template: guaranteeAmount, hasGuarantee\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829650,
+    "message": "2025-12-23T03:50:29.650Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Step 6: Query key computation\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829650,
+    "message": "2025-12-23T03:50:29.650Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Step 7: Financial calculations\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829706,
+    "message": "2025-12-23T03:50:29.706Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Financial summary: {\n  hasGuarantee: true,\n  guaranteeAmount: 6000,\n  prizepoolPlayerContributions: 1000,\n  prizepoolPaid: 6000,\n  guaranteeOverlayCost: 5000,\n  rakeRevenue: 200,\n  gameProfit: -4800,\n  isUnderwater: true,\n  wasInferred: false\n}\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829707,
+    "message": "2025-12-23T03:50:29.707Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Step 8: Saving to database via saveGameFunction\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461829707,
+    "message": "2025-12-23T03:50:29.707Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Invoking saveGameFunction-staging\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461832234,
+    "message": "2025-12-23T03:50:32.234Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Save successful: CREATED (gameId: f28370dc-16da-4ae3-ba36-2b2e713bcdb1)\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461832234,
+    "message": "2025-12-23T03:50:32.234Z\te0c0b1d3-79f0-4b64-b50b-cff445444b6a\tINFO\t[ENRICHER] Enrichment complete\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461832308,
+    "message": "END RequestId: e0c0b1d3-79f0-4b64-b50b-cff445444b6a\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461832308,
+    "message": "REPORT RequestId: e0c0b1d3-79f0-4b64-b50b-cff445444b6a\tDuration: 4175.90 ms\tBilled Duration: 4603 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\tInit Duration: 426.71 ms\t\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833312,
+    "message": "2025-12-23T03:50:33.312Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Handler invoked\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833312,
+    "message": "START RequestId: 9c8b02af-7a5c-488b-94bf-d536bbd95efb Version: $LATEST\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833313,
+    "message": "2025-12-23T03:50:33.313Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"enrichGameData\",\n  \"arguments\": {\n    \"input\": {\n      \"game\": {\n        \"tournamentId\": 1011,\n        \"name\": \"Bella Vista Hotel Tuesdays\",\n        \"gameType\": \"TOURNAMENT\",\n        \"gameVariant\": \"NLHE\",\n        \"gameStatus\": \"FINISHED\",\n        \"registrationStatus\": \"CLOSED\",\n        \"gameStartDateTime\": \"2025-07-15T18:30:00.000Z\",\n        \"buyIn\": 150,\n        \"rake\": 25,\n        \"startingStack\": 40000,\n        \"hasGuarantee\": false,\n        \"guaranteeAmount\": 0,\n        \"totalUniquePlayers\": 54,\n        \"totalInitialEntries\": 54,\n        \"totalEntries\": 54,\n        \"totalRebuys\": 0,\n        \"totalAddons\": 0,\n        \"prizepoolPaid\": 6750,\n        \"prizepoolCalculated\": 6750,\n        \"totalDuration\": \"Total Time\",\n        \"tournamentType\": \"REBUY\",\n        \"isSeries\": false,\n        \"isSatellite\": false,\n        \"isRegular\": false,\n        \"gameTags\": [\n          \"Re-Entry\"\n        ],\n        \"isMainEvent\": false,\n        \"finalDay\": false\n      },\n      \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n      \"source\": {\n        \"type\": \"SCRAPE\",\n        \"sourceId\": \"https://kingsroom.com.au/tournament/?id=1011\",\n        \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n        \"fetchedAt\": \"2025-12-23T03:50:33.145Z\",\n        \"contentHash\": \"8b1341b1464ee7a91e7a8ad488f678959d923faaa7370be7ac5a957567eed168\",\n        \"wasEdited\": false\n      },\n      \"venue\": {\n        \"venueId\": \"6316925d-1163-4b25-8d26-5728a03d99b8\",\n        \"suggestedVenueId\": \"6316925d-1163-4b25-8d26-5728a03d99b8\",\n        \"confidence\": 0\n      },\n      \"options\": {\n        \"saveToDatabase\": true,\n        \"autoCreateSeries\": true,\n        \"autoCreateRecurring\": false\n      }\n    }\n  },\n  \"identity\": {\n    \"accountId\": \"495599763953\",\n    \"cognitoIdentityAuthProvider\": null,\n    \"cognitoIdentityAuthType\": null,\n    \"cognitoIdentityId\": null,\n    \"cognitoIdentityPoolId\": null,\n    \"sourceIp\": [\n      \"54.206.88.95\"\n    ],\n    \"userArn\": \"arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRolea17fa191-staging/autoScraper-staging\",\n    \"username\": \"AROAXGZAMIHYTYAA7NWP3:autoScraper-staging\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"54.206.88.95,130.176.212.45\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"dbb6ae59-5cbb-4065-9077-670f95d3c40e\",\n      \"via\": \"1.1 16481a07c9d54ca0e038ad1d2aec824a.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"content-length\": \"1599\",\n      \"x-forwarded-proto\": \"https\",\n      \"host\": \"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"user-agent\": \"node-fetch/1.0 (+https://github.com/bitinn/node-fetch)\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"x-amz-date\": \"20251223T035033Z\",\n      \"cloudfront-viewer-asn\": \"16509\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip,deflate\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"x-amz-security-token\": \"IQoJb3JpZ2luX2VjEDwaDmFwLXNvdXRoZWFzdC0yIkcwRQIgZ050BPnqoyz2VUivzyck8XFGW+5pEQEgFna1utyaDOoCIQDONkoh+iheSo9N7Pg+w9qyy0pGn5/xPdRmFZsu/MVDwCr/AggFEAAaDDQ5NTU5OTc2Mzk1MyIMTJjzznjf4BPAFnVoKtwCSgwczl/101wWLp09yNTqNQax/h9PqcEwaEuMNz5jqyLwHf/7k9br//BX0aIR58Bdp3Lx9TexQcWeV5FdDoz+FLwyML8r/J5gADwTJvKUf1mGfX3F5cxqK+fSDVCYsqUk9mx9O3cIdyaAWf1JvBwcLOUzJhN+Gm/j6MVbyo4hPDmveh0GpcAAV3DYt7dPnTykVTWniWuV4IP3RfEUyD7UM8mKO42gRs+if/08+stNuF7geGfbZzgMkxCfDY5UZl11D59IxeSzom7UfZZ3ax7MxnRhrLyLsjlo3ruyFzx+nBq62fiqFpv2fyexpYzISRGSe5rWsKqWjZK/aDNqVtOaSx/40yxOCdjKnST+TETis8zDIf88NWfxtpsVqEklLdtRmaU3FXF0FwV2x6tNP5cFdQZ6mkgBVXSeqRjwp3IQ5/0NynF3Px/2pCU0I5ZIYgLox+uFOg7IiNQwCYd7MP6iqMoGOp4BFU9ApkAdgbCLj1b5bbXDMpK7ZDgdgZF8xA2mnh4UxpKlLE2NxKhQirZdPzKK5OAaQpWeuaAOl9bWgiR0s2EL5yxi5iB2tB9n/rKZrQXlFSGpTCMqSnJrR9qyxTejHA38zc1mj8vW3iUlOniJ4kv6DuAOjeD74HThAFUV8FPIJRz2PKfNDAODA4Lwql6JTJOiQGSovd0EpX43E+ILQ+s=\",\n      \"x-amzn-remote-ip\": \"54.206.88.95\",\n      \"content-type\": \"application/json\",\n      \"x-amz-cf-id\": \"AynHPhJBLjw-B-bdPHEOGjOWz4mMfWqROH3-Ef9_7KCcImAGtmaqyQ==\",\n      \"x-amzn-trace-id\": \"Root=1-694a1189-7ef97ac55fcf36624f89ebe9\",\n      \"authorization\": \"AWS4-HMAC-SHA256 Credential=ASIAXGZAMIHYQPMHKHLE/20251223/ap-southeast-2/appsync/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-amz-security-token, Signature=d0157f7bf4a0da04ec98634add3f8573765348e6d2904391f96c471f9148d5eb\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833313,
+    "message": "2025-12-23T03:50:33.313Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Step 1: Validation\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833313,
+    "message": "2025-12-23T03:50:33.313Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Step 2: Data completion\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833314,
+    "message": "2025-12-23T03:50:33.314Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Step 2b: Classification derivation\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833314,
+    "message": "2025-12-23T03:50:33.314Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Derived 6 classification fields: sessionMode, variant, bettingStructure, buyInTier, classificationSource, lastClassifiedAt\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833314,
+    "message": "2025-12-23T03:50:33.314Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Step 3: Venue resolution\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833448,
+    "message": "2025-12-23T03:50:33.448Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Step 4: Series resolution (checking all tournaments)\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833448,
+    "message": "2025-12-23T03:50:33.448Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[SERIES] Resolving series for: \"Bella Vista Hotel Tuesdays\"\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833448,
+    "message": "2025-12-23T03:50:33.448Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[SERIES] Step 2: Trying database matching...\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833508,
+    "message": "2025-12-23T03:50:33.508Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[SERIES] Step 3: Trying pattern detection...\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833508,
+    "message": "2025-12-23T03:50:33.508Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[SERIES] Step 4: Trying keyword heuristics...\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833509,
+    "message": "2025-12-23T03:50:33.509Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[SERIES] No series detected\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833509,
+    "message": "2025-12-23T03:50:33.509Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] No series detected for this tournament\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833509,
+    "message": "2025-12-23T03:50:33.509Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Step 5: Recurring game resolution\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833509,
+    "message": "2025-12-23T03:50:33.509Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[RECURRING] Resolving assignment for: \"Bella Vista Hotel Tuesdays\"\n",
+    "ingestionTime": 1766461833669
+  },
+  {
+    "timestamp": 1766461833570,
+    "message": "2025-12-23T03:50:33.570Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[RECURRING] Found 1 candidate(s) for TUESDAY at venue 6316925d...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461833570,
+    "message": "2025-12-23T03:50:33.570Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[RECURRING] Inheriting guarantee $6000 from template \"Bella Vista Hotel Tuesdays\"\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461833586,
+    "message": "2025-12-23T03:50:33.586Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[RECURRING] ✅ High confidence match: \"Bella Vista Hotel Tuesdays\" (score: 115)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461833586,
+    "message": "2025-12-23T03:50:33.586Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Inherited 2 fields from recurring template: guaranteeAmount, hasGuarantee\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461833586,
+    "message": "2025-12-23T03:50:33.586Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Step 6: Query key computation\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461833586,
+    "message": "2025-12-23T03:50:33.586Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Step 7: Financial calculations\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461833586,
+    "message": "2025-12-23T03:50:33.586Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Financial summary: {\n  hasGuarantee: true,\n  guaranteeAmount: 6000,\n  prizepoolPlayerContributions: 6750,\n  prizepoolPaid: 6750,\n  guaranteeOverlayCost: 0,\n  rakeRevenue: 1350,\n  gameProfit: 1350,\n  isUnderwater: false,\n  wasInferred: false\n}\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461833586,
+    "message": "2025-12-23T03:50:33.586Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Step 8: Saving to database via saveGameFunction\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461833587,
+    "message": "2025-12-23T03:50:33.587Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Invoking saveGameFunction-staging\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461833973,
+    "message": "2025-12-23T03:50:33.973Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Save successful: CREATED (gameId: de6619d5-6d96-4e78-a193-e0e072bb8ca6)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461833973,
+    "message": "2025-12-23T03:50:33.973Z\t9c8b02af-7a5c-488b-94bf-d536bbd95efb\tINFO\t[ENRICHER] Enrichment complete\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461834148,
+    "message": "END RequestId: 9c8b02af-7a5c-488b-94bf-d536bbd95efb\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461834148,
+    "message": "REPORT RequestId: 9c8b02af-7a5c-488b-94bf-d536bbd95efb\tDuration: 834.95 ms\tBilled Duration: 835 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461834995,
+    "message": "START RequestId: ac5b03b7-e535-4f9a-8229-25732171a6f3 Version: $LATEST\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461834996,
+    "message": "2025-12-23T03:50:34.996Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Handler invoked\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461834996,
+    "message": "2025-12-23T03:50:34.996Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"enrichGameData\",\n  \"arguments\": {\n    \"input\": {\n      \"game\": {\n        \"tournamentId\": 1027,\n        \"name\": \"Thursdays Grind St.George Leagues Thursday Weekly $120 rebuy until 9:40pm\",\n        \"gameType\": \"TOURNAMENT\",\n        \"gameVariant\": \"NLHE\",\n        \"gameStatus\": \"FINISHED\",\n        \"registrationStatus\": \"CLOSED\",\n        \"gameStartDateTime\": \"2025-07-31T18:30:00.000Z\",\n        \"buyIn\": 120,\n        \"rake\": 22.4,\n        \"startingStack\": 30000,\n        \"hasGuarantee\": false,\n        \"guaranteeAmount\": 0,\n        \"totalUniquePlayers\": 75,\n        \"totalInitialEntries\": 75,\n        \"totalEntries\": 75,\n        \"totalRebuys\": 0,\n        \"totalAddons\": 0,\n        \"prizepoolPaid\": 7320,\n        \"prizepoolCalculated\": 7320,\n        \"totalDuration\": \"Total Time\",\n        \"tournamentType\": \"REBUY\",\n        \"isSeries\": false,\n        \"isSatellite\": false,\n        \"isRegular\": false,\n        \"gameTags\": [\n          \"Re-Entry\"\n        ],\n        \"isMainEvent\": false,\n        \"finalDay\": false\n      },\n      \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n      \"source\": {\n        \"type\": \"SCRAPE\",\n        \"sourceId\": \"https://kingsroom.com.au/tournament/?id=1027\",\n        \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n        \"fetchedAt\": \"2025-12-23T03:50:34.800Z\",\n        \"contentHash\": \"1f4b2834e2fc6aa68c05c66d46d70bcd35673fb969467e5ef2a149e05c5ac0d6\",\n        \"wasEdited\": false\n      },\n      \"venue\": {\n        \"venueId\": \"fd4f7fb1-67fd-4398-b4b4-d85722256d45\",\n        \"confidence\": 0\n      },\n      \"options\": {\n        \"saveToDatabase\": true,\n        \"autoCreateSeries\": true,\n        \"autoCreateRecurring\": false\n      }\n    }\n  },\n  \"identity\": {\n    \"accountId\": \"495599763953\",\n    \"cognitoIdentityAuthProvider\": null,\n    \"cognitoIdentityAuthType\": null,\n    \"cognitoIdentityId\": null,\n    \"cognitoIdentityPoolId\": null,\n    \"sourceIp\": [\n      \"54.206.88.95\"\n    ],\n    \"userArn\": \"arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRolea17fa191-staging/autoScraper-staging\",\n    \"username\": \"AROAXGZAMIHYTYAA7NWP3:autoScraper-staging\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"54.206.88.95,130.176.212.5\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"9d1facba-63e6-4b62-94e6-8ff5ef23f8bc\",\n      \"via\": \"1.1 82008a7e089b84e7f0a6d8d139a4e3de.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"content-length\": \"1590\",\n      \"x-forwarded-proto\": \"https\",\n      \"host\": \"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"user-agent\": \"node-fetch/1.0 (+https://github.com/bitinn/node-fetch)\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"x-amz-date\": \"20251223T035034Z\",\n      \"cloudfront-viewer-asn\": \"16509\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip,deflate\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"x-amz-security-token\": \"IQoJb3JpZ2luX2VjEDwaDmFwLXNvdXRoZWFzdC0yIkcwRQIgZ050BPnqoyz2VUivzyck8XFGW+5pEQEgFna1utyaDOoCIQDONkoh+iheSo9N7Pg+w9qyy0pGn5/xPdRmFZsu/MVDwCr/AggFEAAaDDQ5NTU5OTc2Mzk1MyIMTJjzznjf4BPAFnVoKtwCSgwczl/101wWLp09yNTqNQax/h9PqcEwaEuMNz5jqyLwHf/7k9br//BX0aIR58Bdp3Lx9TexQcWeV5FdDoz+FLwyML8r/J5gADwTJvKUf1mGfX3F5cxqK+fSDVCYsqUk9mx9O3cIdyaAWf1JvBwcLOUzJhN+Gm/j6MVbyo4hPDmveh0GpcAAV3DYt7dPnTykVTWniWuV4IP3RfEUyD7UM8mKO42gRs+if/08+stNuF7geGfbZzgMkxCfDY5UZl11D59IxeSzom7UfZZ3ax7MxnRhrLyLsjlo3ruyFzx+nBq62fiqFpv2fyexpYzISRGSe5rWsKqWjZK/aDNqVtOaSx/40yxOCdjKnST+TETis8zDIf88NWfxtpsVqEklLdtRmaU3FXF0FwV2x6tNP5cFdQZ6mkgBVXSeqRjwp3IQ5/0NynF3Px/2pCU0I5ZIYgLox+uFOg7IiNQwCYd7MP6iqMoGOp4BFU9ApkAdgbCLj1b5bbXDMpK7ZDgdgZF8xA2mnh4UxpKlLE2NxKhQirZdPzKK5OAaQpWeuaAOl9bWgiR0s2EL5yxi5iB2tB9n/rKZrQXlFSGpTCMqSnJrR9qyxTejHA38zc1mj8vW3iUlOniJ4kv6DuAOjeD74HThAFUV8FPIJRz2PKfNDAODA4Lwql6JTJOiQGSovd0EpX43E+ILQ+s=\",\n      \"x-amzn-remote-ip\": \"54.206.88.95\",\n      \"content-type\": \"application/json\",\n      \"x-amz-cf-id\": \"PFJqBxCvqUJzsPVwdlA_8RXfhgqprQmazXwm3oXD_EOLXdVXS3rXJQ==\",\n      \"x-amzn-trace-id\": \"Root=1-694a118a-1b4c4a10331e01b459452660\",\n      \"authorization\": \"AWS4-HMAC-SHA256 Credential=ASIAXGZAMIHYQPMHKHLE/20251223/ap-southeast-2/appsync/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-amz-security-token, Signature=e371f9c420b0e6d9382e1f6abba9195def5a1d555a6dcc0ec6d96463b0e4dbd7\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461834997,
+    "message": "2025-12-23T03:50:34.997Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Step 1: Validation\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461834997,
+    "message": "2025-12-23T03:50:34.997Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Step 2: Data completion\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461834997,
+    "message": "2025-12-23T03:50:34.997Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Step 2b: Classification derivation\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461834997,
+    "message": "2025-12-23T03:50:34.997Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Derived 6 classification fields: sessionMode, variant, bettingStructure, buyInTier, classificationSource, lastClassifiedAt\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461834997,
+    "message": "2025-12-23T03:50:34.997Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Step 3: Venue resolution\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835067,
+    "message": "2025-12-23T03:50:35.067Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Step 4: Series resolution (checking all tournaments)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835067,
+    "message": "2025-12-23T03:50:35.067Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[SERIES] Resolving series for: \"Thursdays Grind St.George Leagues Thursday Weekly $120 rebuy until 9:40pm\"\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835067,
+    "message": "2025-12-23T03:50:35.067Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[SERIES] Step 2: Trying database matching...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835107,
+    "message": "2025-12-23T03:50:35.107Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[SERIES] Step 3: Trying pattern detection...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835107,
+    "message": "2025-12-23T03:50:35.107Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[SERIES] Step 4: Trying keyword heuristics...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835107,
+    "message": "2025-12-23T03:50:35.107Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[SERIES] No series detected\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835107,
+    "message": "2025-12-23T03:50:35.107Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] No series detected for this tournament\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835107,
+    "message": "2025-12-23T03:50:35.107Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Step 5: Recurring game resolution\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835107,
+    "message": "2025-12-23T03:50:35.107Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[RECURRING] Resolving assignment for: \"Thursdays Grind St.George Leagues Thursday Weekly $120 rebuy until 9:40pm\"\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835147,
+    "message": "2025-12-23T03:50:35.147Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[RECURRING] Found 1 candidate(s) for THURSDAY at venue fd4f7fb1...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835147,
+    "message": "2025-12-23T03:50:35.147Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[RECURRING] Inheriting guarantee $5000 from template \"St.George Leagues Thursday Grind\"\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835147,
+    "message": "2025-12-23T03:50:35.147Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[RECURRING] ✅ High confidence match: \"St.George Leagues Thursday Grind\" (score: 90)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835147,
+    "message": "2025-12-23T03:50:35.147Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Inherited 2 fields from recurring template: guaranteeAmount, hasGuarantee\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835147,
+    "message": "2025-12-23T03:50:35.147Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Step 6: Query key computation\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835147,
+    "message": "2025-12-23T03:50:35.147Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Step 7: Financial calculations\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835147,
+    "message": "2025-12-23T03:50:35.147Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Financial summary: {\n  hasGuarantee: true,\n  guaranteeAmount: 5000,\n  prizepoolPlayerContributions: 7320,\n  prizepoolPaid: 7320,\n  guaranteeOverlayCost: 0,\n  rakeRevenue: 1680,\n  gameProfit: 1680,\n  isUnderwater: false,\n  wasInferred: false\n}\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835148,
+    "message": "2025-12-23T03:50:35.148Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Step 8: Saving to database via saveGameFunction\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835148,
+    "message": "2025-12-23T03:50:35.148Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Invoking saveGameFunction-staging\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835433,
+    "message": "2025-12-23T03:50:35.433Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Save successful: CREATED (gameId: f8449229-3024-4f58-8ea5-a812df8675cf)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835433,
+    "message": "2025-12-23T03:50:35.433Z\tac5b03b7-e535-4f9a-8229-25732171a6f3\tINFO\t[ENRICHER] Enrichment complete\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835567,
+    "message": "END RequestId: ac5b03b7-e535-4f9a-8229-25732171a6f3\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461835567,
+    "message": "REPORT RequestId: ac5b03b7-e535-4f9a-8229-25732171a6f3\tDuration: 571.50 ms\tBilled Duration: 572 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836270,
+    "message": "START RequestId: 44a976ba-f402-44fa-a1d0-44efb1d9816b Version: $LATEST\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836271,
+    "message": "2025-12-23T03:50:36.271Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Handler invoked\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836271,
+    "message": "2025-12-23T03:50:36.271Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"enrichGameData\",\n  \"arguments\": {\n    \"input\": {\n      \"game\": {\n        \"tournamentId\": 1054,\n        \"name\": \"Thursdays Grind St.George Leagues Thursday Weekly $120 rebuy until 9:40pm\",\n        \"gameType\": \"TOURNAMENT\",\n        \"gameVariant\": \"NLHE\",\n        \"gameStatus\": \"FINISHED\",\n        \"registrationStatus\": \"CLOSED\",\n        \"gameStartDateTime\": \"2025-08-28T18:30:00.000Z\",\n        \"buyIn\": 120,\n        \"rake\": 22.4,\n        \"startingStack\": 30000,\n        \"hasGuarantee\": false,\n        \"guaranteeAmount\": 0,\n        \"totalUniquePlayers\": 60,\n        \"totalInitialEntries\": 60,\n        \"totalEntries\": 60,\n        \"totalRebuys\": 0,\n        \"totalAddons\": 0,\n        \"prizepoolPaid\": 7250,\n        \"prizepoolCalculated\": 5856,\n        \"totalDuration\": \"Total Time\",\n        \"tournamentType\": \"REBUY\",\n        \"isSeries\": false,\n        \"isSatellite\": false,\n        \"isRegular\": false,\n        \"gameTags\": [\n          \"Re-Entry\"\n        ],\n        \"isMainEvent\": false,\n        \"finalDay\": false\n      },\n      \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n      \"source\": {\n        \"type\": \"SCRAPE\",\n        \"sourceId\": \"https://kingsroom.com.au/tournament/?id=1054\",\n        \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n        \"fetchedAt\": \"2025-12-23T03:50:36.099Z\",\n        \"contentHash\": \"cef5242f9a9ac3ee27d67de55ef6473fcc9240459f2fbb3e035fe54df7c96ba0\",\n        \"wasEdited\": false\n      },\n      \"venue\": {\n        \"venueId\": \"fd4f7fb1-67fd-4398-b4b4-d85722256d45\",\n        \"confidence\": 0\n      },\n      \"options\": {\n        \"saveToDatabase\": true,\n        \"autoCreateSeries\": true,\n        \"autoCreateRecurring\": false\n      }\n    }\n  },\n  \"identity\": {\n    \"accountId\": \"495599763953\",\n    \"cognitoIdentityAuthProvider\": null,\n    \"cognitoIdentityAuthType\": null,\n    \"cognitoIdentityId\": null,\n    \"cognitoIdentityPoolId\": null,\n    \"sourceIp\": [\n      \"54.206.88.95\"\n    ],\n    \"userArn\": \"arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRolea17fa191-staging/autoScraper-staging\",\n    \"username\": \"AROAXGZAMIHYTYAA7NWP3:autoScraper-staging\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"54.206.88.95,130.176.212.18\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"0b2b859a-5d4c-41a1-997f-9237b219278a\",\n      \"via\": \"1.1 16481a07c9d54ca0e038ad1d2aec824a.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"content-length\": \"1590\",\n      \"x-forwarded-proto\": \"https\",\n      \"host\": \"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"user-agent\": \"node-fetch/1.0 (+https://github.com/bitinn/node-fetch)\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"x-amz-date\": \"20251223T035036Z\",\n      \"cloudfront-viewer-asn\": \"16509\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip,deflate\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"x-amz-security-token\": \"IQoJb3JpZ2luX2VjEDwaDmFwLXNvdXRoZWFzdC0yIkcwRQIgZ050BPnqoyz2VUivzyck8XFGW+5pEQEgFna1utyaDOoCIQDONkoh+iheSo9N7Pg+w9qyy0pGn5/xPdRmFZsu/MVDwCr/AggFEAAaDDQ5NTU5OTc2Mzk1MyIMTJjzznjf4BPAFnVoKtwCSgwczl/101wWLp09yNTqNQax/h9PqcEwaEuMNz5jqyLwHf/7k9br//BX0aIR58Bdp3Lx9TexQcWeV5FdDoz+FLwyML8r/J5gADwTJvKUf1mGfX3F5cxqK+fSDVCYsqUk9mx9O3cIdyaAWf1JvBwcLOUzJhN+Gm/j6MVbyo4hPDmveh0GpcAAV3DYt7dPnTykVTWniWuV4IP3RfEUyD7UM8mKO42gRs+if/08+stNuF7geGfbZzgMkxCfDY5UZl11D59IxeSzom7UfZZ3ax7MxnRhrLyLsjlo3ruyFzx+nBq62fiqFpv2fyexpYzISRGSe5rWsKqWjZK/aDNqVtOaSx/40yxOCdjKnST+TETis8zDIf88NWfxtpsVqEklLdtRmaU3FXF0FwV2x6tNP5cFdQZ6mkgBVXSeqRjwp3IQ5/0NynF3Px/2pCU0I5ZIYgLox+uFOg7IiNQwCYd7MP6iqMoGOp4BFU9ApkAdgbCLj1b5bbXDMpK7ZDgdgZF8xA2mnh4UxpKlLE2NxKhQirZdPzKK5OAaQpWeuaAOl9bWgiR0s2EL5yxi5iB2tB9n/rKZrQXlFSGpTCMqSnJrR9qyxTejHA38zc1mj8vW3iUlOniJ4kv6DuAOjeD74HThAFUV8FPIJRz2PKfNDAODA4Lwql6JTJOiQGSovd0EpX43E+ILQ+s=\",\n      \"x-amzn-remote-ip\": \"54.206.88.95\",\n      \"content-type\": \"application/json\",\n      \"x-amz-cf-id\": \"pk7GL5g64cxrRlku7UJ2EEbxmPTXKp0iHUwfN3xV7KABK9AhBYcfUg==\",\n      \"x-amzn-trace-id\": \"Root=1-694a118c-005a35db0956b85433e79bc7\",\n      \"authorization\": \"AWS4-HMAC-SHA256 Credential=ASIAXGZAMIHYQPMHKHLE/20251223/ap-southeast-2/appsync/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-amz-security-token, Signature=6419229676a4ea28503871a5a3aea44404e04778aa0db69e500efd37c32edbd5\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836271,
+    "message": "2025-12-23T03:50:36.271Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Step 1: Validation\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836272,
+    "message": "2025-12-23T03:50:36.272Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Step 2: Data completion\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836272,
+    "message": "2025-12-23T03:50:36.272Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Step 2b: Classification derivation\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836272,
+    "message": "2025-12-23T03:50:36.272Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Derived 6 classification fields: sessionMode, variant, bettingStructure, buyInTier, classificationSource, lastClassifiedAt\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836272,
+    "message": "2025-12-23T03:50:36.272Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Step 3: Venue resolution\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836327,
+    "message": "2025-12-23T03:50:36.327Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Step 4: Series resolution (checking all tournaments)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836327,
+    "message": "2025-12-23T03:50:36.327Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[SERIES] Resolving series for: \"Thursdays Grind St.George Leagues Thursday Weekly $120 rebuy until 9:40pm\"\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836327,
+    "message": "2025-12-23T03:50:36.327Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[SERIES] Step 2: Trying database matching...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836367,
+    "message": "2025-12-23T03:50:36.367Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[SERIES] Step 3: Trying pattern detection...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836367,
+    "message": "2025-12-23T03:50:36.367Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[SERIES] Step 4: Trying keyword heuristics...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836367,
+    "message": "2025-12-23T03:50:36.367Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[SERIES] No series detected\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836367,
+    "message": "2025-12-23T03:50:36.367Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] No series detected for this tournament\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836367,
+    "message": "2025-12-23T03:50:36.367Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Step 5: Recurring game resolution\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836367,
+    "message": "2025-12-23T03:50:36.367Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[RECURRING] Resolving assignment for: \"Thursdays Grind St.George Leagues Thursday Weekly $120 rebuy until 9:40pm\"\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836407,
+    "message": "2025-12-23T03:50:36.407Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[RECURRING] Found 1 candidate(s) for THURSDAY at venue fd4f7fb1...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836407,
+    "message": "2025-12-23T03:50:36.407Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[RECURRING] Inheriting guarantee $5000 from template \"St.George Leagues Thursday Grind\"\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836407,
+    "message": "2025-12-23T03:50:36.407Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[RECURRING] ✅ High confidence match: \"St.George Leagues Thursday Grind\" (score: 90)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836407,
+    "message": "2025-12-23T03:50:36.407Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Inherited 2 fields from recurring template: guaranteeAmount, hasGuarantee\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836407,
+    "message": "2025-12-23T03:50:36.407Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Step 6: Query key computation\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836407,
+    "message": "2025-12-23T03:50:36.407Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Step 7: Financial calculations\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836407,
+    "message": "2025-12-23T03:50:36.407Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Financial summary: {\n  hasGuarantee: true,\n  guaranteeAmount: 5000,\n  prizepoolPlayerContributions: 5856,\n  prizepoolPaid: 7250,\n  guaranteeOverlayCost: 0,\n  rakeRevenue: 1344,\n  gameProfit: 1344,\n  isUnderwater: false,\n  wasInferred: false\n}\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836407,
+    "message": "2025-12-23T03:50:36.407Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Step 8: Saving to database via saveGameFunction\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836407,
+    "message": "2025-12-23T03:50:36.407Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Invoking saveGameFunction-staging\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836692,
+    "message": "2025-12-23T03:50:36.692Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Save successful: CREATED (gameId: eb844a71-455d-408c-acd2-1dab474f5550)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836692,
+    "message": "2025-12-23T03:50:36.692Z\t44a976ba-f402-44fa-a1d0-44efb1d9816b\tINFO\t[ENRICHER] Enrichment complete\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836827,
+    "message": "END RequestId: 44a976ba-f402-44fa-a1d0-44efb1d9816b\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461836827,
+    "message": "REPORT RequestId: 44a976ba-f402-44fa-a1d0-44efb1d9816b\tDuration: 556.30 ms\tBilled Duration: 557 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837516,
+    "message": "START RequestId: 59289327-b4e3-4d04-abc8-3454fab7a79c Version: $LATEST\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837517,
+    "message": "2025-12-23T03:50:37.517Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Handler invoked\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837517,
+    "message": "2025-12-23T03:50:37.517Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"enrichGameData\",\n  \"arguments\": {\n    \"input\": {\n      \"game\": {\n        \"tournamentId\": 1220,\n        \"name\": \"St George Leagues Thursday Grind Thursday Weekly $120 rebuy until 9:40pm\",\n        \"gameType\": \"TOURNAMENT\",\n        \"gameVariant\": \"NLHE\",\n        \"gameStatus\": \"FINISHED\",\n        \"registrationStatus\": \"CLOSED\",\n        \"gameStartDateTime\": \"2025-11-27T18:30:00.000Z\",\n        \"buyIn\": 120,\n        \"rake\": 20,\n        \"startingStack\": 30000,\n        \"hasGuarantee\": false,\n        \"guaranteeAmount\": 0,\n        \"totalUniquePlayers\": 61,\n        \"totalInitialEntries\": 61,\n        \"totalEntries\": 61,\n        \"totalRebuys\": 0,\n        \"totalAddons\": 0,\n        \"prizepoolPaid\": 6100,\n        \"prizepoolCalculated\": 6100,\n        \"totalDuration\": \"Total Time\",\n        \"tournamentType\": \"REBUY\",\n        \"isSeries\": false,\n        \"isSatellite\": false,\n        \"isRegular\": false,\n        \"gameTags\": [\n          \"Re-Entry\"\n        ],\n        \"isMainEvent\": false,\n        \"finalDay\": false\n      },\n      \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n      \"source\": {\n        \"type\": \"SCRAPE\",\n        \"sourceId\": \"https://kingsroom.com.au/tournament/?id=1220\",\n        \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n        \"fetchedAt\": \"2025-12-23T03:50:37.419Z\",\n        \"contentHash\": \"0aae486fd657a15b46909f22c14715269168cb006521870ede4d8ccc3eb73b58\",\n        \"wasEdited\": false\n      },\n      \"venue\": {\n        \"venueId\": \"fd4f7fb1-67fd-4398-b4b4-d85722256d45\",\n        \"confidence\": 0\n      },\n      \"options\": {\n        \"saveToDatabase\": true,\n        \"autoCreateSeries\": true,\n        \"autoCreateRecurring\": false\n      }\n    }\n  },\n  \"identity\": {\n    \"accountId\": \"495599763953\",\n    \"cognitoIdentityAuthProvider\": null,\n    \"cognitoIdentityAuthType\": null,\n    \"cognitoIdentityId\": null,\n    \"cognitoIdentityPoolId\": null,\n    \"sourceIp\": [\n      \"54.206.88.95\"\n    ],\n    \"userArn\": \"arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRolea17fa191-staging/autoScraper-staging\",\n    \"username\": \"AROAXGZAMIHYTYAA7NWP3:autoScraper-staging\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"54.206.88.95,130.176.212.12\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"3b886b75-4251-4601-ab5a-b7cba19e08ac\",\n      \"via\": \"1.1 82008a7e089b84e7f0a6d8d139a4e3de.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"content-length\": \"1587\",\n      \"x-forwarded-proto\": \"https\",\n      \"host\": \"zxcj3ihlwbas5g7tiq67kzde3m.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"user-agent\": \"node-fetch/1.0 (+https://github.com/bitinn/node-fetch)\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"x-amz-date\": \"20251223T035037Z\",\n      \"cloudfront-viewer-asn\": \"16509\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip,deflate\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"x-amz-security-token\": \"IQoJb3JpZ2luX2VjEDwaDmFwLXNvdXRoZWFzdC0yIkcwRQIgZ050BPnqoyz2VUivzyck8XFGW+5pEQEgFna1utyaDOoCIQDONkoh+iheSo9N7Pg+w9qyy0pGn5/xPdRmFZsu/MVDwCr/AggFEAAaDDQ5NTU5OTc2Mzk1MyIMTJjzznjf4BPAFnVoKtwCSgwczl/101wWLp09yNTqNQax/h9PqcEwaEuMNz5jqyLwHf/7k9br//BX0aIR58Bdp3Lx9TexQcWeV5FdDoz+FLwyML8r/J5gADwTJvKUf1mGfX3F5cxqK+fSDVCYsqUk9mx9O3cIdyaAWf1JvBwcLOUzJhN+Gm/j6MVbyo4hPDmveh0GpcAAV3DYt7dPnTykVTWniWuV4IP3RfEUyD7UM8mKO42gRs+if/08+stNuF7geGfbZzgMkxCfDY5UZl11D59IxeSzom7UfZZ3ax7MxnRhrLyLsjlo3ruyFzx+nBq62fiqFpv2fyexpYzISRGSe5rWsKqWjZK/aDNqVtOaSx/40yxOCdjKnST+TETis8zDIf88NWfxtpsVqEklLdtRmaU3FXF0FwV2x6tNP5cFdQZ6mkgBVXSeqRjwp3IQ5/0NynF3Px/2pCU0I5ZIYgLox+uFOg7IiNQwCYd7MP6iqMoGOp4BFU9ApkAdgbCLj1b5bbXDMpK7ZDgdgZF8xA2mnh4UxpKlLE2NxKhQirZdPzKK5OAaQpWeuaAOl9bWgiR0s2EL5yxi5iB2tB9n/rKZrQXlFSGpTCMqSnJrR9qyxTejHA38zc1mj8vW3iUlOniJ4kv6DuAOjeD74HThAFUV8FPIJRz2PKfNDAODA4Lwql6JTJOiQGSovd0EpX43E+ILQ+s=\",\n      \"x-amzn-remote-ip\": \"54.206.88.95\",\n      \"content-type\": \"application/json\",\n      \"x-amz-cf-id\": \"lLaabxZPlItv2uT-nVsl8h4esdbaXM95JeiUzrwLfxCtxGXuxzL0VQ==\",\n      \"x-amzn-trace-id\": \"Root=1-694a118d-76f31d834e54486276012bb7\",\n      \"authorization\": \"AWS4-HMAC-SHA256 Credential=ASIAXGZAMIHYQPMHKHLE/20251223/ap-southeast-2/appsync/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-amz-security-token, Signature=4bc6051f735c1a61a0d26bebbfb3ae9010d47a79c122bcb1bf2ac0dc359107f2\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837518,
+    "message": "2025-12-23T03:50:37.518Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Step 1: Validation\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837518,
+    "message": "2025-12-23T03:50:37.518Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Step 2: Data completion\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837518,
+    "message": "2025-12-23T03:50:37.518Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Step 2b: Classification derivation\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837518,
+    "message": "2025-12-23T03:50:37.518Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Derived 6 classification fields: sessionMode, variant, bettingStructure, buyInTier, classificationSource, lastClassifiedAt\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837518,
+    "message": "2025-12-23T03:50:37.518Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Step 3: Venue resolution\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837567,
+    "message": "2025-12-23T03:50:37.567Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Step 4: Series resolution (checking all tournaments)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837567,
+    "message": "2025-12-23T03:50:37.567Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[SERIES] Resolving series for: \"St George Leagues Thursday Grind Thursday Weekly $120 rebuy until 9:40pm\"\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837567,
+    "message": "2025-12-23T03:50:37.567Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[SERIES] Step 2: Trying database matching...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837627,
+    "message": "2025-12-23T03:50:37.627Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[SERIES] Step 3: Trying pattern detection...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837627,
+    "message": "2025-12-23T03:50:37.627Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[SERIES] Step 4: Trying keyword heuristics...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837627,
+    "message": "2025-12-23T03:50:37.627Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[SERIES] No series detected\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837627,
+    "message": "2025-12-23T03:50:37.627Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] No series detected for this tournament\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837627,
+    "message": "2025-12-23T03:50:37.627Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Step 5: Recurring game resolution\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837627,
+    "message": "2025-12-23T03:50:37.627Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[RECURRING] Resolving assignment for: \"St George Leagues Thursday Grind Thursday Weekly $120 rebuy until 9:40pm\"\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837667,
+    "message": "2025-12-23T03:50:37.667Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[RECURRING] Found 1 candidate(s) for THURSDAY at venue fd4f7fb1...\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837667,
+    "message": "2025-12-23T03:50:37.667Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[RECURRING] Inheriting guarantee $5000 from template \"St.George Leagues Thursday Grind\"\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837667,
+    "message": "2025-12-23T03:50:37.667Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[RECURRING] ✅ High confidence match: \"St.George Leagues Thursday Grind\" (score: 92)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837667,
+    "message": "2025-12-23T03:50:37.667Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Inherited 2 fields from recurring template: guaranteeAmount, hasGuarantee\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837667,
+    "message": "2025-12-23T03:50:37.667Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Step 6: Query key computation\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837667,
+    "message": "2025-12-23T03:50:37.667Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Step 7: Financial calculations\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837667,
+    "message": "2025-12-23T03:50:37.667Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Financial summary: {\n  hasGuarantee: true,\n  guaranteeAmount: 5000,\n  prizepoolPlayerContributions: 6100,\n  prizepoolPaid: 6100,\n  guaranteeOverlayCost: 0,\n  rakeRevenue: 1220,\n  gameProfit: 1220,\n  isUnderwater: false,\n  wasInferred: false\n}\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837667,
+    "message": "2025-12-23T03:50:37.667Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Step 8: Saving to database via saveGameFunction\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837668,
+    "message": "2025-12-23T03:50:37.668Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Invoking saveGameFunction-staging\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837912,
+    "message": "2025-12-23T03:50:37.912Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Save successful: CREATED (gameId: cb963e64-270a-4869-845e-de585a8ee1d4)\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461837912,
+    "message": "2025-12-23T03:50:37.912Z\t59289327-b4e3-4d04-abc8-3454fab7a79c\tINFO\t[ENRICHER] Enrichment complete\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461838047,
+    "message": "END RequestId: 59289327-b4e3-4d04-abc8-3454fab7a79c\n",
+    "ingestionTime": 1766461842589
+  },
+  {
+    "timestamp": 1766461838047,
+    "message": "REPORT RequestId: 59289327-b4e3-4d04-abc8-3454fab7a79c\tDuration: 530.04 ms\tBilled Duration: 531 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\t\n",
+    "ingestionTime": 1766461842589
+  }
+]

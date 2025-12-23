@@ -1,0 +1,207 @@
+[
+  {
+    "timestamp": 1766476370535,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476370904,
+    "message": "START RequestId: b7fec06e-31cd-4767-a54a-80d674a7464f Version: $LATEST\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476370906,
+    "message": "2025-12-23T07:52:50.906Z\tb7fec06e-31cd-4767-a54a-80d674a7464f\tINFO\t[FINANCIALS] Processing 1 stream records\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476370930,
+    "message": "2025-12-23T07:52:50.930Z\tb7fec06e-31cd-4767-a54a-80d674a7464f\tINFO\t[FINANCIALS] Processing game d782e6bf-4dc8-4a99-852c-10505d6ae1e4 (saveToDatabase: true, isSeries: false, isSeriesParent: false, seriesId: none, recurringGameId: 65483734-00ff-40bc-92b1-218529762d68)\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476371990,
+    "message": "2025-12-23T07:52:51.990Z\tb7fec06e-31cd-4767-a54a-80d674a7464f\tINFO\t[FINANCIALS] ✅ Created GameCost 4fe54c43-5974-4e03-92f7-5c112a88f218\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372129,
+    "message": "2025-12-23T07:52:52.129Z\tb7fec06e-31cd-4767-a54a-80d674a7464f\tINFO\t[FINANCIALS] ✅ Created GameFinancialSnapshot 5d6c87db-fd87-4d70-a9b4-ecb6668e5563 (isSeries: false, isSeriesParent: false, seriesId: null, recurringGameId: 65483734-00ff-40bc-92b1-218529762d68)\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372129,
+    "message": "2025-12-23T07:52:52.129Z\tb7fec06e-31cd-4767-a54a-80d674a7464f\tINFO\t[FINANCIALS] Stream complete: 1 processed (0 series, 1 recurring), 0 skipped, 0 errors\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372169,
+    "message": "END RequestId: b7fec06e-31cd-4767-a54a-80d674a7464f\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372169,
+    "message": "REPORT RequestId: b7fec06e-31cd-4767-a54a-80d674a7464f\tDuration: 1265.11 ms\tBilled Duration: 1631 ms\tMemory Size: 128 MB\tMax Memory Used: 98 MB\tInit Duration: 364.99 ms\t\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372337,
+    "message": "2025-12-23T07:52:52.337Z\tc3b1b665-f4e0-43e1-83d2-a0466567b84f\tINFO\t[FINANCIALS] Processing 1 stream records\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372337,
+    "message": "START RequestId: c3b1b665-f4e0-43e1-83d2-a0466567b84f Version: $LATEST\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372338,
+    "message": "2025-12-23T07:52:52.338Z\tc3b1b665-f4e0-43e1-83d2-a0466567b84f\tINFO\t[FINANCIALS] Processing game 9459663a-d148-4c94-89fb-7872d7306c7e (saveToDatabase: true, isSeries: false, isSeriesParent: false, seriesId: none, recurringGameId: 65483734-00ff-40bc-92b1-218529762d68)\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372409,
+    "message": "2025-12-23T07:52:52.409Z\tc3b1b665-f4e0-43e1-83d2-a0466567b84f\tINFO\t[FINANCIALS] ✅ Created GameCost a9ad960c-325a-4022-86a5-52fa7bee0641\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372529,
+    "message": "2025-12-23T07:52:52.529Z\tc3b1b665-f4e0-43e1-83d2-a0466567b84f\tINFO\t[FINANCIALS] ✅ Created GameFinancialSnapshot 5c8c5ee3-bc94-471a-99ec-d4e017f97076 (isSeries: false, isSeriesParent: false, seriesId: null, recurringGameId: 65483734-00ff-40bc-92b1-218529762d68)\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372529,
+    "message": "2025-12-23T07:52:52.529Z\tc3b1b665-f4e0-43e1-83d2-a0466567b84f\tINFO\t[FINANCIALS] Stream complete: 1 processed (0 series, 1 recurring), 0 skipped, 0 errors\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372550,
+    "message": "END RequestId: c3b1b665-f4e0-43e1-83d2-a0466567b84f\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476372550,
+    "message": "REPORT RequestId: c3b1b665-f4e0-43e1-83d2-a0466567b84f\tDuration: 211.72 ms\tBilled Duration: 212 ms\tMemory Size: 128 MB\tMax Memory Used: 98 MB\t\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476373079,
+    "message": "START RequestId: 7e18b27f-3a83-4b04-959d-765b2ec13729 Version: $LATEST\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476373080,
+    "message": "2025-12-23T07:52:53.080Z\t7e18b27f-3a83-4b04-959d-765b2ec13729\tINFO\t[FINANCIALS] Processing 1 stream records\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476373080,
+    "message": "2025-12-23T07:52:53.080Z\t7e18b27f-3a83-4b04-959d-765b2ec13729\tINFO\t[FINANCIALS] Processing game 3fa9f859-d209-49c7-9af4-d0e71fd2b86f (saveToDatabase: true, isSeries: false, isSeriesParent: false, seriesId: none, recurringGameId: 1c72a18e-8ede-488f-8933-ba2722a0cf6f)\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476373209,
+    "message": "2025-12-23T07:52:53.209Z\t7e18b27f-3a83-4b04-959d-765b2ec13729\tINFO\t[FINANCIALS] ✅ Created GameCost bc5e4832-aa11-4f3f-b464-facafc67a863\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476373308,
+    "message": "2025-12-23T07:52:53.308Z\t7e18b27f-3a83-4b04-959d-765b2ec13729\tINFO\t[FINANCIALS] ✅ Created GameFinancialSnapshot 45da41a4-8c0f-4d85-8a40-592135f2c3af (isSeries: false, isSeriesParent: false, seriesId: null, recurringGameId: 1c72a18e-8ede-488f-8933-ba2722a0cf6f)\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476373309,
+    "message": "2025-12-23T07:52:53.309Z\t7e18b27f-3a83-4b04-959d-765b2ec13729\tINFO\t[FINANCIALS] Stream complete: 1 processed (0 series, 1 recurring), 0 skipped, 0 errors\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476373329,
+    "message": "END RequestId: 7e18b27f-3a83-4b04-959d-765b2ec13729\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476373329,
+    "message": "REPORT RequestId: 7e18b27f-3a83-4b04-959d-765b2ec13729\tDuration: 249.30 ms\tBilled Duration: 250 ms\tMemory Size: 128 MB\tMax Memory Used: 99 MB\t\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476374835,
+    "message": "START RequestId: faaee1aa-eed0-4213-a64d-c909a1431d4a Version: $LATEST\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476374836,
+    "message": "2025-12-23T07:52:54.836Z\tfaaee1aa-eed0-4213-a64d-c909a1431d4a\tINFO\t[FINANCIALS] Processing 1 stream records\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476374836,
+    "message": "2025-12-23T07:52:54.836Z\tfaaee1aa-eed0-4213-a64d-c909a1431d4a\tINFO\t[FINANCIALS] Processing game daf248d1-7c82-4415-b4f5-de7a7cabd399 (saveToDatabase: true, isSeries: false, isSeriesParent: false, seriesId: none, recurringGameId: 1c72a18e-8ede-488f-8933-ba2722a0cf6f)\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476374889,
+    "message": "2025-12-23T07:52:54.889Z\tfaaee1aa-eed0-4213-a64d-c909a1431d4a\tINFO\t[FINANCIALS] ✅ Created GameCost eb888aa9-ced5-4452-9830-4b197e5b565c\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476374969,
+    "message": "2025-12-23T07:52:54.969Z\tfaaee1aa-eed0-4213-a64d-c909a1431d4a\tINFO\t[FINANCIALS] ✅ Created GameFinancialSnapshot 8d9c312c-4b8a-474d-8855-972486eaa6e8 (isSeries: false, isSeriesParent: false, seriesId: null, recurringGameId: 1c72a18e-8ede-488f-8933-ba2722a0cf6f)\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476374969,
+    "message": "2025-12-23T07:52:54.969Z\tfaaee1aa-eed0-4213-a64d-c909a1431d4a\tINFO\t[FINANCIALS] Stream complete: 1 processed (0 series, 1 recurring), 0 skipped, 0 errors\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476374989,
+    "message": "END RequestId: faaee1aa-eed0-4213-a64d-c909a1431d4a\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476374989,
+    "message": "REPORT RequestId: faaee1aa-eed0-4213-a64d-c909a1431d4a\tDuration: 153.30 ms\tBilled Duration: 154 ms\tMemory Size: 128 MB\tMax Memory Used: 99 MB\t\n",
+    "ingestionTime": 1766476375946
+  },
+  {
+    "timestamp": 1766476376080,
+    "message": "START RequestId: 81195686-1ab0-4757-b2ff-e7abadea201d Version: $LATEST\n",
+    "ingestionTime": 1766476385097
+  },
+  {
+    "timestamp": 1766476376081,
+    "message": "2025-12-23T07:52:56.081Z\t81195686-1ab0-4757-b2ff-e7abadea201d\tINFO\t[FINANCIALS] Processing 1 stream records\n",
+    "ingestionTime": 1766476385097
+  },
+  {
+    "timestamp": 1766476376081,
+    "message": "2025-12-23T07:52:56.081Z\t81195686-1ab0-4757-b2ff-e7abadea201d\tINFO\t[FINANCIALS] Processing game 3002e822-9947-43fc-a9cb-17170c066bf5 (saveToDatabase: true, isSeries: false, isSeriesParent: false, seriesId: none, recurringGameId: 1c72a18e-8ede-488f-8933-ba2722a0cf6f)\n",
+    "ingestionTime": 1766476385097
+  },
+  {
+    "timestamp": 1766476376108,
+    "message": "2025-12-23T07:52:56.108Z\t81195686-1ab0-4757-b2ff-e7abadea201d\tINFO\t[FINANCIALS] ✅ Created GameCost e4519183-1cce-4e67-b79e-9cb06e45b00e\n",
+    "ingestionTime": 1766476385097
+  },
+  {
+    "timestamp": 1766476376188,
+    "message": "2025-12-23T07:52:56.188Z\t81195686-1ab0-4757-b2ff-e7abadea201d\tINFO\t[FINANCIALS] ✅ Created GameFinancialSnapshot 00c30a4d-047b-4bb7-8e4d-0723aaafbdb6 (isSeries: false, isSeriesParent: false, seriesId: null, recurringGameId: 1c72a18e-8ede-488f-8933-ba2722a0cf6f)\n",
+    "ingestionTime": 1766476385097
+  },
+  {
+    "timestamp": 1766476376189,
+    "message": "2025-12-23T07:52:56.189Z\t81195686-1ab0-4757-b2ff-e7abadea201d\tINFO\t[FINANCIALS] Stream complete: 1 processed (0 series, 1 recurring), 0 skipped, 0 errors\n",
+    "ingestionTime": 1766476385097
+  },
+  {
+    "timestamp": 1766476376209,
+    "message": "END RequestId: 81195686-1ab0-4757-b2ff-e7abadea201d\n",
+    "ingestionTime": 1766476385097
+  },
+  {
+    "timestamp": 1766476376209,
+    "message": "REPORT RequestId: 81195686-1ab0-4757-b2ff-e7abadea201d\tDuration: 128.05 ms\tBilled Duration: 129 ms\tMemory Size: 128 MB\tMax Memory Used: 99 MB\t\n",
+    "ingestionTime": 1766476385097
+  }
+]

@@ -5,8 +5,8 @@
       "dynamodb:GetItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/byVenue"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/byVenue"
     ]
   },
   {
@@ -17,8 +17,8 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/VenueDetails-*-dev",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/VenueDetails-*-dev/index/byVenue"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/VenueDetails-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/VenueDetails-*-staging/index/byVenue"
     ]
   },
   {
@@ -29,7 +29,7 @@
       "dynamodb:ListStreams"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/stream/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/stream/*"
     ]
   },
   {

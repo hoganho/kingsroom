@@ -94,9 +94,9 @@ exports.handler = async (event) => {
         
         // Route to appropriate handler
         switch (fieldName) {
-            // ─────────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────
             // FETCH: Get HTML and parse tournament data
-            // ─────────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────
             case 'fetchTournamentData':
             case 'FETCH': {
                 // Support both URL fetch and S3 cache re-parse
@@ -120,9 +120,9 @@ exports.handler = async (event) => {
                 }, context);
             }
             
-            // ─────────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────
             // SAVE: Passthrough to saveGameFunction Lambda
-            // ─────────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────
             case 'saveTournamentData':
             case 'SAVE': {
                 const input = args.input || args;
@@ -138,9 +138,9 @@ exports.handler = async (event) => {
                 }, context);
             }
             
-            // ─────────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────
             // FETCH RANGE: Batch fetch multiple tournaments
-            // ─────────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────
             case 'fetchTournamentDataRange': {
                 if (!args.startId || !args.endId) {
                     throw new Error('startId and endId are required for fetchTournamentDataRange');
@@ -153,9 +153,9 @@ exports.handler = async (event) => {
                 }, context);
             }
             
-            // ─────────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────
             // RE-SCRAPE FROM CACHE: Parse existing S3 HTML
-            // ─────────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────
             case 'reScrapeFromCache': {
                 const input = args.input || args;
                 
@@ -172,9 +172,9 @@ exports.handler = async (event) => {
                 }, context);
             }
             
-            // ─────────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────
             // UNKNOWN OPERATION
-            // ─────────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────
             default:
                 throw new Error(`Unknown operation: ${fieldName}`);
         }
@@ -187,6 +187,8 @@ exports.handler = async (event) => {
         });
         
         // Return structured error for fetch operations
+        // FIXED: Use gameStatus: 'ERROR' instead of 'SCHEDULED' so autoScraper
+        // properly recognizes this as an error, not valid tournament data
         if (event.fieldName === 'fetchTournamentData' || event.fieldName === 'FETCH') {
             const args = event.arguments || event.args || event;
             const tournamentId = args.url ? extractTournamentIdFromUrl(args.url) : 0;
@@ -194,14 +196,16 @@ exports.handler = async (event) => {
             return {
                 tournamentId,
                 name: 'Error processing tournament',
-                gameStatus: 'SCHEDULED',
+                gameStatus: 'ERROR',              // FIXED: Was 'SCHEDULED' - now properly indicates error
                 hasGuarantee: false,
                 doNotScrape: true,
                 s3Key: '',
                 error: error.message,
+                errorMessage: error.message,      // ADDED: Explicit error message field
                 status: 'ERROR',
                 registrationStatus: 'N_A',
-                entityId: args.entityId || null
+                entityId: args.entityId || null,
+                source: 'ERROR'                   // ADDED: Indicate this came from error path
             };
         }
         

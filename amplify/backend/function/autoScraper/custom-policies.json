@@ -6,7 +6,7 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-dev"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-staging"
     ]
   },
   {
@@ -15,7 +15,7 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-dev"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-staging"
     ]
   },
   {
@@ -23,8 +23,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byEntityScrapeURL"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/byEntityScrapeURL"
     ]
   },
   {
@@ -42,6 +42,14 @@
     ],
     "Resource": [
       "*"
+    ]
+  },
+  {
+    "Action": ["appsync:GraphQL"],
+    "Resource": [
+      "arn:aws:appsync:*:*:apis/*/types/Mutation/fields/fetchTournamentData",
+      "arn:aws:appsync:*:*:apis/*/types/Mutation/fields/enrichGameData",
+      "arn:aws:appsync:*:*:apis/*/types/Mutation/fields/publishGameProcessed"
     ]
   }
 ]

@@ -6,7 +6,7 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/SocialAccount-*-dev"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/SocialAccount-*-staging"
     ]
   },
   {
@@ -15,7 +15,7 @@
       "dynamodb:PutItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/SocialPost-*-dev"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/SocialPost-*-staging"
     ]
   },
   {
@@ -24,7 +24,7 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/SocialScrapeAttempt-*-dev"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/SocialScrapeAttempt-*-staging"
     ]
   },
   {

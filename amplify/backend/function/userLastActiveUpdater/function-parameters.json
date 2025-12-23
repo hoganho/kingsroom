@@ -1,16 +1,19 @@
 {
   "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
     "storage": {
-      "User": [
-        "read",
+      "User:@model(appsync)": [
         "update"
+      ],
+      "UserAuditLog:@model(appsync)": [
+        "read"
       ]
     }
   },
-  "environmentVariableList": [
-    {
-      "cloudFormationParameterName": "userTable",
-      "environmentVariableName": "USER_TABLE"
-    }
-  ]
+  "lambdaLayers": []
 }

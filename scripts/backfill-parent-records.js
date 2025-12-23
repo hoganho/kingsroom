@@ -16,7 +16,7 @@ import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 
 // Configuration - UPDATE THESE VALUES
-const GAME_TABLE = process.env.API_KINGSROOM_GAMETABLE_NAME || 'Game-sjyzke3u45golhnttlco6bpcua-dev';
+const GAME_TABLE = process.env.API_KINGSROOM_GAMETABLE_NAME || 'Game-fosb7ek5argnhctz4odpt52eia-staging';
 const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 
 const client = new DynamoDBClient({ region: REGION });

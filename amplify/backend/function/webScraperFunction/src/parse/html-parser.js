@@ -8,10 +8,42 @@
  * 
  * Extracted from: scraperStrategies.js
  * 
+ * UPDATED: v2.1.0
+ * - Removed series matching (now handled by gameDataEnricher)
+ * - Fixed getTournamentType() bug (BOUNTY/TURBO not valid enum values)
+ * - Added getClassification() for new multi-dimensional taxonomy
+ * - Added variant/bettingStructure derivation from gameVariant
+ * - Uses entryStructure (not tournamentStructure) to avoid @model conflict
+ * - Uses cashRakeType (not rakeStructure) to avoid @model conflict
+ * 
+ * NOTE: Series detection (isSeries, seriesName, tournamentSeriesId, etc.)
+ * is now handled by gameDataEnricher's series-resolver module.
+ * The scraper only extracts the raw tournament name.
+ * 
  * ===================================================================
  */
 
 const cheerio = require('cheerio');
+
+// ===================================================================
+// VARIANT MAPPING (GameVariant -> PokerVariant + BettingStructure)
+// ===================================================================
+
+const VARIANT_MAPPING = {
+    NOT_PUBLISHED: { variant: 'NOT_SPECIFIED', bettingStructure: null },
+    NLHE: { variant: 'HOLD_EM', bettingStructure: 'NO_LIMIT' },
+    PLO: { variant: 'OMAHA_HI', bettingStructure: 'POT_LIMIT' },
+    PLOM: { variant: 'OMAHA_HILO', bettingStructure: 'POT_LIMIT' },
+    PL04: { variant: 'OMAHA_HI', bettingStructure: 'POT_LIMIT' },
+    PLOM4: { variant: 'OMAHA_HILO', bettingStructure: 'POT_LIMIT' },
+    PLO5: { variant: 'OMAHA5_HI', bettingStructure: 'POT_LIMIT' },
+    PLOM5: { variant: 'OMAHA5_HILO', bettingStructure: 'POT_LIMIT' },
+    PLO6: { variant: 'OMAHA6_HI', bettingStructure: 'POT_LIMIT' },
+    PLOM6: { variant: 'OMAHA6_HILO', bettingStructure: 'POT_LIMIT' },
+    PLMIXED: { variant: 'MIXED_ROTATION', bettingStructure: 'POT_LIMIT' },
+    PLDC: { variant: 'MIXED_DEALERS_CHOICE', bettingStructure: 'POT_LIMIT' },
+    NLDC: { variant: 'MIXED_DEALERS_CHOICE', bettingStructure: 'NO_LIMIT' }
+};
 
 /**
  * Parse duration string to milliseconds
@@ -200,10 +232,11 @@ const defaultStrategy = {
 
     /**
      * Initialize default flags
+     * 
+     * NOTE: isSeries and seriesName are no longer set here.
+     * Series detection is handled by gameDataEnricher's series-resolver.
      */
     initializeDefaultFlags(ctx) {
-        ctx.add('isSeries', false);
-        ctx.add('seriesName', null);
         ctx.add('isSatellite', false);
         ctx.add('isRegular', true);
         ctx.add('hasGuarantee', false);
@@ -212,8 +245,12 @@ const defaultStrategy = {
 
     /**
      * Get tournament name
+     * 
+     * UPDATED: Removed seriesMatchFn parameter.
+     * Series detection (isSeries, seriesName, dayNumber, flightLetter, eventNumber, etc.)
+     * is now handled by gameDataEnricher's series-resolver module.
      */
-    getName(ctx, seriesMatchFn = null, venueMatchFn = null) {
+    getName(ctx) {
         const mainTitle = ctx.$('.cw-game-title').first().text().trim();
         const subTitle = ctx.$('.cw-game-shortdesc').first().text().trim();
         const gameName = [mainTitle, subTitle].filter(Boolean).join(' ');
@@ -230,33 +267,12 @@ const defaultStrategy = {
         
         ctx.add('name', gameName);
         
-        // Series matching is handled by caller passing in a match function
-        if (seriesMatchFn) {
-            const seriesInfo = seriesMatchFn(gameName);
-            if (seriesInfo) {
-                ctx.add('isSeries', seriesInfo.isSeries);
-                ctx.add('seriesName', seriesInfo.seriesName);
-                ctx.add('isRegular', !seriesInfo.isSeries);
-                
-                if (seriesInfo.seriesId) {
-                    ctx.add('seriesId', seriesInfo.seriesId);
-                    ctx.add('tournamentSeriesId', seriesInfo.seriesId);
-                }
-                if (seriesInfo.seriesTitleId) {
-                    ctx.add('seriesMatch', {
-                        seriesTitleId: seriesInfo.seriesTitleId,
-                        seriesName: seriesInfo.seriesName,
-                        score: 0.85
-                    });
-                    ctx.add('seriesTitleId', seriesInfo.seriesTitleId);
-                }
-                if (seriesInfo.dayNumber) ctx.add('dayNumber', seriesInfo.dayNumber);
-                if (seriesInfo.flightLetter) ctx.add('flightLetter', seriesInfo.flightLetter);
-                if (seriesInfo.isMainEvent) ctx.add('isMainEvent', seriesInfo.isMainEvent);
-                if (seriesInfo.eventNumber) ctx.add('eventNumber', seriesInfo.eventNumber);
-                if (seriesInfo.finalDay) ctx.add('finalDay', seriesInfo.finalDay);
-            }
-        }
+        // NOTE: Series matching removed - now handled by gameDataEnricher
+        // The enricher will use series-resolver to:
+        // - Match against TournamentSeriesTitle database
+        // - Extract dayNumber, flightLetter, eventNumber from name
+        // - Resolve to TournamentSeries instance
+        // - Set isSeries, seriesName, tournamentSeriesId, etc.
     },
     
     /**
@@ -273,24 +289,35 @@ const defaultStrategy = {
 
     /**
      * Determine tournament type from tags and name
+     * 
+     * FIXED: Now only returns valid TournamentType enum values:
+     * FREEZEOUT, REBUY, SATELLITE, DEEPSTACK
+     * 
+     * Bounty and speed info are now captured in getClassification()
      */
     getTournamentType(ctx) {
         const tags = ctx.data.gameTags || [];
         const name = ctx.data.name || '';
         const allText = [...tags, name].join(' ');
         
+        // Default
         let tournamentType = 'FREEZEOUT';
         
+        // Check for satellite first (highest priority for old enum)
         if (/(satellite|satty|\bsat\b)/i.test(allText)) {
             tournamentType = 'SATELLITE';
             ctx.add('isSatellite', true);
-        } else if (/(rebuy|re-buy|reentry|re-entry)/i.test(allText)) {
-            tournamentType = 'REBUY';
-        } else if (/(bounty|knockout|ko\b|pko|progressive\s*knockout)/i.test(allText)) {
-            tournamentType = 'BOUNTY';
-        } else if (/(hyper|turbo)/i.test(allText)) {
-            tournamentType = 'TURBO';
         }
+        // Check for rebuy/re-entry
+        else if (/(rebuy|re-buy|reentry|re-entry)/i.test(allText)) {
+            tournamentType = 'REBUY';
+        }
+        // Check for deepstack
+        else if (/(deepstack|deep\s*stack|\bdeep\b)/i.test(allText)) {
+            tournamentType = 'DEEPSTACK';
+        }
+        // Note: BOUNTY and TURBO are NOT valid TournamentType values
+        // They are now captured in bountyType and speedType via getClassification()
         
         ctx.add('tournamentType', tournamentType);
     },
@@ -361,6 +388,159 @@ const defaultStrategy = {
         if (variant) {
             ctx.add('gameVariant', variant.replace(/\s/g, ''));
         }
+    },
+
+    /**
+     * NEW: Extract multi-dimensional classification fields
+     * 
+     * This extracts the new taxonomy fields from scraped data:
+     * - variant + bettingStructure (from gameVariant)
+     * - sessionMode (from gameType)
+     * - bountyType (from name/tags)
+     * - speedType (from name/tags)
+     * - stackDepth (from name/tags)
+     * - entryStructure (from name/tags) - NOTE: not tournamentStructure
+     * - tournamentPurpose (from name/tags + isSatellite)
+     * - scheduleType (from isSeries/isRegular)
+     * 
+     * Should be called AFTER getGameVariant(), getTournamentType(), getName()
+     * 
+     * NOTE: scheduleType now defaults to 'RECURRING' since isSeries detection
+     * has moved to gameDataEnricher. The enricher will update scheduleType
+     * to 'SERIES_EVENT' if series is detected.
+     */
+    getClassification(ctx) {
+        const name = ctx.data.name || '';
+        const tags = ctx.data.gameTags || [];
+        const allText = [...tags, name].join(' ');
+        const gameVariant = ctx.data.gameVariant;
+        const gameType = ctx.data.gameType || 'TOURNAMENT';
+        
+        // === SESSION MODE ===
+        ctx.add('sessionMode', gameType === 'CASH_GAME' ? 'CASH' : 'TOURNAMENT');
+        
+        // === VARIANT + BETTING STRUCTURE (from gameVariant) ===
+        if (gameVariant && VARIANT_MAPPING[gameVariant]) {
+            const mapping = VARIANT_MAPPING[gameVariant];
+            ctx.add('variant', mapping.variant);
+            if (mapping.bettingStructure) {
+                ctx.add('bettingStructure', mapping.bettingStructure);
+            }
+        } else if (gameVariant) {
+            // Unknown variant - log and set as OTHER
+            console.log(`[HtmlParser] Unknown gameVariant: ${gameVariant}`);
+            ctx.add('variant', 'OTHER');
+        }
+        
+        // === BOUNTY TYPE ===
+        if (/MYSTERY\s*BOUNTY/i.test(allText)) {
+            ctx.add('bountyType', 'MYSTERY');
+        } else if (/PKO|PROGRESSIVE\s*(KO|KNOCKOUT)/i.test(allText)) {
+            ctx.add('bountyType', 'PROGRESSIVE');
+        } else if (/SUPER\s*(KO|KNOCKOUT)/i.test(allText)) {
+            ctx.add('bountyType', 'SUPER_KNOCKOUT');
+        } else if (/TOTAL\s*(KO|KNOCKOUT)|TKO/i.test(allText)) {
+            ctx.add('bountyType', 'TOTAL_KNOCKOUT');
+        } else if (/BOUNTY|KNOCKOUT|\bKO\b/i.test(allText)) {
+            ctx.add('bountyType', 'STANDARD');
+        } else {
+            ctx.add('bountyType', 'NONE');
+        }
+        
+        // === SPEED TYPE ===
+        if (/SUPER\s*TURBO|SUPERTURBO/i.test(allText)) {
+            ctx.add('speedType', 'SUPER_TURBO');
+        } else if (/HYPER\s*TURBO|HYPERTURBO|HYPER/i.test(allText)) {
+            ctx.add('speedType', 'HYPER');
+        } else if (/TURBO/i.test(allText)) {
+            ctx.add('speedType', 'TURBO');
+        } else if (/SLOW\s*(STRUCTURE|BLIND)/i.test(allText)) {
+            ctx.add('speedType', 'SLOW');
+        } else {
+            ctx.add('speedType', 'REGULAR');
+        }
+        
+        // === STACK DEPTH ===
+        if (/SUPER\s*STACK|SUPERSTACK/i.test(allText)) {
+            ctx.add('stackDepth', 'SUPER');
+        } else if (/MEGA\s*STACK|MEGASTACK/i.test(allText)) {
+            ctx.add('stackDepth', 'MEGA');
+        } else if (/DEEP\s*STACK|DEEPSTACK|\bDEEP\b/i.test(allText)) {
+            ctx.add('stackDepth', 'DEEP');
+        } else if (/SHALLOW|SHORT\s*STACK/i.test(allText)) {
+            ctx.add('stackDepth', 'SHALLOW');
+        } else {
+            ctx.add('stackDepth', 'STANDARD');
+        }
+        
+        // === ENTRY STRUCTURE (renamed from tournamentStructure) ===
+        if (/UNLIMITED\s*RE-?ENTRY/i.test(allText)) {
+            ctx.add('entryStructure', 'UNLIMITED_RE_ENTRY');
+        } else if (/SINGLE\s*RE-?ENTRY/i.test(allText)) {
+            ctx.add('entryStructure', 'RE_ENTRY');
+        } else if (/RE-?ENTRY/i.test(allText)) {
+            ctx.add('entryStructure', 'RE_ENTRY');
+        } else if (/REBUY.*ADD-?ON|ADD-?ON.*REBUY/i.test(allText)) {
+            ctx.add('entryStructure', 'REBUY_ADDON');
+        } else if (/UNLIMITED\s*REBUY/i.test(allText)) {
+            ctx.add('entryStructure', 'UNLIMITED_REBUY');
+        } else if (/SINGLE\s*REBUY|ONE\s*REBUY|1\s*REBUY/i.test(allText)) {
+            ctx.add('entryStructure', 'SINGLE_REBUY');
+        } else if (/REBUY|RE-?BUY/i.test(allText)) {
+            ctx.add('entryStructure', 'UNLIMITED_REBUY');
+        } else if (/ADD-?ON\s*ONLY/i.test(allText)) {
+            ctx.add('entryStructure', 'ADD_ON_ONLY');
+        } else if (/FREEZE-?OUT/i.test(allText)) {
+            ctx.add('entryStructure', 'FREEZEOUT');
+        } else {
+            // Default based on old tournamentType if available
+            const oldType = ctx.data.tournamentType;
+            if (oldType === 'REBUY') {
+                ctx.add('entryStructure', 'UNLIMITED_REBUY');
+            } else {
+                ctx.add('entryStructure', 'FREEZEOUT');
+            }
+        }
+        
+        // === TOURNAMENT PURPOSE ===
+        if (ctx.data.isSatellite || /SATELLITE|SATTY|\bSAT\b/i.test(allText)) {
+            if (/MEGA\s*SAT/i.test(allText)) {
+                ctx.add('tournamentPurpose', 'MEGA_SATELLITE');
+            } else if (/SUPER\s*SAT/i.test(allText)) {
+                ctx.add('tournamentPurpose', 'SUPER_SATELLITE');
+            } else if (/STEP/i.test(allText)) {
+                ctx.add('tournamentPurpose', 'STEP_SATELLITE');
+            } else {
+                ctx.add('tournamentPurpose', 'SATELLITE');
+            }
+        } else if (/QUALIFIER|QUALIFYING/i.test(allText)) {
+            ctx.add('tournamentPurpose', 'QUALIFIER');
+        } else if (/FREEROLL|FREE\s*ROLL/i.test(allText)) {
+            ctx.add('tournamentPurpose', 'FREEROLL');
+        } else if (/CHARITY/i.test(allText)) {
+            ctx.add('tournamentPurpose', 'CHARITY');
+        } else if (/LEAGUE|POINTS/i.test(allText)) {
+            ctx.add('tournamentPurpose', 'LEAGUE_POINTS');
+        } else {
+            ctx.add('tournamentPurpose', 'STANDARD');
+        }
+        
+        // === SCHEDULE TYPE ===
+        // NOTE: isSeries detection moved to gameDataEnricher
+        // Default to RECURRING here; enricher will update to SERIES_EVENT if needed
+        if (ctx.data.isRegular) {
+            ctx.add('scheduleType', 'RECURRING');
+        } else {
+            ctx.add('scheduleType', 'ONE_OFF');
+        }
+        
+        // === CLASSIFICATION SOURCE ===
+        ctx.add('classificationSource', 'SCRAPED');
+        
+        // Log classification for debugging
+        console.log(`[HtmlParser] Classification: variant=${ctx.data.variant}, betting=${ctx.data.bettingStructure}, ` +
+            `bounty=${ctx.data.bountyType}, speed=${ctx.data.speedType}, stack=${ctx.data.stackDepth}, ` +
+            `entry=${ctx.data.entryStructure}, purpose=${ctx.data.tournamentPurpose}`);
     },
 
     /**
@@ -839,5 +1019,6 @@ module.exports = {
     defaultStrategy,
     getTournamentIdFromUrl,
     parseDurationToMilliseconds,
-    getStatusAndReg
+    getStatusAndReg,
+    VARIANT_MAPPING
 };

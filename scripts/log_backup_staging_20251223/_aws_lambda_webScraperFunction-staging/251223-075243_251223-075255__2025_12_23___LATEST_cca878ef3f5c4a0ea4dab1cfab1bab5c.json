@@ -1,0 +1,742 @@
+[
+  {
+    "timestamp": 1766476363546,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364494,
+    "message": "START RequestId: 45834419-ea1d-4064-9116-b124ee6cc2cf Version: $LATEST\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364601,
+    "message": "2025-12-23T07:52:44.601Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[EntityResolver] No entity found for domain kingsroom.com.au\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364601,
+    "message": "2025-12-23T07:52:44.601Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[Handler] Operation: fetchTournamentData, EntityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364629,
+    "message": "2025-12-23T07:52:44.629Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[ScrapeURLManager] Created new ScrapeURL record for https://kingsroom.com.au/tournament/?id=936\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364629,
+    "message": "2025-12-23T07:52:44.629Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchHandler] ScrapeURL exists but missing S3 link, checking S3Storage...\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364629,
+    "message": "2025-12-23T07:52:44.629Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchHandler] Looking for existing S3Storage for tournamentId: 936, entityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364641,
+    "message": "2025-12-23T07:52:44.641Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchHandler] ✅ Found S3Storage via byURL GSI: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/936/2025-12-11T10-59-32-035Z_tid936_ac7aa3d3.html (entityId: 42101695-1332-48e3-963b-3c6ad4e909a0)\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364641,
+    "message": "2025-12-23T07:52:44.641Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchHandler] Restoring S3 link: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/936/2025-12-11T10-59-32-035Z_tid936_ac7aa3d3.html\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364642,
+    "message": "2025-12-23T07:52:44.642Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchHandler] Using ScrapeURL: https://kingsroom.com.au/tournament/?id=936..., hasS3Key: true\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364642,
+    "message": "2025-12-23T07:52:44.642Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchHandler] S3 cache key: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/936/2025-12-11T10-59-32-035Z_tid936_ac7aa3d3.html\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364657,
+    "message": "2025-12-23T07:52:44.657Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchHandler] Updated ScrapeURL with S3 link: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/936/2025-12-11T10-59-32-035Z_tid936_ac7aa3d3.html\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364675,
+    "message": "2025-12-23T07:52:44.675Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchHandler] Loaded 37 venues for matching\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364675,
+    "message": "2025-12-23T07:52:44.675Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchOrchestrator] Starting fetch {\n  url: 'https://kingsroom.com.au/tournament/?id=936',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 936,\n  forceRefresh: false,\n  hasS3Key: true\n}\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364676,
+    "message": "2025-12-23T07:52:44.676Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[CacheManager] Checking S3 cache: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/936/2025-12-11T10-59-32-035Z_tid936_ac7aa3d3.html\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364856,
+    "message": "2025-12-23T07:52:44.856Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[S3Client] Retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/936/2025-12-11T10-59-32-035Z_tid936_ac7aa3d3.html (83781 bytes)\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364857,
+    "message": "2025-12-23T07:52:44.857Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[CacheManager] ✅ S3 cache hit {\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/936/2025-12-11T10-59-32-035Z_tid936_ac7aa3d3.html',\n  contentLength: 83781\n}\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364868,
+    "message": "2025-12-23T07:52:44.868Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[CacheManager] Updated cache hit stats for https://kingsroom.com.au/tournament/?id=936\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364868,
+    "message": "2025-12-23T07:52:44.868Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchOrchestrator] ✅ Cache hit - source: S3_CACHE {\n  url: 'https://kingsroom.com.au/tournament/?id=936',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 936\n}\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476364869,
+    "message": "2025-12-23T07:52:44.869Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[FetchHandler] Fetch succeeded, source: S3_CACHE, usedCache: true\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476365051,
+    "message": "2025-12-23T07:52:45.051Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[ParseOrchestrator] Starting parse for tournament 936, forceRefresh: false\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476365051,
+    "message": "2025-12-23T07:52:45.051Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[ParseOrchestrator] Reference data: 37 venues\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476365090,
+    "message": "2025-12-23T07:52:45.090Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[HtmlParser] Classification: variant=HOLD_EM, betting=NO_LIMIT, bounty=NONE, speed=REGULAR, stack=STANDARD, entry=RE_ENTRY, purpose=STANDARD\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476365116,
+    "message": "2025-12-23T07:52:45.116Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[VenueMatcher] Exact match: \"Bella Vista Hotel\"\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476365128,
+    "message": "2025-12-23T07:52:45.128Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[ParseOrchestrator] Completed. Found 42 keys, Status: FINISHED, DoNotScrape: false\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476365189,
+    "message": "2025-12-23T07:52:45.189Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[StructureFingerprint] New structure detected: f29b1ef52de04578 - \"STATUS:FINISHED | REG:CLOSED | RESULTS | ENTRIES\"\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476365260,
+    "message": "2025-12-23T07:52:45.260Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[S3StorageManager] ✅ Updated with parsed data { dataChanged: false, isRescrape: false }\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476365262,
+    "message": "2025-12-23T07:52:45.262Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[Handler] Completed in 766ms\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476365267,
+    "message": "END RequestId: 45834419-ea1d-4064-9116-b124ee6cc2cf\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476365267,
+    "message": "REPORT RequestId: 45834419-ea1d-4064-9116-b124ee6cc2cf\tDuration: 772.48 ms\tBilled Duration: 1718 ms\tMemory Size: 1024 MB\tMax Memory Used: 143 MB\tInit Duration: 944.66 ms\t\n",
+    "ingestionTime": 1766476370143
+  },
+  {
+    "timestamp": 1766476370777,
+    "message": "START RequestId: 072e39d4-6beb-457c-b2da-dc81ab616898 Version: $LATEST\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370778,
+    "message": "2025-12-23T07:52:50.778Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tWARN\t[Monitor] Slow DDB operation: PutCommand took 5517ms\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370778,
+    "message": "2025-12-23T07:52:50.778Z\t45834419-ea1d-4064-9116-b124ee6cc2cf\tINFO\t[ScrapeAttemptTracker] Created attempt a74a2066-fbaf-486c-a92b-1b69d63dbb38 - SUCCESS\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370779,
+    "message": "2025-12-23T07:52:50.779Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[EntityResolver] Cache hit for domain kingsroom.com.au: null\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370779,
+    "message": "2025-12-23T07:52:50.779Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[Handler] Operation: fetchTournamentData, EntityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370790,
+    "message": "2025-12-23T07:52:50.790Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[ScrapeURLManager] Created new ScrapeURL record for https://kingsroom.com.au/tournament/?id=1011\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370790,
+    "message": "2025-12-23T07:52:50.790Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchHandler] ScrapeURL exists but missing S3 link, checking S3Storage...\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370790,
+    "message": "2025-12-23T07:52:50.790Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchHandler] Looking for existing S3Storage for tournamentId: 1011, entityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370797,
+    "message": "2025-12-23T07:52:50.797Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchHandler] ✅ Found S3Storage via byURL GSI: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1011/2025-12-11T11-05-20-141Z_tid1011_8b1341b1.html (entityId: 42101695-1332-48e3-963b-3c6ad4e909a0)\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370797,
+    "message": "2025-12-23T07:52:50.797Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchHandler] Restoring S3 link: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1011/2025-12-11T11-05-20-141Z_tid1011_8b1341b1.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370798,
+    "message": "2025-12-23T07:52:50.798Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchHandler] Using ScrapeURL: https://kingsroom.com.au/tournament/?id=1011..., hasS3Key: true\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370798,
+    "message": "2025-12-23T07:52:50.798Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchHandler] S3 cache key: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1011/2025-12-11T11-05-20-141Z_tid1011_8b1341b1.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370804,
+    "message": "2025-12-23T07:52:50.804Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchHandler] Updated ScrapeURL with S3 link: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1011/2025-12-11T11-05-20-141Z_tid1011_8b1341b1.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370811,
+    "message": "2025-12-23T07:52:50.811Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchHandler] Loaded 37 venues for matching\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370812,
+    "message": "2025-12-23T07:52:50.812Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchOrchestrator] Starting fetch {\n  url: 'https://kingsroom.com.au/tournament/?id=1011',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 1011,\n  forceRefresh: false,\n  hasS3Key: true\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370812,
+    "message": "2025-12-23T07:52:50.812Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[CacheManager] Checking S3 cache: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1011/2025-12-11T11-05-20-141Z_tid1011_8b1341b1.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370939,
+    "message": "2025-12-23T07:52:50.939Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[S3Client] Retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1011/2025-12-11T11-05-20-141Z_tid1011_8b1341b1.html (91119 bytes)\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370939,
+    "message": "2025-12-23T07:52:50.939Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[CacheManager] ✅ S3 cache hit {\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1011/2025-12-11T11-05-20-141Z_tid1011_8b1341b1.html',\n  contentLength: 91119\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370946,
+    "message": "2025-12-23T07:52:50.946Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[CacheManager] Updated cache hit stats for https://kingsroom.com.au/tournament/?id=1011\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370946,
+    "message": "2025-12-23T07:52:50.946Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchOrchestrator] ✅ Cache hit - source: S3_CACHE {\n  url: 'https://kingsroom.com.au/tournament/?id=1011',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 1011\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476370946,
+    "message": "2025-12-23T07:52:50.946Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[FetchHandler] Fetch succeeded, source: S3_CACHE, usedCache: true\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476371091,
+    "message": "2025-12-23T07:52:51.091Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[ParseOrchestrator] Starting parse for tournament 1011, forceRefresh: false\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476371091,
+    "message": "2025-12-23T07:52:51.091Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[ParseOrchestrator] Reference data: 37 venues\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476371095,
+    "message": "2025-12-23T07:52:51.095Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[HtmlParser] Classification: variant=HOLD_EM, betting=NO_LIMIT, bounty=NONE, speed=REGULAR, stack=STANDARD, entry=RE_ENTRY, purpose=STANDARD\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476371134,
+    "message": "2025-12-23T07:52:51.134Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[VenueMatcher] Exact match: \"Bella Vista Hotel\"\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476371134,
+    "message": "2025-12-23T07:52:51.134Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[ParseOrchestrator] Completed. Found 42 keys, Status: FINISHED, DoNotScrape: false\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476371185,
+    "message": "2025-12-23T07:52:51.185Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[S3StorageManager] ✅ Updated with parsed data { dataChanged: false, isRescrape: false }\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476371186,
+    "message": "2025-12-23T07:52:51.186Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[Handler] Completed in 407ms\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476371191,
+    "message": "END RequestId: 072e39d4-6beb-457c-b2da-dc81ab616898\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476371191,
+    "message": "REPORT RequestId: 072e39d4-6beb-457c-b2da-dc81ab616898\tDuration: 413.69 ms\tBilled Duration: 414 ms\tMemory Size: 1024 MB\tMax Memory Used: 147 MB\t\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372281,
+    "message": "START RequestId: 6ebef74f-fd22-4d76-abbb-cb989d198550 Version: $LATEST\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372282,
+    "message": "2025-12-23T07:52:52.282Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tWARN\t[Monitor] Slow DDB operation: PutCommand took 1096ms\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372282,
+    "message": "2025-12-23T07:52:52.282Z\t072e39d4-6beb-457c-b2da-dc81ab616898\tINFO\t[ScrapeAttemptTracker] Created attempt 450acaf2-0a23-45d1-ac73-7bbbdc387e9e - SUCCESS\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372282,
+    "message": "2025-12-23T07:52:52.282Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[EntityResolver] Cache hit for domain kingsroom.com.au: null\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372283,
+    "message": "2025-12-23T07:52:52.283Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[Handler] Operation: fetchTournamentData, EntityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372295,
+    "message": "2025-12-23T07:52:52.295Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[ScrapeURLManager] Created new ScrapeURL record for https://kingsroom.com.au/tournament/?id=1027\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372295,
+    "message": "2025-12-23T07:52:52.295Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchHandler] ScrapeURL exists but missing S3 link, checking S3Storage...\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372295,
+    "message": "2025-12-23T07:52:52.295Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchHandler] Looking for existing S3Storage for tournamentId: 1027, entityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372300,
+    "message": "2025-12-23T07:52:52.300Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchHandler] ✅ Found S3Storage via byURL GSI: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1027/2025-12-11T11-06-48-320Z_tid1027_1f4b2834.html (entityId: 42101695-1332-48e3-963b-3c6ad4e909a0)\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372300,
+    "message": "2025-12-23T07:52:52.300Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchHandler] Restoring S3 link: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1027/2025-12-11T11-06-48-320Z_tid1027_1f4b2834.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372300,
+    "message": "2025-12-23T07:52:52.300Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchHandler] Using ScrapeURL: https://kingsroom.com.au/tournament/?id=1027..., hasS3Key: true\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372300,
+    "message": "2025-12-23T07:52:52.300Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchHandler] S3 cache key: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1027/2025-12-11T11-06-48-320Z_tid1027_1f4b2834.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372307,
+    "message": "2025-12-23T07:52:52.307Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchHandler] Updated ScrapeURL with S3 link: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1027/2025-12-11T11-06-48-320Z_tid1027_1f4b2834.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372310,
+    "message": "2025-12-23T07:52:52.310Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchHandler] Loaded 37 venues for matching\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372310,
+    "message": "2025-12-23T07:52:52.310Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchOrchestrator] Starting fetch {\n  url: 'https://kingsroom.com.au/tournament/?id=1027',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 1027,\n  forceRefresh: false,\n  hasS3Key: true\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372310,
+    "message": "2025-12-23T07:52:52.310Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[CacheManager] Checking S3 cache: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1027/2025-12-11T11-06-48-320Z_tid1027_1f4b2834.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372424,
+    "message": "2025-12-23T07:52:52.424Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[S3Client] Retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1027/2025-12-11T11-06-48-320Z_tid1027_1f4b2834.html (93599 bytes)\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372424,
+    "message": "2025-12-23T07:52:52.424Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[CacheManager] ✅ S3 cache hit {\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1027/2025-12-11T11-06-48-320Z_tid1027_1f4b2834.html',\n  contentLength: 93599\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372433,
+    "message": "2025-12-23T07:52:52.433Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[CacheManager] Updated cache hit stats for https://kingsroom.com.au/tournament/?id=1027\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372433,
+    "message": "2025-12-23T07:52:52.433Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchOrchestrator] ✅ Cache hit - source: S3_CACHE {\n  url: 'https://kingsroom.com.au/tournament/?id=1027',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 1027\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372433,
+    "message": "2025-12-23T07:52:52.433Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[FetchHandler] Fetch succeeded, source: S3_CACHE, usedCache: true\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372475,
+    "message": "2025-12-23T07:52:52.475Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[ParseOrchestrator] Starting parse for tournament 1027, forceRefresh: false\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372475,
+    "message": "2025-12-23T07:52:52.475Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[ParseOrchestrator] Reference data: 37 venues\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372491,
+    "message": "2025-12-23T07:52:52.491Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[HtmlParser] Classification: variant=HOLD_EM, betting=NO_LIMIT, bounty=NONE, speed=REGULAR, stack=STANDARD, entry=RE_ENTRY, purpose=LEAGUE_POINTS\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372533,
+    "message": "2025-12-23T07:52:52.533Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[ParseOrchestrator] Completed. Found 41 keys, Status: FINISHED, DoNotScrape: false\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372555,
+    "message": "2025-12-23T07:52:52.555Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[StructureFingerprint] New structure detected: 3fc92aa8e81d3a12 - \"STATUS:FINISHED | REG:CLOSED | RESULTS | ENTRIES\"\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372569,
+    "message": "2025-12-23T07:52:52.569Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[S3StorageManager] ✅ Updated with parsed data { dataChanged: false, isRescrape: false }\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372570,
+    "message": "2025-12-23T07:52:52.570Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[Handler] Completed in 288ms\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372575,
+    "message": "END RequestId: 6ebef74f-fd22-4d76-abbb-cb989d198550\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476372575,
+    "message": "REPORT RequestId: 6ebef74f-fd22-4d76-abbb-cb989d198550\tDuration: 293.17 ms\tBilled Duration: 294 ms\tMemory Size: 1024 MB\tMax Memory Used: 153 MB\t\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373606,
+    "message": "START RequestId: dae89290-705d-4028-80dd-ca2882347540 Version: $LATEST\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373607,
+    "message": "2025-12-23T07:52:53.607Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tWARN\t[Monitor] Slow DDB operation: PutCommand took 1037ms\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373607,
+    "message": "2025-12-23T07:52:53.607Z\t6ebef74f-fd22-4d76-abbb-cb989d198550\tINFO\t[ScrapeAttemptTracker] Created attempt 05eb9ca1-a51d-40eb-bc25-fbdca6f2e95a - SUCCESS\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373608,
+    "message": "2025-12-23T07:52:53.608Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[EntityResolver] Cache hit for domain kingsroom.com.au: null\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373608,
+    "message": "2025-12-23T07:52:53.608Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[Handler] Operation: fetchTournamentData, EntityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373619,
+    "message": "2025-12-23T07:52:53.619Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[ScrapeURLManager] Created new ScrapeURL record for https://kingsroom.com.au/tournament/?id=1054\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373619,
+    "message": "2025-12-23T07:52:53.619Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchHandler] ScrapeURL exists but missing S3 link, checking S3Storage...\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373619,
+    "message": "2025-12-23T07:52:53.619Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchHandler] Looking for existing S3Storage for tournamentId: 1054, entityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373624,
+    "message": "2025-12-23T07:52:53.624Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchHandler] ✅ Found S3Storage via byURL GSI: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1054/2025-12-11T11-09-27-614Z_tid1054_cef5242f.html (entityId: 42101695-1332-48e3-963b-3c6ad4e909a0)\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373624,
+    "message": "2025-12-23T07:52:53.624Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchHandler] Restoring S3 link: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1054/2025-12-11T11-09-27-614Z_tid1054_cef5242f.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373624,
+    "message": "2025-12-23T07:52:53.624Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchHandler] Using ScrapeURL: https://kingsroom.com.au/tournament/?id=1054..., hasS3Key: true\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373624,
+    "message": "2025-12-23T07:52:53.624Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchHandler] S3 cache key: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1054/2025-12-11T11-09-27-614Z_tid1054_cef5242f.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373631,
+    "message": "2025-12-23T07:52:53.631Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchHandler] Updated ScrapeURL with S3 link: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1054/2025-12-11T11-09-27-614Z_tid1054_cef5242f.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373633,
+    "message": "2025-12-23T07:52:53.633Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchHandler] Loaded 37 venues for matching\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373633,
+    "message": "2025-12-23T07:52:53.633Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchOrchestrator] Starting fetch {\n  url: 'https://kingsroom.com.au/tournament/?id=1054',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 1054,\n  forceRefresh: false,\n  hasS3Key: true\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373633,
+    "message": "2025-12-23T07:52:53.633Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[CacheManager] Checking S3 cache: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1054/2025-12-11T11-09-27-614Z_tid1054_cef5242f.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373734,
+    "message": "2025-12-23T07:52:53.734Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[S3Client] Retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1054/2025-12-11T11-09-27-614Z_tid1054_cef5242f.html (89635 bytes)\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373734,
+    "message": "2025-12-23T07:52:53.734Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[CacheManager] ✅ S3 cache hit {\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1054/2025-12-11T11-09-27-614Z_tid1054_cef5242f.html',\n  contentLength: 89635\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373740,
+    "message": "2025-12-23T07:52:53.740Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[CacheManager] Updated cache hit stats for https://kingsroom.com.au/tournament/?id=1054\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373741,
+    "message": "2025-12-23T07:52:53.741Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchOrchestrator] ✅ Cache hit - source: S3_CACHE {\n  url: 'https://kingsroom.com.au/tournament/?id=1054',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 1054\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373741,
+    "message": "2025-12-23T07:52:53.741Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[FetchHandler] Fetch succeeded, source: S3_CACHE, usedCache: true\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373829,
+    "message": "2025-12-23T07:52:53.829Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[ParseOrchestrator] Starting parse for tournament 1054, forceRefresh: false\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373829,
+    "message": "2025-12-23T07:52:53.829Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[ParseOrchestrator] Reference data: 37 venues\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373848,
+    "message": "2025-12-23T07:52:53.848Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[HtmlParser] Classification: variant=HOLD_EM, betting=NO_LIMIT, bounty=NONE, speed=REGULAR, stack=STANDARD, entry=RE_ENTRY, purpose=LEAGUE_POINTS\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373858,
+    "message": "2025-12-23T07:52:53.858Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[ParseOrchestrator] Completed. Found 41 keys, Status: FINISHED, DoNotScrape: false\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373889,
+    "message": "2025-12-23T07:52:53.889Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[S3StorageManager] ✅ Updated with parsed data { dataChanged: false, isRescrape: false }\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373889,
+    "message": "2025-12-23T07:52:53.889Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[Handler] Completed in 281ms\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373893,
+    "message": "END RequestId: dae89290-705d-4028-80dd-ca2882347540\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476373893,
+    "message": "REPORT RequestId: dae89290-705d-4028-80dd-ca2882347540\tDuration: 286.49 ms\tBilled Duration: 287 ms\tMemory Size: 1024 MB\tMax Memory Used: 160 MB\t\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375046,
+    "message": "START RequestId: 91e63d25-7fbc-4b27-b95b-64c58ce93d6d Version: $LATEST\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375047,
+    "message": "2025-12-23T07:52:55.047Z\tdae89290-705d-4028-80dd-ca2882347540\tWARN\t[Monitor] Slow DDB operation: PutCommand took 1158ms\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375047,
+    "message": "2025-12-23T07:52:55.047Z\tdae89290-705d-4028-80dd-ca2882347540\tINFO\t[ScrapeAttemptTracker] Created attempt 43c0ff02-5004-41e2-95b6-06b9a2594d65 - SUCCESS\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375048,
+    "message": "2025-12-23T07:52:55.048Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[EntityResolver] Cache hit for domain kingsroom.com.au: null\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375048,
+    "message": "2025-12-23T07:52:55.048Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[Handler] Operation: fetchTournamentData, EntityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375056,
+    "message": "2025-12-23T07:52:55.056Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[ScrapeURLManager] Created new ScrapeURL record for https://kingsroom.com.au/tournament/?id=1220\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375056,
+    "message": "2025-12-23T07:52:55.056Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchHandler] ScrapeURL exists but missing S3 link, checking S3Storage...\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375056,
+    "message": "2025-12-23T07:52:55.056Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchHandler] Looking for existing S3Storage for tournamentId: 1220, entityId: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375060,
+    "message": "2025-12-23T07:52:55.060Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchHandler] ✅ Found S3Storage via byURL GSI: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1220/2025-12-11T11-23-33-413Z_tid1220_0aae486f.html (entityId: 42101695-1332-48e3-963b-3c6ad4e909a0)\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375060,
+    "message": "2025-12-23T07:52:55.060Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchHandler] Restoring S3 link: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1220/2025-12-11T11-23-33-413Z_tid1220_0aae486f.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375061,
+    "message": "2025-12-23T07:52:55.061Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchHandler] Using ScrapeURL: https://kingsroom.com.au/tournament/?id=1220..., hasS3Key: true\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375061,
+    "message": "2025-12-23T07:52:55.061Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchHandler] S3 cache key: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1220/2025-12-11T11-23-33-413Z_tid1220_0aae486f.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375066,
+    "message": "2025-12-23T07:52:55.066Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchHandler] Updated ScrapeURL with S3 link: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1220/2025-12-11T11-23-33-413Z_tid1220_0aae486f.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375070,
+    "message": "2025-12-23T07:52:55.070Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchHandler] Loaded 37 venues for matching\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375070,
+    "message": "2025-12-23T07:52:55.070Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchOrchestrator] Starting fetch {\n  url: 'https://kingsroom.com.au/tournament/?id=1220',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 1220,\n  forceRefresh: false,\n  hasS3Key: true\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375070,
+    "message": "2025-12-23T07:52:55.070Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[CacheManager] Checking S3 cache: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1220/2025-12-11T11-23-33-413Z_tid1220_0aae486f.html\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375181,
+    "message": "2025-12-23T07:52:55.181Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[S3Client] Retrieved HTML from: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1220/2025-12-11T11-23-33-413Z_tid1220_0aae486f.html (90963 bytes)\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375181,
+    "message": "2025-12-23T07:52:55.181Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[CacheManager] ✅ S3 cache hit {\n  s3Key: 'entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1220/2025-12-11T11-23-33-413Z_tid1220_0aae486f.html',\n  contentLength: 90963\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375186,
+    "message": "2025-12-23T07:52:55.186Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[CacheManager] Updated cache hit stats for https://kingsroom.com.au/tournament/?id=1220\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375186,
+    "message": "2025-12-23T07:52:55.186Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchOrchestrator] ✅ Cache hit - source: S3_CACHE {\n  url: 'https://kingsroom.com.au/tournament/?id=1220',\n  entityId: '42101695-1332-48e3-963b-3c6ad4e909a0',\n  tournamentId: 1220\n}\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375186,
+    "message": "2025-12-23T07:52:55.186Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[FetchHandler] Fetch succeeded, source: S3_CACHE, usedCache: true\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375212,
+    "message": "2025-12-23T07:52:55.212Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[ParseOrchestrator] Starting parse for tournament 1220, forceRefresh: false\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375212,
+    "message": "2025-12-23T07:52:55.212Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[ParseOrchestrator] Reference data: 37 venues\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375227,
+    "message": "2025-12-23T07:52:55.227Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[HtmlParser] Classification: variant=HOLD_EM, betting=NO_LIMIT, bounty=NONE, speed=REGULAR, stack=STANDARD, entry=RE_ENTRY, purpose=LEAGUE_POINTS\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375310,
+    "message": "2025-12-23T07:52:55.310Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[ParseOrchestrator] Completed. Found 41 keys, Status: FINISHED, DoNotScrape: false\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375346,
+    "message": "2025-12-23T07:52:55.346Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[S3StorageManager] ✅ Updated with parsed data { dataChanged: false, isRescrape: false }\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375346,
+    "message": "2025-12-23T07:52:55.346Z\t91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tINFO\t[Handler] Completed in 298ms\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375351,
+    "message": "END RequestId: 91e63d25-7fbc-4b27-b95b-64c58ce93d6d\n",
+    "ingestionTime": 1766476379801
+  },
+  {
+    "timestamp": 1766476375351,
+    "message": "REPORT RequestId: 91e63d25-7fbc-4b27-b95b-64c58ce93d6d\tDuration: 303.97 ms\tBilled Duration: 304 ms\tMemory Size: 1024 MB\tMax Memory Used: 167 MB\t\n",
+    "ingestionTime": 1766476379801
+  }
+]

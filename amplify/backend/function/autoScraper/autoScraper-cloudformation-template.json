@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.0\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"I am a current Gen 1 user\"}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.3\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -943,7 +943,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -953,7 +953,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -962,8 +962,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byEntityScrapeURL"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/byEntityScrapeURL"
               ],
               "Effect": "Allow"
             },
@@ -983,6 +983,17 @@
               ],
               "Resource": [
                 "*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "appsync:GraphQL"
+              ],
+              "Resource": [
+                "arn:aws:appsync:*:*:apis/*/types/Mutation/fields/fetchTournamentData",
+                "arn:aws:appsync:*:*:apis/*/types/Mutation/fields/enrichGameData",
+                "arn:aws:appsync:*:*:apis/*/types/Mutation/fields/publishGameProcessed"
               ],
               "Effect": "Allow"
             }

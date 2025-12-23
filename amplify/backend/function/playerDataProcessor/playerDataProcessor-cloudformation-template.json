@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.0\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"I am a current Gen 1 user\"}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.3\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -1244,8 +1244,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Player-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Player-*-dev/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Player-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Player-*-staging/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1256,7 +1256,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1267,7 +1267,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1278,8 +1278,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-dev/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-staging/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1291,8 +1291,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-dev/index/byPlayer"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-staging/index/byPlayer"
               ],
               "Effect": "Allow"
             },
@@ -1302,7 +1302,7 @@
                 "dynamodb:BatchWriteItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1313,7 +1313,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerCredits-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerCredits-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1324,7 +1324,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerPoints-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerPoints-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1334,7 +1334,7 @@
                 "dynamodb:PutItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTicket-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTicket-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1343,7 +1343,7 @@
                 "dynamodb:GetItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TicketTemplate-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TicketTemplate-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -1352,7 +1352,7 @@
                 "dynamodb:GetItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-staging"
               ],
               "Effect": "Allow"
             },

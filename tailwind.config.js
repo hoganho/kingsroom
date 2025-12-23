@@ -12,7 +12,7 @@ export default {
       fontFamily: {
         display: ["Poppins", "sans-serif"],
       },
-      // Custom keyframes from Tremor template
+      // Custom keyframes from Tremor template + BatchJobProgress animations
       keyframes: {
         hide: {
           from: { opacity: "1" },
@@ -53,6 +53,26 @@ export default {
           from: { opacity: "1", transform: "translateX(0)" },
           to: { opacity: "0", transform: "translateX(100%)" },
         },
+        // NEW: Shimmer animation for progress bar
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+        // NEW: Subtle pulse for active indicators
+        "pulse-subtle": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
+        // NEW: Scale pulse for highlighting changes
+        "scale-pulse": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.02)" },
+        },
+        // NEW: Bounce for new item indicators
+        "bounce-subtle": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-2px)" },
+        },
       },
       animation: {
         hide: "hide 150ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -64,6 +84,12 @@ export default {
         dialogContentShow: "dialogContentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)",
         drawerSlideLeftAndFade: "drawerSlideLeftAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)",
         drawerSlideRightAndFade: "drawerSlideRightAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)",
+        // NEW: BatchJobProgress animations
+        shimmer: "shimmer 2s infinite",
+        "pulse-subtle": "pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "scale-pulse": "scale-pulse 2s ease-in-out infinite",
+        "bounce-subtle": "bounce-subtle 1s ease-in-out infinite",
       },
     },
   },

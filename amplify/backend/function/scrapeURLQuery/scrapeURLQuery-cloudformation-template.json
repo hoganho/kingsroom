@@ -330,8 +330,8 @@
                 "dynamodb:GetItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byEntityScrapeURL"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/byEntityScrapeURL"
               ],
               "Effect": "Allow"
             }

@@ -7,8 +7,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-dev/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/*"
     ]
   },
   {
@@ -17,8 +17,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-dev/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging/index/*"
     ]
   },
   {
@@ -27,7 +27,7 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-dev"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-staging"
     ]
   },
   {
@@ -38,12 +38,12 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byTournamentSeriesTitle",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byYear",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byName",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byMonth",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-dev/index/byQuarter"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byTournamentSeriesTitle",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byYear",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byName",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byMonth",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byQuarter"
     ]
   },
   {
@@ -55,7 +55,7 @@
       "dynamodb:Scan"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-dev"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-staging"
     ]
   },
   {
@@ -66,8 +66,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/*"
     ]
   },
   {
@@ -75,7 +75,7 @@
       "dynamodb:PutItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-dev"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-staging"
     ]
   },
   {
@@ -84,7 +84,7 @@
       "dynamodb:PutItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-dev"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-staging"
     ]
   },
   {
@@ -95,8 +95,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-dev",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-dev/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-staging/index/*"
     ]
   },
   {
@@ -107,8 +107,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-dev",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-dev/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-staging/index/*"
     ]
   },
   {
@@ -119,8 +119,8 @@
         "dynamodb:Query"
     ],
     "Resource": [
-        "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*-dev",
-        "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*-dev/index/*"
+        "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*-staging",
+        "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*-staging/index/*"
     ]
   },
   {

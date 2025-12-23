@@ -119,6 +119,52 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   # --- Structure Data ---
   levels: AWSJSON
 
+  # === NEW: CLASSIFICATION FIELDS ===
+  sessionMode: SessionMode
+  variant: PokerVariant
+  bettingStructure: BettingStructure
+  speedType: SpeedType
+  tableSize: TableSize
+  maxPlayers: Int
+  dealType: DealType
+  buyInTier: BuyInTier
+  
+  # Tournament classification
+  # NOTE: Field named entryStructure to avoid conflict with TournamentStructure @model
+  entryStructure: EntryStructure
+  bountyType: BountyType
+  bountyAmount: Float
+  bountyPercentage: Float
+  tournamentPurpose: TournamentPurpose
+  stackDepth: StackDepth
+  lateRegistration: LateRegistration
+  payoutStructure: PayoutStructure
+  scheduleType: TournamentScheduleType
+  
+  # Tournament feature flags
+  isShootout: Boolean
+  isSurvivor: Boolean
+  isFlipAndGo: Boolean
+  isWinTheButton: Boolean
+  isAnteOnly: Boolean
+  isBigBlindAnte: Boolean
+  
+  # Cash classification
+  cashGameType: CashGameType
+  # NOTE: Field named cashRakeType to avoid conflict with RakeStructure @model
+  cashRakeType: CashRakeType
+  hasBombPots: Boolean
+  hasRunItTwice: Boolean
+  hasStraddle: Boolean
+  
+  # Mixed game support
+  mixedGameRotation: [MixedGameComponent]
+  
+  # Classification metadata
+  classificationSource: ClassificationSource
+  classificationConfidence: Float
+  lastClassifiedAt: AWSDateTime
+  
   # --- Relationships ---
   venueId: ID @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
   venue: Venue @belongsTo(fields: ["venueId"])
@@ -132,8 +178,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
 
   # Social Pulse Relationships
   linkedSocialPosts: [SocialPost] @hasMany(indexName: "bySocialPostGame", fields: ["id"])
-
-  entityId: ID @index(name: "byEntityGame", sortKeyFields: ["gameStartDateTime"])
+  entityId: ID @index(name: "byEntityGame", sortKeyFields: ["gameStartDateTime"], queryField: "gamesByEntity")
              @index(name: "byEntityAndTournamentId", sortKeyFields: ["tournamentId"], queryField: "gamesByEntityAndTournamentId")
   entity: Entity @belongsTo(fields: ["entityId"])
 
@@ -266,7 +311,7 @@ type GameFinancialSnapshot
   gameType: GameType
   tournamentType: TournamentType
 
-  # === SERIES FLAGS (for filtering/aggregation) ===
+  # === SERIES CLASSIFICATION (denormalized from Game) ===
   # isSeries: true if game is part of a tournament series
   # Use for filtering: exclude series games from regular game aggregations
   isSeries: Boolean @default(value: "false")
@@ -277,13 +322,25 @@ type GameFinancialSnapshot
 
   # Reference to parent game (for child/flight games)
   parentGameId: ID
+
+  # === SERIES IDENTIFICATION (for grouping/reporting) ===
+  # The specific tournament series this game belongs to
+  tournamentSeriesId: ID @index(name: "byTournamentSeriesSnapshot", sortKeyFields: ["gameStartDateTime"])
   
-  # === COMPOSITE QUERY KEYS (for efficient filtering) ===
+  # Denormalized series name for display/reporting
+  seriesName: String
+
+  # === RECURRING GAME REFERENCE (for RecurringGameMetrics) ===
+  # Link to the recurring game template (for regular/non-series games)
+  recurringGameId: ID @index(name: "byRecurringGameSnapshot", sortKeyFields: ["gameStartDateTime"])
+  
+  # === COMPOSITE QUERY KEYS (for efficient series vs regular partitioning) ===
   # Format: "{entityId}#REGULAR" or "{entityId}#SERIES" 
   # Enables efficient queries for series vs non-series games per entity
   entitySeriesKey: String @index(name: "byEntitySeriesKey", sortKeyFields: ["gameStartDateTime"])
   
   # Format: "{venueId}#REGULAR" or "{venueId}#SERIES"
+  # Enables efficient queries for series vs non-series games per venue
   venueSeriesKey: String @index(name: "byVenueSeriesKey", sortKeyFields: ["gameStartDateTime"])
 
   # === METADATA ===
@@ -546,7 +603,7 @@ type BulkReassignGameVenuesResult {
   reassignEntity: Boolean
 }
 
-type SaveGameResult {
+type SaveGameResult @aws_iam @aws_cognito_user_pools {
   success: Boolean!
   gameId: ID
   action: String!
@@ -562,7 +619,7 @@ type SaveGameResult {
 }
 
 # NEW: Recurring game assignment result info
-type SaveRecurringAssignmentInfo {
+type SaveRecurringAssignmentInfo @aws_iam @aws_cognito_user_pools {
   recurringGameId: ID
   recurringGameName: String
   status: RecurringGameAssignmentStatus
@@ -621,15 +678,40 @@ input GamePreviewDataInput {
 }
 
 input StartScraperJobInput {
+  # Required
+  entityId: ID!
+  
+  # Job metadata
+  mode: ScraperJobMode
   triggerSource: ScraperJobTriggerSource!
-  maxGames: Int
-  targetURLs: [String]
+  triggeredBy: String
+  
+  # Scrape options
+  useS3: Boolean
+  forceRefresh: Boolean
+  skipNotPublished: Boolean
+  skipNotFoundGaps: Boolean
+  skipInProgress: Boolean
+  ignoreDoNotScrape: Boolean
+  
+  # Save options
+  saveToDatabase: Boolean
+  defaultVenueId: ID
+  
+  # Mode-specific parameters
+  bulkCount: Int
   startId: Int
   endId: Int
+  maxId: Int
+  gapIds: [Int]
+  maxGames: Int
   isFullScan: Boolean
-  triggeredBy: String
-  entityId: ID
-  isSequential: Boolean
+
+  # Stopping thresholds
+  maxConsecutiveNotFound: Int
+  maxConsecutiveErrors: Int
+  maxConsecutiveBlanks: Int
+  maxTotalErrors: Int
 }
 
 input SaveGameInput {

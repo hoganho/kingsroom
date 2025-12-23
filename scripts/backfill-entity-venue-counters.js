@@ -17,7 +17,7 @@ import {
 
 // --- CONFIGURATION ---
 const DRY_RUN = true; // Set to false to actually update records
-const ENV_ID = 'sjyzke3u45golhnttlco6bpcua-dev'; // Your specific env ID
+const ENV_ID = 'fosb7ek5argnhctz4odpt52eia-staging'; // Your specific env ID
 const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 
 // Table Names

@@ -22,10 +22,10 @@ Amplify Params - DO NOT EDIT */
 
 /**
  * ===================================================================
- * SAVEGAME LAMBDA FUNCTION - PURE WRITER (v4.0.0)
+ * SAVEGAME LAMBDA FUNCTION - PURE WRITER (v4.1.0)
  * ===================================================================
  * 
- * VERSION: 4.0.0 (Refactored - accepts pre-enriched data)
+ * VERSION: 4.1.0 (Added classification fields support)
  * 
  * RESPONSIBILITIES:
  * This Lambda is now a "pure writer" that accepts pre-enriched data
@@ -52,6 +52,11 @@ Amplify Params - DO NOT EDIT */
  * 
  * ENTITY ID REQUIREMENT:
  * This Lambda REQUIRES source.entityId to be provided in the input.
+ * 
+ * CHANGELOG:
+ * v4.1.0 - Added 29 classification fields to createGame() and updateGame()
+ *        - Uses entryStructure (not tournamentStructure) to avoid @model conflict
+ *        - Uses cashRakeType (not rakeStructure) to avoid @model conflict
  * 
  * ===================================================================
  */
@@ -499,6 +504,56 @@ const createGame = async (input) => {
         entityQueryKey: gameData.entityQueryKey,
         entityGameTypeKey: gameData.entityGameTypeKey,
         
+        // ===================================================================
+        // NEW: Classification fields (from gameDataEnricher)
+        // ===================================================================
+        
+        // Universal classification
+        sessionMode: gameData.sessionMode || null,
+        variant: gameData.variant || null,
+        bettingStructure: gameData.bettingStructure || null,
+        speedType: gameData.speedType || null,
+        tableSize: gameData.tableSize || null,
+        maxPlayers: gameData.maxPlayers || null,
+        dealType: gameData.dealType || null,
+        buyInTier: gameData.buyInTier || null,
+        
+        // Tournament classification
+        // NOTE: entryStructure (not tournamentStructure) to avoid @model conflict
+        entryStructure: gameData.entryStructure || null,
+        bountyType: gameData.bountyType || null,
+        bountyAmount: gameData.bountyAmount || null,
+        bountyPercentage: gameData.bountyPercentage || null,
+        tournamentPurpose: gameData.tournamentPurpose || null,
+        stackDepth: gameData.stackDepth || null,
+        lateRegistration: gameData.lateRegistration || null,
+        payoutStructure: gameData.payoutStructure || null,
+        scheduleType: gameData.scheduleType || null,
+        
+        // Tournament feature flags
+        isShootout: gameData.isShootout || null,
+        isSurvivor: gameData.isSurvivor || null,
+        isFlipAndGo: gameData.isFlipAndGo || null,
+        isWinTheButton: gameData.isWinTheButton || null,
+        isAnteOnly: gameData.isAnteOnly || null,
+        isBigBlindAnte: gameData.isBigBlindAnte || null,
+        
+        // Cash game classification
+        // NOTE: cashRakeType (not rakeStructure) to avoid @model conflict
+        cashGameType: gameData.cashGameType || null,
+        cashRakeType: gameData.cashRakeType || null,
+        hasBombPots: gameData.hasBombPots || null,
+        hasRunItTwice: gameData.hasRunItTwice || null,
+        hasStraddle: gameData.hasStraddle || null,
+        
+        // Mixed game support
+        mixedGameRotation: gameData.mixedGameRotation || null,
+        
+        // Classification metadata
+        classificationSource: gameData.classificationSource || null,
+        classificationConfidence: gameData.classificationConfidence || null,
+        lastClassifiedAt: gameData.lastClassifiedAt || null,
+        
         // Entity & timestamps
         entityId: entityId,
         createdAt: now,
@@ -542,29 +597,107 @@ const updateGame = async (existingGame, input) => {
 
     // Fields to check for updates
     const fieldMappings = {
-        name: 'name', gameStatus: 'gameStatus', registrationStatus: 'registrationStatus',
-        totalUniquePlayers: 'totalUniquePlayers', totalInitialEntries: 'totalInitialEntries',
-        totalEntries: 'totalEntries', totalRebuys: 'totalRebuys', totalAddons: 'totalAddons',
-        prizepoolPaid: 'prizepoolPaid', prizepoolCalculated: 'prizepoolCalculated',
-        playersRemaining: 'playersRemaining', totalChipsInPlay: 'totalChipsInPlay',
-        averagePlayerStack: 'averagePlayerStack', totalDuration: 'totalDuration',
+        // Core fields
+        name: 'name',
+        gameStatus: 'gameStatus',
+        registrationStatus: 'registrationStatus',
+        
+        // Entry counts
+        totalUniquePlayers: 'totalUniquePlayers',
+        totalInitialEntries: 'totalInitialEntries',
+        totalEntries: 'totalEntries',
+        totalRebuys: 'totalRebuys',
+        totalAddons: 'totalAddons',
+        
+        // Results
+        prizepoolPaid: 'prizepoolPaid',
+        prizepoolCalculated: 'prizepoolCalculated',
+        playersRemaining: 'playersRemaining',
+        totalChipsInPlay: 'totalChipsInPlay',
+        averagePlayerStack: 'averagePlayerStack',
+        totalDuration: 'totalDuration',
+        
         // Pre-calculated financials
-        rakeRevenue: 'rakeRevenue', totalBuyInsCollected: 'totalBuyInsCollected',
-        prizepoolPlayerContributions: 'prizepoolPlayerContributions', prizepoolAddedValue: 'prizepoolAddedValue',
-        prizepoolSurplus: 'prizepoolSurplus', guaranteeOverlayCost: 'guaranteeOverlayCost', gameProfit: 'gameProfit',
+        rakeRevenue: 'rakeRevenue',
+        totalBuyInsCollected: 'totalBuyInsCollected',
+        prizepoolPlayerContributions: 'prizepoolPlayerContributions',
+        prizepoolAddedValue: 'prizepoolAddedValue',
+        prizepoolSurplus: 'prizepoolSurplus',
+        guaranteeOverlayCost: 'guaranteeOverlayCost',
+        gameProfit: 'gameProfit',
+        
         // Pre-resolved venue
-        venueId: 'venueId', venueAssignmentStatus: 'venueAssignmentStatus', venueAssignmentConfidence: 'venueAssignmentConfidence',
+        venueId: 'venueId',
+        venueAssignmentStatus: 'venueAssignmentStatus',
+        venueAssignmentConfidence: 'venueAssignmentConfidence',
         venueFee: 'venueFee',
+        
         // Pre-resolved series
-        tournamentSeriesId: 'tournamentSeriesId', seriesName: 'seriesName',
-        seriesAssignmentStatus: 'seriesAssignmentStatus', seriesAssignmentConfidence: 'seriesAssignmentConfidence',
+        tournamentSeriesId: 'tournamentSeriesId',
+        seriesName: 'seriesName',
+        seriesAssignmentStatus: 'seriesAssignmentStatus',
+        seriesAssignmentConfidence: 'seriesAssignmentConfidence',
+        
         // Pre-resolved recurring
-        recurringGameId: 'recurringGameId', recurringGameAssignmentStatus: 'recurringGameAssignmentStatus',
+        recurringGameId: 'recurringGameId',
+        recurringGameAssignmentStatus: 'recurringGameAssignmentStatus',
         recurringGameAssignmentConfidence: 'recurringGameAssignmentConfidence',
+        
         // Pre-computed query keys
-        gameDayOfWeek: 'gameDayOfWeek', buyInBucket: 'buyInBucket',
-        venueScheduleKey: 'venueScheduleKey', venueGameTypeKey: 'venueGameTypeKey',
-        entityQueryKey: 'entityQueryKey', entityGameTypeKey: 'entityGameTypeKey'
+        gameDayOfWeek: 'gameDayOfWeek',
+        buyInBucket: 'buyInBucket',
+        venueScheduleKey: 'venueScheduleKey',
+        venueGameTypeKey: 'venueGameTypeKey',
+        entityQueryKey: 'entityQueryKey',
+        entityGameTypeKey: 'entityGameTypeKey',
+        
+        // ===================================================================
+        // NEW: Classification fields
+        // ===================================================================
+        
+        // Universal classification
+        sessionMode: 'sessionMode',
+        variant: 'variant',
+        bettingStructure: 'bettingStructure',
+        speedType: 'speedType',
+        tableSize: 'tableSize',
+        maxPlayers: 'maxPlayers',
+        dealType: 'dealType',
+        buyInTier: 'buyInTier',
+        
+        // Tournament classification
+        entryStructure: 'entryStructure',
+        bountyType: 'bountyType',
+        bountyAmount: 'bountyAmount',
+        bountyPercentage: 'bountyPercentage',
+        tournamentPurpose: 'tournamentPurpose',
+        stackDepth: 'stackDepth',
+        lateRegistration: 'lateRegistration',
+        payoutStructure: 'payoutStructure',
+        scheduleType: 'scheduleType',
+        
+        // Tournament feature flags
+        isShootout: 'isShootout',
+        isSurvivor: 'isSurvivor',
+        isFlipAndGo: 'isFlipAndGo',
+        isWinTheButton: 'isWinTheButton',
+        isAnteOnly: 'isAnteOnly',
+        isBigBlindAnte: 'isBigBlindAnte',
+        
+        // Cash game classification
+        cashGameType: 'cashGameType',
+        cashRakeType: 'cashRakeType',
+        hasBombPots: 'hasBombPots',
+        hasRunItTwice: 'hasRunItTwice',
+        hasStraddle: 'hasStraddle',
+        
+        // Mixed game support
+        mixedGameRotation: 'mixedGameRotation',
+        
+        // Classification metadata
+        classificationSource: 'classificationSource',
+        classificationConfidence: 'classificationConfidence',
+        lastClassifiedAt: 'lastClassifiedAt'
     };
 
     for (const [inputField, dbField] of Object.entries(fieldMappings)) {
@@ -616,7 +749,7 @@ const updateGame = async (existingGame, input) => {
 // ===================================================================
 
 exports.handler = async (event) => {
-    console.log('[SAVE-GAME] v4.0.0 - Pure Writer (pre-enriched data)');
+    console.log('[SAVE-GAME] v4.1.0 - Pure Writer (pre-enriched data) with classification fields');
     
     // Handle both direct invocation and GraphQL resolver invocation
     const input = event.arguments?.input || event.input || event;

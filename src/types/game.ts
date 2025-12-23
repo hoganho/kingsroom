@@ -195,6 +195,8 @@ export interface GameState {
     fetchCount: number;
     existingGameId?: string | null;
     entityId?: string | null;
+    dataSource?: 's3' | 'web' | 'none';
+    s3Key?: string;
 }
 
 export interface SaveTournamentInput {

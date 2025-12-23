@@ -149,10 +149,12 @@ input EnrichmentOptionsInput {
 
 # ===================================================================
 # OUTPUT TYPES
+# All output types need @aws_iam @aws_cognito_user_pools for
+# Lambda-to-AppSync IAM authentication to work
 # ===================================================================
 
 # Main enrichment output
-type EnrichGameDataOutput {
+type EnrichGameDataOutput @aws_iam @aws_cognito_user_pools {
   success: Boolean!
   
   # Validation results
@@ -170,19 +172,19 @@ type EnrichGameDataOutput {
 }
 
 # Validation result
-type EnrichmentValidationResult {
+type EnrichmentValidationResult @aws_iam @aws_cognito_user_pools {
   isValid: Boolean!
   errors: [EnrichmentValidationError!]!
   warnings: [EnrichmentValidationWarning!]!
 }
 
-type EnrichmentValidationError {
+type EnrichmentValidationError @aws_iam @aws_cognito_user_pools {
   field: String!
   message: String!
   code: String
 }
 
-type EnrichmentValidationWarning {
+type EnrichmentValidationWarning @aws_iam @aws_cognito_user_pools {
   field: String!
   message: String!
   code: String
@@ -190,7 +192,7 @@ type EnrichmentValidationWarning {
 
 # Enriched game data - comprehensive output
 # This is what gets passed to saveGame
-type EnrichedGameData {
+type EnrichedGameData @aws_iam @aws_cognito_user_pools {
   # === IDENTITY ===
   tournamentId: Int
   existingGameId: ID
@@ -286,7 +288,7 @@ type EnrichedGameData {
 }
 
 # Metadata about what the enricher did
-type EnrichmentMetadata {
+type EnrichmentMetadata @aws_iam @aws_cognito_user_pools {
   # Series resolution details
   seriesResolution: SeriesResolutionMetadata
   
@@ -306,7 +308,7 @@ type EnrichmentMetadata {
 }
 
 # Series resolution metadata (detailed)
-type SeriesResolutionMetadata {
+type SeriesResolutionMetadata @aws_iam @aws_cognito_user_pools {
   status: SeriesResolutionStatus!
   confidence: Float
   matchedSeriesId: ID
@@ -318,7 +320,7 @@ type SeriesResolutionMetadata {
 }
 
 # Recurring game resolution metadata (detailed)
-type RecurringResolutionMetadata {
+type RecurringResolutionMetadata @aws_iam @aws_cognito_user_pools {
   status: RecurringResolutionStatus!
   confidence: Float
   matchedRecurringGameId: ID
@@ -330,7 +332,7 @@ type RecurringResolutionMetadata {
 }
 
 # Venue resolution metadata (detailed)
-type VenueResolutionMetadata {
+type VenueResolutionMetadata @aws_iam @aws_cognito_user_pools {
   status: VenueAssignmentStatus!
   venueId: ID
   venueName: String
@@ -347,7 +349,9 @@ extend type Mutation {
   # Enrich game data before saving (or with auto-save)
   # - saveToDatabase: false → returns enriched data for preview
   # - saveToDatabase: true → enriches AND saves via saveGameFunction
-  enrichGameData(input: EnrichGameDataInput!): EnrichGameDataOutput!
+  enrichGameData(input: EnrichGameDataInput!): EnrichGameDataOutput
+    @aws_iam
+    @aws_cognito_user_pools
     @function(name: "gameDataEnricher-${env}")
 }
 
@@ -358,5 +362,7 @@ extend type Mutation {
 extend type Query {
   # Preview enrichment without any side effects (no autoCreate, no save)
   previewEnrichment(input: EnrichGameDataInput!): EnrichGameDataOutput!
+    @aws_iam
+    @aws_cognito_user_pools
     @function(name: "gameDataEnricher-${env}")
 }

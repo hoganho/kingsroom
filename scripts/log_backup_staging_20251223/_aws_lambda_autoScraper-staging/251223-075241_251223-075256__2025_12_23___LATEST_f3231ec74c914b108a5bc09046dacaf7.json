@@ -1,0 +1,107 @@
+[
+  {
+    "timestamp": 1766476361100,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766476365762
+  },
+  {
+    "timestamp": 1766476361516,
+    "message": "START RequestId: 67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6 Version: $LATEST\n",
+    "ingestionTime": 1766476365762
+  },
+  {
+    "timestamp": 1766476361608,
+    "message": "2025-12-23T07:52:41.608Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[AutoScraper] Event: {\n  \"operation\": \"executeJob\",\n  \"jobId\": \"3f5928bb-4ec2-4beb-96a4-651f6d007142\",\n  \"entityId\": \"42101695-1332-48e3-963b-3c6ad4e909a0\",\n  \"mode\": \"multiId\",\n  \"useS3\": true,\n  \"forceRefresh\": false,\n  \"skipNotPublished\": true,\n  \"skipNotFoundGaps\": true,\n  \"skipInProgress\": false,\n  \"ignoreDoNotScrape\": false,\n  \"saveToDatabase\": true,\n  \"defaultVenueId\": \"fd4f7fb1-67fd-4398-b4b4-d85722256d45\",\n  \"gapIds\": [\n    936,\n    1011,\n    1027,\n    1054,\n    1220\n  ],\n  \"maxConsecutiveNotFound\": 10,\n  \"maxConsecutiveErrors\": 3,\n  \"maxConsecutiveBlanks\": 5,\n  \"maxTotalErrors\": 15\n}\n",
+    "ingestionTime": 1766476365762
+  },
+  {
+    "timestamp": 1766476361630,
+    "message": "2025-12-23T07:52:41.630Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[executeJob] Starting job 3f5928bb-4ec2-4beb-96a4-651f6d007142 for entity 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1766476365762
+  },
+  {
+    "timestamp": 1766476362810,
+    "message": "2025-12-23T07:52:42.810Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[ScrapingEngine] Using thresholds: NOT_FOUND=10, ERRORS=3, BLANKS=5, TOTAL_ERRORS=15\n",
+    "ingestionTime": 1766476365762
+  },
+  {
+    "timestamp": 1766476362810,
+    "message": "2025-12-23T07:52:42.810Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[ScrapingEngine] Processing 5 gap IDs\n",
+    "ingestionTime": 1766476365762
+  },
+  {
+    "timestamp": 1766476362889,
+    "message": "2025-12-23T07:52:42.889Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[ScrapingEngine] Entity: Kings Room, URL pattern: https://kingsroom.com.au/tournament/?id={id}\n",
+    "ingestionTime": 1766476365762
+  },
+  {
+    "timestamp": 1766476370563,
+    "message": "2025-12-23T07:52:50.563Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[publishGameProcessedEvent] Publishing event for ID 936, action: CREATED\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476370954,
+    "message": "2025-12-23T07:52:50.954Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[publishGameProcessedEvent] Success for ID 936\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476372224,
+    "message": "2025-12-23T07:52:52.224Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[publishGameProcessedEvent] Publishing event for ID 1011, action: CREATED\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476372580,
+    "message": "2025-12-23T07:52:52.580Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[publishGameProcessedEvent] Success for ID 1011\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476373241,
+    "message": "2025-12-23T07:52:53.241Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[publishGameProcessedEvent] Publishing event for ID 1027, action: CREATED\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476373381,
+    "message": "2025-12-23T07:52:53.381Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[publishGameProcessedEvent] Success for ID 1027\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476374742,
+    "message": "2025-12-23T07:52:54.742Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[publishGameProcessedEvent] Publishing event for ID 1054, action: CREATED\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476374967,
+    "message": "2025-12-23T07:52:54.967Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[publishGameProcessedEvent] Success for ID 1054\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476376244,
+    "message": "2025-12-23T07:52:56.244Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[publishGameProcessedEvent] Publishing event for ID 1220, action: CREATED\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476376388,
+    "message": "2025-12-23T07:52:56.388Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tERROR\t[executeJob] Job 3f5928bb-4ec2-4beb-96a4-651f6d007142 failed: ValidationException: Invalid UpdateExpression: An expression attribute value used in expression is not defined; attribute value: :consecutiveBlanks\n    at throwDefaultError (/var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:422:20)\n    at /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:431:5\n    at de_CommandError (/var/runtime/node_modules/@aws-sdk/client-dynamodb/dist-cjs/index.js:2359:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-serde/dist-cjs/index.js:36:20\n    at async /var/runtime/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:173:30\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/core/dist-cjs/index.js:193:18\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-retry/dist-cjs/index.js:312:38\n    at async /var/runtime/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:33:22\n    at async ddbDocClient.send (/var/task/lambda-monitoring.js:95:32) {\n  '$fault': 'client',\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: '0H3FO8Q9LUG88J95RMKIM1LDKJVV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.validate#ValidationException'\n}\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476376489,
+    "message": "2025-12-23T07:52:56.489Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tERROR\t[AutoScraper] Error: ValidationException: Invalid UpdateExpression: An expression attribute value used in expression is not defined; attribute value: :consecutiveBlanks\n    at throwDefaultError (/var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:422:20)\n    at /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:431:5\n    at de_CommandError (/var/runtime/node_modules/@aws-sdk/client-dynamodb/dist-cjs/index.js:2359:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-serde/dist-cjs/index.js:36:20\n    at async /var/runtime/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:173:30\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/core/dist-cjs/index.js:193:18\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-retry/dist-cjs/index.js:312:38\n    at async /var/runtime/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:33:22\n    at async ddbDocClient.send (/var/task/lambda-monitoring.js:95:32) {\n  '$fault': 'client',\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: '0H3FO8Q9LUG88J95RMKIM1LDKJVV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.validate#ValidationException'\n}\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476376628,
+    "message": "2025-12-23T07:52:56.628Z\t67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tINFO\t[publishGameProcessedEvent] Success for ID 1220\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476376710,
+    "message": "END RequestId: 67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\n",
+    "ingestionTime": 1766476379581
+  },
+  {
+    "timestamp": 1766476376710,
+    "message": "REPORT RequestId: 67f9309e-ca2a-4a15-845a-bc0ab5d2e9a6\tDuration: 15193.39 ms\tBilled Duration: 15606 ms\tMemory Size: 128 MB\tMax Memory Used: 101 MB\tInit Duration: 412.45 ms\t\n",
+    "ingestionTime": 1766476379581
+  }
+]

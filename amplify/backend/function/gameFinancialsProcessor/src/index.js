@@ -23,9 +23,10 @@ Amplify Params - DO NOT EDIT *//**
  * GAME FINANCIALS PROCESSOR LAMBDA
  * ===================================================================
  * 
- * VERSION: 1.2.0
+ * VERSION: 1.3.0
  * 
  * CHANGELOG:
+ * - v1.3.0: Added tournamentSeriesId, seriesName, recurringGameId for metrics partitioning
  * - v1.2.0: Added isSeries and isSeriesParent flags for filtering/aggregation
  * 
  * TRIGGERS:
@@ -45,7 +46,19 @@ Amplify Params - DO NOT EDIT *//**
  * SERIES HANDLING:
  * - isSeries: true if game is part of a tournament series
  * - isSeriesParent: true if series game AND no parentGameId (consolidated record)
- * - These flags enable proper filtering in aggregate queries
+ * - tournamentSeriesId: ID of the specific tournament series
+ * - seriesName: Denormalized series name for display
+ * - These fields enable proper filtering and grouping in aggregate queries
+ * 
+ * RECURRING GAME HANDLING:
+ * - recurringGameId: Link to the recurring game template (for regular games)
+ * - Enables RecurringGameMetrics calculation in refreshAllMetrics Lambda
+ * 
+ * GSI QUERY PATTERNS:
+ * - byEntitySeriesKey: Query "{entityId}#SERIES" or "{entityId}#REGULAR"
+ * - byVenueSeriesKey: Query "{venueId}#SERIES" or "{venueId}#REGULAR"
+ * - byTournamentSeriesSnapshot: Query all snapshots for a specific series
+ * - byRecurringGameSnapshot: Query all instances of a recurring game
  * 
  * ARCHITECTURE:
  * ┌─────────────────────────────────────────────────────────────────┐
@@ -329,7 +342,7 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         dealerCostPerHour,
         
         // ===================================================================
-        // SERIES FLAGS - NEW in v1.2.0
+        // SERIES FLAGS - For filtering and aggregation
         // ===================================================================
         // isSeries: true if game is part of a tournament series
         // Use to exclude series games from regular game aggregations
@@ -340,16 +353,36 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         // (avoids double-counting flights/days)
         isSeriesParent,
         
-        // Also store parentGameId for reference
+        // Reference to parent game (for child/flight games)
         parentGameId: game.parentGameId || null,
+        
+        // ===================================================================
+        // SERIES IDENTIFICATION - For grouping and reporting (NEW in v1.3.0)
+        // ===================================================================
+        // The specific tournament series this game belongs to
+        // Enables queries like "all snapshots for WSOP 2024"
+        tournamentSeriesId: game.tournamentSeriesId || null,
+        
+        // Denormalized series name for display/reporting
+        // Avoids joins when displaying series info
+        seriesName: game.seriesName || null,
+        
+        // ===================================================================
+        // RECURRING GAME REFERENCE - For RecurringGameMetrics (NEW in v1.3.0)
+        // ===================================================================
+        // Link to the recurring game template (for regular/non-series games)
+        // Enables RecurringGameMetrics calculation in refreshAllMetrics Lambda
+        recurringGameId: game.recurringGameId || null,
         
         // ===================================================================
         // COMPOSITE QUERY KEYS - For efficient GSI queries
         // ===================================================================
         // Format: "{entityId}#REGULAR" or "{entityId}#SERIES"
+        // Use with byEntitySeriesKey GSI to efficiently query series vs regular games
         entitySeriesKey: game.entityId ? `${game.entityId}#${isSeries ? 'SERIES' : 'REGULAR'}` : null,
         
         // Format: "{venueId}#REGULAR" or "{venueId}#SERIES"
+        // Use with byVenueSeriesKey GSI to efficiently query series vs regular games per venue
         venueSeriesKey: game.venueId ? `${game.venueId}#${isSeries ? 'SERIES' : 'REGULAR'}` : null
     };
 };
@@ -465,6 +498,11 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
         // Remove gameId from fields (it's stored separately)
         const gameId = snapshotFields.gameId;
         delete snapshotFields.gameId;
+        
+        // Remove null GSI key fields - DynamoDB doesn't allow null values in GSI keys
+        // Items without these fields simply won't be indexed (which is correct behavior)
+        if (!snapshotFields.tournamentSeriesId) delete snapshotFields.tournamentSeriesId;
+        if (!snapshotFields.recurringGameId) delete snapshotFields.recurringGameId;
 
         if (existingResult.Items?.[0]) {
             // Update existing
@@ -489,7 +527,7 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
                 ExpressionAttributeValues: expressionAttributeValues
             }));
             
-            console.log(`[FINANCIALS] ✅ Updated GameFinancialSnapshot ${existing.id} (isSeries: ${snapshotData.isSeries}, isSeriesParent: ${snapshotData.isSeriesParent})`);
+            console.log(`[FINANCIALS] ✅ Updated GameFinancialSnapshot ${existing.id} (isSeries: ${snapshotData.isSeries}, isSeriesParent: ${snapshotData.isSeriesParent}, seriesId: ${snapshotData.tournamentSeriesId}, recurringGameId: ${snapshotData.recurringGameId})`);
             return { action: 'UPDATED', snapshotId: existing.id };
         }
 
@@ -507,7 +545,7 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
             }
         }));
         
-        console.log(`[FINANCIALS] ✅ Created GameFinancialSnapshot ${snapshotId} (isSeries: ${snapshotData.isSeries}, isSeriesParent: ${snapshotData.isSeriesParent})`);
+        console.log(`[FINANCIALS] ✅ Created GameFinancialSnapshot ${snapshotId} (isSeries: ${snapshotData.isSeries}, isSeriesParent: ${snapshotData.isSeriesParent}, seriesId: ${snapshotData.tournamentSeriesId}, recurringGameId: ${snapshotData.recurringGameId})`);
         return { action: 'CREATED', snapshotId };
         
     } catch (error) {
@@ -535,7 +573,7 @@ const processGameFinancials = async (game, options = {}) => {
     // Log series status for debugging
     const isSeries = determineIsSeries(game);
     const isSeriesParent = determineIsSeriesParent(game);
-    console.log(`[FINANCIALS] Processing game ${game.id} (saveToDatabase: ${saveToDatabase}, isSeries: ${isSeries}, isSeriesParent: ${isSeriesParent})`);
+    console.log(`[FINANCIALS] Processing game ${game.id} (saveToDatabase: ${saveToDatabase}, isSeries: ${isSeries}, isSeriesParent: ${isSeriesParent}, seriesId: ${game.tournamentSeriesId || 'none'}, recurringGameId: ${game.recurringGameId || 'none'})`);
     
     // Get existing cost record (for preserving manual entries)
     const existingCost = saveToDatabase ? await getExistingGameCost(game.id) : null;
@@ -590,7 +628,12 @@ const processGameFinancials = async (game, options = {}) => {
             
             // Series flags (for FE awareness)
             isSeries: snapshotData.isSeries,
-            isSeriesParent: snapshotData.isSeriesParent
+            isSeriesParent: snapshotData.isSeriesParent,
+            
+            // Series/Recurring identification (NEW in v1.3.0)
+            tournamentSeriesId: snapshotData.tournamentSeriesId,
+            seriesName: snapshotData.seriesName,
+            recurringGameId: snapshotData.recurringGameId
         },
         
         // Save results (only populated when saveToDatabase is true)
@@ -702,6 +745,7 @@ const handleStreamEvent = async (event) => {
         skipped: 0,
         errors: 0,
         seriesGames: 0,
+        recurringGames: 0,
         details: []
     };
     
@@ -729,9 +773,12 @@ const handleStreamEvent = async (event) => {
                 continue;
             }
             
-            // Track series games for logging
+            // Track series and recurring games for logging
             if (determineIsSeries(game)) {
                 results.seriesGames++;
+            }
+            if (game.recurringGameId) {
+                results.recurringGames++;
             }
             
             // Stream events always save to database
@@ -743,6 +790,8 @@ const handleStreamEvent = async (event) => {
                 eventName,
                 isSeries: result.summary?.isSeries,
                 isSeriesParent: result.summary?.isSeriesParent,
+                tournamentSeriesId: result.summary?.tournamentSeriesId,
+                recurringGameId: result.summary?.recurringGameId,
                 cost: result.costSaveResult,
                 snapshot: result.snapshotSaveResult
             });
@@ -757,7 +806,7 @@ const handleStreamEvent = async (event) => {
         }
     }
     
-    console.log(`[FINANCIALS] Stream complete: ${results.processed} processed (${results.seriesGames} series), ${results.skipped} skipped, ${results.errors} errors`);
+    console.log(`[FINANCIALS] Stream complete: ${results.processed} processed (${results.seriesGames} series, ${results.recurringGames} recurring), ${results.skipped} skipped, ${results.errors} errors`);
     
     return results;
 };
@@ -805,6 +854,8 @@ exports.batchProcess = async (event) => {
                 gameId,
                 isSeries: processResult.summary?.isSeries,
                 isSeriesParent: processResult.summary?.isSeriesParent,
+                tournamentSeriesId: processResult.summary?.tournamentSeriesId,
+                recurringGameId: processResult.summary?.recurringGameId,
                 ...processResult
             });
             
@@ -817,6 +868,7 @@ exports.batchProcess = async (event) => {
         totalRequested: gameIds.length,
         processed: results.filter(r => r.success).length,
         seriesGames: results.filter(r => r.isSeries).length,
+        recurringGames: results.filter(r => r.recurringGameId).length,
         failed: results.filter(r => !r.success).length,
         results
     };

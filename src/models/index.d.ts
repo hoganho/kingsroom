@@ -309,7 +309,14 @@ export enum ScraperJobStatus {
   COMPLETED = "COMPLETED",
   FAILED = "FAILED",
   CANCELLED = "CANCELLED",
-  TIMEOUT = "TIMEOUT"
+  TIMEOUT = "TIMEOUT",
+  STOPPED_TIMEOUT = "STOPPED_TIMEOUT",
+  STOPPED_BLANKS = "STOPPED_BLANKS",
+  STOPPED_NOT_FOUND = "STOPPED_NOT_FOUND",
+  STOPPED_ERROR = "STOPPED_ERROR",
+  STOPPED_MANUAL = "STOPPED_MANUAL",
+  STOPPED_NO_VENUE = "STOPPED_NO_VENUE",
+  STOPPED_MAX_ID = "STOPPED_MAX_ID"
 }
 
 export enum ScrapeUrlStatus {
@@ -323,6 +330,7 @@ export enum ScrapeUrlStatus {
 export enum ScrapeAttemptStatus {
   SUCCESS = "SUCCESS",
   FAILED = "FAILED",
+  ERROR = "ERROR",
   SKIPPED_DONOTSCRAPE = "SKIPPED_DONOTSCRAPE",
   SKIPPED_VENUE = "SKIPPED_VENUE",
   BLANK = "BLANK",
@@ -352,6 +360,16 @@ export enum ScraperOperation {
   DISABLE = "DISABLE",
   STATUS = "STATUS",
   RESET = "RESET"
+}
+
+export enum ScraperJobMode {
+  SINGLE = "single",
+  BULK = "bulk",
+  RANGE = "range",
+  GAPS = "gaps",
+  AUTO = "auto",
+  REFRESH = "refresh",
+  MULTI_ID = "multiId"
 }
 
 export enum SocialPlatform {
@@ -440,6 +458,210 @@ export enum RecurringResolutionStatus {
   SKIPPED = "SKIPPED",
   PENDING_REVIEW = "PENDING_REVIEW",
   FAILED = "FAILED"
+}
+
+export enum SessionMode {
+  CASH = "CASH",
+  TOURNAMENT = "TOURNAMENT"
+}
+
+export enum PokerVariant {
+  HOLD_EM = "HOLD_EM",
+  HOLD_EM_SHORT_DECK = "HOLD_EM_SHORT_DECK",
+  OMAHA_HI = "OMAHA_HI",
+  OMAHA_HILO = "OMAHA_HILO",
+  OMAHA5_HI = "OMAHA5_HI",
+  OMAHA5_HILO = "OMAHA5_HILO",
+  OMAHA6_HI = "OMAHA6_HI",
+  OMAHA6_HILO = "OMAHA6_HILO",
+  STUD_HI = "STUD_HI",
+  STUD_HILO = "STUD_HILO",
+  RAZZ = "RAZZ",
+  DRAW_2_7_TRIPLE = "DRAW_2_7_TRIPLE",
+  DRAW_2_7_SINGLE = "DRAW_2_7_SINGLE",
+  DRAW_5_CARD = "DRAW_5_CARD",
+  BADUGI = "BADUGI",
+  MIXED_HORSE = "MIXED_HORSE",
+  MIXED_8_GAME = "MIXED_8GAME",
+  MIXED_HOSE = "MIXED_HOSE",
+  MIXED_RASH = "MIXED_RASH",
+  MIXED_DEALERS_CHOICE = "MIXED_DEALERS_CHOICE",
+  MIXED_ROTATION = "MIXED_ROTATION",
+  MIXED_OTHER = "MIXED_OTHER",
+  COURCHEVEL = "COURCHEVEL",
+  IRISH = "IRISH",
+  PINEAPPLE = "PINEAPPLE",
+  CRAZY_PINEAPPLE = "CRAZY_PINEAPPLE",
+  OTHER = "OTHER",
+  NOT_SPECIFIED = "NOT_SPECIFIED"
+}
+
+export enum BettingStructure {
+  NO_LIMIT = "NO_LIMIT",
+  POT_LIMIT = "POT_LIMIT",
+  FIXED_LIMIT = "FIXED_LIMIT",
+  SPREAD_LIMIT = "SPREAD_LIMIT",
+  CAP_LIMIT = "CAP_LIMIT",
+  MIXED_LIMIT = "MIXED_LIMIT"
+}
+
+export enum SpeedType {
+  SLOW = "SLOW",
+  REGULAR = "REGULAR",
+  TURBO = "TURBO",
+  HYPER = "HYPER",
+  SUPER_TURBO = "SUPER_TURBO"
+}
+
+export enum TableSize {
+  HEADS_UP = "HEADS_UP",
+  SHORT_HANDED = "SHORT_HANDED",
+  FULL_RING = "FULL_RING"
+}
+
+export enum DealType {
+  LIVE_DEALER = "LIVE_DEALER",
+  AUTO_SHUFFLER = "AUTO_SHUFFLER",
+  ELECTRONIC = "ELECTRONIC",
+  SELF_DEALT = "SELF_DEALT"
+}
+
+export enum BuyInTier {
+  FREEROLL = "FREEROLL",
+  MICRO = "MICRO",
+  LOW = "LOW",
+  MID = "MID",
+  HIGH = "HIGH",
+  SUPER_HIGH = "SUPER_HIGH",
+  ULTRA_HIGH = "ULTRA_HIGH"
+}
+
+export enum EntryStructure {
+  FREEZEOUT = "FREEZEOUT",
+  SINGLE_REBUY = "SINGLE_REBUY",
+  UNLIMITED_REBUY = "UNLIMITED_REBUY",
+  RE_ENTRY = "RE_ENTRY",
+  UNLIMITED_RE_ENTRY = "UNLIMITED_RE_ENTRY",
+  ADD_ON_ONLY = "ADD_ON_ONLY",
+  REBUY_ADDON = "REBUY_ADDON"
+}
+
+export enum BountyType {
+  NONE = "NONE",
+  STANDARD = "STANDARD",
+  PROGRESSIVE = "PROGRESSIVE",
+  MYSTERY = "MYSTERY",
+  SUPER_KNOCKOUT = "SUPER_KNOCKOUT",
+  TOTAL_KNOCKOUT = "TOTAL_KNOCKOUT"
+}
+
+export enum TournamentPurpose {
+  STANDARD = "STANDARD",
+  SATELLITE = "SATELLITE",
+  MEGA_SATELLITE = "MEGA_SATELLITE",
+  SUPER_SATELLITE = "SUPER_SATELLITE",
+  QUALIFIER = "QUALIFIER",
+  STEP_SATELLITE = "STEP_SATELLITE",
+  FREEROLL = "FREEROLL",
+  CHARITY = "CHARITY",
+  LEAGUE_POINTS = "LEAGUE_POINTS",
+  LAST_LONGER = "LAST_LONGER",
+  PROMOTIONAL = "PROMOTIONAL"
+}
+
+export enum StackDepth {
+  SHALLOW = "SHALLOW",
+  STANDARD = "STANDARD",
+  DEEP = "DEEP",
+  MEGA = "MEGA",
+  SUPER = "SUPER"
+}
+
+export enum LateRegistration {
+  NONE = "NONE",
+  STANDARD = "STANDARD",
+  EXTENDED = "EXTENDED",
+  UNLIMITED = "UNLIMITED"
+}
+
+export enum PayoutStructure {
+  STANDARD = "STANDARD",
+  FLAT = "FLAT",
+  WINNER_TAKE_ALL = "WINNER_TAKE_ALL",
+  FIFTY_FIFTY = "FIFTY_FIFTY",
+  TOP_HEAVY = "TOP_HEAVY",
+  SATELLITE_TICKETS = "SATELLITE_TICKETS",
+  MILESTONE = "MILESTONE",
+  PROGRESSIVE = "PROGRESSIVE"
+}
+
+export enum TournamentScheduleType {
+  ONE_OFF = "ONE_OFF",
+  RECURRING = "RECURRING",
+  SERIES_EVENT = "SERIES_EVENT",
+  SPECIAL_EVENT = "SPECIAL_EVENT",
+  FESTIVAL_EVENT = "FESTIVAL_EVENT",
+  AD_HOC = "AD_HOC"
+}
+
+export enum CashGameType {
+  STANDARD = "STANDARD",
+  CAPPED = "CAPPED",
+  UNCAPPED = "UNCAPPED",
+  BOMB_POT = "BOMB_POT",
+  DOUBLE_BOARD = "DOUBLE_BOARD",
+  MANDATORY_STRADDLE = "MANDATORY_STRADDLE",
+  STRADDLE_OPTIONAL = "STRADDLE_OPTIONAL",
+  ANTE_GAME = "ANTE_GAME",
+  MUST_MOVE = "MUST_MOVE",
+  SHORT_DECK = "SHORT_DECK"
+}
+
+export enum CashRakeType {
+  NO_RAKE = "NO_RAKE",
+  POT_PERCENTAGE = "POT_PERCENTAGE",
+  POT_PERCENTAGE_CAPPED = "POT_PERCENTAGE_CAPPED",
+  TIME_RAKE = "TIME_RAKE",
+  JACKPOT_DROP = "JACKPOT_DROP",
+  PROMOTIONAL = "PROMOTIONAL",
+  SUBSCRIPTION = "SUBSCRIPTION"
+}
+
+export enum MixedGameComponent {
+  NLHE = "NLHE",
+  LHE = "LHE",
+  PLO = "PLO",
+  PLO8 = "PLO8",
+  LO8 = "LO8",
+  STUD = "STUD",
+  STUD8 = "STUD8",
+  RAZZ = "RAZZ",
+  TRIPLE_DRAW = "TRIPLE_DRAW",
+  SINGLE_DRAW = "SINGLE_DRAW",
+  BADUGI = "BADUGI",
+  NL_DRAW = "NL_DRAW",
+  COURCHEVEL = "COURCHEVEL",
+  SHORT_DECK = "SHORT_DECK",
+  BIG_O = "BIG_O",
+  OTHER = "OTHER"
+}
+
+export enum ClassificationSource {
+  SCRAPED = "SCRAPED",
+  DERIVED = "DERIVED",
+  INFERRED = "INFERRED",
+  INHERITED = "INHERITED",
+  MANUAL = "MANUAL",
+  MIGRATED = "MIGRATED"
+}
+
+export enum GameProcessedAction {
+  CREATED = "CREATED",
+  UPDATED = "UPDATED",
+  SKIPPED = "SKIPPED",
+  ERROR = "ERROR",
+  NOT_FOUND = "NOT_FOUND",
+  NOT_PUBLISHED = "NOT_PUBLISHED"
 }
 
 type EagerVenueMetricsResult = {
@@ -1684,15 +1906,19 @@ type EagerRefreshAllMetricsResult = {
   readonly entityMetricsUpdated?: number | null;
   readonly venueMetricsUpdated?: number | null;
   readonly recurringGameMetricsUpdated?: number | null;
+  readonly tournamentSeriesMetricsUpdated?: number | null;
   readonly entitiesProcessed?: number | null;
   readonly venuesProcessed?: number | null;
   readonly recurringGamesProcessed?: number | null;
+  readonly tournamentSeriesProcessed?: number | null;
   readonly snapshotsAnalyzed?: number | null;
+  readonly bySeriesType?: MetricsBySeriesType | null;
   readonly executionTimeMs?: number | null;
   readonly peakMemoryMB?: number | null;
   readonly entityResults?: (MetricsUpdateResult | null)[] | null;
   readonly venueResults?: (MetricsUpdateResult | null)[] | null;
   readonly recurringGameResults?: (MetricsUpdateResult | null)[] | null;
+  readonly tournamentSeriesResults?: (MetricsUpdateResult | null)[] | null;
   readonly errors?: (string | null)[] | null;
   readonly warnings?: (string | null)[] | null;
   readonly refreshedAt?: string | null;
@@ -1705,15 +1931,19 @@ type LazyRefreshAllMetricsResult = {
   readonly entityMetricsUpdated?: number | null;
   readonly venueMetricsUpdated?: number | null;
   readonly recurringGameMetricsUpdated?: number | null;
+  readonly tournamentSeriesMetricsUpdated?: number | null;
   readonly entitiesProcessed?: number | null;
   readonly venuesProcessed?: number | null;
   readonly recurringGamesProcessed?: number | null;
+  readonly tournamentSeriesProcessed?: number | null;
   readonly snapshotsAnalyzed?: number | null;
+  readonly bySeriesType?: MetricsBySeriesType | null;
   readonly executionTimeMs?: number | null;
   readonly peakMemoryMB?: number | null;
   readonly entityResults?: (MetricsUpdateResult | null)[] | null;
   readonly venueResults?: (MetricsUpdateResult | null)[] | null;
   readonly recurringGameResults?: (MetricsUpdateResult | null)[] | null;
+  readonly tournamentSeriesResults?: (MetricsUpdateResult | null)[] | null;
   readonly errors?: (string | null)[] | null;
   readonly warnings?: (string | null)[] | null;
   readonly refreshedAt?: string | null;
@@ -1724,11 +1954,46 @@ export declare type RefreshAllMetricsResult = LazyLoading extends LazyLoadingDis
 
 export declare const RefreshAllMetricsResult: (new (init: ModelInit<RefreshAllMetricsResult>) => RefreshAllMetricsResult)
 
+type EagerMetricsBySeriesType = {
+  readonly ALL?: SeriesTypeBreakdown | null;
+  readonly SERIES?: SeriesTypeBreakdown | null;
+  readonly REGULAR?: SeriesTypeBreakdown | null;
+}
+
+type LazyMetricsBySeriesType = {
+  readonly ALL?: SeriesTypeBreakdown | null;
+  readonly SERIES?: SeriesTypeBreakdown | null;
+  readonly REGULAR?: SeriesTypeBreakdown | null;
+}
+
+export declare type MetricsBySeriesType = LazyLoading extends LazyLoadingDisabled ? EagerMetricsBySeriesType : LazyMetricsBySeriesType
+
+export declare const MetricsBySeriesType: (new (init: ModelInit<MetricsBySeriesType>) => MetricsBySeriesType)
+
+type EagerSeriesTypeBreakdown = {
+  readonly entity?: number | null;
+  readonly venue?: number | null;
+  readonly recurringGame?: number | null;
+  readonly tournamentSeries?: number | null;
+}
+
+type LazySeriesTypeBreakdown = {
+  readonly entity?: number | null;
+  readonly venue?: number | null;
+  readonly recurringGame?: number | null;
+  readonly tournamentSeries?: number | null;
+}
+
+export declare type SeriesTypeBreakdown = LazyLoading extends LazyLoadingDisabled ? EagerSeriesTypeBreakdown : LazySeriesTypeBreakdown
+
+export declare const SeriesTypeBreakdown: (new (init: ModelInit<SeriesTypeBreakdown>) => SeriesTypeBreakdown)
+
 type EagerMetricsUpdateResult = {
   readonly id?: string | null;
   readonly name?: string | null;
   readonly type?: string | null;
   readonly timeRange?: string | null;
+  readonly seriesType?: string | null;
   readonly success?: boolean | null;
   readonly recordsCreated?: number | null;
   readonly recordsUpdated?: number | null;
@@ -1741,6 +2006,7 @@ type LazyMetricsUpdateResult = {
   readonly name?: string | null;
   readonly type?: string | null;
   readonly timeRange?: string | null;
+  readonly seriesType?: string | null;
   readonly success?: boolean | null;
   readonly recordsCreated?: number | null;
   readonly recordsUpdated?: number | null;
@@ -1754,17 +2020,23 @@ export declare const MetricsUpdateResult: (new (init: ModelInit<MetricsUpdateRes
 
 type EagerEntityDashboard = {
   readonly entity?: Entity | null;
-  readonly metrics?: EntityMetrics | null;
+  readonly metricsAll?: EntityMetrics | null;
+  readonly metricsSeries?: EntityMetrics | null;
+  readonly metricsRegular?: EntityMetrics | null;
   readonly venueBreakdown?: (VenueMetrics | null)[] | null;
   readonly topRecurringGames?: (RecurringGameMetrics | null)[] | null;
+  readonly topTournamentSeries?: (TournamentSeriesMetrics | null)[] | null;
   readonly trends?: TrendAnalysis | null;
 }
 
 type LazyEntityDashboard = {
   readonly entity: AsyncItem<Entity | undefined>;
-  readonly metrics: AsyncItem<EntityMetrics | undefined>;
+  readonly metricsAll: AsyncItem<EntityMetrics | undefined>;
+  readonly metricsSeries: AsyncItem<EntityMetrics | undefined>;
+  readonly metricsRegular: AsyncItem<EntityMetrics | undefined>;
   readonly venueBreakdown: AsyncCollection<VenueMetrics>;
   readonly topRecurringGames: AsyncCollection<RecurringGameMetrics>;
+  readonly topTournamentSeries: AsyncCollection<TournamentSeriesMetrics>;
   readonly trends?: TrendAnalysis | null;
 }
 
@@ -1774,16 +2046,22 @@ export declare const EntityDashboard: (new (init: ModelInit<EntityDashboard>) =>
 
 type EagerVenueDashboard = {
   readonly venue?: Venue | null;
-  readonly metrics?: VenueMetrics | null;
+  readonly metricsAll?: VenueMetrics | null;
+  readonly metricsSeries?: VenueMetrics | null;
+  readonly metricsRegular?: VenueMetrics | null;
   readonly recurringGameBreakdown?: (RecurringGameMetrics | null)[] | null;
+  readonly tournamentSeriesBreakdown?: (TournamentSeriesMetrics | null)[] | null;
   readonly recentGames?: (Game | null)[] | null;
   readonly trends?: TrendAnalysis | null;
 }
 
 type LazyVenueDashboard = {
   readonly venue: AsyncItem<Venue | undefined>;
-  readonly metrics: AsyncItem<VenueMetrics | undefined>;
+  readonly metricsAll: AsyncItem<VenueMetrics | undefined>;
+  readonly metricsSeries: AsyncItem<VenueMetrics | undefined>;
+  readonly metricsRegular: AsyncItem<VenueMetrics | undefined>;
   readonly recurringGameBreakdown: AsyncCollection<RecurringGameMetrics>;
+  readonly tournamentSeriesBreakdown: AsyncCollection<TournamentSeriesMetrics>;
   readonly recentGames: AsyncCollection<Game>;
   readonly trends?: TrendAnalysis | null;
 }
@@ -1821,6 +2099,78 @@ type LazyRecurringGameReport = {
 export declare type RecurringGameReport = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameReport : LazyRecurringGameReport
 
 export declare const RecurringGameReport: (new (init: ModelInit<RecurringGameReport>) => RecurringGameReport)
+
+type EagerTournamentSeriesReport = {
+  readonly tournamentSeries?: TournamentSeries | null;
+  readonly metricsAllTime?: TournamentSeriesMetrics | null;
+  readonly metrics12M?: TournamentSeriesMetrics | null;
+  readonly metrics6M?: TournamentSeriesMetrics | null;
+  readonly metrics3M?: TournamentSeriesMetrics | null;
+  readonly metrics1M?: TournamentSeriesMetrics | null;
+  readonly events?: (Game | null)[] | null;
+  readonly mainEvents?: (Game | null)[] | null;
+  readonly topPlayers?: (PlayerSummary | null)[] | null;
+  readonly trends?: TrendAnalysis | null;
+  readonly recommendations?: (string | null)[] | null;
+}
+
+type LazyTournamentSeriesReport = {
+  readonly tournamentSeries: AsyncItem<TournamentSeries | undefined>;
+  readonly metricsAllTime: AsyncItem<TournamentSeriesMetrics | undefined>;
+  readonly metrics12M: AsyncItem<TournamentSeriesMetrics | undefined>;
+  readonly metrics6M: AsyncItem<TournamentSeriesMetrics | undefined>;
+  readonly metrics3M: AsyncItem<TournamentSeriesMetrics | undefined>;
+  readonly metrics1M: AsyncItem<TournamentSeriesMetrics | undefined>;
+  readonly events: AsyncCollection<Game>;
+  readonly mainEvents: AsyncCollection<Game>;
+  readonly topPlayers: AsyncCollection<PlayerSummary>;
+  readonly trends?: TrendAnalysis | null;
+  readonly recommendations?: (string | null)[] | null;
+}
+
+export declare type TournamentSeriesReport = LazyLoading extends LazyLoadingDisabled ? EagerTournamentSeriesReport : LazyTournamentSeriesReport
+
+export declare const TournamentSeriesReport: (new (init: ModelInit<TournamentSeriesReport>) => TournamentSeriesReport)
+
+type EagerSeriesVsRegularComparison = {
+  readonly entityId: string;
+  readonly timeRange: string;
+  readonly seriesMetrics?: EntityMetrics | null;
+  readonly seriesCount?: number | null;
+  readonly seriesProfit?: number | null;
+  readonly seriesAvgEntries?: number | null;
+  readonly regularMetrics?: EntityMetrics | null;
+  readonly regularCount?: number | null;
+  readonly regularProfit?: number | null;
+  readonly regularAvgEntries?: number | null;
+  readonly profitDifference?: number | null;
+  readonly profitDifferencePercent?: number | null;
+  readonly avgEntriesDifference?: number | null;
+  readonly avgEntriesDifferencePercent?: number | null;
+  readonly insights?: (string | null)[] | null;
+}
+
+type LazySeriesVsRegularComparison = {
+  readonly entityId: string;
+  readonly timeRange: string;
+  readonly seriesMetrics: AsyncItem<EntityMetrics | undefined>;
+  readonly seriesCount?: number | null;
+  readonly seriesProfit?: number | null;
+  readonly seriesAvgEntries?: number | null;
+  readonly regularMetrics: AsyncItem<EntityMetrics | undefined>;
+  readonly regularCount?: number | null;
+  readonly regularProfit?: number | null;
+  readonly regularAvgEntries?: number | null;
+  readonly profitDifference?: number | null;
+  readonly profitDifferencePercent?: number | null;
+  readonly avgEntriesDifference?: number | null;
+  readonly avgEntriesDifferencePercent?: number | null;
+  readonly insights?: (string | null)[] | null;
+}
+
+export declare type SeriesVsRegularComparison = LazyLoading extends LazyLoadingDisabled ? EagerSeriesVsRegularComparison : LazySeriesVsRegularComparison
+
+export declare const SeriesVsRegularComparison: (new (init: ModelInit<SeriesVsRegularComparison>) => SeriesVsRegularComparison)
 
 type EagerTrendAnalysis = {
   readonly period?: string | null;
@@ -2520,6 +2870,112 @@ export declare type ScrapeURLConnection = LazyLoading extends LazyLoadingDisable
 
 export declare const ScrapeURLConnection: (new (init: ModelInit<ScrapeURLConnection>) => ScrapeURLConnection)
 
+type EagerGameProcessedEvent = {
+  readonly jobId: string;
+  readonly entityId: string;
+  readonly tournamentId: number;
+  readonly url?: string | null;
+  readonly action: GameProcessedAction | keyof typeof GameProcessedAction;
+  readonly message?: string | null;
+  readonly errorMessage?: string | null;
+  readonly processedAt: string;
+  readonly durationMs?: number | null;
+  readonly dataSource?: string | null;
+  readonly s3Key?: string | null;
+  readonly gameData?: GameProcessedData | null;
+  readonly saveResult?: GameSaveResult | null;
+}
+
+type LazyGameProcessedEvent = {
+  readonly jobId: string;
+  readonly entityId: string;
+  readonly tournamentId: number;
+  readonly url?: string | null;
+  readonly action: GameProcessedAction | keyof typeof GameProcessedAction;
+  readonly message?: string | null;
+  readonly errorMessage?: string | null;
+  readonly processedAt: string;
+  readonly durationMs?: number | null;
+  readonly dataSource?: string | null;
+  readonly s3Key?: string | null;
+  readonly gameData?: GameProcessedData | null;
+  readonly saveResult?: GameSaveResult | null;
+}
+
+export declare type GameProcessedEvent = LazyLoading extends LazyLoadingDisabled ? EagerGameProcessedEvent : LazyGameProcessedEvent
+
+export declare const GameProcessedEvent: (new (init: ModelInit<GameProcessedEvent>) => GameProcessedEvent)
+
+type EagerGameProcessedData = {
+  readonly name?: string | null;
+  readonly gameStatus?: string | null;
+  readonly registrationStatus?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly gameEndDateTime?: string | null;
+  readonly buyIn?: number | null;
+  readonly rake?: number | null;
+  readonly guaranteeAmount?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly totalEntries?: number | null;
+  readonly totalUniquePlayers?: number | null;
+  readonly totalRebuys?: number | null;
+  readonly totalAddons?: number | null;
+  readonly gameType?: string | null;
+  readonly gameVariant?: string | null;
+  readonly tournamentType?: string | null;
+  readonly gameTags?: (string | null)[] | null;
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly doNotScrape?: boolean | null;
+  readonly existingGameId?: string | null;
+}
+
+type LazyGameProcessedData = {
+  readonly name?: string | null;
+  readonly gameStatus?: string | null;
+  readonly registrationStatus?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly gameEndDateTime?: string | null;
+  readonly buyIn?: number | null;
+  readonly rake?: number | null;
+  readonly guaranteeAmount?: number | null;
+  readonly prizepoolPaid?: number | null;
+  readonly totalEntries?: number | null;
+  readonly totalUniquePlayers?: number | null;
+  readonly totalRebuys?: number | null;
+  readonly totalAddons?: number | null;
+  readonly gameType?: string | null;
+  readonly gameVariant?: string | null;
+  readonly tournamentType?: string | null;
+  readonly gameTags?: (string | null)[] | null;
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly doNotScrape?: boolean | null;
+  readonly existingGameId?: string | null;
+}
+
+export declare type GameProcessedData = LazyLoading extends LazyLoadingDisabled ? EagerGameProcessedData : LazyGameProcessedData
+
+export declare const GameProcessedData: (new (init: ModelInit<GameProcessedData>) => GameProcessedData)
+
+type EagerGameSaveResult = {
+  readonly success: boolean;
+  readonly gameId?: string | null;
+  readonly action?: string | null;
+  readonly message?: string | null;
+}
+
+type LazyGameSaveResult = {
+  readonly success: boolean;
+  readonly gameId?: string | null;
+  readonly action?: string | null;
+  readonly message?: string | null;
+}
+
+export declare type GameSaveResult = LazyLoading extends LazyLoadingDisabled ? EagerGameSaveResult : LazyGameSaveResult
+
+export declare const GameSaveResult: (new (init: ModelInit<GameSaveResult>) => GameSaveResult)
+
 type EagerSocialFeedConnection = {
   readonly items: SocialPost[];
   readonly nextToken?: string | null;
@@ -3068,6 +3524,7 @@ type EagerEntity = {
   readonly entityMetrics?: (EntityMetrics | null)[] | null;
   readonly venueMetrics?: (VenueMetrics | null)[] | null;
   readonly recurringGameMetrics?: (RecurringGameMetrics | null)[] | null;
+  readonly tournamentSeriesMetrics?: (TournamentSeriesMetrics | null)[] | null;
   readonly socialAccounts?: (SocialAccount | null)[] | null;
 }
 
@@ -3101,6 +3558,7 @@ type LazyEntity = {
   readonly entityMetrics: AsyncCollection<EntityMetrics>;
   readonly venueMetrics: AsyncCollection<VenueMetrics>;
   readonly recurringGameMetrics: AsyncCollection<RecurringGameMetrics>;
+  readonly tournamentSeriesMetrics: AsyncCollection<TournamentSeriesMetrics>;
   readonly socialAccounts: AsyncCollection<SocialAccount>;
 }
 
@@ -3370,6 +3828,38 @@ type EagerGame = {
   readonly seriesAssignmentConfidence?: number | null;
   readonly suggestedSeriesName?: string | null;
   readonly levels?: string | null;
+  readonly sessionMode?: SessionMode | keyof typeof SessionMode | null;
+  readonly variant?: PokerVariant | keyof typeof PokerVariant | null;
+  readonly bettingStructure?: BettingStructure | keyof typeof BettingStructure | null;
+  readonly speedType?: SpeedType | keyof typeof SpeedType | null;
+  readonly tableSize?: TableSize | keyof typeof TableSize | null;
+  readonly maxPlayers?: number | null;
+  readonly dealType?: DealType | keyof typeof DealType | null;
+  readonly buyInTier?: BuyInTier | keyof typeof BuyInTier | null;
+  readonly entryStructure?: EntryStructure | keyof typeof EntryStructure | null;
+  readonly bountyType?: BountyType | keyof typeof BountyType | null;
+  readonly bountyAmount?: number | null;
+  readonly bountyPercentage?: number | null;
+  readonly tournamentPurpose?: TournamentPurpose | keyof typeof TournamentPurpose | null;
+  readonly stackDepth?: StackDepth | keyof typeof StackDepth | null;
+  readonly lateRegistration?: LateRegistration | keyof typeof LateRegistration | null;
+  readonly payoutStructure?: PayoutStructure | keyof typeof PayoutStructure | null;
+  readonly scheduleType?: TournamentScheduleType | keyof typeof TournamentScheduleType | null;
+  readonly isShootout?: boolean | null;
+  readonly isSurvivor?: boolean | null;
+  readonly isFlipAndGo?: boolean | null;
+  readonly isWinTheButton?: boolean | null;
+  readonly isAnteOnly?: boolean | null;
+  readonly isBigBlindAnte?: boolean | null;
+  readonly cashGameType?: CashGameType | keyof typeof CashGameType | null;
+  readonly cashRakeType?: CashRakeType | keyof typeof CashRakeType | null;
+  readonly hasBombPots?: boolean | null;
+  readonly hasRunItTwice?: boolean | null;
+  readonly hasStraddle?: boolean | null;
+  readonly mixedGameRotation?: (MixedGameComponent | null)[] | Array<keyof typeof MixedGameComponent> | null;
+  readonly classificationSource?: ClassificationSource | keyof typeof ClassificationSource | null;
+  readonly classificationConfidence?: number | null;
+  readonly lastClassifiedAt?: string | null;
   readonly venueId?: string | null;
   readonly venue?: Venue | null;
   readonly tournamentSeriesId?: string | null;
@@ -3474,6 +3964,38 @@ type LazyGame = {
   readonly seriesAssignmentConfidence?: number | null;
   readonly suggestedSeriesName?: string | null;
   readonly levels?: string | null;
+  readonly sessionMode?: SessionMode | keyof typeof SessionMode | null;
+  readonly variant?: PokerVariant | keyof typeof PokerVariant | null;
+  readonly bettingStructure?: BettingStructure | keyof typeof BettingStructure | null;
+  readonly speedType?: SpeedType | keyof typeof SpeedType | null;
+  readonly tableSize?: TableSize | keyof typeof TableSize | null;
+  readonly maxPlayers?: number | null;
+  readonly dealType?: DealType | keyof typeof DealType | null;
+  readonly buyInTier?: BuyInTier | keyof typeof BuyInTier | null;
+  readonly entryStructure?: EntryStructure | keyof typeof EntryStructure | null;
+  readonly bountyType?: BountyType | keyof typeof BountyType | null;
+  readonly bountyAmount?: number | null;
+  readonly bountyPercentage?: number | null;
+  readonly tournamentPurpose?: TournamentPurpose | keyof typeof TournamentPurpose | null;
+  readonly stackDepth?: StackDepth | keyof typeof StackDepth | null;
+  readonly lateRegistration?: LateRegistration | keyof typeof LateRegistration | null;
+  readonly payoutStructure?: PayoutStructure | keyof typeof PayoutStructure | null;
+  readonly scheduleType?: TournamentScheduleType | keyof typeof TournamentScheduleType | null;
+  readonly isShootout?: boolean | null;
+  readonly isSurvivor?: boolean | null;
+  readonly isFlipAndGo?: boolean | null;
+  readonly isWinTheButton?: boolean | null;
+  readonly isAnteOnly?: boolean | null;
+  readonly isBigBlindAnte?: boolean | null;
+  readonly cashGameType?: CashGameType | keyof typeof CashGameType | null;
+  readonly cashRakeType?: CashRakeType | keyof typeof CashRakeType | null;
+  readonly hasBombPots?: boolean | null;
+  readonly hasRunItTwice?: boolean | null;
+  readonly hasStraddle?: boolean | null;
+  readonly mixedGameRotation?: (MixedGameComponent | null)[] | Array<keyof typeof MixedGameComponent> | null;
+  readonly classificationSource?: ClassificationSource | keyof typeof ClassificationSource | null;
+  readonly classificationConfidence?: number | null;
+  readonly lastClassifiedAt?: string | null;
   readonly venueId?: string | null;
   readonly venue: AsyncItem<Venue | undefined>;
   readonly tournamentSeriesId?: string | null;
@@ -3701,6 +4223,9 @@ type EagerGameFinancialSnapshot = {
   readonly isSeries?: boolean | null;
   readonly isSeriesParent?: boolean | null;
   readonly parentGameId?: string | null;
+  readonly tournamentSeriesId?: string | null;
+  readonly seriesName?: string | null;
+  readonly recurringGameId?: string | null;
   readonly entitySeriesKey?: string | null;
   readonly venueSeriesKey?: string | null;
   readonly notes?: string | null;
@@ -3777,6 +4302,9 @@ type LazyGameFinancialSnapshot = {
   readonly isSeries?: boolean | null;
   readonly isSeriesParent?: boolean | null;
   readonly parentGameId?: string | null;
+  readonly tournamentSeriesId?: string | null;
+  readonly seriesName?: string | null;
+  readonly recurringGameId?: string | null;
   readonly entitySeriesKey?: string | null;
   readonly venueSeriesKey?: string | null;
   readonly notes?: string | null;
@@ -4160,6 +4688,7 @@ type EagerTournamentSeries = {
   readonly venueId?: string | null;
   readonly venue?: Venue | null;
   readonly games?: (Game | null)[] | null;
+  readonly metrics?: (TournamentSeriesMetrics | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -4190,6 +4719,7 @@ type LazyTournamentSeries = {
   readonly venueId?: string | null;
   readonly venue: AsyncItem<Venue | undefined>;
   readonly games: AsyncCollection<Game>;
+  readonly metrics: AsyncCollection<TournamentSeriesMetrics>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -4900,13 +5430,17 @@ type EagerEntityMetrics = {
   readonly entityId: string;
   readonly entity?: Entity | null;
   readonly timeRange: string;
+  readonly seriesType: string;
   readonly totalVenues: number;
   readonly activeVenues: number;
   readonly inactiveVenues: number;
   readonly totalGames: number;
+  readonly totalSeriesGames: number;
+  readonly totalRegularGames: number;
   readonly totalRecurringGames: number;
   readonly totalOneOffGames: number;
   readonly totalActiveRecurringGameTypes: number;
+  readonly totalActiveTournamentSeries: number;
   readonly totalEntries: number;
   readonly totalUniquePlayers: number;
   readonly totalReentries: number;
@@ -4942,12 +5476,14 @@ type EagerEntityMetrics = {
   readonly topVenuesByRevenue?: string | null;
   readonly topVenuesByAttendance?: string | null;
   readonly topRecurringGames?: string | null;
+  readonly topTournamentSeries?: string | null;
   readonly calculatedAt: string;
   readonly calculatedBy?: string | null;
   readonly calculationDurationMs?: number | null;
   readonly snapshotsIncluded?: number | null;
   readonly venuesIncluded?: number | null;
   readonly recurringGamesIncluded?: number | null;
+  readonly tournamentSeriesIncluded?: number | null;
   readonly dateRangeStart?: string | null;
   readonly dateRangeEnd?: string | null;
   readonly createdAt: string;
@@ -4962,13 +5498,17 @@ type LazyEntityMetrics = {
   readonly entityId: string;
   readonly entity: AsyncItem<Entity | undefined>;
   readonly timeRange: string;
+  readonly seriesType: string;
   readonly totalVenues: number;
   readonly activeVenues: number;
   readonly inactiveVenues: number;
   readonly totalGames: number;
+  readonly totalSeriesGames: number;
+  readonly totalRegularGames: number;
   readonly totalRecurringGames: number;
   readonly totalOneOffGames: number;
   readonly totalActiveRecurringGameTypes: number;
+  readonly totalActiveTournamentSeries: number;
   readonly totalEntries: number;
   readonly totalUniquePlayers: number;
   readonly totalReentries: number;
@@ -5004,12 +5544,14 @@ type LazyEntityMetrics = {
   readonly topVenuesByRevenue?: string | null;
   readonly topVenuesByAttendance?: string | null;
   readonly topRecurringGames?: string | null;
+  readonly topTournamentSeries?: string | null;
   readonly calculatedAt: string;
   readonly calculatedBy?: string | null;
   readonly calculationDurationMs?: number | null;
   readonly snapshotsIncluded?: number | null;
   readonly venuesIncluded?: number | null;
   readonly recurringGamesIncluded?: number | null;
+  readonly tournamentSeriesIncluded?: number | null;
   readonly dateRangeStart?: string | null;
   readonly dateRangeEnd?: string | null;
   readonly createdAt: string;
@@ -5031,10 +5573,14 @@ type EagerVenueMetrics = {
   readonly venueId: string;
   readonly venueName: string;
   readonly timeRange: string;
+  readonly seriesType: string;
   readonly totalGames: number;
+  readonly totalSeriesGames: number;
+  readonly totalRegularGames: number;
   readonly totalRecurringGames: number;
   readonly totalOneOffGames: number;
   readonly totalActiveRecurringGameTypes: number;
+  readonly totalActiveTournamentSeries: number;
   readonly totalTournaments: number;
   readonly totalCashGames: number;
   readonly totalNLHE: number;
@@ -5071,6 +5617,7 @@ type EagerVenueMetrics = {
   readonly peakAttendanceDay?: string | null;
   readonly topRecurringGames?: string | null;
   readonly topBuyInLevels?: string | null;
+  readonly topTournamentSeries?: string | null;
   readonly profitTrend?: string | null;
   readonly profitTrendPercent?: number | null;
   readonly attendanceTrend?: string | null;
@@ -5085,6 +5632,7 @@ type EagerVenueMetrics = {
   readonly calculationDurationMs?: number | null;
   readonly snapshotsIncluded?: number | null;
   readonly recurringGamesIncluded?: number | null;
+  readonly tournamentSeriesIncluded?: number | null;
   readonly dateRangeStart?: string | null;
   readonly dateRangeEnd?: string | null;
   readonly venue?: Venue | null;
@@ -5102,10 +5650,14 @@ type LazyVenueMetrics = {
   readonly venueId: string;
   readonly venueName: string;
   readonly timeRange: string;
+  readonly seriesType: string;
   readonly totalGames: number;
+  readonly totalSeriesGames: number;
+  readonly totalRegularGames: number;
   readonly totalRecurringGames: number;
   readonly totalOneOffGames: number;
   readonly totalActiveRecurringGameTypes: number;
+  readonly totalActiveTournamentSeries: number;
   readonly totalTournaments: number;
   readonly totalCashGames: number;
   readonly totalNLHE: number;
@@ -5142,6 +5694,7 @@ type LazyVenueMetrics = {
   readonly peakAttendanceDay?: string | null;
   readonly topRecurringGames?: string | null;
   readonly topBuyInLevels?: string | null;
+  readonly topTournamentSeries?: string | null;
   readonly profitTrend?: string | null;
   readonly profitTrendPercent?: number | null;
   readonly attendanceTrend?: string | null;
@@ -5156,6 +5709,7 @@ type LazyVenueMetrics = {
   readonly calculationDurationMs?: number | null;
   readonly snapshotsIncluded?: number | null;
   readonly recurringGamesIncluded?: number | null;
+  readonly tournamentSeriesIncluded?: number | null;
   readonly dateRangeStart?: string | null;
   readonly dateRangeEnd?: string | null;
   readonly venue: AsyncItem<Venue | undefined>;
@@ -5176,11 +5730,12 @@ type EagerRecurringGameMetrics = {
   };
   readonly id: string;
   readonly entityId: string;
-  readonly venueId: string;
+  readonly venueId?: string | null;
   readonly recurringGameId: string;
   readonly recurringGame?: RecurringGame | null;
   readonly recurringGameName: string;
   readonly timeRange: string;
+  readonly seriesType: string;
   readonly totalInstances: number;
   readonly scheduledInstances: number;
   readonly actualInstances: number;
@@ -5251,11 +5806,12 @@ type LazyRecurringGameMetrics = {
   };
   readonly id: string;
   readonly entityId: string;
-  readonly venueId: string;
+  readonly venueId?: string | null;
   readonly recurringGameId: string;
   readonly recurringGame: AsyncItem<RecurringGame | undefined>;
   readonly recurringGameName: string;
   readonly timeRange: string;
+  readonly seriesType: string;
   readonly totalInstances: number;
   readonly scheduledInstances: number;
   readonly actualInstances: number;
@@ -5326,6 +5882,134 @@ export declare const RecurringGameMetrics: (new (init: ModelInit<RecurringGameMe
   copyOf(source: RecurringGameMetrics, mutator: (draft: MutableModel<RecurringGameMetrics>) => MutableModel<RecurringGameMetrics> | void): RecurringGameMetrics;
 }
 
+type EagerTournamentSeriesMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentSeriesMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly tournamentSeriesId: string;
+  readonly tournamentSeries?: TournamentSeries | null;
+  readonly seriesName: string;
+  readonly timeRange: string;
+  readonly seriesType: string;
+  readonly totalEvents: number;
+  readonly totalFlights: number;
+  readonly uniqueVenues: number;
+  readonly mainEventCount: number;
+  readonly totalEntries: number;
+  readonly totalUniquePlayers: number;
+  readonly totalReentries: number;
+  readonly totalAddons: number;
+  readonly mainEventTotalEntries: number;
+  readonly regularSeriesPlayers?: number | null;
+  readonly occasionalSeriesPlayers?: number | null;
+  readonly oneTimeSeriesPlayers?: number | null;
+  readonly totalPrizepool: number;
+  readonly totalRevenue: number;
+  readonly totalCost: number;
+  readonly totalProfit: number;
+  readonly avgEntriesPerEvent?: number | null;
+  readonly avgUniquePlayersPerEvent?: number | null;
+  readonly avgPrizepoolPerEvent?: number | null;
+  readonly avgRevenuePerEvent?: number | null;
+  readonly avgProfitPerEvent?: number | null;
+  readonly mainEventAvgEntries?: number | null;
+  readonly stdDevEntries?: number | null;
+  readonly minEntries?: number | null;
+  readonly maxEntries?: number | null;
+  readonly medianEntries?: number | null;
+  readonly entriesCV?: number | null;
+  readonly profitMargin?: number | null;
+  readonly firstEventDate?: string | null;
+  readonly firstEventDaysAgo?: number | null;
+  readonly latestEventDate?: string | null;
+  readonly latestEventDaysAgo?: number | null;
+  readonly seriesDurationDays?: number | null;
+  readonly profitability?: string | null;
+  readonly consistency?: string | null;
+  readonly overallHealth?: string | null;
+  readonly topEventsByEntries?: string | null;
+  readonly topEventsByProfit?: string | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy: string;
+  readonly calculationDurationMs?: number | null;
+  readonly snapshotsIncluded: number;
+  readonly parentSnapshotsIncluded: number;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly entity?: Entity | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyTournamentSeriesMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentSeriesMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly tournamentSeriesId: string;
+  readonly tournamentSeries: AsyncItem<TournamentSeries | undefined>;
+  readonly seriesName: string;
+  readonly timeRange: string;
+  readonly seriesType: string;
+  readonly totalEvents: number;
+  readonly totalFlights: number;
+  readonly uniqueVenues: number;
+  readonly mainEventCount: number;
+  readonly totalEntries: number;
+  readonly totalUniquePlayers: number;
+  readonly totalReentries: number;
+  readonly totalAddons: number;
+  readonly mainEventTotalEntries: number;
+  readonly regularSeriesPlayers?: number | null;
+  readonly occasionalSeriesPlayers?: number | null;
+  readonly oneTimeSeriesPlayers?: number | null;
+  readonly totalPrizepool: number;
+  readonly totalRevenue: number;
+  readonly totalCost: number;
+  readonly totalProfit: number;
+  readonly avgEntriesPerEvent?: number | null;
+  readonly avgUniquePlayersPerEvent?: number | null;
+  readonly avgPrizepoolPerEvent?: number | null;
+  readonly avgRevenuePerEvent?: number | null;
+  readonly avgProfitPerEvent?: number | null;
+  readonly mainEventAvgEntries?: number | null;
+  readonly stdDevEntries?: number | null;
+  readonly minEntries?: number | null;
+  readonly maxEntries?: number | null;
+  readonly medianEntries?: number | null;
+  readonly entriesCV?: number | null;
+  readonly profitMargin?: number | null;
+  readonly firstEventDate?: string | null;
+  readonly firstEventDaysAgo?: number | null;
+  readonly latestEventDate?: string | null;
+  readonly latestEventDaysAgo?: number | null;
+  readonly seriesDurationDays?: number | null;
+  readonly profitability?: string | null;
+  readonly consistency?: string | null;
+  readonly overallHealth?: string | null;
+  readonly topEventsByEntries?: string | null;
+  readonly topEventsByProfit?: string | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy: string;
+  readonly calculationDurationMs?: number | null;
+  readonly snapshotsIncluded: number;
+  readonly parentSnapshotsIncluded: number;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly entity: AsyncItem<Entity | undefined>;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type TournamentSeriesMetrics = LazyLoading extends LazyLoadingDisabled ? EagerTournamentSeriesMetrics : LazyTournamentSeriesMetrics
+
+export declare const TournamentSeriesMetrics: (new (init: ModelInit<TournamentSeriesMetrics>) => TournamentSeriesMetrics) & {
+  copyOf(source: TournamentSeriesMetrics, mutator: (draft: MutableModel<TournamentSeriesMetrics>) => MutableModel<TournamentSeriesMetrics> | void): TournamentSeriesMetrics;
+}
+
 type EagerScraperJob = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<ScraperJob, 'id'>;
@@ -5354,6 +6038,14 @@ type EagerScraperJob = {
   readonly errorMessages?: (string | null)[] | null;
   readonly failedURLs?: (string | null)[] | null;
   readonly urlResults?: (ScraperJobURLResult | null)[] | null;
+  readonly currentId?: number | null;
+  readonly stopReason?: string | null;
+  readonly lastErrorMessage?: string | null;
+  readonly notFoundCount?: number | null;
+  readonly s3CacheHits?: number | null;
+  readonly consecutiveNotFound?: number | null;
+  readonly consecutiveErrors?: number | null;
+  readonly consecutiveBlanks?: number | null;
   readonly scrapeAttempts?: (ScrapeAttempt | null)[] | null;
   readonly entityId?: string | null;
   readonly entity?: Entity | null;
@@ -5389,6 +6081,14 @@ type LazyScraperJob = {
   readonly errorMessages?: (string | null)[] | null;
   readonly failedURLs?: (string | null)[] | null;
   readonly urlResults?: (ScraperJobURLResult | null)[] | null;
+  readonly currentId?: number | null;
+  readonly stopReason?: string | null;
+  readonly lastErrorMessage?: string | null;
+  readonly notFoundCount?: number | null;
+  readonly s3CacheHits?: number | null;
+  readonly consecutiveNotFound?: number | null;
+  readonly consecutiveErrors?: number | null;
+  readonly consecutiveBlanks?: number | null;
   readonly scrapeAttempts: AsyncCollection<ScrapeAttempt>;
   readonly entityId?: string | null;
   readonly entity: AsyncItem<Entity | undefined>;
@@ -5660,12 +6360,15 @@ type EagerScrapeStructure = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly fields: (string | null)[];
+  readonly fingerprint: string;
   readonly structureLabel: string;
-  readonly occurrenceCount: number;
+  readonly foundKeys: (string | null)[];
+  readonly keyCount?: number | null;
+  readonly hitCount: number;
   readonly firstSeenAt: string;
   readonly lastSeenAt: string;
   readonly exampleUrl?: string | null;
+  readonly isActive?: boolean | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -5676,12 +6379,15 @@ type LazyScrapeStructure = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly fields: (string | null)[];
+  readonly fingerprint: string;
   readonly structureLabel: string;
-  readonly occurrenceCount: number;
+  readonly foundKeys: (string | null)[];
+  readonly keyCount?: number | null;
+  readonly hitCount: number;
   readonly firstSeenAt: string;
   readonly lastSeenAt: string;
   readonly exampleUrl?: string | null;
+  readonly isActive?: boolean | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }

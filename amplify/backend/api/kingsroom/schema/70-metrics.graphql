@@ -1,17 +1,25 @@
 # ===================================================================
+# 70-metrics.graphql
 # METRICS - Pre-calculated Analytics
 # ===================================================================
-# Three-level metrics hierarchy for fast dashboard loading:
-# 1. EntityMetrics - Aggregate across all venues
-# 2. VenueMetrics - Aggregate per venue
-# 3. RecurringGameMetrics - Aggregate per recurring game
+# Four-level metrics hierarchy for fast dashboard loading:
+# 1. EntityMetrics - Aggregate across all venues (by seriesType)
+# 2. VenueMetrics - Aggregate per venue (by seriesType)
+# 3. RecurringGameMetrics - Aggregate per recurring game (REGULAR only)
+# 4. TournamentSeriesMetrics - Aggregate per tournament series (SERIES only)
 #
 # Updated nightly by Lambda or on-demand via mutation
 # Each level has 5 time range variants: ALL, 12M, 6M, 3M, 1M
+# EntityMetrics and VenueMetrics also have 3 seriesType variants: ALL, SERIES, REGULAR
+#
+# VERSION: 2.0.0 - Added seriesType dimension and TournamentSeriesMetrics
 # ===================================================================
 
 # ===================================================================
 # ENTITY METRICS (Top Level)
+# ===================================================================
+# ID Format: {entityId}_{timeRange}_{seriesType}
+# Example: "entity_abc123_12M_ALL", "entity_abc123_12M_SERIES", "entity_abc123_12M_REGULAR"
 # ===================================================================
 
 type EntityMetrics
@@ -19,6 +27,7 @@ type EntityMetrics
   @auth(rules: [{ allow: private }]) {
   
   # === PRIMARY KEY ===
+  # Format: {entityId}_{timeRange}_{seriesType}
   id: ID!
   
   # === COMPOSITE KEY ===
@@ -26,10 +35,14 @@ type EntityMetrics
     @index(name: "byEntityMetrics", sortKeyFields: ["timeRange"])
   entity: Entity @belongsTo(fields: ["entityId"])
   
-  # === TIME RANGE ===
-  # Values: "ALL", "12M", "6M", "3M", "1M"
+  # === DIMENSIONS ===
+  # Time range: "ALL", "12M", "6M", "3M", "1M"
   timeRange: String! 
     @index(name: "byTimeRangeEntity", sortKeyFields: ["entityId"])
+  
+  # Series type: "ALL" (combined), "SERIES" (tournament series only), "REGULAR" (recurring games only)
+  seriesType: String! @default(value: "ALL")
+    @index(name: "bySeriesTypeEntity", sortKeyFields: ["entityId"])
   
   # === VENUE AGGREGATES ===
   totalVenues: Int! @default(value: "0")
@@ -38,9 +51,18 @@ type EntityMetrics
   
   # === GAME AGGREGATES ===
   totalGames: Int! @default(value: "0")
-  totalRecurringGames: Int! @default(value: "0") # Instances of recurring games
-  totalOneOffGames: Int! @default(value: "0")
+  
+  # Series vs Regular breakdown
+  totalSeriesGames: Int! @default(value: "0")      # Games where isSeries=true
+  totalRegularGames: Int! @default(value: "0")     # Games where isSeries=false/null
+  
+  # Recurring game breakdown
+  totalRecurringGames: Int! @default(value: "0")   # Instances of recurring games
+  totalOneOffGames: Int! @default(value: "0")      # Regular games without recurringGameId
   totalActiveRecurringGameTypes: Int! @default(value: "0") # Unique recurring games
+  
+  # Tournament series breakdown
+  totalActiveTournamentSeries: Int! @default(value: "0") # Unique tournament series
   
   # === PLAYER AGGREGATES ===
   totalEntries: Int! @default(value: "0")
@@ -100,6 +122,9 @@ type EntityMetrics
   topRecurringGames: AWSJSON
   # [{ recurringGameId, name, avgEntries, avgProfit }, ...]
   
+  topTournamentSeries: AWSJSON
+  # [{ tournamentSeriesId, seriesName, totalEvents, avgEntries, totalProfit }, ...]
+  
   # === METADATA ===
   calculatedAt: AWSDateTime!
   calculatedBy: String # "SCHEDULED_LAMBDA" | "ON_DEMAND" | "BACKFILL"
@@ -108,6 +133,7 @@ type EntityMetrics
   snapshotsIncluded: Int
   venuesIncluded: Int
   recurringGamesIncluded: Int
+  tournamentSeriesIncluded: Int
   
   dateRangeStart: AWSDateTime
   dateRangeEnd: AWSDateTime
@@ -120,12 +146,16 @@ type EntityMetrics
 # ===================================================================
 # VENUE METRICS (Mid Level)
 # ===================================================================
+# ID Format: {venueId}_{timeRange}_{seriesType}
+# Example: "venue_abc123_12M_ALL", "venue_abc123_12M_SERIES", "venue_abc123_12M_REGULAR"
+# ===================================================================
 
 type VenueMetrics
   @model(subscriptions: null)
   @auth(rules: [{ allow: private }]) {
   
   # === PRIMARY KEY ===
+  # Format: {venueId}_{timeRange}_{seriesType}
   id: ID!
   
   # === COMPOSITE KEYS ===
@@ -137,15 +167,28 @@ type VenueMetrics
   
   venueName: String! # Denormalized for sorting/display
   
-  # === TIME RANGE ===
+  # === DIMENSIONS ===
   timeRange: String! 
     @index(name: "byTimeRangeVenue", sortKeyFields: ["venueId"])
   
+  # Series type: "ALL" (combined), "SERIES" (tournament series only), "REGULAR" (recurring games only)
+  seriesType: String! @default(value: "ALL")
+    @index(name: "bySeriesTypeVenue", sortKeyFields: ["venueId"])
+  
   # === GAME BREAKDOWN ===
   totalGames: Int! @default(value: "0")
+  
+  # Series vs Regular breakdown
+  totalSeriesGames: Int! @default(value: "0")
+  totalRegularGames: Int! @default(value: "0")
+  
+  # Recurring game breakdown
   totalRecurringGames: Int! @default(value: "0")
   totalOneOffGames: Int! @default(value: "0")
   totalActiveRecurringGameTypes: Int! @default(value: "0")
+  
+  # Tournament series breakdown
+  totalActiveTournamentSeries: Int! @default(value: "0")
   
   # By game type
   totalTournaments: Int! @default(value: "0")
@@ -213,6 +256,9 @@ type VenueMetrics
   topBuyInLevels: AWSJSON
   # [{ buyIn, gameCount, avgEntries, totalRevenue }, ...]
   
+  topTournamentSeries: AWSJSON
+  # [{ tournamentSeriesId, seriesName, totalEvents, avgEntries }, ...]
+  
   # === TRENDS ===
   profitTrend: String
   profitTrendPercent: Float
@@ -233,6 +279,7 @@ type VenueMetrics
   
   snapshotsIncluded: Int
   recurringGamesIncluded: Int
+  tournamentSeriesIncluded: Int
   
   dateRangeStart: AWSDateTime
   dateRangeEnd: AWSDateTime
@@ -247,7 +294,11 @@ type VenueMetrics
 }
 
 # ===================================================================
-# RECURRING GAME METRICS (Detailed Level)
+# RECURRING GAME METRICS (Detailed Level - REGULAR games only)
+# ===================================================================
+# ID Format: {recurringGameId}_{timeRange}
+# Example: "rg_abc123_12M"
+# Note: RecurringGameMetrics always represent REGULAR (non-series) games
 # ===================================================================
 
 type RecurringGameMetrics
@@ -255,13 +306,14 @@ type RecurringGameMetrics
   @auth(rules: [{ allow: private }]) {
   
   # === PRIMARY KEY ===
+  # Format: {recurringGameId}_{timeRange}
   id: ID!
   
   # === COMPOSITE KEYS ===
   entityId: ID! 
     @index(name: "byEntityRecurringGameMetrics", sortKeyFields: ["recurringGameId"])
   
-  venueId: ID! 
+  venueId: ID 
     @index(name: "byVenueRecurringGameMetrics", sortKeyFields: ["recurringGameId"])
   
   recurringGameId: ID! 
@@ -270,11 +322,14 @@ type RecurringGameMetrics
   
   recurringGameName: String! # Denormalized for display
   
-  # === TIME RANGE ===
-  timeRange: String! 
+  # === DIMENSIONS ===
+  timeRange: String!
     @index(name: "byTimeRangeRecurringGame", sortKeyFields: ["recurringGameId"])
   
-  # === INSTANCE COUNT ===
+  # Always REGULAR for RecurringGameMetrics
+  seriesType: String! @default(value: "REGULAR")
+  
+  # === INSTANCE COUNTS ===
   totalInstances: Int! @default(value: "0")
   scheduledInstances: Int! @default(value: "0") # Expected count
   actualInstances: Int! @default(value: "0") # Games that ran
@@ -389,6 +444,134 @@ type RecurringGameMetrics
 }
 
 # ===================================================================
+# TOURNAMENT SERIES METRICS (Detailed Level - SERIES games only)
+# ===================================================================
+# ID Format: {tournamentSeriesId}_{timeRange}
+# Example: "ts_abc123_12M"
+# Note: TournamentSeriesMetrics always represent SERIES games
+#
+# DOUBLE-COUNTING PREVENTION:
+# Uses isSeriesParent to count only consolidated/parent records,
+# avoiding inflation from flight/day records.
+# ===================================================================
+
+type TournamentSeriesMetrics
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  # === PRIMARY KEY ===
+  # Format: {tournamentSeriesId}_{timeRange}
+  id: ID!
+
+  # === COMPOSITE KEYS ===
+  entityId: ID! 
+    @index(name: "byEntityTournamentSeriesMetrics", sortKeyFields: ["tournamentSeriesId"])
+  
+  tournamentSeriesId: ID! 
+    @index(name: "byTournamentSeriesMetrics", sortKeyFields: ["timeRange"])
+  tournamentSeries: TournamentSeries @belongsTo(fields: ["tournamentSeriesId"])
+  
+  seriesName: String! # Denormalized for display
+  
+  # === DIMENSIONS ===
+  timeRange: String! 
+    @index(name: "byTimeRangeTournamentSeries", sortKeyFields: ["tournamentSeriesId"])
+  
+  # Always SERIES for TournamentSeriesMetrics
+  seriesType: String! @default(value: "SERIES")
+
+  # === EVENT COUNTS ===
+  # Total events (parent/consolidated records only - avoids double-counting)
+  totalEvents: Int! @default(value: "0")
+  
+  # Total flights/days (child records)
+  totalFlights: Int! @default(value: "0")
+  
+  # Unique venues where series events were held
+  uniqueVenues: Int! @default(value: "0")
+  
+  # Main event count (isMainEvent=true)
+  mainEventCount: Int! @default(value: "0")
+
+  # === PLAYER METRICS ===
+  totalEntries: Int! @default(value: "0")
+  totalUniquePlayers: Int! @default(value: "0")
+  totalReentries: Int! @default(value: "0")
+  totalAddons: Int! @default(value: "0")
+  
+  # Main event specific
+  mainEventTotalEntries: Int! @default(value: "0")
+  
+  # Player loyalty (optional)
+  regularSeriesPlayers: Int # Players who played 3+ events
+  occasionalSeriesPlayers: Int # Played 2 events
+  oneTimeSeriesPlayers: Int # Played 1 event
+
+  # === FINANCIAL METRICS ===
+  totalPrizepool: Float! @default(value: "0")
+  totalRevenue: Float! @default(value: "0")
+  totalCost: Float! @default(value: "0")
+  totalProfit: Float! @default(value: "0")
+
+  # === AVERAGES (per event) ===
+  avgEntriesPerEvent: Float
+  avgUniquePlayersPerEvent: Float
+  avgPrizepoolPerEvent: Float
+  avgRevenuePerEvent: Float
+  avgProfitPerEvent: Float
+  mainEventAvgEntries: Float
+
+  # === CONSISTENCY METRICS ===
+  stdDevEntries: Float
+  minEntries: Int
+  maxEntries: Int
+  medianEntries: Float
+  entriesCV: Float # Coefficient of Variation (%)
+
+  # === MARGINS ===
+  profitMargin: Float # (totalProfit / totalRevenue) * 100
+
+  # === DATE TRACKING ===
+  firstEventDate: AWSDateTime
+  firstEventDaysAgo: Int
+  latestEventDate: AWSDateTime
+  latestEventDaysAgo: Int
+  
+  # Duration of series (first to last event)
+  seriesDurationDays: Int
+
+  # === HEALTH INDICATORS ===
+  profitability: String # highly-profitable, profitable, break-even, loss
+  consistency: String # very-reliable, reliable, variable, erratic
+  overallHealth: String # excellent, good, needs-attention, critical
+
+  # === TOP PERFORMERS ===
+  topEventsByEntries: AWSJSON
+  # [{ gameId, eventName, totalEntries, prizepool }, ...]
+  
+  topEventsByProfit: AWSJSON
+  # [{ gameId, eventName, netProfit, profitMargin }, ...]
+
+  # === METADATA ===
+  calculatedAt: AWSDateTime!
+  calculatedBy: String! @default(value: "SCHEDULED_LAMBDA")
+  calculationDurationMs: Int
+  
+  snapshotsIncluded: Int!
+  parentSnapshotsIncluded: Int!
+  
+  dateRangeStart: AWSDateTime
+  dateRangeEnd: AWSDateTime
+  
+  # === RELATIONSHIPS ===
+  entity: Entity @belongsTo(fields: ["entityId"])
+
+  # === AUDIT ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
 # MUTATION INPUTS
 # ===================================================================
 
@@ -397,20 +580,25 @@ input RefreshAllMetricsInput {
   entityId: ID
   venueId: ID
   recurringGameId: ID
+  tournamentSeriesId: ID
   
-  # Time ranges to refresh
+  # Time ranges to refresh (default: ALL, 12M, 6M, 3M, 1M)
   timeRanges: [String]
   
-  # Which metrics to calculate - REMOVED @default HERE
+  # Series types to refresh (default: ALL, SERIES, REGULAR)
+  seriesTypes: [String]
+  
+  # Which metrics to calculate
   includeEntityMetrics: Boolean 
   includeVenueMetrics: Boolean
   includeRecurringGameMetrics: Boolean
+  includeTournamentSeriesMetrics: Boolean
   
-  # Performance options - REMOVED @default HERE
+  # Performance options
   parallelExecution: Boolean 
   skipIfRecent: Boolean 
   
-  # Debug - REMOVED @default HERE
+  # Debug
   dryRun: Boolean 
   verbose: Boolean 
 }
@@ -427,12 +615,17 @@ type RefreshAllMetricsResult {
   entityMetricsUpdated: Int
   venueMetricsUpdated: Int
   recurringGameMetricsUpdated: Int
+  tournamentSeriesMetricsUpdated: Int
   
   # Processing counts
   entitiesProcessed: Int
   venuesProcessed: Int
   recurringGamesProcessed: Int
+  tournamentSeriesProcessed: Int
   snapshotsAnalyzed: Int
+  
+  # Breakdown by series type
+  bySeriesType: MetricsBySeriesType
   
   # Performance
   executionTimeMs: Int
@@ -442,6 +635,7 @@ type RefreshAllMetricsResult {
   entityResults: [MetricsUpdateResult]
   venueResults: [MetricsUpdateResult]
   recurringGameResults: [MetricsUpdateResult]
+  tournamentSeriesResults: [MetricsUpdateResult]
   
   # Errors
   errors: [String]
@@ -452,11 +646,25 @@ type RefreshAllMetricsResult {
   refreshedBy: String
 }
 
+type MetricsBySeriesType {
+  ALL: SeriesTypeBreakdown
+  SERIES: SeriesTypeBreakdown
+  REGULAR: SeriesTypeBreakdown
+}
+
+type SeriesTypeBreakdown {
+  entity: Int
+  venue: Int
+  recurringGame: Int
+  tournamentSeries: Int
+}
+
 type MetricsUpdateResult {
   id: ID
   name: String
-  type: String # "entity", "venue", "recurringGame"
+  type: String # "entity", "venue", "recurringGame", "tournamentSeries"
   timeRange: String
+  seriesType: String
   success: Boolean
   recordsCreated: Int
   recordsUpdated: Int
@@ -474,15 +682,19 @@ extend type Mutation {
     @function(name: "refreshAllMetrics-${env}")
   
   # Quick refresh for single entity (faster)
-  refreshEntityMetrics(entityId: ID!, timeRanges: [String]): RefreshAllMetricsResult
+  refreshEntityMetrics(entityId: ID!, timeRanges: [String], seriesTypes: [String]): RefreshAllMetricsResult
     @function(name: "refreshAllMetrics-${env}")
   
   # Quick refresh for single venue (faster)
-  refreshVenueMetrics(venueId: ID!, timeRanges: [String]): RefreshAllMetricsResult
+  refreshVenueMetrics(venueId: ID!, timeRanges: [String], seriesTypes: [String]): RefreshAllMetricsResult
     @function(name: "refreshAllMetrics-${env}")
   
   # Quick refresh for single recurring game (fastest)
   refreshRecurringGameMetrics(recurringGameId: ID!, timeRanges: [String]): RefreshAllMetricsResult
+    @function(name: "refreshAllMetrics-${env}")
+  
+  # Quick refresh for single tournament series
+  refreshTournamentSeriesMetrics(tournamentSeriesId: ID!, timeRanges: [String]): RefreshAllMetricsResult
     @function(name: "refreshAllMetrics-${env}")
 }
 
@@ -490,19 +702,27 @@ extend type Mutation {
 # QUERY HELPERS
 # ===================================================================
 
-extend type Query {
-  # Get comprehensive metrics dashboard
-  getEntityDashboard(entityId: ID!, timeRange: String!): EntityDashboard
-    @function(name: "metricsQuery-${env}")
-  
-  # Get venue dashboard with breakdown
-  getVenueDashboard(venueId: ID!, timeRange: String!): VenueDashboard
-    @function(name: "metricsQuery-${env}")
-  
-  # Get recurring game performance report
-  getRecurringGameReport(recurringGameId: ID!): RecurringGameReport
-    @function(name: "metricsQuery-${env}")
-}
+#extend type Query {
+#  # Get comprehensive metrics dashboard
+#  getEntityDashboard(entityId: ID!, timeRange: String!, seriesType: String): EntityDashboard
+#    @function(name: "metricsQuery-${env}")
+#  
+#  # Get venue dashboard with breakdown
+#  getVenueDashboard(venueId: ID!, timeRange: String!, seriesType: String): VenueDashboard
+#    @function(name: "metricsQuery-${env}")
+#  
+#  # Get recurring game performance report
+#  getRecurringGameReport(recurringGameId: ID!): RecurringGameReport
+#    @function(name: "metricsQuery-${env}")
+#
+#  # Get tournament series performance report
+#  getTournamentSeriesReport(tournamentSeriesId: ID!): TournamentSeriesReport
+#    @function(name: "metricsQuery-${env}")
+#
+#  # Compare series vs regular performance
+#  getSeriesVsRegularComparison(entityId: ID!, timeRange: String!): SeriesVsRegularComparison
+#    @function(name: "metricsQuery-${env}")
+#}
 
 # ===================================================================
 # QUERY RESULT TYPES
@@ -510,16 +730,22 @@ extend type Query {
 
 type EntityDashboard {
   entity: Entity
-  metrics: EntityMetrics
+  metricsAll: EntityMetrics      # Combined
+  metricsSeries: EntityMetrics   # Series only
+  metricsRegular: EntityMetrics  # Regular only
   venueBreakdown: [VenueMetrics]
   topRecurringGames: [RecurringGameMetrics]
+  topTournamentSeries: [TournamentSeriesMetrics]
   trends: TrendAnalysis
 }
 
 type VenueDashboard {
   venue: Venue
-  metrics: VenueMetrics
+  metricsAll: VenueMetrics
+  metricsSeries: VenueMetrics
+  metricsRegular: VenueMetrics
   recurringGameBreakdown: [RecurringGameMetrics]
+  tournamentSeriesBreakdown: [TournamentSeriesMetrics]
   recentGames: [Game]
   trends: TrendAnalysis
 }
@@ -535,6 +761,45 @@ type RecurringGameReport {
   regularPlayers: [PlayerSummary]
   trends: TrendAnalysis
   recommendations: [String]
+}
+
+type TournamentSeriesReport {
+  tournamentSeries: TournamentSeries
+  metricsAllTime: TournamentSeriesMetrics
+  metrics12M: TournamentSeriesMetrics
+  metrics6M: TournamentSeriesMetrics
+  metrics3M: TournamentSeriesMetrics
+  metrics1M: TournamentSeriesMetrics
+  events: [Game]
+  mainEvents: [Game]
+  topPlayers: [PlayerSummary]
+  trends: TrendAnalysis
+  recommendations: [String]
+}
+
+type SeriesVsRegularComparison {
+  entityId: ID!
+  timeRange: String!
+  
+  # Series summary
+  seriesMetrics: EntityMetrics
+  seriesCount: Int
+  seriesProfit: Float
+  seriesAvgEntries: Float
+  
+  # Regular summary
+  regularMetrics: EntityMetrics
+  regularCount: Int
+  regularProfit: Float
+  regularAvgEntries: Float
+  
+  # Comparison
+  profitDifference: Float
+  profitDifferencePercent: Float
+  avgEntriesDifference: Float
+  avgEntriesDifferencePercent: Float
+  
+  insights: [String]
 }
 
 type TrendAnalysis {

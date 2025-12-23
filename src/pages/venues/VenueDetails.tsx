@@ -789,7 +789,7 @@ export const VenueDetails: React.FC = () => {
         <Card className="border-red-200 bg-red-50">
           <Text className="text-sm text-red-700">{error || 'Venue not found'}</Text>
           <button
-            onClick={() => navigate('/venues/dashboard')}
+            onClick={() => navigate('/venues')}
             className="mt-4 inline-flex items-center text-sm text-indigo-600 hover:text-indigo-900"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -806,7 +806,7 @@ export const VenueDetails: React.FC = () => {
     <PageWrapper title={venue.name}>
       {/* Back Navigation */}
       <button
-        onClick={() => navigate('/venues/dashboard')}
+        onClick={() => navigate('/venues')}
         className="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
       >
         <ArrowLeftIcon className="h-4 w-4 mr-1" />

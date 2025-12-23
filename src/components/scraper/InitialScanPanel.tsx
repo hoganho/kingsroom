@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import { useScraperJobs } from '../../hooks/useScraperManagement';
+import { useEntity } from '../../contexts/EntityContext';
 import { ScraperJobTriggerSource } from '../../API';
 
 interface BatchJob {
@@ -24,6 +25,7 @@ interface BatchJob {
 
 export const InitialScanPanel: React.FC = () => {
     const { startJob, fetchJobs } = useScraperJobs();
+    const { currentEntity } = useEntity();
     
     // Configuration
     const [config, setConfig] = useState({
@@ -66,6 +68,11 @@ export const InitialScanPanel: React.FC = () => {
     
     // Main scanning function
     const performScan = async () => {
+        if (!currentEntity) {
+            setError('Please select an entity first');
+            return;
+        }
+        
         setIsScanning(true);
         setError(null);
         abortRef.current = false;
@@ -98,6 +105,7 @@ export const InitialScanPanel: React.FC = () => {
                 console.log(`Starting batch ${batch.batchNumber}: IDs ${batch.startId}-${batch.endId}`);
                 
                 const job = await startJob({
+                    entityId: currentEntity.id,
                     triggerSource: ScraperJobTriggerSource.MANUAL,
                     triggeredBy: 'initial-scan',
                     maxGames: 999, // Set high to scan full range
@@ -252,6 +260,16 @@ export const InitialScanPanel: React.FC = () => {
                 <p className="text-sm text-gray-600">
                     Perform a comprehensive scan of tournament IDs to populate the database
                 </p>
+                {currentEntity && (
+                    <p className="text-sm text-blue-600 mt-1">
+                        Scanning for: <strong>{currentEntity.entityName}</strong>
+                    </p>
+                )}
+                {!currentEntity && (
+                    <p className="text-sm text-red-600 mt-1">
+                        ⚠️ Please select an entity before scanning
+                    </p>
+                )}
             </div>
             
             {/* Configuration */}
@@ -311,7 +329,8 @@ export const InitialScanPanel: React.FC = () => {
                 {!isScanning ? (
                     <button
                         onClick={handleStart}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                        disabled={!currentEntity}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                         <Play className="h-4 w-4" />
                         Start Scan

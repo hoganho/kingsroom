@@ -9,23 +9,11 @@
  * It builds an EnrichGameDataInput payload and invokes gameDataEnricher,
  * which enriches the data and then invokes saveGameFunction.
  * 
- * FLOW:
- * webScraperFunction (save-handler)
- *     │
- *     ▼ EnrichGameDataInput { saveToDatabase: true }
- * gameDataEnricher
- *     │ (enriches: series, recurring, financials, query keys)
- *     ▼ SaveGameInput
- * saveGameFunction
- *     │ (writes to DB)
- *     ▼
- * Game record saved
- * 
- * WHY:
- * - Single enrichment pipeline for all game saves
- * - gameDataEnricher handles series resolution, recurring detection, etc.
- * - saveGameFunction is now a pure writer
- * - webScraperFunction stays focused on fetch + parse
+ * UPDATED: v2.0.0
+ * - Added new classification field passthrough
+ * - Uses entryStructure (not tournamentStructure) to avoid @model conflict
+ * - Uses cashRakeType (not rakeStructure) to avoid @model conflict
+ * - Fixed: Added prizepoolPaid and prizepoolCalculated fields
  * 
  * ===================================================================
  */
@@ -131,17 +119,6 @@ const getTournamentIdFromUrl = (url) => {
 /**
  * Handle saveTournamentData operation
  * Delegates to gameDataEnricher Lambda (with saveToDatabase: true)
- * 
- * @param {object} options - Save options
- * @param {string} options.sourceUrl - Tournament URL
- * @param {string} options.venueId - Venue ID (optional)
- * @param {object} options.data - Scraped tournament data
- * @param {string} options.existingGameId - Existing game ID for updates
- * @param {boolean} options.doNotScrape - Mark as do not scrape
- * @param {string} options.entityId - Entity ID
- * @param {string} options.scraperJobId - Scraper job ID
- * @param {object} context - Shared context
- * @returns {object} Save result
  */
 const handleSave = async (options, context) => {
     const {
@@ -206,22 +183,33 @@ const handleSave = async (options, context) => {
             hasGuarantee: parsedData.hasGuarantee || false,
             guaranteeAmount: parsedData.guaranteeAmount || 0,
             
+            // Results - IMPORTANT: include prizepool fields
+            prizepoolPaid: parsedData.prizepoolPaid || 0,
+            prizepoolCalculated: parsedData.prizepoolCalculated || 0,
+            
             // Entry counts
-            totalUniquePlayers: parsedData.totalUniquePlayers || playerData.totalUniquePlayers || 0,
+            totalUniquePlayers: playerData.totalUniquePlayers || parsedData.totalUniquePlayers || 0,
             totalInitialEntries: parsedData.totalInitialEntries || 0,
             totalEntries: parsedData.totalEntries || 0,
             totalRebuys: parsedData.totalRebuys || 0,
             totalAddons: parsedData.totalAddons || 0,
             
-            // Results
-            prizepoolPaid: parsedData.prizepoolPaid || 0,
-            prizepoolCalculated: parsedData.prizepoolCalculated || 0,
+            // Live game data
             playersRemaining: parsedData.playersRemaining || null,
             totalChipsInPlay: parsedData.totalChipsInPlay || null,
             averagePlayerStack: parsedData.averagePlayerStack || null,
             totalDuration: parsedData.totalDuration || null,
             
-            // Classification
+            // Pre-calculated financials (if already computed by parser)
+            totalBuyInsCollected: parsedData.totalBuyInsCollected || null,
+            rakeRevenue: parsedData.rakeRevenue || null,
+            prizepoolPlayerContributions: parsedData.prizepoolPlayerContributions || null,
+            prizepoolAddedValue: parsedData.prizepoolAddedValue || null,
+            prizepoolSurplus: parsedData.prizepoolSurplus || null,
+            guaranteeOverlayCost: parsedData.guaranteeOverlayCost || null,
+            gameProfit: parsedData.gameProfit || null,
+            
+            // Legacy classification fields
             tournamentType: parsedData.tournamentType || null,
             isSatellite: parsedData.isSatellite || false,
             isSeries: parsedData.isSeries || false,
@@ -240,7 +228,59 @@ const handleSave = async (options, context) => {
             // Recurring game fields (if already known)
             recurringGameId: parsedData.recurringGameId || null,
             recurringGameAssignmentStatus: parsedData.recurringGameAssignmentStatus || 'PENDING_ASSIGNMENT',
-            recurringGameAssignmentConfidence: parsedData.recurringGameAssignmentConfidence || 0
+            recurringGameAssignmentConfidence: parsedData.recurringGameAssignmentConfidence || 0,
+            
+            // ===================================================================
+            // NEW: Classification fields (from html-parser getClassification)
+            // ===================================================================
+            
+            // Universal classification
+            sessionMode: parsedData.sessionMode || null,
+            variant: parsedData.variant || null,
+            bettingStructure: parsedData.bettingStructure || null,
+            speedType: parsedData.speedType || null,
+            stackDepth: parsedData.stackDepth || null,
+            
+            // Tournament classification
+            // NOTE: entryStructure (not tournamentStructure) to avoid @model conflict
+            entryStructure: parsedData.entryStructure || null,
+            bountyType: parsedData.bountyType || null,
+            bountyAmount: parsedData.bountyAmount || null,
+            bountyPercentage: parsedData.bountyPercentage || null,
+            tournamentPurpose: parsedData.tournamentPurpose || null,
+            lateRegistration: parsedData.lateRegistration || null,
+            payoutStructure: parsedData.payoutStructure || null,
+            scheduleType: parsedData.scheduleType || null,
+            
+            // Tournament feature flags
+            isShootout: parsedData.isShootout || null,
+            isSurvivor: parsedData.isSurvivor || null,
+            isFlipAndGo: parsedData.isFlipAndGo || null,
+            isWinTheButton: parsedData.isWinTheButton || null,
+            isAnteOnly: parsedData.isAnteOnly || null,
+            isBigBlindAnte: parsedData.isBigBlindAnte || null,
+            
+            // Cash game classification
+            // NOTE: cashRakeType (not rakeStructure) to avoid @model conflict
+            cashGameType: parsedData.cashGameType || null,
+            cashRakeType: parsedData.cashRakeType || null,
+            hasBombPots: parsedData.hasBombPots || null,
+            hasRunItTwice: parsedData.hasRunItTwice || null,
+            hasStraddle: parsedData.hasStraddle || null,
+            
+            // Table configuration
+            tableSize: parsedData.tableSize || null,
+            maxPlayers: parsedData.maxPlayers || null,
+            dealType: parsedData.dealType || null,
+            buyInTier: parsedData.buyInTier || null,
+            
+            // Mixed game support
+            mixedGameRotation: parsedData.mixedGameRotation || null,
+            
+            // Classification metadata
+            classificationSource: parsedData.classificationSource || 'SCRAPED',
+            classificationConfidence: parsedData.classificationConfidence || null,
+            lastClassifiedAt: parsedData.lastClassifiedAt || null
         },
         
         // Series information for resolution
@@ -275,11 +315,11 @@ const handleSave = async (options, context) => {
         
         // Options - KEY: saveToDatabase: true triggers save via saveGameFunction
         options: {
-            saveToDatabase: true,           // Enricher will invoke saveGameFunction
+            saveToDatabase: true,
             skipPlayerProcessing: false,
             forceUpdate: !!existingGameId,
-            autoCreateSeries: true,         // Create TournamentSeries if not found
-            autoCreateRecurring: false,     // Don't auto-create RecurringGame
+            autoCreateSeries: true,
+            autoCreateRecurring: false,
             doNotScrape,
             scraperJobId
         }
@@ -310,7 +350,11 @@ const handleSave = async (options, context) => {
             saveAction: responsePayload.saveResult?.action,
             gameId: responsePayload.saveResult?.gameId,
             seriesStatus: responsePayload.enrichmentMetadata?.seriesResolution?.status,
-            recurringStatus: responsePayload.enrichmentMetadata?.recurringResolution?.status
+            recurringStatus: responsePayload.enrichmentMetadata?.recurringResolution?.status,
+            // Log classification info
+            variant: responsePayload.enrichedGame?.variant,
+            bountyType: responsePayload.enrichedGame?.bountyType,
+            speedType: responsePayload.enrichedGame?.speedType
         });
         
         if (!responsePayload.success) {
@@ -353,7 +397,17 @@ const handleSave = async (options, context) => {
             seriesAssigned: responsePayload.enrichmentMetadata?.seriesResolution?.status === 'MATCHED_EXISTING' ||
                            responsePayload.enrichmentMetadata?.seriesResolution?.status === 'CREATED_NEW',
             seriesName: responsePayload.enrichedGame?.seriesName,
-            recurringGameAssigned: responsePayload.enrichmentMetadata?.recurringResolution?.status === 'MATCHED_EXISTING'
+            recurringGameAssigned: responsePayload.enrichmentMetadata?.recurringResolution?.status === 'MATCHED_EXISTING',
+            // Return classification info
+            classification: {
+                variant: responsePayload.enrichedGame?.variant,
+                bettingStructure: responsePayload.enrichedGame?.bettingStructure,
+                bountyType: responsePayload.enrichedGame?.bountyType,
+                speedType: responsePayload.enrichedGame?.speedType,
+                stackDepth: responsePayload.enrichedGame?.stackDepth,
+                entryStructure: responsePayload.enrichedGame?.entryStructure,
+                tournamentPurpose: responsePayload.enrichedGame?.tournamentPurpose
+            }
         };
         
     } catch (error) {

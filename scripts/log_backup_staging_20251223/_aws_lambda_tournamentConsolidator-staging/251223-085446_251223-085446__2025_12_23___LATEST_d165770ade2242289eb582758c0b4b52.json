@@ -1,0 +1,57 @@
+[
+  {
+    "timestamp": 1766480086477,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766480089521
+  },
+  {
+    "timestamp": 1766480086865,
+    "message": "START RequestId: 4ad4d111-15c1-4989-b9be-d803b2ee03cf Version: $LATEST\n",
+    "ingestionTime": 1766480089521
+  },
+  {
+    "timestamp": 1766480086867,
+    "message": "2025-12-23T08:54:46.867Z\t4ad4d111-15c1-4989-b9be-d803b2ee03cf\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1766480089521
+  },
+  {
+    "timestamp": 1766480086902,
+    "message": "2025-12-23T08:54:46.902Z\t4ad4d111-15c1-4989-b9be-d803b2ee03cf\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1766480089521
+  },
+  {
+    "timestamp": 1766480086923,
+    "message": "END RequestId: 4ad4d111-15c1-4989-b9be-d803b2ee03cf\n",
+    "ingestionTime": 1766480089521
+  },
+  {
+    "timestamp": 1766480086923,
+    "message": "REPORT RequestId: 4ad4d111-15c1-4989-b9be-d803b2ee03cf\tDuration: 57.43 ms\tBilled Duration: 442 ms\tMemory Size: 128 MB\tMax Memory Used: 94 MB\tInit Duration: 384.17 ms\t\n",
+    "ingestionTime": 1766480089521
+  },
+  {
+    "timestamp": 1766480086941,
+    "message": "2025-12-23T08:54:46.941Z\tc3d5528d-3684-4173-b340-5d5e784d5116\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1766480089521
+  },
+  {
+    "timestamp": 1766480086941,
+    "message": "2025-12-23T08:54:46.941Z\tc3d5528d-3684-4173-b340-5d5e784d5116\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1766480089521
+  },
+  {
+    "timestamp": 1766480086941,
+    "message": "START RequestId: c3d5528d-3684-4173-b340-5d5e784d5116 Version: $LATEST\n",
+    "ingestionTime": 1766480089521
+  },
+  {
+    "timestamp": 1766480086961,
+    "message": "END RequestId: c3d5528d-3684-4173-b340-5d5e784d5116\n",
+    "ingestionTime": 1766480089521
+  },
+  {
+    "timestamp": 1766480086961,
+    "message": "REPORT RequestId: c3d5528d-3684-4173-b340-5d5e784d5116\tDuration: 2.15 ms\tBilled Duration: 3 ms\tMemory Size: 128 MB\tMax Memory Used: 94 MB\t\n",
+    "ingestionTime": 1766480089521
+  }
+]

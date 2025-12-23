@@ -318,13 +318,20 @@ enum ScraperJobTriggerSource {
   ADMIN
 }
 
-enum ScraperJobStatus { 
+enum ScraperJobStatus {
   QUEUED
   RUNNING
   COMPLETED
   FAILED
   CANCELLED
   TIMEOUT
+  STOPPED_TIMEOUT
+  STOPPED_BLANKS
+  STOPPED_NOT_FOUND
+  STOPPED_ERROR
+  STOPPED_MANUAL
+  STOPPED_NO_VENUE
+  STOPPED_MAX_ID
 }
 
 enum ScrapeURLStatus { 
@@ -338,6 +345,7 @@ enum ScrapeURLStatus {
 enum ScrapeAttemptStatus { 
   SUCCESS
   FAILED
+  ERROR
   SKIPPED_DONOTSCRAPE
   SKIPPED_VENUE
   BLANK
@@ -367,6 +375,16 @@ enum ScraperOperation {
   DISABLE
   STATUS
   RESET
+}
+
+enum ScraperJobMode {
+  single
+  bulk
+  range
+  gaps
+  auto
+  refresh
+  multiId
 }
 
 # ===================================================================

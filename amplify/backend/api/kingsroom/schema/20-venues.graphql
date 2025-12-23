@@ -45,7 +45,7 @@ type Venue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   # Social Pulse Relationships
   socialAccounts: [SocialAccount] @hasMany(indexName: "bySocialAccountVenue", fields: ["id"])
 
-  entityId: ID @index(name: "byEntityVenue", sortKeyFields: ["name"])
+  entityId: ID @index(name: "byEntityVenue", sortKeyFields: ["name"], queryField: "venuesByEntity")
   entity: Entity @belongsTo(fields: ["entityId"])
 }
 
@@ -145,7 +145,7 @@ type BatchVenueAssignmentResult {
 
 # --- Venue Reassignment Types (NEW) ---
 
-type SaveVenueAssignmentInfo {
+type SaveVenueAssignmentInfo @aws_iam @aws_cognito_user_pools {
   venueId: ID
   venueName: String
   status: VenueAssignmentStatus

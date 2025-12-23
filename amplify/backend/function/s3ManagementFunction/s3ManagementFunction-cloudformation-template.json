@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.2\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.3\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -631,10 +631,10 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byURL",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byTournamentId",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev/index/byEntityScrapeURL"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/byURL",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/byTournamentId",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/byEntityScrapeURL"
               ],
               "Effect": "Allow"
             },
@@ -646,10 +646,10 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byURL",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byEntity",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-dev/index/byScrapeURL"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging/index/byURL",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging/index/byEntity",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging/index/byScrapeURL"
               ],
               "Effect": "Allow"
             },

@@ -1,0 +1,297 @@
+[
+  {
+    "timestamp": 1766480087628,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480087969,
+    "message": "START RequestId: d59e8bd7-ad0c-44b3-8af2-e0c64dfa4073 Version: $LATEST\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480087971,
+    "message": "2025-12-23T08:54:47.971Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] ============================================================\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480087981,
+    "message": "2025-12-23T08:54:47.981Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] Lambda invoked at 2025-12-23T08:54:47.981Z\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480087981,
+    "message": "2025-12-23T08:54:47.981Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] ============================================================\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480087981,
+    "message": "2025-12-23T08:54:47.981Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:ENV] GAME_TABLE: Game-fosb7ek5argnhctz4odpt52eia-staging\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480087981,
+    "message": "2025-12-23T08:54:47.981Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:ENV] VENUE_DETAILS_TABLE: VenueDetails-fosb7ek5argnhctz4odpt52eia-staging\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480087981,
+    "message": "2025-12-23T08:54:47.981Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:ENV] Region: ap-southeast-2\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480087981,
+    "message": "2025-12-23T08:54:47.981Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] Event type: DynamoDB Stream\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480087999,
+    "message": "2025-12-23T08:54:47.999Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] Full event: {\n  \"Records\": [\n    {\n      \"eventID\": \"10b37bffa3091ceca5c91a0a1491f0ee\",\n      \"eventName\": \"REMOVE\",\n      \"eventVersion\": \"1.1\",\n      \"eventSource\": \"aws:dynamodb\",\n      \"awsRegion\": \"ap-southeast-2\",\n      \"dynamodb\": {\n        \"ApproximateCreationDateTime\": 1766480086,\n        \"Keys\": {\n          \"id\": {\n            \"S\": \"9459663a-d148-4c94-89fb-7872d7306c7e\"\n          }\n        },\n        \"OldImage\": {\n          \"_lastChangedAt\": {\n            \"N\": \"1766476371777\"\n          },\n          \"totalBuyInsCollected\": {\n            \"N\": \"8100\"\n          },\n          \"hasGuarantee\": {\n            \"BOOL\": true\n          },\n          \"tournamentType\": {\n            \"S\": \"REBUY\"\n          },\n          \"prizepoolPaid\": {\n            \"N\": \"6750\"\n          },\n          \"isSurvivor\": {\n            \"NULL\": true\n          },\n          \"cashGameType\": {\n            \"NULL\": true\n          },\n          \"gameDayOfWeek\": {\n            \"S\": \"TUESDAY\"\n          },\n          \"gameVariant\": {\n            \"S\": \"NLHE\"\n          },\n          \"seriesAssignmentConfidence\": {\n            \"N\": \"0\"\n          },\n          \"id\": {\n            \"S\": \"9459663a-d148-4c94-89fb-7872d7306c7e\"\n          },\n          \"isBigBlindAnte\": {\n            \"NULL\": true\n          },\n          \"_version\": {\n            \"N\": \"1\"\n          },\n          \"prizepoolCalculated\": {\n            \"N\": \"6750\"\n          },\n          \"totalAddons\": {\n            \"N\": \"0\"\n          },\n          \"totalDuration\": {\n            \"S\": \"Total Time\"\n          },\n          \"isRegular\": {\n            \"BOOL\": false\n          },\n          \"finalDay\": {\n            \"BOOL\": false\n          },\n          \"maxPlayers\": {\n            \"NULL\": true\n          },\n          \"cashRakeType\": {\n            \"NULL\": true\n          },\n          \"venueGameTypeKey\": {\n            \"S\": \"6316925d-1163-4b25-8d26-5728a03d99b8#STANDARD#TUESDAY#NLHE\"\n          },\n          \"venueAssignmentStatus\": {\n            \"S\": \"MANUALLY_ASSIGNED\"\n          },\n          \"gameFrequency\": {\n            \"S\": \"UNKNOWN\"\n          },\n          \"recurringGameAssignmentConfidence\": {\n            \"N\": \"0.99\"\n          },\n          \"recurringGameId\": {\n            \"S\": \"65483734-00ff-40bc-92b1-218529762d68\"\n          },\n          \"isSatellite\": {\n            \"BOOL\": false\n          },\n          \"scheduleType\": {\n            \"NULL\": true\n          },\n          \"bettingStructure\": {\n            \"S\": \"NO_LIMIT\"\n          },\n          \"speedType\": {\n            \"NULL\": true\n          },\n          \"isShootout\": {\n            \"NULL\": true\n          },\n          \"totalUniquePlayers\": {\n            \"N\": \"54\"\n          },\n          \"classificationSource\": {\n            \"S\": \"DERIVED\"\n          },\n          \"isWinTheButton\": {\n            \"NULL\": true\n          },\n          \"tournamentPurpose\": {\n            \"NULL\": true\n          },\n          \"prizepoolAddedValue\": {\n            \"N\": \"0\"\n          },\n          \"guaranteeOverlayCost\": {\n            \"N\": \"0\"\n          },\n          \"lateRegistration\": {\n            \"NULL\": true\n          },\n          \"totalChipsInPlay\": {\n            \"NULL\": true\n          },\n          \"venueId\": {\n            \"S\": \"6316925d-1163-4b25-8d26-5728a03d99b8\"\n          },\n          \"totalRebuys\": {\n            \"N\": \"0\"\n          },\n          \"venueFee\": {\n            \"N\": \"1300\"\n          },\n          \"eventNumber\": {\n            \"NULL\": true\n          },\n          \"guaranteeAmount\": {\n            \"N\": \"6000\"\n          },\n          \"averagePlayerStack\": {\n            \"NULL\": true\n          },\n          \"isSeries\": {\n            \"BOOL\": false\n          },\n          \"entityQueryKey\": {\n            \"S\": \"42101695-1332-48e3-963b-3c6ad4e909a0#TUESDAY#NLHE#0101-0200\"\n          },\n          \"buyInTier\": {\n            \"S\": \"MID\"\n          },\n          \"isFlipAndGo\": {\n            \"NULL\": true\n          },\n          \"levels\": {\n            \"L\": []\n          },\n          \"mixedGameRotation\": {\n            \"NULL\": true\n          },\n          \"prizepoolSurplus\": {\n            \"N\": \"750\"\n          },\n          \"registrationStatus\": {\n            \"S\": \"CLOSED\"\n          },\n          \"wasScheduledInstance\": {\n            \"BOOL\": false\n          },\n          \"venueAssignmentConfidence\": {\n            \"N\": \"1\"\n          },\n          \"wasEdited\": {\n            \"BOOL\": false\n          },\n          \"classificationConfidence\": {\n            \"NULL\": true\n          },\n          \"isMainEvent\": {\n            \"BOOL\": false\n          },\n          \"lastClassifiedAt\": {\n            \"S\": \"2025-12-23T07:52:51.416Z\"\n          },\n          \"gameEndDateTime\": {\n            \"NULL\": true\n          },\n          \"sourceUrl\": {\n            \"S\": \"https://kingsroom.com.au/tournament/?id=1011\"\n          },\n          \"createdAt\": {\n            \"S\": \"2025-12-23T07:52:51.777Z\"\n          },\n          \"entityGameTypeKey\": {\n            \"S\": \"42101695-1332-48e3-963b-3c6ad4e909a0#STANDARD#TUESDAY#NLHE#0101-0200\"\n          },\n          \"tableSize\": {\n            \"NULL\": true\n          },\n          \"tournamentId\": {\n            \"N\": \"1011\"\n          },\n          \"dayNumber\": {\n            \"NULL\": true\n          },\n          \"flightLetter\": {\n            \"NULL\": true\n          },\n          \"variant\": {\n            \"S\": \"HOLD_EM\"\n          },\n          \"totalEntries\": {\n            \"N\": \"54\"\n          },\n          \"updatedAt\": {\n            \"S\": \"2025-12-23T07:52:51.777Z\"\n          },\n          \"venueScheduleKey\": {\n            \"S\": \"6316925d-1163-4b25-8d26-5728a03d99b8#TUESDAY#NLHE\"\n          },\n          \"totalInitialEntries\": {\n            \"N\": \"54\"\n          },\n          \"startingStack\": {\n            \"N\": \"40000\"\n          },\n          \"gameTags\": {\n            \"L\": [\n              {\n                \"S\": \"Re-Entry\"\n              }\n            ]\n          },\n          \"hasRunItTwice\": {\n            \"NULL\": true\n          },\n          \"dealType\": {\n            \"NULL\": true\n          },\n          \"requiresVenueAssignment\": {\n            \"BOOL\": false\n          },\n          \"payoutStructure\": {\n            \"NULL\": true\n          },\n          \"recurringGameAssignmentStatus\": {\n            \"S\": \"AUTO_ASSIGNED\"\n          },\n          \"name\": {\n            \"S\": \"Bella Vista Hotel Tuesdays\"\n          },\n          \"bountyPercentage\": {\n            \"NULL\": true\n          },\n          \"gameType\": {\n            \"S\": \"TOURNAMENT\"\n          },\n          \"stackDepth\": {\n            \"NULL\": true\n          },\n          \"__typename\": {\n            \"S\": \"Game\"\n          },\n          \"entryStructure\": {\n            \"NULL\": true\n          },\n          \"seriesAssignmentStatus\": {\n            \"S\": \"NOT_SERIES\"\n          },\n          \"buyInBucket\": {\n            \"S\": \"0101-0200\"\n          },\n          \"buyIn\": {\n            \"N\": \"150\"\n          },\n          \"gameStartDateTime\": {\n            \"S\": \"2025-07-15T18:30:00.000Z\"\n          },\n          \"hasBombPots\": {\n            \"NULL\": true\n          },\n          \"hasStraddle\": {\n            \"NULL\": true\n          },\n          \"prizepoolPlayerContributions\": {\n            \"N\": \"6750\"\n          },\n          \"bountyType\": {\n            \"NULL\": true\n          },\n          \"gameStatus\": {\n            \"S\": \"FINISHED\"\n          },\n          \"entityId\": {\n            \"S\": \"42101695-1332-48e3-963b-3c6ad4e909a0\"\n          },\n          \"isAnteOnly\": {\n            \"NULL\": true\n          },\n          \"playersRemaining\": {\n            \"NULL\": true\n          },\n          \"rakeRevenue\": {\n            \"N\": \"1350\"\n          },\n          \"gameProfit\": {\n            \"N\": \"1350\"\n          },\n          \"rake\": {\n            \"N\": \"25\"\n          },\n          \"sessionMode\": {\n            \"S\": \"TOURNAMENT\"\n          },\n          \"bountyAmount\": {\n            \"NULL\": true\n          }\n        },\n        \"SequenceNumber\": \"16357800000293809048662161\",\n        \"SizeBytes\": 2197,\n        \"StreamViewType\": \"NEW_AND_OLD_IMAGES\"\n      },\n      \"eventSourceARN\": \"arn:aws:dynamodb:ap-southeast-2:495599763953:table/Game-fosb7ek5argnhctz4odpt52eia-staging/stream/2025-12-19T21:00:29.042\"\n    }\n  ]\n}\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480087999,
+    "message": "2025-12-23T08:54:47.999Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] Processing 1 stream records\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] --- Record 1/1 ---\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] eventSourceARN: arn:aws:dynamodb:ap-southeast-2:495599763953:table/Game-fosb7ek5argnhctz4odpt52eia-staging/stream/2025-12-19T21:00:29.042\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] GAME_TABLE check: looking for \"Game\"\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] ✅ Processing this record...\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] ========================================\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] Processing stream record: REMOVE\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] ========================================\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] Raw record keys: [\n  'eventID',\n  'eventName',\n  'eventVersion',\n  'eventSource',\n  'awsRegion',\n  'dynamodb',\n  'eventSourceARN'\n]\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] dynamodb keys: [\n  'ApproximateCreationDateTime',\n  'Keys',\n  'OldImage',\n  'SequenceNumber',\n  'SizeBytes',\n  'StreamViewType'\n]\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] Has NewImage: false\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088000,
+    "message": "2025-12-23T08:54:48.000Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] Has OldImage: true\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088001,
+    "message": "2025-12-23T08:54:48.001Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] Unmarshalled NewImage: null\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088001,
+    "message": "2025-12-23T08:54:48.001Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] Unmarshalled OldImage: {\n  \"id\": \"9459663a-d148-4c94-89fb-7872d7306c7e\",\n  \"gameStatus\": \"FINISHED\",\n  \"venueId\": \"6316925d-1163-4b25-8d26-5728a03d99b8\"\n}\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088001,
+    "message": "2025-12-23T08:54:48.001Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] ⏭️ No venueId in newImage or is UNASSIGNED\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088001,
+    "message": "2025-12-23T08:54:48.001Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] Venue change detected: 6316925d-1163-4b25-8d26-5728a03d99b8 -> undefined\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088001,
+    "message": "2025-12-23T08:54:48.001Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] Game 9459663a-d148-4c94-89fb-7872d7306c7e removed, updating venue 6316925d-1163-4b25-8d26-5728a03d99b8\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088001,
+    "message": "2025-12-23T08:54:48.001Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] Venues to update: 6316925d-1163-4b25-8d26-5728a03d99b8\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088001,
+    "message": "2025-12-23T08:54:48.001Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:STREAM] Processing venue: 6316925d-1163-4b25-8d26-5728a03d99b8\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088001,
+    "message": "2025-12-23T08:54:48.001Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:RECALC] ========================================\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088001,
+    "message": "2025-12-23T08:54:48.001Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:RECALC] Starting full recalculation for venue 6316925d-1163-4b25-8d26-5728a03d99b8\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088001,
+    "message": "2025-12-23T08:54:48.001Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:RECALC] ========================================\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088002,
+    "message": "2025-12-23T08:54:48.002Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] Fetching games for venueId: 6316925d-1163-4b25-8d26-5728a03d99b8\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088002,
+    "message": "2025-12-23T08:54:48.002Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] Game Table: Game-fosb7ek5argnhctz4odpt52eia-staging, Index: byVenue\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088922,
+    "message": "2025-12-23T08:54:48.922Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] ✅ Retrieved 0 total games for venue 6316925d-1163-4b25-8d26-5728a03d99b8\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088922,
+    "message": "2025-12-23T08:54:48.922Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:RECALC] Found 0 games for venue\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088922,
+    "message": "2025-12-23T08:54:48.922Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:RECALC] Calculated metrics: {\n  \"totalGamesHeld\": 0,\n  \"averageUniquePlayersPerGame\": 0,\n  \"averageEntriesPerGame\": 0,\n  \"gameNights\": [],\n  \"gamesIncluded\": 0,\n  \"gamesExcluded\": 0,\n  \"exclusionReasons\": {}\n}\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088922,
+    "message": "2025-12-23T08:54:48.922Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] Querying VenueDetails for venueId: 6316925d-1163-4b25-8d26-5728a03d99b8\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480088922,
+    "message": "2025-12-23T08:54:48.922Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] Table: VenueDetails-fosb7ek5argnhctz4odpt52eia-staging, Index: byVenue\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480089021,
+    "message": "2025-12-23T08:54:49.021Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] Query result: found 1 records\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480089021,
+    "message": "2025-12-23T08:54:49.021Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] Existing record ID: f5a15cb8-9526-4148-be6b-1aa61e5496fb\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480089021,
+    "message": "2025-12-23T08:54:49.021Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:RECALC] Existing record: f5a15cb8-9526-4148-be6b-1aa61e5496fb\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480089021,
+    "message": "2025-12-23T08:54:49.021Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:RECALC] Built record: {\n  \"id\": \"f5a15cb8-9526-4148-be6b-1aa61e5496fb\",\n  \"venueId\": \"6316925d-1163-4b25-8d26-5728a03d99b8\",\n  \"startDate\": \"2025-12-23T08:54:48.597Z\",\n  \"status\": \"PENDING\",\n  \"lastCustomerSuccessVisit\": null,\n  \"totalGamesHeld\": 0,\n  \"averageUniquePlayersPerGame\": 0,\n  \"averageEntriesPerGame\": 0,\n  \"gameNights\": [],\n  \"createdAt\": \"2025-12-23T08:54:48.597Z\",\n  \"updatedAt\": \"2025-12-23T08:54:49.021Z\",\n  \"_version\": 2,\n  \"_lastChangedAt\": 1766480089021,\n  \"__typename\": \"VenueDetails\"\n}\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480089021,
+    "message": "2025-12-23T08:54:49.021Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:RECALC] Updating existing record...\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480089021,
+    "message": "2025-12-23T08:54:49.021Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] Updating VenueDetails record: f5a15cb8-9526-4148-be6b-1aa61e5496fb\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480089021,
+    "message": "2025-12-23T08:54:49.021Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] Updates: {\n  \"id\": \"f5a15cb8-9526-4148-be6b-1aa61e5496fb\",\n  \"venueId\": \"6316925d-1163-4b25-8d26-5728a03d99b8\",\n  \"startDate\": \"2025-12-23T08:54:48.597Z\",\n  \"status\": \"PENDING\",\n  \"lastCustomerSuccessVisit\": null,\n  \"totalGamesHeld\": 0,\n  \"averageUniquePlayersPerGame\": 0,\n  \"averageEntriesPerGame\": 0,\n  \"gameNights\": [],\n  \"createdAt\": \"2025-12-23T08:54:48.597Z\",\n  \"updatedAt\": \"2025-12-23T08:54:49.021Z\",\n  \"_version\": 2,\n  \"_lastChangedAt\": 1766480089021,\n  \"__typename\": \"VenueDetails\"\n}\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480089021,
+    "message": "2025-12-23T08:54:49.021Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] Update expression: SET #totalGamesHeld = :totalGamesHeld, #averageUniquePlayersPerGame = :averageUniquePlayersPerGame, #averageEntriesPerGame = :averageEntriesPerGame, #gameNights = :gameNights, #status = :status, #updatedAt = :updatedAt, #_lastChangedAt = :_lastChangedAt, #_version = :_version\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480089021,
+    "message": "2025-12-23T08:54:49.021Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] Expression values: {\n  \":totalGamesHeld\": 0,\n  \":averageUniquePlayersPerGame\": 0,\n  \":averageEntriesPerGame\": 0,\n  \":gameNights\": [],\n  \":status\": \"PENDING\",\n  \":updatedAt\": \"2025-12-23T08:54:49.021Z\",\n  \":_lastChangedAt\": 1766480089021,\n  \":_version\": 2\n}\n",
+    "ingestionTime": 1766480089136
+  },
+  {
+    "timestamp": 1766480089100,
+    "message": "2025-12-23T08:54:49.100Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:DB] ✅ Updated VenueDetails f5a15cb8-9526-4148-be6b-1aa61e5496fb: games=0, avgUniquePlayers=0, avgEntries=0, nights=[]\n",
+    "ingestionTime": 1766480098115
+  },
+  {
+    "timestamp": 1766480089100,
+    "message": "2025-12-23T08:54:49.100Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails:RECALC] ✅ Recalculation complete. Details ID: f5a15cb8-9526-4148-be6b-1aa61e5496fb\n",
+    "ingestionTime": 1766480098115
+  },
+  {
+    "timestamp": 1766480089101,
+    "message": "2025-12-23T08:54:49.101Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] ============================================================\n",
+    "ingestionTime": 1766480098115
+  },
+  {
+    "timestamp": 1766480089101,
+    "message": "2025-12-23T08:54:49.101Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] Stream processing complete: 1 succeeded, 0 failed\n",
+    "ingestionTime": 1766480098115
+  },
+  {
+    "timestamp": 1766480089101,
+    "message": "2025-12-23T08:54:49.101Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] Results: [\n  {\n    \"venueId\": \"6316925d-1163-4b25-8d26-5728a03d99b8\",\n    \"detailsId\": \"f5a15cb8-9526-4148-be6b-1aa61e5496fb\",\n    \"success\": true\n  }\n]\n",
+    "ingestionTime": 1766480098115
+  },
+  {
+    "timestamp": 1766480089101,
+    "message": "2025-12-23T08:54:49.101Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] ============================================================\n",
+    "ingestionTime": 1766480098115
+  },
+  {
+    "timestamp": 1766480089400,
+    "message": "2025-12-23T08:54:49.400Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] ============================================================\n",
+    "ingestionTime": 1766480098115
+  },
+  {
+    "timestamp": 1766480089400,
+    "message": "2025-12-23T08:54:49.400Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] Lambda execution complete\n",
+    "ingestionTime": 1766480098115
+  },
+  {
+    "timestamp": 1766480089400,
+    "message": "2025-12-23T08:54:49.400Z\td59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tINFO\t[VenueDetails] ============================================================\n",
+    "ingestionTime": 1766480098115
+  },
+  {
+    "timestamp": 1766480089440,
+    "message": "END RequestId: d59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\n",
+    "ingestionTime": 1766480098115
+  },
+  {
+    "timestamp": 1766480089440,
+    "message": "REPORT RequestId: d59e8bd7-ad0c-44b3-8af2-e0c64dfa4073\tDuration: 1470.90 ms\tBilled Duration: 1809 ms\tMemory Size: 128 MB\tMax Memory Used: 97 MB\tInit Duration: 338.10 ms\t\n",
+    "ingestionTime": 1766480098115
+  }
+]

@@ -98,8 +98,11 @@ export const RecurringGamesManager: React.FC<RecurringGamesManagerProps> = ({ ve
         setIsSubmitting(true);
         try {
             if (editingGame) {
+                // IMPORTANT: Pass _version for optimistic locking (DataStore sync)
+                // This ensures concurrent updates don't overwrite each other
                 await updateExistingRecurringGame({
                     id: editingGame.id,
+                    _version: editingGame._version, // Pass current version for optimistic locking
                     ...formData
                 });
             } else {
@@ -110,9 +113,16 @@ export const RecurringGamesManager: React.FC<RecurringGamesManagerProps> = ({ ve
             }
             await loadGames();
             setIsModalOpen(false);
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            alert('Failed to save game');
+            // Handle version conflict errors gracefully
+            if (err?.errors?.[0]?.errorType === 'ConflictUnhandled' || 
+                err?.message?.includes('version')) {
+                alert('This record was modified by someone else. Please refresh and try again.');
+                await loadGames();
+            } else {
+                alert('Failed to save game');
+            }
         } finally {
             setIsSubmitting(false);
         }

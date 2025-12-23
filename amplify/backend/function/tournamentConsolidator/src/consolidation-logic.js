@@ -732,7 +732,7 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         // Series fields - *** FIX: Now properly copying from child ***
         tournamentSeriesId: childGame.tournamentSeriesId || null,
         seriesName: childGame.seriesName || null,
-        isSeries: true,
+        isSeries: childGame.isSeries || false,
         eventNumber: childGame.eventNumber || null,
         seriesAssignmentStatus: childGame.seriesAssignmentStatus || 'NOT_SERIES',
         seriesAssignmentConfidence: childGame.seriesAssignmentConfidence || 0,
@@ -749,7 +749,7 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         
         // Tournament type flags
         isMainEvent: childGame.isMainEvent || false,
-        isRegular: false,
+        isRegular: childGame.isRegular || false,
         isSatellite: childGame.isSatellite || false,
         tournamentType: childGame.tournamentType || null,
         

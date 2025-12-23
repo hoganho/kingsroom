@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.1\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.2.3\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -906,8 +906,8 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-dev",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-dev/index/byStatus"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-staging",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-staging/index/byStatus"
               ],
               "Effect": "Allow"
             },
@@ -918,7 +918,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -927,7 +927,7 @@
                 "dynamodb:Scan"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -937,7 +937,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-dev"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-staging"
               ],
               "Effect": "Allow"
             },
@@ -946,7 +946,7 @@
                 "lambda:InvokeFunction"
               ],
               "Resource": [
-                "arn:aws:lambda:ap-southeast-2:*:function:autoScraper-dev"
+                "arn:aws:lambda:ap-southeast-2:*:function:autoScraper-staging"
               ],
               "Effect": "Allow"
             },

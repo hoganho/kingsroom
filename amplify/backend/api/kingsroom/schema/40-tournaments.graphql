@@ -33,4 +33,5 @@ type TournamentSeries @model(subscriptions: null) @auth(rules: [{ allow: private
   venueId: ID @index(name: "byVenue")
   venue: Venue @belongsTo(fields: ["venueId"])
   games: [Game] @hasMany(indexName: "byTournamentSeries", fields: ["id"])
+  metrics: [TournamentSeriesMetrics] @hasMany(indexName: "byTournamentSeriesMetrics", fields: ["id"])
 }

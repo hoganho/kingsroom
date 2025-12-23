@@ -284,6 +284,22 @@ export const schema = {
                         ]
                     }
                 },
+                "tournamentSeriesMetrics": {
+                    "name": "tournamentSeriesMetrics",
+                    "isArray": true,
+                    "type": {
+                        "model": "TournamentSeriesMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "entity"
+                        ]
+                    }
+                },
                 "socialAccounts": {
                     "name": "socialAccounts",
                     "isArray": true,
@@ -867,6 +883,7 @@ export const schema = {
                     "type": "key",
                     "properties": {
                         "name": "byEntityVenue",
+                        "queryField": "venuesByEntity",
                         "fields": [
                             "entityId",
                             "name"
@@ -1583,6 +1600,267 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "sessionMode": {
+                    "name": "sessionMode",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SessionMode"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "variant": {
+                    "name": "variant",
+                    "isArray": false,
+                    "type": {
+                        "enum": "PokerVariant"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "bettingStructure": {
+                    "name": "bettingStructure",
+                    "isArray": false,
+                    "type": {
+                        "enum": "BettingStructure"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "speedType": {
+                    "name": "speedType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SpeedType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tableSize": {
+                    "name": "tableSize",
+                    "isArray": false,
+                    "type": {
+                        "enum": "TableSize"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "maxPlayers": {
+                    "name": "maxPlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dealType": {
+                    "name": "dealType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "DealType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "buyInTier": {
+                    "name": "buyInTier",
+                    "isArray": false,
+                    "type": {
+                        "enum": "BuyInTier"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entryStructure": {
+                    "name": "entryStructure",
+                    "isArray": false,
+                    "type": {
+                        "enum": "EntryStructure"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "bountyType": {
+                    "name": "bountyType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "BountyType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "bountyAmount": {
+                    "name": "bountyAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "bountyPercentage": {
+                    "name": "bountyPercentage",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentPurpose": {
+                    "name": "tournamentPurpose",
+                    "isArray": false,
+                    "type": {
+                        "enum": "TournamentPurpose"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "stackDepth": {
+                    "name": "stackDepth",
+                    "isArray": false,
+                    "type": {
+                        "enum": "StackDepth"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lateRegistration": {
+                    "name": "lateRegistration",
+                    "isArray": false,
+                    "type": {
+                        "enum": "LateRegistration"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "payoutStructure": {
+                    "name": "payoutStructure",
+                    "isArray": false,
+                    "type": {
+                        "enum": "PayoutStructure"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scheduleType": {
+                    "name": "scheduleType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "TournamentScheduleType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isShootout": {
+                    "name": "isShootout",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSurvivor": {
+                    "name": "isSurvivor",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isFlipAndGo": {
+                    "name": "isFlipAndGo",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isWinTheButton": {
+                    "name": "isWinTheButton",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isAnteOnly": {
+                    "name": "isAnteOnly",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isBigBlindAnte": {
+                    "name": "isBigBlindAnte",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "cashGameType": {
+                    "name": "cashGameType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "CashGameType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "cashRakeType": {
+                    "name": "cashRakeType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "CashRakeType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasBombPots": {
+                    "name": "hasBombPots",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasRunItTwice": {
+                    "name": "hasRunItTwice",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasStraddle": {
+                    "name": "hasStraddle",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "mixedGameRotation": {
+                    "name": "mixedGameRotation",
+                    "isArray": true,
+                    "type": {
+                        "enum": "MixedGameComponent"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "classificationSource": {
+                    "name": "classificationSource",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ClassificationSource"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "classificationConfidence": {
+                    "name": "classificationConfidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastClassifiedAt": {
+                    "name": "lastClassifiedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "venueId": {
                     "name": "venueId",
                     "isArray": false,
@@ -1999,6 +2277,7 @@ export const schema = {
                     "type": "key",
                     "properties": {
                         "name": "byEntityGame",
+                        "queryField": "gamesByEntity",
                         "fields": [
                             "entityId",
                             "gameStartDateTime"
@@ -2846,6 +3125,27 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "tournamentSeriesId": {
+                    "name": "tournamentSeriesId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesName": {
+                    "name": "seriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameId": {
+                    "name": "recurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "entitySeriesKey": {
                     "name": "entitySeriesKey",
                     "isArray": false,
@@ -2957,6 +3257,26 @@ export const schema = {
                         "fields": [
                             "gameStartDateTime",
                             "netProfit"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byTournamentSeriesSnapshot",
+                        "fields": [
+                            "tournamentSeriesId",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byRecurringGameSnapshot",
+                        "fields": [
+                            "recurringGameId",
+                            "gameStartDateTime"
                         ]
                     }
                 },
@@ -4469,6 +4789,22 @@ export const schema = {
                         ]
                     }
                 },
+                "metrics": {
+                    "name": "metrics",
+                    "isArray": true,
+                    "type": {
+                        "model": "TournamentSeriesMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "tournamentSeries"
+                        ]
+                    }
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -4949,6 +5285,7 @@ export const schema = {
                     "type": "key",
                     "properties": {
                         "name": "byPrimaryEntity",
+                        "queryField": "playersByEntity",
                         "fields": [
                             "primaryEntityId"
                         ]
@@ -7137,6 +7474,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "seriesType": {
+                    "name": "seriesType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "totalVenues": {
                     "name": "totalVenues",
                     "isArray": false,
@@ -7165,6 +7509,20 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "totalSeriesGames": {
+                    "name": "totalSeriesGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalRegularGames": {
+                    "name": "totalRegularGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "totalRecurringGames": {
                     "name": "totalRecurringGames",
                     "isArray": false,
@@ -7181,6 +7539,13 @@ export const schema = {
                 },
                 "totalActiveRecurringGameTypes": {
                     "name": "totalActiveRecurringGameTypes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalActiveTournamentSeries": {
+                    "name": "totalActiveTournamentSeries",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": true,
@@ -7431,6 +7796,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "topTournamentSeries": {
+                    "name": "topTournamentSeries",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "calculatedAt": {
                     "name": "calculatedAt",
                     "isArray": false,
@@ -7468,6 +7840,13 @@ export const schema = {
                 },
                 "recurringGamesIncluded": {
                     "name": "recurringGamesIncluded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentSeriesIncluded": {
+                    "name": "tournamentSeriesIncluded",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": false,
@@ -7532,6 +7911,16 @@ export const schema = {
                     }
                 },
                 {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySeriesTypeEntity",
+                        "fields": [
+                            "seriesType",
+                            "entityId"
+                        ]
+                    }
+                },
+                {
                     "type": "auth",
                     "properties": {
                         "rules": [
@@ -7587,8 +7976,29 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "seriesType": {
+                    "name": "seriesType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "totalGames": {
                     "name": "totalGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalSeriesGames": {
+                    "name": "totalSeriesGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalRegularGames": {
+                    "name": "totalRegularGames",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": true,
@@ -7610,6 +8020,13 @@ export const schema = {
                 },
                 "totalActiveRecurringGameTypes": {
                     "name": "totalActiveRecurringGameTypes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalActiveTournamentSeries": {
+                    "name": "totalActiveTournamentSeries",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": true,
@@ -7867,6 +8284,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "topTournamentSeries": {
+                    "name": "topTournamentSeries",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "profitTrend": {
                     "name": "profitTrend",
                     "isArray": false,
@@ -7960,6 +8384,13 @@ export const schema = {
                 },
                 "recurringGamesIncluded": {
                     "name": "recurringGamesIncluded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentSeriesIncluded": {
+                    "name": "tournamentSeriesIncluded",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": false,
@@ -8064,6 +8495,16 @@ export const schema = {
                     }
                 },
                 {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySeriesTypeVenue",
+                        "fields": [
+                            "seriesType",
+                            "venueId"
+                        ]
+                    }
+                },
+                {
                     "type": "auth",
                     "properties": {
                         "rules": [
@@ -8102,7 +8543,7 @@ export const schema = {
                     "name": "venueId",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "recurringGameId": {
@@ -8136,6 +8577,13 @@ export const schema = {
                 },
                 "timeRange": {
                     "name": "timeRange",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "seriesType": {
+                    "name": "seriesType",
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
@@ -8659,6 +9107,468 @@ export const schema = {
                 }
             ]
         },
+        "TournamentSeriesMetrics": {
+            "name": "TournamentSeriesMetrics",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tournamentSeriesId": {
+                    "name": "tournamentSeriesId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tournamentSeries": {
+                    "name": "tournamentSeries",
+                    "isArray": false,
+                    "type": {
+                        "model": "TournamentSeries"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "tournamentSeriesId"
+                        ]
+                    }
+                },
+                "seriesName": {
+                    "name": "seriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "timeRange": {
+                    "name": "timeRange",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "seriesType": {
+                    "name": "seriesType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalEvents": {
+                    "name": "totalEvents",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalFlights": {
+                    "name": "totalFlights",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "uniqueVenues": {
+                    "name": "uniqueVenues",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "mainEventCount": {
+                    "name": "mainEventCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalEntries": {
+                    "name": "totalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalUniquePlayers": {
+                    "name": "totalUniquePlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalReentries": {
+                    "name": "totalReentries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalAddons": {
+                    "name": "totalAddons",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "mainEventTotalEntries": {
+                    "name": "mainEventTotalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "regularSeriesPlayers": {
+                    "name": "regularSeriesPlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "occasionalSeriesPlayers": {
+                    "name": "occasionalSeriesPlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "oneTimeSeriesPlayers": {
+                    "name": "oneTimeSeriesPlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPrizepool": {
+                    "name": "totalPrizepool",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalRevenue": {
+                    "name": "totalRevenue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalProfit": {
+                    "name": "totalProfit",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "avgEntriesPerEvent": {
+                    "name": "avgEntriesPerEvent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgUniquePlayersPerEvent": {
+                    "name": "avgUniquePlayersPerEvent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgPrizepoolPerEvent": {
+                    "name": "avgPrizepoolPerEvent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgRevenuePerEvent": {
+                    "name": "avgRevenuePerEvent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgProfitPerEvent": {
+                    "name": "avgProfitPerEvent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "mainEventAvgEntries": {
+                    "name": "mainEventAvgEntries",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "stdDevEntries": {
+                    "name": "stdDevEntries",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "minEntries": {
+                    "name": "minEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "maxEntries": {
+                    "name": "maxEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "medianEntries": {
+                    "name": "medianEntries",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entriesCV": {
+                    "name": "entriesCV",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "profitMargin": {
+                    "name": "profitMargin",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "firstEventDate": {
+                    "name": "firstEventDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "firstEventDaysAgo": {
+                    "name": "firstEventDaysAgo",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "latestEventDate": {
+                    "name": "latestEventDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "latestEventDaysAgo": {
+                    "name": "latestEventDaysAgo",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesDurationDays": {
+                    "name": "seriesDurationDays",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "profitability": {
+                    "name": "profitability",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consistency": {
+                    "name": "consistency",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "overallHealth": {
+                    "name": "overallHealth",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topEventsByEntries": {
+                    "name": "topEventsByEntries",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topEventsByProfit": {
+                    "name": "topEventsByProfit",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "calculatedAt": {
+                    "name": "calculatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "calculatedBy": {
+                    "name": "calculatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "calculationDurationMs": {
+                    "name": "calculationDurationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "snapshotsIncluded": {
+                    "name": "snapshotsIncluded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "parentSnapshotsIncluded": {
+                    "name": "parentSnapshotsIncluded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dateRangeStart": {
+                    "name": "dateRangeStart",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dateRangeEnd": {
+                    "name": "dateRangeEnd",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "TournamentSeriesMetrics",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityTournamentSeriesMetrics",
+                        "fields": [
+                            "entityId",
+                            "tournamentSeriesId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byTournamentSeriesMetrics",
+                        "fields": [
+                            "tournamentSeriesId",
+                            "timeRange"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byTimeRangeTournamentSeries",
+                        "fields": [
+                            "timeRange",
+                            "tournamentSeriesId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "ScraperJob": {
             "name": "ScraperJob",
             "fields": {
@@ -8839,6 +9749,62 @@ export const schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "currentId": {
+                    "name": "currentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "stopReason": {
+                    "name": "stopReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastErrorMessage": {
+                    "name": "lastErrorMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "notFoundCount": {
+                    "name": "notFoundCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "s3CacheHits": {
+                    "name": "s3CacheHits",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveNotFound": {
+                    "name": "consecutiveNotFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveErrors": {
+                    "name": "consecutiveErrors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveBlanks": {
+                    "name": "consecutiveBlanks",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
                 },
                 "scrapeAttempts": {
                     "name": "scrapeAttempts",
@@ -9886,13 +10852,12 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "fields": {
-                    "name": "fields",
-                    "isArray": true,
+                "fingerprint": {
+                    "name": "fingerprint",
+                    "isArray": false,
                     "type": "String",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": false
+                    "isRequired": true,
+                    "attributes": []
                 },
                 "structureLabel": {
                     "name": "structureLabel",
@@ -9901,8 +10866,23 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "occurrenceCount": {
-                    "name": "occurrenceCount",
+                "foundKeys": {
+                    "name": "foundKeys",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "keyCount": {
+                    "name": "keyCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hitCount": {
+                    "name": "hitCount",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": true,
@@ -9926,6 +10906,13 @@ export const schema = {
                     "name": "exampleUrl",
                     "isArray": false,
                     "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isActive": {
+                    "name": "isActive",
+                    "isArray": false,
+                    "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -9953,6 +10940,16 @@ export const schema = {
                     "type": "model",
                     "properties": {
                         "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byFingerprint",
+                        "queryField": "scrapeStructuresByFingerprint",
+                        "fields": [
+                            "fingerprint"
+                        ]
                     }
                 },
                 {
@@ -12665,7 +13662,14 @@ export const schema = {
                 "COMPLETED",
                 "FAILED",
                 "CANCELLED",
-                "TIMEOUT"
+                "TIMEOUT",
+                "STOPPED_TIMEOUT",
+                "STOPPED_BLANKS",
+                "STOPPED_NOT_FOUND",
+                "STOPPED_ERROR",
+                "STOPPED_MANUAL",
+                "STOPPED_NO_VENUE",
+                "STOPPED_MAX_ID"
             ]
         },
         "ScrapeURLStatus": {
@@ -12683,6 +13687,7 @@ export const schema = {
             "values": [
                 "SUCCESS",
                 "FAILED",
+                "ERROR",
                 "SKIPPED_DONOTSCRAPE",
                 "SKIPPED_VENUE",
                 "BLANK",
@@ -12716,6 +13721,18 @@ export const schema = {
                 "DISABLE",
                 "STATUS",
                 "RESET"
+            ]
+        },
+        "ScraperJobMode": {
+            "name": "ScraperJobMode",
+            "values": [
+                "single",
+                "bulk",
+                "range",
+                "gaps",
+                "auto",
+                "refresh",
+                "multiId"
             ]
         },
         "SocialPlatform": {
@@ -12824,6 +13841,248 @@ export const schema = {
                 "SKIPPED",
                 "PENDING_REVIEW",
                 "FAILED"
+            ]
+        },
+        "SessionMode": {
+            "name": "SessionMode",
+            "values": [
+                "CASH",
+                "TOURNAMENT"
+            ]
+        },
+        "PokerVariant": {
+            "name": "PokerVariant",
+            "values": [
+                "HOLD_EM",
+                "HOLD_EM_SHORT_DECK",
+                "OMAHA_HI",
+                "OMAHA_HILO",
+                "OMAHA5_HI",
+                "OMAHA5_HILO",
+                "OMAHA6_HI",
+                "OMAHA6_HILO",
+                "STUD_HI",
+                "STUD_HILO",
+                "RAZZ",
+                "DRAW_2_7_TRIPLE",
+                "DRAW_2_7_SINGLE",
+                "DRAW_5_CARD",
+                "BADUGI",
+                "MIXED_HORSE",
+                "MIXED_8GAME",
+                "MIXED_HOSE",
+                "MIXED_RASH",
+                "MIXED_DEALERS_CHOICE",
+                "MIXED_ROTATION",
+                "MIXED_OTHER",
+                "COURCHEVEL",
+                "IRISH",
+                "PINEAPPLE",
+                "CRAZY_PINEAPPLE",
+                "OTHER",
+                "NOT_SPECIFIED"
+            ]
+        },
+        "BettingStructure": {
+            "name": "BettingStructure",
+            "values": [
+                "NO_LIMIT",
+                "POT_LIMIT",
+                "FIXED_LIMIT",
+                "SPREAD_LIMIT",
+                "CAP_LIMIT",
+                "MIXED_LIMIT"
+            ]
+        },
+        "SpeedType": {
+            "name": "SpeedType",
+            "values": [
+                "SLOW",
+                "REGULAR",
+                "TURBO",
+                "HYPER",
+                "SUPER_TURBO"
+            ]
+        },
+        "TableSize": {
+            "name": "TableSize",
+            "values": [
+                "HEADS_UP",
+                "SHORT_HANDED",
+                "FULL_RING"
+            ]
+        },
+        "DealType": {
+            "name": "DealType",
+            "values": [
+                "LIVE_DEALER",
+                "AUTO_SHUFFLER",
+                "ELECTRONIC",
+                "SELF_DEALT"
+            ]
+        },
+        "BuyInTier": {
+            "name": "BuyInTier",
+            "values": [
+                "FREEROLL",
+                "MICRO",
+                "LOW",
+                "MID",
+                "HIGH",
+                "SUPER_HIGH",
+                "ULTRA_HIGH"
+            ]
+        },
+        "EntryStructure": {
+            "name": "EntryStructure",
+            "values": [
+                "FREEZEOUT",
+                "SINGLE_REBUY",
+                "UNLIMITED_REBUY",
+                "RE_ENTRY",
+                "UNLIMITED_RE_ENTRY",
+                "ADD_ON_ONLY",
+                "REBUY_ADDON"
+            ]
+        },
+        "BountyType": {
+            "name": "BountyType",
+            "values": [
+                "NONE",
+                "STANDARD",
+                "PROGRESSIVE",
+                "MYSTERY",
+                "SUPER_KNOCKOUT",
+                "TOTAL_KNOCKOUT"
+            ]
+        },
+        "TournamentPurpose": {
+            "name": "TournamentPurpose",
+            "values": [
+                "STANDARD",
+                "SATELLITE",
+                "MEGA_SATELLITE",
+                "SUPER_SATELLITE",
+                "QUALIFIER",
+                "STEP_SATELLITE",
+                "FREEROLL",
+                "CHARITY",
+                "LEAGUE_POINTS",
+                "LAST_LONGER",
+                "PROMOTIONAL"
+            ]
+        },
+        "StackDepth": {
+            "name": "StackDepth",
+            "values": [
+                "SHALLOW",
+                "STANDARD",
+                "DEEP",
+                "MEGA",
+                "SUPER"
+            ]
+        },
+        "LateRegistration": {
+            "name": "LateRegistration",
+            "values": [
+                "NONE",
+                "STANDARD",
+                "EXTENDED",
+                "UNLIMITED"
+            ]
+        },
+        "PayoutStructure": {
+            "name": "PayoutStructure",
+            "values": [
+                "STANDARD",
+                "FLAT",
+                "WINNER_TAKE_ALL",
+                "FIFTY_FIFTY",
+                "TOP_HEAVY",
+                "SATELLITE_TICKETS",
+                "MILESTONE",
+                "PROGRESSIVE"
+            ]
+        },
+        "TournamentScheduleType": {
+            "name": "TournamentScheduleType",
+            "values": [
+                "ONE_OFF",
+                "RECURRING",
+                "SERIES_EVENT",
+                "SPECIAL_EVENT",
+                "FESTIVAL_EVENT",
+                "AD_HOC"
+            ]
+        },
+        "CashGameType": {
+            "name": "CashGameType",
+            "values": [
+                "STANDARD",
+                "CAPPED",
+                "UNCAPPED",
+                "BOMB_POT",
+                "DOUBLE_BOARD",
+                "MANDATORY_STRADDLE",
+                "STRADDLE_OPTIONAL",
+                "ANTE_GAME",
+                "MUST_MOVE",
+                "SHORT_DECK"
+            ]
+        },
+        "CashRakeType": {
+            "name": "CashRakeType",
+            "values": [
+                "NO_RAKE",
+                "POT_PERCENTAGE",
+                "POT_PERCENTAGE_CAPPED",
+                "TIME_RAKE",
+                "JACKPOT_DROP",
+                "PROMOTIONAL",
+                "SUBSCRIPTION"
+            ]
+        },
+        "MixedGameComponent": {
+            "name": "MixedGameComponent",
+            "values": [
+                "NLHE",
+                "LHE",
+                "PLO",
+                "PLO8",
+                "LO8",
+                "STUD",
+                "STUD8",
+                "RAZZ",
+                "TRIPLE_DRAW",
+                "SINGLE_DRAW",
+                "BADUGI",
+                "NL_DRAW",
+                "COURCHEVEL",
+                "SHORT_DECK",
+                "BIG_O",
+                "OTHER"
+            ]
+        },
+        "ClassificationSource": {
+            "name": "ClassificationSource",
+            "values": [
+                "SCRAPED",
+                "DERIVED",
+                "INFERRED",
+                "INHERITED",
+                "MANUAL",
+                "MIGRATED"
+            ]
+        },
+        "GameProcessedAction": {
+            "name": "GameProcessedAction",
+            "values": [
+                "CREATED",
+                "UPDATED",
+                "SKIPPED",
+                "ERROR",
+                "NOT_FOUND",
+                "NOT_PUBLISHED"
             ]
         }
     },
@@ -16089,6 +17348,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "tournamentSeriesMetricsUpdated": {
+                    "name": "tournamentSeriesMetricsUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "entitiesProcessed": {
                     "name": "entitiesProcessed",
                     "isArray": false,
@@ -16110,10 +17376,26 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "tournamentSeriesProcessed": {
+                    "name": "tournamentSeriesProcessed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "snapshotsAnalyzed": {
                     "name": "snapshotsAnalyzed",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "bySeriesType": {
+                    "name": "bySeriesType",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "MetricsBySeriesType"
+                    },
                     "isRequired": false,
                     "attributes": []
                 },
@@ -16161,6 +17443,16 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "tournamentSeriesResults": {
+                    "name": "tournamentSeriesResults",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "MetricsUpdateResult"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
                 "errors": {
                     "name": "errors",
                     "isArray": true,
@@ -16193,6 +17485,71 @@ export const schema = {
                 }
             }
         },
+        "MetricsBySeriesType": {
+            "name": "MetricsBySeriesType",
+            "fields": {
+                "ALL": {
+                    "name": "ALL",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "SeriesTypeBreakdown"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "SERIES": {
+                    "name": "SERIES",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "SeriesTypeBreakdown"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "REGULAR": {
+                    "name": "REGULAR",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "SeriesTypeBreakdown"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SeriesTypeBreakdown": {
+            "name": "SeriesTypeBreakdown",
+            "fields": {
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venue": {
+                    "name": "venue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGame": {
+                    "name": "recurringGame",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentSeries": {
+                    "name": "tournamentSeries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "MetricsUpdateResult": {
             "name": "MetricsUpdateResult",
             "fields": {
@@ -16219,6 +17576,13 @@ export const schema = {
                 },
                 "timeRange": {
                     "name": "timeRange",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesType": {
+                    "name": "seriesType",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -16273,8 +17637,26 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "metrics": {
-                    "name": "metrics",
+                "metricsAll": {
+                    "name": "metricsAll",
+                    "isArray": false,
+                    "type": {
+                        "model": "EntityMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metricsSeries": {
+                    "name": "metricsSeries",
+                    "isArray": false,
+                    "type": {
+                        "model": "EntityMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metricsRegular": {
+                    "name": "metricsRegular",
                     "isArray": false,
                     "type": {
                         "model": "EntityMetrics"
@@ -16297,6 +17679,16 @@ export const schema = {
                     "isArray": true,
                     "type": {
                         "model": "RecurringGameMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "topTournamentSeries": {
+                    "name": "topTournamentSeries",
+                    "isArray": true,
+                    "type": {
+                        "model": "TournamentSeriesMetrics"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -16325,8 +17717,26 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "metrics": {
-                    "name": "metrics",
+                "metricsAll": {
+                    "name": "metricsAll",
+                    "isArray": false,
+                    "type": {
+                        "model": "VenueMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metricsSeries": {
+                    "name": "metricsSeries",
+                    "isArray": false,
+                    "type": {
+                        "model": "VenueMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metricsRegular": {
+                    "name": "metricsRegular",
                     "isArray": false,
                     "type": {
                         "model": "VenueMetrics"
@@ -16339,6 +17749,16 @@ export const schema = {
                     "isArray": true,
                     "type": {
                         "model": "RecurringGameMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "tournamentSeriesBreakdown": {
+                    "name": "tournamentSeriesBreakdown",
+                    "isArray": true,
+                    "type": {
+                        "model": "TournamentSeriesMetrics"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -16453,6 +17873,227 @@ export const schema = {
                 },
                 "recommendations": {
                     "name": "recommendations",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "TournamentSeriesReport": {
+            "name": "TournamentSeriesReport",
+            "fields": {
+                "tournamentSeries": {
+                    "name": "tournamentSeries",
+                    "isArray": false,
+                    "type": {
+                        "model": "TournamentSeries"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metricsAllTime": {
+                    "name": "metricsAllTime",
+                    "isArray": false,
+                    "type": {
+                        "model": "TournamentSeriesMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metrics12M": {
+                    "name": "metrics12M",
+                    "isArray": false,
+                    "type": {
+                        "model": "TournamentSeriesMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metrics6M": {
+                    "name": "metrics6M",
+                    "isArray": false,
+                    "type": {
+                        "model": "TournamentSeriesMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metrics3M": {
+                    "name": "metrics3M",
+                    "isArray": false,
+                    "type": {
+                        "model": "TournamentSeriesMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metrics1M": {
+                    "name": "metrics1M",
+                    "isArray": false,
+                    "type": {
+                        "model": "TournamentSeriesMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "events": {
+                    "name": "events",
+                    "isArray": true,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "mainEvents": {
+                    "name": "mainEvents",
+                    "isArray": true,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "topPlayers": {
+                    "name": "topPlayers",
+                    "isArray": true,
+                    "type": {
+                        "model": "PlayerSummary"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "trends": {
+                    "name": "trends",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "TrendAnalysis"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recommendations": {
+                    "name": "recommendations",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "SeriesVsRegularComparison": {
+            "name": "SeriesVsRegularComparison",
+            "fields": {
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "timeRange": {
+                    "name": "timeRange",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "seriesMetrics": {
+                    "name": "seriesMetrics",
+                    "isArray": false,
+                    "type": {
+                        "model": "EntityMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesCount": {
+                    "name": "seriesCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesProfit": {
+                    "name": "seriesProfit",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesAvgEntries": {
+                    "name": "seriesAvgEntries",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "regularMetrics": {
+                    "name": "regularMetrics",
+                    "isArray": false,
+                    "type": {
+                        "model": "EntityMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "regularCount": {
+                    "name": "regularCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "regularProfit": {
+                    "name": "regularProfit",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "regularAvgEntries": {
+                    "name": "regularAvgEntries",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "profitDifference": {
+                    "name": "profitDifference",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "profitDifferencePercent": {
+                    "name": "profitDifferencePercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgEntriesDifference": {
+                    "name": "avgEntriesDifference",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgEntriesDifferencePercent": {
+                    "name": "avgEntriesDifferencePercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "insights": {
+                    "name": "insights",
                     "isArray": true,
                     "type": "String",
                     "isRequired": false,
@@ -18092,6 +19733,294 @@ export const schema = {
                 }
             }
         },
+        "GameProcessedEvent": {
+            "name": "GameProcessedEvent",
+            "fields": {
+                "jobId": {
+                    "name": "jobId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tournamentId": {
+                    "name": "tournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "url": {
+                    "name": "url",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "action": {
+                    "name": "action",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameProcessedAction"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "errorMessage": {
+                    "name": "errorMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "processedAt": {
+                    "name": "processedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "durationMs": {
+                    "name": "durationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dataSource": {
+                    "name": "dataSource",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "s3Key": {
+                    "name": "s3Key",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameData": {
+                    "name": "gameData",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameProcessedData"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "saveResult": {
+                    "name": "saveResult",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameSaveResult"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GameProcessedData": {
+            "name": "GameProcessedData",
+            "fields": {
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStatus": {
+                    "name": "gameStatus",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "registrationStatus": {
+                    "name": "registrationStatus",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameEndDateTime": {
+                    "name": "gameEndDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "buyIn": {
+                    "name": "buyIn",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rake": {
+                    "name": "rake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeAmount": {
+                    "name": "guaranteeAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolPaid": {
+                    "name": "prizepoolPaid",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalEntries": {
+                    "name": "totalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalUniquePlayers": {
+                    "name": "totalUniquePlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalRebuys": {
+                    "name": "totalRebuys",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalAddons": {
+                    "name": "totalAddons",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameType": {
+                    "name": "gameType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameVariant": {
+                    "name": "gameVariant",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentType": {
+                    "name": "tournamentType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameTags": {
+                    "name": "gameTags",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueName": {
+                    "name": "venueName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "doNotScrape": {
+                    "name": "doNotScrape",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "existingGameId": {
+                    "name": "existingGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GameSaveResult": {
+            "name": "GameSaveResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "action": {
+                    "name": "action",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "SocialFeedConnection": {
             "name": "SocialFeedConnection",
             "fields": {
@@ -19102,5 +21031,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "882b91735e2329aaf0fc973a66a4b8c3"
+    "version": "daf33fc9c2bd664d499794f71f65a2f7"
 };

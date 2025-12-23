@@ -1,5 +1,6 @@
 // src/pages/scraper-admin-tabs/ScraperTab.tsx
 // REFACTORED: Single-ID on frontend (useSingleScrape), batch on backend (useScraperJobs)
+// UPDATED: Integrated BatchJobProgress for real-time batch job monitoring with polling
 //
 // Architecture:
 // - 'single' mode: Frontend handles with full interactive control (modals, venue selection)
@@ -8,10 +9,11 @@
 // This integrates with existing hooks:
 // - useScraperJobs from useScraperManagement.ts for batch job management
 // - useSingleScrape for single-ID interactive processing
+// - useBatchJobMonitor for real-time job status polling
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { Settings, Play, Square, RefreshCw, Zap, Clock, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Settings, Play, Square, RefreshCw, Zap, AlertCircle, CheckCircle } from 'lucide-react';
 
 // --- Types ---
 import {
@@ -26,67 +28,38 @@ import {
   DEFAULT_BATCH_THRESHOLDS,
   isBatchMode,
   isSingleMode,
-  buildBatchJobInput,
+  parseMultiIdString,
+  getMultiIdCount,
+  validateMultiIdString,
 } from '../../types/scraper';
 
 // --- Hooks ---
 import { useSingleScrape } from '../../hooks/scraper/useSingleScrape';
 import { useScraperJobs } from '../../hooks/useScraperManagement';
 import { useScraperModals } from '../../hooks/scraper/useModalResolver';
-// Alternative: import { useScraperModals } from '../../hooks/scraper' if you have a barrel file
+// NEW: Import batch job monitor utilities for status checking
+import { isJobRunning } from '../../hooks/scraper/useBatchJobMonitor';
 
 // --- Components ---
 import { CollapsibleSection } from '../../components/scraper/admin/CollapsibleSection';
 import { GameDetailsModal } from '../../components/scraper/admin/ScraperModals';
 import { SaveConfirmationModal } from '../../components/scraper/SaveConfirmationModal';
+import GameListItem from '../../components/scraper/GameListItem';
+// NEW: Import BatchJobProgress component for real-time monitoring
+import { BatchJobProgress } from '../../components/scraper/admin/BatchJobProgress';
 
 // --- Contexts & Hooks ---
 import { useEntity } from '../../contexts/EntityContext';
 import { useGameIdTracking } from '../../hooks/useGameIdTracking';
 
 // --- API Types ---
-import { Venue, ScrapedGameData, StartScraperJobInput } from '../../API';
+import { Venue, ScrapedGameData, StartScraperJobInput, ScraperJob } from '../../API';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
 
 // --- Utils ---
 import { scraperLogger } from '../../utils/scraperLogger';
 
 const getClient = () => generateClient();
-
-// ===================================================================
-// HELPER: Format duration
-// ===================================================================
-const formatDuration = (seconds: number | null | undefined): string => {
-  if (!seconds) return '-';
-  if (seconds < 60) return `${seconds}s`;
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}m ${secs}s`;
-};
-
-// ===================================================================
-// HELPER: Get status badge color
-// ===================================================================
-const getStatusColor = (status: string | null | undefined): string => {
-  switch (status) {
-    case 'RUNNING':
-    case 'QUEUED':
-      return 'bg-blue-100 text-blue-700';
-    case 'COMPLETED':
-      return 'bg-green-100 text-green-700';
-    case 'STOPPED_NOT_FOUND':
-    case 'STOPPED_BLANKS':
-    case 'STOPPED_MAX_ID':
-      return 'bg-yellow-100 text-yellow-700';
-    case 'STOPPED_ERROR':
-    case 'STOPPED_MANUAL':
-    case 'FAILED':
-    case 'CANCELLED':
-      return 'bg-red-100 text-red-700';
-    default:
-      return 'bg-gray-100 text-gray-700';
-  }
-};
 
 // ===================================================================
 // MAIN COMPONENT
@@ -137,30 +110,36 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
   // --- Scraper Jobs Hook (backend batch processing) ---
   const { 
     jobs, 
-    loading: jobsLoading, 
     startJob, 
     cancelJob,
     fetchJobs 
   } = useScraperJobs();
 
-  // Find the active job from jobs list
+  // Find the active job from jobs list (used for checking if we can start a new job)
   const activeJob = useMemo(() => {
     if (!activeJobId) return null;
     return jobs.find(j => j.id === activeJobId || j.jobId === activeJobId) || null;
   }, [jobs, activeJobId]);
 
-  // Check if any batch job is running (QUEUED is the "in progress" status)
+  // UPDATED: Use the utility function from useBatchJobMonitor for consistent status checking
   const isBatchRunning = useMemo(() => {
-    // ScraperJobStatus enum values: QUEUED, COMPLETED, FAILED, CANCELLED, TIMEOUT
-    // QUEUED means the job is active/running
-    return activeJob?.status === 'QUEUED';
-  }, [activeJob]);
+    return isJobRunning(activeJob?.status);
+  }, [activeJob?.status]);
 
   // --- Effects ---
   useEffect(() => {
     if (currentEntity?.id) {
       fetchVenues();
-      getScrapingStatus({ forceRefresh: false }).catch(() => getBounds().catch(() => {}));
+      // Try to get scraping status first, fall back to bounds
+      getScrapingStatus({ forceRefresh: false })
+        .catch(() => {
+          console.log('[ScraperTab] Scraping status failed, trying bounds...');
+          return getBounds();
+        })
+        .catch((err) => {
+          console.log('[ScraperTab] Both scraping status and bounds failed:', err);
+          // For new entities with no data, this is expected
+        });
     }
   }, [currentEntity?.id]);
 
@@ -184,12 +163,56 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
     }
   }, [urlToReparse]);
 
-  // Update singleId when highestTournamentId changes
-  useEffect(() => {
-    if (isSingleMode(idSelectionMode) && !idSelectionParams.singleId && highestTournamentId) {
-      setIdSelectionParams(p => ({ ...p, singleId: String(highestTournamentId + 1) }));
+  // Calculate the "suggested next ID" - this is what would be auto-used if input is empty
+  const suggestedNextId = useMemo(() => {
+    // If we have a highest ID, suggest the next one
+    if (highestTournamentId) {
+      return highestTournamentId + 1;
     }
-  }, [highestTournamentId, idSelectionMode, idSelectionParams.singleId]);
+    
+    // If we're still loading, don't suggest anything yet
+    if (gapLoading) {
+      return null;
+    }
+    
+    // If we've finished loading and there's no data, default to 1
+    // This handles new entities with no games yet
+    if (scrapingStatus !== null) {
+      // scrapingStatus exists but no highestTournamentId means no games
+      return 1;
+    }
+    
+    // If bounds loaded but empty, also default to 1
+    if (bounds !== null && !bounds.highestId) {
+      return 1;
+    }
+    
+    // Fallback: if we have an entity selected and not loading, default to 1
+    // This handles cases where both API calls might have failed
+    if (currentEntity?.id) {
+      return 1;
+    }
+    
+    return null;
+  }, [highestTournamentId, gapLoading, scrapingStatus, bounds, currentEntity?.id]);
+
+  // Pre-populate singleId when entity changes or on initial load
+  useEffect(() => {
+    // Only auto-populate for single mode when:
+    // 1. We have a suggestedNextId
+    // 2. singleId is empty OR entity just changed
+    if (isSingleMode(idSelectionMode) && suggestedNextId && !idSelectionParams.singleId) {
+      setIdSelectionParams(p => ({ ...p, singleId: String(suggestedNextId) }));
+    }
+  }, [suggestedNextId, idSelectionMode]); // Note: removed idSelectionParams.singleId to allow re-population on entity change
+
+  // Reset singleId when entity changes (so it can be re-populated with new entity's next ID)
+  useEffect(() => {
+    if (currentEntity?.id) {
+      // Clear singleId so the above effect can re-populate it
+      setIdSelectionParams(p => ({ ...p, singleId: '' }));
+    }
+  }, [currentEntity?.id]);
 
   // --- Data Fetching ---
   const fetchVenues = async () => {
@@ -226,6 +249,38 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
   };
 
   // =========================================================================
+  // BATCH JOB CALLBACKS (NEW)
+  // =========================================================================
+
+  /**
+   * Called when a batch job completes (success, failure, or stopped)
+   * Refreshes scraping status to update gaps and highest ID
+   */
+  const handleJobComplete = useCallback((job: ScraperJob) => {
+    console.log('[ScraperTab] Job completed:', job.status, {
+      processed: job.totalURLsProcessed,
+      newGames: job.newGamesScraped,
+      updated: job.gamesUpdated,
+      errors: job.errors,
+    });
+    
+    // Refresh scraping status to update gaps and highest ID
+    getScrapingStatus({ forceRefresh: true }).catch(() => {
+      getBounds().catch(() => {});
+    });
+    
+    // Refresh jobs list
+    fetchJobs(true);
+  }, [getScrapingStatus, getBounds, fetchJobs]);
+
+  /**
+   * Clear the active job from display
+   */
+  const handleClearJob = useCallback(() => {
+    setActiveJobId(null);
+  }, []);
+
+  // =========================================================================
   // PROCESSING HANDLERS
   // =========================================================================
 
@@ -238,40 +293,161 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
       // =====================================================================
       // SINGLE ID: Frontend handles with interactive control
       // =====================================================================
-      const tournamentId = parseInt(idSelectionParams.singleId);
-      if (!tournamentId || isNaN(tournamentId)) {
+      
+      // Use the entered ID, or fall back to suggestedNextId, or finally default to 1
+      const enteredId = idSelectionParams.singleId ? parseInt(idSelectionParams.singleId) : null;
+      const tournamentId = enteredId || suggestedNextId || 1;
+      
+      if (isNaN(tournamentId)) {
         alert('Please enter a valid tournament ID');
         setConfigSectionOpen(true);
         return;
       }
+      
+      // Update the input to show what we're processing
+      setIdSelectionParams(p => ({ ...p, singleId: String(tournamentId) }));
 
-      scraperLogger.info('PROCESSING_START', `Processing single ID: ${tournamentId}`);
+      scraperLogger.info('PROCESSING_START', `Processing single ID: ${tournamentId} (flow: ${scrapeFlow}, skipManualReviews: ${options.skipManualReviews})`);
       
       const parsedData = await singleScrape.scrape(tournamentId);
       
-      if (parsedData && singleScrape.result?.status === 'review') {
-        // Open save confirmation modal
-        const autoVenueId = singleScrape.result.autoVenueId;
+      console.log('[ScraperTab DEBUG] After scrape:', {
+        hasParsedData: !!parsedData,
+        parsedDataName: parsedData?.name,
+        parsedDataGameStatus: parsedData?.gameStatus,
+        scrapeFlow,
+        skipManualReviews: options.skipManualReviews,
+      });
+      
+      // Determine if data is reviewable (can't rely on singleScrape.result state - it's async)
+      // Mirror the logic from useSingleScrape to determine if this is a 'review' case
+      const isReviewable = (() => {
+        if (!parsedData) {
+          console.log('[ScraperTab DEBUG] isReviewable: false (no parsedData)');
+          return false;
+        }
+        
+        // Check for error in response
+        const dataAsRecord = parsedData as Record<string, unknown>;
+        const errorMsg = (dataAsRecord.error || dataAsRecord.errorMessage) as string | undefined;
+        if (errorMsg || parsedData.name === 'Error processing tournament') {
+          console.log('[ScraperTab DEBUG] isReviewable: false (error in response)', { errorMsg, name: parsedData.name });
+          return false;
+        }
+        
+        // Check for NOT_FOUND status
+        const gameStatus = parsedData.gameStatus?.toUpperCase();
+        if (gameStatus === 'NOT_FOUND' || gameStatus === 'NOT_IN_USE' || gameStatus === 'BLANK') {
+          console.log('[ScraperTab DEBUG] isReviewable: false (NOT_FOUND/BLANK status)', { gameStatus });
+          return false;
+        }
+        
+        // Check for doNotScrape
+        const isDoNotScrape = dataAsRecord.skipped && dataAsRecord.skipReason === 'DO_NOT_SCRAPE';
+        if (isDoNotScrape && !options.ignoreDoNotScrape) {
+          console.log('[ScraperTab DEBUG] isReviewable: false (doNotScrape)', { isDoNotScrape });
+          return false;
+        }
+        
+        console.log('[ScraperTab DEBUG] isReviewable: true');
+        return true;
+      })();
+      
+      // Get autoVenueId from parsedData directly (can't rely on state)
+      const autoVenueId = parsedData?.venueMatch?.autoAssignedVenue?.id;
+      
+      console.log('[ScraperTab DEBUG] Decision point:', {
+        isReviewable,
+        scrapeFlow,
+        skipManualReviews: options.skipManualReviews,
+        autoVenueId,
+        defaultVenueId,
+        willOpenModal: isReviewable && scrapeFlow === 'scrape_save' && !options.skipManualReviews,
+      });
+      
+      if (parsedData && isReviewable) {
         
         if (scrapeFlow === 'scrape_save') {
+          if (options.skipManualReviews) {
+            // =====================================================================
+            // AUTO-SAVE MODE: Skip modal, save immediately with auto-venue or default
+            // =====================================================================
+            scraperLogger.info('ITEM_SAVING', `Auto-saving tournament ${tournamentId} (skipManualReviews=true)`);
+            
+            const venueToUse = autoVenueId || defaultVenueId;
+            
+            if (!venueToUse) {
+              scraperLogger.warn('ITEM_SAVING', `No venue available for auto-save, falling back to review modal`);
+              // Fall through to manual review if no venue available
+            } else {
+              const sourceUrl = `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${tournamentId}`;
+              await singleScrape.save(venueToUse, parsedData, sourceUrl, tournamentId);
+              getScrapingStatus({ forceRefresh: true }).catch(() => {});
+              
+              // Update next ID (increment from current)
+              setIdSelectionParams(p => ({ ...p, singleId: String(tournamentId + 1) }));
+              
+              // Callback for re-parse completion
+              if (urlToReparse && onReparseComplete) {
+                onReparseComplete();
+              }
+              return; // Exit early - auto-save complete
+            }
+          }
+          
+          // =====================================================================
+          // MANUAL REVIEW MODE: Show modal for venue confirmation/editing
+          // =====================================================================
+          console.log('[ScraperTab DEBUG] About to open SaveConfirmationModal', {
+            parsedDataName: parsedData.name,
+            suggestedVenueId: autoVenueId || defaultVenueId,
+            entityId: currentEntity.id,
+          });
+          
           const modalResult = await modals.saveConfirmation.openModal(
             parsedData,
             autoVenueId || defaultVenueId,
             currentEntity.id
           );
           
+          console.log('[ScraperTab DEBUG] Modal closed with result:', modalResult);
+          
           if (modalResult.action === 'save') {
+            const sourceUrl = `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${tournamentId}`;
             await singleScrape.save(
               modalResult.venueId || defaultVenueId,
-              modalResult.editedData as ScrapedGameData | undefined
+              modalResult.editedData as ScrapedGameData | undefined,
+              sourceUrl,
+              tournamentId
             );
+            
+            // Refresh scraping status to update suggestedNextId
+            getScrapingStatus({ forceRefresh: true }).catch(() => {});
           }
         }
+        // If scrapeFlow === 'scrape', just display the result (no auto-modal, no save)
+        // User can still manually trigger save via the Save button in GameListItem
         
-        // Update next ID
+        // Update next ID (increment from current)
         setIdSelectionParams(p => ({ ...p, singleId: String(tournamentId + 1) }));
         
         // Callback for re-parse completion
+        if (urlToReparse && onReparseComplete) {
+          onReparseComplete();
+        }
+      } else if (parsedData && !isReviewable) {
+        // Data returned but not reviewable (skipped/error case)
+        // Still increment ID so user can easily continue to next ID
+        setIdSelectionParams(p => ({ ...p, singleId: String(tournamentId + 1) }));
+        
+        // Callback for re-parse completion (even on skip/error)
+        if (urlToReparse && onReparseComplete) {
+          onReparseComplete();
+        }
+      } else if (!parsedData) {
+        // No data returned (error case)
+        setIdSelectionParams(p => ({ ...p, singleId: String(tournamentId + 1) }));
+        
         if (urlToReparse && onReparseComplete) {
           onReparseComplete();
         }
@@ -299,17 +475,76 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         });
       }
 
-      // Build the input for startScraperJob
-      const jobInput = buildBatchJobInput(
-        currentEntity.id,
-        idSelectionMode as Exclude<IdSelectionMode, 'single' | 'next'>,
-        idSelectionParams,
-        options,
-        defaultVenueId,
-        scrapeFlow === 'scrape_save',
-        batchThresholds,
-        gapIds
-      );
+      // Parse multi-ID string if needed
+      let multiIds: number[] | undefined;
+      if (idSelectionMode === 'multiId') {
+        const validationError = validateMultiIdString(idSelectionParams.multiIdString);
+        if (validationError) {
+          alert(validationError);
+          setConfigSectionOpen(true);
+          return;
+        }
+        multiIds = parseMultiIdString(idSelectionParams.multiIdString);
+        if (multiIds.length === 0) {
+          alert('Please enter at least one valid tournament ID');
+          setConfigSectionOpen(true);
+          return;
+        }
+        console.log(`[ScraperTab] Multi-ID mode: parsed ${multiIds.length} IDs from "${idSelectionParams.multiIdString}"`);
+      }
+
+      console.log('[ScraperTab DEBUG] Raw params:', {
+        idSelectionMode,
+        'bulkCount raw': idSelectionParams.bulkCount,
+        'typeof': typeof idSelectionParams.bulkCount,
+        'parseInt': parseInt(idSelectionParams.bulkCount),
+        'params object': JSON.stringify(idSelectionParams)
+      });
+
+      // Build the input for startScraperJob - must match Lambda expectations
+      // See sm-index.js startScraperJob() for expected fields
+      const jobInput = {
+        // Required
+        entityId: currentEntity.id,
+        
+        // Job metadata
+        mode: idSelectionMode as string,
+        triggerSource: 'MANUAL' as const,
+        triggeredBy: 'scraper-admin-ui',
+        
+        // Scrape options
+        useS3: options.useS3,
+        forceRefresh: !options.useS3,
+        skipNotPublished: options.skipNotPublished,
+        skipNotFoundGaps: options.skipNotFoundGaps,
+        skipInProgress: options.skipInProgress,
+        ignoreDoNotScrape: options.ignoreDoNotScrape,
+        
+        // Save options
+        saveToDatabase: scrapeFlow === 'scrape_save',
+        defaultVenueId: defaultVenueId || undefined,
+        
+        // Mode-specific parameters
+        bulkCount: idSelectionMode === 'bulk' 
+            ? Math.max(1, parseInt(idSelectionParams.bulkCount) || 10) 
+            : undefined,
+        startId: idSelectionMode === 'range' ? (parseInt(idSelectionParams.rangeStart) || undefined) : undefined,
+        endId: idSelectionMode === 'range' ? (parseInt(idSelectionParams.rangeEnd) || undefined) : 
+               idSelectionMode === 'auto' ? (parseInt(idSelectionParams.maxId) || undefined) : undefined,
+        maxId: idSelectionMode === 'auto' ? (parseInt(idSelectionParams.maxId) || undefined) : undefined,
+        // Use gapIds for both 'gaps' mode and 'multiId' mode (same field, different source)
+        gapIds: idSelectionMode === 'gaps' && gapIds ? gapIds 
+              : idSelectionMode === 'multiId' && multiIds ? multiIds 
+              : undefined,
+        
+        // Stopping thresholds
+        maxConsecutiveNotFound: batchThresholds.maxConsecutiveNotFound,
+        maxConsecutiveErrors: batchThresholds.maxConsecutiveErrors,
+        maxConsecutiveBlanks: batchThresholds.maxConsecutiveBlanks,
+        maxTotalErrors: batchThresholds.maxTotalErrors,
+      };
+
+      console.log('[ScraperTab DEBUG] Batch job input:', JSON.stringify(jobInput, null, 2));
 
       try {
         // Use the existing startJob from useScraperJobs
@@ -327,7 +562,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
     }
   }, [
     currentEntity, idSelectionMode, idSelectionParams, options, scrapeFlow, batchThresholds,
-    singleScrape, modals.saveConfirmation, defaultVenueId, scrapingStatus, startJob, urlToReparse, onReparseComplete
+    singleScrape, modals.saveConfirmation, defaultVenueId, scrapingStatus, startJob, urlToReparse, onReparseComplete, suggestedNextId, getScrapingStatus
   ]);
 
   const handleStopProcessing = useCallback(async () => {
@@ -338,10 +573,6 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
     scraperLogger.info('PROCESSING_STOP', 'Processing stopped by user');
     getScrapingStatus({ forceRefresh: true }).catch(() => {});
   }, [isBatchRunning, activeJobId, cancelJob, singleScrape, getScrapingStatus]);
-
-  const handleClearJob = useCallback(() => {
-    setActiveJobId(null);
-  }, []);
 
   // --- Render ---
   if (!currentEntity) {
@@ -378,6 +609,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
                 { mode: 'single' as const, label: 'Single ID', desc: 'Interactive', icon: <Zap className="h-3 w-3" /> },
                 { mode: 'bulk' as const, label: 'Bulk', desc: 'Next N IDs', icon: null },
                 { mode: 'range' as const, label: 'Range', desc: 'ID range', icon: null },
+                { mode: 'multiId' as const, label: 'Multi ID', desc: 'Custom IDs', icon: null },
                 { mode: 'gaps' as const, label: 'Gaps', desc: 'Fill missing', icon: null },
                 { mode: 'auto' as const, label: 'Auto', desc: 'Until threshold', icon: null },
                 { mode: 'refresh' as const, label: 'Refresh', desc: 'Update existing', icon: <RefreshCw className="h-3 w-3" /> },
@@ -419,15 +651,49 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {isSingleMode(idSelectionMode) && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tournament ID</label>
-                <input
-                  type="number"
-                  value={idSelectionParams.singleId}
-                  onChange={(e) => setIdSelectionParams(p => ({ ...p, singleId: e.target.value }))}
-                  disabled={isProcessing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-                  placeholder={highestTournamentId ? String(highestTournamentId + 1) : 'Enter ID'}
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tournament ID
+                  {suggestedNextId && !gapLoading && (
+                    <span className="ml-2 text-xs text-gray-500 font-normal">
+                      (Next: {suggestedNextId})
+                    </span>
+                  )}
+                  {gapLoading && (
+                    <span className="ml-2 text-xs text-gray-400 font-normal">
+                      (loading...)
+                    </span>
+                  )}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={idSelectionParams.singleId}
+                    onChange={(e) => setIdSelectionParams(p => ({ ...p, singleId: e.target.value }))}
+                    disabled={isProcessing}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                    placeholder={gapLoading ? 'Loading...' : (suggestedNextId ? String(suggestedNextId) : '1')}
+                  />
+                  {suggestedNextId && idSelectionParams.singleId !== String(suggestedNextId) && (
+                    <button
+                      onClick={() => setIdSelectionParams(p => ({ ...p, singleId: String(suggestedNextId) }))}
+                      disabled={isProcessing}
+                      className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 rounded-md text-gray-600 disabled:opacity-50 transition-colors whitespace-nowrap"
+                      title="Reset to next ID"
+                    >
+                      Use Next
+                    </button>
+                  )}
+                </div>
+                {highestTournamentId && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Highest stored ID: {highestTournamentId}
+                  </p>
+                )}
+                {!highestTournamentId && !gapLoading && currentEntity && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    No games stored yet for {currentEntity.entityName}. Starting from ID 1.
+                  </p>
+                )}
               </div>
             )}
 
@@ -436,6 +702,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
                 <label className="block text-sm font-medium text-gray-700 mb-1">Number of IDs</label>
                 <input
                   type="number"
+                  min="1"
                   value={idSelectionParams.bulkCount}
                   onChange={(e) => setIdSelectionParams(p => ({ ...p, bulkCount: e.target.value }))}
                   disabled={isProcessing}
@@ -468,6 +735,47 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
                   />
                 </div>
               </>
+            )}
+
+            {idSelectionMode === 'multiId' && (
+              <div className="col-span-full">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tournament IDs
+                  <span className="ml-2 text-xs text-gray-500 font-normal">
+                    (comma-separated IDs and ranges)
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={idSelectionParams.multiIdString}
+                  onChange={(e) => setIdSelectionParams(p => ({ ...p, multiIdString: e.target.value }))}
+                  disabled={isProcessing}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="e.g., 100-110, 115, 120-125, 200"
+                />
+                {idSelectionParams.multiIdString && (
+                  <div className="mt-1 text-xs">
+                    {(() => {
+                      const validationError = validateMultiIdString(idSelectionParams.multiIdString);
+                      if (validationError) {
+                        return (
+                          <span className="text-red-600">
+                            <AlertCircle className="h-3 w-3 inline mr-1" />
+                            {validationError}
+                          </span>
+                        );
+                      }
+                      const count = getMultiIdCount(idSelectionParams.multiIdString);
+                      return (
+                        <span className="text-green-600">
+                          <CheckCircle className="h-3 w-3 inline mr-1" />
+                          {count} tournament ID{count !== 1 ? 's' : ''} selected
+                        </span>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
             )}
 
             {idSelectionMode === 'auto' && (
@@ -570,23 +878,109 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
             </div>
           )}
 
+          {/* Scrape Flow Toggle - Restored from pre-refactor */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Scrape Flow</label>
+            <div className="flex rounded-md shadow-sm max-w-md">
+              <button
+                type="button"
+                onClick={() => setScrapeFlow('scrape')}
+                disabled={isProcessing}
+                className={`flex-1 px-4 py-2 text-sm font-medium rounded-l-md border transition-colors ${
+                  scrapeFlow === 'scrape'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                Scrape Only
+              </button>
+              <button
+                type="button"
+                onClick={() => setScrapeFlow('scrape_save')}
+                disabled={isProcessing}
+                className={`flex-1 px-4 py-2 text-sm font-medium rounded-r-md border-t border-r border-b transition-colors ${
+                  scrapeFlow === 'scrape_save'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                Scrape + Save
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              {scrapeFlow === 'scrape' 
+                ? 'Preview scraped data without saving to database' 
+                : 'Scrape and save to database'}
+            </p>
+          </div>
+
           {/* Options */}
           <div className="flex flex-wrap gap-4">
             <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" checked={options.useS3} onChange={(e) => setOptions(o => ({ ...o, useS3: e.target.checked }))} disabled={isProcessing} className="rounded border-gray-300 text-blue-600" />
-              Use S3 Cache
+              <input 
+                type="checkbox" 
+                checked={options.useS3} 
+                onChange={(e) => setOptions(o => ({ ...o, useS3: e.target.checked }))} 
+                disabled={isProcessing} 
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+              />
+              <span>Use S3 Cache</span>
             </label>
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" checked={options.skipNotPublished} onChange={(e) => setOptions(o => ({ ...o, skipNotPublished: e.target.checked }))} disabled={isProcessing} className="rounded border-gray-300 text-blue-600" />
-              Skip NOT_PUBLISHED
+            
+            <label className={`flex items-center gap-2 text-sm cursor-pointer ${scrapeFlow === 'scrape' ? 'opacity-50' : ''}`}>
+              <input 
+                type="checkbox" 
+                checked={options.skipManualReviews} 
+                onChange={(e) => setOptions(o => ({ ...o, skipManualReviews: e.target.checked }))} 
+                disabled={isProcessing || scrapeFlow === 'scrape'} 
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50" 
+              />
+              <span>Skip Manual Reviews</span>
+              <span className="text-xs text-gray-500">(auto-save)</span>
             </label>
+            
             <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" checked={options.skipNotFoundGaps} onChange={(e) => setOptions(o => ({ ...o, skipNotFoundGaps: e.target.checked }))} disabled={isProcessing} className="rounded border-gray-300 text-blue-600" />
-              Skip NOT_FOUND Gaps
+              <input 
+                type="checkbox" 
+                checked={options.skipNotPublished} 
+                onChange={(e) => setOptions(o => ({ ...o, skipNotPublished: e.target.checked }))} 
+                disabled={isProcessing} 
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+              />
+              <span>Skip NOT_PUBLISHED</span>
             </label>
+            
             <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" checked={scrapeFlow === 'scrape_save'} onChange={(e) => setScrapeFlow(e.target.checked ? 'scrape_save' : 'scrape')} disabled={isProcessing} className="rounded border-gray-300 text-blue-600" />
-              Save to Database
+              <input 
+                type="checkbox" 
+                checked={options.skipNotFoundGaps} 
+                onChange={(e) => setOptions(o => ({ ...o, skipNotFoundGaps: e.target.checked }))} 
+                disabled={isProcessing} 
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+              />
+              <span>Skip NOT_FOUND Gaps</span>
+            </label>
+            
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={options.ignoreDoNotScrape} 
+                onChange={(e) => setOptions(o => ({ ...o, ignoreDoNotScrape: e.target.checked }))} 
+                disabled={isProcessing} 
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+              />
+              <span>Ignore Do Not Scrape</span>
+            </label>
+            
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={options.skipInProgress} 
+                onChange={(e) => setOptions(o => ({ ...o, skipInProgress: e.target.checked }))} 
+                disabled={isProcessing} 
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+              />
+              <span>Skip In-Progress</span>
             </label>
           </div>
 
@@ -619,22 +1013,27 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
 
           {/* API Key (only for single mode) */}
           {isSingleMode(idSelectionMode) && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Scraper API Key (optional)</label>
-              <div className="flex gap-2">
+            <form onSubmit={(e) => e.preventDefault()}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Scraper API Key (optional)</label>
+                <div className="flex gap-2">
                 <input
-                  type={showApiKey ? 'text' : 'password'}
-                  value={scraperApiKey}
-                  onChange={(e) => setScraperApiKey(e.target.value)}
-                  disabled={isProcessing}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter API key..."
+                    type={showApiKey ? 'text' : 'password'}
+                    value={scraperApiKey}
+                    onChange={(e) => setScraperApiKey(e.target.value)}
+                    disabled={isProcessing}
+                    autoComplete="off"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter API key..."
                 />
-                <button onClick={() => setShowApiKey(!showApiKey)} className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
-                  {showApiKey ? 'Hide' : 'Show'}
+                <button 
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)} 
+                    className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                >
+                    {showApiKey ? 'Hide' : 'Show'}
                 </button>
-              </div>
-            </div>
+                </div>
+            </form>
           )}
 
           {/* Start/Stop Buttons */}
@@ -642,10 +1041,17 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
             <button
               onClick={handleStartProcessing}
               disabled={isProcessing || !defaultVenueId}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed
+                ${scrapeFlow === 'scrape_save' 
+                  ? 'bg-green-600 text-white hover:bg-green-700' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700'}`}
             >
               <Play className="h-4 w-4" />
-              {isProcessing ? 'Processing...' : `Start ${isSingleMode(idSelectionMode) ? 'Scrape' : 'Batch Job'}`}
+              {isProcessing 
+                ? 'Processing...' 
+                : isSingleMode(idSelectionMode) 
+                  ? (scrapeFlow === 'scrape_save' ? 'Scrape + Save' : 'Scrape Only')
+                  : `Start Batch Job`}
             </button>
             
             {isProcessing && (
@@ -665,122 +1071,101 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         </div>
       </CollapsibleSection>
 
-      {/* Single ID Result */}
+      {/* Single ID Result - Using GameListItem for rich formatting */}
       {singleScrape.result && (
-        <div className={`p-4 rounded-lg border ${
-          singleScrape.result.status === 'success' ? 'bg-green-50 border-green-200' :
-          singleScrape.result.status === 'error' ? 'bg-red-50 border-red-200' :
-          singleScrape.result.status === 'skipped' ? 'bg-yellow-50 border-yellow-200' :
-          'bg-blue-50 border-blue-200'
-        }`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {singleScrape.result.status === 'success' && <CheckCircle className="h-5 w-5 text-green-600" />}
-              {singleScrape.result.status === 'error' && <XCircle className="h-5 w-5 text-red-600" />}
-              {singleScrape.result.status === 'skipped' && <AlertCircle className="h-5 w-5 text-yellow-600" />}
-              {(singleScrape.result.status === 'scraping' || singleScrape.result.status === 'saving') && <RefreshCw className="h-5 w-5 text-blue-600 animate-spin" />}
-              
-              <span className="font-medium">Tournament {singleScrape.result.id}</span>
-              <span className={`px-2 py-0.5 text-xs rounded ${
-                singleScrape.result.status === 'success' ? 'bg-green-200 text-green-800' :
-                singleScrape.result.status === 'error' ? 'bg-red-200 text-red-800' :
-                singleScrape.result.status === 'skipped' ? 'bg-yellow-200 text-yellow-800' :
-                'bg-blue-200 text-blue-800'
-              }`}>
-                {singleScrape.result.status}
-              </span>
-              {singleScrape.result.dataSource && (
-                <span className={`px-2 py-0.5 text-xs rounded ${
-                  singleScrape.result.dataSource === 's3' ? 'bg-purple-100 text-purple-700' : 'bg-cyan-100 text-cyan-700'
-                }`}>
-                  {singleScrape.result.dataSource === 's3' ? 'S3 Cache' : 'Live'}
-                </span>
-              )}
-            </div>
-            <div className="text-sm text-gray-600">{singleScrape.result.message}</div>
-          </div>
-          {singleScrape.result.parsedData && (
-            <button 
-              onClick={() => setSelectedGameDetails(singleScrape.result!.parsedData!)} 
-              className="mt-2 text-sm text-blue-600 hover:text-blue-800 hover:underline"
-            >
-              View Details →
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Batch Job Progress */}
-      {activeJob && (
-        <div className="p-4 bg-white border rounded-lg shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Batch Job: {(activeJob.jobId || activeJob.id || '').slice(0, 8)}...
-            </h3>
-            <div className="flex items-center gap-2">
-              <span className={`px-2 py-1 text-xs rounded ${getStatusColor(activeJob.status)} ${
-                activeJob.status === 'QUEUED' ? 'animate-pulse' : ''
-              }`}>
-                {activeJob.status}
-              </span>
-              <button 
-                onClick={() => fetchJobs(true)} 
-                className="p-1 text-gray-400 hover:text-gray-600 transition-colors" 
-                title="Refresh"
+        <div className="space-y-3">
+          <GameListItem
+            game={{
+              id: singleScrape.result.url || String(singleScrape.result.id),
+              // Cast to any to handle ScrapedGameData vs GameData type differences (null vs undefined)
+              data: singleScrape.result.parsedData as any,
+              errorMessage: singleScrape.result.status === 'error' ? singleScrape.result.message : undefined,
+              saveResult: singleScrape.result.savedGameId ? { 
+                success: true, 
+                gameId: singleScrape.result.savedGameId 
+              } : undefined,
+              existingGameId: singleScrape.result.savedGameId,
+              // Required GameState fields - using correct types from game.ts
+              source: 'SCRAPE' as any, // DataSource enum from API
+              jobStatus: singleScrape.result.status === 'scraping' ? 'SCRAPING' 
+                : singleScrape.result.status === 'saving' ? 'SAVING'
+                : singleScrape.result.status === 'success' ? 'DONE'
+                : singleScrape.result.status === 'error' ? 'ERROR'
+                : singleScrape.result.status === 'review' ? 'READY_TO_SAVE'
+                : 'IDLE',
+              fetchCount: 1,
+            }}
+            processingStatus={singleScrape.result.status}
+            processingMessage={singleScrape.result.message}
+            dataSource={singleScrape.result.dataSource || 'none'}
+            tournamentId={singleScrape.result.id}
+            sourceUrl={singleScrape.result.url}
+            compact={false}
+            showActions={true}
+            onViewDetails={singleScrape.result.parsedData ? () => setSelectedGameDetails(singleScrape.result!.parsedData!) : undefined}
+            onSave={
+              singleScrape.result.status === 'review' && singleScrape.result.parsedData
+                ? async () => {
+                    // Capture values before opening modal to avoid stale closure issues
+                    const capturedUrl = singleScrape.result!.url;
+                    const capturedId = singleScrape.result!.id;
+                    const capturedParsedData = singleScrape.result!.parsedData!;
+                    const capturedAutoVenueId = singleScrape.result!.autoVenueId;
+                    
+                    const modalResult = await modals.saveConfirmation.openModal(
+                      capturedParsedData,
+                      capturedAutoVenueId || defaultVenueId,
+                      currentEntity!.id
+                    );
+                    if (modalResult.action === 'save') {
+                      await singleScrape.save(
+                        modalResult.venueId || defaultVenueId,
+                        modalResult.editedData as ScrapedGameData | undefined,
+                        capturedUrl,
+                        capturedId
+                      );
+                      getScrapingStatus({ forceRefresh: true }).catch(() => {});
+                    }
+                  }
+                : undefined
+            }
+            selectedVenueId={singleScrape.result.selectedVenueId || defaultVenueId}
+            venues={venues}
+          />
+          
+          {/* Process Next Button */}
+          {['success', 'error', 'skipped', 'review'].includes(singleScrape.result.status) && !singleScrape.isProcessing && (
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  singleScrape.reset();
+                  handleStartProcessing();
+                }}
+                disabled={!defaultVenueId}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
-                <RefreshCw className={`h-4 w-4 ${jobsLoading ? 'animate-spin' : ''}`} />
+                <Play className="h-4 w-4" />
+                Process Next ({idSelectionParams.singleId})
               </button>
             </div>
-          </div>
-
-          {/* Progress Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="bg-gray-50 rounded p-2">
-              <div className="text-gray-500 text-xs">Processed</div>
-              <div className="font-semibold text-lg">{activeJob.totalURLsProcessed || 0}</div>
-            </div>
-            <div className="bg-green-50 rounded p-2">
-              <div className="text-gray-500 text-xs">New Games</div>
-              <div className="font-semibold text-lg text-green-600">{activeJob.newGamesScraped || 0}</div>
-            </div>
-            <div className="bg-blue-50 rounded p-2">
-              <div className="text-gray-500 text-xs">Updated</div>
-              <div className="font-semibold text-lg text-blue-600">{activeJob.gamesUpdated || 0}</div>
-            </div>
-            <div className="bg-red-50 rounded p-2">
-              <div className="text-gray-500 text-xs">Errors</div>
-              <div className="font-semibold text-lg text-red-600">{activeJob.errors || 0}</div>
-            </div>
-            <div className="bg-yellow-50 rounded p-2">
-              <div className="text-gray-500 text-xs">Skipped</div>
-              <div className="font-semibold text-lg text-yellow-600">{activeJob.gamesSkipped || 0}</div>
-            </div>
-            <div className="bg-gray-50 rounded p-2">
-              <div className="text-gray-500 text-xs">Blanks</div>
-              <div className="font-semibold text-lg">{activeJob.blanks || 0}</div>
-            </div>
-            <div className="bg-gray-50 rounded p-2">
-              <div className="text-gray-500 text-xs">Duration</div>
-              <div className="font-semibold text-lg">{formatDuration(activeJob.durationSeconds)}</div>
-            </div>
-            <div className="bg-gray-50 rounded p-2">
-              <div className="text-gray-500 text-xs">Success Rate</div>
-              <div className="font-semibold text-lg">{activeJob.successRate ? `${activeJob.successRate.toFixed(1)}%` : '-'}</div>
-            </div>
-          </div>
-
-          {/* Clear button when done */}
-          {!isBatchRunning && (
-            <button 
-              onClick={handleClearJob} 
-              className="mt-4 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              Clear job status
-            </button>
           )}
         </div>
       )}
+
+      {/* ================================================================= */}
+      {/* BATCH JOB PROGRESS - NEW: Real-time monitoring with polling       */}
+      {/* Replaces the old static display with live updates                 */}
+      {/* ================================================================= */}
+       {activeJobId && (
+         <BatchJobProgress
+           jobId={activeJobId}
+           onClear={handleClearJob}
+           onComplete={handleJobComplete}
+           showDetailedStats={true}
+           showStreamingGames={true}    // NEW: Enable real-time GameListItem display
+           maxStreamedGames={50}        // NEW: Optional - limit number of games shown (default: 50)
+         />
+       )}
 
       {/* Modals */}
       {selectedGameDetails && (
@@ -800,6 +1185,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
           skipConfirmation={false}
         />
       )}
+      
     </div>
   );
 };
