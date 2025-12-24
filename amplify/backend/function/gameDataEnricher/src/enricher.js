@@ -353,6 +353,40 @@ const enrichGameData = async (input) => {
     }
     
     // =========================================================
+    // 5c. isRegular FINALIZATION (ensures mutual exclusivity)
+    // =========================================================
+    // RULE: A game is either a SERIES game OR a REGULAR (recurring) game, never both
+    // - isSeries=true + isRegular=false → Series game (part of tournament series)
+    // - isSeries=false + isRegular=true → Regular game (recurring weekly/daily game)
+    // - isSeries=false + isRegular=false → One-off game (neither series nor recurring)
+    
+    console.log('[ENRICHER] Step 5c: isRegular finalization');
+    
+    if (enrichedGame.isSeries === true) {
+      // Series games are NEVER regular games
+      if (enrichedGame.isRegular !== false) {
+        enrichedGame.isRegular = false;
+        console.log('[ENRICHER] → Set isRegular=false (game is part of a series)');
+      }
+    } else if (enrichedGame.recurringGameId) {
+      // Games matched to a recurring game ARE regular games
+      if (enrichedGame.isRegular !== true) {
+        enrichedGame.isRegular = true;
+        console.log('[ENRICHER] → Set isRegular=true (matched to recurring game)');
+      }
+    } else {
+      // Neither series nor recurring - this is a one-off game
+      // Leave isRegular as false (or set it explicitly)
+      if (enrichedGame.isRegular === undefined || enrichedGame.isRegular === null) {
+        enrichedGame.isRegular = false;
+        console.log('[ENRICHER] → Set isRegular=false (one-off game, not recurring)');
+      }
+    }
+    
+    // Log final classification
+    console.log(`[ENRICHER] Game classification: isSeries=${enrichedGame.isSeries}, isRegular=${enrichedGame.isRegular}, recurringGameId=${enrichedGame.recurringGameId || 'none'}, tournamentSeriesId=${enrichedGame.tournamentSeriesId || 'none'}`);
+    
+    // =========================================================
     // 6. QUERY KEY COMPUTATION
     // =========================================================
     if (!options.skipQueryKeys) {

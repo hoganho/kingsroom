@@ -91,6 +91,11 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
         netProfit
         profitMargin
         gameType
+        # New prizepool adjustment fields
+        prizepoolPaidDelta
+        prizepoolJackpotContributions
+        prizepoolAccumulatorTicketPayoutEstimate
+        prizepoolAccumulatorTicketPayoutActual
         game {
           id
           name
@@ -185,6 +190,13 @@ const getGameQuery = /* GraphQL */ `
       entityId
       createdAt
       updatedAt
+      # Jackpot contributions (inherited from RecurringGame)
+      hasJackpotContributions
+      jackpotContributionAmount
+      # Accumulator tickets (inherited from RecurringGame)
+      hasAccumulatorTickets
+      accumulatorTicketValue
+      numberOfAccumulatorTicketsPaid
     }
   }
 `;
@@ -246,6 +258,13 @@ const updateGameMutation = /* GraphQL */ `
       lastEditedAt
       lastEditedBy
       updatedAt
+      # Jackpot contributions (inherited from RecurringGame)
+      hasJackpotContributions
+      jackpotContributionAmount
+      # Accumulator tickets (inherited from RecurringGame)
+      hasAccumulatorTickets
+      accumulatorTicketValue
+      numberOfAccumulatorTicketsPaid
     }
   }
 `;
@@ -266,6 +285,11 @@ interface GameFinancialSnapshotWithGame {
   netProfit?: number | null;
   profitMargin?: number | null;
   gameType?: string | null;
+  // New prizepool adjustment fields
+  prizepoolPaidDelta?: number | null;
+  prizepoolJackpotContributions?: number | null;
+  prizepoolAccumulatorTicketPayoutEstimate?: number | null;
+  prizepoolAccumulatorTicketPayoutActual?: number | null;
   game?: {
     id: string;
     name?: string | null;
@@ -385,6 +409,13 @@ interface GameDetails {
   entityId?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+  // Jackpot contributions (inherited from RecurringGame)
+  hasJackpotContributions?: boolean | null;
+  jackpotContributionAmount?: number | null;
+  // Accumulator tickets (inherited from RecurringGame)
+  hasAccumulatorTickets?: boolean | null;
+  accumulatorTicketValue?: number | null;
+  numberOfAccumulatorTicketsPaid?: number | null;
 }
 
 // ---- Helpers ----
@@ -392,16 +423,35 @@ interface GameDetails {
 function isValidGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
   const game = snapshot.game;
   
-  // Explicitly exclude NOT_PUBLISHED games
-  if (game?.gameStatus === 'NOT_PUBLISHED') return false;
+  // Debug logging to identify filtering issues
+  const checks = {
+    hasGame: !!game,
+    gameStatus: game?.gameStatus,
+    isFinished: game?.gameStatus === 'FINISHED',
+    isRegular: game?.isRegular,
+    venueScheduleKey: game?.venueScheduleKey,
+    venueGameTypeKey: game?.venueGameTypeKey,
+  };
   
-  return (
+  // Explicitly exclude NOT_PUBLISHED games
+  if (game?.gameStatus === 'NOT_PUBLISHED') {
+    console.log(`[VenueGameDetails] Snapshot ${snapshot.id} excluded: NOT_PUBLISHED`);
+    return false;
+  }
+  
+  const isValid = (
     !!game &&
     game.gameStatus === 'FINISHED' &&
     game.isRegular === true &&
     !!game.venueScheduleKey &&
     !!game.venueGameTypeKey
   );
+  
+  if (!isValid) {
+    console.log(`[VenueGameDetails] Snapshot ${snapshot.id} filtered out:`, checks);
+  }
+  
+  return isValid;
 }
 
 function formatCurrency(value: number): string {
@@ -778,6 +828,17 @@ function GameEditModal({ isOpen, onClose, gameId, onSaveSuccess }: GameEditModal
                             {renderField('Starting Stack', 'startingStack', 'number')}
                             {renderField('Has Guarantee', 'hasGuarantee', 'boolean')}
                             {renderField('Guarantee Amount', 'guaranteeAmount', 'number')}
+                            <div className="mt-4 pt-3 border-t border-gray-200">
+                              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Jackpot Contributions</h4>
+                            </div>
+                            {renderField('Has Jackpot Contributions', 'hasJackpotContributions', 'boolean')}
+                            {renderField('Jackpot Contribution Amount', 'jackpotContributionAmount', 'number')}
+                            <div className="mt-4 pt-3 border-t border-gray-200">
+                              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Accumulator Tickets</h4>
+                            </div>
+                            {renderField('Has Accumulator Tickets', 'hasAccumulatorTickets', 'boolean')}
+                            {renderField('Accumulator Ticket Value', 'accumulatorTicketValue', 'number')}
+                            {renderField('# Accumulator Tickets Paid', 'numberOfAccumulatorTicketsPaid', 'number')}
                           </>
                         )}
 

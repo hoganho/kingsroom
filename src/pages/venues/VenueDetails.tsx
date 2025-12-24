@@ -93,6 +93,11 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
         netProfit
         profitMargin
         gameType
+        # New prizepool adjustment fields
+        prizepoolPaidDelta
+        prizepoolJackpotContributions
+        prizepoolAccumulatorTicketPayoutEstimate
+        prizepoolAccumulatorTicketPayoutActual
         game {
           id
           name
@@ -126,6 +131,11 @@ interface GameFinancialSnapshotWithGame {
   netProfit?: number | null;
   profitMargin?: number | null;
   gameType?: string | null;
+  // New prizepool adjustment fields
+  prizepoolPaidDelta?: number | null;
+  prizepoolJackpotContributions?: number | null;
+  prizepoolAccumulatorTicketPayoutEstimate?: number | null;
+  prizepoolAccumulatorTicketPayoutActual?: number | null;
   game?: {
     id: string;
     name?: string | null;
@@ -180,16 +190,35 @@ interface GameRowData {
 function isValidGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
   const game = snapshot.game;
   
-  // Explicitly exclude NOT_PUBLISHED games
-  if (game?.gameStatus === 'NOT_PUBLISHED') return false;
+  // Debug logging to identify filtering issues
+  const checks = {
+    hasGame: !!game,
+    gameStatus: game?.gameStatus,
+    isFinished: game?.gameStatus === 'FINISHED',
+    isRegular: game?.isRegular,
+    venueScheduleKey: game?.venueScheduleKey,
+    venueGameTypeKey: game?.venueGameTypeKey,
+  };
   
-  return (
+  // Explicitly exclude NOT_PUBLISHED games
+  if (game?.gameStatus === 'NOT_PUBLISHED') {
+    console.log(`[VenueDetails] Snapshot ${snapshot.id} excluded: NOT_PUBLISHED`);
+    return false;
+  }
+  
+  const isValid = (
     !!game &&
     game.gameStatus === 'FINISHED' &&
     game.isRegular === true &&
     !!game.venueScheduleKey &&
     !!game.venueGameTypeKey
   );
+  
+  if (!isValid) {
+    console.log(`[VenueDetails] Snapshot ${snapshot.id} filtered out:`, checks);
+  }
+  
+  return isValid;
 }
 
 function formatCurrency(value: number): string {

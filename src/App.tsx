@@ -200,7 +200,7 @@ class ErrorBoundary extends React.Component<
 // ============================================
 const ProtectedLayout = () => {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute redirectIfNoAccess>
       <EntityProvider>
         <GameProvider>
           <MainLayout>

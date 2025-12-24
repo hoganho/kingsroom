@@ -668,7 +668,9 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
         const gameUpdates = {
           recurringGameId: matchResult.match.id,
           recurringGameAssignmentStatus: matchResult.isAmbiguous ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED',
-          recurringGameAssignmentConfidence: confidence
+          recurringGameAssignmentConfidence: confidence,
+          isRegular: true,  // Recurring games ARE regular games
+          isSeries: false   // Explicitly not a series
         };
         
         const inheritedFields = inheritFieldsFromTemplate(game, matchResult.match, gameUpdates);
@@ -704,7 +706,9 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
         const gameUpdates = {
           recurringGameId: matchResult.match.id,
           recurringGameAssignmentStatus: 'PENDING_ASSIGNMENT',
-          recurringGameAssignmentConfidence: confidence
+          recurringGameAssignmentConfidence: confidence,
+          isRegular: true,  // Recurring games ARE regular games
+          isSeries: false   // Explicitly not a series
         };
         
         const inheritedFields = inheritFieldsFromTemplate(game, matchResult.match, gameUpdates);
@@ -748,7 +752,9 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
           const gameUpdates = {
             recurringGameId: existingDuplicate.id,
             recurringGameAssignmentStatus: 'PENDING_ASSIGNMENT',  // Needs review since days differ
-            recurringGameAssignmentConfidence: 0.7
+            recurringGameAssignmentConfidence: 0.7,
+            isRegular: true,  // Recurring games ARE regular games
+            isSeries: false   // Explicitly not a series
           };
           
           const inheritedFields = inheritFieldsFromTemplate(game, existingDuplicate, gameUpdates);
@@ -795,7 +801,9 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
             gameUpdates: {
               recurringGameId: newGame.id,
               recurringGameAssignmentStatus: 'AUTO_ASSIGNED',
-              recurringGameAssignmentConfidence: 0.9
+              recurringGameAssignmentConfidence: 0.9,
+              isRegular: true,  // Recurring games ARE regular games
+              isSeries: false   // Explicitly not a series
             },
             metadata: {
               status: 'CREATED_NEW',

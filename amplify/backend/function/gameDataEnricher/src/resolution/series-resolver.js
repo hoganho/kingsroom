@@ -804,6 +804,7 @@ const resolveSeriesInstance = async ({
         seriesAssignmentStatus: 'AUTO_ASSIGNED',
         seriesAssignmentConfidence: Math.min(matchConfidence, temporalMatch.confidence),
         isSeries: true,
+        isRegular: false,  // Series games are NOT regular recurring games
         ...details
       },
       metadata: {
@@ -840,6 +841,7 @@ const resolveSeriesInstance = async ({
           seriesAssignmentStatus: 'AUTO_ASSIGNED',
           seriesAssignmentConfidence: matchConfidence * 0.95,
           isSeries: true,
+          isRegular: false,  // Series games are NOT regular recurring games
           ...details
         },
         metadata: {
@@ -867,6 +869,7 @@ const resolveSeriesInstance = async ({
       seriesAssignmentConfidence: matchConfidence,
       suggestedSeriesName: `${seriesTitle} ${year}`,
       isSeries: true,
+      isRegular: false,  // Series games are NOT regular recurring games
       ...details
     },
     metadata: {
@@ -919,6 +922,7 @@ const resolveSeriesFromName = async ({
         seriesAssignmentStatus: 'AUTO_ASSIGNED',
         seriesAssignmentConfidence: Math.min(matchConfidence, bestScore / 100),
         isSeries: true,
+        isRegular: false,  // Series games are NOT regular recurring games
         ...details
       },
       metadata: {
@@ -953,6 +957,7 @@ const resolveSeriesFromName = async ({
           seriesAssignmentStatus: 'AUTO_ASSIGNED',
           seriesAssignmentConfidence: matchConfidence * 0.9,
           isSeries: true,
+          isRegular: false,  // Series games are NOT regular recurring games
           ...details
         },
         metadata: {
@@ -978,6 +983,7 @@ const resolveSeriesFromName = async ({
       seriesAssignmentConfidence: matchConfidence,
       suggestedSeriesName: seriesName,
       isSeries: true,
+      isRegular: false,  // Series games are NOT regular recurring games
       ...details
     },
     metadata: {
