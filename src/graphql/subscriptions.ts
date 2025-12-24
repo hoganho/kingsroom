@@ -629,6 +629,11 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           prizepoolSurplus
           guaranteeOverlayCost
           gameProfit
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
+          numberOfAccumulatorTicketsPaid
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -676,6 +681,11 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             prizepoolSurplus
             guaranteeOverlayCost
             gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -1000,6 +1010,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -1282,6 +1296,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
           isActive
           isPaused
           pausedReason
@@ -1572,6 +1590,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -2563,6 +2585,11 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           prizepoolSurplus
           guaranteeOverlayCost
           gameProfit
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
+          numberOfAccumulatorTicketsPaid
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -2610,6 +2637,11 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             prizepoolSurplus
             guaranteeOverlayCost
             gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -2934,6 +2966,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -3216,6 +3252,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
           isActive
           isPaused
           pausedReason
@@ -3506,6 +3546,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -4572,6 +4616,11 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           prizepoolSurplus
           guaranteeOverlayCost
           gameProfit
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
+          numberOfAccumulatorTicketsPaid
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -4619,6 +4668,11 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             prizepoolSurplus
             guaranteeOverlayCost
             gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -4943,6 +4997,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -5225,6 +5283,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
           isActive
           isPaused
           pausedReason
@@ -5515,6 +5577,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -6517,6 +6583,11 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           prizepoolSurplus
           guaranteeOverlayCost
           gameProfit
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
+          numberOfAccumulatorTicketsPaid
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -6564,6 +6635,11 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             prizepoolSurplus
             guaranteeOverlayCost
             gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -6888,6 +6964,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -7170,6 +7250,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
           isActive
           isPaused
           pausedReason
@@ -7460,6 +7544,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -8462,6 +8550,11 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           prizepoolSurplus
           guaranteeOverlayCost
           gameProfit
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
+          numberOfAccumulatorTicketsPaid
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -8509,6 +8602,11 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             prizepoolSurplus
             guaranteeOverlayCost
             gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -8833,6 +8931,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -9115,6 +9217,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
           isActive
           isPaused
           pausedReason
@@ -9405,6 +9511,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -10396,6 +10506,11 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           prizepoolSurplus
           guaranteeOverlayCost
           gameProfit
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
+          numberOfAccumulatorTicketsPaid
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -10443,6 +10558,11 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             prizepoolSurplus
             guaranteeOverlayCost
             gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -10767,6 +10887,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -11049,6 +11173,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
           isActive
           isPaused
           pausedReason
@@ -11339,6 +11467,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -12343,6 +12475,11 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           prizepoolSurplus
           guaranteeOverlayCost
           gameProfit
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
+          numberOfAccumulatorTicketsPaid
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -12390,6 +12527,11 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             prizepoolSurplus
             guaranteeOverlayCost
             gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -12714,6 +12856,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -12996,6 +13142,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
           isActive
           isPaused
           pausedReason
@@ -13286,6 +13436,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -14290,6 +14444,11 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           prizepoolSurplus
           guaranteeOverlayCost
           gameProfit
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
+          numberOfAccumulatorTicketsPaid
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
@@ -14337,6 +14496,11 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             prizepoolSurplus
             guaranteeOverlayCost
             gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
@@ -14661,6 +14825,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason
@@ -14943,6 +15111,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
           isActive
           isPaused
           pausedReason
@@ -15233,6 +15405,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
             isActive
             isPaused
             pausedReason

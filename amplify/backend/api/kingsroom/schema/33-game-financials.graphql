@@ -146,6 +146,12 @@ type GameFinancialSnapshotCalculation {
   prizepoolTotal: Float
   prizepoolSurplus: Float
   
+  # Prizepool Adjustments (NEW)
+  prizepoolPaidDelta: Float
+  prizepoolJackpotContributions: Float
+  prizepoolAccumulatorTicketPayoutEstimate: Float
+  prizepoolAccumulatorTicketPayoutActual: Float
+  
   # Guarantee
   guaranteeOverlayCost: Float
   guaranteeCoverageRate: Float

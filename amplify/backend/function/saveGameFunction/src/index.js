@@ -441,6 +441,15 @@ const createGame = async (input) => {
         guaranteeOverlayCost: gameData.guaranteeOverlayCost || 0,
         gameProfit: gameData.gameProfit || 0,
         
+        // Jackpot contributions (inherited from RecurringGame)
+        hasJackpotContributions: gameData.hasJackpotContributions || false,
+        jackpotContributionAmount: gameData.jackpotContributionAmount || null,
+        
+        // Accumulator tickets (inherited from RecurringGame)
+        hasAccumulatorTickets: gameData.hasAccumulatorTickets || false,
+        accumulatorTicketValue: gameData.accumulatorTicketValue || null,
+        numberOfAccumulatorTicketsPaid: gameData.numberOfAccumulatorTicketsPaid || null,
+        
         // Entry counts
         totalUniquePlayers: totalUniquePlayers,
         totalInitialEntries: gameData.totalInitialEntries || 0,
@@ -625,6 +634,15 @@ const updateGame = async (existingGame, input) => {
         prizepoolSurplus: 'prizepoolSurplus',
         guaranteeOverlayCost: 'guaranteeOverlayCost',
         gameProfit: 'gameProfit',
+        
+        // Jackpot contributions (inherited from RecurringGame)
+        hasJackpotContributions: 'hasJackpotContributions',
+        jackpotContributionAmount: 'jackpotContributionAmount',
+        
+        // Accumulator tickets (inherited from RecurringGame)
+        hasAccumulatorTickets: 'hasAccumulatorTickets',
+        accumulatorTicketValue: 'accumulatorTicketValue',
+        numberOfAccumulatorTicketsPaid: 'numberOfAccumulatorTicketsPaid',
         
         // Pre-resolved venue
         venueId: 'venueId',

@@ -102,12 +102,12 @@ function convertToCsv(items) {
   return [headerRow, ...dataRows].join('\n');
 }
 
-function makeTimestampedDirName(prefix = 'backup') {
+function makeTimestampedDirName(prefix = 'dbbackup') {
   const now = new Date();
   const pad = (n) => n.toString().padStart(2, '0');
-  const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(
+  const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(
     now.getHours()
-  )}${pad(now.getMinutes())}`;
+  )}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
   return `${prefix}_${timestamp}`;
 }
 
@@ -238,7 +238,7 @@ async function main() {
     return;
   }
 
-  const backupDirName = makeTimestampedDirName('backup');
+  const backupDirName = makeTimestampedDirName('dbbackup');
   try {
     await fs.mkdir(backupDirName, { recursive: true });
     logger.info(`Saving backups to directory: ./${backupDirName}`);

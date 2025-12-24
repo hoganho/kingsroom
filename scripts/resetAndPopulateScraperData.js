@@ -5903,7 +5903,1574 @@ Type "proceed" to continue: [29Gproceed
 [SUCCESS] ✅   └─ Saved 148 events → log_backup_staging_20251223/_aws_lambda_webScraperFunction-staging/251223-075243_251223-075255__2025_12_23___LATEST_cca878ef3f5c4a0ea4dab1cfab1bab5c.json
 [SUCCESS] ✅ Finished /aws/lambda/webScraperFunction-staging: 148 events.
 [SUCCESS] ✅ Deleted log group: /aws/lambda/webScraperFunction-staging
+[SUCCESnnode back[?7l[31m…[39m[?7h[0m[27m[24m[J[01;32m➜  [36mscripts[00m [01;34mgit:([31mmain[34m) [33m✗[00m node back[K
+[0mbackfill-entity-venue-counters.js         
+backfill-parent-records.js                
+backfill-recurring-game-sync-fields.cjs   
+backupDevData-csv-timestamped.js          
+[JbackupThenClearCloudwatchLogs_perStream.js[J[5A[0m[27m[24m[24Cnode back[Ku[?7l[31m…[39m[?7h
+[J[A[0m[27m[24m[J[01;32m➜  [36mscripts[00m [01;34mgit:([31mmain[34m) [33m✗[00m node backup[Kd[?7l[31m…[39m[?7h[0m[27m[24m[J[01;32m➜  [36mscripts[00m [01;34mgit:([31mmain[34m) [33m�nnode back[?7l[31m…[39m[?7h[0m[27m[24m[J[01;32m➜  [36mscripts[00m [01;34mgit:([31mmain[34m) [33m✗[00m node back[K
+[0mbackfill-entity-venue-counters.js       [INFO] This script will discover tables dynamically and back them up.
+[WARN] ⚠️  This performs full table scans and may incur RCU costs.
+[INFO] Region: ap-southeast-2
+[INFO] Filters: ENV_SUFFIX="staging", API_ID_FILTER="fosb7ek5argnhctz4odpt52eia", TABLE_PREFIX_FILTER="(none)"
+
+This script will back up all data from the following 51 tables:
+- AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging
+- Asset-fosb7ek5argnhctz4odpt52eia-staging
+- BackgroundTask-fosb7ek5argnhctz4odpt52eia-staging
+- CashStructure-fosb7ek5argnhctz4odpt52eia-staging
+- DataSync-fosb7ek5argnhctz4odpt52eia-staging
+- Entity-fosb7ek5argnhctz4odpt52eia-staging
+- EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- Game-fosb7ek5argnhctz4odpt52eia-staging
+- GameCost-fosb7ek5argnhctz4odpt52eia-staging
+- GameCostItem-fosb7ek5argnhctz4odpt52eia-staging
+- GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging
+- GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+- KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging
+- MarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+- Player-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+- RakeStructure-fosb7ek5argnhctz4odpt52eia-staging
+- RecurringGame-fosb7ek5argnhctz4odpt52eia-staging
+- RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- S3Storage-fosb7ek5argnhctz4odpt52eia-staging
+- ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+- ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+- ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+- ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+- ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+- SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+- SocialPost-fosb7ek5argnhctz4odpt52eia-staging
+- SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging
+- SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+- Staff-fosb7ek5argnhctz4odpt52eia-staging
+- TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+- User-fosb7ek5argnhctz4odpt52eia-staging
+- UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+- UserPreference-fosb7ek5argnhctz4odpt52eia-staging
+- Venue-fosb7ek5argnhctz4odpt52eia-staging
+- VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+- VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[1G[0J
+Type "backup" to continue: [28Gbackup
+[INFO] Saving backups to directory: ./backup_2025-12-23_2221
+[INFO] 
+Processing table: AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 4 items from AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 4 items from AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: Asset-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Asset-fosb7ek5argnhctz4odpt52eia-sbackup
+[INFO] Saving backups to directory: ./backup_2025-12-23_2221
+[INFO] 
+Processing table: AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 4 items from AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 4 items from AmplifyDat
+Processing table: CashStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: CashStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table CashStructure-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: DataSync-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: DataSync-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table DataSync-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: Entity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Entity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 3 items from Entity-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 3 items from Entity-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/Entity-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 45 items from EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 45 items from EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from Game-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from Game-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/Game-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: GameCost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameCost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from GameCost-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from GameCost-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/GameCost-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: GameCostItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameCostItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table GameCostItem-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: MarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: MarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table MarketingMessage-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: Player-fosb7ek5ot-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: MarketingMessage-foing
+[INFO] Table PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerResult-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: RakeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: RakeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table RakeStructure-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: RecurringGame-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: RecurringGame-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 13 items from RecurringGame-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 13 items from RecurringGame-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/RecurringGame-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/RecurringGameMetrics-fosScanned 13 items from RecurringGame-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 13 items from RecurringGame-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/RecurringGame-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Recurrinaved 1739 items from S3Storage-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/S3Storage-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 10 items from ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 10 items from ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 2 items from ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 2 items from ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 1 items from ScraperJob-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1 items from ScraperJob-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/ScraperJob-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 1 items from ScraperState-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1 items from ScraperState-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/ScraperState-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 18 items from SocialAccount-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 18 items from SocialAccount-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/SocialAccount-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: SocialPost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: SocialPost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 399 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 796 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1200 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1601 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1801 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1801 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/SocialPost-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: SocialScrapeAttempt-fosb7ek5argnhctz4items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1801 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1801 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/SocialPost-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: Staff-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Staff-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table Staff-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 7 items from TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 7 items from TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: User-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: User-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 6 items from User-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 6 items from User-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/User-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 16 items from UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 16 items from UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: UserPreference-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: UserPreference-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table UserPreference-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: Venue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Venue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 37 items from Venue-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 37 items from Venue-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/Venue-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: UserPreference-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: UserPreference-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table UserPreference-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: Venue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Venue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 37 items from Venue-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 37 items from Venue-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/Venue-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 2 items from VenueDetails-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 2 items from VenueDetails-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2221/VenueDetails-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 193 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 193 items from VenueMetrics-fosb7ek5argnhctnode backupDevData-csv-timestamped.js[37Dnpm run dev                          [26D[11Damplify push --yes[10Dstatus    [14Dnpm run build [13Damplify push --yes[18Dgit add .         
+git commit -m "Split game metrics (All metrics) by gameType, other fixes and enhancements."[K
+git push[K[3A[25C[9Dnpm run build[1B[K[1B[K[1B[K[3A[37Cdev  builddev  [11Dno[9C[11Dnp[6Cbuild[13Damplify push --yes[10Dstatus    [14D./run_cleanup_sequence.sh --auto[?1l>[?2004l[1B]2;./run_cleanup_sequence.sh --auto]1;./run_cleanup_sequence.sh
+======================================================================
+   ⚠️  WARNING: RUNNING IN AUTO MODE (NO CONFIRMATIONS) ⚠️
+======================================================================
+
+The script will automatically pipe confirmation keywords.
+
+======================================================================
+   STEP 1/4: Backup DynamoDB Tables (CSV)
+======================================================================
+
+[INFO] --- DYNAMODB DATABASE BACKUP SCRIPT (CSV) ---
+[INFO] This script will discover tables dynamically and back them up.
+[WARN] ⚠️  This performs full table scans and may incur RCU costs.
+[INFO] Region: ap-southeast-2
+[INFO] Filters: ENV_SUFFIX="staging", API_ID_FILTER="fosb7ek5argnhctz4odpt52eia", TABLE_PREFIX_FILTER="(none)"
+
+This script will back up all data from the following 51 tables:
+- AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging
+- Asset-fosb7ek5argnhctz4odpt52eia-staging
+- BackgroundTask-fosb7ek5argnhctz4odpt52eia-staging
+- CashStructure-fosb7ek5argnhctz4odpt52eia-staging
+- DataSync-fosb7ek5argnhctz4odpt52eia-staging
+- Entity-fosb7ek5argnhctz4odpt52eia-staging
+- EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- Game-fosb7ek5argnhctz4odpt52eia-staging
+- GameCost-fosb7ek5argnhctz4odpt52eia-staging
+- GameCostItem-fosb7ek5argnhctz4odpt52eia-staging
+- GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging
+- GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+- KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging
+- MarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+- Player-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+- RakeStructure-fosb7ek5argnhctz4odpt52eia-staging
+- RecurringGame-fosb7ek5argnhctz4odpt52eia-staging
+- RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- S3Storage-fosb7ek5argnhctz4odpt52eia-staging
+- ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+- ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+- ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+- ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+- ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+- SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+- SocialPost-fosb7ek5argnhctz4odpt52eia-staging
+- SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging
+- SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+- Staff-fosb7ek5argnhctz4odpt52eia-staging
+- TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+- User-fosb7ek5argnhctz4odpt52eia-staging
+- UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+- UserPreference-fosb7ek5argnhctz4odpt52eia-staging
+- Venue-fosb7ek5argnhctz4odpt52eia-staging
+- VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+- VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[1G[0J
+Type "backup" to continue: [28Gbackup
+[INFO] Saving backups to directory: ./backup_2025-12-23_2257
+[INFO] 
+Processing table: AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 4 items from AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 4 items from AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: Asset-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Asset-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table Asset-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: BackgroundTask-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: BackgroundTask-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table BackgroundTask-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: CashStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: CashStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table CashStructure-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: DataSync-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: DataSync-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table DataSync-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: Entity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Entity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 3 items from Entity-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 3 items from Entity-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/Entity-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 45 items from EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 45 items from EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from Game-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from Game-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/Game-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: GameCost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameCost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from GameCost-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from GameCost-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/GameCost-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: GameCostItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameCostItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table GameCostItem-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: MarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: MarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table MarketingMessage-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: Player-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Player-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table Player-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerResult-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up a[INFO] 
+Processing table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: RakeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to backz4odpt52eia-staging
+[INFO] Starting to back up all data from table: RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: S3Storage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: S3Storage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 1108 items from S3Storage-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1739 items from S3Storage-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1739 items from S3Storage-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/S3Storage-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 10 items from ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 10 items from ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 2 items from ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 2 items from ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 1 items from ScraperJob-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1 items from ScraperJob-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/ScraperJob-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 1 items from ScraperState-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1 items from ScraperState-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/ScraperState-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 18 items from SocialAccount-fosb7ek5argnhctzng.csv
+[INFO] 
+Processing table: ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 1 items from ScraperState-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1 items from ScraperState-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/ScraperState-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 18 items from SocialAccount-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 18 items from SocialAccount-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/SocialAccount-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: SocialPost-fosb7ek5argnhctz4odpt52eia-staging
+[I[INFO] 
+Processing table: SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 113 items from SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 113 items from SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: Staff-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Staff-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table Staff-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 7 items from TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 7 items from TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: User-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: User-fosb7ek5argnhctSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 7 items from TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: User-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: User-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 6 items from User-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 6 items from User-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/User-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing tablecreated.
+[INFO] 
+Processing table: Venue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Venue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 37 items from Venue-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 37 items from Venue-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/Venue-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 2 items from VenueDetails-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 2 items from VenueDetails-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/VenueDetails-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 193 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 193 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging → backup_2025-12-23_2257/VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging.csv
+[SUCCESS] ✅ 
+All matched tables have been processed.
+[SUCCESS] ✅ Backup data is located in: ./backup_2025-12-23_2257
+
+======================================================================
+   STEP 2/4: Clear DynamoDB Data
+======================================================================
+
+[WARN] ⚠️  --- KINGSROOM DEV DATABASE CLEARER ---
+[WARN] ⚠️  This script will PERMANENTLY DELETE ALL ITEMS from the specified tables.
+[WARN] ⚠️  The table structures will remain, but they will be empty.
+[WARN] ⚠️  This action is IRREVERSIBLE. Please be absolutely sure.
+
+This script will clear all data from the following tables:
+- Game-fosb7ek5argnhctz4odpt52eia-staging
+- GameCost-fosb7ek5argnhctz4odpt52eia-staging
+- GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+- Player-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+- UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+- VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+- EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[1G[0J
+Type "proceed" to continue: [29Gproceed
+[INFO] 
+Processing table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 5 items from saction-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+- UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+- VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+- EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[1G[0J
+Type "proceed" to continue: [29Gproceed
+[INFO] 
+Processing table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 5 items from Game-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 5 items from Game-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: GameCost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: GameCos52eia-staging
+[INFO] Starting to clear all data from table: Player-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from Player-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerResult-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: UserAuditLog-fosb7ek5argnhctz4odpt52eiodpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 16 items from UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 16 items from UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: VenueDetails-fosb7ek5argnhctz4odpt52eia-s all 45 items from EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 5 items from RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 5 items from RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 25 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 50 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 75 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 100 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 125 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 150 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 175 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 193 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 193 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging.
+[SUCCESS] ✅ 
+All specified tables have been processed.
+
+======================================================================
+   STEP 3/4: Clear Scraper Metadata
+======================================================================
+
+
+============================================================
+  CLEAR SCRAPER METADATA TABLES
+  (S3Storage will be PRESERVED)
+============================================================
+
+[WARN] ⚠️  LIVE MODE - Data WILL be permanently deleted!
+
+Tables to CLEAR:
+  ❌ ScrapeAttempt
+  ❌ ScraperJob
+  ❌ ScraperState
+  ❌ ScrapeStructure
+  ❌ ScrapeURL
+
+Tables PRESERVED:
+  ✅ S3Storage (HTML cache references)
+
+------------------------------------------------------------
+Checking item counts...
+
+  ScrapeAttempt: 10 items
+  ScraperJob: 1 items
+  ScraperState: 1 items
+  ScrapeStructure: 2 items
+  ScrapeURL: 5 items
+
+  TOTAL: 19 items to delete
+
+------------------------------------------------------------
+[1G[0J
+Type "DELETE" to confirm deletion: [36GDELETE
+
+------------------------------------------------------------
+Clearing tables...
+
+[INFO] Clearing table: ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+  Deleted 10 items...
+[SUCCESS] ✅ Cleared 10 items from ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Clearing table: ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+  Deleted 1 items...
+[SUCCESS] ✅ Cleared 1 items from ScraperJob-fosb7ek5argnhctz4odpt52eia-sttate: 1 items
+  ScrapeStructure: 2 items
+  ScrapeURL: 5 items
+
+  TOTAL: 19 items to delete
+
+------------------------------------------------------------
+[1G[0J
+Type "DELETE" to confirm deletion: [36GDELETE
+
+------------------------------------------------------------
+Clearing tables...
+
+[INFO] Clearing table: ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+  Deleted 10 items...
+[SUCCESS] ✅ Cleared 10 items from ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Clearing table: ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+  Deleted 1 items...
+[SUCCESS] ✅ Cleared 1 items from ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Clearing table: ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+  Deleted 1 items...
+[SUCCESS] ✅ Cleared 1 items from ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Clearing table: ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+ =================================================
+
+[WARN] ⚠️  --- CLOUDWATCH LOG BACKUP & DELETE (DIRECT AWS DISCOVERY) ---
+[WARN] ⚠️  Target Suffix: "staging"
+[INFO] Scanning AWS CloudWatch for groups matching suffix: "staging"...
+[INFO] Found 11 groups. Counting streams...
+
+------------------------------------------------------------
+ LOG GROUP NAME                                | STREAMS
+------------------------------------------------------------
+ /aws/lambda/autoScraper-staging               | 1
+ ...bda/entityVenueDashMetricCounter-staging   | 2
+ /aws/lambda/gameDataEnricher-staging          | 1
+ /aws/lambda/gameFinancialsProcessor-staging   | 2
+ /aws/lambda/gameIdTracker-staging             | 2
+ /aws/lambda/refreshAllMetrics-staging         | 1
+ /aws/lambda/saveGameFunction-staging          | 1
+ /aws/lambda/scraperManagement-staging         | 2
+ /aws/lambda/tournamentConsolidator-staging    | 2
+ /aws/lambda/venueDetailsUpdater-staging       | 1
+ /aws/lambda/webScraperFunction-staging        | 1
+------------------------------------------------------------
+
+[1G[0J
+Type "proceed" to continue: [29Gproceed
+[INFO] 
+--- /aws/lambda/autoScraper-staging ---
+[INFO] Starting backup for: /aws/lambda/autoScraper-staging
+[SUCCESS] ✅   └─ Saved 21 events → log_backup_staging_20251223/_aws_lambda_autoScraper-staging/251223-090323_251223-090339__2025_12_23___LATEST_0c8830f8302b4cc38aa5d5d3aa8b9a8f.json
+[SUCCESS] ✅ Finished /aws/lambda/autoScraper-staging: 21 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/autoScraper-staging
+[INFO] 
+--- /aws/lambda/entityVenueDashMetricCounter-staging ---
+[INFO] Starting backup for: /aws/lambda/entityVenueDashMetricCounter-staging
+[SUCCESS] ✅   └─ Saved 30 events → log_backup_staging_20251223/_aws_lambda_entityVenueDashMetricCounter-staging/251223-090333_251223-090339__2025_12_23___LATEST_5076b04863e041528593a3c440de488c.json
+[SUCCESS] ✅   └─ Saved 1 events → log_backup_staging_20251223/_aws_lambda_entityVenueDashMetricCounter-staging/251223-115751_251223-115751__2025_12_23___LATEST_8f078c3c11ca4137a86eeb5f7f619440.json
+[SUCCESS] ✅   └─ Saved 13 events → log_backup_staging_20251223/_aws_lambda_entityVenueDashMetricCounter-staging/251223-115749_251223-115751__2025_12_23___LATEST_cd2e1acee57a49a7a2a900769e4f06b1.json
+[SUCCESS] ✅   └─ Saved 3 events → log_backup_staging_20251223/_aws_lambda_entityVenueDashMetricCounter-staging/251223-115750_251223-115750__2025_12_23___LATEST_e2d01a65e9d646d1942f19870b10940f.json
+[SUCCESS] ✅ Finished /aws/lambda/entityVenueDashMetricCounter-staging: 47 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/entityVenueDashMetricCounter-staging
+[INFO] 
+--- /aws/lambda/gameDataEnricher-staging ---
+[INFO] Starting backup for: /aws/lambda/gameDataEnricher-staging
+[SUCCESS] ✅   └─ Saved 151 events → log_backup_staging_20251223/_aws_lambda_gameDataEnricher-staging/251223-090328_251223-090339__2025_12_23___LATEST_767169b082fc491fa8ee62f9d1a4a903.json
+[SUCCESS] ✅ Finished /aws/lambda/gameDataEnricher-staging: 151 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambd2_23___LATEST_e2d01a65e9d646d1942f19870b10940f.json
+[SUCCESS] ✅ Finished /aws/lambda/entityVenueDashMetricCounter-staging: 47 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/entityVenueDashMetricCounter-staging
+[INFO] 
+--- /aws/lambda/gameDataEnricher-staging ---
+[INFO] Starting backup for: /aws/lambda/gameDataEnricher-staging
+[SUCCESS] ✅   └─ Saved 151 events → log_backup_staging_20251223/_aws_lambda_gameDataEnricher-staging/251223-090328_251223-090339__2025_12_23___LATEST_767169b082fc491fa8ee62f9d1a4a903.json
+[SUCCESS] ✅ Finished /aws/lambda/gameDataEnricher-staging: 151 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/gameDataEnricher-staging
+[INFO] 
+--- /aws/lambda/gameFinancialsProcessor-staging ---
+[INFO] Starting backup for: /aws/lambda/gameFinancialsProcessor-staging
+[SUCCESS] ✅   └─ Saved 16 events → log_backup_staging_20251223/_aws_lambda_gameFinancialsPro-staging
+[INFO] 
+--- /aws/lambda/gameIdTracker-staging ---
+[INFO] Starting backup for: /aws/lambda/gameIdTracker-staging
+[SUCCESS] ✅   └─ Saved 25 events → log_backup_staging_20251223/_aws_lambda_gameIdTracker-staging/251223-090228_251223-090312__2025_12_23___LATEST_f1f361fadf0d4ce4bb7c705d3e6ed2ed.json
+[SUCCESS] ✅   └─ Saved 40 events → log_backup_staging_20251223/_aws_lambda_gameIdTracker-staging/251223-090228_251223-090341__2025_12_23___LATEST_fc44fddceb4c4ff09c07768b3139af88.json
+[SUCCESS] ✅ Finished /aws/lambda/gameIdTracker-staging: 65 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/gameIdTracker-staging
+[INFO] 
+--- /aws/lambda/refreshAllMetrics-staging ---
+[INFO] Starting backup for: /aws/lambda/refreshAllMetrics-staging
+[SUCCESS] ✅   └─ Saved 17 events → log_backup_staging_20251223/_aws_lambda_refreshAllMetrics-staging/251223-090858_251223-090911__2025_12_23___LATEST_9f399cd95e0748309a0fb58e6c09b848.json
+[SUCCESS] ✅ Finished /aws/lambda/refreshAllMetrics-staging: 17 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/refreshAllMetrics-staging
+[INFO] 
+--- /aws/lambda/saveGameFunction-staging ---
+[INFO] Starting backup for: /aws/lambda/saveGameFunction-staging
+[SUCCESS] ✅   └─ Saved 26 events → log_backup_staging_20251223/_aws_lambda_saveGameFunction-staging/251223-090331_251223-090339__2025_12_23___LATEST_48b7ce35dbf34314a5a2d9ab7a758650.json
+[SUCCESS] ✅ Finished /aws/lambda/saveGameFunction-staging: 26 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/saveGameFunction-staging
+[INFO] 
+--- /aws/lambda/scraperManagement-staging ---
+[INFO] Starting backup for: /aws/lambda/scraperManagement-staging
+[SUCCESS] ✅   └─ Saved 18 events → log_backup_staging_20251223/_aws_lambda_scraperManagement-staging/251223-090227_251223-090312__2025_12_23___LATEST_486a55c5756141c3831a1c154e98f310.json
+[SUCCESS] ✅   └─ Saved 107 events → log_backup_staging_20251223/_aws_lambda_scraperManagement-staging/251223-090227_251223-090340__2025_12_23___LATEST_82fae59dda534c4594c5401129ed6efd.json
+[SUCCESS] ✅ Finished /aws/lambda/scraperManagement-staging: 125 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/scraperManagement-staging
+[INFO] 
+--- /aws/lambda/tournamentConsolidator-staging ---
+[INFO] Starting backup for: /aws/lambda/tournamentConsolidator-staging
+[SUCCESS] ✅   └─ Saved 6 events → log_backup_staging_20251223/_aws_lambda_tournamentConsolidator-staging/251223-115749_251223-115750__2025_12_23___LATEST_c22b61819a2244a3954c9758784bc534.json
+[SUCCESS] ✅   └─ Saved 16 events → log_backup_staging_20251223/_aws_lambda_tournamentConsolidator-staging/251223-115749_251223-115750__2025_12_23___LATEST_c54a83ad12bc496d8f223899a1b99513.json
+[SUCCESS] ✅   └─ Saved 30 events → log_backup_staging_20251223/_aws_lambda_tournamentConsolidator-staging/251223-090333_251223-090339__2025_12_23___LATEST_d165770ade2242289eb582758c0b4b52.json
+[SUCCESS] ✅   └─ Saved 6 events → log_backup_staging_20251223/_aws_lambda_tournamentConsolidator-staging/251223-115749_251223-115750__2025_12_23___LATEST_e2e745cc7e67425b99ed69d0453b23d8.jso12_23___LATEST_c22b61819a2244a3954c9758784bc534.json
+[SUCCESS] ✅   └─ Saved 16 events → log_backup_staging_20251223/_aws_lambda_tournamentConsolidator-staging/251223-115749_251223-115750__2025_12_23___LATEST_c54a83ad12bc496d8f223899a1b99513.json
+[SUCCESS] ✅   └─ Saved 30 events → log_backup_staging_20251223/_aws_lambda_tournamentConsolidator-staging/251223-090333_251223-090339__2025_12_23___LATEST_d165770ade2242289eb582758c0b4b52.json
+[SUCCESS] ✅   └─ Saved 6 events → log_backup_staging_20251223/_aws_lambda_tournamentConsolidator-staging/251223-115749_251223-115750__2025_12_23___LATEST_e2e745cc7e67425b99ed69d0453b23d8.json
+[SUCCESS] ✅ Finished /aws/lambda/tournamentConsolidator-staging: 58 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/tournamentConsolidator-staging
+[INFO] 
+--- /aws/lambda/venueDetailsUpdater-staging ---
+[INFO] Starting backup for: /aws/lambda/venueDetailsUpdater-staging
+[SUCCESS] ✅   └─ Saved 55 events → log_backup_staging_20251223/_aws_lambda_venueDetailsUpdater-staging/251223-115749_251223-115752__2025_12_23___LATEST_172bb24cf8cc40e0bedac2b2d910298f.json
+[SUCCESS] ✅   └─ Saved 113 events → log_backup_staging_20251223/_aws_lambda_venueDetailsUpdater-staging/251223-115750_251223-115752__2025_12_23___LATEST_2fa32f2cf1d34411b48ca573074cfd03.json
+[SUCCESS] ✅   └─ Saved 300 events → log_backup_staging_20251223/_aws_lambda_venueDetailsUpdater-staging/251223-090333_251223-090339__2025_12_23___LATEST_4a2b1677dcc7439da7f0dbb196df5288.json
+[SUCCESS] ✅   └─ Saved 117 events → log_backup_staging_20251223/_aws_lambda_venueDetail[SUCCESS] ✅ Deleted log group: /aws/lambda/webScraperFunction-staging
 [SUCCESS] ✅ Done.
+
+======================================================================
+   ✅ SEQUENCE COMPLETE
+======================================================================
+
+All scripts executed successfully.
+[1m[7m%[27m[1m[0m                                                                                ]7;file://Hogans-MacBook-Pro-5.local/Users/hoganho/Development/kingsroom/scripts]2;hoganho@Hogans-MacBook-Pro-5]1;..sroom/scripts]7;file://Hogans-MacBook-Pro-5.local/Users/hoganho/Development/kingsroom/scripts\[0m[27m[24m[J[01;32m➜  [36mscripts[00m [01;34mgit:([31mmain[34m) [33m✗[00m [K[?1h=[?2004hnnode  n  ./run_cleanup_sequence.sh --auto[?1l>[?2004l
+]2;./run_cleanup_sequence.sh --auto]1;./run_cleanup_sequence.sh
+======================================================================
+   ⚠️  WARNING: RUNNING IN AUTO MODE (NO CONFIRMATIONS) ⚠️
+======================================================================
+
+The script will automatically pipe confirmation keywords.
+
+======================================================================
+   STEP 1/4: Backup DynamoDB Tables (CSV)
+======================================================================
+
+[INFO] --- DYNAMODB DATABASE BACKUP SCRIPT (CSV) ---
+[INFO] This script will discover tables dynamically and back them up.
+[WARN] ⚠️  This performs full table scans and may incur RCU costs.
+[INFO] Region: ap-southeast-2
+[INFO] Filters: ENV_SUFFIX="staging", API_ID_FILTER="fosb7ek5argnhctz4odpt52eia", TABLE_PREFIX_FILTER="(none)"
+
+This script will back up all data from the following 51 tables:
+- AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging
+- Asset-fosb7ek5argnhctz4odpt52eia-staging
+- BackgroundTask-fosb7ek5argnhctz4odpt52eia-staging
+- CashStructure-fosb7ek5argnhctz4odpt52eia-staging
+- DataSync-fosb7ek5argnhctz4odpt52eia-staging
+- Entity-fosb7ek5argnhctz4odpt52eia-staging
+- EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- Game-fosb7ek5argnhctz4odpt52eia-staging
+- GameCost-fosb7ek5argnhctz4odpt52eia-staging
+- GameCostItem-fosb7ek5argnhctz4odpt52eia-staging
+- GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging
+- GameFinancialSnapshot-fosb7ek5argnhctz4odpt
+This script will back up all data from the following 51 tables:
+- AmplifyDataStore-fosb7ek5argnhctz4odpt52eia-staging
+- Asset-fosb7ek5argnhctz4odpt52eia-staging
+- BackgroundTask-fosb7ek5argnhctz4odpt52eia-staging
+- CashStructure-fosb7ek5argnhctz4odpt52eia-staging
+- DataSync-fosb7ek5argnhctz4odpt52eia-staging
+- Entity-fosb7ek5argnhctz4odpt52eia-staging
+- EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- Game-fosb7ek5argnhctz4odpt52eia-staging
+- GameCost-fosb7ek5argnhctz4odpt52eia-staging
+- GameCostItem-fosb7ek5argnhctz4odpt52eia-staging
+- GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging
+- GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+- KnownPlayerIdentity-fosb7ek5argnhctz4odpt52eia-staging
+- MarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+- Player-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+- RakeStructure-fosb7ek5argnhctz4odpt52eia-staging
+- RecurringGame-fosb7ek5argnhctz4odpt52eia-staging
+- RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- S3Storage-fosb7ek5argnhctz4odpt52eia-staging
+- ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+- ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+- ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+- ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+- ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+- SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+- SocialPost-fosb7ek5argnhctz4odpt52eia-staging
+- SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging
+- SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+- Staff-fosb7ek5argnhctz4odpt52eia-staging
+- TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+- User-fosb7ek5argnhctz4odpt52eia-staging
+- UserAuditLog-fosb7ek5argnhctz4odctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Asset-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table Asset-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: BackgroundTask-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: BackgroundTask-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table BackgroundTask-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: CashStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: CashStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table CashStructure-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: DataSync-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: DataSync-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table DataSync-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: Entity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Entity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 3 items from Entity-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 3 items from Entity-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/Entity-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scannedble DataSync-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: Entity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Entity-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 3 items from Entity-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 3 items from Entity-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/Entity-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 45 items from EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 45 items from EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from Game-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from Game-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/Game-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: GameCost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameCost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from GameCost-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from GameCost-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/GameCost-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: GameCostItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameCostItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table GameCostItem-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table GameCostLineItem-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items fro5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: Player-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Player-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table Player-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from 52eia-staging
+[INFO] Starting to back up all data from table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerResult-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: RakeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: RakeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table RakeStructure-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: RecurringGame-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: RecurringGame-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 13 items from RecurringGame-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 13 items from RecurringGame-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/RecurringGame-fosb7[INFO] Scanned 1108 items from S3Storage-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1739 items from S3Storage-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1739 items from S3Storage-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/S3Storage-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 10 items from ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 10 items from ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 2 items from ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 2 items from ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 1 items from ScraperJob-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1 items from ScraperJob-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/ScraperJob-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 1 items from ScraperState-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1 items from ScraperState-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/ScraperState-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: SocialAccount-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 18 items from SocialAccount-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 18 items from SocialAccount-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/SocialAccount-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: SocialPost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: SocialPost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 399 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 796 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1200 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1601 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[[SUCCESS] ✅ Saved 18 items from SocialAccount-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/SocialAccount-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: SocialPost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: SocialPost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 399 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 796 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1200 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1601 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Scanned 1801 items from SocialPost-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 1801 items from SocialPost-fosb7ek5argnhcting...
+[SUCCESS] ✅ Saved 113 items from SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: Staff-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: Staff-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table Staff-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TicketTemplate-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TournamentLevelData-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 5 items from TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 5 items from TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 7 items from TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 7 items from TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Table TournamentStructure-fosb7ek5argnhctz4odpt52eia-staging is empty. No backup file created.
+[INFO] 
+Processing table: User-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: User-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 6 items from User-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 6 items from User-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/User-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 11 items from UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 11 items from UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing tableNFO] Scanned 6 items from User-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 6 items from User-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/User-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 11 items from UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ [SUCCESS] ✅ Saved 37 items from Venue-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/Venue-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 2 items from VenueDetails-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 2 items from VenueDetails-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/VenueDetails-fosb7ek5argnhctz4odpt52eia-staging.csv
+[INFO] 
+Processing table: VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to back up all data from table: VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Scanned 193 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Saved 193 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging → backup_20251224_093424/VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging.csv
+[SUCCESS] ✅ 
+All matched tables have been processed.
+[SUCCESS] ✅ Backup data is located in: ./backup_20251224_093424
+
+======================================================================
+   STEP 2/4: Clear DynamoDB Data
+======================================================================
+
+[WARN] ⚠️  --- KINGSROOM DEV DATABASE CLEARER ---
+[WARN] ⚠️  This script will PERMANENTLY DELETE ALL ITEMS from the specified tables.
+[WARN] ⚠️  The table structures will remain, but they will be empty.
+[WARN] ⚠️  This action is IRREVERSIBLE. Please be absolutely sure.
+
+This script will clear all data from the following tables:
+- Game-fosb7ek5argnhctz4odpt52eia-staging
+- GameCost-fosb7ek5argnhctz4odpt52eia-staging
+- GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+- Player-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+- PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+- UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+- VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+- EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+- TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[1G[0J
+Type "proceed" to continue: [29Gproceed
+[INFO] 
+Processing table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: Game-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 5 items from Game-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 5 items from Game-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: GameCost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: GameCost-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 5 items from GameCost-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 5 items from GameCost-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 5 items from GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 5 items from GameFinancialSnapshot-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: Player-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: Player-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from Player-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerCredits-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerEntry-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerMarketingMessage-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerMarketingPreferences-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerPoints-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerResult-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerResult-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerSummary-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerTicket-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerTransaction-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from PlayerVenue-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 11 items from UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 11 items from UserAuditLog-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: VenueDetails-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 2 items from VenueDetails-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 2 items from VenueDetails-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 25 items from EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 45 items from EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 45 items from EntityMetrics-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 5 items from RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 5 items from RecurringGameMetrics-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Deleted 25 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 50 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 75 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 100 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 125 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 150 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 175 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[INFO] Deleted 193 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging...
+[SUCCESS] ✅ Successfully deleted all 193 items from VenueMetrics-fosb7ek5argnhctz4odpt52eia-staging.
+[INFO] 
+Processing table: TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Starting to clear all data from table: TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging
+[SUCCESS] ✅ Successfully deleted all 0 items from TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging.
+[SUCCESS] ✅ 
+All specified tables have been processed.
+
+======================================================================
+   STEP 3/4: Clear Scraper Metadata
+======================================================================
+
+
+============================================================
+  CLEAR SCRAPER METADATA TABLES
+  (S3Storage will be PRESERVED)
+============================================================
+
+[WARN] ⚠️  LIVE MODE - Data WILL be permanently deleted!
+
+Tables to CLEAR:
+  ❌ ScrapeAttempt
+  [SUCCESS] ✅ Successfully deleted all 0 items from TournamentSeriesMetrics-fosb7ek5argnhctz4odpt52eia-staging.
+[SUCCESS] ✅ 
+All specified tables have been processed.
+
+======================================================================
+   STEP 3/4: Clear Scraper Metadata
+======================================================================
+
+
+============================================================
+  CLEAR SCRAPER METADATA TABLES
+  (S3Storage will be PRESERVED)
+============================================================
+
+[WARN] ⚠️  LIVE MODE - Data WILL be permanently deleted!
+
+Tables to CLEAR:
+  ❌ ScrapeAttempt
+  ❌ ScraperJob
+  ❌ ScraperState
+  ❌ ScrapeStructure
+  ❌ ScrapeURL
+
+Tables PRESERVED:
+  ✅ S3Storage (HTML cache references)
+
+------------------------------------------------------------
+Checking item counts...
+
+  ScrapeAttempt: 10 items
+  ScraperJob: 1 items
+  ScraperState: 1 items
+  ScrapeStructure: 2 items
+  ScrapeURL: 5 items
+
+  TOTAL: 19 items to delete
+
+------------------------------------------------------------
+[1G[0J
+Type "DELETE" to confirm deletion: [36GDELETE
+
+------------------------------------------------------------
+Clearing tables...
+
+[INFO] Clearing table: ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+  Deleted 10 items...
+[SUCCESS] ✅ Cleared 10 items from ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Clearing table: ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+  Deleted 1 items...
+[SUCCESS] ✅ Cleared 1 items from ScraperJob-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Clearing table: ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+  Deleted 1 items...
+[SUCCESS] ✅ Cleared 1 items from ScraperState-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Clearing table: ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+  Deleted 2 items...
+[SUCCESS] ✅ Cleared 2 items from ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging
+[INFO] Clearing table: ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+  Deleted 5 items...
+[SUCCESS] ✅ Cleared 5 items from ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging
+
+============================================================
+[SUCCESS] LOG GROUP NAME                                | STREAMS
+------------------------------------------------------------
+ /aws/lambda/autoScraper-staging               | 1
+ ...bda/entityVenueDashMetricCounter-staging   | 8
+ /aws/lambda/gameDataEnricher-staging          | 1
+ /aws/lambda/gameFinancialsProcessor-staging   | 6
+ /aws/lambda/gameIdTracker-staging             | 2
+ /aws/lambda/getModelCount-staging             | 2
+ /aws/lambda/refreshAllMetrics-staging         | 1
+ /aws/lambda/saveGameFunction-staging          | 1
+ /aws/lambda/scraperManagement-staging         | 3
+ /aws/lambda/tournamentConsolidator-staging    | 4
+ /aws/lambda/venueDetailsUpdater-staging       | 6
+ /aws/lambda/webScraperFunction-staging        | 2
+------------------------------------------------------------
+
+[1G[0J
+Type "proceed" to continue: [29Gproceed
+[INFO] 
+--- /aws/lambda/autoScraper-staging ---
+[INFO] Starting backup for: /aws/lambda/autoScraper-staging
+[SUCCESS] ✅   └─ Saved 21 events → logbackup_20251224_093622/_aws_lambda_autoScraper-staging/251223-120901_251223-120916__2025_12_23___LATEST_fea6823d3fb146d6b9431c8853c93742.json
+[SUCCESS] ✅ Finished /aws/lambda/autoScraper-staging: 21 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/autoScraper-staging
+[INFO] 
+--- /aws/lambda/entityVenueDashMetricCounter-staging ---
+[INFO] Starting backup for: /aws/lambda/entityVenueDashMetricCounter-staging
+[SUCCESS] ✅   └─ Saved 56 events → logbackup_20251224_093622/_aws_lambda_entityVenueDashMetricCounter-staging/251223-120911_251223-120916__2025_12_23___LATEST_1badf47dde794bfe905d6[SUCCESS] ✅   └─ Saved 21 events → logbackup_20251224_093622/_aws_lambda_autoScraper-staging/251223-120901_251223-120916__2025_12_23___LATEST_fea6823d3fb146d6b9431c8853c93742.json
+[SUCCESS] ✅ Finished /aws/lambda/autoScraper-staging: 21 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/autoScraper-staging
+[INFO] 
+--- /aws/lambda/entityVenueDashMetricCounter-staging ---
+[INFO] Starting backup for: /aws/lambda/entityVenueDashMetricCounter-staging
+[SUCCESS] ✅   └─ Saved 56 events → logbackup_20251224_093622/_aws_lambda_entityVenueDashMetricCounter-staging/251223-120911_251223-120916__2025_12_23___LATEST_1badf47dde794bfe905d6bd5a00e1a4a.json
+[SUCCESS] ✅   └─ Saved 12 events → logbackup_20251224_093622/_aws_lambda_entityVenueDashMetricCounter-staging/251223-223521_251223-223521__2025_12_23___LATEST_1e4f750aa7a24514beccc9984aaeb14b.json
+[SUCCESS] ✅   └─ Saved 19 events → logbackup_20251224_093622/_aws_lambda_entityVenueDashMetricCounter-staging/251223-223521_251223-223522__2025_12_23___LATEST_396432c738164956acdfac46ad578858.json
+[SUCCESS] ✅   └─ Saved 13 events → logbackup_20251224_093622/_aws_lambda_entityVenueDashMetricCounter-staging/251223-115749_251223-115751__2025_12_23___LATEST_4764424a212243ad9d60dc23ac8bdd04.json
+[SUCCESS] ✅   └─ Saved 1 events → logbackup_20251224_093622/_aws_lambda_entityVenueDashMetricCounter-staging/251223-120913_251223-120913__2025_12_23___LATEST_6bb568b538e64e118ba72310f5b31136.json
+[SUCCESS] ✅   └─ Saved 16 events → logbackup_20251224_093622/_aws_lambda_entityVenueDashMetricCounter-staging/251223-223521_251223-223522__2025_12_23___LATEST_7e7c7b47a6cb4e91840391caa141006b.json
+[SUCCESS] ✅   └─ Saved 12 events → lo[SUCCESS] ✅   └─ Saved 151 events → logbackup_20251224_093622/_aws_lambda_gameDataEnricher-staging/251223-120906_251223-120916__2025_12_23___LATEST_ab4d74b9bbcf452abcc694eed614c7e1.json
+[SUCCESS] ✅ Finished /aws/lambda/gameDataEnricher-staging: 151 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/gameDataEnricher-staging
+[INFO] 
+--- /aws/lambda/gameFinancialsProcessor-staging ---
+[INFO] Starting backup for: /aws/lambda/gameFinancialsProcessor-staging
+[SUCCESS] ✅   └─ Saved 6 events → logbackup_20251224_093622/_aws_lambda_gameFinancialsProcessor-staging/251223-223521_251223-223521__2025_12_23___LATEST_911d4e562f384228972a01622d3f9faa.json
+[SUCCESS] ✅   └─ Saved 11 events → logbackup_20251224_093622/_aws_lambda_gameFinancialsProcessor-staging/251223-223521_251223-223521__2025_12_23___LATEST_c92953efc3764e4ca0e978601f0a87e8.json
+[SUCCESS] ✅   └─ Saved 6 events → logbackup_20251224_093622/_aws_lambda_gameFinancialsProcessor-staging/251223-223521_251223-223521__2025_12_23___LATEST_d6808b6b7e7e4e6896048a5dad793807.json
+[SUCCESS] ✅   └─ Saved 11 events → logbackup_20251224_093622/_aws_lambda_gameFinancialsProcessor-staging/251223-115750_251223-115750__2025_12_23___LATEST_e8459fd9e8794934ab951d935492b75a.json
+[SUCCESS] ✅   └─ Saved 41 events → logbackup_2[SUCCESS] ✅   └─ Saved 11 events → logbackup_20251224_093622/_aws_lambda_gameFinancialsProcessor-staging/251223-223521_251223-223521__2025_12_23___LATEST_c92953efc3764e4ca0e978601f0a87e8.json
+[SUCCESS] ✅   └─ Saved 6 events → logbackup_20251224_093622/_aws_lambda_gameFinancialsProcessor-staging/251223-223521_251223-223521__2025_12_23___LATEST_d6808b6b7e7e4e6896048a5dad793807.json
+[SUCCESS] ✅   └─ Saved 11 events → logbackup_20251224_093622/_aws_lambda_gameFinancialsProcessor-staging/251223-115750_251223-115750__2025_12_23___LATEST_e8459fd9e8794934ab951d935492b75a.json
+[SUCCESS] ✅   └─ Saved 41 events → logbackup_20251224_093622/_aws_lambda_gameFinancialsProcessor-staging/251223-120911_251223-120916__2025_12_23___LATEST_eb234fee6e054c9f82f305a1b657ba92.json
+[SUCCESS] ✅   └─ Saved 6 events → logbackup_20251224_093622/_aws_lambda_gameFinancialsProcessor-staging/251223-223521_251223-223521__2025_12_23___LATEST_f5d54b35c2b2464ba5df6fcfa1b09e82.json
+[SUCCESS] ✅ Finished /aws/lambda/gameFinancialsProcessor-staging: 81 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/gameFinancialsProcessor-staging
+[INFO] 
+--- /aws/lambda/gameIdTracker-staging ---
+[INFO] Starting backup for: /aws/lambda/ga[SUCCESS] ✅   └─ Saved 19 events → logbackup_20251224_093622/_aws_lambda_getModelCount-staging/251223-122348_251223-122350__2025_12_23___LATEST_470f109eedee4533b690afe0e17d7450.json
+[SUCCESS] ✅   └─ Saved 19 events → logbackup_20251224_093622/_aws_lambda_getModelCount-staging/251223-122348_251223-122350__2025_12_23___LATEST_64cda0ba9317497b87f85b0a734a9546.json
+[SUCCESS] ✅ Finished /aws/lambda/getModelCount-staging: 38 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/getModelCount-staging
+[INFO] 
+--- /aws/lambda/refreshAllMetrics-staging ---
+[INFO] Starting backup for: /aws/lambda/refreshAllMetrics-staging
+[SUCCESS] ✅   └─ Saved 17 events → logbackup_20251224_093622/_aws_lambda_refreshAllMetrics-staging/251223-122144_251223-122157__2025_12_23___LATEST_452c5816fb294a3ca1504175745cd9db.json
+[SUCCESS] ✅ Finished /aws/lambda/refreshAllMetrics-staging: 17 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/refreshAllMetrics-staging
+[INFO] 
+--- /aws/lambda/saveGameFunction-staging ---
+[INFO] Starting backup for: /aws/lambda/saveGameFunction-staging
+[SUCCESS] ✅   └─ Saved 26 events → logbackup_20251224_093622/_aws_lambda_saveGameFunction-staging/251223-120909_251223-120916__2025_12_23___LATEST_8e82bce2250c4eefb3a5901b8106bf78.json
+[SUCCESS] ✅ Finished /aws/lambda/saveGameFunction-staging: 26 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/saveGameFunction-staging
+[INFO] 
+--- /aws/lambda/scraperManagement-staging ---
+[INFO] Starting backup for: /aws/lambda/scraperManagement-staging
+[SUCCESS] ✅   └─ Saved 19 events → logbackup_20251224_093622/_aws_lambda_scraperManagement-staging/251223-120816_251223-1[INFO] Starting backup for: /aws/lambda/saveGameFunction-staging
+[SUCCESS] ✅   └─ Saved 26 events → logbackup_20251224_093622/_aws_lambda_saveGameFunction-staging/251223-120909_251223-120916__2025_12_23___LATEST_8e82bce2250c4eefb3a5901b8106bf78.json
+[SUCCESS] ✅ Finished /aws/lambda/saveGameFunction-staging: 26 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/saveGameFunction-staging
+[INFO] 
+--- /aws/lambda/scraperManagement-staging ---
+[INFO] Starting backup for: /aws/lambda/scraperManagement-staging
+[SUCCESS] ✅   └─ Saved 19 events → logbackup_20251224_093622/_aws_lambda_scraperManagement-staging/251223-120816_251223-121044__2025_12_23___LATEST_06ef647e91124b08b23a3dc9bee4cc48.json
+[SUCCESS] ✅   └─ Saved 215 events → logbackup_20251224_093622/_aws_lambda_scraperManagement-staging/251223-120816_251223-121541__2025_12_23___LATEST_4b8cf28439374c1094a7f31d87891202.json
+[SUCCESS] ✅   �[SUCCESS] ✅   └─ Saved 16 events → logbackup_20251224_093622/_aws_lambda_tournamentConsolidator-staging/251223-223522_251223-223522__2025_12_23___LATEST_5b0e5dab2f71474fb98b2a51789bc4d2.json
+[SUCCESS] ✅   └─ Saved 6 events → logbackup_20251224_093622/_aws_lambda_tournamentConsolidator-staging/251223-223522_251223-223522__2025_12_23___LATEST_6053eb1f65bf43b89d4773de222a0721.json
+[SUCCESS] ✅   └─ Saved 31 events → logbackup_20251224_093622/_aws_lambda_tournamentConsolidator-staging/251223-120911_251223-120916__2025_12_23___LATEST_b8cde2d42d9f40e78d1b572b46ebdc11.json
+[SUCCESS] ✅ Finished /aws/lambda/tournamentConsolidator-staging: 59 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/tournamentConsolidator-staging
+[INFO] 
+--- /aws/lambda/venueDetailsUpdater-staging ---
+[INFO] Starting backup for: /aws/lambda/venueDetailsUpdater-staging
+[SUCCESS] ✅   └─ Saved 181 events → logbackup_20251224_093622/_aws_lambda_venueDetailsUpdater-staging/251223-120913_251223-120917__2025_12_23___LATEST_123c642086fa44bca59eb99775a41156.json
+[SUCCESS] ✅   └─ Saved 117 events → logbackup_20251224_093622/_aws_lambda_venueDetailsUpdater-staging/251223-223521_251223-223523__2025_12_23___LATEST_5870fee8a9e4425b[SUCCESS] ✅ Finished /aws/lambda/tournamentConsolidator-staging: 59 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/tournamentConsolidator-staging
+[INFO] 
+--- /aws/lambda/venueDetailsUpdater-staging ---
+[INFO] Starting backup for: /aws/lambda/venueDetailsUpdater-staging
+[SUCCESS] ✅   └─ Saved 181 events → logbackup_20251224_093622/_aws_lambda_venueDetailsUpdater-staging/251223-120913_251223-120917__2025_12_23___LATEST_123c642086fa44bca59eb99775a41156.json
+[SUCCESS] ✅   └─ Saved 117 events → logbackup_20251224_093622/_aws_lambda_venueDetailsUpdater-staging/251223-223521_251223-223523__2025_12_23___LATEST_5870fee8a9e4425bbc31c5ad23fe2e4d.json
+[SUCCESS] ✅   └─ Saved 59 events → logbackup_20251224_093622/_aws_lambda_venueDetailsUpdater-staging/251223-223522_251223-223523__2025_12_23___LATEST_5f1188db31f948569d7b4b72ccc2ba1a.json
+[SUCCESS] ✅   └─ Saved 59 events → logbackup_20251224_093622/_aws_lambda_venueDetailsUpdater-staging/251223-223521_251223-223523__2025_12_23___LATEST_8741eea887174df18d03885f017c3388.json
+[SUCCESS] ✅  [SUCCESS] ✅   └─ Saved 1 events → logbackup_20251224_093622/_aws_lambda_webScraperFunction-staging/251223-121456_251223-121456__2025_12_23___LATEST_8144275a73d84bdfaf2d88f719b63fdd.json
+[SUCCESS] ✅   └─ Saved 145 events → logbackup_20251224_093622/_aws_lambda_webScraperFunction-staging/251223-120904_251223-120915__2025_12_23___LATEST_9d72e1e3ae3d4bb893c85173db294535.json
+[SUCCESS] ✅ Finished /aws/lambda/webScraperFunction-staging: 146 events.
+[SUCCESS] ✅ Deleted log group: /aws/lambda/webScraperFunction-staging
+[SUCCESS] ✅ Done.
+
+======================================================================
+   ✅ SEQUENCE COMPLETE
+======================================================================
+
+All scripts executed successfully.
+[1m[7m%[27m[1m[0m                                                                                ]7;file://Hogans-MacBook-Pro-5.local/Users/hoganho/Development/kingsroom/scripts]2;hoganho@Hogans-MacBook-Pro-5]1;..sroom/scripts]7;file://Hogans-MacBook-Pro-5.local/Users/hoganho/Development/kingsroom/scripts\[0m[27m[24m[J[01;32m➜  [36mscripts[00m [01;34mgit:([31mmain[34m) [33m✗[00m [K[?1h=[?2004hS] ✅ Done.
 
 ======================================================================
    ✅ SEQUENCE COMPLETE

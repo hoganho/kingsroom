@@ -287,7 +287,7 @@ async function main() {
   // 3. Confirm
   const now = new Date();
   const pad = (n) => n.toString().padStart(2, '0');
-  const backupDirName = `log_backup_${ENV_SUFFIX}_${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+  const backupDirName = `logbackup_${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 
   await fs.mkdir(backupDirName, { recursive: true });
 

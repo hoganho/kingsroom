@@ -335,6 +335,24 @@ const enrichGameData = async (input) => {
     }
     
     // =========================================================
+    // 5b. ACCUMULATOR TICKET CALCULATION (after recurring resolution)
+    // =========================================================
+    const totalEntries = enrichedGame.totalEntries || 0;
+    
+    // Only calculate accumulator tickets if the recurring game has them enabled
+    if (enrichedGame.hasAccumulatorTickets && totalEntries > 0) {
+      // Calculate number of accumulator tickets (10% of entries, floored)
+      if (!enrichedGame.numberOfAccumulatorTicketsPaid) {
+        enrichedGame.numberOfAccumulatorTicketsPaid = Math.floor(totalEntries * 0.10);
+        result.enrichmentMetadata.fieldsCompleted.push('numberOfAccumulatorTicketsPaid');
+      }
+      console.log(`[ENRICHER] Accumulator tickets: ${enrichedGame.numberOfAccumulatorTicketsPaid} @ $${enrichedGame.accumulatorTicketValue}`);
+    } else {
+      // No accumulator tickets for this game
+      enrichedGame.numberOfAccumulatorTicketsPaid = 0;
+    }
+    
+    // =========================================================
     // 6. QUERY KEY COMPUTATION
     // =========================================================
     if (!options.skipQueryKeys) {

@@ -69,6 +69,15 @@ input EnrichGameInput {
   hasGuarantee: Boolean
   guaranteeAmount: Float
   
+  # Jackpot contributions (if known, otherwise inherited from RecurringGame)
+  hasJackpotContributions: Boolean
+  jackpotContributionAmount: Float
+  
+  # Accumulator tickets (if known, otherwise inherited from RecurringGame)
+  hasAccumulatorTickets: Boolean
+  accumulatorTicketValue: Float
+  numberOfAccumulatorTicketsPaid: Int
+  
   # Entries (raw - totals will be derived)
   totalUniquePlayers: Int
   totalInitialEntries: Int
@@ -226,6 +235,15 @@ type EnrichedGameData @aws_iam @aws_cognito_user_pools {
   guaranteeOverlayCost: Float
   gameProfit: Float
   prizepoolCalculated: Float
+  
+  # === JACKPOT CONTRIBUTIONS (inherited from RecurringGame) ===
+  hasJackpotContributions: Boolean
+  jackpotContributionAmount: Float
+  
+  # === ACCUMULATOR TICKETS (inherited from RecurringGame) ===
+  hasAccumulatorTickets: Boolean
+  accumulatorTicketValue: Float
+  numberOfAccumulatorTicketsPaid: Int
   
   # === ENTRIES ===
   totalUniquePlayers: Int

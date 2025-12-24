@@ -1268,6 +1268,41 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "hasJackpotContributions": {
+                    "name": "hasJackpotContributions",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "jackpotContributionAmount": {
+                    "name": "jackpotContributionAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasAccumulatorTickets": {
+                    "name": "hasAccumulatorTickets",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "accumulatorTicketValue": {
+                    "name": "accumulatorTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "numberOfAccumulatorTicketsPaid": {
+                    "name": "numberOfAccumulatorTicketsPaid",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "playersRemaining": {
                     "name": "playersRemaining",
                     "isArray": false,
@@ -2799,6 +2834,34 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "prizepoolPaidDelta": {
+                    "name": "prizepoolPaidDelta",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolJackpotContributions": {
+                    "name": "prizepoolJackpotContributions",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolAccumulatorTicketPayoutEstimate": {
+                    "name": "prizepoolAccumulatorTicketPayoutEstimate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolAccumulatorTicketPayoutActual": {
+                    "name": "prizepoolAccumulatorTicketPayoutActual",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "totalDealerCost": {
                     "name": "totalDealerCost",
                     "isArray": false,
@@ -4215,6 +4278,34 @@ export const schema = {
                 },
                 "typicalGuarantee": {
                     "name": "typicalGuarantee",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasJackpotContributions": {
+                    "name": "hasJackpotContributions",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "jackpotContributionAmount": {
+                    "name": "jackpotContributionAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasAccumulatorTickets": {
+                    "name": "hasAccumulatorTickets",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "accumulatorTicketValue": {
+                    "name": "accumulatorTicketValue",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -16162,6 +16253,41 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "hasJackpotContributions": {
+                    "name": "hasJackpotContributions",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "jackpotContributionAmount": {
+                    "name": "jackpotContributionAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasAccumulatorTickets": {
+                    "name": "hasAccumulatorTickets",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "accumulatorTicketValue": {
+                    "name": "accumulatorTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "numberOfAccumulatorTicketsPaid": {
+                    "name": "numberOfAccumulatorTicketsPaid",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "totalUniquePlayers": {
                     "name": "totalUniquePlayers",
                     "isArray": false,
@@ -17034,6 +17160,34 @@ export const schema = {
                 },
                 "prizepoolSurplus": {
                     "name": "prizepoolSurplus",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolPaidDelta": {
+                    "name": "prizepoolPaidDelta",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolJackpotContributions": {
+                    "name": "prizepoolJackpotContributions",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolAccumulatorTicketPayoutEstimate": {
+                    "name": "prizepoolAccumulatorTicketPayoutEstimate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepoolAccumulatorTicketPayoutActual": {
+                    "name": "prizepoolAccumulatorTicketPayoutActual",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -21031,5 +21185,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "daf33fc9c2bd664d499794f71f65a2f7"
+    "version": "f0cf5277cd0f745b727f0ede78ded8de"
 };

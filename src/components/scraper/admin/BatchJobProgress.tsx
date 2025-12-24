@@ -1,12 +1,14 @@
 // src/components/scraper/admin/BatchJobProgress.tsx
 // Enhanced batch job progress display with real-time game streaming
 // UPDATED: Fixed nested button DOM warning by converting accordion header to interactive div
+// UPDATED: Added onStop prop and stop button next to Processing badge for better UX
 //
 // New features:
 // - Real-time GameListItem display as games are processed
 // - Live subscription indicator
 // - Collapsible game list
 // - Stats derived from both polling and streaming
+// - Stop button visible next to Processing badge when job is active
 
 import React, { useMemo, useState } from 'react';
 import { 
@@ -22,7 +24,8 @@ import {
   X,
   ChevronDown,
   ChevronUp,
-  Radio
+  Radio,
+  Square
 } from 'lucide-react';
 import { ScraperJob } from '../../../API';
 import { 
@@ -42,6 +45,7 @@ interface BatchJobProgressProps {
   entityId?: string;
   onClear?: () => void;
   onComplete?: (job: ScraperJob) => void;
+  onStop?: () => void;              // NEW: Callback to stop the batch job
   showDetailedStats?: boolean;
   showStreamingGames?: boolean;  // NEW: Enable real-time game list
   compact?: boolean;
@@ -347,6 +351,7 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
   // entityId is available via props but not currently used - reserved for future filtering
   onClear,
   onComplete,
+  onStop,                           // NEW: Stop callback
   showDetailedStats = true,
   showStreamingGames = false,  // NEW: Default off for backward compatibility
   compact = false,
@@ -483,6 +488,18 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
             `}>
               {statusLabel}
             </span>
+            
+            {/* NEW: Stop button - only shown when job is active */}
+            {isActive && onStop && (
+              <button
+                onClick={onStop}
+                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-full transition-colors"
+                title="Stop batch job"
+              >
+                <Square className="h-3 w-3" />
+                Stop
+              </button>
+            )}
             
             {/* Refresh button */}
             <button

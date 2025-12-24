@@ -53,6 +53,15 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   guaranteeOverlayCost: Float
   gameProfit: Float
 
+  # --- Jackpot Contributions (inherited from RecurringGame) ---
+  hasJackpotContributions: Boolean @default(value: "false")
+  jackpotContributionAmount: Float
+
+  # --- Accumulator Tickets (inherited from RecurringGame) ---
+  hasAccumulatorTickets: Boolean @default(value: "false")
+  accumulatorTicketValue: Float
+  numberOfAccumulatorTicketsPaid: Int
+
   # --- Live Game Data ---
   playersRemaining: Int
   totalChipsInPlay: Float
@@ -261,6 +270,12 @@ type GameFinancialSnapshot
   prizepoolAddedValue: Float @default(value: "0")
   prizepoolTotal: Float @default(value: "0")
   prizepoolSurplus: Float @default(value: "0")
+
+  # === PRIZEPOOL ADJUSTMENTS (NEW) ===
+  prizepoolPaidDelta: Float @default(value: "0")  # = prizepoolPaid - prizepoolCalculated (rounding adjustments)
+  prizepoolJackpotContributions: Float @default(value: "0")  # = jackpotContributionAmount × totalEntries
+  prizepoolAccumulatorTicketPayoutEstimate: Float @default(value: "0")  # = numberOfAccumulatorTicketsPaid × accumulatorTicketValue
+  prizepoolAccumulatorTicketPayoutActual: Float  # Manual entry via FE
 
   # === COST SIDE (from GameCost model) ===
   totalDealerCost: Float @default(value: "0")

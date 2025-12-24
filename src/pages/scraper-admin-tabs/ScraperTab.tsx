@@ -1161,6 +1161,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
            jobId={activeJobId}
            onClear={handleClearJob}
            onComplete={handleJobComplete}
+           onStop={handleStopProcessing}  // NEW: Stop button now visible in BatchJobProgress header
            showDetailedStats={true}
            showStreamingGames={true}    // NEW: Enable real-time GameListItem display
            maxStreamedGames={50}        // NEW: Optional - limit number of games shown (default: 50)

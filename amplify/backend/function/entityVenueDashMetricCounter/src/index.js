@@ -2,9 +2,11 @@
   Lambda: entityVenueDashMetricCounter
   Region: ap-southeast-2
   
-  VERSION: 1.1.0
+  VERSION: 1.2.0
   
   CHANGELOG:
+  - v1.2.0: Added robust table name resolution (same as refreshAllMetrics)
+            Supports both STORAGE_* and API_KINGSROOM_* env var patterns
   - v1.1.0: Added series game exclusion logic
     - Games with isSeries=true are excluded from gameCount
     - Added separate seriesGameCount for tracking series games
@@ -17,10 +19,51 @@ const { unmarshall } = require("@aws-sdk/util-dynamodb");
 const client = new DynamoDBClient({ region: "ap-southeast-2" });
 const docClient = DynamoDBDocumentClient.from(client);
 
-const ENTITY_TABLE = process.env.STORAGE_ENTITY_NAME; 
-const VENUE_TABLE = process.env.STORAGE_VENUE_NAME;
+// ===================================================================
+// ROBUST TABLE NAME RESOLUTION (same as refreshAllMetrics)
+// ===================================================================
+
+const getTableName = (modelName) => {
+  // Try STORAGE_* pattern first (legacy)
+  const storageVarName = `STORAGE_${modelName.toUpperCase()}_NAME`;
+  if (process.env[storageVarName]) {
+    return process.env[storageVarName];
+  }
+
+  // Try API_KINGSROOM_* pattern (Amplify Gen 2)
+  const apiVarName = `API_KINGSROOM_${modelName.toUpperCase()}TABLE_NAME`;
+  if (process.env[apiVarName]) {
+    return process.env[apiVarName];
+  }
+
+  // Fallback: construct from API ID and environment
+  const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
+  const env = process.env.ENV;
+
+  if (apiId && env) {
+    return `${modelName}-${apiId}-${env}`;
+  }
+
+  console.error(`[METRICS] Could not resolve table name for ${modelName}. Available env vars:`, 
+    Object.keys(process.env).filter(k => k.includes('TABLE') || k.includes('STORAGE') || k.includes('API_')).join(', ')
+  );
+  return null;
+};
+
+const ENTITY_TABLE = getTableName('Entity');
+const VENUE_TABLE = getTableName('Venue');
 
 exports.handler = async (event) => {
+  // Log configuration on cold start
+  console.log('[METRICS] Table configuration:', { ENTITY_TABLE, VENUE_TABLE });
+  
+  // Validate tables are configured
+  if (!ENTITY_TABLE || !VENUE_TABLE) {
+    console.error('[METRICS] FATAL: Table names not configured. Check Lambda environment variables.');
+    console.error('[METRICS] Available env vars:', Object.keys(process.env).join(', '));
+    return { error: 'Table configuration missing' };
+  }
+
   const promises = event.Records.map(async (record) => {
     // Determine source table based on Event Source ARN (Game or Venue table triggered this?)
     const sourceArn = record.eventSourceARN || "";
@@ -208,6 +251,12 @@ async function handleVenueChange(record) {
 // ===================================================================
 
 async function updateStats(tableName, id, options) {
+  // Early exit if table name is not configured
+  if (!tableName) {
+    console.error(`[METRICS] Cannot update stats - table name is undefined for ID: ${id}`);
+    return;
+  }
+
   const { incFields, setDates } = options;
   
   // Handle legacy single-field format
@@ -254,7 +303,8 @@ async function updateStats(tableName, id, options) {
       ExpressionAttributeNames: expAttrNames,
       ExpressionAttributeValues: expAttrValues
     }));
+    console.log(`[METRICS] Updated ${tableName} [ID: ${id}] successfully`);
   } catch (err) {
-    console.error(`Error updating ${tableName} [ID: ${id}]:`, err);
+    console.error(`[METRICS] Error updating ${tableName} [ID: ${id}]:`, err);
   }
 }

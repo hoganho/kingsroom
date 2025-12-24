@@ -289,6 +289,9 @@ async function updateScraperState(stateId, updates) {
     
     Object.keys(updates).forEach(key => {
         if (key === 'id') return;
+        // Skip undefined values - DynamoDB SDK strips them from ExpressionAttributeValues
+        if (updates[key] === undefined) return;
+        
         updateExpressions.push(`#${key} = :${key}`);
         expressionAttributeNames[`#${key}`] = key;
         expressionAttributeValues[`:${key}`] = updates[key];
@@ -330,6 +333,10 @@ async function updateScraperJob(jobId, updates) {
     
     Object.keys(updates).forEach(key => {
         if (key === 'id') return;
+        // Skip undefined values - DynamoDB SDK strips them from ExpressionAttributeValues
+        // but leaves the expression reference, causing ValidationException
+        if (updates[key] === undefined) return;
+        
         const attrName = key === 'status' ? '#status' : key;
         const placeholder = `:${key}`;
         

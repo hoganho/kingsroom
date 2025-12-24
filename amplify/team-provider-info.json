@@ -18,19 +18,19 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
-          "s3Key": "amplify-builds/autoScraper-786c52416a344131382f-build.zip"
+          "s3Key": "amplify-builds/autoScraper-30434e352f552b58654c-build.zip"
         },
         "entityVenueDashMetricCounter": {
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
-          "s3Key": "amplify-builds/entityVenueDashMetricCounter-6a2b6379706243336f4d-build.zip"
+          "s3Key": "amplify-builds/entityVenueDashMetricCounter-695950566b6c317a5438-build.zip"
         },
         "gameDataEnricher": {
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
-          "s3Key": "amplify-builds/gameDataEnricher-76654e4d2f6c68706941-build.zip"
+          "s3Key": "amplify-builds/gameDataEnricher-776f344d2f5670435437-build.zip"
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
-          "s3Key": "amplify-builds/gameFinancialsProcessor-514d4367575434646b76-build.zip"
+          "s3Key": "amplify-builds/gameFinancialsProcessor-5a516c66706261544e46-build.zip"
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
@@ -63,7 +63,7 @@
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-70506b65775a5266686f-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-666f663571396c507145-build.zip"
         },
         "scrapeURLQuery": {
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",

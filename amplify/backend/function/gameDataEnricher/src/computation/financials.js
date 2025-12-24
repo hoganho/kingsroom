@@ -91,7 +91,11 @@ const inferGuaranteeFromPayout = (gameData, prizepoolPlayerContributions) => {
 /**
  * Calculate all financial metrics for a game
  * 
- * ENHANCED: Now infers guarantee from prizepoolPaid if not explicitly set
+ * ENHANCED: 
+ * - Now infers guarantee from prizepoolPaid if not explicitly set
+ * - Jackpot contribution calculations (deducted from prizepool)
+ * - Accumulator ticket payout calculations
+ * - Prizepool delta calculation (rounding adjustments)
  * 
  * @param {Object} gameData - Game data object with financial inputs
  * @returns {Object} Calculated financial fields
@@ -106,7 +110,16 @@ const calculateFinancials = (gameData) => {
     totalEntries: inputTotalEntries,
     guaranteeAmount: inputGuaranteeAmount = 0,
     hasGuarantee: inputHasGuarantee,
-    prizepoolPaid
+    prizepoolPaid,
+    
+    // Jackpot contributions (inherited from RecurringGame)
+    hasJackpotContributions = false,
+    jackpotContributionAmount = 0,
+    
+    // Accumulator tickets (inherited from RecurringGame)
+    hasAccumulatorTickets = false,
+    accumulatorTicketValue = 100,
+    numberOfAccumulatorTicketsPaid: inputNumberOfAccumulatorTicketsPaid,
   } = gameData;
   
   const result = {};
@@ -125,6 +138,34 @@ const calculateFinancials = (gameData) => {
   const entriesForRake = totalInitialEntries + totalRebuys;
   
   // ===================================================================
+  // JACKPOT CONTRIBUTIONS
+  // ===================================================================
+  
+  const jackpotPerEntry = hasJackpotContributions ? (jackpotContributionAmount || 2) : 0;
+  const prizepoolJackpotContributions = jackpotPerEntry * totalEntries;
+  result.prizepoolJackpotContributions = prizepoolJackpotContributions;
+  result.hasJackpotContributions = hasJackpotContributions;
+  result.jackpotContributionAmount = jackpotContributionAmount;
+  
+  // ===================================================================
+  // ACCUMULATOR TICKET PAYOUTS
+  // ===================================================================
+  
+  let numberOfAccumulatorTicketsPaid = 0;
+  let prizepoolAccumulatorTicketPayoutEstimate = 0;
+  
+  if (hasAccumulatorTickets) {
+    numberOfAccumulatorTicketsPaid = inputNumberOfAccumulatorTicketsPaid ?? Math.floor(totalEntries * 0.10);
+    prizepoolAccumulatorTicketPayoutEstimate = numberOfAccumulatorTicketsPaid * accumulatorTicketValue;
+  }
+  
+  result.hasAccumulatorTickets = hasAccumulatorTickets;
+  result.accumulatorTicketValue = accumulatorTicketValue;
+  result.numberOfAccumulatorTicketsPaid = numberOfAccumulatorTicketsPaid;
+  result.prizepoolAccumulatorTicketPayoutEstimate = prizepoolAccumulatorTicketPayoutEstimate;
+  result.prizepoolAccumulatorTicketPayoutActual = null; // Manual entry only
+  
+  // ===================================================================
   // REVENUE - What we collect
   // ===================================================================
   
@@ -137,16 +178,16 @@ const calculateFinancials = (gameData) => {
   result.totalBuyInsCollected = totalBuyInsCollected;
   
   // ===================================================================
-  // PRIZEPOOL - What players receive
+  // PRIZEPOOL - What players receive (accounts for jackpot deduction)
   // ===================================================================
   
-  // Prizepool from entries and rebuys (buy-in minus rake)
-  const prizepoolFromEntriesAndRebuys = (buyIn - rake) * entriesForRake;
+  // Prizepool from entries and rebuys (buy-in minus rake minus jackpot)
+  const prizepoolFromEntriesAndRebuys = (buyIn - rake - jackpotPerEntry) * entriesForRake;
   
-  // Prizepool from addons (full buy-in, no rake)
-  const prizepoolFromAddons = buyIn * totalAddons;
+  // Prizepool from addons (full buy-in minus jackpot, no rake)
+  const prizepoolFromAddons = (buyIn - jackpotPerEntry) * totalAddons;
   
-  // Total player contributions to prizepool
+  // Total player contributions to prizepool (AFTER jackpot deduction)
   const prizepoolPlayerContributions = prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
   result.prizepoolPlayerContributions = prizepoolPlayerContributions;
   
@@ -212,13 +253,16 @@ const calculateFinancials = (gameData) => {
   result.gameProfit = gameProfit;
   
   // ===================================================================
-  // CALCULATED PRIZEPOOL
+  // CALCULATED PRIZEPOOL & DELTA
   // ===================================================================
   
-  // Calculate prizepool if not set
-  if (!gameData.prizepoolCalculated && prizepoolPlayerContributions > 0) {
-    result.prizepoolCalculated = prizepoolPlayerContributions + prizepoolAddedValue;
-  }
+  // Calculate prizepool
+  const prizepoolCalculated = prizepoolPlayerContributions + prizepoolAddedValue;
+  result.prizepoolCalculated = prizepoolCalculated;
+  
+  // Delta = what we actually paid vs what we calculated (rounding adjustments)
+  const prizepoolPaidDelta = (prizepoolPaid || 0) - prizepoolCalculated;
+  result.prizepoolPaidDelta = prizepoolPaidDelta;
   
   // ===================================================================
   // LOGGING
@@ -234,6 +278,18 @@ const calculateFinancials = (gameData) => {
       gameProfit,
       isUnderwater: gameProfit < 0
     });
+  }
+  
+  if (hasJackpotContributions) {
+    console.log(`[FINANCIALS] 🎰 Jackpot contributions: $${prizepoolJackpotContributions} ($${jackpotPerEntry} × ${totalEntries} entries)`);
+  }
+  
+  if (hasAccumulatorTickets) {
+    console.log(`[FINANCIALS] 🎫 Accumulator tickets: ${numberOfAccumulatorTicketsPaid} @ $${accumulatorTicketValue} = $${prizepoolAccumulatorTicketPayoutEstimate}`);
+  }
+  
+  if (prizepoolPaidDelta !== 0) {
+    console.log(`[FINANCIALS] 📊 Prizepool delta (rounding): $${prizepoolPaidDelta}`);
   }
   
   return result;

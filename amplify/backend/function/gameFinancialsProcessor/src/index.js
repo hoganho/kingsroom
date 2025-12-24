@@ -283,6 +283,29 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         : null;
     
     // ===================================================================
+    // PRIZEPOOL ADJUSTMENTS (NEW)
+    // ===================================================================
+    
+    // Prizepool delta (rounding adjustments)
+    const prizepoolCalculated = game.prizepoolCalculated || 0;
+    const prizepoolPaidDelta = (game.prizepoolPaid || 0) - prizepoolCalculated;
+    
+    // Jackpot contributions
+    const hasJackpotContributions = game.hasJackpotContributions || false;
+    const jackpotContributionAmount = game.jackpotContributionAmount || 0;
+    const prizepoolJackpotContributions = game.prizepoolJackpotContributions || 
+        (hasJackpotContributions ? jackpotContributionAmount * totalEntries : 0);
+    
+    // Accumulator ticket payouts
+    const hasAccumulatorTickets = game.hasAccumulatorTickets || false;
+    const accumulatorTicketValue = game.accumulatorTicketValue || 100;
+    const numberOfAccumulatorTicketsPaid = game.numberOfAccumulatorTicketsPaid || 
+        (hasAccumulatorTickets ? Math.floor(totalEntries * 0.10) : 0);
+    const prizepoolAccumulatorTicketPayoutEstimate = hasAccumulatorTickets 
+        ? numberOfAccumulatorTicketsPaid * accumulatorTicketValue 
+        : 0;
+    
+    // ===================================================================
     // SERIES FLAGS - For filtering and aggregation
     // ===================================================================
     const isSeries = determineIsSeries(game);
@@ -313,6 +336,12 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         prizepoolAddedValue,
         prizepoolTotal,
         prizepoolSurplus,
+        
+        // Prizepool Adjustments (NEW)
+        prizepoolPaidDelta,
+        prizepoolJackpotContributions,
+        prizepoolAccumulatorTicketPayoutEstimate,
+        prizepoolAccumulatorTicketPayoutActual: game.prizepoolAccumulatorTicketPayoutActual || null,
         
         // Guarantee
         guaranteeOverlayCost,

@@ -46,6 +46,14 @@ type RecurringGame
   typicalStartingStack: Int
   typicalGuarantee: Float
   
+  # === JACKPOT CONTRIBUTION CONFIG ===
+  hasJackpotContributions: Boolean @default(value: "false")
+  jackpotContributionAmount: Float @default(value: "2")  # $2 per entry when enabled
+  
+  # === ACCUMULATOR TICKET CONFIG ===
+  hasAccumulatorTickets: Boolean @default(value: "false")
+  accumulatorTicketValue: Float @default(value: "100")  # $100 per ticket when enabled
+  
   # === STATUS & TRACKING ===
   isActive: Boolean! @default(value: "true")
   isPaused: Boolean @default(value: "false") 

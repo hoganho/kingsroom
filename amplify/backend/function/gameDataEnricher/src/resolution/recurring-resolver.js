@@ -171,25 +171,70 @@ const buildDayOfWeekNameKey = (dayOfWeek, name) => {
 
 /**
  * Inherit fields from recurring game template to game
+ * 
+ * UPDATED: 
+ * - Guarantee exception logic (prizepoolPaid < typicalGuarantee means no guarantee)
+ * - Jackpot contribution inheritance
+ * - Accumulator ticket inheritance
  */
 const inheritFieldsFromTemplate = (game, recurringGame, gameUpdates) => {
   const inheritedFields = [];
   
+  // ===================================================================
+  // GUARANTEE INHERITANCE (with exception logic)
+  // ===================================================================
   if ((!game.guaranteeAmount || game.guaranteeAmount === 0) && recurringGame.typicalGuarantee) {
-    gameUpdates.guaranteeAmount = recurringGame.typicalGuarantee;
-    gameUpdates.hasGuarantee = true;
-    inheritedFields.push('guaranteeAmount', 'hasGuarantee');
-    console.log(`[RECURRING] Inheriting guarantee $${recurringGame.typicalGuarantee} from template "${recurringGame.name}"`);
+    // EXCEPTION: If prizepoolPaid exists and is LESS than typicalGuarantee,
+    // this game instance didn't have the typical guarantee (no overlay scenario)
+    if (game.prizepoolPaid && game.prizepoolPaid > 0 && game.prizepoolPaid < recurringGame.typicalGuarantee) {
+      console.log(`[RECURRING] ⚠️ prizepoolPaid ($${game.prizepoolPaid}) < typicalGuarantee ($${recurringGame.typicalGuarantee})`);
+      console.log(`[RECURRING] → This instance ran without typical guarantee. Not inheriting.`);
+      gameUpdates.hasGuarantee = false;
+      gameUpdates.guaranteeAmount = 0;
+      inheritedFields.push('hasGuarantee_exception', 'guaranteeAmount_exception');
+    } else {
+      // Normal inheritance: prizepoolPaid >= typicalGuarantee (or no prizepoolPaid yet)
+      gameUpdates.guaranteeAmount = recurringGame.typicalGuarantee;
+      gameUpdates.hasGuarantee = true;
+      inheritedFields.push('guaranteeAmount', 'hasGuarantee');
+      console.log(`[RECURRING] Inheriting guarantee $${recurringGame.typicalGuarantee} from template "${recurringGame.name}"`);
+    }
   }
   
+  // ===================================================================
+  // BUY-IN INHERITANCE (existing)
+  // ===================================================================
   if ((!game.buyIn || game.buyIn === 0) && recurringGame.typicalBuyIn) {
     gameUpdates.buyIn = recurringGame.typicalBuyIn;
     inheritedFields.push('buyIn');
   }
   
+  // ===================================================================
+  // GAME VARIANT INHERITANCE (existing)
+  // ===================================================================
   if (!game.gameVariant && recurringGame.gameVariant) {
     gameUpdates.gameVariant = recurringGame.gameVariant;
     inheritedFields.push('gameVariant');
+  }
+  
+  // ===================================================================
+  // JACKPOT CONTRIBUTION INHERITANCE (NEW)
+  // ===================================================================
+  if (recurringGame.hasJackpotContributions) {
+    gameUpdates.hasJackpotContributions = true;
+    gameUpdates.jackpotContributionAmount = recurringGame.jackpotContributionAmount || 2;
+    inheritedFields.push('hasJackpotContributions', 'jackpotContributionAmount');
+    console.log(`[RECURRING] Inheriting jackpot contribution $${gameUpdates.jackpotContributionAmount} from template "${recurringGame.name}"`);
+  }
+  
+  // ===================================================================
+  // ACCUMULATOR TICKET INHERITANCE (NEW)
+  // ===================================================================
+  if (recurringGame.hasAccumulatorTickets) {
+    gameUpdates.hasAccumulatorTickets = true;
+    gameUpdates.accumulatorTicketValue = recurringGame.accumulatorTicketValue || 100;
+    inheritedFields.push('hasAccumulatorTickets', 'accumulatorTicketValue');
+    console.log(`[RECURRING] Inheriting accumulator tickets @ $${gameUpdates.accumulatorTicketValue} from template "${recurringGame.name}"`);
   }
   
   return inheritedFields;

@@ -1,7 +1,0 @@
-[
-  {
-    "timestamp": 1766464427072,
-    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
-    "ingestionTime": 1766464427954
-  }
-]

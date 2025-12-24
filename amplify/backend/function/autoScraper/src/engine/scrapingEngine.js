@@ -763,6 +763,9 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
             if (isNotFoundResponse(parsedData)) {
                 results.notFoundCount++;
                 results.blanks++;
+                results.consecutiveBlanks++;
+                results.consecutiveNotFound++;
+                results.consecutiveErrors = 0;
                 
                 publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
                     action: parsedData.gameStatus === 'NOT_PUBLISHED' ? 'NOT_PUBLISHED' : 'NOT_FOUND',
@@ -775,6 +778,11 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
             } else if (options.saveToDatabase !== false) {
+                // Valid game - reset all consecutive counters
+                results.consecutiveErrors = 0;
+                results.consecutiveBlanks = 0;
+                results.consecutiveNotFound = 0;
+                
                 const venueId = parsedData.venueMatch?.autoAssignedVenue?.id || options.defaultVenueId;
                 
                 if (!venueId) {
@@ -858,12 +866,12 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                 }
             }
             
-            results.consecutiveErrors = 0;
-            
         } catch (error) {
             console.error(`[ScrapingEngine] Gap error at ID ${tournamentId}:`, error.message);
             results.errors++;
             results.consecutiveErrors++;
+            results.consecutiveBlanks = 0;
+            results.consecutiveNotFound = 0;
             
             publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
                 action: 'ERROR',
