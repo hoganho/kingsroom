@@ -12,7 +12,7 @@ import {
   XCircleIcon,
 } from '@heroicons/react/24/outline';
 
-import { PlayerEntry } from './types';
+import { PlayerEntry } from '../../../API';
 import { EmptyState } from './components';
 
 interface PlayersTabProps {

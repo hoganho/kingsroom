@@ -21,20 +21,47 @@ import {
 
 // Import tab components and types
 import {
-  TabId,
-  GameData,
-  Game,
-  RecurringGame,
-  TournamentSeries,
   StatusBadge,
   LoadingSpinner,
 } from './game-tabs';
+
+import type {
+  Game,
+  TournamentStructure,
+  PlayerEntry,
+  PlayerResult,
+  RecurringGame,
+  TournamentSeries,
+  GameCost,
+  GameFinancialSnapshot,
+  SocialPost,
+} from '../../API';
 
 import { OverviewTab } from './game-tabs/OverviewTab';
 import { FinancialsTab } from './game-tabs/FinancialsTab';
 import { PlayersTab } from './game-tabs/PlayersTab';
 import { ResultsTab } from './game-tabs/ResultsTab';
 import { RelationsTab } from './game-tabs/RelationsTab';
+
+// =============================================================================
+// LOCAL TYPES
+// =============================================================================
+
+type TabId = 'overview' | 'financials' | 'players' | 'results' | 'relations';
+
+interface GameData {
+  game: Game;
+  structure?: TournamentStructure | null;
+  entries: PlayerEntry[];
+  results: PlayerResult[];
+  recurringGame?: RecurringGame | null;
+  tournamentSeries?: TournamentSeries | null;
+  parentGame?: Game | null;
+  childGames: Game[];
+  gameCost?: GameCost | null;
+  financialSnapshot?: GameFinancialSnapshot | null;
+  linkedSocialPosts: SocialPost[];
+}
 
 // =============================================================================
 // GRAPHQL QUERIES
@@ -188,15 +215,14 @@ const GET_TOURNAMENT_STRUCTURE_QUERY = /* GraphQL */ `
         id
         levels {
           levelNumber
-          duration
+          durationMinutes
           smallBlind
           bigBlind
           ante
-          bigBlindAnte
         }
         breaks {
           levelNumberBeforeBreak
-          duration
+          durationMinutes
         }
       }
     }

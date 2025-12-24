@@ -49,6 +49,7 @@ const mainNavigation: NavItem[] = [
   },
   {
     name: "Players",
+    href: "/players/dashboard",
     icon: UserGroupIcon,
     requiredPaths: ["/players/dashboard", "/players/search"],
     children: [
@@ -58,6 +59,7 @@ const mainNavigation: NavItem[] = [
   },
   {
     name: "Series",
+    href: "/series/dashboard",
     icon: TrophyIcon,
     requiredPaths: ["/series/dashboard"],
     children: [
@@ -66,6 +68,7 @@ const mainNavigation: NavItem[] = [
   },
   {
     name: "Games",
+    href: "/games/dashboard",
     icon: BeakerIcon,
     requiredPaths: ["/games/dashboard", "/games/search"],
     children: [
@@ -87,6 +90,7 @@ const mainNavigation: NavItem[] = [
   },
   {
     name: "Social",
+    href: "/social/pulse",
     icon: MegaphoneIcon,
     requiredPaths: ["/social/pulse", "/social/dashboard"],
     children: [

@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { TrophyIcon } from '@heroicons/react/24/outline';
 import { formatCurrency } from '../../../utils/generalHelpers';
 
-import { PlayerResult } from './types';
+import { PlayerResult } from '../../../API';
 import { EmptyState } from './components';
 
 interface ResultsTabProps {
@@ -27,7 +27,7 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ results }) => {
     return results.reduce((sum, r) => sum + (r.pointsEarned || 0), 0);
   }, [results]);
 
-  const getPlaceStyle = (place?: number) => {
+  const getPlaceStyle = (place?: number | null) => {
     if (!place) return '';
     if (place === 1) return 'bg-yellow-50 border-l-4 border-yellow-400';
     if (place === 2) return 'bg-gray-50 border-l-4 border-gray-400';
@@ -35,7 +35,7 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ results }) => {
     return '';
   };
 
-  const getPlaceIcon = (place?: number) => {
+  const getPlaceIcon = (place?: number | null) => {
     if (place === 1) return '🥇';
     if (place === 2) return '🥈';
     if (place === 3) return '🥉';

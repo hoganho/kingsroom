@@ -230,7 +230,6 @@ const PublicRoutes = () => {
 // ============================================
 // NO ACCESS SCREEN
 // ============================================
-// Shown when user is authenticated but has no page permissions
 const NoAccessScreen = () => {
   const { user } = useAuth();
   const [signingOut, setSigningOut] = React.useState(false);
@@ -239,14 +238,16 @@ const NoAccessScreen = () => {
     setSigningOut(true);
     try {
       await signOut();
+      window.location.href = '/';
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error('Error signing out:', error);
+      setSigningOut(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950 p-4">
-      <div className="text-center bg-white dark:bg-gray-900 p-8 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 max-w-md w-full">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
+      <div className="max-w-md w-full text-center">
         {/* Lock Icon */}
         <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 dark:bg-amber-900/30 mb-6">
           <svg
@@ -384,15 +385,18 @@ const AuthenticatedRoutes = () => {
             {/* Home */}
             <Route path="/home" element={<HomePage />} />
 
-            {/* Players */}
+            {/* Players - with parent redirect */}
+            <Route path="/players" element={<Navigate to="/players/dashboard" replace />} />
             <Route path="/players/dashboard" element={<PlayersDashboard />} />
             <Route path="/players/search" element={<PlayerSearch />} />
             <Route path="/players/profile/:playerId" element={<PlayerProfile />} />
 
-            {/* Series */}
+            {/* Series - with parent redirect */}
+            <Route path="/series" element={<Navigate to="/series/dashboard" replace />} />
             <Route path="/series/dashboard" element={<SeriesDashboard />} />
 
-            {/* Games */}
+            {/* Games - with parent redirect */}
+            <Route path="/games" element={<Navigate to="/games/dashboard" replace />} />
             <Route path="/games/dashboard" element={<GamesDashboard />} />
             <Route path="/games/search" element={<GameSearch />} />
             <Route path="/games/details/:gameId" element={<GameDetails />} />
@@ -402,7 +406,8 @@ const AuthenticatedRoutes = () => {
             <Route path="/venues/details" element={<VenueDetails />} />
             <Route path="/venues/game" element={<VenueGameDetails />} />
 
-            {/* Social */}
+            {/* Social - with parent redirect */}
+            <Route path="/social" element={<Navigate to="/social/pulse" replace />} />
             <Route path="/social/pulse" element={<SocialPulse />} />
             <Route path="/social/dashboard" element={<SocialDashboard />} />
 

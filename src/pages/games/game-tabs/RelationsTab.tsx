@@ -20,14 +20,14 @@ import {
   RecurringGame, 
   TournamentSeries, 
   SocialPost 
-} from './types';
+} from '../../../API';
 import { SectionCard, DetailRow, StatusBadge, EmptyState } from './components';
 
 interface RelationsTabProps {
   game: Game;
-  recurringGame?: RecurringGame;
-  tournamentSeries?: TournamentSeries;
-  parentGame?: Game;
+  recurringGame?: RecurringGame | null;
+  tournamentSeries?: TournamentSeries | null;
+  parentGame?: Game | null;
   childGames: Game[];
   linkedSocialPosts: SocialPost[];
 }
@@ -40,7 +40,7 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({
   childGames, 
   linkedSocialPosts 
 }) => {
-  const formatDateTime = (dateString?: string) => {
+  const formatDateTime = (dateString?: string | null) => {
     if (!dateString) return '-';
     try {
       return format(new Date(dateString), 'dd MMM yyyy');
@@ -351,8 +351,8 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({
                     {formatDateTime(post.postedAt)}
                   </span>
                 </div>
-                {post.textContent && (
-                  <p className="text-sm text-gray-700 mt-2 line-clamp-2">{post.textContent}</p>
+                {(post as any).textContent && (
+                  <p className="text-sm text-gray-700 mt-2 line-clamp-2">{(post as any).textContent}</p>
                 )}
                 <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                   <span>❤️ {post.likeCount || 0}</span>

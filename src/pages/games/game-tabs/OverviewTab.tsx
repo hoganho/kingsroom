@@ -16,16 +16,16 @@ import {
   LinkIcon,
 } from '@heroicons/react/24/outline';
 
-import { Game, TournamentStructure, TournamentLevel } from './types';
+import { Game, TournamentStructure } from '../../../API';
 import { SectionCard, DetailRow, StatusBadge } from './components';
 
 interface OverviewTabProps {
   game: Game;
-  structure?: TournamentStructure;
+  structure?: TournamentStructure | null;
 }
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({ game, structure }) => {
-  const formatDateTime = (dateString?: string) => {
+  const formatDateTime = (dateString?: string | null) => {
     if (!dateString) return '-';
     try {
       return format(new Date(dateString), "EEE, dd MMM yyyy 'at' HH:mm");
@@ -34,7 +34,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ game, structure }) => 
     }
   };
 
-  const formatRelativeTime = (dateString?: string) => {
+  const formatRelativeTime = (dateString?: string | null) => {
     if (!dateString) return '';
     try {
       return formatDistanceToNow(new Date(dateString), { addSuffix: true });
@@ -177,14 +177,14 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ game, structure }) => 
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {displayLevels.slice(0, 15).map((level: TournamentLevel) => (
-                  <tr key={level.levelNumber} className="hover:bg-gray-50">
-                    <td className="px-3 py-2 text-gray-900">{level.levelNumber}</td>
-                    <td className="px-3 py-2 text-gray-600">{level.duration} min</td>
-                    <td className="px-3 py-2 text-gray-900 text-right">{level.smallBlind?.toLocaleString()}</td>
-                    <td className="px-3 py-2 text-gray-900 text-right">{level.bigBlind?.toLocaleString()}</td>
+                {displayLevels.slice(0, 15).map((level: any, idx: number) => (
+                  <tr key={level.levelNumber || idx} className="hover:bg-gray-50">
+                    <td className="px-3 py-2 text-gray-900">{level.levelNumber || level.level || idx + 1}</td>
+                    <td className="px-3 py-2 text-gray-600">{level.durationMinutes || level.duration || level.minutes || level.time || '-'} min</td>
+                    <td className="px-3 py-2 text-gray-900 text-right">{(level.smallBlind || level.sb)?.toLocaleString() || '-'}</td>
+                    <td className="px-3 py-2 text-gray-900 text-right">{(level.bigBlind || level.bb)?.toLocaleString() || '-'}</td>
                     <td className="px-3 py-2 text-gray-600 text-right">
-                      {level.bigBlindAnte || level.ante || '-'}
+                      {level.ante || level.bigBlindAnte || '-'}
                     </td>
                   </tr>
                 ))}

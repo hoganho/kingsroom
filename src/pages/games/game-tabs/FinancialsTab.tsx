@@ -15,13 +15,13 @@ import {
 } from '@heroicons/react/24/outline';
 import { formatCurrency } from '../../../utils/generalHelpers';
 
-import { Game, GameCost, GameFinancialSnapshot } from './types';
+import { Game, GameCost, GameFinancialSnapshot } from '../../../API';
 import { SectionCard, DetailRow, StatCard } from './components';
 
 interface FinancialsTabProps {
   game: Game;
-  gameCost?: GameCost;
-  financialSnapshot?: GameFinancialSnapshot;
+  gameCost?: GameCost | null;
+  financialSnapshot?: GameFinancialSnapshot | null;
 }
 
 export const FinancialsTab: React.FC<FinancialsTabProps> = ({ 

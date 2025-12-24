@@ -73,12 +73,14 @@ export const GameCard: React.FC<GameCardProps> = ({
   let startDate = '';
   let startTime = '';
   let startMonth = '';
+  let startYear = '';
 
   try {
     const parsedDate = parseISO(gameStartDateTime);
     startDate = format(parsedDate, 'dd');
     startTime = format(parsedDate, 'HH:mm');
     startMonth = format(parsedDate, 'MMM');
+    startYear = format(parsedDate, 'yy');
   } catch (e) {
     console.warn('Invalid gameStartDateTime:', gameStartDateTime);
   }
@@ -90,9 +92,9 @@ export const GameCard: React.FC<GameCardProps> = ({
     >
       <div className="flex items-center px-4 py-4 sm:px-6">
         {/* Left: Date/Time Block */}
-        <div className="flex-shrink-0 mr-4 text-center w-12">
+        <div className="flex-shrink-0 mr-4 text-center w-14">
           <p className="text-sm font-medium text-indigo-600 uppercase">
-            {startMonth}
+            {startMonth}<span className="text-gray-400 font-normal"> '{startYear}</span>
           </p>
           <p className="text-2xl font-bold text-gray-900">{startDate}</p>
           <p className="text-sm text-gray-500">{startTime}</p>

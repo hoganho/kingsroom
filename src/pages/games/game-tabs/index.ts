@@ -2,7 +2,6 @@
 // Barrel export for game tab components
 // =============================================================================
 
-export * from './types';
 export * from './components';
 export { OverviewTab } from './OverviewTab';
 export { FinancialsTab } from './FinancialsTab';
