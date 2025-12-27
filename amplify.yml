@@ -3,6 +3,8 @@ backend:
   phases:
     build:
       commands:
+        - rm -rf amplify/.config amplify/#current-cloud-backend
+        - amplify pull --appId d37g1shsg3vvxw --envName staging --yes
         - amplifyPush --simple
 frontend:
   phases:
