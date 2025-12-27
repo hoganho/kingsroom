@@ -3,7 +3,7 @@ backend:
   phases:
     build:
       commands:
-        - amplify env pull --restore
+        - amplify pull --appId d37g1shsg3vvxw --envName staging --yes
         - amplifyPush --simple
 frontend:
   phases:
