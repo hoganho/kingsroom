@@ -1,3 +1,0 @@
-__typename,_lastChangedAt,totalGamesHeld,status,gameNights,createdAt,lastCustomerSuccessVisit,_version,updatedAt,venueId,startDate,averageUniquePlayersPerGame,id,averageEntriesPerGame
-VenueDetails,1766618279549,0,PENDING,[],2025-12-24T23:17:59.549Z,,1,2025-12-24T23:17:59.549Z,6316925d-1163-4b25-8d26-5728a03d99b8,2025-12-24T23:17:59.549Z,0,5ab78ad6-5bfe-475d-8ed6-b74f024c36f6,0
-VenueDetails,1766755326197,1,INACTIVE,"[""Thursday""]",2025-12-24T23:38:53.130Z,,2,2025-12-26T13:22:06.197Z,fd4f7fb1-67fd-4398-b4b4-d85722256d45,2025-08-28T18:30:00.000Z,33,3bf9a595-000b-4c20-8147-fd0bf26e1cbf,60
