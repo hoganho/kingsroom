@@ -1,25 +1,21 @@
 version: 1
 backend:
   phases:
-    preBuild:
-      commands:
-        - rm -rf amplify/.config amplify/#current-cloud-backend amplify/team-provider-info.json
     build:
       commands:
-        - amplify init --envName staging --yes --appId d37g1shsg3vvxw
-        - amplify push --yes
+        - amplifyPush --simple
 frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - npm ci --cache .npm --prefer-offline
     build:
       commands:
         - npm run build
   artifacts:
-    baseDirectory: build
+    baseDirectory: dist
     files:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
+      - .npm/**/*
