@@ -1,0 +1,27 @@
+[
+  {
+    "timestamp": 1766752655013,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766752657657
+  },
+  {
+    "timestamp": 1766752655380,
+    "message": "START RequestId: 6dc13587-d93f-41e3-88a4-43120ed97d94 Version: $LATEST\n",
+    "ingestionTime": 1766752657657
+  },
+  {
+    "timestamp": 1766752655381,
+    "message": "2025-12-26T12:37:35.381Z\t6dc13587-d93f-41e3-88a4-43120ed97d94\tINFO\t[METRICS] Table configuration: {\n  ENTITY_TABLE: 'Entity-fosb7ek5argnhctz4odpt52eia-staging',\n  VENUE_TABLE: 'Venue-fosb7ek5argnhctz4odpt52eia-staging'\n}\n",
+    "ingestionTime": 1766752657657
+  },
+  {
+    "timestamp": 1766752655456,
+    "message": "END RequestId: 6dc13587-d93f-41e3-88a4-43120ed97d94\n",
+    "ingestionTime": 1766752657657
+  },
+  {
+    "timestamp": 1766752655456,
+    "message": "REPORT RequestId: 6dc13587-d93f-41e3-88a4-43120ed97d94\tDuration: 76.08 ms\tBilled Duration: 440 ms\tMemory Size: 128 MB\tMax Memory Used: 93 MB\tInit Duration: 363.00 ms\t\n",
+    "ingestionTime": 1766752657657
+  }
+]

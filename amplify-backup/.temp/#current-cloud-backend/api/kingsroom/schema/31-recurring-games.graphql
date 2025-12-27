@@ -1,0 +1,257 @@
+# 31-recurring-games.graphql
+# ===================================================================
+# RECURRING GAMES
+# ===================================================================
+
+type RecurringGame
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  # === PRIMARY KEY ===
+  id: ID!
+  
+  # === IDENTIFICATION ===
+  name: String! 
+    @index(name: "byRecurringGameName", sortKeyFields: ["venueId"])
+  
+  displayName: String
+  description: String
+  aliases: [String]
+  
+  # === RELATIONSHIPS ===
+  entityId: ID!
+    @index(name: "byEntityRecurringGame", sortKeyFields: ["venueId", "name"])
+  entity: Entity @belongsTo(fields: ["entityId"])
+  
+  venueId: ID!
+    @index(name: "byVenueRecurringGame", sortKeyFields: ["dayOfWeek", "name"])
+  venue: Venue @belongsTo(fields: ["venueId"])
+  
+  # === SCHEDULE INFORMATION ===
+  dayOfWeek: String 
+    @index(name: "byDayOfWeekRecurring", sortKeyFields: ["venueId"])
+  
+  startTime: String 
+  endTime: String 
+  frequency: GameFrequency! @default(value: "WEEKLY")
+  
+  # === GAME CHARACTERISTICS ===
+  gameType: GameType! @default(value: "TOURNAMENT")
+  gameVariant: GameVariant!
+  tournamentType: TournamentType
+  
+  # Typical values
+  typicalBuyIn: Float
+  typicalRake: Float
+  typicalStartingStack: Int
+  typicalGuarantee: Float
+  
+  # === JACKPOT CONTRIBUTION CONFIG ===
+  hasJackpotContributions: Boolean @default(value: "false")
+  jackpotContributionAmount: Float @default(value: "2")  # $2 per entry when enabled
+  
+  # === ACCUMULATOR TICKET CONFIG ===
+  hasAccumulatorTickets: Boolean @default(value: "false")
+  accumulatorTicketValue: Float @default(value: "100")  # $100 per ticket when enabled
+  
+  # === STATUS & TRACKING ===
+  isActive: Boolean! @default(value: "true")
+  isPaused: Boolean @default(value: "false") 
+  pausedReason: String 
+  
+  lastGameDate: AWSDateTime 
+  nextScheduledDate: AWSDateTime 
+  expectedInstanceCount: Int 
+  
+  # === CATEGORIZATION ===
+  isSignature: Boolean @default(value: "false") 
+  isBeginnerFriendly: Boolean @default(value: "false")
+  isBounty: Boolean @default(value: "false")
+  tags: [String] 
+  
+  # === MARKETING ===
+  marketingDescription: String 
+  imageUrl: AWSURL 
+  socialMediaHashtags: [String]
+  
+  # === CONFIDENCE ===
+  autoDetectionConfidence: Float 
+  wasManuallyCreated: Boolean @default(value: "false")
+  requiresReview: Boolean @default(value: "false")
+  
+  # === STATISTICS ===
+  totalInstancesRun: Int @default(value: "0")
+  avgAttendance: Float
+  lastMonthAttendance: Float 
+  
+  # === RELATIONSHIPS ===
+  gameInstances: [Game] @hasMany(indexName: "byRecurringGame", fields: ["id"])
+  metrics: [RecurringGameMetrics] @hasMany(indexName: "byRecurringGameMetrics", fields: ["id"])
+  
+  # === METADATA ===
+  notes: String 
+  adminNotes: String 
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  createdBy: String
+  lastEditedBy: String
+  lastEditedAt: AWSDateTime
+}
+
+# ===================================================================
+# QUERY TYPES
+# ===================================================================
+
+input ListRecurringGamesInput {
+  entityId: ID
+  venueId: ID
+  dayOfWeek: String
+  isActive: Boolean
+  gameVariant: GameVariant
+  isSignature: Boolean
+}
+
+# ===================================================================
+# MUTATION INPUTS
+# ===================================================================
+
+input AssignGameToRecurringGameInput {
+  gameId: ID!
+  recurringGameId: ID!
+  confidence: Float
+  notes: String
+}
+
+input DetectRecurringGamesInput {
+  entityId: ID 
+  venueId: ID 
+  minInstanceCount: Int 
+  confidenceThreshold: Float 
+  dryRun: Boolean 
+}
+
+# ===================================================================
+# MUTATION RESULTS
+# ===================================================================
+
+type AssignGameResult {
+  success: Boolean!
+  game: Game
+  recurringGame: RecurringGame
+  message: String
+  confidence: Float
+}
+
+type DetectRecurringGamesResult {
+  success: Boolean!
+  message: String
+  
+  # Summary stats
+  gamesAnalyzed: Int
+  recurringGamesCreated: Int
+  recurringGamesUpdated: Int
+  gamesAssigned: Int
+  gamesPendingReview: Int
+  
+  # Detailed results
+  newRecurringGames: [RecurringGame]
+  assignmentResults: [AssignGameResult]
+  
+  # For dry run
+  preview: AWSJSON
+  errors: [String]
+}
+
+type BulkAssignResult {
+  success: Boolean!
+  totalGames: Int
+  successfulAssignments: Int
+  failedAssignments: Int
+  results: [AssignGameResult]
+  errors: [String]
+}
+
+# ===================================================================
+# CUSTOM MUTATIONS
+# ===================================================================
+
+extend type Mutation {
+  # Manually assign a game to a recurring game
+  assignGameToRecurringGame(input: AssignGameToRecurringGameInput!): AssignGameResult
+    @function(name: "recurringGameManagement-${env}")
+  
+  # Auto-detect and create recurring games from existing data
+  detectRecurringGames(input: DetectRecurringGamesInput): DetectRecurringGamesResult
+    @function(name: "recurringGameDetection-${env}")
+  
+  # Bulk assign games to recurring games
+  bulkAssignGamesToRecurringGame(
+    recurringGameId: ID!
+    venueId: ID!
+    startDate: AWSDateTime
+    endDate: AWSDateTime
+    autoAssign: Boolean
+  ): BulkAssignResult
+    @function(name: "recurringGameManagement-${env}")
+}
+
+# ===================================================================
+# QUERY HELPERS
+# ===================================================================
+
+extend type Query {
+  # Get recurring games with detailed stats
+  getRecurringGameWithStats(id: ID!): RecurringGameWithStats
+    @function(name: "recurringGameStats-${env}")
+  
+  # Search recurring games by criteria
+  searchRecurringGames(
+    entityId: ID
+    venueId: ID
+    dayOfWeek: String
+    gameVariant: GameVariant
+    isActive: Boolean
+    limit: Int
+  ): SearchRecurringGamesResult
+    @function(name: "recurringGameSearch-${env}")
+}
+
+# ===================================================================
+# QUERY RESULT TYPES
+# ===================================================================
+
+type RecurringGameWithStats {
+  recurringGame: RecurringGame
+  
+  # Quick stats
+  totalInstances: Int
+  avgEntries: Float
+  avgProfit: Float
+  recentTrend: String 
+  
+  # Recent instances
+  recentGames: [Game]
+  
+  # Health indicators
+  consistency: String 
+  profitability: String 
+  attendanceHealth: String 
+  
+  # Regular players
+  topPlayers: [RecurringGamePlayerSummary]
+}
+
+type RecurringGamePlayerSummary {
+  playerId: ID
+  playerName: String
+  appearances: Int
+  avgFinish: Float
+  totalWinnings: Float
+}
+
+type SearchRecurringGamesResult {
+  items: [RecurringGame]
+  total: Int
+  nextToken: String
+}

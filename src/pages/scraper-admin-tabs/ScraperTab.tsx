@@ -10,6 +10,8 @@
 // - useScraperJobs from useScraperManagement.ts for batch job management
 // - useSingleScrape for single-ID interactive processing
 // - useBatchJobMonitor for real-time job status polling
+//
+// FIX: Now uses enrichedData returned directly from scrape() to avoid stale state issues
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -309,11 +311,15 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
 
       scraperLogger.info('PROCESSING_START', `Processing single ID: ${tournamentId} (flow: ${scrapeFlow}, skipManualReviews: ${options.skipManualReviews})`);
       
-      const parsedData = await singleScrape.scrape(tournamentId);
+      // FIX: scrape() now returns { parsedData, enrichedData } directly
+      // This avoids stale state issues when reading enrichedData immediately after scrape
+      const { parsedData, enrichedData } = await singleScrape.scrape(tournamentId);
       
       console.log('[ScraperTab DEBUG] After scrape:', {
         hasParsedData: !!parsedData,
+        hasEnrichedData: !!enrichedData,
         parsedDataName: parsedData?.name,
+        enrichedDataName: enrichedData?.name,
         parsedDataGameStatus: parsedData?.gameStatus,
         scrapeFlow,
         skipManualReviews: options.skipManualReviews,
@@ -398,14 +404,25 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
           // =====================================================================
           // MANUAL REVIEW MODE: Show modal for venue confirmation/editing
           // =====================================================================
+          
+          // FIX: Use enrichedData returned directly from scrape() - not from stale state!
+          // Merge: parsedData as base, enrichedData overlay (has series info)
+          const gameDataForModal = enrichedData 
+            ? { ...parsedData, ...enrichedData } as ScrapedGameData
+            : parsedData;
+          
           console.log('[ScraperTab DEBUG] About to open SaveConfirmationModal', {
+            dataSource: enrichedData ? 'ENRICHED' : 'RAW_PARSED',
             parsedDataName: parsedData.name,
+            isSeries: enrichedData?.isSeries,
+            tournamentSeriesId: enrichedData?.tournamentSeriesId,
+            seriesName: enrichedData?.seriesName,
             suggestedVenueId: autoVenueId || defaultVenueId,
             entityId: currentEntity.id,
           });
           
           const modalResult = await modals.saveConfirmation.openModal(
-            parsedData,
+            gameDataForModal,
             autoVenueId || defaultVenueId,
             currentEntity.id
           );
@@ -1110,10 +1127,19 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
                     const capturedUrl = singleScrape.result!.url;
                     const capturedId = singleScrape.result!.id;
                     const capturedParsedData = singleScrape.result!.parsedData!;
+                    // NOTE: For the GameListItem Save button, we use singleScrape.enrichedData from state
+                    // This is safe here because this callback is triggered by user action AFTER
+                    // scrape() has completed and React has had time to update state
+                    const capturedEnrichedData = singleScrape.enrichedData;
                     const capturedAutoVenueId = singleScrape.result!.autoVenueId;
                     
+                    // Merge: parsedData as base, enrichedData overlay (has series info)
+                    const gameDataForModal = capturedEnrichedData 
+                      ? { ...capturedParsedData, ...capturedEnrichedData } as ScrapedGameData
+                      : capturedParsedData;
+                    
                     const modalResult = await modals.saveConfirmation.openModal(
-                      capturedParsedData,
+                      gameDataForModal,
                       capturedAutoVenueId || defaultVenueId,
                       currentEntity!.id
                     );

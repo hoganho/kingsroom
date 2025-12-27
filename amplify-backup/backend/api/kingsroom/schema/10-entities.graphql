@@ -1,0 +1,78 @@
+# 10-entities.graphql
+# ==========================================
+
+type Entity @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  entityName: String! @index(name: "byEntityName")
+  gameUrlDomain: String!
+  gameUrlPath: String!
+  entityLogo: AWSURL
+  isActive: Boolean! @default(value: "true")
+  defaultVenueId: ID
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+
+  # --- NEW: High-Level Dashboard Stats ---
+  gameCount: Int @default(value: "0")
+  venueCount: Int @default(value: "0")
+  lastGameAddedAt: AWSDateTime
+  lastDataRefreshedAt: AWSDateTime # Updated on any Game ADD/UPDATE
+  seriesGameCount: Int @default(value: "0")
+  lastSeriesGameAddedAt: AWSDateTime
+
+  # Relationships
+  scraperStates: [ScraperState] @hasMany(indexName: "byEntityScraperState", fields: ["id"])
+  scraperJobs: [ScraperJob] @hasMany(indexName: "byEntityScraperJob", fields: ["id"])
+  scrapeURLs: [ScrapeURL] @hasMany(indexName: "byEntityScrapeURL", fields: ["id"])
+  venues: [Venue] @hasMany(indexName: "byEntityVenue", fields: ["id"])
+  games: [Game] @hasMany(indexName: "byEntityGame", fields: ["id"])
+  assets: [Asset] @hasMany(indexName: "byEntityAsset", fields: ["id"])
+  tournamentSeries: [TournamentSeries] @hasMany(indexName: "byEntityTournamentSeries", fields: ["id"])
+
+  # === NEW RELATIONSHIPS ===
+  recurringGames: [RecurringGame] @hasMany(indexName: "byEntityRecurringGame", fields: ["id"])
+  
+  # Metrics relationships
+  entityMetrics: [EntityMetrics] @hasMany(indexName: "byEntityMetrics", fields: ["id"])
+  venueMetrics: [VenueMetrics] @hasMany(indexName: "byEntityVenueMetrics", fields: ["id"])
+  recurringGameMetrics: [RecurringGameMetrics] @hasMany(indexName: "byEntityRecurringGameMetrics", fields: ["id"])
+  tournamentSeriesMetrics: [TournamentSeriesMetrics] @hasMany(indexName: "byEntityTournamentSeriesMetrics", fields: ["id"])
+
+  # Social Pulse Relationships
+  socialAccounts: [SocialAccount] @hasMany(indexName: "bySocialAccountEntity", fields: ["id"])
+}
+
+type BackgroundTask @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  # Who owns this task
+  entityId: ID! @index(name: "byEntityTask", sortKeyFields: ["createdAt"], queryField: "tasksByEntity")
+  
+  # Task classification
+  taskType: BackgroundTaskType!
+  status: BackgroundTaskStatus!
+  
+  # What this task operates on
+  targetType: String!
+  targetId: ID
+  targetIds: [ID]
+  targetCount: Int
+  
+  # Task-specific data
+  payload: AWSJSON
+  
+  # Progress tracking
+  processedCount: Int
+  progressPercent: Float
+  
+  # Results
+  result: AWSJSON
+  errorMessage: String
+  
+  # Timestamps
+  createdAt: AWSDateTime!
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+  
+  # User who initiated
+  initiatedBy: String
+}

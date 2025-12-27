@@ -1,0 +1,36 @@
+[
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:Query",
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/SocialPost-*",
+      "arn:aws:dynamodb:*:*:table/SocialPost-*/index/*",
+      "arn:aws:dynamodb:*:*:table/SocialPostGameLink-*",
+      "arn:aws:dynamodb:*:*:table/SocialPostGameLink-*/index/*",
+      "arn:aws:dynamodb:*:*:table/SocialPostGameData-*",
+      "arn:aws:dynamodb:*:*:table/SocialPostGameData-*/index/*",
+      "arn:aws:dynamodb:*:*:table/SocialPostPlacement-*",
+      "arn:aws:dynamodb:*:*:table/SocialPostPlacement-*/index/*",
+      "arn:aws:dynamodb:*:*:table/Game-*",
+      "arn:aws:dynamodb:*:*:table/Game-*/index/*",
+      "arn:aws:dynamodb:*:*:table/Venue-*",
+      "arn:aws:dynamodb:*:*:table/Venue-*/index/*",
+      "arn:aws:dynamodb:*:*:table/Entity-*",
+      "arn:aws:dynamodb:*:*:table/Entity-*/index/*",
+      "arn:aws:dynamodb:*:*:table/SocialAccount-*",
+      "arn:aws:dynamodb:*:*:table/SocialAccount-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": ["*"]
+  }
+]

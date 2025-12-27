@@ -440,6 +440,52 @@ enum ScheduledPostStatus {
 }
 
 # ===================================================================
+# SOCIAL POST PROCESSING ENUMS (NEW)
+# ===================================================================
+
+# Content classification for social posts (distinct from SocialPostType which is media type)
+# Detected by analyzing post content patterns
+enum SocialPostContentType {
+  RESULT               # Tournament results with placements/prizes
+  PROMOTIONAL          # Upcoming tournament announcements
+  GENERAL              # General poker-related content
+  COMMENT              # Comment/reply (not a standalone post)
+}
+
+# Processing pipeline status for social posts
+enum SocialPostProcessingStatus {
+  PENDING              # Awaiting processing
+  PROCESSING           # Currently being processed
+  EXTRACTED            # Extraction complete, matching pending
+  MATCHED              # Matching complete (may or may not have links)
+  LINKED               # Links created successfully
+  FAILED               # Processing failed
+  SKIPPED              # Skipped (e.g., COMMENT type, duplicate)
+  MANUAL_REVIEW        # Flagged for human review
+  PREVIEW
+}
+
+# How a social post was linked to a game
+enum SocialPostLinkType {
+  AUTO_MATCHED         # System automatically matched
+  MANUAL_LINKED        # Admin manually created link
+  VERIFIED             # Auto-matched and verified by admin
+  REJECTED             # Auto-matched but rejected by admin
+  TOURNAMENT_ID        # Matched via explicit tournament ID in URL
+}
+
+# Types of non-cash prizes extracted from tournament results
+enum NonCashPrizeType {
+  ACCUMULATOR_TICKET   # Entry to accumulator freeroll
+  TOURNAMENT_ENTRY     # Entry to specific tournament
+  SATELLITE_TICKET     # Satellite seat
+  BOUNTY_TICKET        # Bounty hunter entry
+  MERCHANDISE          # Physical prizes
+  POINTS               # League/loyalty points
+  OTHER                # Catch-all for other non-cash prizes
+}
+
+# ===================================================================
 # BACKGROUND TASK ENUMS
 # ===================================================================
 

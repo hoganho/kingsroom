@@ -98,6 +98,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
 
   # --- Query Optimisation Keys ---
   gameDayOfWeek: String @index(name: "byDayOfWeek", sortKeyFields: ["gameStartDateTime"])
+  gameYearMonth: String @index(name: "byGameMonth", sortKeyFields: ["gameStartDateTime"], queryField: "gamesByMonth")
   buyInBucket: String @index(name: "byBuyInBucket", sortKeyFields: ["gameStartDateTime"])
   venueScheduleKey: String @index(name: "byVenueSchedule", sortKeyFields: ["gameStartDateTime"])
   venueGameTypeKey: String @index(name: "byVenueGameType", sortKeyFields: ["gameStartDateTime"])
@@ -106,7 +107,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
 
   # --- Data Source ---
   sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
-  tournamentId: Int
+  tournamentId: Int @index(name: "byTournamentId", queryField: "gamesByTournamentId")
   originalScrapedData: AWSJSON
 
   # --- Edit Tracking ---
@@ -185,8 +186,23 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
 
-  # Social Pulse Relationships
+  # === SOCIAL PULSE RELATIONSHIPS (UPDATED) ===
+  
+  # Legacy: Direct hasMany to SocialPost (via linkedGameId on SocialPost)
+  # KEEP for backward compatibility - posts that used old single-link approach
   linkedSocialPosts: [SocialPost] @hasMany(indexName: "bySocialPostGame", fields: ["id"])
+  
+  # NEW: Many-to-many via junction table (preferred)
+  socialPostLinks: [SocialPostGameLink] @hasMany(indexName: "byGameSocialPostLink", fields: ["id"])
+  
+  # NEW: Convenience fields (denormalized for quick filtering)
+  linkedSocialPostCount: Int @default(value: "0")
+  hasLinkedSocialPosts: Boolean @default(value: "false")
+  
+  # NEW: Primary result post (for quick access to the main RESULT post)
+  primaryResultPostId: ID
+  primaryResultPost: SocialPost @hasOne(fields: ["primaryResultPostId"])
+  
   entityId: ID @index(name: "byEntityGame", sortKeyFields: ["gameStartDateTime"], queryField: "gamesByEntity")
              @index(name: "byEntityAndTournamentId", sortKeyFields: ["tournamentId"], queryField: "gamesByEntityAndTournamentId")
   entity: Entity @belongsTo(fields: ["entityId"])

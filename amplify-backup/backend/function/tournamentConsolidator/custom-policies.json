@@ -1,0 +1,82 @@
+[
+  {
+    "Action": [
+      "dynamodb:DescribeStream",
+      "dynamodb:GetRecords",
+      "dynamodb:GetShardIterator",
+      "dynamodb:ListStreams"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/stream/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/byConsolidationKey",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/byParentGame"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-staging/index/byGame"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-staging/index/byGame"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*-staging"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:UpdateItem",
+      "dynamodb:PutItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-staging",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-staging/index/byVisitKey"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": [
+      "*"
+    ]
+  }
+]

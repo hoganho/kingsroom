@@ -1,0 +1,28 @@
+[
+  {
+    "Effect": "Allow",
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:BatchWriteItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/Entity-*",
+      "arn:aws:dynamodb:*:*:table/Entity-*/index/*",
+      "arn:aws:dynamodb:*:*:table/Venue-*",
+      "arn:aws:dynamodb:*:*:table/Venue-*/index/*",
+      "arn:aws:dynamodb:*:*:table/Game-*",
+      "arn:aws:dynamodb:*:*:table/Game-*/index/*",
+      "arn:aws:dynamodb:*:*:table/GameFinancialSnapshot-*",
+      "arn:aws:dynamodb:*:*:table/GameFinancialSnapshot-*/index/*",
+      "arn:aws:dynamodb:*:*:table/RecurringGame-*",
+      "arn:aws:dynamodb:*:*:table/RecurringGame-*/index/*",
+      "arn:aws:dynamodb:*:*:table/EntityMetrics-*",
+      "arn:aws:dynamodb:*:*:table/VenueMetrics-*",
+      "arn:aws:dynamodb:*:*:table/RecurringGameMetrics-*"
+    ]
+  }
+]

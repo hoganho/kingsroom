@@ -708,6 +708,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             missingFlightCount
             expectedTotalEntries
             gameDayOfWeek
+            gameYearMonth
             buyInBucket
             venueScheduleKey
             venueGameTypeKey
@@ -762,6 +763,9 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
             entityId
             createdAt
             updatedAt
@@ -790,6 +794,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           missingFlightCount
           expectedTotalEntries
           gameDayOfWeek
+          gameYearMonth
           buyInBucket
           venueScheduleKey
           venueGameTypeKey
@@ -964,6 +969,72 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           linkedSocialPosts {
             nextToken
             startedAt
+            __typename
+          }
+          socialPostLinks {
+            nextToken
+            startedAt
+            __typename
+          }
+          linkedSocialPostCount
+          hasLinkedSocialPosts
+          primaryResultPostId
+          primaryResultPost {
+            id
+            platformPostId
+            postUrl
+            postType
+            accountName
+            accountProfileImageUrl
+            platform
+            businessLocation
+            content
+            contentPreview
+            rawContent
+            mediaUrls
+            thumbnailUrl
+            mediaType
+            videoUrl
+            videoThumbnailUrl
+            videoWidth
+            videoHeight
+            videoTitle
+            videoDescription
+            likeCount
+            commentCount
+            shareCount
+            reactionCount
+            viewCount
+            postedAt
+            scrapedAt
+            lastUpdatedAt
+            status
+            isPromotional
+            isPinned
+            isTournamentResult
+            isTournamentRelated
+            tags
+            sentiment
+            contentCategory
+            linkedGameId
+            processingStatus
+            processedAt
+            processingError
+            processingVersion
+            contentType
+            contentTypeConfidence
+            extractedGameDataId
+            primaryLinkedGameId
+            linkedGameCount
+            hasUnverifiedLinks
+            socialAccountId
+            entityId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           entityId
@@ -2664,6 +2735,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             missingFlightCount
             expectedTotalEntries
             gameDayOfWeek
+            gameYearMonth
             buyInBucket
             venueScheduleKey
             venueGameTypeKey
@@ -2718,6 +2790,9 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
             entityId
             createdAt
             updatedAt
@@ -2746,6 +2821,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           missingFlightCount
           expectedTotalEntries
           gameDayOfWeek
+          gameYearMonth
           buyInBucket
           venueScheduleKey
           venueGameTypeKey
@@ -2920,6 +2996,72 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           linkedSocialPosts {
             nextToken
             startedAt
+            __typename
+          }
+          socialPostLinks {
+            nextToken
+            startedAt
+            __typename
+          }
+          linkedSocialPostCount
+          hasLinkedSocialPosts
+          primaryResultPostId
+          primaryResultPost {
+            id
+            platformPostId
+            postUrl
+            postType
+            accountName
+            accountProfileImageUrl
+            platform
+            businessLocation
+            content
+            contentPreview
+            rawContent
+            mediaUrls
+            thumbnailUrl
+            mediaType
+            videoUrl
+            videoThumbnailUrl
+            videoWidth
+            videoHeight
+            videoTitle
+            videoDescription
+            likeCount
+            commentCount
+            shareCount
+            reactionCount
+            viewCount
+            postedAt
+            scrapedAt
+            lastUpdatedAt
+            status
+            isPromotional
+            isPinned
+            isTournamentResult
+            isTournamentRelated
+            tags
+            sentiment
+            contentCategory
+            linkedGameId
+            processingStatus
+            processedAt
+            processingError
+            processingVersion
+            contentType
+            contentTypeConfidence
+            extractedGameDataId
+            primaryLinkedGameId
+            linkedGameCount
+            hasUnverifiedLinks
+            socialAccountId
+            entityId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           entityId
@@ -4695,6 +4837,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             missingFlightCount
             expectedTotalEntries
             gameDayOfWeek
+            gameYearMonth
             buyInBucket
             venueScheduleKey
             venueGameTypeKey
@@ -4749,6 +4892,9 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
             entityId
             createdAt
             updatedAt
@@ -4777,6 +4923,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           missingFlightCount
           expectedTotalEntries
           gameDayOfWeek
+          gameYearMonth
           buyInBucket
           venueScheduleKey
           venueGameTypeKey
@@ -4951,6 +5098,72 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           linkedSocialPosts {
             nextToken
             startedAt
+            __typename
+          }
+          socialPostLinks {
+            nextToken
+            startedAt
+            __typename
+          }
+          linkedSocialPostCount
+          hasLinkedSocialPosts
+          primaryResultPostId
+          primaryResultPost {
+            id
+            platformPostId
+            postUrl
+            postType
+            accountName
+            accountProfileImageUrl
+            platform
+            businessLocation
+            content
+            contentPreview
+            rawContent
+            mediaUrls
+            thumbnailUrl
+            mediaType
+            videoUrl
+            videoThumbnailUrl
+            videoWidth
+            videoHeight
+            videoTitle
+            videoDescription
+            likeCount
+            commentCount
+            shareCount
+            reactionCount
+            viewCount
+            postedAt
+            scrapedAt
+            lastUpdatedAt
+            status
+            isPromotional
+            isPinned
+            isTournamentResult
+            isTournamentRelated
+            tags
+            sentiment
+            contentCategory
+            linkedGameId
+            processingStatus
+            processedAt
+            processingError
+            processingVersion
+            contentType
+            contentTypeConfidence
+            extractedGameDataId
+            primaryLinkedGameId
+            linkedGameCount
+            hasUnverifiedLinks
+            socialAccountId
+            entityId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           entityId
@@ -6662,6 +6875,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             missingFlightCount
             expectedTotalEntries
             gameDayOfWeek
+            gameYearMonth
             buyInBucket
             venueScheduleKey
             venueGameTypeKey
@@ -6716,6 +6930,9 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
             entityId
             createdAt
             updatedAt
@@ -6744,6 +6961,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           missingFlightCount
           expectedTotalEntries
           gameDayOfWeek
+          gameYearMonth
           buyInBucket
           venueScheduleKey
           venueGameTypeKey
@@ -6918,6 +7136,72 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           linkedSocialPosts {
             nextToken
             startedAt
+            __typename
+          }
+          socialPostLinks {
+            nextToken
+            startedAt
+            __typename
+          }
+          linkedSocialPostCount
+          hasLinkedSocialPosts
+          primaryResultPostId
+          primaryResultPost {
+            id
+            platformPostId
+            postUrl
+            postType
+            accountName
+            accountProfileImageUrl
+            platform
+            businessLocation
+            content
+            contentPreview
+            rawContent
+            mediaUrls
+            thumbnailUrl
+            mediaType
+            videoUrl
+            videoThumbnailUrl
+            videoWidth
+            videoHeight
+            videoTitle
+            videoDescription
+            likeCount
+            commentCount
+            shareCount
+            reactionCount
+            viewCount
+            postedAt
+            scrapedAt
+            lastUpdatedAt
+            status
+            isPromotional
+            isPinned
+            isTournamentResult
+            isTournamentRelated
+            tags
+            sentiment
+            contentCategory
+            linkedGameId
+            processingStatus
+            processedAt
+            processingError
+            processingVersion
+            contentType
+            contentTypeConfidence
+            extractedGameDataId
+            primaryLinkedGameId
+            linkedGameCount
+            hasUnverifiedLinks
+            socialAccountId
+            entityId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           entityId
@@ -8629,6 +8913,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             missingFlightCount
             expectedTotalEntries
             gameDayOfWeek
+            gameYearMonth
             buyInBucket
             venueScheduleKey
             venueGameTypeKey
@@ -8683,6 +8968,9 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
             entityId
             createdAt
             updatedAt
@@ -8711,6 +8999,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           missingFlightCount
           expectedTotalEntries
           gameDayOfWeek
+          gameYearMonth
           buyInBucket
           venueScheduleKey
           venueGameTypeKey
@@ -8885,6 +9174,72 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           linkedSocialPosts {
             nextToken
             startedAt
+            __typename
+          }
+          socialPostLinks {
+            nextToken
+            startedAt
+            __typename
+          }
+          linkedSocialPostCount
+          hasLinkedSocialPosts
+          primaryResultPostId
+          primaryResultPost {
+            id
+            platformPostId
+            postUrl
+            postType
+            accountName
+            accountProfileImageUrl
+            platform
+            businessLocation
+            content
+            contentPreview
+            rawContent
+            mediaUrls
+            thumbnailUrl
+            mediaType
+            videoUrl
+            videoThumbnailUrl
+            videoWidth
+            videoHeight
+            videoTitle
+            videoDescription
+            likeCount
+            commentCount
+            shareCount
+            reactionCount
+            viewCount
+            postedAt
+            scrapedAt
+            lastUpdatedAt
+            status
+            isPromotional
+            isPinned
+            isTournamentResult
+            isTournamentRelated
+            tags
+            sentiment
+            contentCategory
+            linkedGameId
+            processingStatus
+            processedAt
+            processingError
+            processingVersion
+            contentType
+            contentTypeConfidence
+            extractedGameDataId
+            primaryLinkedGameId
+            linkedGameCount
+            hasUnverifiedLinks
+            socialAccountId
+            entityId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           entityId
@@ -10585,6 +10940,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             missingFlightCount
             expectedTotalEntries
             gameDayOfWeek
+            gameYearMonth
             buyInBucket
             venueScheduleKey
             venueGameTypeKey
@@ -10639,6 +10995,9 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
             entityId
             createdAt
             updatedAt
@@ -10667,6 +11026,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           missingFlightCount
           expectedTotalEntries
           gameDayOfWeek
+          gameYearMonth
           buyInBucket
           venueScheduleKey
           venueGameTypeKey
@@ -10841,6 +11201,72 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           linkedSocialPosts {
             nextToken
             startedAt
+            __typename
+          }
+          socialPostLinks {
+            nextToken
+            startedAt
+            __typename
+          }
+          linkedSocialPostCount
+          hasLinkedSocialPosts
+          primaryResultPostId
+          primaryResultPost {
+            id
+            platformPostId
+            postUrl
+            postType
+            accountName
+            accountProfileImageUrl
+            platform
+            businessLocation
+            content
+            contentPreview
+            rawContent
+            mediaUrls
+            thumbnailUrl
+            mediaType
+            videoUrl
+            videoThumbnailUrl
+            videoWidth
+            videoHeight
+            videoTitle
+            videoDescription
+            likeCount
+            commentCount
+            shareCount
+            reactionCount
+            viewCount
+            postedAt
+            scrapedAt
+            lastUpdatedAt
+            status
+            isPromotional
+            isPinned
+            isTournamentResult
+            isTournamentRelated
+            tags
+            sentiment
+            contentCategory
+            linkedGameId
+            processingStatus
+            processedAt
+            processingError
+            processingVersion
+            contentType
+            contentTypeConfidence
+            extractedGameDataId
+            primaryLinkedGameId
+            linkedGameCount
+            hasUnverifiedLinks
+            socialAccountId
+            entityId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           entityId
@@ -12554,6 +12980,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             missingFlightCount
             expectedTotalEntries
             gameDayOfWeek
+            gameYearMonth
             buyInBucket
             venueScheduleKey
             venueGameTypeKey
@@ -12608,6 +13035,9 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
             entityId
             createdAt
             updatedAt
@@ -12636,6 +13066,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           missingFlightCount
           expectedTotalEntries
           gameDayOfWeek
+          gameYearMonth
           buyInBucket
           venueScheduleKey
           venueGameTypeKey
@@ -12810,6 +13241,72 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           linkedSocialPosts {
             nextToken
             startedAt
+            __typename
+          }
+          socialPostLinks {
+            nextToken
+            startedAt
+            __typename
+          }
+          linkedSocialPostCount
+          hasLinkedSocialPosts
+          primaryResultPostId
+          primaryResultPost {
+            id
+            platformPostId
+            postUrl
+            postType
+            accountName
+            accountProfileImageUrl
+            platform
+            businessLocation
+            content
+            contentPreview
+            rawContent
+            mediaUrls
+            thumbnailUrl
+            mediaType
+            videoUrl
+            videoThumbnailUrl
+            videoWidth
+            videoHeight
+            videoTitle
+            videoDescription
+            likeCount
+            commentCount
+            shareCount
+            reactionCount
+            viewCount
+            postedAt
+            scrapedAt
+            lastUpdatedAt
+            status
+            isPromotional
+            isPinned
+            isTournamentResult
+            isTournamentRelated
+            tags
+            sentiment
+            contentCategory
+            linkedGameId
+            processingStatus
+            processedAt
+            processingError
+            processingVersion
+            contentType
+            contentTypeConfidence
+            extractedGameDataId
+            primaryLinkedGameId
+            linkedGameCount
+            hasUnverifiedLinks
+            socialAccountId
+            entityId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           entityId
@@ -14523,6 +15020,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             missingFlightCount
             expectedTotalEntries
             gameDayOfWeek
+            gameYearMonth
             buyInBucket
             venueScheduleKey
             venueGameTypeKey
@@ -14577,6 +15075,9 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
             entityId
             createdAt
             updatedAt
@@ -14605,6 +15106,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           missingFlightCount
           expectedTotalEntries
           gameDayOfWeek
+          gameYearMonth
           buyInBucket
           venueScheduleKey
           venueGameTypeKey
@@ -14779,6 +15281,72 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           linkedSocialPosts {
             nextToken
             startedAt
+            __typename
+          }
+          socialPostLinks {
+            nextToken
+            startedAt
+            __typename
+          }
+          linkedSocialPostCount
+          hasLinkedSocialPosts
+          primaryResultPostId
+          primaryResultPost {
+            id
+            platformPostId
+            postUrl
+            postType
+            accountName
+            accountProfileImageUrl
+            platform
+            businessLocation
+            content
+            contentPreview
+            rawContent
+            mediaUrls
+            thumbnailUrl
+            mediaType
+            videoUrl
+            videoThumbnailUrl
+            videoWidth
+            videoHeight
+            videoTitle
+            videoDescription
+            likeCount
+            commentCount
+            shareCount
+            reactionCount
+            viewCount
+            postedAt
+            scrapedAt
+            lastUpdatedAt
+            status
+            isPromotional
+            isPinned
+            isTournamentResult
+            isTournamentRelated
+            tags
+            sentiment
+            contentCategory
+            linkedGameId
+            processingStatus
+            processedAt
+            processingError
+            processingVersion
+            contentType
+            contentTypeConfidence
+            extractedGameDataId
+            primaryLinkedGameId
+            linkedGameCount
+            hasUnverifiedLinks
+            socialAccountId
+            entityId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           entityId

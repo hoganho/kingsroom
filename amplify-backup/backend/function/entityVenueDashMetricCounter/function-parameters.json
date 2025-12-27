@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "storage": {
+      "Entity:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Venue:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

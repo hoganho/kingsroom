@@ -93,8 +93,8 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
 
       if (hasGraphQLData<{ listSocialAccounts: { items: (SocialAccount | null)[] } }>(response)) {
         const items = (response.data.listSocialAccounts?.items || [])
-          .filter((item): item is SocialAccount => item !== null)
-          .sort((a, b) => a.accountName.localeCompare(b.accountName));
+          .filter((item: SocialAccount | null): item is SocialAccount => item !== null)
+          .sort((a: SocialAccount, b: SocialAccount) => a.accountName.localeCompare(b.accountName));
         setAccounts(items);
         hasFetchedRef.current = true;
         currentEntityIdRef.current = entityId;

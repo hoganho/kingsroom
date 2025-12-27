@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Mutation"
+      ]
+    },
+    "auth": {
+      "kingsroomauth": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

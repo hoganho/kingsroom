@@ -1,0 +1,41 @@
+{
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "auditLogTable",
+      "environmentVariableName": "AUDIT_LOG_TABLE"
+    }
+  ],
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "auth": {
+      "kingsroomauth": [
+        "create",
+        "read",
+        "update"
+      ]
+    },
+    "storage": {
+      "User:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "UserPreference:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "UserAuditLog:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  }
+}

@@ -458,11 +458,14 @@ export const listGamesForDebug = /* GraphQL */ `
         id
         name
         gameType
+        gameVariant
         gameStatus
         gameStartDateTime
         registrationStatus
+        buyIn
         venueId
         tournamentId
+        entityId
         venue {
           id
           name

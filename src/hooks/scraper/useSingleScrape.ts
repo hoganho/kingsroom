@@ -3,6 +3,9 @@
 // This replaces useScrapeOrchestrator for single-ID mode only
 //
 // For batch processing, use useScraperJobs.startJob() from useScraperManagement.ts
+//
+// FIX: scrape() now returns { parsedData, enrichedData } to avoid stale state issues
+// when reading enrichedData immediately after scrape completes.
 
 import { useState, useCallback } from 'react';
 import { ScrapedGameData } from '../../API';
@@ -35,17 +38,28 @@ export interface UseSingleScrapeConfig {
   defaultVenueId: string;
 }
 
+/**
+ * Result returned from scrape() function
+ * Contains both parsed data and enriched data to avoid stale state issues
+ */
+export interface ScrapeResult {
+  parsedData: ScrapedGameData | null;
+  enrichedData: EnrichedGameDataWithContext | null;
+}
+
 export interface UseSingleScrapeResult {
   // State
   result: ProcessingResult | null;
   isProcessing: boolean;
   
   // Actions
-  scrape: (tournamentId: number) => Promise<ScrapedGameData | null>;
+  // UPDATED: scrape now returns { parsedData, enrichedData } directly
+  scrape: (tournamentId: number) => Promise<ScrapeResult>;
   save: (venueId: string, editedData?: ScrapedGameData, overrideUrl?: string, overrideTournamentId?: number) => Promise<{ success: boolean; gameId?: string }>;
   reset: () => void;
   
-  // Enriched data (available after scrape)
+  // Enriched data (available after scrape - kept for backwards compatibility)
+  // NOTE: Prefer using the enrichedData returned directly from scrape() to avoid stale state
   enrichedData: EnrichedGameDataWithContext | null;
 }
 
@@ -89,11 +103,13 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
 
   // =========================================================================
   // SCRAPE - Fetch and optionally enrich data
+  // UPDATED: Now returns { parsedData, enrichedData } to avoid stale state
   // =========================================================================
   
-  const scrape = useCallback(async (tournamentId: number): Promise<ScrapedGameData | null> => {
+  const scrape = useCallback(async (tournamentId: number): Promise<ScrapeResult> => {
     const url = `${baseUrl}${urlPath}${tournamentId}`;
     
+    // Clear previous state immediately
     setIsProcessing(true);
     setEnrichedData(null);
     setResult({
@@ -104,6 +120,9 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
     });
 
     scraperLogger.logItemStart(tournamentId, url);
+
+    // Track enriched data locally to return directly (avoids stale state)
+    let localEnrichedData: EnrichedGameDataWithContext | null = null;
 
     try {
       // Fetch from backend
@@ -123,7 +142,7 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
           errorType: 'UNKNOWN',
         });
         setIsProcessing(false);
-        return null;
+        return { parsedData: null, enrichedData: null };
       }
 
       // Check for error in response
@@ -142,7 +161,7 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
         });
         scraperLogger.logFetchError(tournamentId, errorMsg || 'Scraper Error', errorType);
         setIsProcessing(false);
-        return parsedData; // Return so caller can inspect
+        return { parsedData, enrichedData: null }; // Return so caller can inspect
       }
 
       const normalizedStatus = normalizeGameStatus(parsedData.gameStatus);
@@ -161,7 +180,7 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
           dataSource,
         });
         setIsProcessing(false);
-        return parsedData;
+        return { parsedData, enrichedData: null };
       }
 
       // Check for doNotScrape
@@ -176,7 +195,7 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
           dataSource,
         });
         setIsProcessing(false);
-        return parsedData;
+        return { parsedData, enrichedData: null };
       }
 
       // Enrich the data for modal display
@@ -190,10 +209,12 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
           url
         );
         
-        setEnrichedData(enrichResult.enrichedGame);
+        // Store locally AND in state
+        localEnrichedData = enrichResult.enrichedGame;
+        setEnrichedData(localEnrichedData);
       } catch (enrichError) {
         console.warn('[useSingleScrape] Enrichment failed, using raw data:', enrichError);
-        // Continue without enrichment
+        // Continue without enrichment - localEnrichedData remains null
       }
       
       setResult({
@@ -207,7 +228,9 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
       });
 
       setIsProcessing(false);
-      return parsedData;
+      
+      // Return both parsed and enriched data directly to avoid stale state issues
+      return { parsedData, enrichedData: localEnrichedData };
 
     } catch (error) {
       const errorMessage = (error as Error)?.message || 'Unknown error occurred';
@@ -223,7 +246,7 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
       
       scraperLogger.error('PROCESSING_ERROR', errorMessage, { tournamentId });
       setIsProcessing(false);
-      return null;
+      return { parsedData: null, enrichedData: null };
     }
   }, [entityId, baseUrl, urlPath, scraperApiKey, options, defaultVenueId]);
 

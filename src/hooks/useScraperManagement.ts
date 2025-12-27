@@ -80,9 +80,9 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
             const newJobs = jobsReport.items || [];
             
             if (reset) {
-                setJobs(newJobs.map(job => castToType<ScraperJob>(job)!).filter(Boolean));
+                setJobs(newJobs.map((job: unknown) => castToType<ScraperJob>(job)!).filter(Boolean));
             } else {
-                setJobs(prev => [...prev, ...newJobs.map(job => castToType<ScraperJob>(job)!).filter(Boolean)]);
+                setJobs(prev => [...prev, ...newJobs.map((job: unknown) => castToType<ScraperJob>(job)!).filter(Boolean)]);
             }
             
             setNextToken(jobsReport.nextToken || null);
@@ -208,9 +208,9 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
 
             const newURLs = urlsData.items || [];
             if (reset) {
-                setUrls(newURLs.map(url => castToType<ScrapeURL>(url)!).filter(Boolean));
+                setUrls(newURLs.map((url: unknown) => castToType<ScrapeURL>(url)!).filter(Boolean));
             } else {
-                setUrls(prev => [...prev, ...newURLs.map(url => castToType<ScrapeURL>(url)!).filter(Boolean)]);
+                setUrls(prev => [...prev, ...newURLs.map((url: unknown) => castToType<ScrapeURL>(url)!).filter(Boolean)]);
             }
             setNextToken(urlsData.nextToken || null);
         } catch (err) {
@@ -262,8 +262,8 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
             });
             if (!hasGraphQLData<any>(response)) throw new Error('Invalid response');
             const updatedURLs = response.data.bulkModifyScrapeURLs || [];
-            const typedURLs = updatedURLs.map(u => castToType<ScrapeURL>(u)!).filter(Boolean);
-            const urlMap = new Map(typedURLs.map(u => [u.url, u]));
+            const typedURLs = updatedURLs.map((u: unknown) => castToType<ScrapeURL>(u)!).filter(Boolean);
+            const urlMap = new Map(typedURLs.map((u: ScrapeURL) => [u.url, u]));
             
             setUrls(prev => prev.map(u =>
                 urlMap.has(u.url) ? { ...u, ...urlMap.get(u.url)! } : u

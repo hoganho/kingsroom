@@ -1,0 +1,699 @@
+/* Amplify Params - DO NOT EDIT
+    API_KINGSROOM_ENTITYTABLE_ARN
+    API_KINGSROOM_ENTITYTABLE_NAME
+    API_KINGSROOM_GAMETABLE_ARN
+    API_KINGSROOM_GAMETABLE_NAME
+    API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
+    API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+    API_KINGSROOM_SCRAPERSTATETABLE_ARN
+    API_KINGSROOM_SCRAPERSTATETABLE_NAME
+    ENV
+    REGION
+Amplify Params - DO NOT EDIT */
+
+/**
+ * gameIdTracker Lambda Function
+ * * Efficiently tracks tournament IDs, detects gaps, and manages scraping status
+ * Uses composite index for optimal DynamoDB queries
+ * * FIX: Added filtering to exclude 'PARENT' records from consolidation
+ * to prevent them from breaking statistics.
+ */
+
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, QueryCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+
+// --- Lambda Monitoring ---
+const { LambdaMonitoring } = require('./lambda-monitoring');
+// --- End Lambda Monitoring ---
+
+const client = new DynamoDBClient({});
+const originalDdbDocClient = DynamoDBDocumentClient.from(client); 
+
+// --- Lambda Monitoring Initialization ---
+const monitoring = new LambdaMonitoring('gameIdTracker', null);
+const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(originalDdbDocClient);
+// --- End Lambda Monitoring ---
+
+const GAME_TABLE = process.env.API_KINGSROOM_GAMETABLE_NAME;
+const SCRAPER_STATE_TABLE = process.env.API_KINGSROOM_SCRAPERSTATETABLE_NAME;
+const ENTITY_TABLE = process.env.API_KINGSROOM_ENTITYTABLE_NAME;
+
+// Cache TTL in seconds (5 minutes)
+const CACHE_TTL = 300;
+
+// Unfinished game statuses
+const UNFINISHED_STATUSES = [
+  'INITIATING',
+  'SCHEDULED', 
+  'REGISTERING',
+  'RUNNING',
+  'CLOCK_STOPPED'
+];
+
+/**
+ * Main Lambda handler
+ */
+exports.handler = async (event) => {
+  console.log('Event:', JSON.stringify(event, null, 2));
+  
+  const fieldName = event.fieldName;
+  const args = event.arguments || {};
+  
+  monitoring.trackOperation('HANDLER_START', 'Handler', fieldName || 'unknown', { operation: fieldName });
+  
+  try {
+    switch (fieldName) {
+      case 'getTournamentIdBounds':
+        monitoring.trackOperation('GET_BOUNDS_START', 'Game', args.entityId, { entityId: args.entityId });
+        return await getTournamentIdBounds(args.entityId);
+      
+      case 'getEntityScrapingStatus':
+        monitoring.trackOperation('GET_STATUS_START', 'Game', args.entityId, { 
+          entityId: args.entityId, 
+          forceRefresh: args.forceRefresh 
+        });
+        return await getEntityScrapingStatus(
+          args.entityId,
+          args.forceRefresh,
+          args.startId,
+          args.endId
+        );
+      
+      case 'findTournamentIdGaps':
+        monitoring.trackOperation('FIND_GAPS_START', 'Game', args.entityId, { 
+          entityId: args.entityId,
+          startId: args.startId,
+          endId: args.endId
+        });
+        return await findTournamentIdGaps(
+          args.entityId,
+          args.startId,
+          args.endId,
+          args.maxGapsToReturn
+        );
+      
+      case 'getUnfinishedGamesByEntity':
+        monitoring.trackOperation('GET_UNFINISHED_START', 'Game', args.entityId, { 
+          entityId: args.entityId,
+          limit: args.limit
+        });
+        return await getUnfinishedGamesByEntity(
+          args.entityId,
+          args.limit,
+          args.nextToken
+        );
+      
+      case 'listExistingTournamentIds':
+        monitoring.trackOperation('LIST_IDS_START', 'Game', args.entityId, { 
+          entityId: args.entityId,
+          startId: args.startId,
+          endId: args.endId
+        });
+        return await listExistingTournamentIds(
+          args.entityId,
+          args.startId,
+          args.endId,
+          args.limit
+        );
+      
+      default:
+        throw new Error(`Unknown field: ${fieldName}`);
+    }
+  } catch (error) {
+    monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'fatal', { 
+      error: error.message, 
+      operation: fieldName 
+    });
+    console.error('Error:', error);
+    throw error;
+  } finally {
+    if (monitoring) {
+      console.log('[gameIdTracker] Flushing monitoring metrics...');
+      await monitoring.flush();
+      console.log('[gameIdTracker] Monitoring flush complete.');
+    }
+  }
+};
+
+/**
+ * Get highest and lowest tournament IDs for an entity
+ * FIX: Uses pagination to handle cases where many PARENT records exist at boundaries
+ */
+async function getTournamentIdBounds(entityId) {
+  console.log(`[getTournamentIdBounds] Getting bounds for entity: ${entityId}`);
+  
+  // Helper function to find first non-PARENT item with pagination
+  async function findBoundaryId(scanForward) {
+    let lastEvaluatedKey = undefined;
+    let iterations = 0;
+    const maxIterations = 10; // Safety limit
+    
+    do {
+      const result = await monitoredDdbDocClient.send(new QueryCommand({
+        TableName: GAME_TABLE,
+        IndexName: 'byEntityAndTournamentId',
+        KeyConditionExpression: 'entityId = :entityId',
+        FilterExpression: 'consolidationType <> :parent OR attribute_not_exists(consolidationType)',
+        ExpressionAttributeValues: {
+          ':entityId': entityId,
+          ':parent': 'PARENT'
+        },
+        ProjectionExpression: 'tournamentId, consolidationType',
+        Limit: 50, // Query more items per batch
+        ScanIndexForward: scanForward,
+        ExclusiveStartKey: lastEvaluatedKey
+      }));
+      
+      // Find first valid item in this batch
+      const validItem = result.Items?.find(item => 
+        item.tournamentId != null && item.consolidationType !== 'PARENT'
+      );
+      
+      if (validItem) {
+        return validItem.tournamentId;
+      }
+      
+      lastEvaluatedKey = result.LastEvaluatedKey;
+      iterations++;
+      
+      console.log(`[getTournamentIdBounds] Iteration ${iterations} (${scanForward ? 'asc' : 'desc'}): No valid item found, continuing...`);
+      
+    } while (lastEvaluatedKey && iterations < maxIterations);
+    
+    return undefined;
+  }
+  
+  // Query for lowest ID (ascending)
+  const lowestId = await findBoundaryId(true);
+  
+  // Query for highest ID (descending)  
+  const highestId = await findBoundaryId(false);
+  
+  // Count total games (excluding Parents)
+  const countQuery = await monitoredDdbDocClient.send(new QueryCommand({
+    TableName: GAME_TABLE,
+    IndexName: 'byEntityAndTournamentId',
+    KeyConditionExpression: 'entityId = :entityId',
+    FilterExpression: 'consolidationType <> :parent OR attribute_not_exists(consolidationType)',
+    ExpressionAttributeValues: {
+      ':entityId': entityId,
+      ':parent': 'PARENT'
+    },
+    Select: 'COUNT'
+  }));
+  
+  const totalCount = countQuery.Count || 0;
+  
+  console.log(`[getTournamentIdBounds] Bounds: ${lowestId} - ${highestId}, Total: ${totalCount}`);
+  
+  monitoring.trackOperation('GET_BOUNDS_COMPLETE', 'Game', entityId, { 
+    lowestId, 
+    highestId, 
+    totalCount 
+  });
+  
+  return {
+    entityId,
+    lowestId,
+    highestId,
+    totalCount,
+    lastUpdated: new Date().toISOString()
+  };
+}
+
+/**
+ * Get all tournament IDs for an entity (paginated)
+ * FIX: Filter out PARENT records from the stream
+ */
+async function getAllTournamentIds(entityId) {
+  console.log(`[getAllTournamentIds] Fetching all IDs for entity: ${entityId}`);
+  
+  monitoring.trackOperation('GET_ALL_IDS_START', 'Game', entityId, { entityId });
+  
+  const ids = new Set();
+  let lastEvaluatedKey = undefined;
+  let iterations = 0;
+  
+  do {
+    const result = await monitoredDdbDocClient.send(new QueryCommand({
+      TableName: GAME_TABLE,
+      IndexName: 'byEntityAndTournamentId',
+      KeyConditionExpression: 'entityId = :entityId',
+      ExpressionAttributeValues: {
+        ':entityId': entityId
+      },
+      // FIX: Request consolidationType so we can filter in memory
+      ProjectionExpression: 'tournamentId, consolidationType',
+      Limit: 1000,
+      ExclusiveStartKey: lastEvaluatedKey
+    }));
+    
+    if (result.Items) {
+      result.Items.forEach(item => {
+        // FIX: Explicitly ignore PARENT records
+        if (item.consolidationType === 'PARENT') return;
+
+        if (item.tournamentId) {
+          ids.add(item.tournamentId);
+        }
+      });
+    }
+    
+    lastEvaluatedKey = result.LastEvaluatedKey;
+    iterations++;
+    
+    console.log(`[getAllTournamentIds] Iteration ${iterations}: Found ${result.Items?.length || 0} items, Total: ${ids.size}`);
+    
+  } while (lastEvaluatedKey);
+  
+  console.log(`[getAllTournamentIds] Complete: ${ids.size} unique tournament IDs`);
+  
+  monitoring.trackOperation('GET_ALL_IDS_COMPLETE', 'Game', entityId, { 
+    totalIds: ids.size,
+    iterations 
+  });
+  
+  return ids;
+}
+
+/**
+ * Calculate gaps in tournament ID sequence
+ */
+function calculateGaps(foundIds, startId, endId, maxGapsToReturn = 1000) {
+  console.log(`[calculateGaps] Finding gaps between ${startId} and ${endId}`);
+  
+  const gaps = [];
+  let currentGapStart = null;
+  
+  for (let id = startId; id <= endId; id++) {
+    if (!foundIds.has(id)) {
+      if (currentGapStart === null) {
+        currentGapStart = id;
+      }
+    } else {
+      if (currentGapStart !== null) {
+        // End of gap
+        const gapEnd = id - 1;
+        gaps.push({
+          start: currentGapStart,
+          end: gapEnd,
+          count: gapEnd - currentGapStart + 1
+        });
+        currentGapStart = null;
+        
+        if (gaps.length >= maxGapsToReturn) {
+          console.log(`[calculateGaps] Reached max gaps limit: ${maxGapsToReturn}`);
+          break;
+        }
+      }
+    }
+  }
+  
+  // Handle gap that extends to end
+  if (currentGapStart !== null && gaps.length < maxGapsToReturn) {
+    gaps.push({
+      start: currentGapStart,
+      end: endId,
+      count: endId - currentGapStart + 1
+    });
+  }
+  
+  console.log(`[calculateGaps] Found ${gaps.length} gaps`);
+  return gaps;
+}
+
+/**
+ * Get gap summary statistics
+ */
+function getGapSummary(gaps, totalRange) {
+  const totalMissingIds = gaps.reduce((sum, gap) => sum + gap.count, 0);
+  const largestGap = gaps.reduce((max, gap) => 
+    gap.count > (max?.count || 0) ? gap : max,
+    gaps[0]
+  );
+  
+  const coveragePercentage = totalRange > 0 
+    ? ((totalRange - totalMissingIds) / totalRange) * 100 
+    : 0;
+  
+  return {
+    totalGaps: gaps.length,
+    totalMissingIds,
+    largestGapStart: largestGap?.start,
+    largestGapEnd: largestGap?.end,
+    largestGapCount: largestGap?.count,
+    coveragePercentage: parseFloat(coveragePercentage.toFixed(2))
+  };
+}
+
+/**
+ * Get cached scraping status from ScraperState
+ */
+async function getCachedStatus(entityId) {
+  try {
+    monitoring.trackOperation('CACHE_CHECK', 'ScraperState', entityId, { entityId });
+    
+    const result = await monitoredDdbDocClient.send(new QueryCommand({
+      TableName: SCRAPER_STATE_TABLE,
+      IndexName: 'byEntityScraperState',
+      KeyConditionExpression: 'entityId = :entityId',
+      ExpressionAttributeValues: {
+        ':entityId': entityId
+      },
+      Limit: 1
+    }));
+    
+    const scraperState = result.Items?.[0];
+    
+    if (!scraperState?.lastGapScanAt) {
+      monitoring.trackOperation('CACHE_MISS', 'ScraperState', entityId, { reason: 'no_scan_time' });
+      return null;
+    }
+    
+    // Check cache age
+    const cacheAge = Math.floor(
+      (Date.now() - new Date(scraperState.lastGapScanAt).getTime()) / 1000
+    );
+    
+    if (cacheAge > CACHE_TTL) {
+      console.log(`[getCachedStatus] Cache expired (${cacheAge}s old)`);
+      monitoring.trackOperation('CACHE_EXPIRED', 'ScraperState', entityId, { cacheAge });
+      return null;
+    }
+    
+    console.log(`[getCachedStatus] Using cached data (${cacheAge}s old)`);
+    monitoring.trackOperation('CACHE_HIT', 'ScraperState', entityId, { cacheAge });
+    
+    return {
+      highestStoredId: scraperState.highestStoredId,
+      lowestStoredId: scraperState.lowestStoredId,
+      knownGapRanges: scraperState.knownGapRanges 
+        ? JSON.parse(scraperState.knownGapRanges) 
+        : [],
+      totalGamesInDatabase: scraperState.totalGamesInDatabase,
+      lastGapScanAt: scraperState.lastGapScanAt,
+      cacheAge,
+      scraperStateId: scraperState.id
+    };
+  } catch (error) {
+    console.error('[getCachedStatus] Error:', error);
+    monitoring.trackOperation('CACHE_ERROR', 'ScraperState', entityId, { error: error.message });
+    return null;
+  }
+}
+
+/**
+ * Update ScraperState with gap analysis cache
+ */
+async function updateScraperStateCache(scraperStateId, data) {
+  try {
+    monitoring.trackOperation('CACHE_UPDATE_START', 'ScraperState', scraperStateId, { 
+      highestStoredId: data.highestStoredId,
+      lowestStoredId: data.lowestStoredId,
+      gapCount: data.knownGapRanges.length
+    });
+    
+    await monitoredDdbDocClient.send(new UpdateCommand({
+      TableName: SCRAPER_STATE_TABLE,
+      Key: { id: scraperStateId },
+      UpdateExpression: `
+        SET highestStoredId = :high,
+            lowestStoredId = :low,
+            knownGapRanges = :gaps,
+            lastGapScanAt = :scanTime,
+            totalGamesInDatabase = :total
+      `,
+      ExpressionAttributeValues: {
+        ':high': data.highestStoredId,
+        ':low': data.lowestStoredId,
+        ':gaps': JSON.stringify(data.knownGapRanges),
+        ':scanTime': new Date().toISOString(),
+        ':total': data.totalGamesInDatabase
+      }
+    }));
+    
+    console.log('[updateScraperStateCache] Cache updated successfully');
+    monitoring.trackOperation('CACHE_UPDATE_COMPLETE', 'ScraperState', scraperStateId);
+  } catch (error) {
+    console.error('[updateScraperStateCache] Error:', error);
+    monitoring.trackOperation('CACHE_UPDATE_ERROR', 'ScraperState', scraperStateId, { error: error.message });
+  }
+}
+
+/**
+ * Get entity name from Entity table
+ */
+async function getEntityName(entityId) {
+  try {
+    const result = await monitoredDdbDocClient.send(new GetCommand({
+      TableName: ENTITY_TABLE,
+      Key: { id: entityId },
+      ProjectionExpression: 'entityName'
+    }));
+    
+    return result.Item?.entityName;
+  } catch (error) {
+    console.error('[getEntityName] Error:', error);
+    return undefined;
+  }
+}
+
+/**
+ * Get comprehensive entity scraping status
+ */
+async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, endId) {
+  console.log(`[getEntityScrapingStatus] Entity: ${entityId}, Force: ${forceRefresh}`);
+  const entityName = await getEntityName(entityId);
+
+  // Try to use cache unless forced refresh
+  if (!forceRefresh) {
+    const cached = await getCachedStatus(entityId);
+    if (cached) {
+      const unfinishedCount = await getUnfinishedGamesCount(entityId);
+      
+      const totalRange = (cached.highestStoredId || 0) - (cached.lowestStoredId || 0) + 1;
+      const gapSummary = getGapSummary(cached.knownGapRanges, totalRange);
+      
+      monitoring.trackOperation('STATUS_FROM_CACHE', 'Game', entityId, { 
+        totalGames: cached.totalGamesInDatabase,
+        gapCount: cached.knownGapRanges.length
+      });
+      
+      return {
+        entityId,
+        entityName,
+        lowestTournamentId: cached.lowestStoredId,
+        highestTournamentId: cached.highestStoredId,
+        totalGamesStored: cached.totalGamesInDatabase,
+        unfinishedGameCount: unfinishedCount,
+        gaps: cached.knownGapRanges,
+        gapSummary,
+        lastUpdated: cached.lastGapScanAt,
+        cacheAge: cached.cacheAge
+      };
+    }
+  }
+  
+  console.log('[getEntityScrapingStatus] Performing fresh calculation...');
+  monitoring.trackOperation('STATUS_FRESH_CALC_START', 'Game', entityId, { forceRefresh });
+  
+  // Get bounds
+  const bounds = await getTournamentIdBounds(entityId);
+  
+  if (!bounds.lowestId || !bounds.highestId) {
+    monitoring.trackOperation('STATUS_NO_GAMES', 'Game', entityId);
+    return {
+      entityId,
+      totalGamesStored: 0,
+      unfinishedGameCount: 0,
+      gaps: [],
+      gapSummary: {
+        totalGaps: 0,
+        totalMissingIds: 0,
+        coveragePercentage: 0
+      },
+      lastUpdated: new Date().toISOString(),
+      cacheAge: 0
+    };
+  }
+  
+  // Get all IDs
+  const foundIds = await getAllTournamentIds(entityId);
+  
+  // Calculate gaps
+  const rangeStart = startId || bounds.lowestId;
+  const rangeEnd = endId || bounds.highestId;
+  const gaps = calculateGaps(foundIds, rangeStart, rangeEnd);
+  
+  // Get unfinished games count
+  const unfinishedCount = await getUnfinishedGamesCount(entityId);
+  
+  // Calculate summary
+  const totalRange = rangeEnd - rangeStart + 1;
+  const gapSummary = getGapSummary(gaps, totalRange);
+  
+  monitoring.trackOperation('STATUS_FRESH_CALC_COMPLETE', 'Game', entityId, { 
+    totalGames: bounds.totalCount,
+    gapCount: gaps.length,
+    coverage: gapSummary.coveragePercentage
+  });
+  
+  // Update cache
+  const cached = await getCachedStatus(entityId);
+  if (cached?.scraperStateId) {
+    await updateScraperStateCache(cached.scraperStateId, {
+      highestStoredId: bounds.highestId,
+      lowestStoredId: bounds.lowestId,
+      knownGapRanges: gaps,
+      totalGamesInDatabase: bounds.totalCount
+    });
+  }
+  
+  return {
+    entityId,
+    lowestTournamentId: bounds.lowestId,
+    highestTournamentId: bounds.highestId,
+    totalGamesStored: bounds.totalCount,
+    unfinishedGameCount: unfinishedCount,
+    gaps,
+    gapSummary,
+    lastUpdated: new Date().toISOString(),
+    cacheAge: 0
+  };
+}
+
+/**
+ * Find tournament ID gaps
+ */
+async function findTournamentIdGaps(entityId, startId, endId, maxGapsToReturn = 1000) {
+  console.log(`[findTournamentIdGaps] Entity: ${entityId}`);
+  
+  const bounds = await getTournamentIdBounds(entityId);
+  const rangeStart = startId || bounds.lowestId || 1;
+  const rangeEnd = endId || bounds.highestId || rangeStart;
+  
+  const foundIds = await getAllTournamentIds(entityId);
+  const gaps = calculateGaps(foundIds, rangeStart, rangeEnd, maxGapsToReturn);
+  
+  monitoring.trackOperation('GAPS_FOUND', 'Game', entityId, { 
+    gapCount: gaps.length,
+    rangeStart,
+    rangeEnd
+  });
+  
+  return gaps;
+}
+
+/**
+ * Get count of unfinished games
+ */
+async function getUnfinishedGamesCount(entityId) {
+  monitoring.trackOperation('COUNT_UNFINISHED_START', 'Game', entityId);
+  
+  let count = 0;
+  
+  for (const status of UNFINISHED_STATUSES) {
+    try {
+      const result = await monitoredDdbDocClient.send(new QueryCommand({
+        TableName: GAME_TABLE,
+        IndexName: 'byStatus',
+        KeyConditionExpression: 'gameStatus = :status',
+        FilterExpression: 'entityId = :entityId AND consolidationType <> :parent',
+        ExpressionAttributeValues: {
+          ':status': status,
+          ':entityId': entityId,
+          ':parent': 'PARENT'
+        },
+        Select: 'COUNT'
+      }));
+      
+      count += result.Count || 0;
+    } catch (error) {
+      console.error(`[getUnfinishedGamesCount] Error for status ${status}:`, error);
+    }
+  }
+  
+  monitoring.trackOperation('COUNT_UNFINISHED_COMPLETE', 'Game', entityId, { count });
+  
+  return count;
+}
+
+/**
+ * Get unfinished games with pagination
+ */
+async function getUnfinishedGamesByEntity(entityId, limit = 50, nextToken) {
+  console.log(`[getUnfinishedGamesByEntity] Entity: ${entityId}, Limit: ${limit}`);
+  
+  const items = [];
+  let currentToken = nextToken;
+  
+  for (const status of UNFINISHED_STATUSES) {
+    if (items.length >= limit) break;
+    
+    try {
+      const result = await monitoredDdbDocClient.send(new QueryCommand({
+        TableName: GAME_TABLE,
+        IndexName: 'byStatus',
+        KeyConditionExpression: 'gameStatus = :status',
+        FilterExpression: 'entityId = :entityId AND consolidationType <> :parent',
+        ExpressionAttributeValues: {
+          ':status': status,
+          ':entityId': entityId,
+          ':parent': 'PARENT'
+        },
+        Limit: limit - items.length,
+        ExclusiveStartKey: currentToken ? JSON.parse(Buffer.from(currentToken, 'base64').toString()) : undefined
+      }));
+      
+      if (result.Items) {
+        items.push(...result.Items);
+      }
+      
+      currentToken = result.LastEvaluatedKey 
+        ? Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString('base64')
+        : undefined;
+      
+    } catch (error) {
+      console.error(`[getUnfinishedGamesByEntity] Error for status ${status}:`, error);
+    }
+  }
+  
+  const totalCount = await getUnfinishedGamesCount(entityId);
+  
+  monitoring.trackOperation('GET_UNFINISHED_COMPLETE', 'Game', entityId, { 
+    itemsReturned: items.length,
+    totalCount 
+  });
+  
+  return {
+    items,
+    nextToken: currentToken,
+    totalCount
+  };
+}
+
+/**
+ * List existing tournament IDs in a range
+ */
+async function listExistingTournamentIds(entityId, startId, endId, limit = 1000) {
+  console.log(`[listExistingTournamentIds] Entity: ${entityId}, Range: ${startId}-${endId}`);
+  
+  const ids = await getAllTournamentIds(entityId);
+  const idsArray = Array.from(ids).sort((a, b) => a - b);
+  
+  const filtered = idsArray.filter(id => {
+    if (startId && id < startId) return false;
+    if (endId && id > endId) return false;
+    return true;
+  });
+  
+  const result = filtered.slice(0, limit);
+  
+  monitoring.trackOperation('LIST_IDS_COMPLETE', 'Game', entityId, { 
+    totalIds: ids.size,
+    filteredCount: filtered.length,
+    returnedCount: result.length
+  });
+  
+  return result;
+}

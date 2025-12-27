@@ -1,0 +1,534 @@
+# ===================================================================
+# ENUMS - Foundation Types
+# ===================================================================
+# All enumeration types used throughout the schema
+# These are defined first as they have no dependencies
+# ===================================================================
+
+enum DataSource { 
+  SCRAPE 
+  API 
+  MANUAL 
+}
+
+enum AssetCondition { 
+  NEW 
+  GOOD 
+  FAIR 
+  POOR 
+  RETIRED 
+}
+
+enum VenueStatus { 
+  ACTIVE 
+  INACTIVE 
+  PENDING 
+}
+
+enum GameType { 
+  TOURNAMENT 
+  CASH_GAME 
+}
+
+enum GameStatus { 
+  INITIATING
+  SCHEDULED
+  REGISTERING
+  RUNNING
+  CANCELLED
+  FINISHED
+  NOT_IN_USE
+  NOT_PUBLISHED
+  CLOCK_STOPPED
+  UNKNOWN
+}
+
+enum GameVariant { 
+  NOT_PUBLISHED
+  NLHE
+  PLO
+  PLOM
+  PL04
+  PLOM4
+  PLOM5
+  PLO5
+  PLO6
+  PLOM6
+  PLMIXED
+  PLDC
+  NLDC
+}
+
+enum GameFrequency { 
+  DAILY
+  WEEKLY
+  FORTNIGHTLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  UNKNOWN
+}
+
+enum RegistrationStatus { 
+  SCHEDULED
+  OPEN
+  FINAL
+  CLOSED
+  N_A
+}
+
+enum TournamentType { 
+  FREEZEOUT
+  REBUY
+  SATELLITE
+  DEEPSTACK
+}
+
+enum PaymentSourceType { 
+  CASH
+  SQUARE
+  CREDIT_CARD
+  INTERNAL_CREDIT
+  UNKNOWN
+}
+
+enum PlayerAccountStatus { 
+  ACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum PlayerAccountCategory { 
+  NEW
+  RECREATIONAL
+  REGULAR
+  VIP
+  LAPSED
+}
+
+enum SeriesStatus { 
+  LIVE
+  SCHEDULED
+  COMPLETED
+}
+
+enum PlayerTargetingClassification { 
+  NotPlayed
+  Active_EL
+  Active
+  Retain_Inactive31_60d
+  Retain_Inactive61_90d
+  Churned_91_120d
+  Churned_121_180d
+  Churned_181_360d
+  Churned_361d
+}
+
+enum PlayerVenueTargetingClassification { 
+  Active_EL
+  Active
+  Retain_Inactive31_60d
+  Retain_Inactive61_90d
+  Churned_91_120d
+  Churned_121_180d
+  Churned_181_360d
+  Churned_361d
+}
+
+enum TransactionType { 
+  BUY_IN
+  DEPOSIT
+  TICKET_AWARD
+  TICKET_REDEMPTION
+  CASH_AWARD
+  QUALIFICATION
+  WITHDRAWAL
+}
+
+enum MessageStatus { 
+  SENT
+  DELIVERED
+  FAILED
+  READ
+}
+
+enum UserRole { 
+  SUPER_ADMIN
+  ADMIN
+  VENUE_MANAGER
+  TOURNAMENT_DIRECTOR
+  MARKETING
+}
+
+enum StaffRole { 
+  DEALER
+  FLOOR_MANAGER
+  SERVICE
+  TOURNAMENT_DIRECTOR
+}
+
+enum TicketStatus { 
+  ACTIVE
+  EXPIRED
+  USED
+}
+
+enum PlayerEntryStatus { 
+  REGISTERED
+  VOIDED
+  PLAYING
+  ELIMINATED
+  COMPLETED
+}
+
+enum CreditTransactionType { 
+  AWARD_PROMOTION
+  AWARD_REFUND
+  AWARD_MANUAL
+  REDEEM_GAME_BUY_IN
+  EXPIRED
+}
+
+enum PointsTransactionType { 
+  EARN_FROM_PLAY
+  EARN_FROM_PROMOTION
+  REDEEM_FOR_BUY_IN
+  REDEEM_FOR_MERCH
+  ADJUSTMENT_MANUAL
+  EXPIRED
+}
+
+enum SeriesCategory { 
+  REGULAR
+  SPECIAL
+  PROMOTIONAL
+  CHAMPIONSHIP
+  SEASONAL
+}
+
+enum HolidayType { 
+  NEW_YEAR
+  AUSTRALIA_DAY
+  EASTER
+  ANZAC_DAY
+  QUEENS_BIRTHDAY
+  CHRISTMAS
+  BOXING_DAY
+  MELBOURNE_CUP
+  LABOUR_DAY
+  OTHER
+}
+
+enum VenueAssignmentStatus { 
+  AUTO_ASSIGNED
+  MANUALLY_ASSIGNED
+  PENDING_ASSIGNMENT
+  UNASSIGNED
+  RETROACTIVE_ASSIGNED
+}
+
+enum SeriesAssignmentStatus { 
+  AUTO_ASSIGNED
+  MANUALLY_ASSIGNED
+  PENDING_ASSIGNMENT
+  UNASSIGNED
+  NOT_SERIES
+}
+
+# ===================================================================
+# NEW: RECURRING GAME ASSIGNMENT STATUS
+# ===================================================================
+
+enum RecurringGameAssignmentStatus {
+  AUTO_ASSIGNED        # Automatically matched by detection logic
+  MANUALLY_ASSIGNED    # Admin manually linked
+  PENDING_ASSIGNMENT   # Needs review
+  NOT_RECURRING        # One-off game
+  DEVIATION_FLAGGED    # Matched but significantly different from typical
+}
+
+# ===================================================================
+# COST & FINANCIAL ENUMS
+# ===================================================================
+
+enum CostItemType {
+  DEALER
+  TOURNAMENT_DIRECTOR
+  FLOOR_STAFF
+  SECURITY
+  PRIZE_CONTRIBUTION
+  JACKPOT_CONTRIBUTION
+  GUARANTEE_OVERLAY
+  ADDED_VALUE
+  BOUNTY
+  VENUE_RENTAL
+  EQUIPMENT_RENTAL
+  FOOD_BEVERAGE
+  MARKETING
+  STREAMING
+  INSURANCE
+  LICENSING
+  STAFF_TRAVEL
+  PLAYER_ACCOMMODATION
+  PROMOTION
+  OTHER
+}
+
+enum CostItemRateType { 
+  STANDARD
+  OVERTIME
+  DOUBLE_TIME
+  PENALTY
+  HOLIDAY
+  SPECIAL
+  FLAT
+}
+
+enum CostStatus { 
+  PENDING
+  PARTIAL
+  COMPLETE
+  ESTIMATED
+}
+
+enum SnapshotType { 
+  AUTO
+  MANUAL
+  RECONCILED
+}
+
+enum EntryType { 
+  INITIAL
+  REENTRY
+  DIRECT_BUYIN
+  QUALIFIED_CONTINUATION
+  AGGREGATE_LISTING
+}
+
+# ===================================================================
+# SCRAPER ENUMS
+# ===================================================================
+
+enum ScraperJobTriggerSource { 
+  SCHEDULED
+  MANUAL
+  API
+  CONTROL
+  BULK
+  ADMIN
+}
+
+enum ScraperJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+  TIMEOUT
+  STOPPED_TIMEOUT
+  STOPPED_BLANKS
+  STOPPED_NOT_FOUND
+  STOPPED_ERROR
+  STOPPED_MANUAL
+  STOPPED_NO_VENUE
+  STOPPED_MAX_ID
+}
+
+enum ScrapeURLStatus { 
+  ACTIVE
+  INACTIVE
+  DO_NOT_SCRAPE
+  ERROR
+  ARCHIVED
+}
+
+enum ScrapeAttemptStatus { 
+  SUCCESS
+  FAILED
+  ERROR
+  SKIPPED_DONOTSCRAPE
+  SKIPPED_VENUE
+  BLANK
+  NO_CHANGES
+  UPDATED
+  SAVED
+  SUCCESS_EDITED
+  SAVED_EDITED
+  UPDATED_EDITED
+  NOT_FOUND
+  NOT_IN_USE
+  NOT_PUBLISHED
+}
+
+enum TimeRange { 
+  LAST_HOUR
+  LAST_24_HOURS
+  LAST_7_DAYS
+  LAST_30_DAYS
+  CUSTOM
+}
+
+enum ScraperOperation { 
+  START
+  STOP
+  ENABLE
+  DISABLE
+  STATUS
+  RESET
+}
+
+enum ScraperJobMode {
+  single
+  bulk
+  range
+  gaps
+  auto
+  refresh
+  multiId
+}
+
+# ===================================================================
+# SOCIAL PULSE ENUMS
+# ===================================================================
+
+enum SocialPlatform { 
+  FACEBOOK
+  INSTAGRAM
+  TWITTER
+  LINKEDIN
+}
+
+enum SocialAccountStatus { 
+  ACTIVE
+  INACTIVE
+  PENDING_VERIFICATION
+  ERROR
+  RATE_LIMITED
+}
+
+enum SocialPostType { 
+  TEXT
+  IMAGE
+  VIDEO
+  LINK
+  EVENT
+  ALBUM
+  LIVE
+}
+
+enum SocialScrapeStatus { 
+  RUNNING
+  SUCCESS
+  FAILED
+  SKIPPED
+  RATE_LIMITED
+  NO_NEW_CONTENT
+}
+
+enum SocialPostStatus { 
+  ACTIVE
+  HIDDEN
+  ARCHIVED
+  DELETED
+}
+
+enum ScheduledPostStatus { 
+  SCHEDULED
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+# ===================================================================
+# SOCIAL POST PROCESSING ENUMS (NEW)
+# ===================================================================
+
+# Content classification for social posts (distinct from SocialPostType which is media type)
+# Detected by analyzing post content patterns
+enum SocialPostContentType {
+  RESULT               # Tournament results with placements/prizes
+  PROMOTIONAL          # Upcoming tournament announcements
+  GENERAL              # General poker-related content
+  COMMENT              # Comment/reply (not a standalone post)
+}
+
+# Processing pipeline status for social posts
+enum SocialPostProcessingStatus {
+  PENDING              # Awaiting processing
+  PROCESSING           # Currently being processed
+  EXTRACTED            # Extraction complete, matching pending
+  MATCHED              # Matching complete (may or may not have links)
+  LINKED               # Links created successfully
+  FAILED               # Processing failed
+  SKIPPED              # Skipped (e.g., COMMENT type, duplicate)
+  MANUAL_REVIEW        # Flagged for human review
+}
+
+# How a social post was linked to a game
+enum SocialPostLinkType {
+  AUTO_MATCHED         # System automatically matched
+  MANUAL_LINKED        # Admin manually created link
+  VERIFIED             # Auto-matched and verified by admin
+  REJECTED             # Auto-matched but rejected by admin
+  TOURNAMENT_ID        # Matched via explicit tournament ID in URL
+}
+
+# Types of non-cash prizes extracted from tournament results
+enum NonCashPrizeType {
+  ACCUMULATOR_TICKET   # Entry to accumulator freeroll
+  TOURNAMENT_ENTRY     # Entry to specific tournament
+  SATELLITE_TICKET     # Satellite seat
+  BOUNTY_TICKET        # Bounty hunter entry
+  MERCHANDISE          # Physical prizes
+  POINTS               # League/loyalty points
+  OTHER                # Catch-all for other non-cash prizes
+}
+
+# ===================================================================
+# BACKGROUND TASK ENUMS
+# ===================================================================
+
+enum BackgroundTaskType {
+  VENUE_REASSIGNMENT
+  BULK_VENUE_REASSIGNMENT
+  ENTITY_REASSIGNMENT
+  VENUE_CLONE
+  BULK_IMPORT
+  DATA_MIGRATION
+  REPORT_GENERATION
+  VENUE_DETAILS_RECALC
+  RECURRING_GAME_DETECTION    # NEW
+  METRICS_CALCULATION         # NEW
+}
+
+enum BackgroundTaskStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+  PARTIAL_SUCCESS
+}
+
+# ===================================================================
+# ENRICHMENT RESOLUTION ENUMS
+# Used by gameDataEnricher to track resolution outcomes
+# ===================================================================
+
+enum SeriesResolutionStatus {
+  MATCHED_EXISTING      # Found existing TournamentSeries
+  CREATED_NEW           # Created new TournamentSeries
+  NOT_SERIES            # Game is not part of a series
+  SKIPPED               # Resolution was skipped (per options)
+  PENDING_REVIEW        # Needs manual review (low confidence)
+  FAILED                # Resolution failed (error)
+}
+
+enum RecurringResolutionStatus {
+  MATCHED_EXISTING      # Found existing RecurringGame
+  CREATED_NEW           # Created new RecurringGame
+  NOT_RECURRING         # Game is not recurring
+  SKIPPED               # Resolution was skipped (per options)
+  PENDING_REVIEW        # Needs manual review (low confidence)
+  FAILED                # Resolution failed (error)
+}

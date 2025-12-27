@@ -1,7 +1,10 @@
 // src/pages/debug/GamesDebug.tsx
 // Updated with getAllCounts and specific formatting requirements
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import { getClient } from '../../utils/apiClient';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { listGamesForDebug, listTournamentStructuresForDebug } from '../../graphql/customQueries';
@@ -15,6 +18,10 @@ interface TabData {
   query: any;
   listKey: string;
   countKey: string;
+}
+
+interface S3StorageInfo {
+  s3Key: string;
 }
 
 const tabs: Record<TabType, TabData> = {
@@ -40,6 +47,54 @@ const RefreshIcon = () => (
   </svg>
 );
 
+// GraphQL query to fetch ScrapeURL by sourceSystem and tournamentId
+const getScrapeURLForS3 = /* GraphQL */ `
+  query GetScrapeURLForS3($sourceSystem: String!, $tournamentId: ModelIntKeyConditionInput) {
+    scrapeURLsBySourceSystem(sourceSystem: $sourceSystem, tournamentId: $tournamentId, limit: 1) {
+      items {
+        id
+        tournamentId
+        entityId
+        latestS3Key
+        s3StoragePrefix
+      }
+    }
+  }
+`;
+
+// S3 bucket configuration
+const S3_BUCKET_NAME = 'pokerpro-scraper-storage';
+const S3_REGION = 'ap-southeast-2';
+const SOURCE_SYSTEM = 'KINGSROOM_WEB';
+
+// Helper to generate a pre-signed URL for S3 object
+const getPresignedS3Url = async (s3Key: string): Promise<string> => {
+  const session = await fetchAuthSession();
+  const credentials = session.credentials;
+
+  if (!credentials) {
+    throw new Error('Unable to get AWS credentials. Please sign in again.');
+  }
+
+  const s3Client = new S3Client({
+    region: S3_REGION,
+    credentials: {
+      accessKeyId: credentials.accessKeyId,
+      secretAccessKey: credentials.secretAccessKey,
+      sessionToken: credentials.sessionToken,
+    },
+  });
+
+  const command = new GetObjectCommand({
+    Bucket: S3_BUCKET_NAME,
+    Key: s3Key,
+  });
+
+  // Generate pre-signed URL valid for 1 hour
+  const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+  return signedUrl;
+};
+
 export const GamesDebug = () => {
   const [activeTab, setActiveTab] = useState<TabType>('games');
   const [data, setData] = useState<Record<TabType, any[]>>({
@@ -61,6 +116,114 @@ export const GamesDebug = () => {
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [countsLoading, setCountsLoading] = useState(true);
+  
+  // S3 storage lookup map: "entityId-tournamentId" -> S3StorageInfo
+  const [s3StorageMap, setS3StorageMap] = useState<Record<string, S3StorageInfo>>({});
+  const [s3LoadingKeys, setS3LoadingKeys] = useState<Set<string>>(new Set());
+  const [s3OpeningKey, setS3OpeningKey] = useState<string | null>(null);
+
+  // Handle clicking an S3 link - generate pre-signed URL and open
+  const handleS3LinkClick = useCallback(async (s3Key: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    setS3OpeningKey(s3Key);
+    
+    try {
+      console.log(`[S3 Open] Generating pre-signed URL for: ${s3Key}`);
+      const signedUrl = await getPresignedS3Url(s3Key);
+      console.log(`[S3 Open] Opening pre-signed URL`);
+      window.open(signedUrl, '_blank');
+    } catch (err) {
+      console.error(`[S3 Open] Error generating pre-signed URL:`, err);
+      alert('Failed to open S3 file. Please try again.');
+    } finally {
+      setS3OpeningKey(null);
+    }
+  }, []);
+
+  // Build a lookup key from entityId and tournamentId
+  const getS3LookupKey = (entityId: string | null, tournamentId: number | null): string | null => {
+    if (!entityId || !tournamentId) return null;
+    return `${entityId}-${tournamentId}`;
+  };
+
+  // Fetch S3 storage info for a game by tournamentId (using ScrapeURL table)
+  const fetchS3StorageForGame = async (entityId: string, tournamentId: number) => {
+    const lookupKey = `${entityId}-${tournamentId}`;
+    if (s3StorageMap[lookupKey] || s3LoadingKeys.has(lookupKey)) return;
+    
+    console.log(`[S3 Fetch] Starting fetch for entityId=${entityId}, tournamentId=${tournamentId}`);
+    
+    const client = getClient();
+    setS3LoadingKeys(prev => new Set(prev).add(lookupKey));
+    
+    try {
+      const response = await client.graphql({
+        query: getScrapeURLForS3,
+        variables: { 
+          sourceSystem: SOURCE_SYSTEM,
+          tournamentId: { eq: tournamentId }
+        }
+      });
+      
+      console.log(`[S3 Fetch] Response for ${lookupKey}:`, response);
+      
+      if ('data' in response && response.data?.scrapeURLsBySourceSystem?.items?.length > 0) {
+        const scrapeUrl = response.data.scrapeURLsBySourceSystem.items[0];
+        console.log(`[S3 Fetch] Found ScrapeURL for ${lookupKey}:`, scrapeUrl);
+        
+        // Verify entityId matches (in case there are multiple entities with same tournamentId)
+        if (scrapeUrl.entityId === entityId && scrapeUrl.latestS3Key) {
+          setS3StorageMap(prev => ({
+            ...prev,
+            [lookupKey]: { s3Key: scrapeUrl.latestS3Key }
+          }));
+          console.log(`[S3 Fetch] Stored s3Key for ${lookupKey}: ${scrapeUrl.latestS3Key}`);
+        } else if (scrapeUrl.entityId !== entityId) {
+          console.log(`[S3 Fetch] EntityId mismatch for ${lookupKey}: expected ${entityId}, got ${scrapeUrl.entityId}`);
+        } else {
+          console.log(`[S3 Fetch] No latestS3Key for ${lookupKey}`);
+        }
+      } else {
+        console.log(`[S3 Fetch] No ScrapeURL found for ${lookupKey}`);
+      }
+    } catch (err) {
+      console.error(`[S3 Fetch] Error fetching ScrapeURL for tournament ${tournamentId}:`, err);
+    } finally {
+      setS3LoadingKeys(prev => {
+        const next = new Set(prev);
+        next.delete(lookupKey);
+        return next;
+      });
+    }
+  };
+
+  // Fetch S3 storage for multiple games in parallel
+  const fetchS3StorageForGames = async (games: any[]) => {
+    console.log(`[S3 Batch] Processing ${games.length} games`);
+    console.log(`[S3 Batch] Sample game data:`, games.slice(0, 3).map(g => ({
+      id: g.id,
+      tournamentId: g.tournamentId,
+      entityId: g.entityId,
+      name: g.name
+    })));
+    
+    const gamesToFetch = games.filter(g => {
+      if (!g.entityId || !g.tournamentId) {
+        console.log(`[S3 Batch] Skipping game ${g.id} - missing entityId=${g.entityId} or tournamentId=${g.tournamentId}`);
+        return false;
+      }
+      const key = getS3LookupKey(g.entityId, g.tournamentId);
+      return key && !s3StorageMap[key];
+    });
+    
+    console.log(`[S3 Batch] Fetching S3 storage for ${gamesToFetch.length} games`);
+    await Promise.all(gamesToFetch.map(g => fetchS3StorageForGame(g.entityId, g.tournamentId)));
+  };
+
+  // Debug: Log when s3StorageMap changes
+  useEffect(() => {
+    console.log(`[S3 Map] Updated - now has ${Object.keys(s3StorageMap).length} entries:`, s3StorageMap);
+  }, [s3StorageMap]);
 
   // Format date helper
   const formatGameDateTime = (dateString: string | null) => {
@@ -133,6 +296,12 @@ export const GamesDebug = () => {
       if ('data' in response && response.data) {
         let items = response.data[tabConfig.listKey].items.filter(Boolean);
         
+        // Debug log raw items
+        if (tab === 'games') {
+          console.log(`[Games Fetch] Loaded ${items.length} games`);
+          console.log(`[Games Fetch] First 3 games raw:`, items.slice(0, 3));
+        }
+        
         // Sort games by gameStartDateTime (most recent first)
         if (tab === 'games') {
           items = items.sort((a: any, b: any) => {
@@ -162,12 +331,22 @@ export const GamesDebug = () => {
               [tab]: allItems
             };
           });
+          
+          // Fetch S3 storage info for new games
+          if (tab === 'games') {
+            fetchS3StorageForGames(items);
+          }
         } else {
           // First fetch: Set items
           setData(prev => ({
             ...prev,
             [tab]: items
           }));
+          
+          // Fetch S3 storage info for games
+          if (tab === 'games') {
+            fetchS3StorageForGames(items);
+          }
         }
         
         setNextTokens(prev => ({
@@ -203,6 +382,11 @@ export const GamesDebug = () => {
       ...prev,
       [activeTab]: null
     }));
+    
+    // Clear S3 storage map when refreshing games
+    if (activeTab === 'games') {
+      setS3StorageMap({});
+    }
     
     // Refetch all counts
     await fetchAllCounts();
@@ -253,23 +437,42 @@ export const GamesDebug = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {gamesData.map((game) => {
-                const tournamentUrl = game.tournamentId 
-                  ? `https://example.com/tournament/${game.tournamentId}` 
-                  : null;
+              {gamesData.map((game, index) => {
+                // Look up S3 storage info from the map using entityId-tournamentId
+                const lookupKey = getS3LookupKey(game.entityId, game.tournamentId);
+                const s3Info = lookupKey ? s3StorageMap[lookupKey] : null;
+                const hasS3Key = !!s3Info?.s3Key;
+                const isLoadingS3 = lookupKey ? s3LoadingKeys.has(lookupKey) : false;
+                const isOpening = s3Info?.s3Key === s3OpeningKey;
+                
+                // Debug log for first 5 games
+                if (index < 5) {
+                  console.log(`[Render] Game ${index}:`, {
+                    id: game.id,
+                    tournamentId: game.tournamentId,
+                    entityId: game.entityId,
+                    lookupKey,
+                    s3Info,
+                    hasS3Key,
+                    isLoadingS3,
+                    s3StorageMapKeys: Object.keys(s3StorageMap)
+                  });
+                }
                 
                 return (
                   <tr key={game.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {tournamentUrl ? (
-                        <a 
-                          href={tournamentUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-indigo-600 hover:text-indigo-900 underline"
+                      {isLoadingS3 ? (
+                        <span className="text-gray-400">{game.tournamentId || '-'}...</span>
+                      ) : hasS3Key ? (
+                        <button 
+                          onClick={(e) => handleS3LinkClick(s3Info.s3Key, e)}
+                          disabled={isOpening}
+                          className="text-indigo-600 hover:text-indigo-900 underline disabled:opacity-50 disabled:cursor-wait"
+                          title={`View S3 HTML: ${s3Info.s3Key}`}
                         >
-                          {game.tournamentId || '-'}
-                        </a>
+                          {isOpening ? `${game.tournamentId}...` : game.tournamentId || '-'}
+                        </button>
                       ) : (
                         <span className="text-gray-900">{game.tournamentId || '-'}</span>
                       )}

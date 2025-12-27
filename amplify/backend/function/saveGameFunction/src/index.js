@@ -96,6 +96,12 @@ const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
 // Environment variables
 const PLAYER_PROCESSOR_QUEUE_URL = process.env.PLAYER_PROCESSOR_QUEUE_URL;
 
+// DEBUG: Log SQS configuration at cold start
+console.log('[SAVE-GAME] [SQS-DEBUG] Lambda cold start - SQS Config:', {
+    PLAYER_PROCESSOR_QUEUE_URL_SET: !!PLAYER_PROCESSOR_QUEUE_URL,
+    PLAYER_PROCESSOR_QUEUE_URL_VALUE: PLAYER_PROCESSOR_QUEUE_URL ? `${PLAYER_PROCESSOR_QUEUE_URL.substring(0, 50)}...` : 'NOT SET'
+});
+
 // ===================================================================
 // HELPER FUNCTIONS
 // ===================================================================
@@ -129,6 +135,18 @@ const ensureISODate = (dateValue, fallback = null) => {
         console.error(`Failed to parse date: ${dateValue}`, error);
     }
     return fallback || new Date().toISOString();
+};
+
+/**
+ * Extract YYYY-MM from ISO date string for byGameMonth GSI
+ * @param {string} isoDateString - ISO format date string
+ * @returns {string|null} Format: "2025-08" or null
+ */
+const getYearMonth = (isoDateString) => {
+  if (!isoDateString) return null;
+  const date = new Date(isoDateString);
+  if (isNaN(date.getTime())) return null;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 };
 
 const parseAuditTrail = (auditTrailString) => {
@@ -344,49 +362,107 @@ const createScrapeAttempt = async (input, gameId, wasNewGame, fieldsUpdated) => 
 
 const shouldQueueForPDP = (input, game) => {
     const hasPlayerList = input.players?.allPlayers?.length > 0;
+    const playerCount = input.players?.allPlayers?.length || 0;
     const isFinished = FINISHED_STATUSES.includes(game.gameStatus);
     const isLive = LIVE_STATUSES.includes(game.gameStatus);
     
-    if (!hasPlayerList) return { shouldQueue: false, updateEntriesOnly: false };
-    if (isFinished) return { shouldQueue: true, updateEntriesOnly: false };
-    if (isLive) return { shouldQueue: false, updateEntriesOnly: true };
+    // DEBUG: Log all decision factors
+    console.log('[SAVE-GAME] [SQS-DEBUG] shouldQueueForPDP evaluation:', {
+        gameId: game.id,
+        gameStatus: game.gameStatus,
+        hasPlayerList,
+        playerCount,
+        isFinished,
+        isLive,
+        FINISHED_STATUSES,
+        LIVE_STATUSES
+    });
+    
+    if (!hasPlayerList) {
+        console.log('[SAVE-GAME] [SQS-DEBUG] ❌ Decision: NO QUEUE - No player list provided');
+        return { shouldQueue: false, updateEntriesOnly: false };
+    }
+    if (isFinished) {
+        console.log('[SAVE-GAME] [SQS-DEBUG] ✅ Decision: QUEUE FOR PDP - Game is finished with players');
+        return { shouldQueue: true, updateEntriesOnly: false };
+    }
+    if (isLive) {
+        console.log('[SAVE-GAME] [SQS-DEBUG] ⏸️ Decision: UPDATE ENTRIES ONLY - Game is live');
+        return { shouldQueue: false, updateEntriesOnly: true };
+    }
+    
+    console.log('[SAVE-GAME] [SQS-DEBUG] ❌ Decision: NO QUEUE - Game status not finished or live');
     return { shouldQueue: false, updateEntriesOnly: false };
 };
 
 const queueForPDP = async (game, input) => {
+    console.log('[SAVE-GAME] [SQS-DEBUG] queueForPDP called:', {
+        gameId: game.id,
+        entityId: input.source.entityId,
+        playerCount: input.players?.allPlayers?.length || 0
+    });
+    
     if (!PLAYER_PROCESSOR_QUEUE_URL) {
-        console.warn('[SAVE-GAME] PLAYER_PROCESSOR_QUEUE_URL not configured');
+        console.error('[SAVE-GAME] [SQS-DEBUG] ❌ CRITICAL: PLAYER_PROCESSOR_QUEUE_URL not configured!');
+        console.error('[SAVE-GAME] [SQS-DEBUG] Available env vars:', Object.keys(process.env).filter(k => k.includes('QUEUE') || k.includes('SQS')));
         return;
     }
     
+    console.log('[SAVE-GAME] [SQS-DEBUG] ✅ Queue URL is set, preparing message...');
+    
+    const messageBody = {
+        game: {
+            id: game.id,
+            entityId: input.source.entityId,
+            venueId: game.venueId,
+            gameStatus: game.gameStatus,
+            gameStartDateTime: game.gameStartDateTime,
+            gameEndDateTime: game.gameEndDateTime,
+            buyIn: game.buyIn,
+            totalUniquePlayers: game.totalUniquePlayers,
+            venueAssignmentStatus: game.venueAssignmentStatus
+        },
+        players: {
+            allPlayers: input.players.allPlayers,
+            totalUniquePlayers: input.players.totalUniquePlayers || input.players.allPlayers.length,
+            hasCompleteResults: input.players.hasCompleteResults,
+            totalPrizesPaid: input.players.totalPrizesPaid || 0
+        }
+    };
+    
+    const sqsParams = {
+        QueueUrl: PLAYER_PROCESSOR_QUEUE_URL,
+        MessageBody: JSON.stringify(messageBody),
+        MessageGroupId: game.id,
+        MessageDeduplicationId: `${game.id}-${Date.now()}`
+    };
+    
+    console.log('[SAVE-GAME] [SQS-DEBUG] SQS SendMessage params:', {
+        QueueUrl: sqsParams.QueueUrl,
+        MessageGroupId: sqsParams.MessageGroupId,
+        MessageDeduplicationId: sqsParams.MessageDeduplicationId,
+        MessageBodyLength: sqsParams.MessageBody.length,
+        playerCount: input.players.allPlayers.length
+    });
+    
     try {
-        await sqsClient.send(new SendMessageCommand({
-            QueueUrl: PLAYER_PROCESSOR_QUEUE_URL,
-            MessageBody: JSON.stringify({
-                game: {
-                    id: game.id,
-                    entityId: input.source.entityId,
-                    venueId: game.venueId,
-                    gameStatus: game.gameStatus,
-                    gameStartDateTime: game.gameStartDateTime,
-                    gameEndDateTime: game.gameEndDateTime,
-                    buyIn: game.buyIn,
-                    totalUniquePlayers: game.totalUniquePlayers,
-                    venueAssignmentStatus: game.venueAssignmentStatus
-                },
-                players: {
-                    allPlayers: input.players.allPlayers,
-                    totalUniquePlayers: input.players.totalUniquePlayers || input.players.allPlayers.length,
-                    hasCompleteResults: input.players.hasCompleteResults,
-                    totalPrizesPaid: input.players.totalPrizesPaid || 0
-                }
-            }),
-            MessageGroupId: game.id,
-            MessageDeduplicationId: `${game.id}-${Date.now()}`
-        }));
-        console.log(`[SAVE-GAME] Queued ${input.players.allPlayers.length} players for processing`);
+        const result = await sqsClient.send(new SendMessageCommand(sqsParams));
+        console.log('[SAVE-GAME] [SQS-DEBUG] ✅ SQS SendMessage SUCCESS:', {
+            MessageId: result.MessageId,
+            SequenceNumber: result.SequenceNumber,
+            gameId: game.id,
+            playerCount: input.players.allPlayers.length
+        });
     } catch (error) {
-        console.error('[SAVE-GAME] Error queueing for PDP:', error);
+        console.error('[SAVE-GAME] [SQS-DEBUG] ❌ SQS SendMessage FAILED:', {
+            errorName: error.name,
+            errorMessage: error.message,
+            errorCode: error.code,
+            gameId: game.id,
+            queueUrl: PLAYER_PROCESSOR_QUEUE_URL
+        });
+        // Re-throw to surface the error if needed
+        throw error;
     }
 };
 
@@ -507,6 +583,7 @@ const createGame = async (input) => {
         
         // Query keys (pre-computed by enricher)
         gameDayOfWeek: gameData.gameDayOfWeek,
+        gameYearMonth: gameData.gameYearMonth || getYearMonth(gameStartDateTime),
         buyInBucket: gameData.buyInBucket,
         venueScheduleKey: gameData.venueScheduleKey,
         venueGameTypeKey: gameData.venueGameTypeKey,
@@ -670,7 +747,7 @@ const updateGame = async (existingGame, input) => {
         entityGameTypeKey: 'entityGameTypeKey',
         
         // ===================================================================
-        // NEW: Classification fields
+        // NEW: Classification field
         // ===================================================================
         
         // Universal classification
@@ -715,7 +792,8 @@ const updateGame = async (existingGame, input) => {
         // Classification metadata
         classificationSource: 'classificationSource',
         classificationConfidence: 'classificationConfidence',
-        lastClassifiedAt: 'lastClassifiedAt'
+        lastClassifiedAt: 'lastClassifiedAt',
+        gameYearMonth: 'gameYearMonth'
     };
 
     for (const [inputField, dbField] of Object.entries(fieldMappings)) {
@@ -772,6 +850,16 @@ exports.handler = async (event) => {
     // Handle both direct invocation and GraphQL resolver invocation
     const input = event.arguments?.input || event.input || event;
 
+    // DEBUG: Log input structure for SQS debugging
+    console.log('[SAVE-GAME] [SQS-DEBUG] Input structure check:', {
+        hasPlayers: !!input.players,
+        hasAllPlayers: !!input.players?.allPlayers,
+        playerCount: input.players?.allPlayers?.length || 0,
+        gameStatus: input.game?.gameStatus,
+        sourceType: input.source?.type,
+        entityId: input.source?.entityId
+    });
+
     try {
         // Validate input structure
         const validation = validateInput(input);
@@ -824,17 +912,25 @@ exports.handler = async (event) => {
         }
 
         // Player processing
+        console.log('[SAVE-GAME] [SQS-DEBUG] Starting player processing evaluation...');
         const pdpDecision = shouldQueueForPDP(input, game);
         let playerProcessingQueued = false;
         let playerProcessingReason = null;
 
+        console.log('[SAVE-GAME] [SQS-DEBUG] PDP decision result:', pdpDecision);
+
         if (pdpDecision.shouldQueue) {
+            console.log('[SAVE-GAME] [SQS-DEBUG] Calling queueForPDP...');
             await queueForPDP(game, input);
             playerProcessingQueued = true;
             playerProcessingReason = 'Game finished with player list';
+            console.log('[SAVE-GAME] [SQS-DEBUG] queueForPDP completed');
         } else if (pdpDecision.updateEntriesOnly) {
             await updatePlayerEntries(game, input);
             playerProcessingReason = 'Live game - entries updated inline';
+        } else {
+            console.log('[SAVE-GAME] [SQS-DEBUG] No player processing action taken');
+            playerProcessingReason = 'No queue action - check logs for reason';
         }
 
         // NOTE: GameCost and GameFinancialSnapshot are now created by

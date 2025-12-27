@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "storage": {
+      "Entity:@model(appsync)": [
+        "read"
+      ],
+      "Venue:@model(appsync)": [
+        "read"
+      ],
+      "Game:@model(appsync)": [
+        "read"
+      ],
+      "SocialAccount:@model(appsync)": [
+        "read"
+      ],
+      "SocialPost:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "SocialPostGameLink:@model(appsync)": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "SocialPostGameData:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "SocialPostPlacement:@model(appsync)": [
+        "create",
+        "read"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

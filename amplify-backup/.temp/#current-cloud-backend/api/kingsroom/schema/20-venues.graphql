@@ -1,0 +1,167 @@
+# 20-venues.graphql
+# ==========================================
+
+# 2. CORE DOMAIN (Entities, Venues, Series)
+
+type Venue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  venueNumber: Int! @index(name: "byVenueNumber", sortKeyFields: ["name"])
+  name: String!
+  aliases: [String]
+  address: String
+  city: String
+  country: String
+  fee: Float
+  isSpecial: Boolean @default(value: "false")
+  details: VenueDetails @hasOne
+  logo: AWSURL
+
+  # --- NEW: Venue-Level Stats ---
+  gameCount: Int @default(value: "0")
+  lastGameAddedAt: AWSDateTime
+  lastDataRefreshedAt: AWSDateTime # Updated on any Game ADD/UPDATE for this venue
+  seriesGameCount: Int @default(value: "0")
+  lastSeriesGameAddedAt: AWSDateTime
+  
+  # NEW: Links venue "clones" across entities to the same physical location
+  # If null, this IS the canonical (original) venue
+  # If set, points to the canonical venue ID for cross-entity analytics
+  canonicalVenueId: ID @index(name: "byCanonicalVenue")
+
+  # Relationships
+  assets: [Asset] @hasMany(indexName: "byVenue", fields: ["id"])
+  games: [Game] @hasMany(indexName: "byVenue", fields: ["id"])
+  series: [TournamentSeries] @hasMany(indexName: "byVenue", fields: ["id"])
+  playerMemberships: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
+  registeredPlayers: [Player] @hasMany(indexName: "byRegistrationVenue", fields: ["id"])
+
+  # === NEW RELATIONSHIPS ===
+  recurringGames: [RecurringGame] @hasMany(indexName: "byVenueRecurringGame", fields: ["id"])
+  
+  # Metrics relationships
+  venueMetrics: [VenueMetrics] @hasMany(indexName: "byVenueMetrics", fields: ["id"])
+  recurringGameMetrics: [RecurringGameMetrics] @hasMany(indexName: "byVenueRecurringGameMetrics", fields: ["id"])
+
+  # Social Pulse Relationships
+  socialAccounts: [SocialAccount] @hasMany(indexName: "bySocialAccountVenue", fields: ["id"])
+
+  entityId: ID @index(name: "byEntityVenue", sortKeyFields: ["name"], queryField: "venuesByEntity")
+  entity: Entity @belongsTo(fields: ["entityId"])
+}
+
+type VenueDetails @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
+  id: ID!
+  startDate: AWSDateTime!
+  status: VenueStatus!
+  lastCustomerSuccessVisit: AWSDateTime
+  totalGamesHeld: Int
+  averageUniquePlayersPerGame: Float
+  averageEntriesPerGame: Float
+  gameNights: [String]
+  venueId: ID!
+  @index(name: "byVenue")
+  venue: Venue @belongsTo(fields: ["venueId"])
+}
+
+# --- VenueDetails Mutations ---
+
+type VenueMetricsResult {
+  success: Boolean!
+  venuesProcessed: Int
+  results: [VenueMetricsUpdateResult]
+  error: String
+}
+
+type VenueMetricsUpdateResult {
+  venueId: ID!
+  detailsId: ID
+  success: Boolean!
+  error: String
+}
+
+type VenueMetricsPreview {
+  success: Boolean!
+  venueId: ID
+  currentMetrics: VenueMetricsSnapshot
+  calculatedMetrics: VenueMetricsSnapshot
+  wouldChange: Boolean
+  error: String
+}
+
+input RecalculateVenueDetailsInput {
+  venueId: ID
+  entityId: ID
+  forceAll: Boolean
+}
+
+input VenueMetricsPreviewInput {
+  venueId: ID!
+}
+
+type VenueMatch {
+  autoAssignedVenue: ScrapedVenueMatchDetails
+  suggestions: [ScrapedVenueMatchDetails]
+}
+
+type AllCountsResult {
+  playerCount: Int
+  playerSummaryCount: Int
+  playerEntryCount: Int
+  playerResultCount: Int
+  playerVenueCount: Int
+  playerTransactionCount: Int
+  playerCreditsCount: Int
+  playerPointsCount: Int
+  playerTicketCount: Int
+  playerMarketingPreferencesCount: Int
+  playerMarketingMessageCount: Int
+  gameCount: Int
+  tournamentStructureCount: Int
+}
+
+# --- Venue Assignment Types ---
+
+type VenueAssignmentResult {
+  success: Boolean!
+  gameId: ID!
+  venueId: ID!
+  affectedRecords: AffectedRecords
+  error: String
+}
+
+type AffectedRecords {
+  gameUpdated: Boolean
+  playerEntriesUpdated: Int
+  playerVenueRecordsCreated: Int
+  playersWithRegistrationUpdated: Int
+  playerSummariesUpdated: Int
+}
+
+type BatchVenueAssignmentResult {
+  successful: [VenueAssignmentResult]
+  failed: [VenueAssignmentResult]
+  totalProcessed: Int
+}
+
+# --- Venue Reassignment Types (NEW) ---
+
+type SaveVenueAssignmentInfo @aws_iam @aws_cognito_user_pools {
+  venueId: ID
+  venueName: String
+  status: VenueAssignmentStatus
+  confidence: Float
+}
+
+# --- Venue Reassignment Input Types (NEW) ---
+
+input VenueAssignment {
+  gameId: ID!
+  venueId: ID!
+}
+
+input VenueReferenceInput {
+  venueId: ID
+  venueName: String
+  suggestedVenueId: ID
+  confidence: Float
+}

@@ -1,0 +1,240 @@
+# 33-game-financials.graphql
+# ===================================================================
+# GAME FINANCIALS PROCESSOR
+# Schema for calculating and persisting game financial data
+# ===================================================================
+
+# ===================================================================
+# INPUT TYPES
+# ===================================================================
+
+input CalculateGameFinancialsInput {
+  # Option 1: Provide full game data (for preview before save)
+  game: GameFinancialsGameInput
+  
+  # Option 2: Provide gameId (fetch from DB and calculate)
+  gameId: ID
+  
+  # Control options
+  options: GameFinancialsOptionsInput
+}
+
+# Game data input for financial calculation
+# Subset of Game fields needed for financials
+input GameFinancialsGameInput {
+  id: ID!
+  entityId: ID!
+  venueId: ID
+  
+  # Entry data
+  totalEntries: Int
+  totalUniquePlayers: Int
+  totalInitialEntries: Int
+  totalRebuys: Int
+  totalAddons: Int
+  
+  # Financial inputs
+  buyIn: Float
+  rake: Float
+  venueFee: Float
+  guaranteeAmount: Float
+  hasGuarantee: Boolean
+  
+  # Pre-calculated financials (from enricher)
+  rakeRevenue: Float
+  totalBuyInsCollected: Float
+  prizepoolPlayerContributions: Float
+  prizepoolAddedValue: Float
+  prizepoolSurplus: Float
+  guaranteeOverlayCost: Float
+  gameProfit: Float
+  
+  # Results
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  
+  # Timing
+  gameStartDateTime: AWSDateTime
+  gameEndDateTime: AWSDateTime
+  
+  # Classification
+  gameType: GameType
+  tournamentType: TournamentType
+  gameStatus: GameStatus
+}
+
+input GameFinancialsOptionsInput {
+  # If true, save to GameCost and GameFinancialSnapshot tables
+  # If false (default), just return calculated values for preview
+  saveToDatabase: Boolean
+}
+
+# ===================================================================
+# OUTPUT TYPES
+# ===================================================================
+
+type CalculateGameFinancialsOutput {
+  success: Boolean!
+  gameId: ID
+  mode: String!                              # "PREVIEW" or "SAVE"
+  
+  # Calculated cost data
+  calculatedCost: GameCostCalculation
+  
+  # Calculated snapshot data
+  calculatedSnapshot: GameFinancialSnapshotCalculation
+  
+  # Summary for quick FE display
+  summary: FinancialsSummary
+  
+  # Save results (only populated when saveToDatabase is true)
+  costSaveResult: FinancialsSaveResult
+  snapshotSaveResult: FinancialsSaveResult
+  
+  # Metadata
+  processingTimeMs: Int
+  error: String
+}
+
+# Calculated GameCost data
+type GameCostCalculation {
+  gameId: ID
+  entityId: ID
+  venueId: ID
+  gameDate: AWSDateTime
+  
+  # Cost breakdown
+  totalDealerCost: Float
+  totalTournamentDirectorCost: Float
+  totalFloorStaffCost: Float
+  totalSecurityCost: Float
+  totalPrizeContribution: Float
+  totalJackpotContribution: Float
+  totalPromotionCost: Float
+  totalOtherCost: Float
+  totalCost: Float
+  
+  # Calculation metadata
+  dealerRatePerEntry: Float
+  entriesUsedForCalculation: Int
+}
+
+# Calculated GameFinancialSnapshot data
+type GameFinancialSnapshotCalculation {
+  gameId: ID
+  entityId: ID
+  venueId: ID
+  gameStartDateTime: AWSDateTime
+  
+  # Denormalized game data
+  totalUniquePlayers: Int
+  totalEntries: Int
+  guaranteeAmount: Float
+  gameDurationMinutes: Int
+  gameType: GameType
+  tournamentType: TournamentType
+  
+  # Revenue
+  totalBuyInsCollected: Float
+  rakeRevenue: Float
+  venueFee: Float
+  totalRevenue: Float
+  
+  # Prizepool
+  prizepoolPlayerContributions: Float
+  prizepoolAddedValue: Float
+  prizepoolTotal: Float
+  prizepoolSurplus: Float
+  
+  # Prizepool Adjustments (NEW)
+  prizepoolPaidDelta: Float
+  prizepoolJackpotContributions: Float
+  prizepoolAccumulatorTicketPayoutEstimate: Float
+  prizepoolAccumulatorTicketPayoutActual: Float
+  
+  # Guarantee
+  guaranteeOverlayCost: Float
+  guaranteeCoverageRate: Float
+  guaranteeMet: Boolean
+  
+  # Costs
+  totalCost: Float
+  totalDealerCost: Float
+  totalStaffCost: Float
+  
+  # Profit
+  gameProfit: Float
+  netProfit: Float
+  profitMargin: Float
+  
+  # Per-player metrics
+  revenuePerPlayer: Float
+  costPerPlayer: Float
+  profitPerPlayer: Float
+  rakePerEntry: Float
+  staffCostPerPlayer: Float
+  dealerCostPerHour: Float
+}
+
+# Summary for quick FE display
+type FinancialsSummary {
+  # Revenue
+  totalRevenue: Float
+  rakeRevenue: Float
+  totalBuyInsCollected: Float
+  
+  # Costs
+  totalCost: Float
+  totalDealerCost: Float
+  
+  # Prizepool
+  prizepoolTotal: Float
+  prizepoolPlayerContributions: Float
+  prizepoolAddedValue: Float
+  
+  # Guarantee
+  guaranteeMet: Boolean
+  guaranteeOverlayCost: Float
+  guaranteeCoverageRate: Float
+  
+  # Profit
+  gameProfit: Float
+  netProfit: Float
+  profitMargin: Float
+  
+  # Per-player
+  revenuePerPlayer: Float
+  costPerPlayer: Float
+  profitPerPlayer: Float
+  rakePerEntry: Float
+}
+
+# Save operation result
+type FinancialsSaveResult {
+  action: String                             # "CREATED", "UPDATED", "ERROR"
+  costId: ID
+  snapshotId: ID
+  error: String
+}
+
+# ===================================================================
+# MUTATIONS
+# ===================================================================
+
+extend type Mutation {
+  # Calculate game financials (with optional save)
+  # - saveToDatabase: false → returns calculated data for preview
+  # - saveToDatabase: true → saves to GameCost + GameFinancialSnapshot
+  calculateGameFinancials(input: CalculateGameFinancialsInput!): CalculateGameFinancialsOutput!
+    @function(name: "gameFinancialsProcessor-${env}")
+}
+
+# ===================================================================
+# QUERIES (for re-fetching saved data)
+# ===================================================================
+
+extend type Query {
+  # Preview financials without saving (alias for mutation with saveToDatabase: false)
+  previewGameFinancials(input: CalculateGameFinancialsInput!): CalculateGameFinancialsOutput!
+    @function(name: "gameFinancialsProcessor-${env}")
+}

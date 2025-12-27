@@ -1,0 +1,266 @@
+# ===================================================================
+# 02-classification-enums.graphql
+# GAME CLASSIFICATION ENUMS - New Taxonomy
+# ===================================================================
+# These enums provide a structured, multi-dimensional classification
+# system for poker games. They work alongside existing enums during
+# migration and will eventually replace them.
+#
+# NOTE: Some enums renamed to avoid conflicts with existing @model types:
+#   - TournamentStructure → EntryStructure (conflict with TournamentStructure @model)
+#   - RakeStructure → CashRakeType (conflict with RakeStructure @model)
+# ===================================================================
+
+# ===================================================================
+# UNIVERSAL CLASSIFICATION (All Games)
+# ===================================================================
+
+# Primary session type - replaces GameType
+enum SessionMode {
+  CASH
+  TOURNAMENT
+}
+
+# Core poker variant - the base game being played
+enum PokerVariant {
+  # Hold'em family
+  HOLD_EM
+  HOLD_EM_SHORT_DECK
+  
+  # Omaha family - 4 card
+  OMAHA_HI
+  OMAHA_HILO
+  
+  # Omaha family - 5 card
+  OMAHA5_HI
+  OMAHA5_HILO
+  
+  # Omaha family - 6 card
+  OMAHA6_HI
+  OMAHA6_HILO
+  
+  # Stud family
+  STUD_HI
+  STUD_HILO
+  RAZZ
+  
+  # Draw family
+  DRAW_2_7_TRIPLE
+  DRAW_2_7_SINGLE
+  DRAW_5_CARD
+  BADUGI
+  
+  # Mixed games - specific rotations
+  MIXED_HORSE          # Hold'em, Omaha Hi-Lo, Razz, Stud, Stud Hi-Lo
+  MIXED_8GAME          # 2-7 Triple Draw, Hold'em, Omaha Hi-Lo, Razz, Stud, Stud Hi-Lo, NL Hold'em, PLO
+  MIXED_HOSE           # Hold'em, Omaha Hi-Lo, Stud, Stud Hi-Lo
+  MIXED_RASH           # Razz, Stud, Stud Hi-Lo, Hold'em
+  MIXED_DEALERS_CHOICE # Dealer selects game each hand/orbit
+  MIXED_ROTATION       # Custom rotation defined separately
+  MIXED_OTHER          # Other mixed format
+  
+  # Specialty
+  COURCHEVEL           # 5-card Omaha with first flop card dealt pre-flop
+  IRISH               # 4 cards, discard 2 after flop
+  PINEAPPLE           # 3 cards, discard after flop
+  CRAZY_PINEAPPLE     # 3 cards, discard after turn
+  
+  # Fallback
+  OTHER
+  NOT_SPECIFIED
+}
+
+# Betting structure - how betting limits work
+enum BettingStructure {
+  NO_LIMIT        # Bet any amount up to stack
+  POT_LIMIT       # Bet up to pot size
+  FIXED_LIMIT     # Fixed bet sizes per street
+  SPREAD_LIMIT    # Bet within a range (e.g., $2-$10)
+  CAP_LIMIT       # No-limit but capped per hand
+  MIXED_LIMIT     # Varies (e.g., limit pre-flop, NL post)
+}
+
+# Speed of play / blind level duration
+enum SpeedType {
+  SLOW            # 30+ min levels
+  REGULAR         # 15-30 min levels (standard)
+  TURBO           # 8-15 min levels
+  HYPER           # 3-8 min levels
+  SUPER_TURBO     # <3 min levels
+}
+
+# Table size classification
+enum TableSize {
+  HEADS_UP        # 2 players max
+  SHORT_HANDED    # 3-6 players max
+  FULL_RING       # 7-10 players max
+}
+
+# How cards are dealt
+enum DealType {
+  LIVE_DEALER       # Human dealer with manual shuffle
+  AUTO_SHUFFLER     # Human dealer with shuffle machine
+  ELECTRONIC        # Fully electronic table
+  SELF_DEALT        # Players deal (home game style)
+}
+
+# Buy-in tier for segmentation
+# Thresholds are configurable per entity but these are defaults
+enum BuyInTier {
+  FREEROLL        # $0
+  MICRO           # $1-30
+  LOW             # $31-100
+  MID             # $101-300
+  HIGH            # $301-1000
+  SUPER_HIGH      # $1001-5000
+  ULTRA_HIGH      # $5000+
+}
+
+# ===================================================================
+# TOURNAMENT-SPECIFIC CLASSIFICATION
+# ===================================================================
+
+# Primary tournament entry structure - how entries/rebuys work
+# RENAMED from TournamentStructure to avoid conflict with existing @model
+enum EntryStructure {
+  FREEZEOUT           # Single entry, no rebuys
+  SINGLE_REBUY        # One rebuy allowed
+  UNLIMITED_REBUY     # Unlimited rebuys during period
+  RE_ENTRY            # Can re-enter after elimination (new seat)
+  UNLIMITED_RE_ENTRY  # Unlimited re-entries
+  ADD_ON_ONLY         # No rebuys, optional add-on at break
+  REBUY_ADDON         # Rebuys during period + add-on at break
+}
+
+# Bounty/knockout format
+enum BountyType {
+  NONE                # No bounties
+  STANDARD            # Fixed bounty per knockout
+  PROGRESSIVE         # Bounty grows (half kept, half added)
+  MYSTERY             # Random bounty amounts
+  SUPER_KNOCKOUT      # Higher bounty percentage
+  TOTAL_KNOCKOUT      # Entire buy-in is bounty
+}
+
+# Tournament purpose / payout goal
+enum TournamentPurpose {
+  STANDARD            # Normal tournament, cash prizes
+  SATELLITE           # Wins seat to larger tournament
+  MEGA_SATELLITE      # Multiple seats awarded
+  SUPER_SATELLITE     # Large-field satellite
+  QUALIFIER           # Qualifies for future round
+  STEP_SATELLITE      # Multi-step satellite system
+  FREEROLL            # Free entry, real prizes
+  CHARITY             # Charity event
+  LEAGUE_POINTS       # Points-based league event
+  LAST_LONGER         # Side bet - last longest wins
+  PROMOTIONAL         # Promotional/marketing event
+}
+
+# Starting stack depth relative to blinds
+enum StackDepth {
+  SHALLOW         # <30 BB
+  STANDARD        # 30-100 BB
+  DEEP            # 100-200 BB
+  MEGA            # 200-300 BB
+  SUPER           # 300+ BB
+}
+
+# Late registration policy
+enum LateRegistration {
+  NONE            # No late registration
+  STANDARD        # Until end of rebuy period
+  EXTENDED        # Beyond standard (e.g., into Day 2)
+  UNLIMITED       # Until final table / certain point
+}
+
+# Payout structure style
+enum PayoutStructure {
+  STANDARD            # Traditional % tiers
+  FLAT                # Equal payouts for ITM
+  WINNER_TAKE_ALL     # 1st place only
+  FIFTY_FIFTY         # Top 50% paid equally
+  TOP_HEAVY           # Disproportionate to top spots
+  SATELLITE_TICKETS   # Seat packages (non-cash)
+  MILESTONE           # Payouts at specific bust-outs
+  PROGRESSIVE         # Increases as players bust
+}
+
+# How tournament is scheduled
+enum TournamentScheduleType {
+  ONE_OFF             # Single occurrence
+  RECURRING           # Regular schedule (weekly, etc.)
+  SERIES_EVENT        # Part of a tournament series
+  SPECIAL_EVENT       # Holiday/promotional special
+  FESTIVAL_EVENT      # Part of poker festival
+  AD_HOC              # Unscheduled / impromptu
+}
+
+# ===================================================================
+# CASH GAME-SPECIFIC CLASSIFICATION
+# ===================================================================
+
+# Cash game structure type
+enum CashGameType {
+  STANDARD            # Normal cash game
+  CAPPED              # Maximum buy-in cap
+  UNCAPPED            # No maximum buy-in
+  BOMB_POT            # Mandatory bomb pots
+  DOUBLE_BOARD        # Two boards run simultaneously
+  MANDATORY_STRADDLE  # Straddle required
+  STRADDLE_OPTIONAL   # Straddle allowed but optional
+  ANTE_GAME           # Ante instead of/with blinds
+  MUST_MOVE           # Feeder table to main game
+  SHORT_DECK          # 36-card deck version
+}
+
+# Cash game rake type
+# RENAMED from RakeStructure to avoid conflict with existing @model
+enum CashRakeType {
+  NO_RAKE             # No rake (private/promotional)
+  POT_PERCENTAGE      # % of pot, no cap
+  POT_PERCENTAGE_CAPPED  # % of pot with cap
+  TIME_RAKE           # Hourly/half-hourly collection
+  JACKPOT_DROP        # Additional rake for bad beat
+  PROMOTIONAL         # Reduced promotional rake
+  SUBSCRIPTION        # Flat fee membership model
+}
+
+# ===================================================================
+# MIXED GAME SUPPORT
+# ===================================================================
+
+# Individual game in a mixed rotation
+# Used in mixedGameRotation array
+enum MixedGameComponent {
+  NLHE          # No-Limit Hold'em
+  LHE           # Limit Hold'em
+  PLO           # Pot-Limit Omaha
+  PLO8          # Pot-Limit Omaha Hi-Lo
+  LO8           # Limit Omaha Hi-Lo
+  STUD          # Seven Card Stud
+  STUD8         # Seven Card Stud Hi-Lo
+  RAZZ          # Razz
+  TRIPLE_DRAW   # 2-7 Triple Draw
+  SINGLE_DRAW   # 2-7 Single Draw
+  BADUGI        # Badugi
+  NL_DRAW       # No-Limit 2-7 Draw
+  COURCHEVEL    # Courchevel
+  SHORT_DECK    # Short Deck Hold'em
+  BIG_O         # 5-card PLO
+  OTHER         # Other game
+}
+
+# ===================================================================
+# CLASSIFICATION METADATA
+# ===================================================================
+
+# How classification was determined
+enum ClassificationSource {
+  SCRAPED           # Directly from third-party system
+  DERIVED           # Computed from existing fields
+  INFERRED          # Inferred from name/patterns
+  INHERITED         # Inherited from RecurringGame template
+  MANUAL            # Manually set by admin
+  MIGRATED          # Set during data migration
+}

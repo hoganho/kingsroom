@@ -32,7 +32,7 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 
 // Utilities
-import { cx, formatDateTimeAEST, formatCompact } from '@/lib/utils';
+import { formatCompact } from '@/lib/utils';
 import { useSocialAccounts, SocialAccount } from '../../hooks/useSocialAccounts';
 import { useSocialPosts, SocialPost } from '../../hooks/useSocialPosts';
 
@@ -199,7 +199,13 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
   const extendedPost = post as ExtendedSocialPost;
   const isVideoPost = post.postType === 'VIDEO' || !!extendedPost.videoUrl;
   const videoUrl = extendedPost.videoUrl || post.postUrl;
-  const videoThumbnailUrl = extendedPost.videoThumbnailUrl || post.thumbnailUrl || (post.mediaUrls?.[0] as string);
+  
+  // Get media URLs - should be a simple string array from GraphQL
+  const mediaUrls = (post.mediaUrls || []) as string[];
+  const videoThumbnailUrl = extendedPost.videoThumbnailUrl || post.thumbnailUrl || mediaUrls[0];
+  
+  // Content is stored with actual newlines, whitespace-pre-wrap handles display
+  const displayContent = post.content || '';
 
   const handleVideoClick = () => {
     if (isVideoPost && videoUrl) {
@@ -207,7 +213,7 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
     }
   };
 
-  const hasMultipleImages = post.mediaUrls && post.mediaUrls.length > 1;
+  const hasMultipleImages = mediaUrls.length > 1;
 
   return (
     <>
@@ -255,12 +261,12 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
 
         {/* Content */}
         <div className="p-4">
-          {post.content && (
+          {displayContent && (
             <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-               <p className={!isExpanded && post.content.length > 200 ? 'line-clamp-3' : ''}>
-                  {post.content}
+               <p className={`whitespace-pre-wrap ${!isExpanded && displayContent.length > 200 ? 'line-clamp-3' : ''}`}>
+                  {displayContent}
                </p>
-               {post.content.length > 200 && (
+               {displayContent.length > 200 && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
                   className="mt-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
@@ -273,7 +279,7 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
         </div>
 
         {/* Media */}
-        {((post.mediaUrls && post.mediaUrls.length > 0) || isVideoPost) && (
+        {(mediaUrls.length > 0 || isVideoPost) && (
           <div className="px-4 pb-4">
             {isVideoPost ? (
               <div 
@@ -301,7 +307,7 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
               </div>
             ) : (
               <div className={`grid gap-1 ${hasMultipleImages ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                {(post.mediaUrls!.filter(Boolean) as string[]).slice(0, 4).map((url, idx) => (
+                {mediaUrls.slice(0, 4).map((url, idx) => (
                   <div 
                     key={idx} 
                     className={`relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 
@@ -313,10 +319,14 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
                       alt=""
                       className={`w-full ${hasMultipleImages ? 'h-full object-cover' : 'h-auto'}`}
                       loading="lazy"
+                      onError={(e) => {
+                        // Hide broken images
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
                     />
-                    {idx === 3 && post.mediaUrls!.length > 4 && (
+                    {idx === 3 && mediaUrls.length > 4 && (
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                        <span className="text-white text-xl font-bold">+{post.mediaUrls!.length - 4}</span>
+                        <span className="text-white text-xl font-bold">+{mediaUrls.length - 4}</span>
                       </div>
                     )}
                   </div>
@@ -349,36 +359,37 @@ const PostCard: React.FC<{ post: SocialPost }> = ({ post }) => {
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
             >
+              <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" />
               View
-              <ArrowTopRightOnSquareIcon className="w-3 h-3" />
             </a>
           )}
         </div>
       </div>
 
+      {/* Video Modal */}
       {isVideoPost && videoUrl && (
         <VideoModal
           isOpen={showVideoModal}
           onClose={() => setShowVideoModal(false)}
           videoUrl={videoUrl}
-          thumbnailUrl={videoThumbnailUrl || undefined}
-          title={extendedPost.videoTitle || accountName}
+          thumbnailUrl={videoThumbnailUrl}
+          title={displayContent?.substring(0, 50)}
         />
       )}
     </>
   );
 };
 
-const HorizontalScrollRow: React.FC<{ 
-  children: React.ReactNode;
+const HorizontalScrollRow: React.FC<{
   dateLabel: string;
   postCount: number;
-}> = ({ children, dateLabel, postCount }) => {
+  children: React.ReactNode;
+}> = ({ dateLabel, postCount, children }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const checkScrollability = () => {
+  const checkScroll = () => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       setCanScrollLeft(scrollLeft > 0);
@@ -387,9 +398,9 @@ const HorizontalScrollRow: React.FC<{
   };
 
   useEffect(() => {
-    checkScrollability();
-    window.addEventListener('resize', checkScrollability);
-    return () => window.removeEventListener('resize', checkScrollability);
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
   }, [children]);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -399,52 +410,52 @@ const HorizontalScrollRow: React.FC<{
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
       });
-      setTimeout(checkScrollability, 400);
     }
   };
 
   return (
-    <div className="mb-8 relative group">
-      <div className="flex items-center justify-between mb-4 px-1">
+    <div className="relative">
+      {/* Date Header */}
+      <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">{dateLabel}</h3>
-          <Badge variant="neutral" className="rounded-full">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">{dateLabel}</h3>
+            <Badge variant="neutral" className="text-xs">
             {postCount} post{postCount !== 1 ? 's' : ''}
           </Badge>
         </div>
-        
-        <div className="flex items-center gap-2">
-           <Button
-             variant="secondary"
-             size="sm"
-             onClick={() => scroll('left')}
-             disabled={!canScrollLeft}
-             className="h-8 w-8 p-0 rounded-full"
-           >
-             <ChevronLeftIcon className="w-4 h-4" />
-           </Button>
-           <Button
-             variant="secondary"
-             size="sm"
-             onClick={() => scroll('right')}
-             disabled={!canScrollRight}
-             className="h-8 w-8 p-0 rounded-full"
-           >
-             <ChevronRightIcon className="w-4 h-4" />
-           </Button>
-        </div>
       </div>
 
-      <div 
-        ref={scrollRef}
-        onScroll={checkScrollability}
-        className="flex gap-4 overflow-x-auto pb-6 px-1 scrollbar-hide snap-x"
-        style={{ 
-          scrollbarWidth: 'none', 
-          msOverflowStyle: 'none',
-        }}
-      >
-        {children}
+      {/* Scroll Container */}
+      <div className="relative group">
+        {/* Left Arrow */}
+        {canScrollLeft && (
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-gray-800 shadow-lg rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all opacity-0 group-hover:opacity-100"
+          >
+            <ChevronLeftIcon className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Posts Row */}
+        <div
+          ref={scrollRef}
+          onScroll={checkScroll}
+          className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {children}
+        </div>
+
+        {/* Right Arrow */}
+        {canScrollRight && (
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-gray-800 shadow-lg rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all opacity-0 group-hover:opacity-100"
+          >
+            <ChevronRightIcon className="w-5 h-5" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -454,381 +465,315 @@ const HorizontalScrollRow: React.FC<{
 // MAIN COMPONENT
 // ============================================
 
-export const SocialPulse: React.FC = () => {
-  const client = generateClient();
+const SocialPulse: React.FC = () => {
+  const client = useMemo(() => generateClient(), []);
+  
+  // State
+  const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
-  const [showingHistory, setShowingHistory] = useState(false);
-  const filterRef = useRef<HTMLDivElement>(null);
-  
-  // New state for refresh logs
-  const [refreshLogs, setRefreshLogs] = useState<RefreshLog[]>([]);
   const [showRefreshModal, setShowRefreshModal] = useState(false);
-  
-  const { 
-    accounts, 
-    loading: accountsLoading, 
-    fetchAccounts 
-  } = useSocialAccounts({ filterByEntity: false });
-  
-  // PARALLEL FETCH: Prepare list of IDs
-  const allAccountIds = useMemo(() => 
-    accounts.map((a: SocialAccount) => a.id), 
-  [accounts]);
+  const [refreshLogs, setRefreshLogs] = useState<RefreshLog[]>([]);
+  const [showingHistory, setShowingHistory] = useState(false);
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
 
+  // Hooks
+  const { accounts, loading: accountsLoading } = useSocialAccounts({ 
+    filterByEntity: false 
+  });
+  
   const { 
     posts, 
     loading: postsLoading, 
-    refresh: refreshPosts,
-    hasMore,
-    loadMore,
+    fetchPosts,
+    fetchFullHistory,
+    hasMore 
   } = useSocialPosts({ 
-    filterByEntity: false, 
-    accountIds: allAccountIds.length > 0 ? allAccountIds : undefined,
-    daysBack: showingHistory ? undefined : 7,
-    limit: 50,
-    autoFetch: allAccountIds.length > 0 
+    accountIds: selectedAccountIds.length > 0 ? selectedAccountIds : undefined,
+    autoFetch: false,
+    filterByEntity: false,
+    daysBack: showingHistory ? undefined : 7
   });
 
+  // Auto-select all accounts on first load
   useEffect(() => {
-    if (accounts.length > 0 && selectedAccountIds.length === 0) {
-      setSelectedAccountIds(accounts.map((a: SocialAccount) => a.id));
+    if (!accountsLoading && accounts.length > 0 && selectedAccountIds.length === 0) {
+      setSelectedAccountIds(accounts.map(a => a.id));
     }
-  }, [accounts]);
+  }, [accounts, accountsLoading, selectedAccountIds.length]);
 
-  // Click outside listener for filter dropdown
+  // Fetch posts when account selection changes
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-        setIsFilterOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleRefreshAll = async () => {
-    setIsRefreshing(true);
-    setShowRefreshModal(true);
-    setRefreshLogs([]); 
-    
-    const enabledAccounts = accounts.filter((a: SocialAccount) => a.isScrapingEnabled && a.status !== 'ERROR');
-    
-    const initialLogs: RefreshLog[] = enabledAccounts.map(account => ({
-      accountId: account.id,
-      accountName: account.accountName,
-      status: 'pending'
-    }));
-    setRefreshLogs(initialLogs);
-
-    for (const account of enabledAccounts) {
-      try {
-        const response = client.graphql({
-          query: triggerSocialScrape,
-          variables: { socialAccountId: account.id },
-        }) as Promise<any>;
-        
-        await response;
-        
-        setRefreshLogs(prev => prev.map(log => 
-          log.accountId === account.id 
-            ? { ...log, status: 'success', message: 'Scrape triggered successfully' } 
-            : log
-        ));
-        
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-      } catch (err: any) {
-        console.error(`Error scraping ${account.accountName}:`, err);
-
-        let errorMessage = 'Unknown error occurred';
-        if (err.errors && err.errors.length > 0) {
-            const rawMsg = err.errors[0].message;
-            if (rawMsg.includes('Task timed out')) {
-                errorMessage = 'Timeout: Lambda took too long (>25s)';
-            } else {
-                errorMessage = rawMsg;
-            }
-        } else if (err.message) {
-            errorMessage = err.message;
-        }
-
-        setRefreshLogs(prev => prev.map(log => 
-          log.accountId === account.id 
-            ? { ...log, status: 'error', message: errorMessage } 
-            : log
-        ));
-      }
+    if (selectedAccountIds.length > 0) {
+      fetchPosts();
     }
+  }, [selectedAccountIds, fetchPosts]);
 
-    fetchAccounts();
-    refreshPosts();
-    setIsRefreshing(false);
-  };
-
-  const handleLoadHistory = () => {
-    setShowingHistory(true);
-  };
-
-  const handleLoadMore = () => {
-    if (hasMore && loadMore) {
-      loadMore();
-    }
-  };
-
-  const toggleAccountSelection = (id: string) => {
-    setSelectedAccountIds(prev => 
-      prev.includes(id) 
-        ? prev.filter(accId => accId !== id) 
-        : [...prev, id]
-    );
-  };
-
-  const toggleAllSelection = () => {
-    if (selectedAccountIds.length === accounts.length) {
-      setSelectedAccountIds([]);
-    } else {
-      setSelectedAccountIds(accounts.map((a: SocialAccount) => a.id));
-    }
-  };
-
-  const filteredPosts = useMemo(() => {
-    return posts.filter((post: SocialPost) => {
-      const accountId = (post.socialAccount as SocialAccount)?.id || (post.socialAccount as unknown as string);
-      
-      if (selectedAccountIds.length > 0 && accountId && !selectedAccountIds.includes(accountId)) {
-        return false;
-      }
-
-      if (searchQuery && !post.content?.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
-      }
-      
-      return true;
-    });
-  }, [posts, searchQuery, selectedAccountIds]);
-
+  // Group posts by date
   const groupedPosts = useMemo(() => {
-    const sortedPosts = [...filteredPosts].sort((a, b) => {
-      const dateA = a.postedAt ? new Date(a.postedAt).getTime() : 0;
-      const dateB = b.postedAt ? new Date(b.postedAt).getTime() : 0;
+    let filteredPosts = posts;
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filteredPosts = posts.filter(post => 
+        post.content?.toLowerCase().includes(query) ||
+        post.accountName?.toLowerCase().includes(query) ||
+        (post.tags as string[] || []).some(tag => tag.toLowerCase().includes(query))
+      );
+    }
+
+    // Sort by date descending
+    const sorted = [...filteredPosts].sort((a, b) => {
+      const dateA = new Date(a.postedAt || 0).getTime();
+      const dateB = new Date(b.postedAt || 0).getTime();
       return dateB - dateA;
     });
 
-    const groups: Map<string, SocialPost[]> = new Map();
-    
-    for (const post of sortedPosts) {
+    // Group by date
+    const groups = new Map<string, SocialPost[]>();
+    sorted.forEach(post => {
       const dateKey = getDateKey(post.postedAt);
       if (!groups.has(dateKey)) {
         groups.set(dateKey, []);
       }
       groups.get(dateKey)!.push(post);
-    }
-
-    const sortedGroups = Array.from(groups.entries()).sort((a, b) => {
-      if (a[0] === 'unknown') return 1;
-      if (b[0] === 'unknown') return -1;
-      return b[0].localeCompare(a[0]);
     });
 
-    return sortedGroups;
-  }, [filteredPosts]);
+    return Array.from(groups.entries());
+  }, [posts, searchQuery]);
 
-  // Updated logic: We only show "Global Loading" if we are loading AND have zero posts.
-  // This allows the UI to populate progressively.
-  const isGlobalLoading = (accountsLoading || postsLoading) && posts.length === 0;
+  // Handlers
+  const toggleAccountSelection = (accountId: string) => {
+    setSelectedAccountIds(prev => 
+      prev.includes(accountId) 
+        ? prev.filter(id => id !== accountId)
+        : [...prev, accountId]
+    );
+  };
+
+  const handleRefreshAll = async () => {
+    if (selectedAccountIds.length === 0) return;
+
+    setIsRefreshing(true);
+    setShowRefreshModal(true);
+    setRefreshLogs(selectedAccountIds.map(id => ({
+      accountId: id,
+      accountName: accounts.find(a => a.id === id)?.accountName || 'Unknown',
+      status: 'pending'
+    })));
+
+    for (const accountId of selectedAccountIds) {
+      try {
+        const result = await client.graphql({
+          query: triggerSocialScrape,
+          variables: { socialAccountId: accountId }
+        }) as any;
+
+        const data = result.data?.triggerSocialScrape;
+        setRefreshLogs(prev => prev.map(log => 
+          log.accountId === accountId 
+            ? { 
+                ...log, 
+                status: data?.success ? 'success' : 'error',
+                message: data?.message || (data?.success ? `Found ${data.newPostsAdded} new posts` : 'Failed')
+              }
+            : log
+        ));
+      } catch (error) {
+        setRefreshLogs(prev => prev.map(log => 
+          log.accountId === accountId 
+            ? { ...log, status: 'error', message: 'Request failed' }
+            : log
+        ));
+      }
+    }
+
+    setIsRefreshing(false);
+    // Refresh posts after scraping
+    setTimeout(() => fetchPosts(), 1000);
+  };
+
+  const handleLoadHistory = () => {
+    setShowingHistory(true);
+    fetchFullHistory();
+  };
+
+  const handleLoadMore = () => {
+    // Not implemented yet for parallel fetch
+  };
+
+  const isGlobalLoading = accountsLoading || (postsLoading && posts.length === 0);
 
   return (
     <>
-      <div className="space-y-6">
-        <style>{`
-            .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-            }
-            .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            }
-        `}</style>
-        
-        {/* Page Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-50 sm:text-2xl">
-                Social Pulse
-                </h1>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Live feed from Facebook and Instagram
-                </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Social Pulse</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">
+              {posts.length} posts from {selectedAccountIds.length} account{selectedAccountIds.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Search */}
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search posts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 w-64"
+              />
             </div>
-            
-            <div className="flex items-center gap-3">
-                <span className="hidden sm:inline-block text-xs text-gray-400 dark:text-gray-500">
-                    Updated: {formatDateTimeAEST(new Date())}
-                </span>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRefreshAll}
-                    disabled={isRefreshing}
-                    className="h-8 w-8 p-0 border border-gray-200 dark:border-gray-800"
-                    title="Refresh All"
-                >
-                    <ArrowPathIcon className={cx("h-4 w-4", isRefreshing && "animate-spin")} />
-                </Button>
-            </div>
-        </div>
 
-        {/* Controls - Aligned Right */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-            
-            {/* Search & Local Filter */}
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="flex-1 sm:w-64">
-                    <Input
-                        type="search" 
-                        placeholder="Search posts..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
+            {/* Refresh Button */}
+            <Button
+              onClick={handleRefreshAll}
+              disabled={isRefreshing || selectedAccountIds.length === 0}
+              variant="secondary"
+            >
+              {isRefreshing ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <ArrowPathIcon className="w-4 h-4 mr-2" />
+              )}
+              Refresh
+            </Button>
 
-                <div className="relative" ref={filterRef}>
-                    <Button
-                        variant="secondary"
-                        onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className={cx(
-                            "flex items-center gap-2",
-                            (isFilterOpen || selectedAccountIds.length !== accounts.length) && "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400"
-                        )}
-                    >
-                        <FunnelIcon className="h-4 w-4" />
-                        <span className="hidden sm:inline">Accounts</span>
-                        <Badge variant="default" className="ml-1 rounded-full px-1.5 py-0">
-                            {selectedAccountIds.length}
-                        </Badge>
-                    </Button>
+            {/* Account Selector */}
+            <div className="relative">
+              <Button
+                onClick={() => setShowAccountDropdown(!showAccountDropdown)}
+                variant="secondary"
+              >
+                <FunnelIcon className="w-4 h-4 mr-2" />
+                Accounts ({selectedAccountIds.length})
+              </Button>
 
-                    {isFilterOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-800 z-50 overflow-hidden">
-                            <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
-                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Filter Accounts</span>
-                                <button 
-                                    onClick={toggleAllSelection} 
-                                    className="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
-                                >
-                                    {selectedAccountIds.length === accounts.length ? 'Unselect All' : 'Select All'}
-                                </button>
+              {showAccountDropdown && (
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 z-50 max-h-96 overflow-hidden">
+                  <div className="p-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Account</span>
+                      <button 
+                        onClick={() => setSelectedAccountIds(accounts.map(a => a.id))}
+                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >
+                        Select All
+                      </button>
+                    </div>
+                  </div>
+                  <div className="max-h-72 overflow-y-auto">
+                    {accountsLoading ? (
+                      <div className="p-4 text-center text-gray-500">Loading...</div>
+                    ) : (
+                      accounts.map((account: SocialAccount) => (
+                        <button
+                          key={account.id}
+                          onClick={() => toggleAccountSelection(account.id)}
+                          className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center justify-between group transition-colors border-b border-gray-50 dark:border-gray-800/50 last:border-0"
+                        >
+                          <div className="flex items-center gap-3 truncate">
+                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                              <PlatformIcon platform={account.platform} className="w-3.5 h-3.5" />
                             </div>
-                            <div className="max-h-64 overflow-y-auto">
-                                {accounts.length === 0 ? (
-                                    <div className="px-4 py-3 text-sm text-gray-500 text-center">No accounts found</div>
-                                ) : (
-                                    accounts.map((account: SocialAccount) => (
-                                        <button
-                                            key={account.id}
-                                            onClick={() => toggleAccountSelection(account.id)}
-                                            className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center justify-between group transition-colors border-b border-gray-50 dark:border-gray-800/50 last:border-0"
-                                        >
-                                            <div className="flex items-center gap-3 truncate">
-                                                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                                                    <PlatformIcon platform={account.platform} className="w-3.5 h-3.5" />
-                                                </div>
-                                                <span className={`text-sm truncate ${selectedAccountIds.includes(account.id) ? 'text-gray-900 dark:text-gray-50 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>
-                                                    {account.accountName}
-                                                </span>
-                                            </div>
-                                            {selectedAccountIds.includes(account.id) && (
-                                                <CheckCircleIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
-                                            )}
-                                        </button>
-                                    ))
-                                )}
-                            </div>
-                        </div>
+                            <span className={`text-sm truncate ${selectedAccountIds.includes(account.id) ? 'text-gray-900 dark:text-gray-50 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>
+                              {account.accountName}
+                            </span>
+                          </div>
+                          {selectedAccountIds.includes(account.id) && (
+                            <CheckCircleIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                          )}
+                        </button>
+                      ))
                     )}
+                  </div>
                 </div>
+              )}
             </div>
+          </div>
         </div>
 
         {/* Content Feed */}
         {isGlobalLoading ? (
-            <div className="flex flex-col items-center justify-center py-40">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mt-6">Refreshing Social Feed</h3>
-                <p className="text-gray-500 dark:text-gray-400 mt-2">Gathering the latest posts...</p>
-            </div>
+          <div className="flex flex-col items-center justify-center py-40">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mt-6">Refreshing Social Feed</h3>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">Gathering the latest posts...</p>
+          </div>
         ) : (
-            <>
-                <div className="space-y-2">
-                    {groupedPosts.length === 0 ? (
-                        <div className="text-center py-24 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
-                            <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">No posts found</h3>
-                            <p className="text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
-                                {searchQuery 
-                                    ? `No results found for "${searchQuery}".` 
-                                    : "No posts available. Try refreshing or loading history."}
-                            </p>
-                            {!showingHistory && selectedAccountIds.length > 0 && !searchQuery && (
-                                <Button 
-                                    onClick={handleLoadHistory}
-                                    variant="secondary"
-                                    className="mt-6"
-                                >
-                                    <ClockIcon className="w-4 h-4 mr-2" />
-                                    Load Older Posts
-                                </Button>
-                            )}
-                        </div>
-                    ) : (
-                        <>
-                            {groupedPosts.map(([dateKey, dayPosts]) => (
-                                <HorizontalScrollRow 
-                                    key={dateKey} 
-                                    dateLabel={formatDateLabel(dateKey)}
-                                    postCount={dayPosts.length}
-                                >
-                                    {dayPosts.map((post: SocialPost) => (
-                                        <PostCard key={post.id} post={post} />
-                                    ))}
-                                </HorizontalScrollRow>
-                            ))}
-
-                            {/* Load History / More Buttons */}
-                            <div className="flex justify-center pt-8 pb-12">
-                                {!showingHistory ? (
-                                    <Button 
-                                        onClick={handleLoadHistory}
-                                        variant="secondary"
-                                        size="lg"
-                                        className="rounded-full shadow-sm"
-                                    >
-                                        <ClockIcon className="w-4 h-4 mr-2" />
-                                        Load posts older than 7 days
-                                    </Button>
-                                ) : hasMore && !postsLoading ? (
-                                    <Button 
-                                        onClick={handleLoadMore}
-                                        variant="secondary"
-                                        size="lg"
-                                        className="rounded-full shadow-sm"
-                                    >
-                                        <ArrowPathIcon className="w-4 h-4 mr-2" />
-                                        Load more posts
-                                    </Button>
-                                ) : postsLoading && (
-                                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-                                )}
-                            </div>
-                        </>
-                    )}
+          <>
+            <div className="space-y-2">
+              {groupedPosts.length === 0 ? (
+                <div className="text-center py-24 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
+                  <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">No posts found</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
+                    {searchQuery 
+                      ? `No results found for "${searchQuery}".` 
+                      : "No posts available. Try refreshing or loading history."}
+                  </p>
+                  {!showingHistory && selectedAccountIds.length > 0 && !searchQuery && (
+                    <Button 
+                      onClick={handleLoadHistory}
+                      variant="secondary"
+                      className="mt-6"
+                    >
+                      <ClockIcon className="w-4 h-4 mr-2" />
+                      Load Older Posts
+                    </Button>
+                  )}
                 </div>
-            </>
+              ) : (
+                <>
+                  {groupedPosts.map(([dateKey, dayPosts]) => (
+                    <HorizontalScrollRow 
+                      key={dateKey} 
+                      dateLabel={formatDateLabel(dateKey)}
+                      postCount={dayPosts.length}
+                    >
+                      {dayPosts.map((post: SocialPost) => (
+                        <PostCard key={post.id} post={post} />
+                      ))}
+                    </HorizontalScrollRow>
+                  ))}
+
+                  {/* Load History / More Buttons */}
+                  <div className="flex justify-center pt-8 pb-12">
+                    {!showingHistory ? (
+                      <Button 
+                        onClick={handleLoadHistory}
+                        variant="secondary"
+                        size="lg"
+                        className="rounded-full shadow-sm"
+                      >
+                        <ClockIcon className="w-4 h-4 mr-2" />
+                        Load posts older than 7 days
+                      </Button>
+                    ) : hasMore && !postsLoading ? (
+                      <Button 
+                        onClick={handleLoadMore}
+                        variant="secondary"
+                        size="lg"
+                        className="rounded-full shadow-sm"
+                      >
+                        <ArrowPathIcon className="w-4 h-4 mr-2" />
+                        Load more posts
+                      </Button>
+                    ) : postsLoading && (
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </>
         )}
       </div>
 
@@ -910,4 +855,4 @@ export const SocialPulse: React.FC = () => {
   );
 };
 
-export default SocialPulse;
+export { SocialPulse };

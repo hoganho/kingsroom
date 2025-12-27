@@ -239,6 +239,61 @@ const createVenueMutation = /* GraphQL */ `
 `;
 
 // ===================================================================
+// HELPER: Extract valid data from GraphQL response with errors
+// ===================================================================
+
+interface GraphQLResponseWithErrors<T> {
+  data?: T;
+  errors?: Array<{
+    message: string;
+    path?: (string | number)[];
+  }>;
+}
+
+/**
+ * Extracts valid items from a GraphQL list response that may contain errors.
+ * GraphQL returns partial data when some items fail validation (e.g., null non-nullable fields).
+ * This function filters out the invalid items that caused errors.
+ */
+function extractValidItems<T extends { id?: string }>(
+  response: GraphQLResponseWithErrors<any>,
+  dataPath: string,
+  itemsKey: string = 'items'
+): T[] {
+  // Get the items array from the response data
+  const items: (T | null)[] = response.data?.[dataPath]?.[itemsKey] || [];
+  
+  // If there are no errors, return all items
+  if (!response.errors || response.errors.length === 0) {
+    return items.filter((item): item is T => item !== null);
+  }
+  
+  // Build a set of invalid item indices from error paths
+  // Error paths look like: ['listTournamentSeries', 'items', 1, 'tournamentSeriesTitleId']
+  const invalidIndices = new Set<number>();
+  
+  for (const error of response.errors) {
+    if (error.path && error.path.length >= 3) {
+      // Check if the error is for this data path
+      if (error.path[0] === dataPath && error.path[1] === itemsKey) {
+        const index = error.path[2];
+        if (typeof index === 'number') {
+          invalidIndices.add(index);
+          console.warn(`[Context] Skipping invalid ${dataPath} item at index ${index}: ${error.message}`);
+        }
+      }
+    }
+  }
+  
+  // Filter out invalid items
+  return items.filter((item, index): item is T => {
+    if (item === null) return false;
+    if (invalidIndices.has(index)) return false;
+    return true;
+  });
+}
+
+// ===================================================================
 // CONTEXT
 // ===================================================================
 
@@ -354,22 +409,46 @@ export const SaveConfirmationProvider: React.FC<SaveConfirmationProviderProps> =
           client.graphql({ query: listSeriesTitlesQuery, variables: { limit: 500 } }) as any,
         ]);
         
-        setEntities(entitiesRes.data.listEntities?.items || []);
-        setVenues(venuesRes.data.listVenues?.items || []);
-        setSeries(seriesRes.data.listTournamentSeries?.items || []);
-        setSeriesTitles(titlesRes.data.listTournamentSeriesTitles?.items || []);
+        // Handle entities (simple case - usually no errors)
+        setEntities(entitiesRes.data?.listEntities?.items || []);
+        
+        // Handle venues (simple case - usually no errors)
+        setVenues(venuesRes.data?.listVenues?.items || []);
+        
+        // Handle series - this may have partial errors due to null tournamentSeriesTitleId
+        // Use the helper to extract only valid items
+        if (seriesRes.errors && seriesRes.errors.length > 0) {
+          console.warn('[Context] TournamentSeries query returned with errors (some items have invalid data):', 
+            seriesRes.errors.length, 'errors');
+          const validSeries = extractValidItems<TournamentSeries>(
+            seriesRes, 
+            'listTournamentSeries'
+          );
+          console.log('[Context] Loaded', validSeries.length, 'valid TournamentSeries records');
+          setSeries(validSeries);
+        } else {
+          setSeries(seriesRes.data?.listTournamentSeries?.items || []);
+        }
+        
+        // Handle series titles (simple case - usually no errors)
+        setSeriesTitles(titlesRes.data?.listTournamentSeriesTitles?.items || []);
         
         // Load venue name if we have a venueId
         const venueId = editedData.venueId || initialVenueId;
         if (venueId) {
-          const venueRes = await client.graphql({
-            query: getVenueQuery,
-            variables: { id: venueId },
-          }) as any;
-          
-          if (venueRes.data.getVenue) {
-            setVenueName(venueRes.data.getVenue.name);
-            setVenueFee(venueRes.data.getVenue.fee || null);
+          try {
+            const venueRes = await client.graphql({
+              query: getVenueQuery,
+              variables: { id: venueId },
+            }) as any;
+            
+            if (venueRes.data?.getVenue) {
+              setVenueName(venueRes.data.getVenue.name);
+              setVenueFee(venueRes.data.getVenue.fee || null);
+            }
+          } catch (venueError) {
+            console.warn('[Context] Error loading venue details:', venueError);
+            // Non-critical, continue without venue details
           }
         }
         
@@ -380,7 +459,8 @@ export const SaveConfirmationProvider: React.FC<SaveConfirmationProviderProps> =
         }
         
       } catch (error) {
-        console.error('[Context] Error loading initial data:', error);
+        // This catch block now only handles complete failures, not partial errors
+        console.error('[Context] Critical error loading initial data:', error);
       } finally {
         setInitialLoading(false);
       }
@@ -406,7 +486,7 @@ export const SaveConfirmationProvider: React.FC<SaveConfirmationProviderProps> =
         },
       }) as any;
       
-      setRecurringGames(response.data.listRecurringGames?.items || []);
+      setRecurringGames(response.data?.listRecurringGames?.items || []);
     } catch (error) {
       console.error('[Context] Error loading recurring games:', error);
       setRecurringGames([]);

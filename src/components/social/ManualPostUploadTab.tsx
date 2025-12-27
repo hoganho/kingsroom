@@ -1,7 +1,8 @@
 // src/components/social/ManualPostUploadTab.tsx
-// FINAL VERSION - All TypeScript errors fixed
+// UPDATED: Integrated Lambda processing with upload_only / upload_process flows
+// Similar to scraper's scrape_only / scrape_save pattern
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   FolderOpenIcon,
   ArrowUpTrayIcon,
@@ -15,35 +16,143 @@ import {
   HeartIcon,
   ShareIcon,
   DocumentTextIcon,
+  InformationCircleIcon,
+  MegaphoneIcon,
+  CloudArrowUpIcon,
+  LinkIcon,
+  CogIcon,
+  PlayIcon,
+  EyeIcon,
 } from '@heroicons/react/24/outline';
 import { Loader2 } from 'lucide-react';
 
-import { useSocialPostUpload } from '../../hooks/useSocialPostUpload';
-import { getConfidenceBadge } from '../../utils/socialPostParser';
-import type { ReviewablePost } from '../../types/socialPostUpload';
-import type { SocialAccount } from '../../API';
+// Hooks
+import { useSocialPostUpload, ReviewablePostWithAttachments } from '../../hooks/useSocialPostUpload';
+import { useSocialPostProcessor } from '../../hooks/useSocialPostProcessor';
+
+// Components
+import { SocialPostProcessingModal } from './SocialPostProcessingModal';
+
+// Types
+import type { 
+  PostType, 
+  ProcessingFlow, 
+  ProcessingOptions,
+  ProcessingResultSummary,
+  ContentType,
+} from '../../types/socialPostUpload';
+import { 
+  DEFAULT_PROCESSING_OPTIONS,
+  getContentTypeInfo,
+  getConfidenceBadge,
+} from '../../types/socialPostUpload';
+import type { SocialAccount, ProcessSocialPostResult, SocialPostProcessingStatus } from '../../API';
+
+// ===================================================================
+// TYPES
+// ===================================================================
 
 interface ManualPostUploadTabProps {
   accounts: SocialAccount[];
-  entities: Array<{ id: string; entityName: string }>;
+  entities?: Array<{ id: string; entityName: string }>;
+  venues?: Array<{ id: string; name: string }>;
 }
+
+// ===================================================================
+// SUB-COMPONENTS
+// ===================================================================
+
+// Post Type Badge - shows AFTER Lambda processing
+const ProcessedTypeBadge: React.FC<{ 
+  result: ProcessingResultSummary;
+}> = ({ result }) => {
+  const typeInfo = getContentTypeInfo(result.contentType);
+  const confidenceBadge = getConfidenceBadge(result.confidence);
+  
+  return (
+    <div className="flex items-center gap-2">
+      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${typeInfo.bgColor} ${typeInfo.color}`}>
+        <span className="mr-1">{typeInfo.icon}</span>
+        {typeInfo.label}
+      </span>
+      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${confidenceBadge.color}`}>
+        {result.confidence}%
+      </span>
+      {result.matchCount > 0 && (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+          <LinkIcon className="w-3 h-3 mr-1" />
+          {result.matchCount} match{result.matchCount !== 1 ? 'es' : ''}
+        </span>
+      )}
+      {result.linksCreated > 0 && (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          ✓ Linked
+        </span>
+      )}
+    </div>
+  );
+};
+
+// Pending Badge - shows BEFORE Lambda processing (using client-side hints)
+const PendingTypeBadge: React.FC<{ 
+  postType: PostType; 
+  confidence: number;
+}> = ({ postType, confidence }) => {
+  const typeInfo = getContentTypeInfo(postType as ContentType);
+  
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border opacity-60 ${typeInfo.bgColor} ${typeInfo.color}`}>
+      <span className="mr-1">{typeInfo.icon}</span>
+      {typeInfo.label}
+      <span className="ml-1 text-gray-500">({confidence}%)</span>
+      <span className="ml-1 text-gray-400 italic">pending</span>
+    </span>
+  );
+};
+
+// Attachment Preview Component
+const AttachmentPreview: React.FC<{ files: File[] }> = ({ files }) => {
+  const [previewUrls, setPreviewUrls] = React.useState<string[]>([]);
+  
+  React.useEffect(() => {
+    const urls = files.slice(0, 4).map(file => URL.createObjectURL(file));
+    setPreviewUrls(urls);
+    return () => { urls.forEach(url => URL.revokeObjectURL(url)); };
+  }, [files]);
+  
+  if (files.length === 0) return null;
+  
+  return (
+    <div className="mt-2">
+      <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
+        <PhotoIcon className="w-3.5 h-3.5" />
+        <span>{files.length} attachment{files.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div className="flex gap-1">
+        {previewUrls.map((url, idx) => (
+          <div key={idx} className="relative w-12 h-12 rounded overflow-hidden bg-gray-100">
+            <img src={url} alt={`Attachment ${idx + 1}`} className="w-full h-full object-cover" />
+            {idx === 3 && files.length > 4 && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <span className="text-white text-xs font-bold">+{files.length - 4}</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 // Post Preview Card Component
 const PostPreviewCard: React.FC<{
-  post: ReviewablePost;
+  post: ReviewablePostWithAttachments;
   isSelected: boolean;
   onToggleSelect: () => void;
   onToggleExpand: () => void;
-}> = ({ post, isSelected, onToggleSelect, onToggleExpand }) => {
-  const confidenceBadge = getConfidenceBadge(post.confidence);
-  
-  const badgeColors = {
-    success: 'bg-green-100 text-green-800 border-green-200',
-    warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    error: 'bg-red-100 text-red-800 border-red-200',
-    default: 'bg-gray-100 text-gray-800 border-gray-200',
-  };
-  
+  onPreview?: () => void;
+  showPreviewButton?: boolean;
+}> = ({ post, isSelected, onToggleSelect, onToggleExpand, onPreview, showPreviewButton }) => {
   const statusColors = {
     pending: 'bg-gray-100 text-gray-600',
     uploading: 'bg-blue-100 text-blue-600',
@@ -52,10 +161,22 @@ const PostPreviewCard: React.FC<{
     skipped: 'bg-yellow-100 text-yellow-600',
   };
   
+  const processingColors = {
+    pending: 'bg-gray-100 text-gray-600',
+    processing: 'bg-blue-100 text-blue-600',
+    success: 'bg-green-100 text-green-600',
+    error: 'bg-red-100 text-red-600',
+    skipped: 'bg-yellow-100 text-yellow-600',
+  };
+  
+  const hasAttachments = post.attachmentFiles && post.attachmentFiles.length > 0;
+  const hasProcessingResult = !!post._processingResult;
+  const isProcessed = post._processingStatus === 'success';
+  
   return (
     <div className={`border rounded-lg p-4 transition-all ${
       isSelected ? 'border-indigo-500 bg-indigo-50/30' : 'border-gray-200 bg-white'
-    } ${post._uploadStatus === 'success' ? 'opacity-60' : ''}`}>
+    } ${post._uploadStatus === 'success' && !isProcessed ? 'opacity-80' : ''}`}>
       {/* Header Row */}
       <div className="flex items-start gap-3">
         {/* Selection Checkbox */}
@@ -78,11 +199,18 @@ const PostPreviewCard: React.FC<{
               {post.author.name}
             </span>
             
-            {/* Tournament Result Badge */}
-            {post.isTournamentResult && (
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${badgeColors[confidenceBadge.variant]}`}>
-                <TrophyIcon className="w-3 h-3 mr-1" />
-                {confidenceBadge.label} ({post.confidence}%)
+            {/* Type Badge - show processed result or pending indicator */}
+            {hasProcessingResult ? (
+              <ProcessedTypeBadge result={post._processingResult!} />
+            ) : (
+              <PendingTypeBadge postType={post.postType} confidence={post.confidence} />
+            )}
+            
+            {/* Attachments indicator */}
+            {hasAttachments && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800 border border-cyan-200">
+                <CloudArrowUpIcon className="w-3 h-3 mr-1" />
+                {post.attachmentFiles!.length} image{post.attachmentFiles!.length !== 1 ? 's' : ''}
               </span>
             )}
             
@@ -91,12 +219,34 @@ const PostPreviewCard: React.FC<{
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[post._uploadStatus]}`}>
                 {post._uploadStatus === 'success' && <CheckCircleIcon className="w-3 h-3 mr-1" />}
                 {post._uploadStatus === 'error' && <ExclamationCircleIcon className="w-3 h-3 mr-1" />}
+                {post._uploadStatus === 'uploading' && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
                 {post._uploadStatus}
               </span>
             )}
             
-            {/* Tags */}
-            {post.venueMatch && (
+            {/* Processing Status */}
+            {post._processingStatus && post._processingStatus !== 'success' && (
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${processingColors[post._processingStatus]}`}>
+                {post._processingStatus === 'processing' && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
+                {post._processingStatus === 'error' && <ExclamationCircleIcon className="w-3 h-3 mr-1" />}
+                {post._processingStatus}
+              </span>
+            )}
+            
+            {/* Errors */}
+            {post._uploadError && (
+              <span className="text-xs text-red-600 truncate max-w-xs" title={post._uploadError}>
+                {post._uploadError}
+              </span>
+            )}
+            {post._processingError && (
+              <span className="text-xs text-red-600 truncate max-w-xs" title={post._processingError}>
+                {post._processingError}
+              </span>
+            )}
+            
+            {/* Venue Match (from client-side parsing) */}
+            {post.venueMatch && !hasProcessingResult && (
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                 📍 {post.venueMatch.name}
               </span>
@@ -118,10 +268,15 @@ const PostPreviewCard: React.FC<{
             </button>
           )}
           
-          {/* Extracted Data (when expanded or is tournament result) */}
-          {(post.isExpanded || post.isTournamentResult) && post.placements.length > 0 && (
+          {/* Attachment Preview */}
+          {hasAttachments && (
+            <AttachmentPreview files={post.attachmentFiles!} />
+          )}
+          
+          {/* Extracted Data (from client-side parsing - shown when expanded) */}
+          {(post.isExpanded || post.isTournamentResult) && post.placements.length > 0 && !hasProcessingResult && (
             <div className="mt-3 p-2 bg-gray-50 rounded-md">
-              <h4 className="text-xs font-semibold text-gray-700 mb-1">Extracted Results:</h4>
+              <h4 className="text-xs font-semibold text-gray-700 mb-1">Extracted Results (preview):</h4>
               <div className="space-y-1">
                 {post.placements.slice(0, 5).map((p, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm">
@@ -136,7 +291,6 @@ const PostPreviewCard: React.FC<{
                 ))}
               </div>
               
-              {/* Additional metadata */}
               <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-500">
                 {post.entriesCount && <span>📊 {post.entriesCount} entries</span>}
                 {post.prizePoolAmount && <span>💰 ${post.prizePoolAmount.toLocaleString()} pool</span>}
@@ -146,7 +300,20 @@ const PostPreviewCard: React.FC<{
             </div>
           )}
           
-          {/* Bottom Row: Engagement Stats & Images */}
+          {/* Processing Result Details (when processed) */}
+          {hasProcessingResult && post._processingResult!.suggestedGameName && (
+            <div className="mt-3 p-2 bg-green-50 rounded-md border border-green-200">
+              <h4 className="text-xs font-semibold text-green-700 mb-1">Matched Game:</h4>
+              <div className="text-sm text-green-800">
+                {post._processingResult!.suggestedGameName}
+                <span className="ml-2 text-green-600">
+                  ({post._processingResult!.bestMatchConfidence}% confidence)
+                </span>
+              </div>
+            </div>
+          )}
+          
+          {/* Bottom Row: Engagement Stats */}
           <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
             <span className="flex items-center gap-1">
               <HeartIcon className="w-4 h-4" />
@@ -166,6 +333,17 @@ const PostPreviewCard: React.FC<{
                 {post.imageCount}
               </span>
             )}
+            
+            {/* Preview button */}
+            {showPreviewButton && onPreview && (
+              <button
+                onClick={onPreview}
+                className="ml-auto flex items-center gap-1 text-indigo-600 hover:text-indigo-800"
+              >
+                <EyeIcon className="w-4 h-4" />
+                Preview
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -173,23 +351,50 @@ const PostPreviewCard: React.FC<{
   );
 };
 
-// Main Component
+// ===================================================================
+// MAIN COMPONENT
+// ===================================================================
+
 export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
   accounts,
-  entities,
+  entities = [],
+  venues = [],
 }) => {
-  // Selected account and entity
+  // =========================================================================
+  // STATE
+  // =========================================================================
+  
+  // Account & overrides
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [selectedEntityId, setSelectedEntityId] = useState<string>('');
-  const [showFilters, setShowFilters] = useState(false);
+  const [selectedVenueId, setSelectedVenueId] = useState<string>('');
   
-  // Initialize hook
+  // UI state
+  const [showFilters, setShowFilters] = useState(false);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [showProcessingOptions, setShowProcessingOptions] = useState(false);
+  
+  // Processing flow (NEW - like scraper's scrape_only/scrape_save)
+  const [processingFlow, setProcessingFlow] = useState<ProcessingFlow>('upload_only');
+  const [processingOptions, setProcessingOptions] = useState<ProcessingOptions>(DEFAULT_PROCESSING_OPTIONS);
+  
+  // Modal state
+  const [processingModalOpen, setProcessingModalOpen] = useState(false);
+  const [currentModalResult, setCurrentModalResult] = useState<ProcessSocialPostResult | null>(null);
+  const [currentModalPost, setCurrentModalPost] = useState<ReviewablePostWithAttachments | null>(null);
+  
+  // =========================================================================
+  // HOOKS
+  // =========================================================================
+  
+  // Upload hook (existing)
   const {
     reviewablePosts,
     isLoading,
     isUploading,
     error,
     uploadProgress,
+    accountContext,
     loadPostsFromFiles,
     clearPosts,
     selectedPosts,
@@ -197,6 +402,7 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
     selectAll,
     deselectAll,
     selectTournamentResults,
+    // selectByType, // Available but not currently used
     filterOptions,
     setFilterOptions,
     sortOptions,
@@ -207,12 +413,65 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
     updatePostField,
   } = useSocialPostUpload({
     socialAccountId: selectedAccountId,
-    entityId: selectedEntityId,
+    entityId: selectedEntityId || undefined,
+    venueId: selectedVenueId || undefined,
   });
   
-  // File input ref
+  // Processor hook (NEW)
+  const processor = useSocialPostProcessor();
+  
+  // File input refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+  
+  // =========================================================================
+  // COMPUTED VALUES
+  // =========================================================================
+  
+  // const selectedAccount = accounts.find(a => a.id === selectedAccountId);
+  
+  const attachmentStats = useMemo(() => {
+    const postsWithAttachments = reviewablePosts.filter(
+      p => p.attachmentFiles && p.attachmentFiles.length > 0
+    );
+    const totalAttachments = postsWithAttachments.reduce(
+      (sum, p) => sum + (p.attachmentFiles?.length || 0),
+      0
+    );
+    const selectedWithAttachments = reviewablePosts.filter(
+      p => selectedPosts.has(p.postId) && p.attachmentFiles && p.attachmentFiles.length > 0
+    );
+    const selectedAttachments = selectedWithAttachments.reduce(
+      (sum, p) => sum + (p.attachmentFiles?.length || 0),
+      0
+    );
+    
+    return {
+      postsWithAttachments: postsWithAttachments.length,
+      totalAttachments,
+      selectedWithAttachments: selectedWithAttachments.length,
+      selectedAttachments,
+    };
+  }, [reviewablePosts, selectedPosts]);
+  
+  // Processing stats
+  const processingStats = useMemo(() => {
+    const processed = reviewablePosts.filter(p => p._processingStatus === 'success');
+    const linked = processed.filter(p => p._processingResult?.linksCreated && p._processingResult.linksCreated > 0);
+    const results = processed.filter(p => p._processingResult?.contentType === 'RESULT');
+    
+    return {
+      processedCount: processed.length,
+      linkedCount: linked.length,
+      resultCount: results.length,
+    };
+  }, [reviewablePosts]);
+  
+  const isProcessing = isUploading || processor.isProcessing;
+  
+  // =========================================================================
+  // HANDLERS
+  // =========================================================================
   
   // Handle file selection
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -221,26 +480,228 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
     }
   }, [loadPostsFromFiles]);
   
-  // Handle upload
+  // Handle upload with optional processing
   const handleUpload = useCallback(async () => {
-    if (!selectedAccountId || !selectedEntityId) {
-      alert('Please select a Social Account and Entity first');
+    if (!selectedAccountId) {
+      alert('Please select a Social Account first');
       return;
     }
     
-    const result = await uploadSelectedPosts({
-      onlyTournamentResults: filterOptions.showOnlyTournamentResults,
+    console.log('[ManualPostUpload] Starting upload with flow:', processingFlow);
+    console.log('[ManualPostUpload] Processing options:', processingOptions);
+    
+    // Step 1: Upload posts
+    const uploadResult = await uploadSelectedPosts({
+      includeResults: filterOptions.showResults,
+      includePromotional: filterOptions.showPromotional,
+      includeGeneral: filterOptions.showGeneral,
       minConfidence: filterOptions.minConfidence,
       createGameRecords: false,
     });
     
-    alert(
-      `Upload Complete!\n\n` +
-      `✅ Success: ${result.successCount}\n` +
-      `⏭️ Skipped: ${result.skippedCount}\n` +
-      `❌ Errors: ${result.errorCount}`
-    );
-  }, [selectedAccountId, selectedEntityId, uploadSelectedPosts, filterOptions]);
+    console.log('[ManualPostUpload] Upload result:', uploadResult);
+    
+    const successfulUploads = uploadResult.results.filter(r => r.success && r.socialPostId);
+    console.log('[ManualPostUpload] Successful uploads with IDs:', successfulUploads);
+    
+    // Step 2: If upload_process flow, process each uploaded post
+    if (processingFlow === 'upload_process' && successfulUploads.length > 0) {
+      console.log('[ManualPostUpload] Starting Lambda processing for', successfulUploads.length, 'posts');
+      let totalLinksCreated = 0;
+      let processedCount = 0;
+      let errorCount = 0;
+      
+      for (let i = 0; i < successfulUploads.length; i++) {
+        const upload = successfulUploads[i];
+        if (!upload.socialPostId) continue;
+        
+        // Find the original post for context
+        const originalPost = reviewablePosts.find(p => p.postId === upload.postId);
+        
+        // Update processing status
+        if (originalPost) {
+          updatePostField(originalPost.postId, '_processingStatus', 'processing');
+        }
+        
+        try {
+          // Process the post via Lambda
+          console.log('[ManualPostUpload] Calling processSinglePost for:', upload.socialPostId);
+          const result = await processor.processSinglePost({
+            socialPostId: upload.socialPostId,
+            forceReprocess: processingOptions.forceReprocess,
+            skipMatching: processingOptions.skipMatching,
+            skipLinking: processingOptions.skipLinking,
+            matchThreshold: processingOptions.matchThreshold,
+          });
+          
+          console.log('[ManualPostUpload] Process result:', result);
+          
+          if (result.success) {
+            processedCount++;
+            totalLinksCreated += result.linksCreated || 0;
+            
+            // Update post with processing result
+            if (originalPost) {
+              const summary: ProcessingResultSummary = {
+                contentType: (result.extractedGameData?.contentType as ContentType) || 'GENERAL',
+                confidence: result.extractedGameData?.contentTypeConfidence || 0,
+                matchCount: result.matchCandidates?.length || 0,
+                bestMatchConfidence: result.primaryMatch?.matchConfidence || 0,
+                linksCreated: result.linksCreated || 0,
+                placementsExtracted: result.placementsExtracted || 0,
+                suggestedGameId: result.primaryMatch?.gameId ?? undefined,
+                suggestedGameName: result.primaryMatch?.gameName ?? undefined,
+              };
+              
+              updatePostField(originalPost.postId, '_processingStatus', 'success');
+              updatePostField(originalPost.postId, '_processingResult', summary);
+              updatePostField(originalPost.postId, '_matchCandidates', result.matchCandidates);
+              
+              // If has matches but no auto-links, show modal for review
+              if (!processingOptions.skipLinking && 
+                  result.linksCreated === 0 && 
+                  result.matchCandidates && 
+                  result.matchCandidates.length > 0) {
+                setCurrentModalResult(result);
+                setCurrentModalPost(originalPost);
+                setProcessingModalOpen(true);
+                
+                // Wait for modal to close before continuing
+                // (In production, use a promise-based modal pattern)
+                await new Promise(resolve => setTimeout(resolve, 100));
+              }
+            }
+          } else {
+            errorCount++;
+            if (originalPost) {
+              updatePostField(originalPost.postId, '_processingStatus', 'error');
+              updatePostField(originalPost.postId, '_processingError', result.error || 'Processing failed');
+            }
+          }
+        } catch (err) {
+          errorCount++;
+          if (originalPost) {
+            updatePostField(originalPost.postId, '_processingStatus', 'error');
+            updatePostField(originalPost.postId, '_processingError', 
+              err instanceof Error ? err.message : 'Processing failed'
+            );
+          }
+        }
+      }
+      
+      // Show final summary
+      alert(
+        `Upload & Process Complete!\n\n` +
+        `📤 Uploaded: ${uploadResult.successCount}\n` +
+        `⚙️ Processed: ${processedCount}\n` +
+        `🔗 Links Created: ${totalLinksCreated}\n` +
+        `❌ Errors: ${uploadResult.errorCount + errorCount}\n` +
+        (uploadResult.errors.length > 0 ? `\nFirst error: ${uploadResult.errors[0]?.error}` : '')
+      );
+    } else {
+      // Upload only - show simple summary
+      const totalAttachmentsUploaded = reviewablePosts
+        .filter(p => selectedPosts.has(p.postId) && p.attachmentFiles && p.attachmentFiles.length > 0)
+        .reduce((sum, p) => sum + (p.attachmentFiles?.length || 0), 0);
+      
+      alert(
+        `Upload Complete!\n\n` +
+        `✅ Success: ${uploadResult.successCount}\n` +
+        `⏭️ Skipped: ${uploadResult.skippedCount}\n` +
+        `❌ Errors: ${uploadResult.errorCount}\n` +
+        (totalAttachmentsUploaded > 0 ? `📷 Images uploaded: ${totalAttachmentsUploaded}\n` : '') +
+        (uploadResult.errors.length > 0 ? `\nFirst error: ${uploadResult.errors[0]?.error}` : '')
+      );
+    }
+  }, [
+    selectedAccountId, 
+    uploadSelectedPosts, 
+    filterOptions, 
+    processingFlow, 
+    processingOptions,
+    reviewablePosts, 
+    selectedPosts,
+    processor,
+    updatePostField,
+  ]);
+  
+  // Handle preview for a single post (before upload) - calls Lambda without saving
+  const handlePreviewPost = useCallback(async (post: ReviewablePostWithAttachments) => {
+    console.log('[ManualPostUpload] Previewing post:', post.postId);
+    
+    try {
+      // Call Lambda preview - no database save, just extraction + matching
+      const result = await processor.previewContent({
+        content: post.content,
+        postedAt: post.postedAt,
+        platform: 'FACEBOOK',
+        entityId: selectedEntityId || accountContext?.entityId || undefined,
+        venueId: selectedVenueId || accountContext?.venueId || undefined,
+        url: post.url,
+      });
+      
+      console.log('[ManualPostUpload] Preview result:', result);
+      
+      setCurrentModalResult(result);
+      setCurrentModalPost(post);
+      setProcessingModalOpen(true);
+      
+    } catch (err) {
+      console.error('[ManualPostUpload] Preview error:', err);
+      
+      // Fallback to client-side data if Lambda fails
+      const fallbackResult: ProcessSocialPostResult = {
+        __typename: 'ProcessSocialPostResult',
+        success: false,
+        socialPostId: null,
+        processingStatus: 'FAILED' as SocialPostProcessingStatus,
+        error: err instanceof Error ? err.message : 'Preview failed',
+        warnings: ['Using client-side preview due to Lambda error'],
+        extractedGameData: {
+          __typename: 'SocialPostGameData',
+          id: 'preview',
+          socialPostId: post.postId,
+          contentType: post.postType as any,
+          contentTypeConfidence: post.confidence,
+          extractedBuyIn: post.buyInAmount || undefined,
+          extractedPrizePool: post.prizePoolAmount || undefined,
+          extractedTotalEntries: post.entriesCount || undefined,
+          extractedWinnerName: post.placements[0]?.name,
+          extractedWinnerPrize: post.placements[0]?.prize || undefined,
+          placementCount: post.placements.length,
+          extractedAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        } as any,
+        placementsExtracted: post.placements.length,
+        matchCandidates: [],
+      };
+      
+      setCurrentModalResult(fallbackResult);
+      setCurrentModalPost(post);
+      setProcessingModalOpen(true);
+    }
+  }, [processor, selectedEntityId, selectedVenueId, accountContext]);
+  
+  // Handle manual link from modal
+  const handleLinkToGame = useCallback(async (gameId: string, isPrimary?: boolean) => {
+    if (!currentModalResult?.socialPostId) {
+      throw new Error('No social post ID available');
+    }
+    
+    return processor.linkToGame({
+      socialPostId: currentModalResult.socialPostId,
+      gameId,
+      isPrimaryGame: isPrimary,
+    });
+  }, [currentModalResult, processor]);
+  
+  // Handle modal close
+  const handleCloseModal = useCallback(() => {
+    setProcessingModalOpen(false);
+    setCurrentModalResult(null);
+    setCurrentModalPost(null);
+  }, []);
   
   // Toggle expand for a post
   const handleToggleExpand = useCallback((postId: string) => {
@@ -249,209 +710,470 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
     );
   }, [updatePostField, reviewablePosts]);
   
+  // =========================================================================
+  // RENDER
+  // =========================================================================
+  
   return (
     <div className="space-y-6">
-      {/* Header Section */}
+      {/* ================================================================= */}
+      {/* HEADER SECTION */}
+      {/* ================================================================= */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           Manual Post Upload
         </h2>
         
         <p className="text-sm text-gray-600 mb-6">
-          Upload scraped Facebook posts from the Chrome extension. Posts will be analyzed 
-          to detect tournament results automatically.
+          Upload scraped Facebook posts from the Chrome extension. Posts will be 
+          {processingFlow === 'upload_process' 
+            ? ' uploaded and automatically processed to extract data and match to games.'
+            : ' uploaded for later processing.'}
         </p>
         
-        {/* Account & Entity Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Social Account
+        {/* Account Selection (Required) */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Social Account <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={selectedAccountId}
+            onChange={(e) => {
+              setSelectedAccountId(e.target.value);
+              setSelectedEntityId('');
+              setSelectedVenueId('');
+            }}
+            className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          >
+            <option value="">Select account...</option>
+            {accounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.accountName} ({account.platform})
+                {account.businessLocation ? ` — ${account.businessLocation}` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        {/* Account Context Info */}
+        {accountContext && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="flex items-start gap-2">
+              <InformationCircleIcon className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+              <div className="text-sm">
+                <p className="font-medium text-blue-800">Account Context</p>
+                <p className="text-blue-700">
+                  Posts will be linked to <strong>{accountContext.accountName}</strong>
+                  {accountContext.businessLocation && ` (${accountContext.businessLocation})`}
+                </p>
+                {(accountContext.entityId || accountContext.venueId) && (
+                  <p className="text-blue-600 text-xs mt-1">
+                    {accountContext.entityId && '✓ Entity linked from account'}
+                    {accountContext.entityId && accountContext.venueId && ' • '}
+                    {accountContext.venueId && '✓ Venue linked from account'}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* ================================================================= */}
+        {/* PROCESSING FLOW SELECTOR (NEW) */}
+        {/* ================================================================= */}
+        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <CogIcon className="w-4 h-4" />
+            Processing Flow
+          </h4>
+          <div className="flex gap-6">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="radio"
+                name="processingFlow"
+                value="upload_only"
+                checked={processingFlow === 'upload_only'}
+                onChange={() => setProcessingFlow('upload_only')}
+                className="mt-1 w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+              />
+              <div>
+                <div className="font-medium text-gray-900">Upload Only</div>
+                <div className="text-xs text-gray-500">
+                  Save posts to database. Process and match to games later.
+                </div>
+              </div>
             </label>
-            <select
-              value={selectedAccountId}
-              onChange={(e) => setSelectedAccountId(e.target.value)}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            >
-              <option value="">Select account...</option>
-              {accounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.accountName} ({account.platform})
-                </option>
-              ))}
-            </select>
+            
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="radio"
+                name="processingFlow"
+                value="upload_process"
+                checked={processingFlow === 'upload_process'}
+                onChange={() => setProcessingFlow('upload_process')}
+                className="mt-1 w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+              />
+              <div>
+                <div className="font-medium text-gray-900 flex items-center gap-2">
+                  Upload + Process
+                  <span className="px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded">
+                    Recommended
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  Upload, extract data, match to games, and auto-link high confidence matches.
+                </div>
+              </div>
+            </label>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Entity
-            </label>
-            <select
-              value={selectedEntityId}
-              onChange={(e) => setSelectedEntityId(e.target.value)}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          {/* Processing Options (when upload_process selected) */}
+          {processingFlow === 'upload_process' && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => setShowProcessingOptions(!showProcessingOptions)}
+                className="text-sm text-indigo-600 hover:text-indigo-800"
+              >
+                {showProcessingOptions ? '− Hide' : '+ Show'} processing options
+              </button>
+              
+              {showProcessingOptions && (
+                <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={!processingOptions.skipLinking}
+                      onChange={(e) => setProcessingOptions(prev => ({ 
+                        ...prev, 
+                        skipLinking: !e.target.checked 
+                      }))}
+                      className="w-4 h-4 rounded text-indigo-600"
+                    />
+                    <span className="text-sm text-gray-700">Auto-link matches</span>
+                  </label>
+                  
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-700">Threshold:</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={processingOptions.matchThreshold}
+                      onChange={(e) => setProcessingOptions(prev => ({
+                        ...prev,
+                        matchThreshold: parseInt(e.target.value) || 80
+                      }))}
+                      className="w-16 px-2 py-1 border rounded text-sm"
+                    />
+                    <span className="text-sm text-gray-500">%</span>
+                  </div>
+                  
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={!processingOptions.skipMatching}
+                      onChange={(e) => setProcessingOptions(prev => ({ 
+                        ...prev, 
+                        skipMatching: !e.target.checked 
+                      }))}
+                      className="w-4 h-4 rounded text-indigo-600"
+                    />
+                    <span className="text-sm text-gray-700">Match to games</span>
+                  </label>
+                  
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={processingOptions.forceReprocess || false}
+                      onChange={(e) => setProcessingOptions(prev => ({ 
+                        ...prev, 
+                        forceReprocess: e.target.checked 
+                      }))}
+                      className="w-4 h-4 rounded text-indigo-600"
+                    />
+                    <span className="text-sm text-gray-700">Force reprocess</span>
+                  </label>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        
+        {/* Advanced Options Toggle */}
+        {(entities.length > 0 || venues.length > 0) && (
+          <div className="mb-4">
+            <button
+              onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+              className="text-sm text-indigo-600 hover:text-indigo-800"
             >
-              <option value="">Select entity...</option>
-              {entities.map((entity) => (
-                <option key={entity.id} value={entity.id}>
-                  {entity.entityName}
-                </option>
-              ))}
-            </select>
+              {showAdvancedOptions ? '− Hide' : '+ Show'} entity/venue overrides
+            </button>
+          </div>
+        )}
+        
+        {/* Optional Entity/Venue Overrides */}
+        {showAdvancedOptions && (
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-md">
+            {entities.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Override Entity (optional)
+                </label>
+                <select
+                  value={selectedEntityId}
+                  onChange={(e) => setSelectedEntityId(e.target.value)}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                >
+                  <option value="">Use account default</option>
+                  {entities.map((entity) => (
+                    <option key={entity.id} value={entity.id}>
+                      {entity.entityName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
+            {venues.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Override Venue (optional)
+                </label>
+                <select
+                  value={selectedVenueId}
+                  onChange={(e) => setSelectedVenueId(e.target.value)}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                >
+                  <option value="">Use account default</option>
+                  {venues.map((venue) => (
+                    <option key={venue.id} value={venue.id}>
+                      {venue.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Upload Zone */}
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors">
+          <FolderOpenIcon className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+          <p className="text-sm text-gray-600 mb-4">
+            Drop folders containing scraped posts or click to browse
+          </p>
+          
+          <div className="flex justify-center gap-3">
+            {/* Folder Upload */}
+            <label className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
+              <FolderOpenIcon className="w-4 h-4 mr-2" />
+              Select Folder
+              <input
+                ref={folderInputRef}
+                type="file"
+                className="hidden"
+                webkitdirectory="true"
+                directory=""
+                multiple
+                onChange={handleFileSelect}
+              />
+            </label>
+            
+            {/* JSON File Upload */}
+            <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+              <DocumentTextIcon className="w-4 h-4 mr-2" />
+              Select JSON File
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                multiple
+                onChange={handleFileSelect}
+              />
+            </label>
           </div>
         </div>
         
-        {/* File Upload Area */}
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileSelect}
-            accept=".json"
-            multiple
-            className="hidden"
-          />
-          <input
-            type="file"
-            ref={folderInputRef}
-            onChange={handleFileSelect}
-            webkitdirectory=""
-            directory=""
-            multiple
-            className="hidden"
-          />
-          
-          <FolderOpenIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-semibold text-gray-900">
-            Upload Scraped Posts
-          </h3>
-          <p className="mt-1 text-xs text-gray-500">
-            Select post.json files or a folder containing scraped posts
-          </p>
-          
-          <div className="mt-4 flex justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isLoading}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <DocumentTextIcon className="w-4 h-4 mr-2" />
-              Select Files
-            </button>
-            <button
-              type="button"
-              onClick={() => folderInputRef.current?.click()}
-              disabled={isLoading}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <FolderOpenIcon className="w-4 h-4 mr-2" />
-              Select Folder
-            </button>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="mt-4 flex items-center justify-center gap-2 text-indigo-600">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Processing files...</span>
           </div>
-        </div>
+        )}
+        
+        {/* Error Display */}
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+            {error}
+          </div>
+        )}
       </div>
       
-      {/* Loading State */}
-      {isLoading && (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-600" />
-          <p className="mt-2 text-sm text-gray-600">Analyzing posts...</p>
-        </div>
-      )}
-      
-      {/* Error State */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-          <ExclamationCircleIcon className="w-5 h-5 text-red-500" />
-          <p className="text-sm text-red-700">{error}</p>
-        </div>
-      )}
-      
-      {/* Stats & Actions Bar */}
+      {/* ================================================================= */}
+      {/* STATS SUMMARY */}
+      {/* ================================================================= */}
       {stats && stats.totalPosts > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            {/* Stats */}
-            <div className="flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-700">Total:</span>
-                <span className="text-gray-600">{stats.totalPosts}</span>
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Loaded Posts
+              {processingStats.processedCount > 0 && (
+                <span className="ml-2 text-sm font-normal text-gray-500">
+                  ({processingStats.processedCount} processed)
+                </span>
+              )}
+            </h3>
+            
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                showFilters 
+                  ? 'bg-indigo-100 text-indigo-700' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <FunnelIcon className="w-4 h-4 mr-1" />
+              Filters
+            </button>
+          </div>
+          
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
+            <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+              <div className="flex items-center gap-2 text-green-700">
+                <TrophyIcon className="w-5 h-5" />
+                <span className="font-medium">Results</span>
               </div>
-              <div className="flex items-center gap-2">
-                <TrophyIcon className="w-4 h-4 text-yellow-500" />
-                <span className="font-medium text-gray-700">Tournament Results:</span>
-                <span className="text-green-600 font-semibold">{stats.tournamentResults}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-700">Other:</span>
-                <span className="text-gray-600">{stats.otherPosts}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-700">Selected:</span>
-                <span className="text-indigo-600 font-semibold">{selectedPosts.size}</span>
-              </div>
+              <p className="text-2xl font-bold text-green-800 mt-1">{stats.tournamentResults}</p>
             </div>
             
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-              >
-                <FunnelIcon className="w-4 h-4 mr-1" />
-                Filters
-              </button>
-              
-              <div className="border-l border-gray-300 h-6 mx-2" />
-              
-              <button
-                onClick={selectTournamentResults}
-                className="text-sm text-indigo-600 hover:text-indigo-800"
-              >
-                Select Results
-              </button>
-              <button
-                onClick={selectAll}
-                className="text-sm text-indigo-600 hover:text-indigo-800"
-              >
-                Select All
-              </button>
-              <button
-                onClick={deselectAll}
-                className="text-sm text-gray-600 hover:text-gray-800"
-              >
-                Clear
-              </button>
-              
-              <div className="border-l border-gray-300 h-6 mx-2" />
-              
-              <button
-                onClick={clearPosts}
-                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200"
-              >
-                <TrashIcon className="w-4 h-4 mr-1" />
-                Clear All
-              </button>
+            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+              <div className="flex items-center gap-2 text-blue-700">
+                <MegaphoneIcon className="w-5 h-5" />
+                <span className="font-medium">Promo</span>
+              </div>
+              <p className="text-2xl font-bold text-blue-800 mt-1">{stats.promotionalPosts}</p>
             </div>
+            
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+              <div className="flex items-center gap-2 text-gray-700">
+                <DocumentTextIcon className="w-5 h-5" />
+                <span className="font-medium">General</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-800 mt-1">{stats.generalPosts}</p>
+            </div>
+            
+            <div className="bg-cyan-50 rounded-lg p-3 border border-cyan-200">
+              <div className="flex items-center gap-2 text-cyan-700">
+                <PhotoIcon className="w-5 h-5" />
+                <span className="font-medium">Images</span>
+              </div>
+              <p className="text-2xl font-bold text-cyan-800 mt-1">{attachmentStats.totalAttachments}</p>
+              <p className="text-xs text-cyan-600">{attachmentStats.postsWithAttachments} posts</p>
+            </div>
+            
+            <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
+              <div className="flex items-center gap-2 text-purple-700">
+                <LinkIcon className="w-5 h-5" />
+                <span className="font-medium">Linked</span>
+              </div>
+              <p className="text-2xl font-bold text-purple-800 mt-1">{processingStats.linkedCount}</p>
+            </div>
+            
+            <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+              <div className="flex items-center gap-2 text-yellow-700">
+                <ChatBubbleLeftIcon className="w-5 h-5" />
+                <span className="font-medium">Skipped</span>
+              </div>
+              <p className="text-2xl font-bold text-yellow-800 mt-1">{stats.skippedComments}</p>
+            </div>
+          </div>
+          
+          {/* Selection Summary */}
+          <div className="flex items-center gap-4 text-sm">
+            <span className="text-gray-600">
+              <strong>{selectedPosts.size}</strong> selected
+              {attachmentStats.selectedAttachments > 0 && (
+                <span className="text-cyan-600 ml-1">
+                  ({attachmentStats.selectedAttachments} images)
+                </span>
+              )}
+            </span>
+            
+            <div className="flex-1 border-t border-gray-200" />
+            
+            <button
+              onClick={selectTournamentResults}
+              className="text-sm text-indigo-600 hover:text-indigo-800"
+            >
+              Select Results Only
+            </button>
+            <button
+              onClick={selectAll}
+              className="text-sm text-indigo-600 hover:text-indigo-800"
+            >
+              Select All
+            </button>
+            <button
+              onClick={deselectAll}
+              className="text-sm text-gray-600 hover:text-gray-800"
+            >
+              Clear
+            </button>
+            
+            <div className="border-l border-gray-300 h-6 mx-2" />
+            
+            <button
+              onClick={clearPosts}
+              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200"
+            >
+              <TrashIcon className="w-4 h-4 mr-1" />
+              Clear All
+            </button>
           </div>
           
           {/* Filters Panel */}
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={filterOptions.showOnlyTournamentResults}
-                    onChange={(e) => setFilterOptions({ showOnlyTournamentResults: e.target.checked })}
-                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="text-sm text-gray-700">Tournament results only</span>
-                </label>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                {/* Type Filters */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Post Types</label>
+                  <div className="space-y-1">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={filterOptions.showResults}
+                        onChange={(e) => setFilterOptions({ showResults: e.target.checked })}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-sm text-gray-700">🏆 Results</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={filterOptions.showPromotional}
+                        onChange={(e) => setFilterOptions({ showPromotional: e.target.checked })}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-sm text-gray-700">📣 Promotional</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={filterOptions.showGeneral}
+                        onChange={(e) => setFilterOptions({ showGeneral: e.target.checked })}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-sm text-gray-700">📝 General</span>
+                    </label>
+                  </div>
+                </div>
                 
                 <div>
-                  <label className="text-sm text-gray-700">Min Confidence</label>
+                  <label className="text-sm font-medium text-gray-700">Min Confidence</label>
                   <select
                     value={filterOptions.minConfidence}
                     onChange={(e) => setFilterOptions({ minConfidence: parseInt(e.target.value) })}
@@ -465,12 +1187,28 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
                 </div>
                 
                 <div>
-                  <label className="text-sm text-gray-700">Sort By</label>
+                  <label className="text-sm font-medium text-gray-700">Has Venue</label>
                   <select
-                    value={sortOptions.field}
-                    onChange={(e) => setSortOptions({ ...sortOptions, field: e.target.value as 'confidence' | 'postedAt' | 'engagement' | 'prizeAmount' })}
+                    value={filterOptions.hasVenueMatch === null ? '' : filterOptions.hasVenueMatch.toString()}
+                    onChange={(e) => setFilterOptions({ 
+                      hasVenueMatch: e.target.value === '' ? null : e.target.value === 'true' 
+                    })}
                     className="mt-1 block w-full rounded-md border-gray-300 text-sm"
                   >
+                    <option value="">Any</option>
+                    <option value="true">Has venue</option>
+                    <option value="false">No venue</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Sort By</label>
+                  <select
+                    value={sortOptions.field}
+                    onChange={(e) => setSortOptions({ ...sortOptions, field: e.target.value as typeof sortOptions.field })}
+                    className="mt-1 block w-full rounded-md border-gray-300 text-sm"
+                  >
+                    <option value="postType">Post Type</option>
                     <option value="confidence">Confidence</option>
                     <option value="postedAt">Date</option>
                     <option value="engagement">Engagement</option>
@@ -479,7 +1217,7 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
                 </div>
                 
                 <div>
-                  <label className="text-sm text-gray-700">Search</label>
+                  <label className="text-sm font-medium text-gray-700">Search</label>
                   <input
                     type="text"
                     value={filterOptions.searchText}
@@ -494,7 +1232,9 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
         </div>
       )}
       
-      {/* Posts List */}
+      {/* ================================================================= */}
+      {/* POSTS LIST */}
+      {/* ================================================================= */}
       {filteredPosts.length > 0 && (
         <div className="space-y-3">
           {filteredPosts.map((post) => (
@@ -504,42 +1244,115 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
               isSelected={selectedPosts.has(post.postId)}
               onToggleSelect={() => togglePostSelection(post.postId)}
               onToggleExpand={() => handleToggleExpand(post.postId)}
+              onPreview={() => handlePreviewPost(post)}
+              showPreviewButton={true}  // Always show - preview works without saving
             />
           ))}
         </div>
       )}
       
-      {/* Upload Button */}
+      {/* Empty State */}
+      {stats && stats.totalPosts > 0 && filteredPosts.length === 0 && (
+        <div className="bg-gray-50 rounded-lg border border-gray-200 p-8 text-center">
+          <p className="text-gray-500">No posts match the current filters</p>
+          <button
+            onClick={() => setFilterOptions({ 
+              showResults: true, 
+              showPromotional: true, 
+              showGeneral: true,
+              minConfidence: 0,
+              hasVenueMatch: null,
+              searchText: '',
+            })}
+            className="mt-2 text-sm text-indigo-600 hover:text-indigo-800"
+          >
+            Reset filters
+          </button>
+        </div>
+      )}
+      
+      {/* ================================================================= */}
+      {/* UPLOAD BUTTON (Sticky Footer) */}
+      {/* ================================================================= */}
       {selectedPosts.size > 0 && (
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 -mx-6 -mb-6 flex items-center justify-between">
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 -mx-6 -mb-6 flex items-center justify-between shadow-lg">
           <div className="text-sm text-gray-600">
             {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''} selected
+            {attachmentStats.selectedAttachments > 0 && (
+              <span className="text-cyan-600 ml-1">
+                ({attachmentStats.selectedAttachments} image{attachmentStats.selectedAttachments !== 1 ? 's' : ''})
+              </span>
+            )}
+            {!selectedAccountId && (
+              <span className="text-amber-600 ml-2">
+                — Select a Social Account to upload
+              </span>
+            )}
           </div>
           
           <button
             onClick={handleUpload}
-            disabled={isUploading || !selectedAccountId || !selectedEntityId}
-            className="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isProcessing || !selectedAccountId}
+            className={`inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+              processingFlow === 'upload_process'
+                ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
+                : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
+            }`}
           >
-            {isUploading ? (
+            {isProcessing ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Uploading {uploadProgress?.current}/{uploadProgress?.total}...
+                {uploadProgress?.stage || `Processing ${uploadProgress?.current}/${uploadProgress?.total}...`}
               </>
             ) : (
               <>
-                <ArrowUpTrayIcon className="w-4 h-4 mr-2" />
-                Upload Selected Posts
+                {processingFlow === 'upload_process' ? (
+                  <>
+                    <PlayIcon className="w-4 h-4 mr-2" />
+                    Upload + Process
+                  </>
+                ) : (
+                  <>
+                    <ArrowUpTrayIcon className="w-4 h-4 mr-2" />
+                    Upload Only
+                  </>
+                )}
               </>
             )}
           </button>
         </div>
       )}
+      
+      {/* ================================================================= */}
+      {/* PROCESSING MODAL */}
+      {/* ================================================================= */}
+      {processingModalOpen && currentModalResult && (
+        <SocialPostProcessingModal
+          isOpen={processingModalOpen}
+          onClose={handleCloseModal}
+          result={currentModalResult}
+          postContent={currentModalPost?.content}
+          postDate={currentModalPost?.postedAt}
+          postUrl={currentModalPost?.url}
+          onLinkToGame={handleLinkToGame}
+          onReprocess={() => {
+            // For preview mode (no socialPostId), re-call previewContent
+            if (!currentModalResult?.socialPostId && currentModalPost) {
+              handlePreviewPost(currentModalPost);
+            } else if (currentModalResult?.socialPostId) {
+              processor.processSinglePost({
+                socialPostId: currentModalResult.socialPostId,
+                forceReprocess: true,
+              });
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
 
-// Add these attributes to the folder input
+// Add webkitdirectory attribute support
 declare module 'react' {
   interface InputHTMLAttributes<T> {
     webkitdirectory?: string;

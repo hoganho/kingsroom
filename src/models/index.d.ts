@@ -420,6 +420,43 @@ export enum ScheduledPostStatus {
   CANCELLED = "CANCELLED"
 }
 
+export enum SocialPostContentType {
+  RESULT = "RESULT",
+  PROMOTIONAL = "PROMOTIONAL",
+  GENERAL = "GENERAL",
+  COMMENT = "COMMENT"
+}
+
+export enum SocialPostProcessingStatus {
+  PENDING = "PENDING",
+  PROCESSING = "PROCESSING",
+  EXTRACTED = "EXTRACTED",
+  MATCHED = "MATCHED",
+  LINKED = "LINKED",
+  FAILED = "FAILED",
+  SKIPPED = "SKIPPED",
+  MANUAL_REVIEW = "MANUAL_REVIEW",
+  PREVIEW = "PREVIEW"
+}
+
+export enum SocialPostLinkType {
+  AUTO_MATCHED = "AUTO_MATCHED",
+  MANUAL_LINKED = "MANUAL_LINKED",
+  VERIFIED = "VERIFIED",
+  REJECTED = "REJECTED",
+  TOURNAMENT_ID = "TOURNAMENT_ID"
+}
+
+export enum NonCashPrizeType {
+  ACCUMULATOR_TICKET = "ACCUMULATOR_TICKET",
+  TOURNAMENT_ENTRY = "TOURNAMENT_ENTRY",
+  SATELLITE_TICKET = "SATELLITE_TICKET",
+  BOUNTY_TICKET = "BOUNTY_TICKET",
+  MERCHANDISE = "MERCHANDISE",
+  POINTS = "POINTS",
+  OTHER = "OTHER"
+}
+
 export enum BackgroundTaskType {
   VENUE_REASSIGNMENT = "VENUE_REASSIGNMENT",
   BULK_VENUE_REASSIGNMENT = "BULK_VENUE_REASSIGNMENT",
@@ -3084,6 +3121,214 @@ export declare type SocialScrapeResult = LazyLoading extends LazyLoadingDisabled
 
 export declare const SocialScrapeResult: (new (init: ModelInit<SocialScrapeResult>) => SocialScrapeResult)
 
+type EagerSocialPostNonCashPrize = {
+  readonly prizeType: NonCashPrizeType | keyof typeof NonCashPrizeType;
+  readonly description?: string | null;
+  readonly estimatedValue?: number | null;
+  readonly rawText?: string | null;
+  readonly targetTournamentName?: string | null;
+  readonly targetTournamentBuyIn?: number | null;
+  readonly ticketType?: string | null;
+  readonly ticketQuantity?: number | null;
+}
+
+type LazySocialPostNonCashPrize = {
+  readonly prizeType: NonCashPrizeType | keyof typeof NonCashPrizeType;
+  readonly description?: string | null;
+  readonly estimatedValue?: number | null;
+  readonly rawText?: string | null;
+  readonly targetTournamentName?: string | null;
+  readonly targetTournamentBuyIn?: number | null;
+  readonly ticketType?: string | null;
+  readonly ticketQuantity?: number | null;
+}
+
+export declare type SocialPostNonCashPrize = LazyLoading extends LazyLoadingDisabled ? EagerSocialPostNonCashPrize : LazySocialPostNonCashPrize
+
+export declare const SocialPostNonCashPrize: (new (init: ModelInit<SocialPostNonCashPrize>) => SocialPostNonCashPrize)
+
+type EagerProcessSocialPostResult = {
+  readonly success: boolean;
+  readonly socialPostId?: string | null;
+  readonly processingStatus?: SocialPostProcessingStatus | keyof typeof SocialPostProcessingStatus | null;
+  readonly error?: string | null;
+  readonly warnings?: string[] | null;
+  readonly extractedGameData?: SocialPostGameData | null;
+  readonly placementsExtracted?: number | null;
+  readonly matchCandidates?: GameMatchCandidate[] | null;
+  readonly primaryMatch?: GameMatchCandidate | null;
+  readonly linksCreated?: number | null;
+  readonly linksSkipped?: number | null;
+  readonly linkDetails?: SocialPostGameLink[] | null;
+  readonly processingTimeMs?: number | null;
+}
+
+type LazyProcessSocialPostResult = {
+  readonly success: boolean;
+  readonly socialPostId?: string | null;
+  readonly processingStatus?: SocialPostProcessingStatus | keyof typeof SocialPostProcessingStatus | null;
+  readonly error?: string | null;
+  readonly warnings?: string[] | null;
+  readonly extractedGameData: AsyncItem<SocialPostGameData | undefined>;
+  readonly placementsExtracted?: number | null;
+  readonly matchCandidates?: GameMatchCandidate[] | null;
+  readonly primaryMatch?: GameMatchCandidate | null;
+  readonly linksCreated?: number | null;
+  readonly linksSkipped?: number | null;
+  readonly linkDetails: AsyncCollection<SocialPostGameLink>;
+  readonly processingTimeMs?: number | null;
+}
+
+export declare type ProcessSocialPostResult = LazyLoading extends LazyLoadingDisabled ? EagerProcessSocialPostResult : LazyProcessSocialPostResult
+
+export declare const ProcessSocialPostResult: (new (init: ModelInit<ProcessSocialPostResult>) => ProcessSocialPostResult)
+
+type EagerGameMatchCandidate = {
+  readonly gameId: string;
+  readonly gameName?: string | null;
+  readonly gameDate?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly entityId?: string | null;
+  readonly buyIn?: number | null;
+  readonly guaranteeAmount?: number | null;
+  readonly totalEntries?: number | null;
+  readonly matchConfidence: number;
+  readonly matchReason?: string | null;
+  readonly matchSignals?: string | null;
+  readonly rank?: number | null;
+  readonly isPrimaryMatch?: boolean | null;
+  readonly wouldAutoLink?: boolean | null;
+  readonly rejectionReason?: string | null;
+}
+
+type LazyGameMatchCandidate = {
+  readonly gameId: string;
+  readonly gameName?: string | null;
+  readonly gameDate?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly entityId?: string | null;
+  readonly buyIn?: number | null;
+  readonly guaranteeAmount?: number | null;
+  readonly totalEntries?: number | null;
+  readonly matchConfidence: number;
+  readonly matchReason?: string | null;
+  readonly matchSignals?: string | null;
+  readonly rank?: number | null;
+  readonly isPrimaryMatch?: boolean | null;
+  readonly wouldAutoLink?: boolean | null;
+  readonly rejectionReason?: string | null;
+}
+
+export declare type GameMatchCandidate = LazyLoading extends LazyLoadingDisabled ? EagerGameMatchCandidate : LazyGameMatchCandidate
+
+export declare const GameMatchCandidate: (new (init: ModelInit<GameMatchCandidate>) => GameMatchCandidate)
+
+type EagerProcessBatchResult = {
+  readonly success: boolean;
+  readonly totalProcessed: number;
+  readonly successCount: number;
+  readonly failedCount: number;
+  readonly skippedCount: number;
+  readonly results?: ProcessSocialPostResult[] | null;
+  readonly totalLinksCreated?: number | null;
+  readonly totalExtractionsDone?: number | null;
+  readonly averageConfidence?: number | null;
+  readonly processingTimeMs?: number | null;
+}
+
+type LazyProcessBatchResult = {
+  readonly success: boolean;
+  readonly totalProcessed: number;
+  readonly successCount: number;
+  readonly failedCount: number;
+  readonly skippedCount: number;
+  readonly results?: ProcessSocialPostResult[] | null;
+  readonly totalLinksCreated?: number | null;
+  readonly totalExtractionsDone?: number | null;
+  readonly averageConfidence?: number | null;
+  readonly processingTimeMs?: number | null;
+}
+
+export declare type ProcessBatchResult = LazyLoading extends LazyLoadingDisabled ? EagerProcessBatchResult : LazyProcessBatchResult
+
+export declare const ProcessBatchResult: (new (init: ModelInit<ProcessBatchResult>) => ProcessBatchResult)
+
+type EagerSocialPostMatchingStats = {
+  readonly totalPosts: number;
+  readonly processedPosts: number;
+  readonly linkedPosts: number;
+  readonly pendingPosts: number;
+  readonly failedPosts: number;
+  readonly resultPosts: number;
+  readonly promotionalPosts: number;
+  readonly generalPosts: number;
+  readonly autoLinkedCount: number;
+  readonly manualLinkedCount: number;
+  readonly verifiedCount: number;
+  readonly rejectedCount: number;
+  readonly averageConfidence?: number | null;
+  readonly topMatchReasons?: string | null;
+}
+
+type LazySocialPostMatchingStats = {
+  readonly totalPosts: number;
+  readonly processedPosts: number;
+  readonly linkedPosts: number;
+  readonly pendingPosts: number;
+  readonly failedPosts: number;
+  readonly resultPosts: number;
+  readonly promotionalPosts: number;
+  readonly generalPosts: number;
+  readonly autoLinkedCount: number;
+  readonly manualLinkedCount: number;
+  readonly verifiedCount: number;
+  readonly rejectedCount: number;
+  readonly averageConfidence?: number | null;
+  readonly topMatchReasons?: string | null;
+}
+
+export declare type SocialPostMatchingStats = LazyLoading extends LazyLoadingDisabled ? EagerSocialPostMatchingStats : LazySocialPostMatchingStats
+
+export declare const SocialPostMatchingStats: (new (init: ModelInit<SocialPostMatchingStats>) => SocialPostMatchingStats)
+
+type EagerUnlinkedPostsConnection = {
+  readonly items: SocialPostWithMatchInfo[];
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+type LazyUnlinkedPostsConnection = {
+  readonly items: SocialPostWithMatchInfo[];
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+export declare type UnlinkedPostsConnection = LazyLoading extends LazyLoadingDisabled ? EagerUnlinkedPostsConnection : LazyUnlinkedPostsConnection
+
+export declare const UnlinkedPostsConnection: (new (init: ModelInit<UnlinkedPostsConnection>) => UnlinkedPostsConnection)
+
+type EagerSocialPostWithMatchInfo = {
+  readonly socialPost: SocialPost;
+  readonly extractedData?: SocialPostGameData | null;
+  readonly suggestedMatches?: GameMatchCandidate[] | null;
+  readonly bestMatchConfidence?: number | null;
+}
+
+type LazySocialPostWithMatchInfo = {
+  readonly socialPost: AsyncItem<SocialPost>;
+  readonly extractedData: AsyncItem<SocialPostGameData | undefined>;
+  readonly suggestedMatches?: GameMatchCandidate[] | null;
+  readonly bestMatchConfidence?: number | null;
+}
+
+export declare type SocialPostWithMatchInfo = LazyLoading extends LazyLoadingDisabled ? EagerSocialPostWithMatchInfo : LazySocialPostWithMatchInfo
+
+export declare const SocialPostWithMatchInfo: (new (init: ModelInit<SocialPostWithMatchInfo>) => SocialPostWithMatchInfo)
+
 type EagerUserManagementResponse = {
   readonly success: boolean;
   readonly message?: string | null;
@@ -3831,6 +4076,7 @@ type EagerGame = {
   readonly missingFlightCount?: number | null;
   readonly expectedTotalEntries?: number | null;
   readonly gameDayOfWeek?: string | null;
+  readonly gameYearMonth?: string | null;
   readonly buyInBucket?: string | null;
   readonly venueScheduleKey?: string | null;
   readonly venueGameTypeKey?: string | null;
@@ -3893,6 +4139,11 @@ type EagerGame = {
   readonly playerEntries?: (PlayerEntry | null)[] | null;
   readonly playerResults?: (PlayerResult | null)[] | null;
   readonly linkedSocialPosts?: (SocialPost | null)[] | null;
+  readonly socialPostLinks?: (SocialPostGameLink | null)[] | null;
+  readonly linkedSocialPostCount?: number | null;
+  readonly hasLinkedSocialPosts?: boolean | null;
+  readonly primaryResultPostId?: string | null;
+  readonly primaryResultPost?: SocialPost | null;
   readonly entityId?: string | null;
   readonly entity?: Entity | null;
   readonly createdAt: string;
@@ -3972,6 +4223,7 @@ type LazyGame = {
   readonly missingFlightCount?: number | null;
   readonly expectedTotalEntries?: number | null;
   readonly gameDayOfWeek?: string | null;
+  readonly gameYearMonth?: string | null;
   readonly buyInBucket?: string | null;
   readonly venueScheduleKey?: string | null;
   readonly venueGameTypeKey?: string | null;
@@ -4034,6 +4286,11 @@ type LazyGame = {
   readonly playerEntries: AsyncCollection<PlayerEntry>;
   readonly playerResults: AsyncCollection<PlayerResult>;
   readonly linkedSocialPosts: AsyncCollection<SocialPost>;
+  readonly socialPostLinks: AsyncCollection<SocialPostGameLink>;
+  readonly linkedSocialPostCount?: number | null;
+  readonly hasLinkedSocialPosts?: boolean | null;
+  readonly primaryResultPostId?: string | null;
+  readonly primaryResultPost: AsyncItem<SocialPost | undefined>;
   readonly entityId?: string | null;
   readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt: string;
@@ -6696,6 +6953,18 @@ type EagerSocialPost = {
   readonly contentCategory?: string | null;
   readonly linkedGameId?: string | null;
   readonly linkedGame?: Game | null;
+  readonly processingStatus?: SocialPostProcessingStatus | keyof typeof SocialPostProcessingStatus | null;
+  readonly processedAt?: string | null;
+  readonly processingError?: string | null;
+  readonly processingVersion?: string | null;
+  readonly contentType?: SocialPostContentType | keyof typeof SocialPostContentType | null;
+  readonly contentTypeConfidence?: number | null;
+  readonly extractedGameDataId?: string | null;
+  readonly extractedGameData?: SocialPostGameData | null;
+  readonly gameLinks?: (SocialPostGameLink | null)[] | null;
+  readonly primaryLinkedGameId?: string | null;
+  readonly linkedGameCount?: number | null;
+  readonly hasUnverifiedLinks?: boolean | null;
   readonly socialAccountId: string;
   readonly socialAccount?: SocialAccount | null;
   readonly entityId?: string | null;
@@ -6746,6 +7015,18 @@ type LazySocialPost = {
   readonly contentCategory?: string | null;
   readonly linkedGameId?: string | null;
   readonly linkedGame: AsyncItem<Game | undefined>;
+  readonly processingStatus?: SocialPostProcessingStatus | keyof typeof SocialPostProcessingStatus | null;
+  readonly processedAt?: string | null;
+  readonly processingError?: string | null;
+  readonly processingVersion?: string | null;
+  readonly contentType?: SocialPostContentType | keyof typeof SocialPostContentType | null;
+  readonly contentTypeConfidence?: number | null;
+  readonly extractedGameDataId?: string | null;
+  readonly extractedGameData: AsyncItem<SocialPostGameData | undefined>;
+  readonly gameLinks: AsyncCollection<SocialPostGameLink>;
+  readonly primaryLinkedGameId?: string | null;
+  readonly linkedGameCount?: number | null;
+  readonly hasUnverifiedLinks?: boolean | null;
   readonly socialAccountId: string;
   readonly socialAccount: AsyncItem<SocialAccount | undefined>;
   readonly entityId?: string | null;
@@ -6858,6 +7139,228 @@ export declare type SocialScheduledPost = LazyLoading extends LazyLoadingDisable
 
 export declare const SocialScheduledPost: (new (init: ModelInit<SocialScheduledPost>) => SocialScheduledPost) & {
   copyOf(source: SocialScheduledPost, mutator: (draft: MutableModel<SocialScheduledPost>) => MutableModel<SocialScheduledPost> | void): SocialScheduledPost;
+}
+
+type EagerSocialPostGameLink = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialPostGameLink, 'id'>;
+  };
+  readonly id: string;
+  readonly socialPostId: string;
+  readonly gameId: string;
+  readonly linkType: SocialPostLinkType | keyof typeof SocialPostLinkType;
+  readonly matchConfidence: number;
+  readonly matchReason?: string | null;
+  readonly matchSignals?: string | null;
+  readonly isPrimaryGame?: boolean | null;
+  readonly mentionOrder?: number | null;
+  readonly extractedVenueName?: string | null;
+  readonly extractedDate?: string | null;
+  readonly extractedBuyIn?: number | null;
+  readonly extractedGuarantee?: number | null;
+  readonly linkedAt: string;
+  readonly linkedBy?: string | null;
+  readonly verifiedAt?: string | null;
+  readonly verifiedBy?: string | null;
+  readonly rejectedAt?: string | null;
+  readonly rejectedBy?: string | null;
+  readonly rejectionReason?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazySocialPostGameLink = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialPostGameLink, 'id'>;
+  };
+  readonly id: string;
+  readonly socialPostId: string;
+  readonly gameId: string;
+  readonly linkType: SocialPostLinkType | keyof typeof SocialPostLinkType;
+  readonly matchConfidence: number;
+  readonly matchReason?: string | null;
+  readonly matchSignals?: string | null;
+  readonly isPrimaryGame?: boolean | null;
+  readonly mentionOrder?: number | null;
+  readonly extractedVenueName?: string | null;
+  readonly extractedDate?: string | null;
+  readonly extractedBuyIn?: number | null;
+  readonly extractedGuarantee?: number | null;
+  readonly linkedAt: string;
+  readonly linkedBy?: string | null;
+  readonly verifiedAt?: string | null;
+  readonly verifiedBy?: string | null;
+  readonly rejectedAt?: string | null;
+  readonly rejectedBy?: string | null;
+  readonly rejectionReason?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type SocialPostGameLink = LazyLoading extends LazyLoadingDisabled ? EagerSocialPostGameLink : LazySocialPostGameLink
+
+export declare const SocialPostGameLink: (new (init: ModelInit<SocialPostGameLink>) => SocialPostGameLink) & {
+  copyOf(source: SocialPostGameLink, mutator: (draft: MutableModel<SocialPostGameLink>) => MutableModel<SocialPostGameLink> | void): SocialPostGameLink;
+}
+
+type EagerSocialPostGameData = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialPostGameData, 'id'>;
+  };
+  readonly id: string;
+  readonly socialPostId: string;
+  readonly contentType: SocialPostContentType | keyof typeof SocialPostContentType;
+  readonly contentTypeConfidence?: number | null;
+  readonly resultScore?: number | null;
+  readonly promoScore?: number | null;
+  readonly extractedName?: string | null;
+  readonly extractedTournamentUrl?: string | null;
+  readonly extractedTournamentId?: number | null;
+  readonly extractedVenueName?: string | null;
+  readonly suggestedVenueId?: string | null;
+  readonly venueMatchConfidence?: number | null;
+  readonly venueMatchReason?: string | null;
+  readonly extractedDate?: string | null;
+  readonly extractedDayOfWeek?: string | null;
+  readonly extractedStartTime?: string | null;
+  readonly dateSource?: string | null;
+  readonly extractedBuyIn?: number | null;
+  readonly extractedGuarantee?: number | null;
+  readonly extractedPrizePool?: number | null;
+  readonly extractedFirstPlacePrize?: number | null;
+  readonly extractedTotalPrizesPaid?: number | null;
+  readonly extractedTotalEntries?: number | null;
+  readonly extractedTotalUniquePlayers?: number | null;
+  readonly extractedGameType?: GameType | keyof typeof GameType | null;
+  readonly extractedTournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly extractedGameVariant?: GameVariant | keyof typeof GameVariant | null;
+  readonly extractedGameTypes?: (string | null)[] | null;
+  readonly extractedSeriesName?: string | null;
+  readonly extractedEventNumber?: number | null;
+  readonly extractedDayNumber?: number | null;
+  readonly extractedFlightLetter?: string | null;
+  readonly isSeriesEvent?: boolean | null;
+  readonly extractedWinnerName?: string | null;
+  readonly extractedWinnerPrize?: number | null;
+  readonly placementCount?: number | null;
+  readonly suggestedGameId?: string | null;
+  readonly matchCandidateCount?: number | null;
+  readonly patternMatches?: string | null;
+  readonly extractedPrizes?: string | null;
+  readonly extractedAt: string;
+  readonly extractionVersion?: string | null;
+  readonly extractionDurationMs?: number | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly placements?: (SocialPostPlacement | null)[] | null;
+}
+
+type LazySocialPostGameData = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialPostGameData, 'id'>;
+  };
+  readonly id: string;
+  readonly socialPostId: string;
+  readonly contentType: SocialPostContentType | keyof typeof SocialPostContentType;
+  readonly contentTypeConfidence?: number | null;
+  readonly resultScore?: number | null;
+  readonly promoScore?: number | null;
+  readonly extractedName?: string | null;
+  readonly extractedTournamentUrl?: string | null;
+  readonly extractedTournamentId?: number | null;
+  readonly extractedVenueName?: string | null;
+  readonly suggestedVenueId?: string | null;
+  readonly venueMatchConfidence?: number | null;
+  readonly venueMatchReason?: string | null;
+  readonly extractedDate?: string | null;
+  readonly extractedDayOfWeek?: string | null;
+  readonly extractedStartTime?: string | null;
+  readonly dateSource?: string | null;
+  readonly extractedBuyIn?: number | null;
+  readonly extractedGuarantee?: number | null;
+  readonly extractedPrizePool?: number | null;
+  readonly extractedFirstPlacePrize?: number | null;
+  readonly extractedTotalPrizesPaid?: number | null;
+  readonly extractedTotalEntries?: number | null;
+  readonly extractedTotalUniquePlayers?: number | null;
+  readonly extractedGameType?: GameType | keyof typeof GameType | null;
+  readonly extractedTournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly extractedGameVariant?: GameVariant | keyof typeof GameVariant | null;
+  readonly extractedGameTypes?: (string | null)[] | null;
+  readonly extractedSeriesName?: string | null;
+  readonly extractedEventNumber?: number | null;
+  readonly extractedDayNumber?: number | null;
+  readonly extractedFlightLetter?: string | null;
+  readonly isSeriesEvent?: boolean | null;
+  readonly extractedWinnerName?: string | null;
+  readonly extractedWinnerPrize?: number | null;
+  readonly placementCount?: number | null;
+  readonly suggestedGameId?: string | null;
+  readonly matchCandidateCount?: number | null;
+  readonly patternMatches?: string | null;
+  readonly extractedPrizes?: string | null;
+  readonly extractedAt: string;
+  readonly extractionVersion?: string | null;
+  readonly extractionDurationMs?: number | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly placements: AsyncCollection<SocialPostPlacement>;
+}
+
+export declare type SocialPostGameData = LazyLoading extends LazyLoadingDisabled ? EagerSocialPostGameData : LazySocialPostGameData
+
+export declare const SocialPostGameData: (new (init: ModelInit<SocialPostGameData>) => SocialPostGameData) & {
+  copyOf(source: SocialPostGameData, mutator: (draft: MutableModel<SocialPostGameData>) => MutableModel<SocialPostGameData> | void): SocialPostGameData;
+}
+
+type EagerSocialPostPlacement = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialPostPlacement, 'id'>;
+  };
+  readonly id: string;
+  readonly socialPostGameDataId: string;
+  readonly socialPostId: string;
+  readonly place: number;
+  readonly playerName: string;
+  readonly cashPrize?: number | null;
+  readonly cashPrizeRaw?: string | null;
+  readonly hasNonCashPrize?: boolean | null;
+  readonly nonCashPrizes?: string | null;
+  readonly totalEstimatedValue?: number | null;
+  readonly wasChop?: boolean | null;
+  readonly wasICMDeal?: boolean | null;
+  readonly rawText?: string | null;
+  readonly linkedPlayerId?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazySocialPostPlacement = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialPostPlacement, 'id'>;
+  };
+  readonly id: string;
+  readonly socialPostGameDataId: string;
+  readonly socialPostId: string;
+  readonly place: number;
+  readonly playerName: string;
+  readonly cashPrize?: number | null;
+  readonly cashPrizeRaw?: string | null;
+  readonly hasNonCashPrize?: boolean | null;
+  readonly nonCashPrizes?: string | null;
+  readonly totalEstimatedValue?: number | null;
+  readonly wasChop?: boolean | null;
+  readonly wasICMDeal?: boolean | null;
+  readonly rawText?: string | null;
+  readonly linkedPlayerId?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type SocialPostPlacement = LazyLoading extends LazyLoadingDisabled ? EagerSocialPostPlacement : LazySocialPostPlacement
+
+export declare const SocialPostPlacement: (new (init: ModelInit<SocialPostPlacement>) => SocialPostPlacement) & {
+  copyOf(source: SocialPostPlacement, mutator: (draft: MutableModel<SocialPostPlacement>) => MutableModel<SocialPostPlacement> | void): SocialPostPlacement;
 }
 
 type EagerUser = {

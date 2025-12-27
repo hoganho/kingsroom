@@ -163,6 +163,12 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "getDatabaseMetrics": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "getModelCount": {
       "build": true,
       "dependsOn": [
@@ -373,6 +379,22 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "socialPostProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "tournamentConsolidator": {
       "build": true,
       "dependsOn": [
@@ -551,6 +573,22 @@
         {
           "category": "function",
           "resourceName": "gameIdTracker"
+        }
+      ]
+    },
+    "AMPLIFY_function_getDatabaseMetrics_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getDatabaseMetrics"
+        }
+      ]
+    },
+    "AMPLIFY_function_getDatabaseMetrics_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getDatabaseMetrics"
         }
       ]
     },
@@ -759,6 +797,22 @@
         {
           "category": "function",
           "resourceName": "socialFetcher"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialPostProcessor_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialPostProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialPostProcessor_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialPostProcessor"
         }
       ]
     },

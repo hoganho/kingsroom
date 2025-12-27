@@ -1,0 +1,474 @@
+# 86-social-processor.graphql
+# ===================================================================
+# SOCIAL POST PROCESSOR - Models, Types, and API
+# ===================================================================
+# This file contains:
+# 1. New models for social post processing (junction table, extraction data, placements)
+# 2. Embedded types for non-cash prizes
+# 3. Input/output types for the processor API
+# 4. Mutations and queries for the socialPostProcessor Lambda
+#
+# DEPENDENCIES:
+# - 00-enums.graphql: SocialPostContentType, SocialPostProcessingStatus, 
+#                     SocialPostLinkType, NonCashPrizeType, GameStatus, etc.
+# - 85-social.graphql: SocialPost model (extended)
+# - 30-games.graphql: Game model (extended)
+# ===================================================================
+
+# ===================================================================
+# 1. JUNCTION TABLE: SocialPostGameLink
+# ===================================================================
+# Many-to-many relationship between SocialPost and Game
+# A single post can reference multiple games (rare but possible)
+# A single game can be referenced by multiple posts (common - promo + result)
+
+type SocialPostGameLink 
+  @model(subscriptions: null) 
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  
+  # === RELATIONSHIPS ===
+  socialPostId: ID! 
+    @index(name: "bySocialPostGameLink", sortKeyFields: ["matchConfidence"])
+  gameId: ID! 
+    @index(name: "byGameSocialPostLink", sortKeyFields: ["linkedAt"])
+  
+  # === LINK METADATA ===
+  linkType: SocialPostLinkType! @default(value: "AUTO_MATCHED")
+  matchConfidence: Float! @default(value: "0")
+  matchReason: String                    # "tournament_id_exact", "venue_date_match", etc.
+  matchSignals: AWSJSON                  # Detailed scoring breakdown { signalName: score }
+  
+  # === POSITION IN POST ===
+  isPrimaryGame: Boolean @default(value: "false")
+  mentionOrder: Int                      # Order of appearance (1, 2, 3...)
+  
+  # === EXTRACTED DATA SNAPSHOT ===
+  # Denormalized for quick access without joining to SocialPostGameData
+  extractedVenueName: String
+  extractedDate: AWSDateTime
+  extractedBuyIn: Float
+  extractedGuarantee: Float
+  
+  # === AUDIT TRAIL ===
+  linkedAt: AWSDateTime!
+  linkedBy: String                       # "SYSTEM" or userId for manual links
+  
+  verifiedAt: AWSDateTime
+  verifiedBy: String
+  
+  rejectedAt: AWSDateTime
+  rejectedBy: String
+  rejectionReason: String
+  
+  # === STANDARD FIELDS ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# 2. EXTRACTION RESULTS: SocialPostGameData
+# ===================================================================
+# Stores all extracted game information from a social post
+# One extraction per post (1:1 relationship with SocialPost)
+
+type SocialPostGameData 
+  @model(subscriptions: null) 
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  
+  # === SOURCE ===
+  socialPostId: ID! 
+    @index(name: "bySocialPostExtraction", sortKeyFields: ["extractedAt"])
+  
+  # === POST CLASSIFICATION ===
+  contentType: SocialPostContentType!    # RESULT, PROMOTIONAL, GENERAL, COMMENT
+  contentTypeConfidence: Float
+  resultScore: Int                       # Pattern match score for RESULT
+  promoScore: Int                        # Pattern match score for PROMOTIONAL
+  
+  # === EXTRACTED TOURNAMENT IDENTITY ===
+  extractedName: String
+  extractedTournamentUrl: AWSURL
+  extractedTournamentId: Int             # From URL like ?id=455
+  
+  # === EXTRACTED VENUE ===
+  extractedVenueName: String
+  suggestedVenueId: ID                   # After venue matching
+  venueMatchConfidence: Float
+  venueMatchReason: String
+  
+  # === EXTRACTED DATE/TIME ===
+  extractedDate: AWSDateTime             # Inferred game date
+  extractedDayOfWeek: String             # MONDAY, TUESDAY, etc.
+  extractedStartTime: String             # "6:00 PM", "7:30 PM"
+  dateSource: String                     # "post_content", "posted_at", "url"
+  
+  # === EXTRACTED FINANCIALS ===
+  extractedBuyIn: Float
+  extractedGuarantee: Float
+  extractedPrizePool: Float
+  extractedFirstPlacePrize: Float
+  extractedTotalPrizesPaid: Float
+  
+  # === EXTRACTED ENTRIES (for RESULT posts) ===
+  extractedTotalEntries: Int
+  extractedTotalUniquePlayers: Int
+  
+  # === EXTRACTED GAME TYPE ===
+  extractedGameType: GameType
+  extractedTournamentType: TournamentType
+  extractedGameVariant: GameVariant
+  extractedGameTypes: [String]           # ["NLH", "Bounty", "Turbo"]
+  
+  # === SERIES EXTRACTION ===
+  extractedSeriesName: String
+  extractedEventNumber: Int
+  extractedDayNumber: Int
+  extractedFlightLetter: String
+  isSeriesEvent: Boolean
+  
+  # === WINNER EXTRACTION (for RESULT posts) ===
+  extractedWinnerName: String
+  extractedWinnerPrize: Float
+  placementCount: Int                    # Number of placements extracted
+  
+  # === MATCHING HINTS ===
+  suggestedGameId: ID                    # Best match game ID
+  matchCandidateCount: Int               # How many games were candidates
+  
+  # === RAW PATTERN DATA (for debugging) ===
+  patternMatches: AWSJSON                # { resultMatches: [], promoMatches: [] }
+  extractedPrizes: AWSJSON               # All $ amounts found with context
+  
+  # === PROCESSING METADATA ===
+  extractedAt: AWSDateTime!
+  extractionVersion: String              # "1.0.0" - for re-processing tracking
+  extractionDurationMs: Int
+  
+  # === STANDARD FIELDS ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  
+  # === RELATIONSHIPS ===
+  placements: [SocialPostPlacement] @hasMany(indexName: "byGameDataPlacement", fields: ["id"])
+}
+
+# ===================================================================
+# 3. PLACEMENT RECORDS: SocialPostPlacement
+# ===================================================================
+# Individual prize records extracted from tournament results
+# Handles both cash and non-cash prizes (accumulator tickets, etc.)
+
+type SocialPostPlacement 
+  @model(subscriptions: null) 
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  
+  # === SOURCE ===
+  socialPostGameDataId: ID! 
+    @index(name: "byGameDataPlacement", sortKeyFields: ["place"])
+  socialPostId: ID! 
+    @index(name: "bySocialPostPlacement", sortKeyFields: ["place"])
+  
+  # === PLACEMENT DATA ===
+  place: Int!                            # 1, 2, 3, etc.
+  playerName: String!
+  
+  # === CASH PRIZE ===
+  cashPrize: Float                       # Dollar amount (e.g., 570)
+  cashPrizeRaw: String                   # Original text (e.g., "$570")
+  
+  # === NON-CASH PRIZES ===
+  hasNonCashPrize: Boolean @default(value: "false")
+  nonCashPrizes: AWSJSON                 # Array of SocialPostNonCashPrize objects
+  
+  # === TOTAL VALUE ===
+  totalEstimatedValue: Float             # cashPrize + estimated value of non-cash
+  
+  # === DEAL INFORMATION ===
+  wasChop: Boolean @default(value: "false")
+  wasICMDeal: Boolean @default(value: "false")
+  
+  # === RAW DATA ===
+  rawText: String                        # Original line from post
+  
+  # === LINKED PLAYER (future enhancement) ===
+  linkedPlayerId: ID                     # If we can match to Player record
+  
+  # === STANDARD FIELDS ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# 4. EMBEDDED TYPE: Non-Cash Prize
+# ===================================================================
+# Stored as AWSJSON in SocialPostPlacement.nonCashPrizes
+# This is the structure of each item in that array
+
+# Note: This is NOT a @model - it's an embedded type for documentation
+# The actual data is stored as AWSJSON and parsed in the Lambda
+type SocialPostNonCashPrize @aws_iam @aws_cognito_user_pools {
+  prizeType: NonCashPrizeType!
+  description: String                    # "Accumulator Ticket", "KR Event Entry"
+  estimatedValue: Float                  # Estimated dollar value
+  rawText: String                        # Original text (e.g., "Accumulator Ticket*")
+  
+  # For tournament entry prizes
+  targetTournamentName: String
+  targetTournamentBuyIn: Float
+  
+  # For ticket prizes
+  ticketType: String                     # "ACCUMULATOR", "SATELLITE", "BOUNTY_HUNTER"
+  ticketQuantity: Int
+}
+
+# ===================================================================
+# 5. INPUT TYPES
+# ===================================================================
+
+input ProcessSocialPostInput {
+  socialPostId: ID!
+  forceReprocess: Boolean                # Re-process even if already done
+  skipMatching: Boolean                  # Only extract, don't match
+  skipLinking: Boolean                   # Extract and match, don't create links
+  matchThreshold: Float                  # Override default match threshold (0-100)
+}
+
+input ProcessSocialPostBatchInput {
+  # Option 1: Specific IDs
+  socialPostIds: [ID!]
+  
+  # Option 2: Filter criteria
+  socialAccountId: ID
+  entityId: ID
+  postedAfter: AWSDateTime
+  postedBefore: AWSDateTime
+  processingStatus: SocialPostProcessingStatus
+  contentType: SocialPostContentType
+  
+  # Limits
+  limit: Int                             # Max posts to process
+  
+  # Processing options
+  forceReprocess: Boolean
+  skipMatching: Boolean
+  skipLinking: Boolean
+}
+
+input ManualLinkInput {
+  socialPostId: ID!
+  gameId: ID!
+  isPrimaryGame: Boolean
+  mentionOrder: Int
+  notes: String
+}
+
+input UnlinkInput {
+  linkId: ID!
+  reason: String
+}
+
+input VerifyLinkInput {
+  linkId: ID!
+  notes: String
+}
+
+input RejectLinkInput {
+  linkId: ID!
+  reason: String!
+}
+
+input GetUnlinkedPostsInput {
+  entityId: ID
+  socialAccountId: ID
+  contentType: SocialPostContentType
+  minConfidence: Float                   # Filter by match confidence
+  maxConfidence: Float
+  limit: Int
+  nextToken: String
+}
+
+input GetMatchingStatsInput {
+  entityId: ID
+  dateFrom: AWSDateTime
+  dateTo: AWSDateTime
+}
+
+# ===================================================================
+# 6. OUTPUT TYPES
+# ===================================================================
+
+type ProcessSocialPostResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  socialPostId: ID!
+  
+  # Processing status
+  processingStatus: SocialPostProcessingStatus
+  error: String
+  warnings: [String!]
+  
+  # Extraction results
+  extractedGameData: SocialPostGameData
+  placementsExtracted: Int
+  
+  # Matching results
+  matchCandidates: [GameMatchCandidate!]
+  primaryMatch: GameMatchCandidate
+  
+  # Linking results
+  linksCreated: Int
+  linksSkipped: Int                      # Below threshold
+  linkDetails: [SocialPostGameLink!]
+  
+  # Metadata
+  processingTimeMs: Int
+}
+
+type GameMatchCandidate @aws_iam @aws_cognito_user_pools {
+  gameId: ID!
+  gameName: String
+  gameDate: AWSDateTime
+  gameStatus: GameStatus
+  venueId: ID
+  venueName: String
+  entityId: ID
+  
+  buyIn: Float
+  guaranteeAmount: Float
+  totalEntries: Int
+  
+  # Scoring
+  matchConfidence: Float!
+  matchReason: String
+  matchSignals: AWSJSON                  # Detailed breakdown
+  
+  # Selection
+  rank: Int
+  isPrimaryMatch: Boolean
+  wouldAutoLink: Boolean                 # Above threshold
+  rejectionReason: String                # If below threshold
+}
+
+type ProcessBatchResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  totalProcessed: Int!
+  successCount: Int!
+  failedCount: Int!
+  skippedCount: Int!
+  
+  # Results by ID
+  results: [ProcessSocialPostResult!]
+  
+  # Aggregate stats
+  totalLinksCreated: Int
+  totalExtractionsDone: Int
+  averageConfidence: Float
+  
+  # Timing
+  processingTimeMs: Int
+}
+
+type SocialPostMatchingStats @aws_iam @aws_cognito_user_pools {
+  totalPosts: Int!
+  processedPosts: Int!
+  linkedPosts: Int!
+  pendingPosts: Int!
+  failedPosts: Int!
+  
+  # By content type
+  resultPosts: Int!
+  promotionalPosts: Int!
+  generalPosts: Int!
+  
+  # Link quality
+  autoLinkedCount: Int!
+  manualLinkedCount: Int!
+  verifiedCount: Int!
+  rejectedCount: Int!
+  averageConfidence: Float
+  
+  # Top matching reasons
+  topMatchReasons: AWSJSON               # { reason: count }
+}
+
+type UnlinkedPostsConnection @aws_iam @aws_cognito_user_pools {
+  items: [SocialPostWithMatchInfo!]!
+  nextToken: String
+  totalCount: Int
+}
+
+type SocialPostWithMatchInfo @aws_iam @aws_cognito_user_pools {
+  socialPost: SocialPost!
+  extractedData: SocialPostGameData
+  suggestedMatches: [GameMatchCandidate!]
+  bestMatchConfidence: Float
+}
+
+# ===================================================================
+# 7. MUTATIONS
+# ===================================================================
+
+extend type Mutation {
+  # Process single post (sync)
+  processSocialPost(input: ProcessSocialPostInput!): ProcessSocialPostResult
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Process batch (async for large batches)
+  processSocialPostBatch(input: ProcessSocialPostBatchInput!): ProcessBatchResult
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Manual link operations
+  linkSocialPostToGame(input: ManualLinkInput!): SocialPostGameLink
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  unlinkSocialPostFromGame(input: UnlinkInput!): Boolean
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Admin verification
+  verifySocialPostLink(input: VerifyLinkInput!): SocialPostGameLink
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  rejectSocialPostLink(input: RejectLinkInput!): SocialPostGameLink
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+}
+
+# ===================================================================
+# 8. QUERIES
+# ===================================================================
+
+extend type Query {
+  # Preview matching without saving
+  previewSocialPostMatch(socialPostId: ID!): ProcessSocialPostResult
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Get posts needing review
+  getUnlinkedSocialPosts(input: GetUnlinkedPostsInput): UnlinkedPostsConnection
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Get matching stats
+  getSocialPostMatchingStats(input: GetMatchingStatsInput): SocialPostMatchingStats
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+}

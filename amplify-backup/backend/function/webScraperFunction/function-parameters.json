@@ -1,0 +1,83 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "storage": {
+      "Entity:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ScrapeStructure:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Venue:@model(appsync)": [
+        "read"
+      ],
+      "TournamentSeriesTitle:@model(appsync)": [
+        "read"
+      ],
+      "Game:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "TournamentStructure:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Player:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "PlayerEntry:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ScraperJob:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ScrapeURL:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ScrapeAttempt:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "S3Storage:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "playerProcessorQueueUrl",
+      "environmentVariableName": "PLAYER_PROCESSOR_QUEUE_URL"
+    },
+    {
+      "cloudFormationParameterName": "scraperS3Bucket",
+      "environmentVariableName": "SCRAPER_S3_BUCKET"
+    },
+    {
+      "cloudFormationParameterName": "saveGameFunctionName",
+      "environmentVariableName": "SAVE_GAME_FUNCTION_NAME"
+    }
+  ]
+}

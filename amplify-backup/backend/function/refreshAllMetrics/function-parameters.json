@@ -1,0 +1,43 @@
+{
+  "lambdaLayers": [],
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "storage": {
+      "Entity:@model(appsync)": [
+        "read"
+      ],
+      "Venue:@model(appsync)": [
+        "read"
+      ],
+      "Game:@model(appsync)": [
+        "read"
+      ],
+      "GameFinancialSnapshot:@model(appsync)": [
+        "read"
+      ],
+      "RecurringGame:@model(appsync)": [
+        "read"
+      ],
+      "EntityMetrics:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "VenueMetrics:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "RecurringGameMetrics:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  }
+}

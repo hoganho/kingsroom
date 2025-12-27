@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": 1766755324618,
+    "message": "INIT_START Runtime Version: nodejs:22.v70\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:fc822b897c0f33df4df3bc8d3c18d7449cfa5d4f32cd596bcfb8080fdefbad43\n",
+    "ingestionTime": 1766755328131
+  },
+  {
+    "timestamp": 1766755325017,
+    "message": "START RequestId: a83c44e3-13f3-4626-a1ca-f532af85a10f Version: $LATEST\n",
+    "ingestionTime": 1766755328131
+  },
+  {
+    "timestamp": 1766755325020,
+    "message": "2025-12-26T13:22:05.020Z\ta83c44e3-13f3-4626-a1ca-f532af85a10f\tINFO\t[Consolidator] Handling DynamoDB stream event\n",
+    "ingestionTime": 1766755328131
+  },
+  {
+    "timestamp": 1766755325042,
+    "message": "2025-12-26T13:22:05.042Z\ta83c44e3-13f3-4626-a1ca-f532af85a10f\tINFO\t[Consolidator] Processing 1 stream records\n",
+    "ingestionTime": 1766755328131
+  },
+  {
+    "timestamp": 1766755325042,
+    "message": "2025-12-26T13:22:05.042Z\ta83c44e3-13f3-4626-a1ca-f532af85a10f\tINFO\t[Consolidator] Skipping non-multi-day: Thursdays Grind St.George Leagues Thursday Weekly $120 rebuy until 9:40pm (dc95bd6f-62e1-45df-99f0-ed3c7d1bd67f)\n",
+    "ingestionTime": 1766755328131
+  },
+  {
+    "timestamp": 1766755325120,
+    "message": "END RequestId: a83c44e3-13f3-4626-a1ca-f532af85a10f\n",
+    "ingestionTime": 1766755328131
+  },
+  {
+    "timestamp": 1766755325121,
+    "message": "REPORT RequestId: a83c44e3-13f3-4626-a1ca-f532af85a10f\tDuration: 103.03 ms\tBilled Duration: 499 ms\tMemory Size: 128 MB\tMax Memory Used: 94 MB\tInit Duration: 395.53 ms\t\n",
+    "ingestionTime": 1766755328131
+  }
+]

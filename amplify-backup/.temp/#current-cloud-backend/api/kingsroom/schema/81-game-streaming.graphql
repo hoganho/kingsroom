@@ -1,0 +1,141 @@
+# =============================================================================
+# GAME STREAMING TYPES (for real-time batch job streaming)
+# =============================================================================
+# ADD THIS TO: amplify/backend/api/kingsroom/schema/80-scrapers.graphql
+# (or create a new file: 81-game-streaming.graphql)
+# =============================================================================
+
+# Action enum for game processing results
+enum GameProcessedAction {
+  CREATED
+  UPDATED
+  SKIPPED
+  ERROR
+  NOT_FOUND
+  NOT_PUBLISHED
+}
+
+# Main event type streamed to clients
+type GameProcessedEvent @aws_iam @aws_cognito_user_pools {
+  # Job context
+  jobId: ID!
+  entityId: ID!
+  
+  # Game identification
+  tournamentId: Int!
+  url: AWSURL
+  
+  # Processing result
+  action: GameProcessedAction!
+  message: String
+  errorMessage: String
+  
+  # Timing
+  processedAt: AWSDateTime!
+  durationMs: Int
+  
+  # Data source
+  dataSource: String  # 's3' | 'web' | 'none'
+  s3Key: String
+  
+  # Game data (nullable - only present for successful scrapes)
+  gameData: GameProcessedData
+  
+  # Save result (nullable - only present if saved)
+  saveResult: GameSaveResult
+}
+
+# Game data included in event
+type GameProcessedData @aws_iam @aws_cognito_user_pools {
+  # Core fields needed for GameListItem
+  name: String
+  gameStatus: String
+  registrationStatus: String
+  gameStartDateTime: AWSDateTime
+  gameEndDateTime: AWSDateTime
+  
+  # Financials
+  buyIn: Float
+  rake: Float
+  guaranteeAmount: Float
+  prizepoolPaid: Float
+  
+  # Entries
+  totalEntries: Int
+  totalUniquePlayers: Int
+  totalRebuys: Int
+  totalAddons: Int
+  
+  # Classification
+  gameType: String
+  gameVariant: String
+  tournamentType: String
+  gameTags: [String]
+  
+  # Venue
+  venueId: ID
+  venueName: String
+  
+  # Flags
+  doNotScrape: Boolean
+  existingGameId: ID
+}
+
+# Save result included in event
+type GameSaveResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  gameId: ID
+  action: String  # 'CREATED' | 'UPDATED' | 'SKIPPED'
+  message: String
+}
+
+# =============================================================================
+# INPUT TYPES
+# =============================================================================
+
+input GameProcessedEventInput {
+  jobId: ID!
+  entityId: ID!
+  tournamentId: Int!
+  url: AWSURL
+  action: GameProcessedAction!
+  message: String
+  errorMessage: String
+  processedAt: AWSDateTime!
+  durationMs: Int
+  dataSource: String
+  s3Key: String
+  gameData: GameProcessedDataInput
+  saveResult: GameSaveResultInput
+}
+
+input GameProcessedDataInput {
+  name: String
+  gameStatus: String
+  registrationStatus: String
+  gameStartDateTime: AWSDateTime
+  gameEndDateTime: AWSDateTime
+  buyIn: Float
+  rake: Float
+  guaranteeAmount: Float
+  prizepoolPaid: Float
+  totalEntries: Int
+  totalUniquePlayers: Int
+  totalRebuys: Int
+  totalAddons: Int
+  gameType: String
+  gameVariant: String
+  tournamentType: String
+  gameTags: [String]
+  venueId: ID
+  venueName: String
+  doNotScrape: Boolean
+  existingGameId: ID
+}
+
+input GameSaveResultInput {
+  success: Boolean!
+  gameId: ID
+  action: String
+  message: String
+}
