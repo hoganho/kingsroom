@@ -186,6 +186,11 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
 
+  # --- Ticket Template Relationships ---
+  ticketTemplatesFromOrigin: [TicketTemplate] @hasMany(indexName: "byOriginGame", fields: ["id"])
+  ticketTemplatesAsTarget: [TicketTemplate] @hasMany(indexName: "byTargetGame", fields: ["id"])
+  ticketsWonFromGame: [PlayerTicket] @hasMany(indexName: "byWonFromGame", fields: ["id"])
+
   # === SOCIAL PULSE RELATIONSHIPS (UPDATED) ===
   
   # Legacy: Direct hasMany to SocialPost (via linkedGameId on SocialPost)
