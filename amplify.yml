@@ -1,11 +1,13 @@
 version: 1
 backend:
   phases:
+    preBuild:
+      commands:
+        - rm -rf amplify/.config amplify/#current-cloud-backend amplify/team-provider-info.json
     build:
       commands:
-        - rm -rf amplify/.config amplify/#current-cloud-backend
-        - amplify pull --appId d37g1shsg3vvxw --envName staging --yes
-        - amplifyPush --simple
+        - amplify init --envName staging --yes --appId d37g1shsg3vvxw
+        - amplify push --yes
 frontend:
   phases:
     preBuild:
