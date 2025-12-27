@@ -8,3 +8,4 @@ export { FinancialsTab } from './FinancialsTab';
 export { PlayersTab } from './PlayersTab';
 export { ResultsTab } from './ResultsTab';
 export { RelationsTab } from './RelationsTab';
+export { SocialsTab } from './SocialsTab';

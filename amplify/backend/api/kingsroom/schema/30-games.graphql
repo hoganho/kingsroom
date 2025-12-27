@@ -1,5 +1,15 @@
 # 30-games.graphql
 # ==========================================
+# COMPLETE VERSION WITH SOCIAL DATA AGGREGATION UPDATES
+# Version: 2.0.0
+# 
+# NOTE: The following types are defined in OTHER schema files and NOT duplicated here:
+# - SaveVenueAssignmentInfo (20-venues.graphql)
+# - VenueReferenceInput (20-venues.graphql)
+# - SaveSeriesAssignmentInfo (99-mutations.graphql)
+# - DataSourceInfoInput (99-mutations.graphql)
+# - SeriesReferenceInput (99-mutations.graphql)
+# ==========================================
 
 type VenueMetricsSnapshot {
   totalGamesHeld: Int
@@ -53,11 +63,11 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   guaranteeOverlayCost: Float
   gameProfit: Float
 
-  # --- Jackpot Contributions (inherited from RecurringGame) ---
+  # --- Jackpot Contributions (inherited from RecurringGame OR populated from social) ---
   hasJackpotContributions: Boolean @default(value: "false")
   jackpotContributionAmount: Float
 
-  # --- Accumulator Tickets (inherited from RecurringGame) ---
+  # --- Accumulator Tickets (inherited from RecurringGame OR populated from social) ---
   hasAccumulatorTickets: Boolean @default(value: "false")
   accumulatorTicketValue: Float
   numberOfAccumulatorTicketsPaid: Int
@@ -129,7 +139,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   # --- Structure Data ---
   levels: AWSJSON
 
-  # === NEW: CLASSIFICATION FIELDS ===
+  # === CLASSIFICATION FIELDS ===
   sessionMode: SessionMode
   variant: PokerVariant
   bettingStructure: BettingStructure
@@ -140,7 +150,6 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   buyInTier: BuyInTier
   
   # Tournament classification
-  # NOTE: Field named entryStructure to avoid conflict with TournamentStructure @model
   entryStructure: EntryStructure
   bountyType: BountyType
   bountyAmount: Float
@@ -161,7 +170,6 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   
   # Cash classification
   cashGameType: CashGameType
-  # NOTE: Field named cashRakeType to avoid conflict with RakeStructure @model
   cashRakeType: CashRakeType
   hasBombPots: Boolean
   hasRunItTwice: Boolean
@@ -186,23 +194,24 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
 
-  # === SOCIAL PULSE RELATIONSHIPS (UPDATED) ===
-  
-  # Legacy: Direct hasMany to SocialPost (via linkedGameId on SocialPost)
-  # KEEP for backward compatibility - posts that used old single-link approach
+  # === SOCIAL PULSE RELATIONSHIPS ===
   linkedSocialPosts: [SocialPost] @hasMany(indexName: "bySocialPostGame", fields: ["id"])
-  
-  # NEW: Many-to-many via junction table (preferred)
   socialPostLinks: [SocialPostGameLink] @hasMany(indexName: "byGameSocialPostLink", fields: ["id"])
-  
-  # NEW: Convenience fields (denormalized for quick filtering)
   linkedSocialPostCount: Int @default(value: "0")
   hasLinkedSocialPosts: Boolean @default(value: "false")
-  
-  # NEW: Primary result post (for quick access to the main RESULT post)
   primaryResultPostId: ID
   primaryResultPost: SocialPost @hasOne(fields: ["primaryResultPostId"])
+
+  # === SOCIAL DATA AGGREGATION (NEW) ===
+  socialDataAggregation: AWSJSON
+  socialDataAggregatedAt: AWSDateTime
   
+  # === TICKETS AWARDED FROM THIS GAME (NEW) ===
+  ticketsAwarded: [PlayerTicket] @hasMany(indexName: "byWonFromGame", fields: ["id"])
+  ticketsAwardedCount: Int @default(value: "0")
+  ticketProgramName: String
+
+  # === ENTITY RELATIONSHIP ===
   entityId: ID @index(name: "byEntityGame", sortKeyFields: ["gameStartDateTime"], queryField: "gamesByEntity")
              @index(name: "byEntityAndTournamentId", sortKeyFields: ["tournamentId"], queryField: "gamesByEntityAndTournamentId")
   entity: Entity @belongsTo(fields: ["entityId"])
@@ -210,22 +219,15 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 
-  # === RECURRING GAME RELATIONSHIP (NEW) ===
-  # Link to the canonical recurring game (if this is a regular game instance)
-  recurringGameId: ID 
-    @index(name: "byRecurringGame", sortKeyFields: ["gameStartDateTime"])
+  # === RECURRING GAME RELATIONSHIP ===
+  recurringGameId: ID @index(name: "byRecurringGame", sortKeyFields: ["gameStartDateTime"])
   recurringGame: RecurringGame @belongsTo(fields: ["recurringGameId"])
-  
-  # === RECURRING GAME ASSIGNMENT (NEW) ===
   recurringGameAssignmentConfidence: Float
-  recurringGameAssignmentStatus: RecurringGameAssignmentStatus 
-    @default(value: "PENDING_ASSIGNMENT")
+  recurringGameAssignmentStatus: RecurringGameAssignmentStatus @default(value: "PENDING_ASSIGNMENT")
   
-  # === SCHEDULE TRACKING (NEW) ===
+  # === SCHEDULE TRACKING ===
   wasScheduledInstance: Boolean @default(value: "false")
   deviationNotes: String
-  
-  # === INSTANCE METADATA (NEW) ===
   instanceNumber: Int 
   isReplacementInstance: Boolean @default(value: "false")
   replacementReason: String
@@ -275,25 +277,25 @@ type GameFinancialSnapshot
   venueId: ID @index(name: "byVenueGameFinancialSnapshot", sortKeyFields: ["gameStartDateTime"])
   gameStartDateTime: AWSDateTime @index(name: "byGameStartDateFinancialSnapshot", sortKeyFields: ["netProfit"])
 
-  # === REVENUE SIDE (from Game model) ===
+  # === REVENUE SIDE ===
   totalBuyInsCollected: Float @default(value: "0")
   rakeRevenue: Float @default(value: "0")
   venueFee: Float @default(value: "0")
   totalRevenue: Float! @default(value: "0")
   
-  # === PRIZEPOOL BREAKDOWN (from Game model) ===
+  # === PRIZEPOOL BREAKDOWN ===
   prizepoolPlayerContributions: Float @default(value: "0")
   prizepoolAddedValue: Float @default(value: "0")
   prizepoolTotal: Float @default(value: "0")
   prizepoolSurplus: Float @default(value: "0")
 
-  # === PRIZEPOOL ADJUSTMENTS (NEW) ===
-  prizepoolPaidDelta: Float @default(value: "0")  # = prizepoolPaid - prizepoolCalculated (rounding adjustments)
-  prizepoolJackpotContributions: Float @default(value: "0")  # = jackpotContributionAmount × totalEntries
-  prizepoolAccumulatorTicketPayoutEstimate: Float @default(value: "0")  # = numberOfAccumulatorTicketsPaid × accumulatorTicketValue
-  prizepoolAccumulatorTicketPayoutActual: Float  # Manual entry via FE
+  # === PRIZEPOOL ADJUSTMENTS ===
+  prizepoolPaidDelta: Float @default(value: "0")
+  prizepoolJackpotContributions: Float @default(value: "0")
+  prizepoolAccumulatorTicketPayoutEstimate: Float @default(value: "0")
+  prizepoolAccumulatorTicketPayoutActual: Float
 
-  # === COST SIDE (from GameCost model) ===
+  # === COST SIDE ===
   totalDealerCost: Float @default(value: "0")
   totalTournamentDirectorCost: Float @default(value: "0")
   totalFloorStaffCost: Float @default(value: "0")
@@ -334,7 +336,7 @@ type GameFinancialSnapshot
   guaranteeCoverageRate: Float
   guaranteeMet: Boolean
   
-  # Denormalized Game Data for Reporting
+  # Denormalized Game Data
   totalUniquePlayers: Int
   totalEntries: Int
   guaranteeAmount: Float
@@ -342,36 +344,18 @@ type GameFinancialSnapshot
   gameType: GameType
   tournamentType: TournamentType
 
-  # === SERIES CLASSIFICATION (denormalized from Game) ===
-  # isSeries: true if game is part of a tournament series
-  # Use for filtering: exclude series games from regular game aggregations
+  # === SERIES CLASSIFICATION ===
   isSeries: Boolean @default(value: "false")
-
-  # isSeriesParent: true if this is the consolidated/parent record (no parentGameId)
-  # Use for aggregation: when including series data, only count parents to avoid double-counting
   isSeriesParent: Boolean @default(value: "false")
-
-  # Reference to parent game (for child/flight games)
   parentGameId: ID
-
-  # === SERIES IDENTIFICATION (for grouping/reporting) ===
-  # The specific tournament series this game belongs to
   tournamentSeriesId: ID @index(name: "byTournamentSeriesSnapshot", sortKeyFields: ["gameStartDateTime"])
-  
-  # Denormalized series name for display/reporting
   seriesName: String
 
-  # === RECURRING GAME REFERENCE (for RecurringGameMetrics) ===
-  # Link to the recurring game template (for regular/non-series games)
+  # === RECURRING GAME REFERENCE ===
   recurringGameId: ID @index(name: "byRecurringGameSnapshot", sortKeyFields: ["gameStartDateTime"])
   
-  # === COMPOSITE QUERY KEYS (for efficient series vs regular partitioning) ===
-  # Format: "{entityId}#REGULAR" or "{entityId}#SERIES" 
-  # Enables efficient queries for series vs non-series games per entity
+  # === COMPOSITE QUERY KEYS ===
   entitySeriesKey: String @index(name: "byEntitySeriesKey", sortKeyFields: ["gameStartDateTime"])
-  
-  # Format: "{venueId}#REGULAR" or "{venueId}#SERIES"
-  # Enables efficient queries for series vs non-series games per venue
   venueSeriesKey: String @index(name: "byVenueSeriesKey", sortKeyFields: ["gameStartDateTime"])
 
   # === METADATA ===
@@ -390,56 +374,38 @@ type GameCost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   gameId: ID! @index(name: "byGameCost")
   game: Game @belongsTo(fields: ["gameId"])
 
-  # --- Staff Costs ---
   totalDealerCost: Float @default(value: "0")
   totalTournamentDirectorCost: Float @default(value: "0")
   totalFloorStaffCost: Float @default(value: "0")
   totalSecurityCost: Float @default(value: "0")
-  
-  # --- Direct Game Costs ---
   totalPrizeContribution: Float @default(value: "0")
   totalJackpotContribution: Float @default(value: "0")
   totalGuaranteeOverlayCost: Float @default(value: "0")
   totalAddedValueCost: Float @default(value: "0")
   totalBountyCost: Float @default(value: "0")
-  
-  # --- Venue & Equipment ---
   totalVenueRentalCost: Float @default(value: "0")
   totalEquipmentRentalCost: Float @default(value: "0")
-  
-  # --- Operations ---
   totalFoodBeverageCost: Float @default(value: "0")
   totalMarketingCost: Float @default(value: "0")
   totalStreamingCost: Float @default(value: "0")
-  
-  # --- Compliance ---
   totalInsuranceCost: Float @default(value: "0")
   totalLicensingCost: Float @default(value: "0")
-  
-  # --- Travel ---
   totalStaffTravelCost: Float @default(value: "0")
   totalPlayerAccommodationCost: Float @default(value: "0")
-  
-  # --- Promotions & Other ---
   totalPromotionCost: Float @default(value: "0")
   totalOtherCost: Float @default(value: "0")
-  
-  # --- Aggregates ---
   totalStaffCost: Float @default(value: "0")
   totalDirectGameCost: Float @default(value: "0")
   totalOperationsCost: Float @default(value: "0")
   totalComplianceCost: Float @default(value: "0")
   totalCost: Float! @default(value: "0")
 
-  # --- Line Items ---
   lineItems: [GameCostLineItem] @hasMany(indexName: "byGameCost", fields: ["id"])
 
-  # --- Denormalized for Queries ---
   entityId: ID @index(name: "byEntityCost", sortKeyFields: ["gameDate"])
   venueId: ID @index(name: "byVenueCost", sortKeyFields: ["gameDate"])
   gameDate: AWSDateTime @index(name: "byGameDateCost", sortKeyFields: ["totalCost"])
 
-  # --- Metadata ---
   notes: String
   isEstimate: Boolean @default(value: "false")
   costStatus: CostStatus @default(value: "PENDING")
@@ -458,21 +424,15 @@ type GameCostLineItem @model(subscriptions: null) @auth(rules: [{ allow: private
   costType: CostItemType! @index(name: "byCostTypeLine", sortKeyFields: ["gameDate"])
   rateType: CostItemRateType @default(value: "STANDARD")
 
-  # --- Amount Calculation ---
   amount: Float!
   quantity: Float @default(value: "1")
   rate: Float
   hours: Float
-  
-  # --- Staff-Specific ---
   staffMemberId: ID
   staffMemberName: String
-  
-  # --- Description ---
   description: String
   notes: String
 
-  # --- Denormalized for Queries ---
   gameId: ID @index(name: "byGameLineItem")
   entityId: ID @index(name: "byEntityLineItem", sortKeyFields: ["gameDate"])
   venueId: ID @index(name: "byVenueLineItem", sortKeyFields: ["gameDate"])
@@ -644,12 +604,14 @@ type SaveGameResult @aws_iam @aws_cognito_user_pools {
   playerProcessingReason: String
   venueAssignment: SaveVenueAssignmentInfo
   seriesAssignment: SaveSeriesAssignmentInfo
-  recurringGameAssignment: SaveRecurringAssignmentInfo  # NEW: Recurring game assignment info
+  recurringGameAssignment: SaveRecurringAssignmentInfo
   fieldsUpdated: [String]
   wasEdited: Boolean
 }
 
-# NEW: Recurring game assignment result info
+# NOTE: SaveVenueAssignmentInfo is defined in 20-venues.graphql
+# NOTE: SaveSeriesAssignmentInfo is defined in 99-mutations.graphql
+
 type SaveRecurringAssignmentInfo @aws_iam @aws_cognito_user_pools {
   recurringGameId: ID
   recurringGameName: String
@@ -658,7 +620,6 @@ type SaveRecurringAssignmentInfo @aws_iam @aws_cognito_user_pools {
   wasCreated: Boolean
   inheritedGuarantee: Float
 }
-
 
 input ReassignGameVenueInput {
   gameId: ID!
@@ -709,27 +670,18 @@ input GamePreviewDataInput {
 }
 
 input StartScraperJobInput {
-  # Required
   entityId: ID!
-  
-  # Job metadata
   mode: ScraperJobMode
   triggerSource: ScraperJobTriggerSource!
   triggeredBy: String
-  
-  # Scrape options
   useS3: Boolean
   forceRefresh: Boolean
   skipNotPublished: Boolean
   skipNotFoundGaps: Boolean
   skipInProgress: Boolean
   ignoreDoNotScrape: Boolean
-  
-  # Save options
   saveToDatabase: Boolean
   defaultVenueId: ID
-  
-  # Mode-specific parameters
   bulkCount: Int
   startId: Int
   endId: Int
@@ -737,8 +689,6 @@ input StartScraperJobInput {
   gapIds: [Int]
   maxGames: Int
   isFullScan: Boolean
-
-  # Stopping thresholds
   maxConsecutiveNotFound: Int
   maxConsecutiveErrors: Int
   maxConsecutiveBlanks: Int
@@ -754,6 +704,10 @@ input SaveGameInput {
   options: SaveProcessingOptionsInput
   auditTrail: String
 }
+
+# NOTE: DataSourceInfoInput is defined in 99-mutations.graphql
+# NOTE: VenueReferenceInput is defined in 20-venues.graphql
+# NOTE: SeriesReferenceInput is defined in 99-mutations.graphql
 
 input SaveGameDataInput {
   tournamentId: Int

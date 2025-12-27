@@ -365,6 +365,22 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "socialDataAggregator": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "socialFetcher": {
       "build": true,
       "dependsOn": [
@@ -773,6 +789,22 @@
         {
           "category": "function",
           "resourceName": "scraperManagement"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialDataAggregator_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialDataAggregator"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialDataAggregator_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialDataAggregator"
         }
       ]
     },

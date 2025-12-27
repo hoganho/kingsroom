@@ -42,12 +42,13 @@ import { FinancialsTab } from './game-tabs/FinancialsTab';
 import { PlayersTab } from './game-tabs/PlayersTab';
 import { ResultsTab } from './game-tabs/ResultsTab';
 import { RelationsTab } from './game-tabs/RelationsTab';
+import { SocialsTab } from './game-tabs/SocialsTab';
 
 // =============================================================================
 // LOCAL TYPES
 // =============================================================================
 
-type TabId = 'overview' | 'financials' | 'players' | 'results' | 'relations';
+type TabId = 'overview' | 'financials' | 'players' | 'results' | 'relations' | 'socials';
 
 interface GameData {
   game: Game;
@@ -61,6 +62,7 @@ interface GameData {
   gameCost?: GameCost | null;
   financialSnapshot?: GameFinancialSnapshot | null;
   linkedSocialPosts: SocialPost[];
+  socialPostLinkCount: number;
 }
 
 // =============================================================================
@@ -437,6 +439,17 @@ const GET_LINKED_SOCIAL_POSTS_QUERY = /* GraphQL */ `
   }
 `;
 
+const COUNT_SOCIAL_POST_LINKS_QUERY = /* GraphQL */ `
+  query CountSocialPostLinks($gameId: ID!) {
+    listSocialPostGameLinks(filter: { gameId: { eq: $gameId } }, limit: 1) {
+      items {
+        id
+      }
+      nextToken
+    }
+  }
+`;
+
 // =============================================================================
 // MAIN COMPONENT
 // =============================================================================
@@ -470,21 +483,23 @@ export const GameDetails = () => {
       const game = gameResponse.data.getGame as Game;
 
       // Parallel fetch of related data
-      const [
+    const [
         structureRes,
         entriesRes,
         resultsRes,
         costRes,
         snapshotRes,
-        socialRes
-      ] = await Promise.all([
+        socialRes,
+        socialLinksRes
+    ] = await Promise.all([
         client.graphql({ query: GET_TOURNAMENT_STRUCTURE_QUERY, variables: { gameId: id } }),
         client.graphql({ query: GET_PLAYER_ENTRIES_QUERY, variables: { gameId: id } }),
         client.graphql({ query: GET_PLAYER_RESULTS_QUERY, variables: { gameId: id } }),
         client.graphql({ query: GET_GAME_COST_QUERY, variables: { gameId: id } }),
         client.graphql({ query: GET_FINANCIAL_SNAPSHOT_QUERY, variables: { gameId: id } }),
-        client.graphql({ query: GET_LINKED_SOCIAL_POSTS_QUERY, variables: { gameId: id } }).catch(() => null)
-      ]);
+        client.graphql({ query: GET_LINKED_SOCIAL_POSTS_QUERY, variables: { gameId: id } }).catch(() => null),
+        client.graphql({ query: COUNT_SOCIAL_POST_LINKS_QUERY, variables: { gameId: id } }).catch(() => null)  // ADD THIS
+    ]);
 
       // Fetch recurring game if linked
       let recurringGame: RecurringGame | undefined;
@@ -548,19 +563,27 @@ export const GameDetails = () => {
         console.warn('Failed to fetch child games:', e);
       }
 
-      setGameData({
-        game,
-        structure: 'data' in structureRes ? structureRes.data?.listTournamentStructures?.items?.[0] : undefined,
-        entries: 'data' in entriesRes ? entriesRes.data?.listPlayerEntries?.items || [] : [],
-        results: 'data' in resultsRes ? resultsRes.data?.listPlayerResults?.items || [] : [],
-        gameCost: 'data' in costRes ? costRes.data?.listGameCosts?.items?.[0] : undefined,
-        financialSnapshot: 'data' in snapshotRes ? snapshotRes.data?.listGameFinancialSnapshots?.items?.[0] : undefined,
-        linkedSocialPosts: socialRes && 'data' in socialRes ? socialRes.data?.listSocialPosts?.items || [] : [],
-        recurringGame,
-        tournamentSeries,
-        parentGame,
-        childGames
-      });
+        const socialLinksData = socialLinksRes && 'data' in socialLinksRes 
+            ? socialLinksRes.data?.listSocialPostGameLinks 
+            : null;
+        const socialPostLinkCount = socialLinksData 
+            ? (socialLinksData.items?.length || 0) + (socialLinksData.nextToken ? 1 : 0)
+            : 0;
+
+        setGameData({
+            game,
+            structure: 'data' in structureRes ? structureRes.data?.listTournamentStructures?.items?.[0] : undefined,
+            entries: 'data' in entriesRes ? entriesRes.data?.listPlayerEntries?.items || [] : [],
+            results: 'data' in resultsRes ? resultsRes.data?.listPlayerResults?.items || [] : [],
+            gameCost: 'data' in costRes ? costRes.data?.listGameCosts?.items?.[0] : undefined,
+            financialSnapshot: 'data' in snapshotRes ? snapshotRes.data?.listGameFinancialSnapshots?.items?.[0] : undefined,
+            linkedSocialPosts: socialRes && 'data' in socialRes ? socialRes.data?.listSocialPosts?.items || [] : [],
+            socialPostLinkCount,  // ADD THIS
+            recurringGame,
+            tournamentSeries,
+            parentGame,
+            childGames
+        });
     } catch (err) {
       console.error('Error fetching game data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load game details');
@@ -575,14 +598,15 @@ export const GameDetails = () => {
     }
   }, [gameId, fetchGameData]);
 
-  const tabs: { id: TabId; label: string; count?: number }[] = useMemo(() => [
-    { id: 'overview', label: 'Overview' },
-    { id: 'financials', label: 'Financials' },
-    { id: 'players', label: 'Players', count: gameData?.entries.length },
-    { id: 'results', label: 'Results', count: gameData?.results.length },
-    { id: 'relations', label: 'Relations' },
-  ], [gameData]);
-
+    const tabs: { id: TabId; label: string; count?: number }[] = useMemo(() => [
+        { id: 'overview', label: 'Overview' },
+        { id: 'financials', label: 'Financials' },
+        { id: 'players', label: 'Players', count: gameData?.entries.length },
+        { id: 'results', label: 'Results', count: gameData?.results.length },
+        { id: 'relations', label: 'Relations' },
+        { id: 'socials', label: 'Socials', count: gameData?.socialPostLinkCount || undefined },
+    ], [gameData]);
+  
   // Loading State
   if (loading) {
     return (
@@ -805,6 +829,9 @@ export const GameDetails = () => {
               childGames={childGames}
               linkedSocialPosts={linkedSocialPosts}
             />
+          )}
+          {activeTab === 'socials' && (
+            <SocialsTab game={game} />
           )}
         </div>
       </div>

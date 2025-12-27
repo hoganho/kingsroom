@@ -26,11 +26,11 @@
         },
         "gameDataEnricher": {
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
-          "s3Key": "amplify-builds/gameDataEnricher-4a3268736b6f57676231-build.zip"
+          "s3Key": "amplify-builds/gameDataEnricher-47423044707555787830-build.zip"
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
-          "s3Key": "amplify-builds/gameFinancialsProcessor-375359474d3870535077-build.zip"
+          "s3Key": "amplify-builds/gameFinancialsProcessor-4e67733674527953704e-build.zip"
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
@@ -123,7 +123,11 @@
         },
         "socialPostProcessor": {
           "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
-          "s3Key": "amplify-builds/socialPostProcessor-337364532b746a4c4532-build.zip"
+          "s3Key": "amplify-builds/socialPostProcessor-57737656314e37702b45-build.zip"
+        },
+        "socialDataAggregator": {
+          "deploymentBucketName": "amplify-kingsroom-staging-47186-deployment",
+          "s3Key": "amplify-builds/socialDataAggregator-5459716e3158436e4c36-build.zip"
         }
       },
       "api": {
