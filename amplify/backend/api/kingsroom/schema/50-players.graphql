@@ -1,8 +1,19 @@
 # 50-players.graphql
 # ==========================================
-# COMPLETE VERSION WITH PLAYERTICKET SOURCE TRACKING
-# Version: 2.0.0
-# ==========================================
+
+# ===================================================================
+# KINGSROOM SCHEMA (MERGED WITH ENTITY-AWARE UPDATES)
+# Version: 1.4.0
+# ===================================================================
+# 
+# Changes in this version:
+# - Added canonicalVenueId to Venue model
+# - Added entityId, visityKey, canonicalVenueId to PlayerVenue model
+# - Added entityId to PlayerEntry, PlayerResult, PlayerTransaction
+# - Added BackgroundTask model
+# - Added BackgroundTaskType, BackgroundTaskStatus enums
+# - Added reassignment mutations and types
+# ===================================================================
 
 type Player @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
@@ -67,6 +78,8 @@ type PlayerEntry @model(subscriptions: null) @auth(rules: [{ allow: private }]) 
   playerId: ID! @index(name: "byPlayer", sortKeyFields: ["gameStartDateTime"])
   gameId: ID! @index(name: "byGame")
   venueId: ID @index(name: "byVenue")
+  
+  # NEW: Entity that ran the game (for entity-level analytics)
   entityId: ID @index(name: "byEntityEntry", sortKeyFields: ["gameStartDateTime"])
   
   status: PlayerEntryStatus!
@@ -80,8 +93,9 @@ type PlayerEntry @model(subscriptions: null) @auth(rules: [{ allow: private }]) 
   player: Player @belongsTo(fields: ["playerId"])
   game: Game @belongsTo(fields: ["gameId"])
 
+  # Multi-day tournament tracking
   isMultiDayTournament: Boolean
-  qualifyingGameId: ID
+  qualifyingGameId: ID  # The child game they qualified from
   entryType: EntryType @default(value: "INITIAL")
   recordType: String @default(value: "ORIGINAL") @index(name: "byRecordType", sortKeyFields: ["gameStartDateTime"])
 }
@@ -101,30 +115,40 @@ type PlayerResult @model(subscriptions: null) @auth(rules: [{ allow: private }])
   game: Game @belongsTo(fields: ["gameId"])
   recordType: String @default(value: "ORIGINAL") @index(name: "byRecordTypeResult", sortKeyFields: ["gameStartDateTime"])
   venueId: ID @index(name: "byVenueResult", sortKeyFields: ["gameStartDateTime"])
+  
+  # NEW: Entity that ran the game (for entity-level analytics)
   entityId: ID @index(name: "byEntityResult", sortKeyFields: ["gameStartDateTime"])
 
   # Consolidation tracking
   isConsolidatedRecord: Boolean
-  sourceEntryCount: Int
-  sourceBuyInCount: Int
-  totalBuyInsPaid: Float
-  netProfitLoss: Float
-  consolidatedIntoGameId: ID
+  sourceEntryCount: Int        # How many flights this represents
+  sourceBuyInCount: Int        # How many buy-ins this represents
+  totalBuyInsPaid: Float       # Actual amount player paid
+  netProfitLoss: Float         # amountWon - totalBuyInsPaid
+  consolidatedIntoGameId: ID   # Points to parent game (for child results)
 }
 
 type PlayerVenue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   
+  # Core relationships
   playerId: ID! @index(name: "byPlayer", sortKeyFields: ["visityKey"])
   player: Player @belongsTo(fields: ["playerId"])
   
   venueId: ID! @index(name: "byVenue", sortKeyFields: ["playerId"])
   venue: Venue @belongsTo(fields: ["venueId"])
   
+  # NEW: Entity that ran the games (enables entity+venue analytics)
   entityId: ID! @index(name: "byEntityPlayerVenue", sortKeyFields: ["venueId"])
+  
+  # NEW: Composite key for unique constraint and fast lookups
+  # Format: "{playerId}#{entityId}#{venueId}"
   visityKey: String @index(name: "byVisitKey", queryField: "playerVenueByVisitKey")
+  
+  # NEW: Link to canonical venue for cross-entity aggregation
   canonicalVenueId: ID @index(name: "byCanonicalVenuePlayer", sortKeyFields: ["playerId"])
   
+  # Stats for this player at this venue FOR THIS ENTITY
   totalGamesPlayed: Int
   averageBuyIn: Float
   totalBuyIns: Float
@@ -133,6 +157,7 @@ type PlayerVenue @model(subscriptions: null) @auth(rules: [{ allow: private }]) 
   firstPlayedDate: AWSDateTime
   lastPlayedDate: AWSDateTime
   
+  # Targeting
   targetingClassification: PlayerVenueTargetingClassification!
 }
 
@@ -148,6 +173,8 @@ type PlayerTransaction @model(subscriptions: null) @auth(rules: [{ allow: privat
   player: Player @belongsTo(fields: ["playerId"])
   gameId: ID @index(name: "byGame")
   venueId: ID @index(name: "byVenueTransaction", sortKeyFields: ["transactionDate"])
+  
+  # NEW: Entity that ran the game/transaction (for entity-level analytics)
   entityId: ID @index(name: "byEntityTransaction", sortKeyFields: ["transactionDate"])
 }
 
@@ -188,10 +215,6 @@ type KnownPlayerIdentity @model(subscriptions: null) @auth(rules: [{ allow: priv
   player: Player @belongsTo(fields: ["playerId"])
 }
 
-# ===================================================================
-# TICKET TEMPLATE - Defines ticket programs (e.g., "Sydney Millions $250")
-# ===================================================================
-
 type TicketTemplate @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   name: String!
@@ -201,12 +224,12 @@ type TicketTemplate @model(subscriptions: null) @auth(rules: [{ allow: private }
   
   # === SOURCE TRACKING ===
   # The recurring game that generates these tickets (for regular tournaments)
-  # Note: No @belongsTo - use index to query templates by origin game
   originGameId: ID @index(name: "byOriginGame")
+  originGame: Game @belongsTo(fields: ["originGameId"])
   
   # The target game these tickets can be used in (if specific)
-  # Note: No @belongsTo - use index to query templates by target game
   targetGameId: ID @index(name: "byTargetGame")
+  targetGame: Game @belongsTo(fields: ["targetGameId"])
   
   # Entity that owns this ticket program
   entityId: ID @index(name: "byEntityTemplate")
@@ -220,23 +243,18 @@ type TicketTemplate @model(subscriptions: null) @auth(rules: [{ allow: private }
   updatedAt: AWSDateTime!
 }
 
-# ===================================================================
-# PLAYER TICKET - Individual ticket awarded to a player
-# UPDATED: Now tracks which game the ticket was won from
-# ===================================================================
-
 type PlayerTicket @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   
   # === CORE RELATIONSHIPS ===
-  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["assignedAt"])
+  playerId: ID! @index(name: "byPlayer")
   player: Player @belongsTo(fields: ["playerId"])
   
   ticketTemplateId: ID! @index(name: "byTicketTemplate")
   ticketTemplate: TicketTemplate @belongsTo(fields: ["ticketTemplateId"])
   
   # === NEW: SOURCE TRACKING ===
-  # The game where this ticket was WON (enables Game.ticketsAwarded relationship)
+  # The game where this ticket was WON
   wonFromGameId: ID @index(name: "byWonFromGame", sortKeyFields: ["assignedAt"], queryField: "ticketsByWonFromGame")
   wonFromGame: Game @belongsTo(fields: ["wonFromGameId"])
   
@@ -248,7 +266,7 @@ type PlayerTicket @model(subscriptions: null) @auth(rules: [{ allow: private }])
   venueId: ID @index(name: "byVenueTicket", sortKeyFields: ["assignedAt"])
   
   # === TICKET STATUS ===
-  status: TicketStatus!
+  status: TicketStatus!                    # ACTIVE, EXPIRED, USED
   assignedAt: AWSDateTime!
   expiryDate: AWSDateTime
   
@@ -258,10 +276,11 @@ type PlayerTicket @model(subscriptions: null) @auth(rules: [{ allow: private }])
   
   # === DENORMALIZED TICKET INFO ===
   # Stored for quick access without joining to TicketTemplate
-  ticketValue: Float
-  programName: String
-  awardReason: String
-
+  ticketValue: Float                       # Dollar value of the ticket
+  programName: String                      # e.g., "Sydney Millions"
+  awardReason: String                      # e.g., "Finished 3rd place"
+  
+  # === METADATA ===
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -291,10 +310,6 @@ type PlayerMarketingPreferences @model(subscriptions: null) @auth(rules: [{ allo
   player: Player @belongsTo(fields: ["playerId"])
 }
 
-# ===================================================================
-# INPUT TYPES
-# ===================================================================
-
 input SavePlayerDataInput {
   allPlayers: [SavePlayerInfoInput!]!
   totalInitialEntries: Int!
@@ -322,68 +337,4 @@ input SaveProcessingOptionsInput {
   validateOnly: Boolean
   doNotScrape: Boolean
   priority: String
-}
-
-# ===================================================================
-# TICKET MANAGEMENT INPUTS
-# ===================================================================
-
-input AwardTicketInput {
-  playerId: ID!
-  gameId: ID!
-  position: Int!
-  ticketValue: Float
-  programName: String
-  expiryDays: Int
-}
-
-input RedeemTicketInput {
-  ticketId: ID!
-  gameId: ID!
-}
-
-input BulkAwardTicketsInput {
-  gameId: ID!
-  awards: [TicketAwardInput!]!
-  ticketValue: Float
-  programName: String
-}
-
-input TicketAwardInput {
-  playerId: ID!
-  position: Int!
-}
-
-# ===================================================================
-# TICKET MANAGEMENT OUTPUTS
-# ===================================================================
-
-type AwardTicketResult {
-  success: Boolean!
-  ticketId: ID
-  playerId: ID
-  ticketValue: Float
-  error: String
-}
-
-type BulkAwardTicketsResult {
-  success: Boolean!
-  totalAwarded: Int!
-  totalFailed: Int!
-  results: [AwardTicketResult!]!
-}
-
-type TicketAwardSummary {
-  gameId: ID!
-  gameName: String
-  ticketsAwarded: Int!
-  ticketValue: Float
-  totalTicketValue: Float
-  programName: String
-  positions: [Int]
-}
-
-type PlayerTicketConnection {
-  items: [PlayerTicket!]!
-  nextToken: String
 }

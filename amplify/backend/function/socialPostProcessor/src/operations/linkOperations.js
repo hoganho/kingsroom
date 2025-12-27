@@ -1,15 +1,9 @@
 /**
  * operations/linkOperations.js
  * Manual link management operations
- * 
- * UPDATED: v2.0.0
- * - Added integration with socialDataAggregator Lambda
- * - Link/unlink operations now trigger social data re-aggregation
- * - Verify/reject operations update game social data counts
  */
 
 const { v4: uuidv4 } = require('uuid');
-const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 const { 
   getSocialPost,
   updateSocialPost,
@@ -21,76 +15,11 @@ const {
   getLinksBySocialPost
 } = require('../utils/graphql');
 
-// Lambda client for invoking socialDataAggregator
-const lambdaClient = new LambdaClient({
-  region: process.env.AWS_REGION || 'ap-southeast-2'
-});
-
-// ===================================================================
-// SOCIAL DATA AGGREGATOR INTEGRATION
-// ===================================================================
-
-/**
- * Trigger social data aggregation for a game
- * This re-aggregates all linked social post data and updates the Game record
- * 
- * @param {string} gameId - Game ID to aggregate data for
- * @param {Object} options - Aggregation options
- * @returns {Object} Aggregation result
- */
-const triggerSocialDataAggregation = async (gameId, options = {}) => {
-  const functionName = process.env.FUNCTION_SOCIALDATAAGGREGATOR_NAME || 
-                       `socialDataAggregator-${process.env.ENV || 'staging'}`;
-  
-  console.log(`[LINK] Triggering social data aggregation for game ${gameId}`);
-  
-  try {
-    const response = await lambdaClient.send(new InvokeCommand({
-      FunctionName: functionName,
-      InvocationType: options.async ? 'Event' : 'RequestResponse',
-      Payload: JSON.stringify({
-        gameId: gameId,
-        options: {
-          triggerFinancials: options.triggerFinancials ?? true,
-          overridePrizepool: options.overridePrizepool ?? false,
-          returnAggregation: !options.async
-        }
-      })
-    }));
-    
-    if (options.async) {
-      console.log(`[LINK] Aggregation triggered async, status: ${response.StatusCode}`);
-      return { triggered: true, async: true, statusCode: response.StatusCode };
-    }
-    
-    // Parse sync response
-    const payloadString = new TextDecoder().decode(response.Payload);
-    const result = JSON.parse(payloadString);
-    
-    console.log(`[LINK] Aggregation complete:`, {
-      success: result.success,
-      linkedPostCount: result.linkedPostCount,
-      dataExtracted: result.dataExtracted
-    });
-    
-    return result;
-    
-  } catch (error) {
-    console.error(`[LINK] Failed to trigger aggregation:`, error);
-    // Don't throw - aggregation failure shouldn't break the link operation
-    return { triggered: false, error: error.message };
-  }
-};
-
-// ===================================================================
-// LINK OPERATIONS
-// ===================================================================
-
 /**
  * Manually link a social post to a game
  * 
  * @param {Object} input - ManualLinkInput
- * @returns {Object} SocialPostGameLink with aggregation result
+ * @returns {Object} SocialPostGameLink
  */
 const linkSocialPostToGame = async (input) => {
   const { 
@@ -98,11 +27,7 @@ const linkSocialPostToGame = async (input) => {
     gameId, 
     isPrimaryGame = false, 
     mentionOrder,
-    notes,
-    // NEW: Options for aggregation
-    skipAggregation = false,
-    asyncAggregation = false,
-    triggerFinancials = true
+    notes 
   } = input;
   
   console.log(`[LINK] Creating manual link: ${socialPostId} -> ${gameId}`);
@@ -180,38 +105,17 @@ const linkSocialPostToGame = async (input) => {
   
   console.log(`[LINK] Created link: ${createdLink.id}`);
   
-  // =========================================================
-  // NEW: Trigger social data aggregation
-  // =========================================================
-  let aggregationResult = null;
-  if (!skipAggregation) {
-    aggregationResult = await triggerSocialDataAggregation(gameId, {
-      async: asyncAggregation,
-      triggerFinancials: triggerFinancials
-    });
-  }
-  
-  return {
-    ...createdLink,
-    aggregationResult
-  };
+  return createdLink;
 };
 
 /**
  * Remove a link between social post and game
  * 
  * @param {Object} input - UnlinkInput
- * @returns {Object} Result with aggregation status
+ * @returns {boolean} Success
  */
 const unlinkSocialPostFromGame = async (input) => {
-  const { 
-    linkId, 
-    reason,
-    // NEW: Options for aggregation
-    skipAggregation = false,
-    asyncAggregation = true,
-    triggerFinancials = true
-  } = input;
+  const { linkId, reason } = input;
   
   console.log(`[UNLINK] Removing link: ${linkId}`);
   
@@ -221,7 +125,7 @@ const unlinkSocialPostFromGame = async (input) => {
     throw new Error(`Link not found: ${linkId}`);
   }
   
-  const { socialPostId, gameId, isPrimaryGame } = link;
+  const { socialPostId, isPrimaryGame } = link;
   
   // Delete the link
   await deleteSocialPostGameLink(linkId);
@@ -251,26 +155,7 @@ const unlinkSocialPostFromGame = async (input) => {
   
   console.log(`[UNLINK] Link removed successfully`);
   
-  // =========================================================
-  // NEW: Trigger social data aggregation for the game
-  // This will update the game's linked post counts and
-  // re-aggregate data without the removed post
-  // =========================================================
-  let aggregationResult = null;
-  if (!skipAggregation) {
-    aggregationResult = await triggerSocialDataAggregation(gameId, {
-      async: asyncAggregation,
-      triggerFinancials: triggerFinancials
-    });
-  }
-  
-  return {
-    success: true,
-    linkId,
-    gameId,
-    socialPostId,
-    aggregationResult
-  };
+  return true;
 };
 
 /**
@@ -280,13 +165,7 @@ const unlinkSocialPostFromGame = async (input) => {
  * @returns {Object} Updated SocialPostGameLink
  */
 const verifySocialPostLink = async (input) => {
-  const { 
-    linkId, 
-    notes,
-    // NEW: Options for aggregation
-    skipAggregation = false,
-    triggerFinancials = true
-  } = input;
+  const { linkId, notes } = input;
   
   console.log(`[VERIFY] Verifying link: ${linkId}`);
   
@@ -318,22 +197,7 @@ const verifySocialPostLink = async (input) => {
   
   console.log(`[VERIFY] Link verified successfully`);
   
-  // =========================================================
-  // NEW: Trigger aggregation since verified links may have
-  // higher priority in data extraction
-  // =========================================================
-  let aggregationResult = null;
-  if (!skipAggregation) {
-    aggregationResult = await triggerSocialDataAggregation(link.gameId, {
-      async: true,  // Verification doesn't need to wait
-      triggerFinancials: triggerFinancials
-    });
-  }
-  
-  return {
-    ...updatedLink,
-    aggregationResult
-  };
+  return updatedLink;
 };
 
 /**
@@ -343,13 +207,7 @@ const verifySocialPostLink = async (input) => {
  * @returns {Object} Updated SocialPostGameLink
  */
 const rejectSocialPostLink = async (input) => {
-  const { 
-    linkId, 
-    reason,
-    // NEW: Options for aggregation
-    skipAggregation = false,
-    triggerFinancials = true
-  } = input;
+  const { linkId, reason } = input;
   
   console.log(`[REJECT] Rejecting link: ${linkId}`);
   
@@ -363,7 +221,7 @@ const rejectSocialPostLink = async (input) => {
     throw new Error(`Link not found: ${linkId}`);
   }
   
-  const { socialPostId, gameId, isPrimaryGame } = link;
+  const { socialPostId, isPrimaryGame } = link;
   
   // Update to rejected
   const now = new Date().toISOString();
@@ -400,113 +258,7 @@ const rejectSocialPostLink = async (input) => {
   
   console.log(`[REJECT] Link rejected successfully`);
   
-  // =========================================================
-  // NEW: Trigger aggregation to remove rejected post's data
-  // =========================================================
-  let aggregationResult = null;
-  if (!skipAggregation) {
-    aggregationResult = await triggerSocialDataAggregation(gameId, {
-      async: true,  // Rejection doesn't need to wait
-      triggerFinancials: triggerFinancials
-    });
-  }
-  
-  return {
-    ...updatedLink,
-    aggregationResult
-  };
-};
-
-// ===================================================================
-// BULK OPERATIONS
-// ===================================================================
-
-/**
- * Bulk link multiple social posts to a single game
- * Useful when multiple result/promo posts reference the same tournament
- * 
- * @param {Object} input - BulkLinkInput
- * @returns {Object} Bulk operation result
- */
-const bulkLinkSocialPostsToGame = async (input) => {
-  const {
-    socialPostIds,
-    gameId,
-    skipAggregation = false,
-    triggerFinancials = true
-  } = input;
-  
-  console.log(`[BULK_LINK] Linking ${socialPostIds.length} posts to game ${gameId}`);
-  
-  const results = [];
-  
-  for (let i = 0; i < socialPostIds.length; i++) {
-    const socialPostId = socialPostIds[i];
-    
-    try {
-      const result = await linkSocialPostToGame({
-        socialPostId,
-        gameId,
-        isPrimaryGame: i === 0,  // First one is primary
-        mentionOrder: i + 1,
-        skipAggregation: true  // We'll aggregate once at the end
-      });
-      
-      results.push({
-        socialPostId,
-        success: true,
-        linkId: result.id
-      });
-      
-    } catch (error) {
-      results.push({
-        socialPostId,
-        success: false,
-        error: error.message
-      });
-    }
-  }
-  
-  // Trigger aggregation once for all links
-  let aggregationResult = null;
-  if (!skipAggregation) {
-    aggregationResult = await triggerSocialDataAggregation(gameId, {
-      async: false,  // Wait for aggregation since bulk ops want to see results
-      triggerFinancials: triggerFinancials
-    });
-  }
-  
-  return {
-    gameId,
-    totalRequested: socialPostIds.length,
-    successful: results.filter(r => r.success).length,
-    failed: results.filter(r => !r.success).length,
-    results,
-    aggregationResult
-  };
-};
-
-/**
- * Re-aggregate social data for a game
- * Useful for manual trigger after data corrections
- * 
- * @param {Object} input - ReaggregateInput
- * @returns {Object} Aggregation result
- */
-const reaggregateSocialDataForGame = async (input) => {
-  const {
-    gameId,
-    triggerFinancials = true,
-    overridePrizepool = false
-  } = input;
-  
-  console.log(`[REAGGREGATE] Manual re-aggregation for game ${gameId}`);
-  
-  return await triggerSocialDataAggregation(gameId, {
-    async: false,
-    triggerFinancials,
-    overridePrizepool
-  });
+  return updatedLink;
 };
 
 // ===================================================================
@@ -517,8 +269,5 @@ module.exports = {
   linkSocialPostToGame,
   unlinkSocialPostFromGame,
   verifySocialPostLink,
-  rejectSocialPostLink,
-  bulkLinkSocialPostsToGame,
-  reaggregateSocialDataForGame,
-  triggerSocialDataAggregation
+  rejectSocialPostLink
 };
