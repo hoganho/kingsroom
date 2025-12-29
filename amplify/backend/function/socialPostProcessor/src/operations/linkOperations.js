@@ -16,6 +16,19 @@ const {
 } = require('../utils/graphql');
 
 /**
+ * Helper to add DataStore required fields to a record
+ * These fields are required for Amplify DataStore sync to work properly
+ */
+const addDataStoreFields = (record) => {
+  return {
+    ...record,
+    _version: 1,
+    _lastChangedAt: Date.now(),
+    _deleted: null,
+  };
+};
+
+/**
  * Manually link a social post to a game
  * 
  * @param {Object} input - ManualLinkInput
@@ -70,9 +83,9 @@ const linkSocialPostToGame = async (input) => {
     }
   }
   
-  // Create the link
+  // Create the link with DataStore fields
   const now = new Date().toISOString();
-  const link = {
+  const link = addDataStoreFields({
     id: uuidv4(),
     socialPostId,
     gameId,
@@ -83,8 +96,10 @@ const linkSocialPostToGame = async (input) => {
     isPrimaryGame: shouldBePrimary,
     mentionOrder: newMentionOrder,
     linkedAt: now,
-    linkedBy: 'MANUAL'  // Could be user ID if available
-  };
+    linkedBy: 'MANUAL',  // Could be user ID if available
+    createdAt: now,
+    updatedAt: now,
+  });
   
   const createdLink = await createSocialPostGameLink(link);
   
@@ -269,5 +284,6 @@ module.exports = {
   linkSocialPostToGame,
   unlinkSocialPostFromGame,
   verifySocialPostLink,
-  rejectSocialPostLink
+  rejectSocialPostLink,
+  addDataStoreFields  // Export for use in other files
 };

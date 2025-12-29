@@ -364,18 +364,17 @@ const updateS3StorageWithParsedData = async (s3Key, scrapedData, foundKeys, opti
         // Find the S3Storage record
         let queryResult = null;
         
-        // Strategy 1: By tournamentId + entityId
+        // Strategy 1: By tournamentId + entityId using byEntityTournament GSI (PREFERRED)
+        // This GSI doesn't require scrapedAt, so it finds all records
         if (tournamentId && entityId) {
             queryResult = await ddbDocClient.send(new QueryCommand({
                 TableName: s3StorageTable,
-                IndexName: 'byTournamentId',
-                KeyConditionExpression: 'tournamentId = :tid',
-                FilterExpression: 'entityId = :eid',
+                IndexName: 'byEntityTournament',
+                KeyConditionExpression: 'entityId = :eid AND tournamentId = :tid',
                 ExpressionAttributeValues: {
                     ':tid': tournamentId,
                     ':eid': entityId
                 },
-                ScanIndexForward: false,
                 Limit: 1
             }));
         }

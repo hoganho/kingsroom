@@ -78,6 +78,10 @@
     {
       "cloudFormationParameterName": "saveGameFunctionName",
       "environmentVariableName": "SAVE_GAME_FUNCTION_NAME"
+    },
+    {
+      "cloudFormationParameterName": "scraperApiKey",
+      "environmentVariableName": "SCRAPER_API_KEY"
     }
   ]
 }

@@ -2,26 +2,17 @@
  * This file contains custom, lean GraphQL queries for specific components.
  * This avoids over-fetching data and prevents errors from the auto-generated
  * "greedy" queries that try to fetch all nested relationships.
+ * 
+ * QUERY NAMING CONVENTIONS:
+ * - *Shallow  = Ultra-minimal fields (id, name only) for dropdowns/selects
+ * - *Simple   = Core fields + stats, NO nested relationships (for tables/lists)
+ * - *ForDebug = Development/debugging with some nested data
+ * - *WithX    = Includes specific nested relationship X
  */
 
-// Lean query for the Venues dropdown in GameCard
-export const listVenuesForDropdown = /* GraphQL */ `
-  query ListVenuesForDropdown(
-    $filter: ModelVenueFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listVenues(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        name
-        venueNumber
-        entityId
-      }
-      nextToken
-    }
-  }
-`;
+// ===================================================================
+// SHALLOW QUERIES (Ultra-minimal for dropdowns/selects)
+// ===================================================================
 
 export const listEntitiesShallow = /* GraphQL */ `
   query ListEntitiesShallow(
@@ -66,6 +57,415 @@ export const listVenuesShallow = /* GraphQL */ `
   }
 `;
 
+// Lean query for the Venues dropdown in GameCard
+export const listVenuesForDropdown = /* GraphQL */ `
+  query ListVenuesForDropdown(
+    $filter: ModelVenueFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listVenues(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        venueNumber
+        entityId
+      }
+      nextToken
+    }
+  }
+`;
+
+export const listVenuesForDashboard = /* GraphQL */ `
+  query ListVenuesForDashboard(
+    $filter: ModelVenueFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listVenues(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        entityId
+        logo
+      }
+      nextToken
+    }
+  }
+`;
+
+// ===================================================================
+// SIMPLE QUERIES (Core fields + stats, NO nested relationships)
+// Use these for tables and list views to reduce AWS costs
+// ===================================================================
+
+export const listEntitiesSimple = /* GraphQL */ `
+  query ListEntitiesSimple(
+    $filter: ModelEntityFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listEntities(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        defaultVenueId
+        gameCount
+        venueCount
+        lastGameAddedAt
+        lastDataRefreshedAt
+        seriesGameCount
+        lastSeriesGameAddedAt
+        createdAt
+        updatedAt
+        _version
+        _lastChangedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const getEntitySimple = /* GraphQL */ `
+  query GetEntitySimple($id: ID!) {
+    getEntity(id: $id) {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      defaultVenueId
+      gameCount
+      venueCount
+      lastGameAddedAt
+      lastDataRefreshedAt
+      seriesGameCount
+      lastSeriesGameAddedAt
+      createdAt
+      updatedAt
+      _version
+      _lastChangedAt
+    }
+  }
+`;
+
+export const listVenuesSimple = /* GraphQL */ `
+  query ListVenuesSimple(
+    $filter: ModelVenueFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listVenues(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        fee
+        isSpecial
+        logo
+        gameCount
+        lastGameAddedAt
+        lastDataRefreshedAt
+        seriesGameCount
+        lastSeriesGameAddedAt
+        canonicalVenueId
+        entityId
+        createdAt
+        updatedAt
+        _version
+        _lastChangedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const getVenueSimple = /* GraphQL */ `
+  query GetVenueSimple($id: ID!) {
+    getVenue(id: $id) {
+      id
+      venueNumber
+      name
+      aliases
+      address
+      city
+      country
+      fee
+      isSpecial
+      logo
+      gameCount
+      lastGameAddedAt
+      lastDataRefreshedAt
+      seriesGameCount
+      lastSeriesGameAddedAt
+      canonicalVenueId
+      entityId
+      createdAt
+      updatedAt
+      _version
+      _lastChangedAt
+    }
+  }
+`;
+
+export const venuesByEntitySimple = /* GraphQL */ `
+  query VenuesByEntitySimple(
+    $entityId: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelVenueFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    venuesByEntity(
+      entityId: $entityId
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        fee
+        isSpecial
+        logo
+        gameCount
+        lastGameAddedAt
+        entityId
+        createdAt
+        updatedAt
+        _version
+        _lastChangedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const listSocialAccountsSimple = /* GraphQL */ `
+  query ListSocialAccountsSimple(
+    $filter: ModelSocialAccountFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listSocialAccounts(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        platform
+        platformAccountId
+        accountName
+        accountHandle
+        accountUrl
+        profileImageUrl
+        followerCount
+        postCount
+        status
+        isScrapingEnabled
+        lastScrapedAt
+        lastSuccessfulScrapeAt
+        consecutiveFailures
+        hasPostAccess
+        category
+        website
+        entityId
+        venueId
+        createdAt
+        updatedAt
+        _version
+        _lastChangedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const listScrapeURLsSimple = /* GraphQL */ `
+  query ListScrapeURLsSimple(
+    $entityId: ID
+    $status: ScrapeURLStatus
+    $limit: Int
+    $nextToken: String
+  ) {
+    listScrapeURLs(
+      entityId: $entityId
+      status: $status
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        url
+        entityId
+        tournamentId
+        status
+        latestS3Key
+        lastScrapedAt
+        doNotScrape
+        placedIntoDatabase
+        firstScrapedAt
+        timesScraped
+        timesSuccessful
+        timesFailed
+        createdAt
+        updatedAt
+        _version
+        _lastChangedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const listRecurringGamesSimple = /* GraphQL */ `
+  query ListRecurringGamesSimple(
+    $filter: ModelRecurringGameFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listRecurringGames(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        displayName
+        entityId
+        venueId
+        dayOfWeek
+        startTime
+        frequency
+        gameType
+        gameVariant
+        typicalBuyIn
+        typicalGuarantee
+        typicalStartingStack
+        typicalRake
+        isActive
+        isPaused
+        isSignature
+        isBeginnerFriendly
+        isBounty
+        wasManuallyCreated
+        requiresReview
+        totalInstancesRun
+        avgAttendance
+        createdAt
+        updatedAt
+        _version
+        _lastChangedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const listTournamentSeriesSimple = /* GraphQL */ `
+  query ListTournamentSeriesSimple(
+    $filter: ModelTournamentSeriesFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listTournamentSeries(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        year
+        quarter
+        month
+        entityId
+        venueId
+        tournamentSeriesTitleId
+        seriesCategory
+        holidayType
+        status
+        startDate
+        endDate
+        numberOfEvents
+        guaranteedPrizepool
+        estimatedPrizepool
+        actualPrizepool
+        createdAt
+        updatedAt
+        _version
+        _lastChangedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+export const listTournamentSeriesTitlesSimple = /* GraphQL */ `
+  query ListTournamentSeriesTitlesSimple(
+    $filter: ModelTournamentSeriesTitleFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listTournamentSeriesTitles(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        title
+        aliases
+        seriesCategory
+        createdAt
+        updatedAt
+        _version
+        _lastChangedAt
+      }
+      nextToken
+    }
+  }
+`;
+
+// ===================================================================
+// QUERIES WITH SPECIFIC NESTED DATA
+// ===================================================================
+
+// Entity with venues only (no deep nesting)
+export const getEntityWithVenues = /* GraphQL */ `
+  query GetEntityWithVenues($id: ID!) {
+    getEntity(id: $id) {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      defaultVenueId
+      gameCount
+      venueCount
+      createdAt
+      updatedAt
+      _version
+      _lastChangedAt
+      venues {
+        items {
+          id
+          name
+          venueNumber
+          city
+          isSpecial
+          logo
+          gameCount
+          lastGameAddedAt
+        }
+        nextToken
+      }
+    }
+  }
+`;
+
 export const getVenueWithLogo = /* GraphQL */ `
   query GetVenueWithLogo($id: ID!) {
     getVenue(id: $id) {
@@ -90,30 +490,32 @@ export const getVenueWithLogo = /* GraphQL */ `
   }
 `;
 
-export const listVenuesForDashboard = /* GraphQL */ `
-  query ListVenuesForDashboard(
-    $filter: ModelVenueFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listVenues(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        name
-        entityId
-        logo
-      }
-      nextToken
+// ===================================================================
+// LEAN SCRAPE URL QUERIES FOR CACHING
+// ===================================================================
+
+// Lean query for ScrapeOptionsModal - only fetches cache-related fields
+export const getScrapeURLForCache = /* GraphQL */ `
+  query GetScrapeURLForCache($id: ID!) {
+    getScrapeURL(id: $id) {
+      id
+      url
+      latestS3Key
+      lastScrapedAt
+      contentHash
+      etag
+      lastModifiedHeader
+      s3StorageEnabled
+      lastContentChangeAt
+      lastCacheHitAt
     }
   }
 `;
 
-/*
- * ===================================================================
- * DEBUG QUERIES FOR PlayersPage.tsx
- * * All queries have been updated to remove the 'total' field.
- * ===================================================================
- */
+// ===================================================================
+// DEBUG QUERIES FOR PlayersPage.tsx
+// All queries have been updated to remove the 'total' field.
+// ===================================================================
 
 export const listPlayersForDebug = /* GraphQL */ `
   query ListPlayersForDebug(
@@ -440,12 +842,10 @@ export const listPlayerMarketingMessagesForDebug = /* GraphQL */ `
   }
 `;
 
-/*
- * ===================================================================
- * DEBUG QUERIES FOR GamesPage.tsx
- * * All queries have been updated to remove the 'total' field.
- * ===================================================================
- */
+// ===================================================================
+// DEBUG QUERIES FOR GamesPage.tsx
+// All queries have been updated to remove the 'total' field.
+// ===================================================================
 
 export const listGamesForDebug = /* GraphQL */ `
   query ListGamesForDebug(
@@ -508,11 +908,9 @@ export const listTournamentStructuresForDebug = /* GraphQL */ `
   }
 `;
 
-/*
- * ===================================================================
- * NEW: DEDICATED COUNT QUERIES
- * ===================================================================
- */
+// ===================================================================
+// DEDICATED COUNT QUERIES
+// ===================================================================
 
 export const getPlayerCount = /* GraphQL */ `
   query GetPlayerCount {
@@ -589,29 +987,5 @@ export const getGameCount = /* GraphQL */ `
 export const getTournamentStructureCount = /* GraphQL */ `
   query GetTournamentStructureCount {
     tournamentStructureCount
-  }
-`;
-
-/*
- * ===================================================================
- * LEAN SCRAPE URL QUERIES FOR CACHING
- * ===================================================================
- */
-
-// Lean query for ScrapeOptionsModal - only fetches cache-related fields
-export const getScrapeURLForCache = /* GraphQL */ `
-  query GetScrapeURLForCache($id: ID!) {
-    getScrapeURL(id: $id) {
-      id
-      url
-      latestS3Key
-      lastScrapedAt
-      contentHash
-      etag
-      lastModifiedHeader
-      s3StorageEnabled
-      lastContentChangeAt
-      lastCacheHitAt
-    }
   }
 `;

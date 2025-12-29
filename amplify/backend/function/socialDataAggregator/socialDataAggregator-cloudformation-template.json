@@ -164,6 +164,98 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:*:*:table/Game-*",
+                "arn:aws:dynamodb:*:*:table/Game-*/index/*",
+                "arn:aws:dynamodb:*:*:table/SocialPost-*",
+                "arn:aws:dynamodb:*:*:table/SocialPost-*/index/*",
+                "arn:aws:dynamodb:*:*:table/SocialPostGameLink-*",
+                "arn:aws:dynamodb:*:*:table/SocialPostGameLink-*/index/*",
+                "arn:aws:dynamodb:*:*:table/SocialPostGameData-*",
+                "arn:aws:dynamodb:*:*:table/SocialPostGameData-*/index/*",
+                "arn:aws:dynamodb:*:*:table/PlayerResult-*",
+                "arn:aws:dynamodb:*:*:table/PlayerResult-*/index/*",
+                "arn:aws:dynamodb:*:*:table/TicketTemplate-*",
+                "arn:aws:dynamodb:*:*:table/TicketTemplate-*/index/*",
+                "arn:aws:dynamodb:*:*:table/PlayerTicket-*",
+                "arn:aws:dynamodb:*:*:table/PlayerTicket-*/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:*:*:table/Game-*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:*:*:table/TicketTemplate-*",
+                "arn:aws:dynamodb:*:*:table/PlayerTicket-*",
+                "arn:aws:dynamodb:*:*:table/PlayerTicket-*/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:DescribeStream",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:ListStreams"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:*:*:table/SocialPostGameLink-*/stream/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "lambda:InvokeFunction"
+              ],
+              "Resource": [
+                "arn:aws:lambda:*:*:function:gameFinancialsProcessor-*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "cloudwatch:PutMetricData"
+              ],
+              "Resource": [
+                "*"
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

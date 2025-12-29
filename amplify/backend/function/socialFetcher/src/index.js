@@ -858,6 +858,7 @@ async function processAndSavePosts(account, posts) {
         commentCount: fbPost.comments?.summary?.total_count || 0,
         shareCount: fbPost.shares?.count || 0,
         postedAt,
+        postYearMonth: getPostYearMonth(postedAt),
         scrapedAt: now,
         status: 'ACTIVE',
         isPromotional: detectPromotional(fbPost.message),
@@ -913,6 +914,26 @@ function extractPageIdFromUrl(url) {
     return pathParts[0];
   } catch {
     return url;
+  }
+}
+
+/**
+ * Calculate postYearMonth from a date string
+ * Format: "YYYY-MM" (e.g., "2025-01" for January 2025)
+ * 
+ * @param {string} dateString - ISO date string
+ * @returns {string|null} Year-month string or null
+ */
+function getPostYearMonth(dateString) {
+  if (!dateString) return null;
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  } catch {
+    return null;
   }
 }
 

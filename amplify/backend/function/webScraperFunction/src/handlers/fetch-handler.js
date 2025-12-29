@@ -63,13 +63,15 @@ const getTournamentIdFromUrl = (url) => {
  * Look up existing S3Storage record for a tournament
  * This restores the S3 cache link when ScrapeURL was deleted but S3Storage exists
  * 
- * GSI Names (from schema):
+ * GSI Names (from updated schema):
+ * - byEntityTournament: entityId (partition) + tournamentId (sort) ← NEW! PREFERRED
  * - byTournamentId: tournamentId (partition) + scrapedAt (sort)
  * - byURL: url (partition) + scrapedAt (sort)
  * - byS3Key: s3Key (partition)
  * 
- * IMPORTANT: When querying by tournamentId, we MUST also filter by entityId
- * because multiple entities can have the same tournament IDs (1, 2, 3, etc.)
+ * UPDATED v2.4.0: Now uses byEntityTournament GSI as primary method.
+ * This GSI doesn't require scrapedAt, so it finds records that were
+ * migrated without scrapedAt.
  * 
  * @param {string} url - Tournament URL
  * @param {string} entityId - Entity ID (REQUIRED for correct filtering)
@@ -84,8 +86,43 @@ const findExistingS3Storage = async (url, entityId, tournamentId, context) => {
     console.log(`[FetchHandler] Looking for existing S3Storage for tournamentId: ${tournamentId}, entityId: ${entityId}`);
     
     // ─────────────────────────────────────────────────────────────────
-    // Method 1: Query by URL GSI (PREFERRED - URL is unique per entity)
+    // Method 1: NEW! Query by entityId + tournamentId GSI (PREFERRED)
+    // GSI: byEntityTournament (entityId + tournamentId)
+    // 
+    // This is now the preferred method because:
+    // 1. It directly queries by both entityId AND tournamentId
+    // 2. No FilterExpression needed (both are key conditions)
+    // 3. Works even if scrapedAt is missing (unlike byTournamentId)
+    // ─────────────────────────────────────────────────────────────────
+    if (entityId && tournamentId) {
+        try {
+            const queryResult = await ddbDocClient.send(new QueryCommand({
+                TableName: tableName,
+                IndexName: 'byEntityTournament',
+                KeyConditionExpression: 'entityId = :eid AND tournamentId = :tid',
+                ExpressionAttributeValues: { 
+                    ':eid': entityId,
+                    ':tid': tournamentId
+                },
+                Limit: 1
+            }));
+            
+            if (queryResult.Items && queryResult.Items.length > 0) {
+                const item = queryResult.Items[0];
+                console.log(`[FetchHandler] ✅ Found S3Storage via byEntityTournament GSI: ${item.s3Key}`);
+                return item;
+            }
+            console.log(`[FetchHandler] No S3Storage found via byEntityTournament GSI`);
+        } catch (gsiError) {
+            console.log(`[FetchHandler] byEntityTournament GSI query failed: ${gsiError.message}`);
+            // Fall through to other methods
+        }
+    }
+    
+    // ─────────────────────────────────────────────────────────────────
+    // Method 2: Query by URL GSI (FALLBACK)
     // GSI: byURL (url + scrapedAt)
+    // Note: Won't find records missing scrapedAt
     // ─────────────────────────────────────────────────────────────────
     if (url) {
         try {
@@ -110,14 +147,11 @@ const findExistingS3Storage = async (url, entityId, tournamentId, context) => {
     }
     
     // ─────────────────────────────────────────────────────────────────
-    // Method 2: Query by tournamentId GSI WITH entityId filter
+    // Method 3: Query by tournamentId GSI WITH entityId filter (LEGACY)
     // GSI: byTournamentId (tournamentId + scrapedAt)
     // 
-    // CRITICAL FIX (v2.3.0): Must filter by entityId because multiple
-    // entities share the same tournament ID numbers!
-    // 
-    // NOTE: DynamoDB applies Limit BEFORE FilterExpression, so we need
-    // to query more records to ensure we find the matching entity.
+    // NOTE: This method won't find records missing scrapedAt!
+    // Keeping for backwards compatibility.
     // ─────────────────────────────────────────────────────────────────
     if (entityId) {
         try {

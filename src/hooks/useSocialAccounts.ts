@@ -4,7 +4,7 @@ import { generateClient } from 'aws-amplify/api';
 import { useEntity } from '../contexts/EntityContext';
 
 // Import generated GraphQL operations
-import { listSocialAccounts } from '../graphql/queries';
+import { listSocialAccountsSimple as listSocialAccounts } from '../graphql/customQueries';
 import { 
   createSocialAccount, 
   updateSocialAccount, 

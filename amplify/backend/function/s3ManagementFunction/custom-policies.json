@@ -16,10 +16,8 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/byURL",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/byTournamentId",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/byEntityScrapeURL"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*/index/*"
     ]
   },
   {
@@ -30,10 +28,8 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging/index/byURL",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging/index/byEntity",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging/index/byScrapeURL"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*/index/*"
     ]
   },
   {

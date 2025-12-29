@@ -117,6 +117,7 @@ const scraperNavigation: NavItem[] = [
 const debugNavigation: NavItem[] = [
   { name: "Games Debug", href: "/debug/games", icon: BugAntIcon, requiredPaths: ["/debug/games"] },
   { name: "Players Debug", href: "/debug/players", icon: BugAntIcon, requiredPaths: ["/debug/players"] },
+  { name: "Social Debug", href: "/debug/social", icon: BugAntIcon, requiredPaths: ["/debug/social"] },
   { name: "Database Monitor", href: "/debug/database-monitor", icon: BugAntIcon, requiredPaths: ["/debug/database-monitor"] },
 ]
 

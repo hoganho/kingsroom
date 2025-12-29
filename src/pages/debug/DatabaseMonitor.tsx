@@ -4,7 +4,8 @@ import { generateClient } from 'aws-amplify/api';
 import { getMonitoring } from '../../utils/enhanced-monitoring';
 import { 
     Database, Server, Monitor, Activity, RefreshCw, 
-    Play, Users, DollarSign, Globe, Share2, Shield, BarChart3 
+    Play, Users, DollarSign, Globe, Share2, Shield, BarChart3,
+    FileText
 } from 'lucide-react';
 
 // ==========================================
@@ -21,7 +22,9 @@ const SCHEMA_GROUPS = [
             { name: 'Venue', plural: 'Venues' },
             { name: 'VenueDetails', plural: 'VenueDetails' },
             { name: 'Asset', plural: 'Assets' },
-            { name: 'BackgroundTask', plural: 'BackgroundTasks' }
+            { name: 'BackgroundTask', plural: 'BackgroundTasks' },
+            { name: 'DataSync', plural: 'DataSyncs' },
+            { name: 'S3Storage', plural: 'S3Storages' },
         ]
     },
     {
@@ -33,10 +36,11 @@ const SCHEMA_GROUPS = [
             { name: 'RecurringGame', plural: 'RecurringGames' },
             { name: 'TournamentSeries', plural: 'TournamentSeries' },
             { name: 'TournamentSeriesTitle', plural: 'TournamentSeriesTitles' },
+            { name: 'TournamentSeriesMetrics', plural: 'TournamentSeriesMetrics' },
             { name: 'TournamentStructure', plural: 'TournamentStructures' },
             { name: 'TournamentLevelData', plural: 'TournamentLevelData' },
             { name: 'CashStructure', plural: 'CashStructures' },
-            { name: 'RakeStructure', plural: 'RakeStructures' }
+            { name: 'RakeStructure', plural: 'RakeStructures' },
         ]
     },
     {
@@ -50,9 +54,16 @@ const SCHEMA_GROUPS = [
             { name: 'PlayerResult', plural: 'PlayerResults' },
             { name: 'PlayerVenue', plural: 'PlayerVenues' },
             { name: 'KnownPlayerIdentity', plural: 'KnownPlayerIdentities' },
-            { name: 'PlayerMarketingPreferences', plural: 'PlayerMarketingPreferences' },
+        ]
+    },
+    {
+        id: 'marketing',
+        title: 'Marketing & Messages',
+        icon: <FileText className="w-4 h-4 text-cyan-600" />,
+        tables: [
+            { name: 'MarketingMessage', plural: 'MarketingMessages' },
             { name: 'PlayerMarketingMessage', plural: 'PlayerMarketingMessages' },
-            { name: 'MarketingMessage', plural: 'MarketingMessages' }
+            { name: 'PlayerMarketingPreferences', plural: 'PlayerMarketingPreferences' },
         ]
     },
     {
@@ -66,9 +77,9 @@ const SCHEMA_GROUPS = [
             { name: 'PlayerTicket', plural: 'PlayerTickets' },
             { name: 'TicketTemplate', plural: 'TicketTemplates' },
             { name: 'GameCost', plural: 'GameCosts' },
-            { name: 'GameCostLineItem', plural: 'GameCostLineItems' },
             { name: 'GameCostItem', plural: 'GameCostItems' },
-            { name: 'GameFinancialSnapshot', plural: 'GameFinancialSnapshots' }
+            { name: 'GameCostLineItem', plural: 'GameCostLineItems' },
+            { name: 'GameFinancialSnapshot', plural: 'GameFinancialSnapshots' },
         ]
     },
     {
@@ -78,7 +89,7 @@ const SCHEMA_GROUPS = [
         tables: [
             { name: 'EntityMetrics', plural: 'EntityMetrics' },
             { name: 'VenueMetrics', plural: 'VenueMetrics' },
-            { name: 'RecurringGameMetrics', plural: 'RecurringGameMetrics' }
+            { name: 'RecurringGameMetrics', plural: 'RecurringGameMetrics' },
         ]
     },
     {
@@ -87,12 +98,10 @@ const SCHEMA_GROUPS = [
         icon: <Globe className="w-4 h-4 text-orange-600" />,
         tables: [
             { name: 'ScraperJob', plural: 'ScraperJobs' },
+            { name: 'ScraperState', plural: 'ScraperStates' },
             { name: 'ScrapeURL', plural: 'ScrapeURLs' },
             { name: 'ScrapeAttempt', plural: 'ScrapeAttempts' },
-            { name: 'ScraperState', plural: 'ScraperStates' },
             { name: 'ScrapeStructure', plural: 'ScrapeStructures' },
-            { name: 'S3Storage', plural: 'S3Storages' },
-            { name: 'DataSync', plural: 'DataSyncs' }
         ]
     },
     {
@@ -102,8 +111,11 @@ const SCHEMA_GROUPS = [
         tables: [
             { name: 'SocialAccount', plural: 'SocialAccounts' },
             { name: 'SocialPost', plural: 'SocialPosts' },
+            { name: 'SocialPostGameData', plural: 'SocialPostGameData' },
+            { name: 'SocialPostGameLink', plural: 'SocialPostGameLinks' },
+            { name: 'SocialPostPlacement', plural: 'SocialPostPlacements' },
+            { name: 'SocialScheduledPost', plural: 'SocialScheduledPosts' },
             { name: 'SocialScrapeAttempt', plural: 'SocialScrapeAttempts' },
-            { name: 'SocialScheduledPost', plural: 'SocialScheduledPosts' }
         ]
     },
     {
@@ -114,7 +126,7 @@ const SCHEMA_GROUPS = [
             { name: 'User', plural: 'Users' },
             { name: 'UserPreference', plural: 'UserPreferences' },
             { name: 'UserAuditLog', plural: 'UserAuditLogs' },
-            { name: 'Staff', plural: 'Staff' }
+            { name: 'Staff', plural: 'Staff' },
         ]
     }
 ];
@@ -133,7 +145,7 @@ interface TableScanStats {
 export const DatabaseMonitorPage: React.FC = () => {
     // --- State ---
     const [clientOperations, setClientOperations] = useState<any[]>([]);
-    const [lambdaOperations, setLambdaOperations] = useState<any[]>([]);
+    const [lambdaOperations] = useState<any[]>([]);
     const [isLoadingActivity, setIsLoadingActivity] = useState(false);
     
     // Scanner State
@@ -155,221 +167,165 @@ export const DatabaseMonitorPage: React.FC = () => {
         }
         return {};
     });
-    const [scanLimit, setScanLimit] = useState<number>(1000);
-    const [isGlobalScanning, setIsGlobalScanning] = useState(false);
-    
-    // Stats & Batching (Setters removed to fix TS unused errors)
-    const [stats, setStats] = useState({ client: { total: 0 }, lambda: { total: 0 } });
-    
-    // These are effectively constants for now in this view, so we don't destructure setters
-    const [batchTimeWindow] = useState(5000);
-    const [currentBatchIndex] = useState(0);
-    const [showAllBatches] = useState(false);
-    
-    const client = generateClient();
-    const monitoring = getMonitoring();
 
-    // ==========================================
-    // 1. SCANNING LOGIC
-    // ==========================================
-
-    const scanTable = async (tableName: string, pluralName: string): Promise<void> => {
-        setTableStats(prev => ({
-            ...prev,
-            [tableName]: { count: 0, scannedCount: 0, status: 'SCANNING', error: undefined }
-        }));
-
-        try {
-            let nextToken = null;
-            let totalItems = 0;
-            let hasMore = true;
-
-            // Generic query fetching only ID
-            const queryStr = `
-                query List${pluralName}($limit: Int, $nextToken: String) {
-                    list${pluralName}(limit: $limit, nextToken: $nextToken) {
-                        items { id }
-                        nextToken
-                    }
-                }
-            `;
-
-            while (hasMore) {
-                if (totalItems >= scanLimit) break;
-
-                const response: any = await client.graphql({
-                    query: queryStr,
-                    variables: { limit: 1000, nextToken }
-                });
-
-                // Handle potential different response structures or errors gracefully
-                const listResult = response.data[`list${pluralName}`];
-                
-                if (!listResult) {
-                    throw new Error(`Could not find list${pluralName} in response`);
-                }
-
-                const items = listResult.items || [];
-                totalItems += items.length;
-                nextToken = listResult.nextToken;
-
-                setTableStats(prev => ({
-                    ...prev,
-                    [tableName]: { count: totalItems, scannedCount: totalItems, status: 'SCANNING' }
-                }));
-
-                if (!nextToken) hasMore = false;
-            }
-
-            setTableStats(prev => ({
-                ...prev,
-                [tableName]: { count: totalItems, scannedCount: totalItems, status: 'COMPLETE', lastScan: new Date() }
-            }));
-
-        } catch (error: any) {
-            console.error(`Scan failed for ${tableName}:`, error);
-            setTableStats(prev => ({
-                ...prev,
-                [tableName]: { 
-                    count: 0, scannedCount: 0, status: 'ERROR',
-                    error: error.message || 'Query failed' 
-                }
-            }));
-        }
-    };
-
-    const scanGroup = async (groupId: string) => {
-        const group = SCHEMA_GROUPS.find(g => g.id === groupId);
-        if (!group) return;
-
-        // Execute sequentially to avoid rate limiting
-        for (const table of group.tables) {
-            await scanTable(table.name, table.plural);
-        }
-    };
-
-    const scanAllTables = async () => {
-        setIsGlobalScanning(true);
-        // Flatten all tables and run sequentially
-        for (const group of SCHEMA_GROUPS) {
-            for (const table of group.tables) {
-                await scanTable(table.name, table.plural);
-            }
-        }
-        setIsGlobalScanning(false);
-    };
-
-    // ==========================================
-    // 2. ACTIVITY FEED LOGIC
-    // ==========================================
-
-    const fetchCloudWatchMetrics = async () => {
-        setIsLoadingActivity(true);
-        try {
-            const query = /* GraphQL */ `
-                query GetDatabaseMetrics($timeRange: String) {
-                    getDatabaseMetrics(timeRange: $timeRange) {
-                        metrics {
-                            timestamp
-                            functionName
-                            operation
-                            table
-                            success
-                            duration
-                            entityId
-                        }
-                    }
-                }
-            `;
-            const result: any = await client.graphql({
-                query, variables: { timeRange: 'LAST_24_HOURS' }
-            });
-            if (result.data?.getDatabaseMetrics?.metrics) {
-                setLambdaOperations(result.data.getDatabaseMetrics.metrics);
-                setStats(prev => ({ ...prev, lambda: { total: result.data.getDatabaseMetrics.metrics.length } }));
-            }
-        } catch (error) {
-            console.error('Failed to fetch metrics:', error);
-        } finally {
-            setIsLoadingActivity(false);
-        }
-    };
-
+    // Save to sessionStorage whenever tableStats changes
     useEffect(() => {
         if (Object.keys(tableStats).length > 0) {
             sessionStorage.setItem('db_monitor_stats', JSON.stringify(tableStats));
         }
     }, [tableStats]);
 
+    // --- Helpers ---
+    const client = useMemo(() => generateClient(), []);
+    const monitoring = useMemo(() => getMonitoring(), []);
+
+    // Subscribe to client operations
     useEffect(() => {
-        // Only fetch on mount and manual refresh
-        setClientOperations(monitoring.getOperations());
-        setStats(prev => ({ ...prev, client: { total: monitoring.getOperations().length } }));
-        fetchCloudWatchMetrics();
+        const unsubscribe = monitoring.subscribe((op) => {
+            setClientOperations(prev => [op, ...prev].slice(0, 100));
+        });
+        return unsubscribe;
+    }, [monitoring]);
+
+    // Fetch CloudWatch metrics for lambda operations
+    const fetchCloudWatchMetrics = useCallback(async () => {
+        setIsLoadingActivity(true);
+        try {
+            // This would typically call a Lambda to get CloudWatch logs
+            // For now, we'll just simulate with existing data
+            console.log('[DatabaseMonitor] Fetching CloudWatch metrics...');
+        } catch (error) {
+            console.error('Error fetching CloudWatch metrics:', error);
+        } finally {
+            setIsLoadingActivity(false);
+        }
     }, []);
 
-    // ... Batching logic helpers (condensed for brevity)
-    const getAllOperations = useCallback(() => {
-        const combined = [
+    // Scan a single table
+    const scanTable = useCallback(async (tableName: string, pluralName: string) => {
+        setTableStats(prev => ({
+            ...prev,
+            [tableName]: { ...prev[tableName], status: 'SCANNING', count: 0, scannedCount: 0 }
+        }));
+
+        try {
+            // Build a simple list query
+            const query = `query List${pluralName} { list${pluralName}(limit: 10000) { items { id } } }`;
+            
+            const response = await client.graphql({ query });
+            
+            if ('data' in response && response.data) {
+                const items = (response.data as any)[`list${pluralName}`]?.items || [];
+                const count = items.length;
+                
+                setTableStats(prev => ({
+                    ...prev,
+                    [tableName]: {
+                        count,
+                        scannedCount: count,
+                        status: 'COMPLETE',
+                        lastScan: new Date()
+                    }
+                }));
+            }
+        } catch (error: any) {
+            console.error(`Error scanning ${tableName}:`, error);
+            setTableStats(prev => ({
+                ...prev,
+                [tableName]: {
+                    ...prev[tableName],
+                    status: 'ERROR',
+                    error: error.message || 'Unknown error'
+                }
+            }));
+        }
+    }, [client]);
+
+    // Scan all tables in a group
+    const scanGroup = useCallback(async (groupId: string) => {
+        const group = SCHEMA_GROUPS.find(g => g.id === groupId);
+        if (!group) return;
+        
+        for (const table of group.tables) {
+            await scanTable(table.name, table.plural);
+        }
+    }, [scanTable]);
+
+    // Global scanning state
+    const isGlobalScanning = useMemo(() => {
+        return Object.values(tableStats).some(s => s.status === 'SCANNING');
+    }, [tableStats]);
+
+    // Scan all tables
+    const scanAllTables = useCallback(async () => {
+        for (const group of SCHEMA_GROUPS) {
+            for (const table of group.tables) {
+                await scanTable(table.name, table.plural);
+            }
+        }
+    }, [scanTable]);
+
+    // --- Computed Stats ---
+    const stats = useMemo(() => {
+        const clientOps = monitoring.getOperations();
+        return {
+            client: {
+                total: clientOps.length,
+                inserts: clientOps.filter(o => o.operation === 'INSERT').length,
+                updates: clientOps.filter(o => o.operation === 'UPDATE').length,
+                deletes: clientOps.filter(o => o.operation === 'DELETE').length,
+                queries: clientOps.filter(o => o.operation === 'QUERY').length,
+            },
+            lambda: {
+                total: lambdaOperations.length,
+                inserts: lambdaOperations.filter(o => o.operation?.includes('INSERT')).length,
+                updates: lambdaOperations.filter(o => o.operation?.includes('UPDATE')).length,
+                deletes: lambdaOperations.filter(o => o.operation?.includes('DELETE')).length,
+            }
+        };
+    }, [monitoring, lambdaOperations]);
+
+    // All operations combined
+    const filteredOperations = useMemo(() => {
+        const all = [
             ...clientOperations.map(op => ({ ...op, source: 'CLIENT' })),
             ...lambdaOperations.map(op => ({ ...op, source: 'LAMBDA' }))
         ];
-        return combined.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        return all.sort((a, b) => 
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        ).slice(0, 50);
     }, [clientOperations, lambdaOperations]);
 
-    // Removed unused 'batches' from return object
-    const { filteredOperations } = useMemo(() => {
-        const all = getAllOperations();
-        // Simple batching logic
-        const batchesArr = [];
-        if (all.length > 0) {
-            let current = [all[0]];
-            for (let i = 1; i < all.length; i++) {
-                if (new Date(all[i-1].timestamp).getTime() - new Date(all[i].timestamp).getTime() > batchTimeWindow) {
-                    batchesArr.push(current);
-                    current = [all[i]];
-                } else current.push(all[i]);
-            }
-            batchesArr.push(current);
-        }
-        return { 
-            batches: batchesArr, 
-            filteredOperations: showAllBatches ? all : (batchesArr[currentBatchIndex] || []) 
-        };
-    }, [getAllOperations, batchTimeWindow, currentBatchIndex, showAllBatches]);
+    // Total record counts
+    const totalRecords = useMemo(() => {
+        return Object.values(tableStats)
+            .filter(s => s.status === 'COMPLETE')
+            .reduce((sum, s) => sum + s.count, 0);
+    }, [tableStats]);
+
+    const tablesScanned = useMemo(() => {
+        return Object.values(tableStats).filter(s => s.status === 'COMPLETE').length;
+    }, [tableStats]);
 
     return (
-        <div className="p-6 max-w-[1600px] mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-6 bg-gray-50 min-h-screen">
+            {/* ================= HEADER ================= */}
+            <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                         <Database className="w-6 h-6 text-indigo-600" />
                         Database Monitor
                     </h1>
-                    <p className="text-sm text-gray-500">
-                        {ALL_TABLES.length} tables tracked • Safety Limit: {scanLimit} records
+                    <p className="text-sm text-gray-500 mt-1">
+                        {tablesScanned}/{ALL_TABLES.length} tables scanned • {totalRecords.toLocaleString()} total records
                     </p>
                 </div>
                 
-                <div className="flex items-center gap-3">
-                    <select 
-                        value={scanLimit} 
-                        onChange={(e) => setScanLimit(Number(e.target.value))}
-                        className="text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                        <option value="100">Limit: 100</option>
-                        <option value="1000">Limit: 1,000</option>
-                        <option value="5000">Limit: 5,000</option>
-                        <option value="100000">No Limit</option>
-                    </select>
-                    
+                <div className="flex gap-2">
                     <button
                         onClick={scanAllTables}
                         disabled={isGlobalScanning}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors ${
-                            isGlobalScanning ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
-                        }`}
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isGlobalScanning ? (
                             <RefreshCw className="w-4 h-4 animate-spin" />

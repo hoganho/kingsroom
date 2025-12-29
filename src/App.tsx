@@ -73,6 +73,7 @@ import { TermsOfService } from './pages/legal/TermsOfService';
 // Debug Pages (SuperAdmin)
 import { GamesDebug } from './pages/debug/GamesDebug';
 import { PlayersDebug } from './pages/debug/PlayersDebug';
+import { SocialDebug } from './pages/debug/SocialDebug';
 import { DatabaseMonitorPage } from './pages/debug/DatabaseMonitor';
 import { getMonitoring } from './utils/enhanced-monitoring';
 
@@ -126,10 +127,6 @@ const AuthEventLogger = () => {
           const authData = payload.data as { userId?: string; username?: string; sub?: string };
           const userId = authData?.userId || authData?.username || authData?.sub;
           logAuth('LOGIN', { source: 'sign_in_flow', method: 'cognito' }, userId);
-          break;
-
-        case 'signedOut':
-          logAuth('LOGOUT', { source: 'user_initiated' });
           break;
 
         case 'tokenRefresh_failure':
@@ -196,18 +193,50 @@ class ErrorBoundary extends React.Component<
 }
 
 // ============================================
+// AUTH GATE - Prevents rendering until auth ready
+// ============================================
+// This ensures hooks in child components don't fire before
+// authentication is confirmed, preventing "NoSignedUser" errors
+const AuthGate = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+
+  // Still loading auth state - show spinner
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto" />
+          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">Authenticating...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not authenticated - don't render children
+  // CustomAuthenticator should handle redirecting to login
+  if (!user) {
+    return null;
+  }
+
+  // Auth confirmed - safe to render children (and their hooks)
+  return <>{children}</>;
+};
+
+// ============================================
 // PROTECTED LAYOUT
 // ============================================
 const ProtectedLayout = () => {
   return (
     <ProtectedRoute redirectIfNoAccess>
-      <EntityProvider>
-        <GameProvider>
-          <MainLayout>
-            <Outlet />
-          </MainLayout>
-        </GameProvider>
-      </EntityProvider>
+      <AuthGate>
+        <EntityProvider>
+          <GameProvider>
+            <MainLayout>
+              <Outlet />
+            </MainLayout>
+          </GameProvider>
+        </EntityProvider>
+      </AuthGate>
     </ProtectedRoute>
   );
 };
@@ -429,6 +458,7 @@ const AuthenticatedRoutes = () => {
             {/* Debug Pages (SuperAdmin) */}
             <Route path="/debug/games" element={<GamesDebug />} />
             <Route path="/debug/players" element={<PlayersDebug />} />
+            <Route path="/debug/social" element={<SocialDebug />} />
             <Route path="/debug/database-monitor" element={<DatabaseMonitorPage />} />
           </Route>
 

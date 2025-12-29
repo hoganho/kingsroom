@@ -32,6 +32,9 @@
     },
     "saveGameFunctionName": {
       "Type": "String"
+    },
+    "scraperApiKey": {
+      "Type": "String"
     }
   },
   "Conditions": {
@@ -413,6 +416,9 @@
             },
             "SAVE_GAME_FUNCTION_NAME": {
               "Ref": "saveGameFunctionName"
+            },
+            "SCRAPER_API_KEY": {
+              "Ref": "scraperApiKey"
             }
           }
         },
@@ -1347,8 +1353,8 @@
                 "dynamodb:Scan"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1360,10 +1366,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging/index/byURL",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging/index/byTournamentId",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*-staging/index/byS3Key"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*/index/*"
               ],
               "Effect": "Allow"
             },
@@ -1374,7 +1378,7 @@
                 "dynamodb:Scan"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-staging"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*"
               ],
               "Effect": "Allow"
             },
@@ -1383,7 +1387,7 @@
                 "dynamodb:Scan"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*"
               ],
               "Effect": "Allow"
             },
@@ -1392,7 +1396,7 @@
                 "dynamodb:Scan"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-staging"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*"
               ],
               "Effect": "Allow"
             },
@@ -1404,7 +1408,7 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeStructure-*-staging"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeStructure-*"
               ],
               "Effect": "Allow"
             },
@@ -1426,7 +1430,7 @@
                 "lambda:InvokeFunction"
               ],
               "Resource": [
-                "arn:aws:lambda:ap-southeast-2:*:function:saveGameFunction-staging"
+                "arn:aws:lambda:ap-southeast-2:*:function:saveGameFunction-*"
               ],
               "Effect": "Allow"
             },

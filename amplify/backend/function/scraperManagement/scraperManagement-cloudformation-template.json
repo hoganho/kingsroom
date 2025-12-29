@@ -906,8 +906,8 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-staging",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-staging/index/byStatus"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*/index/*"
               ],
               "Effect": "Allow"
             },
@@ -918,7 +918,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*"
               ],
               "Effect": "Allow"
             },
@@ -927,7 +927,7 @@
                 "dynamodb:Scan"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-staging"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*"
               ],
               "Effect": "Allow"
             },
@@ -937,7 +937,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-staging"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*"
               ],
               "Effect": "Allow"
             },
@@ -946,7 +946,7 @@
                 "lambda:InvokeFunction"
               ],
               "Resource": [
-                "arn:aws:lambda:ap-southeast-2:*:function:autoScraper-staging"
+                "arn:aws:lambda:ap-southeast-2:*:function:autoScraper-*"
               ],
               "Effect": "Allow"
             },

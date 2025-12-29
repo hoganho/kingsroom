@@ -528,9 +528,8 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/byEntityAndTournamentId",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/byStatus"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*/index/*"
               ],
               "Effect": "Allow"
             },
@@ -540,8 +539,8 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-staging",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-staging/index/byEntityScraperState"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*/index/*"
               ],
               "Effect": "Allow"
             },
@@ -550,7 +549,7 @@
                 "dynamodb:GetItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-staging"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*"
               ],
               "Effect": "Allow"
             },

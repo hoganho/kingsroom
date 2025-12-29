@@ -54,6 +54,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
+    "gameToSocialMatcher": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "getDatabaseMetrics": {
       "Arn": "string",
       "LambdaExecutionRole": "string",

@@ -110,6 +110,11 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   linkedGameCount: Int @default(value: "0")
   hasUnverifiedLinks: Boolean @default(value: "false")
   
+  # === NEW: YEAR-MONTH PARTITION KEY FOR DATE QUERIES ===
+  # Format: "2025-01" - enables efficient date range queries via byPostMonth GSI
+  # Set automatically when post is created/updated based on postedAt
+  postYearMonth: String @index(name: "byPostMonth", sortKeyFields: ["postedAt"])
+  
   # === RELATIONSHIPS ===
   socialAccountId: ID! @index(name: "bySocialAccount", sortKeyFields: ["postedAt"])
   socialAccount: SocialAccount @belongsTo(fields: ["socialAccountId"])

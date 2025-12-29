@@ -7,8 +7,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*/index/*"
     ]
   },
   {
@@ -17,8 +17,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*/index/*"
     ]
   },
   {
@@ -27,7 +27,7 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*-staging"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*"
     ]
   },
   {
@@ -38,12 +38,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byTournamentSeriesTitle",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byYear",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byName",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byMonth",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*-staging/index/byQuarter"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeries-*/index/*"
     ]
   },
   {
@@ -55,7 +51,7 @@
       "dynamodb:Scan"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*-staging"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentSeriesTitle-*"
     ]
   },
   {
@@ -66,8 +62,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*/index/*"
     ]
   },
   {
@@ -75,7 +71,7 @@
       "dynamodb:PutItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-staging"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*"
     ]
   },
   {
@@ -84,7 +80,7 @@
       "dynamodb:PutItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-staging"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*"
     ]
   },
   {
@@ -95,8 +91,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*/index/*"
     ]
   },
   {
@@ -107,30 +103,30 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*/index/*"
     ]
   },
   {
     "Action": [
-        "dynamodb:GetItem",
-        "dynamodb:PutItem",
-        "dynamodb:UpdateItem",
-        "dynamodb:Query"
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query"
     ],
     "Resource": [
-        "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*-staging",
-        "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/RecurringGame-*/index/*"
     ]
   },
   {
     "Action": ["sqs:SendMessage"],
     "Resource": [
-        "arn:aws:sqs:ap-southeast-2:*:GameProcessingQueue.fifo",
-        "arn:aws:sqs:ap-southeast-2:*:VenueReassignmentQueue.fifo",
-        "arn:aws:sqs:ap-southeast-2:*:PlayerProcessorQueue.fifo"
+      "arn:aws:sqs:ap-southeast-2:*:GameProcessingQueue*",
+      "arn:aws:sqs:ap-southeast-2:*:VenueReassignmentQueue*",
+      "arn:aws:sqs:ap-southeast-2:*:PlayerProcessorQueue*"
     ]
-    },
+  },
   {
     "Action": [
       "cloudwatch:PutMetricData"

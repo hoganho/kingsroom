@@ -1,5 +1,5 @@
 // src/pages/social/SocialDashboard.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { GraphQLResult } from '@aws-amplify/api';
 import { 
@@ -162,14 +162,26 @@ export const SocialDashboard: React.FC = () => {
   const [scrapingAccountId, setScrapingAccountId] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const { accounts, loading, fetchAccounts, toggleScrapingEnabled } = useSocialAccounts({ filterByEntity: false });
-  const { posts, totalEngagement, refresh: refreshPosts } = useSocialPosts({ 
+  const { accounts, loading: accountsLoading, fetchAccounts, toggleScrapingEnabled } = useSocialAccounts({ filterByEntity: false });
+  
+  // Extract account IDs for useSocialPosts - this allows the hook to fetch posts
+  const accountIds = useMemo(() => accounts.map(a => a.id), [accounts]);
+  
+  // Only fetch posts once we have account IDs
+  const { totalEngagement, loading: postsLoading, refresh: refreshPosts } = useSocialPosts({ 
+    accountIds: accountIds.length > 0 ? accountIds : undefined,
     filterByEntity: false,
-    daysBack: 30,  // Limit to last 30 days to prevent payload size issues
-    limit: 100     // Reasonable page size
+    daysBack: 30,
+    autoFetch: accountIds.length > 0,  // Only auto-fetch when we have accounts
   });
 
+  // Calculate total posts from account postCount (more accurate than loaded posts)
+  const totalPostCount = useMemo(() => {
+    return accounts.reduce((sum, account) => sum + (account.postCount || 0), 0);
+  }, [accounts]);
+
   const activeAccounts = accounts.filter((a: SocialAccount) => a.status === 'ACTIVE').length;
+  const loading = accountsLoading;
 
   useEffect(() => {
     if (notification) {
@@ -256,14 +268,18 @@ export const SocialDashboard: React.FC = () => {
               <Calendar className="w-4 h-4 text-blue-500" />
               <span className="text-sm font-medium">Total Posts</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800 mt-2">{posts.length}</p>
+            <p className="text-3xl font-bold text-slate-800 mt-2">
+              {accountsLoading ? '...' : totalPostCount.toLocaleString()}
+            </p>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-slate-200">
             <div className="flex items-center gap-2 text-slate-500">
               <TrendingUp className="w-4 h-4 text-pink-500" />
-              <span className="text-sm font-medium">Engagement</span>
+              <span className="text-sm font-medium">Engagement (30d)</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800 mt-2">{totalEngagement.toLocaleString()}</p>
+            <p className="text-3xl font-bold text-slate-800 mt-2">
+              {postsLoading ? '...' : totalEngagement.toLocaleString()}
+            </p>
           </div>
         </div>
 

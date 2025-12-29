@@ -1,12 +1,14 @@
 // src/pages/settings/EntityManagement.tsx
 // MERGED: Now includes the EntityDashboard for monitoring
 // and the EntityTable for management.
+// UPDATED: Uses optimized query to avoid nested scrapeURLs errors
 
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { GraphQLResult } from '@aws-amplify/api';
 import { createEntity, updateEntity, deleteEntity } from '../../graphql/mutations';
-import { listEntities } from '../../graphql/queries';
+// CHANGED: Import from customQueries instead of auto-generated queries
+import { listEntitiesSimple } from '../../graphql/customQueries';
 import { EntityTable } from '../../components/entities/EntityTable';
 import { EntityModal } from '../../components/entities/EntityModal';
 import { DeleteConfirmationModal } from '../../components/entities/DeleteConfirmationModal';
@@ -33,8 +35,9 @@ const EntityManagement = () => {
     setError(null);
 
     try {
+      // CHANGED: Use optimized query without nested relationships
       const response = await client.graphql({
-        query: listEntities,
+        query: listEntitiesSimple,
       }) as GraphQLResult<any>;
 
       if ('data' in response && response.data) {

@@ -27,9 +27,33 @@
     }
   },
   "Resources": {
-    "EmptyResource": {
-      "Type": "Custom::EmptyResource",
-      "Condition": "AlwaysFalse"
+    "NoneDataSource": {
+      "Type": "AWS::AppSync::DataSource",
+      "Properties": {
+        "ApiId": {
+          "Ref": "AppSyncApiId"
+        },
+        "Name": "NoneDataSource",
+        "Type": "NONE"
+      }
+    },
+    "PublishGameProcessedResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "DependsOn": "NoneDataSource",
+      "Properties": {
+        "ApiId": {
+          "Ref": "AppSyncApiId"
+        },
+        "TypeName": "Mutation",
+        "FieldName": "publishGameProcessed",
+        "DataSourceName": "NoneDataSource",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.publishGameProcessed.req.vtl"
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.publishGameProcessed.res.vtl"
+        }
+      }
     }
   },
   "Conditions": {
@@ -44,15 +68,14 @@
           ]
         }
       ]
-    },
-    "AlwaysFalse": {
-      "Fn::Equals": ["true", "false"]
     }
   },
   "Outputs": {
-    "EmptyOutput": {
-      "Description": "An empty output. You may delete this if you have at least one resource above.",
-      "Value": ""
+    "NoneDataSourceArn": {
+      "Description": "ARN of the None data source",
+      "Value": {
+        "Fn::GetAtt": ["NoneDataSource", "DataSourceArn"]
+      }
     }
   }
 }

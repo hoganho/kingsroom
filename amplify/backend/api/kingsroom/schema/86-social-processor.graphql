@@ -7,6 +7,7 @@
 # 2. Embedded types for non-cash prizes
 # 3. Input/output types for the processor API
 # 4. Mutations and queries for the socialPostProcessor Lambda
+# 5. Mutations and queries for the gameToSocialMatcher Lambda (reverse matching)
 #
 # DEPENDENCIES:
 # - 00-enums.graphql: SocialPostContentType, SocialPostProcessingStatus, 
@@ -92,13 +93,16 @@ type SocialPostGameData
   # === EXTRACTED TOURNAMENT IDENTITY ===
   extractedName: String
   extractedTournamentUrl: AWSURL
-  extractedTournamentId: Int             # From URL like ?id=455
+  # Tournament ID with GSI for reverse matching (game -> posts)
+  extractedTournamentId: Int @index(name: "byTournamentId")
   
   # === EXTRACTED VENUE ===
   extractedVenueName: String
-  suggestedVenueId: ID                   # After venue matching
+  extractedVenueId: ID                   # Matched venue ID (from dataExtractor)
+  suggestedVenueId: ID                   # After venue matching (legacy, use extractedVenueId)
   venueMatchConfidence: Float
   venueMatchReason: String
+  venueMatchSource: String               # "dataExtractor", "gameMatcher", etc.
   
   # === EXTRACTED DATE/TIME ===
   extractedDate: AWSDateTime             # Inferred game date
@@ -112,6 +116,7 @@ type SocialPostGameData
   extractedPrizePool: Float
   extractedFirstPlacePrize: Float
   extractedTotalPrizesPaid: Float
+  extractedRake: Float                   # Extracted rake amount
   
   # === EXTRACTED ENTRIES (for RESULT posts) ===
   extractedTotalEntries: Int
@@ -122,6 +127,9 @@ type SocialPostGameData
   extractedTournamentType: TournamentType
   extractedGameVariant: GameVariant
   extractedGameTypes: [String]           # ["NLH", "Bounty", "Turbo"]
+  
+  # === EXTRACTED RECURRING GAME NAME ===
+  extractedRecurringGameName: String     # For matching to recurring games
   
   # === SERIES EXTRACTION ===
   extractedSeriesName: String
@@ -228,7 +236,7 @@ type SocialPostNonCashPrize @aws_iam @aws_cognito_user_pools {
 }
 
 # ===================================================================
-# 5. INPUT TYPES
+# 5. INPUT TYPES - SOCIAL POST PROCESSOR
 # ===================================================================
 
 input ProcessSocialPostInput {
@@ -310,7 +318,31 @@ input PreviewContentExtractionInput {
 }
 
 # ===================================================================
-# 6. OUTPUT TYPES
+# 5b. INPUT TYPES - GAME TO SOCIAL MATCHER (Reverse Matching)
+# ===================================================================
+
+input MatchGameToSocialPostsInput {
+  gameId: ID!
+  autoLinkThreshold: Int                 # Override default (80)
+  maxCandidates: Int                     # Max posts to evaluate (default 100)
+  previewOnly: Boolean                   # If true, don't create links
+}
+
+input BatchMatchGamesToSocialPostsInput {
+  gameIds: [ID!]!
+  autoLinkThreshold: Int
+  maxCandidates: Int
+  previewOnly: Boolean
+}
+
+input PreviewGameToSocialMatchInput {
+  gameId: ID!
+  autoLinkThreshold: Int                 # Show candidates above this threshold (default 0 = all)
+  maxCandidates: Int                     # Max posts to evaluate
+}
+
+# ===================================================================
+# 6. OUTPUT TYPES - SOCIAL POST PROCESSOR
 # ===================================================================
 
 type ProcessSocialPostResult @aws_iam @aws_cognito_user_pools {
@@ -420,7 +452,88 @@ type SocialPostWithMatchInfo @aws_iam @aws_cognito_user_pools {
 }
 
 # ===================================================================
-# 7. MUTATIONS
+# 6b. OUTPUT TYPES - GAME TO SOCIAL MATCHER
+# ===================================================================
+
+type GameToSocialMatchResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  gameId: ID
+  gameName: String
+  gameDate: AWSDateTime
+  
+  # Search results
+  candidatesFound: Int                   # Total posts in search range
+  candidatesScored: Int                  # Posts that met minimum threshold
+  
+  # Linking results
+  linksCreated: Int
+  linksSkipped: Int                      # Already linked or duplicate
+  existingLinks: Int                     # Links that existed before
+  
+  # Matched posts details
+  matchedPosts: [SocialPostMatchCandidate!]
+  linkDetails: [GameToSocialLinkDetail!]
+  
+  # Match context
+  matchContext: GameToSocialMatchContext
+  
+  # Metadata
+  processingTimeMs: Int
+  error: String
+}
+
+type SocialPostMatchCandidate @aws_iam @aws_cognito_user_pools {
+  socialPostId: ID!
+  postDate: AWSDateTime
+  contentType: SocialPostContentType
+  extractedBuyIn: Float
+  extractedVenueName: String
+  
+  # Scoring
+  matchConfidence: Int!
+  matchReason: String
+  matchSignals: AWSJSON
+  
+  # Selection
+  rank: Int
+  isPrimaryGame: Boolean
+  mentionOrder: Int
+  wouldLink: Boolean                     # Above threshold (for preview)
+}
+
+type GameToSocialLinkDetail @aws_iam @aws_cognito_user_pools {
+  socialPostId: ID!
+  linkId: ID
+  status: String!                        # "CREATED", "SKIPPED", "ERROR"
+  reason: String                         # e.g., "already_linked"
+  matchConfidence: Int
+  error: String
+}
+
+type GameToSocialMatchContext @aws_iam @aws_cognito_user_pools {
+  matchMethod: String                    # "tournament_id", "venue_date", "date_only"
+  venueId: ID
+  venueName: String
+  searchRange: DateRange
+  candidatesScored: Int
+  candidatesAboveMinimum: Int
+}
+
+type DateRange @aws_iam @aws_cognito_user_pools {
+  searchStart: AWSDateTime
+  searchEnd: AWSDateTime
+}
+
+type BatchGameToSocialMatchResult @aws_iam @aws_cognito_user_pools {
+  totalRequested: Int!
+  processed: Int!
+  totalLinksCreated: Int!
+  totalLinksSkipped: Int!
+  results: [GameToSocialMatchResult!]
+}
+
+# ===================================================================
+# 7. MUTATIONS - SOCIAL POST PROCESSOR
 # ===================================================================
 
 extend type Mutation {
@@ -457,6 +570,22 @@ extend type Mutation {
     @function(name: "socialPostProcessor-${env}")
     @aws_iam
     @aws_cognito_user_pools
+  
+  # =========================================================
+  # GAME TO SOCIAL MATCHER (Reverse Matching)
+  # =========================================================
+  
+  # Match a single game to social posts
+  matchGameToSocialPosts(input: MatchGameToSocialPostsInput!): GameToSocialMatchResult
+    @function(name: "gameToSocialMatcher-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Match multiple games to social posts
+  batchMatchGamesToSocialPosts(input: BatchMatchGamesToSocialPostsInput!): BatchGameToSocialMatchResult
+    @function(name: "gameToSocialMatcher-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
 }
 
 # ===================================================================
@@ -486,6 +615,16 @@ extend type Query {
   # Get matching stats
   getSocialPostMatchingStats(input: GetMatchingStatsInput): SocialPostMatchingStats
     @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # =========================================================
+  # GAME TO SOCIAL MATCHER (Reverse Matching)
+  # =========================================================
+  
+  # Preview which posts would match a game (no links created)
+  previewGameToSocialMatch(input: PreviewGameToSocialMatchInput!): GameToSocialMatchResult
+    @function(name: "gameToSocialMatcher-${env}")
     @aws_iam
     @aws_cognito_user_pools
 }

@@ -476,7 +476,7 @@
                 "dynamodb:ListStreams"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/stream/*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*/stream/*"
               ],
               "Effect": "Allow"
             },
@@ -487,9 +487,8 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/byConsolidationKey",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/byParentGame"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*/index/*"
               ],
               "Effect": "Allow"
             },
@@ -500,8 +499,8 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-staging",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-staging/index/byGame"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*/index/*"
               ],
               "Effect": "Allow"
             },
@@ -512,8 +511,8 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-staging",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-staging/index/byGame"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*/index/*"
               ],
               "Effect": "Allow"
             },
@@ -522,7 +521,7 @@
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*-staging"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*"
               ],
               "Effect": "Allow"
             },
@@ -533,8 +532,8 @@
                 "dynamodb:PutItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-staging",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-staging/index/byVisitKey"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*/index/*"
               ],
               "Effect": "Allow"
             },
@@ -543,7 +542,7 @@
                 "dynamodb:GetItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*"
               ],
               "Effect": "Allow"
             },

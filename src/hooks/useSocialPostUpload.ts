@@ -86,6 +86,24 @@ function sanitizeObjectForJson(obj: unknown): unknown {
   return obj;
 }
 
+/**
+ * Calculate postYearMonth from a date string
+ * Format: "YYYY-MM" (e.g., "2025-01" for January 2025)
+ * Used for the byPostMonth GSI for efficient date range queries
+ */
+function getPostYearMonth(dateString: string | null | undefined): string | null {
+  if (!dateString) return null;
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  } catch {
+    return null;
+  }
+}
+
 export interface UseSocialPostUploadOptions {
   socialAccountId: string;
   // Optional - will be inherited from SocialAccount if not provided
@@ -140,7 +158,7 @@ export interface UseSocialPostUploadReturn {
   filteredPosts: ReviewablePostWithAttachments[];
   
   // Upload
-  uploadSelectedPosts: (options?: Partial<UploadOptions>) => Promise<BatchUploadResult>;
+  uploadSelectedPosts: (options?: Partial<UploadOptions>, onShouldCancel?: () => boolean) => Promise<BatchUploadResult>;
   uploadSinglePost: (post: ReviewablePostWithAttachments, createGame?: boolean) => Promise<SingleUploadResult>;
   
   // Editing
@@ -818,6 +836,7 @@ export const useSocialPostUpload = (
         platformPostId: post.postId,
         postType: mediaUrls.length > 0 ? SocialPostType.IMAGE : SocialPostType.TEXT,
         postedAt: post.postedAt,
+        postYearMonth: getPostYearMonth(post.postedAt),
         scrapedAt: now,
         status: SocialPostStatus.ACTIVE,
         socialAccountId,
@@ -900,7 +919,8 @@ export const useSocialPostUpload = (
   }, [client, socialAccountId, accountContext, resolvedEntityId, resolvedVenueId, checkExistingPostById, checkExistingPostByPlatformId]);
   
   const uploadSelectedPosts = useCallback(async (
-    uploadOptions: Partial<UploadOptions> = {}
+    uploadOptions: Partial<UploadOptions> = {},
+    onShouldCancel?: () => boolean
   ): Promise<BatchUploadResult> => {
     const {
       includeResults = true,
@@ -956,6 +976,12 @@ export const useSocialPostUpload = (
     
     try {
       for (let i = 0; i < postsToUpload.length; i++) {
+        // Check for cancellation before processing each post
+        if (onShouldCancel?.()) {
+          console.log(`[uploadSelectedPosts] Cancelled at post ${i + 1}/${postsToUpload.length}`);
+          break;
+        }
+        
         const post = postsToUpload[i];
         const attachmentCount = post.attachmentFiles?.length || 0;
         

@@ -4,6 +4,13 @@ import { generateClient } from 'aws-amplify/api';
 import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { adminUpdateUserMutation, User, UserRole, UpdateUserInput } from '../../graphql/userManagement';
 
+// Response type matching what the Lambda returns
+interface AdminUpdateUserResponse {
+  success: boolean;
+  message: string;
+  user: User | null;
+}
+
 interface UserEditModalProps {
   user: User;
   onClose: () => void;
@@ -53,13 +60,48 @@ export const UserEditModal = ({ user, onClose, onUserUpdated }: UserEditModalPro
       const response = await client.graphql({
         query: adminUpdateUserMutation,
         variables: { input },
-      }) as { data: { updateUser: User } };
+      }) as { data: { adminUpdateUser: AdminUpdateUserResponse } };
 
-      onUserUpdated(response.data.updateUser);
-      onClose();
+      console.log('[UserEditModal] Update response:', response);
+
+      // The Lambda returns { success, message, user } wrapper
+      const result = response.data?.adminUpdateUser;
+      
+      if (!result) {
+        throw new Error('No response received from server');
+      }
+
+      if (!result.success) {
+        throw new Error(result.message || 'Update failed');
+      }
+
+      // Extract the nested user object
+      const updatedUser = result.user;
+
+      if (updatedUser?.id) {
+        onUserUpdated(updatedUser);
+        onClose();
+      } else {
+        // Fallback: construct updated user from form data if response is missing user
+        console.warn('[UserEditModal] Response missing user object, using merged data');
+        const mergedUser: User = {
+          ...user,
+          ...formData,
+          _version: (user._version || 0) + 1,
+        };
+        onUserUpdated(mergedUser);
+        onClose();
+      }
     } catch (err: any) {
       console.error('Error updating user:', err);
-      setError(err.message || 'Failed to update user');
+      
+      // Extract error message from various possible structures
+      const errorMessage = 
+        err.errors?.[0]?.message ||
+        err.message ||
+        'Failed to update user';
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

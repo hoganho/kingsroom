@@ -10,6 +10,7 @@ import { PageWrapper } from '../../components/layout/PageWrapper';
 import { listGamesForDebug, listTournamentStructuresForDebug } from '../../graphql/customQueries';
 import { getAllCounts } from '../../graphql/queries';
 import { formatCurrency } from '../../utils/generalHelpers';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 
 type TabType = 'games' | 'structures';
 
@@ -96,6 +97,19 @@ const getPresignedS3Url = async (s3Key: string): Promise<string> => {
 };
 
 export const GamesDebug = () => {
+  const { authStatus } = useAuthenticator(context => [context.authStatus]);
+  
+  useEffect(() => {
+    if (authStatus === 'authenticated') {
+      fetchAllCounts();
+      fetchData('games');
+    }
+  }, [authStatus]);
+
+  if (authStatus !== 'authenticated') {
+    return <div>Please sign in...</div>;
+  }
+  
   const [activeTab, setActiveTab] = useState<TabType>('games');
   const [data, setData] = useState<Record<TabType, any[]>>({
     games: [],

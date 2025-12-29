@@ -1,6 +1,69 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/Game-*",
+      "arn:aws:dynamodb:*:*:table/Game-*/index/*",
+      "arn:aws:dynamodb:*:*:table/SocialPost-*",
+      "arn:aws:dynamodb:*:*:table/SocialPost-*/index/*",
+      "arn:aws:dynamodb:*:*:table/SocialPostGameLink-*",
+      "arn:aws:dynamodb:*:*:table/SocialPostGameLink-*/index/*",
+      "arn:aws:dynamodb:*:*:table/SocialPostGameData-*",
+      "arn:aws:dynamodb:*:*:table/SocialPostGameData-*/index/*",
+      "arn:aws:dynamodb:*:*:table/PlayerResult-*",
+      "arn:aws:dynamodb:*:*:table/PlayerResult-*/index/*",
+      "arn:aws:dynamodb:*:*:table/TicketTemplate-*",
+      "arn:aws:dynamodb:*:*:table/TicketTemplate-*/index/*",
+      "arn:aws:dynamodb:*:*:table/PlayerTicket-*",
+      "arn:aws:dynamodb:*:*:table/PlayerTicket-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/Game-*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/TicketTemplate-*",
+      "arn:aws:dynamodb:*:*:table/PlayerTicket-*",
+      "arn:aws:dynamodb:*:*:table/PlayerTicket-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:DescribeStream",
+      "dynamodb:GetRecords",
+      "dynamodb:GetShardIterator",
+      "dynamodb:ListStreams"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/SocialPostGameLink-*/stream/*"
+    ]
+  },
+  {
+    "Action": [
+      "lambda:InvokeFunction"
+    ],
+    "Resource": [
+      "arn:aws:lambda:*:*:function:gameFinancialsProcessor-*"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": ["*"]
   }
 ]

@@ -21,8 +21,8 @@ const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 // - ENV_SUFFIX: only tables ending with "-dev" (default "dev")
 // - API_ID_FILTER: only tables containing this amplify apiId (e.g. "fosb7ek5argnhctz4odpt52eia")
 // - TABLE_PREFIX_FILTER: only tables starting with a string (rarely needed)
-const ENV_SUFFIX = process.env.ENV_SUFFIX || 'staging';
-const API_ID_FILTER = process.env.API_ID_FILTER || 'fosb7ek5argnhctz4odpt52eia'; // e.g. fosb7ek5argnhctz4odpt52eia
+const ENV_SUFFIX = process.env.ENV_SUFFIX || 'dev';
+const API_ID_FILTER = process.env.API_ID_FILTER || 'ht3nugt6lvddpeeuwj3x6mkite'; // e.g. fosb7ek5argnhctz4odpt52eia
 const TABLE_PREFIX_FILTER = process.env.TABLE_PREFIX_FILTER || ''; // e.g. "Game-"
 
 // If set to 1, we don't scan or write files; we just print which tables would be backed up.

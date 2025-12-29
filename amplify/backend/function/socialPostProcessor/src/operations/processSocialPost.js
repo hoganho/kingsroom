@@ -24,6 +24,19 @@ const PROCESSING_VERSION = '1.0.0';
 const DEFAULT_AUTO_LINK_THRESHOLD = 80;
 
 /**
+ * Helper to add DataStore required fields to a record
+ * These fields are required for Amplify DataStore sync to work properly
+ */
+const addDataStoreFields = (record) => {
+  return {
+    ...record,
+    _version: 1,
+    _lastChangedAt: Date.now(),
+    _deleted: null,
+  };
+};
+
+/**
  * Process a single social post
  * 
  * @param {Object} input - ProcessSocialPostInput
@@ -146,27 +159,43 @@ const processSocialPost = async (input) => {
     // === STEP 6: Save extraction data ===
     console.log('[PROCESS] Saving extraction data...');
     const extractionId = uuidv4();
-    const extractionRecord = {
+    const now = new Date().toISOString();
+    
+    // Build extraction record with DataStore fields
+    const extractionRecord = addDataStoreFields({
       id: extractionId,
       socialPostId,
       ...extracted,
       patternMatches: JSON.stringify(classification.matches),
       extractedPrizes: JSON.stringify(extracted.extractedPrizes),
-      extractedAt: new Date().toISOString(),
-      extractionVersion: PROCESSING_VERSION
-    };
+      extractedAt: now,
+      extractionVersion: PROCESSING_VERSION,
+      createdAt: now,
+      updatedAt: now,
+    });
     
     // Remove fields that shouldn't be in the record
     delete extractionRecord.extractedPrizes;  // Already stringified above
     
+    // CRITICAL: Remove null GSI key fields - DynamoDB GSIs can't have null partition keys
+    // The byTournamentId GSI will simply not include records without this field
+    if (extractionRecord.extractedTournamentId == null) {
+      delete extractionRecord.extractedTournamentId;
+    }
+
     await createSocialPostGameData(extractionRecord);
     result.extractedGameData = extractionRecord;
     
-    // Save placements
+    // Save placements with DataStore fields
     if (placements.length > 0) {
       const placementRecords = createPlacementRecords(placements, socialPostId, extractionId);
       for (const placement of placementRecords) {
-        await createSocialPostPlacement(placement);
+        const placementWithDataStore = addDataStoreFields({
+          ...placement,
+          createdAt: now,
+          updatedAt: now,
+        });
+        await createSocialPostPlacement(placementWithDataStore);
       }
       result.placementsExtracted = placements.length;
     }
@@ -213,8 +242,10 @@ const processSocialPost = async (input) => {
         
         for (let i = 0; i < autoLinkCandidates.length; i++) {
           const candidate = autoLinkCandidates[i];
+          const linkNow = new Date().toISOString();
           
-          const link = {
+          // Build link with DataStore fields
+          const link = addDataStoreFields({
             id: uuidv4(),
             socialPostId,
             gameId: candidate.gameId,
@@ -228,9 +259,11 @@ const processSocialPost = async (input) => {
             extractedDate: extracted.extractedDate,
             extractedBuyIn: extracted.extractedBuyIn,
             extractedGuarantee: extracted.extractedGuarantee,
-            linkedAt: new Date().toISOString(),
-            linkedBy: 'SYSTEM'
-          };
+            linkedAt: linkNow,
+            linkedBy: 'SYSTEM',
+            createdAt: linkNow,
+            updatedAt: linkNow,
+          });
           
           await createSocialPostGameLink(link);
           result.linkDetails.push(link);
@@ -241,21 +274,25 @@ const processSocialPost = async (input) => {
         result.linksSkipped = matchResult.candidates.length - autoLinkCandidates.length;
         
         // Update post status and counts
-        const primaryLinkGameId = result.linkDetails.length > 0 
-          ? result.linkDetails[0].gameId 
-          : null;
-        
-        await updateSocialPost(socialPostId, {
-          processingStatus: 'LINKED',
-          processedAt: new Date().toISOString(),
-          processingVersion: PROCESSING_VERSION,
-          linkedGameId: primaryLinkGameId,  // Legacy field
-          primaryLinkedGameId: primaryLinkGameId,
-          linkedGameCount: result.linksCreated,
-          hasUnverifiedLinks: result.linksCreated > 0
-        });
-        
-        result.processingStatus = 'LINKED';
+        if (autoLinkCandidates.length > 0) {
+          const primaryLink = autoLinkCandidates[0];
+          await updateSocialPost(socialPostId, {
+            processingStatus: 'LINKED',
+            linkedGameId: primaryLink.gameId,
+            primaryLinkedGameId: primaryLink.gameId,
+            linkedGameCount: autoLinkCandidates.length,
+            hasUnverifiedLinks: true,
+            processedAt: new Date().toISOString()
+          });
+          result.processingStatus = 'LINKED';
+        } else if (matchResult.candidates.length > 0) {
+          // Has candidates but none above threshold - needs manual review
+          await updateSocialPost(socialPostId, {
+            processingStatus: 'MANUAL_REVIEW',
+            processedAt: new Date().toISOString()
+          });
+          result.processingStatus = 'MANUAL_REVIEW';
+        }
       }
     }
     
@@ -268,7 +305,7 @@ const processSocialPost = async (input) => {
     return result;
     
   } catch (error) {
-    console.error('[PROCESS] Error:', error);
+    console.error('[PROCESS] Processing error:', error);
     
     result.error = error.message;
     result.processingStatus = 'FAILED';
@@ -517,6 +554,7 @@ module.exports = {
   processSocialPost,
   previewMatch,
   previewContentExtraction,
+  addDataStoreFields,  // Export for use in other files
   PROCESSING_VERSION,
   DEFAULT_AUTO_LINK_THRESHOLD
 };

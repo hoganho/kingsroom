@@ -105,6 +105,57 @@ function extractErrorType(errorMessage) {
 exports.handler = async (event, context) => {
     console.log('ScraperManagement invoked:', JSON.stringify(event));
     
+    // ===== HANDLE CLOUDWATCH SCHEDULED EVENTS =====
+    // CloudWatch Events have 'detail-type' and 'source' fields, not 'typeName'/'fieldName'
+    if (event['detail-type'] === 'Scheduled Event' && event.source === 'aws.events') {
+        console.log('[ScraperManagement] Scheduled event received - running scheduled scrape check');
+        
+        monitoring.trackOperation('SCHEDULED_EVENT', 'Handler', 'cloudwatch', { 
+            ruleArn: event.resources?.[0] || 'unknown'
+        });
+        
+        try {
+            // Option 1: No-op - just acknowledge the event
+            // Uncomment the section below if you want to trigger auto-scraping
+            console.log('[ScraperManagement] Scheduled event acknowledged. No automatic action configured.');
+            
+            /* 
+            // Option 2: Trigger auto-scraping for all active entities
+            // Uncomment this section to enable scheduled scraping
+            const activeEntities = await getActiveEntities();
+            for (const entityId of activeEntities) {
+                await startScraperJob({ 
+                    input: { 
+                        entityId, 
+                        mode: 'bulk',
+                        triggerSource: 'SCHEDULED',
+                        triggeredBy: 'cloudwatch-schedule'
+                    }
+                }, event);
+            }
+            */
+            
+            return { 
+                statusCode: 200, 
+                body: 'Scheduled event processed',
+                processedAt: new Date().toISOString()
+            };
+        } catch (error) {
+            console.error('[ScraperManagement] Scheduled event error:', error);
+            monitoring.trackOperation('SCHEDULED_EVENT_ERROR', 'Handler', 'cloudwatch', { 
+                error: error.message 
+            });
+            // Don't throw - just log and return gracefully for scheduled events
+            return { 
+                statusCode: 500, 
+                body: `Scheduled event failed: ${error.message}` 
+            };
+        } finally {
+            await monitoring.flush();
+        }
+    }
+    
+    // ===== HANDLE GRAPHQL RESOLVER EVENTS =====
     const { typeName, fieldName, arguments: args } = event;
     const operation = `${typeName}.${fieldName}`;
     

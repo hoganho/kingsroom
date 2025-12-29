@@ -6,8 +6,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*/index/*"
     ]
   },
   {
@@ -18,8 +18,8 @@
       "dynamodb:Scan"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*/index/*"
     ]
   },
   {
@@ -30,8 +30,8 @@
       "dynamodb:PutItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*/index/*"
     ]
   },
   {
@@ -40,7 +40,7 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/Player-*-staging"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Player-*"
     ]
   },
   {
@@ -52,8 +52,8 @@
       "dynamodb:Query"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*/index/*"
     ]
   },
   {
@@ -61,19 +61,7 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*-staging"
-    ]
-  },
-  {
-    "Action": [
-      "dynamodb:Query",
-      "dynamodb:BatchWriteItem",
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem"
-    ],
-    "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*"
     ]
   },
   {
@@ -84,8 +72,20 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*-staging/index/*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*/index/*"
     ]
   },
   {
@@ -95,7 +95,7 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/BackgroundTask-*-staging"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/BackgroundTask-*"
     ]
   },
   {
@@ -115,8 +115,7 @@
       "sqs:GetQueueUrl"
     ],
     "Resource": [
-      "arn:aws:sqs:ap-southeast-2:495599763953:VenueReassignmentQueue.fifo",
-      "arn:aws:sqs:ap-southeast-2:495599763953:VenueReassignmentQueue-DeadLetter.fifo"
+      "arn:aws:sqs:ap-southeast-2:*:VenueReassignmentQueue*"
     ]
   }
 ]

@@ -136,6 +136,12 @@ export interface User {
   updatedAt: string;
   createdBy?: string | null;
   updatedBy?: string | null;
+  
+  // Amplify DataStore internal fields
+  // These are used for optimistic concurrency control
+  _version?: number;
+  _lastChangedAt?: number;
+  _deleted?: boolean;
 }
 
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'VENUE_MANAGER' | 'TOURNAMENT_DIRECTOR' | 'MARKETING';

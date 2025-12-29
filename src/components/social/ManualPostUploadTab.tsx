@@ -1,6 +1,8 @@
 // src/components/social/ManualPostUploadTab.tsx
-// UPDATED: Integrated Lambda processing with upload_only / upload_process flows
-// Similar to scraper's scrape_only / scrape_save pattern
+// UPDATED: Interactive category selectors for bulk upload
+// - Tap Results/Promo/General cards to toggle selection for upload
+// - Skipped posts card shows reasons for skipping
+// - All categories selected by default with highlighted borders
 
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
@@ -373,10 +375,15 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [showProcessingOptions, setShowProcessingOptions] = useState(false);
+  const [showSkippedDetails, setShowSkippedDetails] = useState(false);
   
   // Processing flow (NEW - like scraper's scrape_only/scrape_save)
-  const [processingFlow, setProcessingFlow] = useState<ProcessingFlow>('upload_only');
+  const [processingFlow, setProcessingFlow] = useState<ProcessingFlow>('upload_process');
   const [processingOptions, setProcessingOptions] = useState<ProcessingOptions>(DEFAULT_PROCESSING_OPTIONS);
+  
+  // Upload cancellation
+  const [isCancelling, setIsCancelling] = useState(false);
+  const cancelRef = useRef(false);
   
   // Modal state
   const [processingModalOpen, setProcessingModalOpen] = useState(false);
@@ -402,7 +409,6 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
     selectAll,
     deselectAll,
     selectTournamentResults,
-    // selectByType, // Available but not currently used
     filterOptions,
     setFilterOptions,
     sortOptions,
@@ -467,11 +473,64 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
     };
   }, [reviewablePosts]);
   
+  // Category selection state - derived from actual selectedPosts
+  const categorySelection = useMemo(() => {
+    const resultPosts = reviewablePosts.filter(p => p.postType === 'RESULT' && !p.isComment);
+    const promoPosts = reviewablePosts.filter(p => p.postType === 'PROMOTIONAL' && !p.isComment);
+    const generalPosts = reviewablePosts.filter(p => p.postType === 'GENERAL' && !p.isComment);
+    
+    const resultsSelected = resultPosts.filter(p => selectedPosts.has(p.postId)).length;
+    const promoSelected = promoPosts.filter(p => selectedPosts.has(p.postId)).length;
+    const generalSelected = generalPosts.filter(p => selectedPosts.has(p.postId)).length;
+    
+    return {
+      results: {
+        total: resultPosts.length,
+        selected: resultsSelected,
+        allSelected: resultPosts.length > 0 && resultsSelected === resultPosts.length,
+        posts: resultPosts,
+      },
+      promo: {
+        total: promoPosts.length,
+        selected: promoSelected,
+        allSelected: promoPosts.length > 0 && promoSelected === promoPosts.length,
+        posts: promoPosts,
+      },
+      general: {
+        total: generalPosts.length,
+        selected: generalSelected,
+        allSelected: generalPosts.length > 0 && generalSelected === generalPosts.length,
+        posts: generalPosts,
+      },
+    };
+  }, [reviewablePosts, selectedPosts]);
+  
   const isProcessing = isUploading || processor.isProcessing;
   
   // =========================================================================
   // HANDLERS
   // =========================================================================
+  
+  // Toggle all posts in a category
+  const toggleCategory = useCallback((category: 'results' | 'promo' | 'general') => {
+    const catData = categorySelection[category];
+    
+    if (catData.allSelected) {
+      // Deselect all posts in this category
+      catData.posts.forEach(p => {
+        if (selectedPosts.has(p.postId)) {
+          togglePostSelection(p.postId);
+        }
+      });
+    } else {
+      // Select all posts in this category
+      catData.posts.forEach(p => {
+        if (!selectedPosts.has(p.postId)) {
+          togglePostSelection(p.postId);
+        }
+      });
+    }
+  }, [categorySelection, selectedPosts, togglePostSelection]);
   
   // Handle file selection
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -480,6 +539,13 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
     }
   }, [loadPostsFromFiles]);
   
+  // Handle cancel
+  const handleCancelUpload = useCallback(() => {
+    console.log('[ManualPostUpload] Cancel requested');
+    cancelRef.current = true;
+    setIsCancelling(true);
+  }, []);
+  
   // Handle upload with optional processing
   const handleUpload = useCallback(async () => {
     if (!selectedAccountId) {
@@ -487,19 +553,49 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
       return;
     }
     
+    // Reset cancel state
+    cancelRef.current = false;
+    setIsCancelling(false);
+    
     console.log('[ManualPostUpload] Starting upload with flow:', processingFlow);
     console.log('[ManualPostUpload] Processing options:', processingOptions);
     
-    // Step 1: Upload posts
-    const uploadResult = await uploadSelectedPosts({
-      includeResults: filterOptions.showResults,
-      includePromotional: filterOptions.showPromotional,
-      includeGeneral: filterOptions.showGeneral,
-      minConfidence: filterOptions.minConfidence,
-      createGameRecords: false,
-    });
+    // Step 1: Upload posts (the hook handles duplicate checking internally)
+    const uploadResult = await uploadSelectedPosts(
+      {
+        includeResults: filterOptions.showResults,
+        includePromotional: filterOptions.showPromotional,
+        includeGeneral: filterOptions.showGeneral,
+        minConfidence: filterOptions.minConfidence,
+        createGameRecords: false,
+      },
+      () => cancelRef.current // Pass cancellation check callback
+    );
     
     console.log('[ManualPostUpload] Upload result:', uploadResult);
+    
+    // Check if user cancelled during upload phase
+    if (cancelRef.current) {
+      alert(`Upload cancelled!\n\nCompleted before cancel:\n✅ Uploaded: ${uploadResult.successCount}\n⏭️ Skipped: ${uploadResult.skippedCount}`);
+      setIsCancelling(false);
+      return;
+    }
+    
+    // Check if there were errors and stop
+    if (uploadResult.errorCount > 0) {
+      const firstError = uploadResult.errors[0]?.error || 'Unknown error';
+      const shouldContinue = window.confirm(
+        `Upload encountered ${uploadResult.errorCount} error(s).\n\n` +
+        `First error: ${firstError}\n\n` +
+        `✅ Uploaded: ${uploadResult.successCount}\n` +
+        `⏭️ Skipped: ${uploadResult.skippedCount}\n\n` +
+        `Continue with processing uploaded posts?`
+      );
+      
+      if (!shouldContinue) {
+        return;
+      }
+    }
     
     const successfulUploads = uploadResult.results.filter(r => r.success && r.socialPostId);
     console.log('[ManualPostUpload] Successful uploads with IDs:', successfulUploads);
@@ -510,8 +606,16 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
       let totalLinksCreated = 0;
       let processedCount = 0;
       let errorCount = 0;
+      let cancelledAt = -1;
       
       for (let i = 0; i < successfulUploads.length; i++) {
+        // Check for cancellation
+        if (cancelRef.current) {
+          console.log('[ManualPostUpload] Processing cancelled at post', i + 1);
+          cancelledAt = i;
+          break;
+        }
+        
         const upload = successfulUploads[i];
         if (!upload.socialPostId) continue;
         
@@ -577,26 +681,56 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
               updatePostField(originalPost.postId, '_processingStatus', 'error');
               updatePostField(originalPost.postId, '_processingError', result.error || 'Processing failed');
             }
+            
+            // Stop on processing error - ask user if they want to continue
+            const shouldContinue = window.confirm(
+              `Processing error on post ${i + 1}/${successfulUploads.length}:\n\n` +
+              `${result.error || 'Unknown error'}\n\n` +
+              `Continue processing remaining posts?`
+            );
+            
+            if (!shouldContinue) {
+              cancelledAt = i;
+              break;
+            }
           }
         } catch (err) {
           errorCount++;
+          const errorMessage = err instanceof Error ? err.message : 'Processing failed';
+          
           if (originalPost) {
             updatePostField(originalPost.postId, '_processingStatus', 'error');
-            updatePostField(originalPost.postId, '_processingError', 
-              err instanceof Error ? err.message : 'Processing failed'
-            );
+            updatePostField(originalPost.postId, '_processingError', errorMessage);
+          }
+          
+          // Stop on exception - ask user if they want to continue
+          const shouldContinue = window.confirm(
+            `Processing exception on post ${i + 1}/${successfulUploads.length}:\n\n` +
+            `${errorMessage}\n\n` +
+            `Continue processing remaining posts?`
+          );
+          
+          if (!shouldContinue) {
+            cancelledAt = i;
+            break;
           }
         }
       }
       
+      // Reset cancel state
+      setIsCancelling(false);
+      
       // Show final summary
+      const wasCancelled = cancelledAt >= 0;
       alert(
-        `Upload & Process Complete!\n\n` +
+        `Upload & Process ${wasCancelled ? 'Stopped' : 'Complete'}!\n\n` +
         `📤 Uploaded: ${uploadResult.successCount}\n` +
-        `⚙️ Processed: ${processedCount}\n` +
+        `⏭️ Skipped (duplicates): ${uploadResult.skippedCount}\n` +
+        `⚙️ Processed: ${processedCount}${wasCancelled ? ` / ${successfulUploads.length}` : ''}\n` +
         `🔗 Links Created: ${totalLinksCreated}\n` +
         `❌ Errors: ${uploadResult.errorCount + errorCount}\n` +
-        (uploadResult.errors.length > 0 ? `\nFirst error: ${uploadResult.errors[0]?.error}` : '')
+        (wasCancelled ? `\n⚠️ Stopped at post ${cancelledAt + 1}` : '') +
+        (uploadResult.errors.length > 0 ? `\nFirst upload error: ${uploadResult.errors[0]?.error}` : '')
       );
     } else {
       // Upload only - show simple summary
@@ -604,10 +738,12 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
         .filter(p => selectedPosts.has(p.postId) && p.attachmentFiles && p.attachmentFiles.length > 0)
         .reduce((sum, p) => sum + (p.attachmentFiles?.length || 0), 0);
       
+      setIsCancelling(false);
+      
       alert(
         `Upload Complete!\n\n` +
         `✅ Success: ${uploadResult.successCount}\n` +
-        `⏭️ Skipped: ${uploadResult.skippedCount}\n` +
+        `⏭️ Skipped (duplicates): ${uploadResult.skippedCount}\n` +
         `❌ Errors: ${uploadResult.errorCount}\n` +
         (totalAttachmentsUploaded > 0 ? `📷 Images uploaded: ${totalAttachmentsUploaded}\n` : '') +
         (uploadResult.errors.length > 0 ? `\nFirst error: ${uploadResult.errors[0]?.error}` : '')
@@ -791,27 +927,10 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
               <input
                 type="radio"
                 name="processingFlow"
-                value="upload_only"
-                checked={processingFlow === 'upload_only'}
-                onChange={() => setProcessingFlow('upload_only')}
-                className="mt-1 w-4 h-4 text-indigo-600 focus:ring-indigo-500"
-              />
-              <div>
-                <div className="font-medium text-gray-900">Upload Only</div>
-                <div className="text-xs text-gray-500">
-                  Save posts to database. Process and match to games later.
-                </div>
-              </div>
-            </label>
-            
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="radio"
-                name="processingFlow"
                 value="upload_process"
                 checked={processingFlow === 'upload_process'}
                 onChange={() => setProcessingFlow('upload_process')}
-                className="mt-1 w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                className="mt-1 w-4 h-4 text-green-600 focus:ring-green-500"
               />
               <div>
                 <div className="font-medium text-gray-900 flex items-center gap-2">
@@ -822,6 +941,23 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
                 </div>
                 <div className="text-xs text-gray-500">
                   Upload, extract data, match to games, and auto-link high confidence matches.
+                </div>
+              </div>
+            </label>
+            
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="radio"
+                name="processingFlow"
+                value="upload_only"
+                checked={processingFlow === 'upload_only'}
+                onChange={() => setProcessingFlow('upload_only')}
+                className="mt-1 w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+              />
+              <div>
+                <div className="font-medium text-gray-900">Upload Only</div>
+                <div className="text-xs text-gray-500">
+                  Save posts to database. Process and match to games later.
                 </div>
               </div>
             </label>
@@ -1039,57 +1175,161 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
             </button>
           </div>
           
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
-            <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+          {/* Stats Cards - Interactive Category Selectors */}
+          <p className="text-xs text-gray-500 mb-2">
+            Tap a category to select/deselect all posts of that type
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+            {/* Results Card - Toggleable */}
+            <button
+              type="button"
+              onClick={() => toggleCategory('results')}
+              disabled={categorySelection.results.total === 0}
+              className={`rounded-lg p-3 border-2 transition-all text-left cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 ${
+                categorySelection.results.allSelected
+                  ? 'bg-green-50 border-green-500 ring-2 ring-green-200 shadow-sm'
+                  : categorySelection.results.selected > 0
+                  ? 'bg-green-50 border-green-300'
+                  : 'bg-green-50/50 border-green-200 opacity-60'
+              }`}
+            >
               <div className="flex items-center gap-2 text-green-700">
                 <TrophyIcon className="w-5 h-5" />
                 <span className="font-medium">Results</span>
+                {categorySelection.results.allSelected && (
+                  <CheckCircleIcon className="w-4 h-4 ml-auto text-green-600" />
+                )}
               </div>
-              <p className="text-2xl font-bold text-green-800 mt-1">{stats.tournamentResults}</p>
-            </div>
+              <p className="text-2xl font-bold text-green-800 mt-1">{categorySelection.results.total}</p>
+              <p className="text-xs text-green-600 mt-0.5">
+                {categorySelection.results.selected}/{categorySelection.results.total} selected
+              </p>
+            </button>
             
-            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+            {/* Promo Card - Toggleable */}
+            <button
+              type="button"
+              onClick={() => toggleCategory('promo')}
+              disabled={categorySelection.promo.total === 0}
+              className={`rounded-lg p-3 border-2 transition-all text-left cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 ${
+                categorySelection.promo.allSelected
+                  ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200 shadow-sm'
+                  : categorySelection.promo.selected > 0
+                  ? 'bg-blue-50 border-blue-300'
+                  : 'bg-blue-50/50 border-blue-200 opacity-60'
+              }`}
+            >
               <div className="flex items-center gap-2 text-blue-700">
                 <MegaphoneIcon className="w-5 h-5" />
                 <span className="font-medium">Promo</span>
+                {categorySelection.promo.allSelected && (
+                  <CheckCircleIcon className="w-4 h-4 ml-auto text-blue-600" />
+                )}
               </div>
-              <p className="text-2xl font-bold text-blue-800 mt-1">{stats.promotionalPosts}</p>
-            </div>
+              <p className="text-2xl font-bold text-blue-800 mt-1">{categorySelection.promo.total}</p>
+              <p className="text-xs text-blue-600 mt-0.5">
+                {categorySelection.promo.selected}/{categorySelection.promo.total} selected
+              </p>
+            </button>
             
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+            {/* General Card - Toggleable */}
+            <button
+              type="button"
+              onClick={() => toggleCategory('general')}
+              disabled={categorySelection.general.total === 0}
+              className={`rounded-lg p-3 border-2 transition-all text-left cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 ${
+                categorySelection.general.allSelected
+                  ? 'bg-gray-100 border-gray-500 ring-2 ring-gray-300 shadow-sm'
+                  : categorySelection.general.selected > 0
+                  ? 'bg-gray-100 border-gray-300'
+                  : 'bg-gray-50 border-gray-200 opacity-60'
+              }`}
+            >
               <div className="flex items-center gap-2 text-gray-700">
                 <DocumentTextIcon className="w-5 h-5" />
                 <span className="font-medium">General</span>
+                {categorySelection.general.allSelected && (
+                  <CheckCircleIcon className="w-4 h-4 ml-auto text-gray-600" />
+                )}
               </div>
-              <p className="text-2xl font-bold text-gray-800 mt-1">{stats.generalPosts}</p>
-            </div>
+              <p className="text-2xl font-bold text-gray-800 mt-1">{categorySelection.general.total}</p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                {categorySelection.general.selected}/{categorySelection.general.total} selected
+              </p>
+            </button>
             
+            {/* Skipped Card - Shows details on click */}
+            <button
+              type="button"
+              onClick={() => setShowSkippedDetails(!showSkippedDetails)}
+              className={`rounded-lg p-3 border-2 transition-all text-left cursor-pointer ${
+                showSkippedDetails
+                  ? 'bg-yellow-100 border-yellow-500 ring-2 ring-yellow-200 shadow-sm'
+                  : 'bg-yellow-50 border-yellow-200'
+              }`}
+            >
+              <div className="flex items-center gap-2 text-yellow-700">
+                <ExclamationCircleIcon className="w-5 h-5" />
+                <span className="font-medium">Skipped</span>
+                {showSkippedDetails && (
+                  <EyeIcon className="w-4 h-4 ml-auto text-yellow-600" />
+                )}
+              </div>
+              <p className="text-2xl font-bold text-yellow-800 mt-1">{stats.skippedComments}</p>
+              <p className="text-xs text-yellow-600 mt-0.5">
+                {showSkippedDetails ? 'Click to hide' : 'Click to view reasons'}
+              </p>
+            </button>
+            
+            {/* Images Card - Info only */}
             <div className="bg-cyan-50 rounded-lg p-3 border border-cyan-200">
               <div className="flex items-center gap-2 text-cyan-700">
                 <PhotoIcon className="w-5 h-5" />
                 <span className="font-medium">Images</span>
               </div>
               <p className="text-2xl font-bold text-cyan-800 mt-1">{attachmentStats.totalAttachments}</p>
-              <p className="text-xs text-cyan-600">{attachmentStats.postsWithAttachments} posts</p>
-            </div>
-            
-            <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
-              <div className="flex items-center gap-2 text-purple-700">
-                <LinkIcon className="w-5 h-5" />
-                <span className="font-medium">Linked</span>
-              </div>
-              <p className="text-2xl font-bold text-purple-800 mt-1">{processingStats.linkedCount}</p>
-            </div>
-            
-            <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
-              <div className="flex items-center gap-2 text-yellow-700">
-                <ChatBubbleLeftIcon className="w-5 h-5" />
-                <span className="font-medium">Skipped</span>
-              </div>
-              <p className="text-2xl font-bold text-yellow-800 mt-1">{stats.skippedComments}</p>
+              <p className="text-xs text-cyan-600 mt-0.5">{attachmentStats.postsWithAttachments} posts with images</p>
             </div>
           </div>
+          
+          {/* Skipped Posts Details Panel */}
+          {showSkippedDetails && stats.skippedComments > 0 && (
+            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <h4 className="text-sm font-semibold text-yellow-800 mb-3 flex items-center gap-2">
+                <ExclamationCircleIcon className="w-4 h-4" />
+                Skipped Posts ({stats.skippedComments})
+              </h4>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {reviewablePosts
+                  .filter(p => p.isComment || p.postType === 'COMMENT')
+                  .map(post => (
+                    <div key={post.postId} className="bg-white p-3 rounded-lg border border-yellow-100 shadow-sm">
+                      <div className="flex items-start gap-2 mb-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                          {(post as any).skipReason || 'Comment/Reply'}
+                        </span>
+                        <span className="text-gray-400 text-xs ml-auto">
+                          {new Date(post.postedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-gray-600 text-sm line-clamp-2 mt-1">
+                        {post.content.substring(0, 200)}
+                        {post.content.length > 200 ? '...' : ''}
+                      </p>
+                      {post.author?.name && (
+                        <p className="text-xs text-gray-400 mt-1">By: {post.author.name}</p>
+                      )}
+                    </div>
+                  ))
+                }
+                {reviewablePosts.filter(p => p.isComment || p.postType === 'COMMENT').length === 0 && (
+                  <p className="text-sm text-yellow-700 italic">
+                    No skipped posts with details available. Posts may have been filtered during parsing.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
           
           {/* Selection Summary */}
           <div className="flex items-center gap-4 text-sm">
@@ -1277,49 +1517,83 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
       {selectedPosts.size > 0 && (
         <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 -mx-6 -mb-6 flex items-center justify-between shadow-lg">
           <div className="text-sm text-gray-600">
-            {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''} selected
-            {attachmentStats.selectedAttachments > 0 && (
-              <span className="text-cyan-600 ml-1">
-                ({attachmentStats.selectedAttachments} image{attachmentStats.selectedAttachments !== 1 ? 's' : ''})
-              </span>
-            )}
-            {!selectedAccountId && (
-              <span className="text-amber-600 ml-2">
-                — Select a Social Account to upload
-              </span>
-            )}
-          </div>
-          
-          <button
-            onClick={handleUpload}
-            disabled={isProcessing || !selectedAccountId}
-            className={`inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-              processingFlow === 'upload_process'
-                ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
-                : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
-            }`}
-          >
             {isProcessing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
                 {uploadProgress?.stage || `Processing ${uploadProgress?.current}/${uploadProgress?.total}...`}
-              </>
+                {isCancelling && <span className="text-amber-600">(Cancelling...)</span>}
+              </span>
             ) : (
               <>
-                {processingFlow === 'upload_process' ? (
-                  <>
-                    <PlayIcon className="w-4 h-4 mr-2" />
-                    Upload + Process
-                  </>
-                ) : (
-                  <>
-                    <ArrowUpTrayIcon className="w-4 h-4 mr-2" />
-                    Upload Only
-                  </>
+                {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''} selected
+                {attachmentStats.selectedAttachments > 0 && (
+                  <span className="text-cyan-600 ml-1">
+                    ({attachmentStats.selectedAttachments} image{attachmentStats.selectedAttachments !== 1 ? 's' : ''})
+                  </span>
+                )}
+                {!selectedAccountId && (
+                  <span className="text-amber-600 ml-2">
+                    — Select a Social Account to upload
+                  </span>
                 )}
               </>
             )}
-          </button>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* Cancel button - shown during processing */}
+            {isProcessing && (
+              <button
+                onClick={handleCancelUpload}
+                disabled={isCancelling}
+                className="inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCancelling ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Stopping...
+                  </>
+                ) : (
+                  <>
+                    <ExclamationCircleIcon className="w-4 h-4 mr-2" />
+                    Stop Upload
+                  </>
+                )}
+              </button>
+            )}
+            
+            {/* Upload button */}
+            <button
+              onClick={handleUpload}
+              disabled={isProcessing || !selectedAccountId}
+              className={`inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                processingFlow === 'upload_process'
+                  ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
+                  : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
+              }`}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {uploadProgress?.current}/{uploadProgress?.total}
+                </>
+              ) : (
+                <>
+                  {processingFlow === 'upload_process' ? (
+                    <>
+                      <PlayIcon className="w-4 h-4 mr-2" />
+                      Upload + Process
+                    </>
+                  ) : (
+                    <>
+                      <ArrowUpTrayIcon className="w-4 h-4 mr-2" />
+                      Upload Only
+                    </>
+                  )}
+                </>
+              )}
+            </button>
+          </div>
         </div>
       )}
       

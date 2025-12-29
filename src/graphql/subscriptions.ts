@@ -766,6 +766,10 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
             entityId
             createdAt
             updatedAt
@@ -1027,6 +1031,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             primaryLinkedGameId
             linkedGameCount
             hasUnverifiedLinks
+            postYearMonth
             socialAccountId
             entityId
             venueId
@@ -1037,6 +1042,15 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             _lastChangedAt
             __typename
           }
+          socialDataAggregation
+          socialDataAggregatedAt
+          ticketsAwarded {
+            nextToken
+            startedAt
+            __typename
+          }
+          ticketsAwardedCount
+          ticketProgramName
           entityId
           entity {
             id
@@ -2793,6 +2807,10 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
             entityId
             createdAt
             updatedAt
@@ -3054,6 +3072,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             primaryLinkedGameId
             linkedGameCount
             hasUnverifiedLinks
+            postYearMonth
             socialAccountId
             entityId
             venueId
@@ -3064,6 +3083,15 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             _lastChangedAt
             __typename
           }
+          socialDataAggregation
+          socialDataAggregatedAt
+          ticketsAwarded {
+            nextToken
+            startedAt
+            __typename
+          }
+          ticketsAwardedCount
+          ticketProgramName
           entityId
           entity {
             id
@@ -4895,6 +4923,10 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
             entityId
             createdAt
             updatedAt
@@ -5156,6 +5188,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             primaryLinkedGameId
             linkedGameCount
             hasUnverifiedLinks
+            postYearMonth
             socialAccountId
             entityId
             venueId
@@ -5166,6 +5199,15 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             _lastChangedAt
             __typename
           }
+          socialDataAggregation
+          socialDataAggregatedAt
+          ticketsAwarded {
+            nextToken
+            startedAt
+            __typename
+          }
+          ticketsAwardedCount
+          ticketProgramName
           entityId
           entity {
             id
@@ -6933,6 +6975,10 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
             entityId
             createdAt
             updatedAt
@@ -7194,6 +7240,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             primaryLinkedGameId
             linkedGameCount
             hasUnverifiedLinks
+            postYearMonth
             socialAccountId
             entityId
             venueId
@@ -7204,6 +7251,15 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             _lastChangedAt
             __typename
           }
+          socialDataAggregation
+          socialDataAggregatedAt
+          ticketsAwarded {
+            nextToken
+            startedAt
+            __typename
+          }
+          ticketsAwardedCount
+          ticketProgramName
           entityId
           entity {
             id
@@ -8971,6 +9027,10 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
             entityId
             createdAt
             updatedAt
@@ -9232,6 +9292,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             primaryLinkedGameId
             linkedGameCount
             hasUnverifiedLinks
+            postYearMonth
             socialAccountId
             entityId
             venueId
@@ -9242,6 +9303,15 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             _lastChangedAt
             __typename
           }
+          socialDataAggregation
+          socialDataAggregatedAt
+          ticketsAwarded {
+            nextToken
+            startedAt
+            __typename
+          }
+          ticketsAwardedCount
+          ticketProgramName
           entityId
           entity {
             id
@@ -10998,6 +11068,10 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
             entityId
             createdAt
             updatedAt
@@ -11259,6 +11333,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             primaryLinkedGameId
             linkedGameCount
             hasUnverifiedLinks
+            postYearMonth
             socialAccountId
             entityId
             venueId
@@ -11269,6 +11344,15 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             _lastChangedAt
             __typename
           }
+          socialDataAggregation
+          socialDataAggregatedAt
+          ticketsAwarded {
+            nextToken
+            startedAt
+            __typename
+          }
+          ticketsAwardedCount
+          ticketProgramName
           entityId
           entity {
             id
@@ -13038,6 +13122,10 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
             entityId
             createdAt
             updatedAt
@@ -13299,6 +13387,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             primaryLinkedGameId
             linkedGameCount
             hasUnverifiedLinks
+            postYearMonth
             socialAccountId
             entityId
             venueId
@@ -13309,6 +13398,15 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             _lastChangedAt
             __typename
           }
+          socialDataAggregation
+          socialDataAggregatedAt
+          ticketsAwarded {
+            nextToken
+            startedAt
+            __typename
+          }
+          ticketsAwardedCount
+          ticketProgramName
           entityId
           entity {
             id
@@ -15078,6 +15176,10 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
             entityId
             createdAt
             updatedAt
@@ -15339,6 +15441,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             primaryLinkedGameId
             linkedGameCount
             hasUnverifiedLinks
+            postYearMonth
             socialAccountId
             entityId
             venueId
@@ -15349,6 +15452,15 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             _lastChangedAt
             __typename
           }
+          socialDataAggregation
+          socialDataAggregatedAt
+          ticketsAwarded {
+            nextToken
+            startedAt
+            __typename
+          }
+          ticketsAwardedCount
+          ticketProgramName
           entityId
           entity {
             id

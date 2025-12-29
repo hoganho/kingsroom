@@ -1,6 +1,13 @@
 # 80-scrapers.graphql
 # ==========================================
 # 
+# FIXED VERSION: Uses composite key instead of dual @index on entityId
+# This avoids the Amplify transformer bug that causes "Converting circular structure to JSON"
+#
+# CHANGE LOG:
+# - Removed second @index from entityId (was causing deployment failure)
+# - Added entityTournamentKey computed field for composite lookups
+#
 # DEPENDENCIES:
 # - 00-enums.graphql: ScraperJobStatus, ScrapeAttemptStatus, ScrapeURLStatus, etc.
 # - 30-games.graphql: SaveGameResult, SaveGameInput, SaveGameDataInput
@@ -188,12 +195,37 @@ type DataSync @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   content: String
 }
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# S3Storage - FIXED VERSION
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# SOLUTION: Use composite key field instead of dual @index
+# 
+# entityTournamentKey: Computed field storing "{entityId}#{tournamentId}"
+# - Set by Lambda on create/update
+# - Enables direct lookup without needing scrapedAt
+# - Works with migrated records missing scrapedAt
+# - Avoids Amplify transformer bug with dual @index
+#
+# QUERY USAGE:
+#   KeyConditionExpression: 'entityTournamentKey = :key'
+#   ExpressionAttributeValues: { ':key': `${entityId}#${tournamentId}` }
+# ═══════════════════════════════════════════════════════════════════════════════
+
 type S3Storage @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   scrapeURLId: ID @index(name: "byScrapeURL", sortKeyFields: ["scrapedAt"])
   url: AWSURL! @index(name: "byURL", sortKeyFields: ["scrapedAt"])
   tournamentId: Int! @index(name: "byTournamentId", sortKeyFields: ["scrapedAt"])
+  
+  # Primary entity index (for listing all S3Storage by entity)
   entityId: ID! @index(name: "byEntity", sortKeyFields: ["scrapedAt"])
+  
+  # NEW: Composite key for direct entity+tournament lookups
+  # Format: "{entityId}#{tournamentId}"
+  # Set by Lambda: entityTournamentKey = `${entityId}#${tournamentId}`
+  entityTournamentKey: String @index(name: "byEntityTournament")
+  
   s3Key: String! @index(name: "byS3Key")
   s3Bucket: String!
   scrapedAt: AWSDateTime!

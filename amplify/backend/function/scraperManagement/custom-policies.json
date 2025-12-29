@@ -7,8 +7,8 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-staging",
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*-staging/index/byStatus"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperJob-*/index/*"
     ]
   },
   {
@@ -18,7 +18,7 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*-staging"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*"
     ]
   },
   {
@@ -26,7 +26,7 @@
       "dynamodb:Scan"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*-staging"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*"
     ]
   },
   {
@@ -35,7 +35,7 @@
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*-staging"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*"
     ]
   },
   {
@@ -43,7 +43,7 @@
       "lambda:InvokeFunction"
     ],
     "Resource": [
-      "arn:aws:lambda:ap-southeast-2:*:function:autoScraper-staging"
+      "arn:aws:lambda:ap-southeast-2:*:function:autoScraper-*"
     ]
   },
   {

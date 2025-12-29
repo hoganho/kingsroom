@@ -1955,6 +1955,82 @@ export declare type FinancialsSaveResult = LazyLoading extends LazyLoadingDisabl
 
 export declare const FinancialsSaveResult: (new (init: ModelInit<FinancialsSaveResult>) => FinancialsSaveResult)
 
+type EagerAwardTicketResult = {
+  readonly success: boolean;
+  readonly ticketId?: string | null;
+  readonly playerId?: string | null;
+  readonly ticketValue?: number | null;
+  readonly error?: string | null;
+}
+
+type LazyAwardTicketResult = {
+  readonly success: boolean;
+  readonly ticketId?: string | null;
+  readonly playerId?: string | null;
+  readonly ticketValue?: number | null;
+  readonly error?: string | null;
+}
+
+export declare type AwardTicketResult = LazyLoading extends LazyLoadingDisabled ? EagerAwardTicketResult : LazyAwardTicketResult
+
+export declare const AwardTicketResult: (new (init: ModelInit<AwardTicketResult>) => AwardTicketResult)
+
+type EagerBulkAwardTicketsResult = {
+  readonly success: boolean;
+  readonly totalAwarded: number;
+  readonly totalFailed: number;
+  readonly results: AwardTicketResult[];
+}
+
+type LazyBulkAwardTicketsResult = {
+  readonly success: boolean;
+  readonly totalAwarded: number;
+  readonly totalFailed: number;
+  readonly results: AwardTicketResult[];
+}
+
+export declare type BulkAwardTicketsResult = LazyLoading extends LazyLoadingDisabled ? EagerBulkAwardTicketsResult : LazyBulkAwardTicketsResult
+
+export declare const BulkAwardTicketsResult: (new (init: ModelInit<BulkAwardTicketsResult>) => BulkAwardTicketsResult)
+
+type EagerTicketAwardSummary = {
+  readonly gameId: string;
+  readonly gameName?: string | null;
+  readonly ticketsAwarded: number;
+  readonly ticketValue?: number | null;
+  readonly totalTicketValue?: number | null;
+  readonly programName?: string | null;
+  readonly positions?: (number | null)[] | null;
+}
+
+type LazyTicketAwardSummary = {
+  readonly gameId: string;
+  readonly gameName?: string | null;
+  readonly ticketsAwarded: number;
+  readonly ticketValue?: number | null;
+  readonly totalTicketValue?: number | null;
+  readonly programName?: string | null;
+  readonly positions?: (number | null)[] | null;
+}
+
+export declare type TicketAwardSummary = LazyLoading extends LazyLoadingDisabled ? EagerTicketAwardSummary : LazyTicketAwardSummary
+
+export declare const TicketAwardSummary: (new (init: ModelInit<TicketAwardSummary>) => TicketAwardSummary)
+
+type EagerPlayerTicketConnection = {
+  readonly items: PlayerTicket[];
+  readonly nextToken?: string | null;
+}
+
+type LazyPlayerTicketConnection = {
+  readonly items: AsyncCollection<PlayerTicket>;
+  readonly nextToken?: string | null;
+}
+
+export declare type PlayerTicketConnection = LazyLoading extends LazyLoadingDisabled ? EagerPlayerTicketConnection : LazyPlayerTicketConnection
+
+export declare const PlayerTicketConnection: (new (init: ModelInit<PlayerTicketConnection>) => PlayerTicketConnection)
+
 type EagerRefreshAllMetricsResult = {
   readonly success: boolean;
   readonly message?: string | null;
@@ -3329,6 +3405,156 @@ export declare type SocialPostWithMatchInfo = LazyLoading extends LazyLoadingDis
 
 export declare const SocialPostWithMatchInfo: (new (init: ModelInit<SocialPostWithMatchInfo>) => SocialPostWithMatchInfo)
 
+type EagerGameToSocialMatchResult = {
+  readonly success: boolean;
+  readonly gameId?: string | null;
+  readonly gameName?: string | null;
+  readonly gameDate?: string | null;
+  readonly candidatesFound?: number | null;
+  readonly candidatesScored?: number | null;
+  readonly linksCreated?: number | null;
+  readonly linksSkipped?: number | null;
+  readonly existingLinks?: number | null;
+  readonly matchedPosts?: SocialPostMatchCandidate[] | null;
+  readonly linkDetails?: GameToSocialLinkDetail[] | null;
+  readonly matchContext?: GameToSocialMatchContext | null;
+  readonly processingTimeMs?: number | null;
+  readonly error?: string | null;
+}
+
+type LazyGameToSocialMatchResult = {
+  readonly success: boolean;
+  readonly gameId?: string | null;
+  readonly gameName?: string | null;
+  readonly gameDate?: string | null;
+  readonly candidatesFound?: number | null;
+  readonly candidatesScored?: number | null;
+  readonly linksCreated?: number | null;
+  readonly linksSkipped?: number | null;
+  readonly existingLinks?: number | null;
+  readonly matchedPosts?: SocialPostMatchCandidate[] | null;
+  readonly linkDetails?: GameToSocialLinkDetail[] | null;
+  readonly matchContext?: GameToSocialMatchContext | null;
+  readonly processingTimeMs?: number | null;
+  readonly error?: string | null;
+}
+
+export declare type GameToSocialMatchResult = LazyLoading extends LazyLoadingDisabled ? EagerGameToSocialMatchResult : LazyGameToSocialMatchResult
+
+export declare const GameToSocialMatchResult: (new (init: ModelInit<GameToSocialMatchResult>) => GameToSocialMatchResult)
+
+type EagerSocialPostMatchCandidate = {
+  readonly socialPostId: string;
+  readonly postDate?: string | null;
+  readonly contentType?: SocialPostContentType | keyof typeof SocialPostContentType | null;
+  readonly extractedBuyIn?: number | null;
+  readonly extractedVenueName?: string | null;
+  readonly matchConfidence: number;
+  readonly matchReason?: string | null;
+  readonly matchSignals?: string | null;
+  readonly rank?: number | null;
+  readonly isPrimaryGame?: boolean | null;
+  readonly mentionOrder?: number | null;
+  readonly wouldLink?: boolean | null;
+}
+
+type LazySocialPostMatchCandidate = {
+  readonly socialPostId: string;
+  readonly postDate?: string | null;
+  readonly contentType?: SocialPostContentType | keyof typeof SocialPostContentType | null;
+  readonly extractedBuyIn?: number | null;
+  readonly extractedVenueName?: string | null;
+  readonly matchConfidence: number;
+  readonly matchReason?: string | null;
+  readonly matchSignals?: string | null;
+  readonly rank?: number | null;
+  readonly isPrimaryGame?: boolean | null;
+  readonly mentionOrder?: number | null;
+  readonly wouldLink?: boolean | null;
+}
+
+export declare type SocialPostMatchCandidate = LazyLoading extends LazyLoadingDisabled ? EagerSocialPostMatchCandidate : LazySocialPostMatchCandidate
+
+export declare const SocialPostMatchCandidate: (new (init: ModelInit<SocialPostMatchCandidate>) => SocialPostMatchCandidate)
+
+type EagerGameToSocialLinkDetail = {
+  readonly socialPostId: string;
+  readonly linkId?: string | null;
+  readonly status: string;
+  readonly reason?: string | null;
+  readonly matchConfidence?: number | null;
+  readonly error?: string | null;
+}
+
+type LazyGameToSocialLinkDetail = {
+  readonly socialPostId: string;
+  readonly linkId?: string | null;
+  readonly status: string;
+  readonly reason?: string | null;
+  readonly matchConfidence?: number | null;
+  readonly error?: string | null;
+}
+
+export declare type GameToSocialLinkDetail = LazyLoading extends LazyLoadingDisabled ? EagerGameToSocialLinkDetail : LazyGameToSocialLinkDetail
+
+export declare const GameToSocialLinkDetail: (new (init: ModelInit<GameToSocialLinkDetail>) => GameToSocialLinkDetail)
+
+type EagerGameToSocialMatchContext = {
+  readonly matchMethod?: string | null;
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly searchRange?: DateRange | null;
+  readonly candidatesScored?: number | null;
+  readonly candidatesAboveMinimum?: number | null;
+}
+
+type LazyGameToSocialMatchContext = {
+  readonly matchMethod?: string | null;
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly searchRange?: DateRange | null;
+  readonly candidatesScored?: number | null;
+  readonly candidatesAboveMinimum?: number | null;
+}
+
+export declare type GameToSocialMatchContext = LazyLoading extends LazyLoadingDisabled ? EagerGameToSocialMatchContext : LazyGameToSocialMatchContext
+
+export declare const GameToSocialMatchContext: (new (init: ModelInit<GameToSocialMatchContext>) => GameToSocialMatchContext)
+
+type EagerDateRange = {
+  readonly searchStart?: string | null;
+  readonly searchEnd?: string | null;
+}
+
+type LazyDateRange = {
+  readonly searchStart?: string | null;
+  readonly searchEnd?: string | null;
+}
+
+export declare type DateRange = LazyLoading extends LazyLoadingDisabled ? EagerDateRange : LazyDateRange
+
+export declare const DateRange: (new (init: ModelInit<DateRange>) => DateRange)
+
+type EagerBatchGameToSocialMatchResult = {
+  readonly totalRequested: number;
+  readonly processed: number;
+  readonly totalLinksCreated: number;
+  readonly totalLinksSkipped: number;
+  readonly results?: GameToSocialMatchResult[] | null;
+}
+
+type LazyBatchGameToSocialMatchResult = {
+  readonly totalRequested: number;
+  readonly processed: number;
+  readonly totalLinksCreated: number;
+  readonly totalLinksSkipped: number;
+  readonly results?: GameToSocialMatchResult[] | null;
+}
+
+export declare type BatchGameToSocialMatchResult = LazyLoading extends LazyLoadingDisabled ? EagerBatchGameToSocialMatchResult : LazyBatchGameToSocialMatchResult
+
+export declare const BatchGameToSocialMatchResult: (new (init: ModelInit<BatchGameToSocialMatchResult>) => BatchGameToSocialMatchResult)
+
 type EagerUserManagementResponse = {
   readonly success: boolean;
   readonly message?: string | null;
@@ -4144,6 +4370,11 @@ type EagerGame = {
   readonly hasLinkedSocialPosts?: boolean | null;
   readonly primaryResultPostId?: string | null;
   readonly primaryResultPost?: SocialPost | null;
+  readonly socialDataAggregation?: string | null;
+  readonly socialDataAggregatedAt?: string | null;
+  readonly ticketsAwarded?: (PlayerTicket | null)[] | null;
+  readonly ticketsAwardedCount?: number | null;
+  readonly ticketProgramName?: string | null;
   readonly entityId?: string | null;
   readonly entity?: Entity | null;
   readonly createdAt: string;
@@ -4291,6 +4522,11 @@ type LazyGame = {
   readonly hasLinkedSocialPosts?: boolean | null;
   readonly primaryResultPostId?: string | null;
   readonly primaryResultPost: AsyncItem<SocialPost | undefined>;
+  readonly socialDataAggregation?: string | null;
+  readonly socialDataAggregatedAt?: string | null;
+  readonly ticketsAwarded: AsyncCollection<PlayerTicket>;
+  readonly ticketsAwardedCount?: number | null;
+  readonly ticketProgramName?: string | null;
   readonly entityId?: string | null;
   readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt: string;
@@ -5540,7 +5776,6 @@ export declare const KnownPlayerIdentity: (new (init: ModelInit<KnownPlayerIdent
 type EagerTicketTemplate = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<TicketTemplate, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
   readonly name: string;
@@ -5549,15 +5784,16 @@ type EagerTicketTemplate = {
   readonly validityDays: number;
   readonly originGameId?: string | null;
   readonly targetGameId?: string | null;
+  readonly entityId?: string | null;
   readonly playerTickets?: (PlayerTicket | null)[] | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
+  readonly isActive?: boolean | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 type LazyTicketTemplate = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<TicketTemplate, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
   readonly name: string;
@@ -5566,9 +5802,11 @@ type LazyTicketTemplate = {
   readonly validityDays: number;
   readonly originGameId?: string | null;
   readonly targetGameId?: string | null;
+  readonly entityId?: string | null;
   readonly playerTickets: AsyncCollection<PlayerTicket>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
+  readonly isActive?: boolean | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 export declare type TicketTemplate = LazyLoading extends LazyLoadingDisabled ? EagerTicketTemplate : LazyTicketTemplate
@@ -5580,37 +5818,53 @@ export declare const TicketTemplate: (new (init: ModelInit<TicketTemplate>) => T
 type EagerPlayerTicket = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<PlayerTicket, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly assignedAt: string;
-  readonly expiryDate: string;
-  readonly status: TicketStatus | keyof typeof TicketStatus;
-  readonly usedInGameId?: string | null;
   readonly playerId: string;
   readonly player?: Player | null;
   readonly ticketTemplateId: string;
   readonly ticketTemplate?: TicketTemplate | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
+  readonly wonFromGameId?: string | null;
+  readonly wonFromGame?: Game | null;
+  readonly wonFromPosition?: number | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly status: TicketStatus | keyof typeof TicketStatus;
+  readonly assignedAt: string;
+  readonly expiryDate?: string | null;
+  readonly usedInGameId?: string | null;
+  readonly usedAt?: string | null;
+  readonly ticketValue?: number | null;
+  readonly programName?: string | null;
+  readonly awardReason?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 type LazyPlayerTicket = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<PlayerTicket, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly assignedAt: string;
-  readonly expiryDate: string;
-  readonly status: TicketStatus | keyof typeof TicketStatus;
-  readonly usedInGameId?: string | null;
   readonly playerId: string;
   readonly player: AsyncItem<Player | undefined>;
   readonly ticketTemplateId: string;
   readonly ticketTemplate: AsyncItem<TicketTemplate | undefined>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
+  readonly wonFromGameId?: string | null;
+  readonly wonFromGame: AsyncItem<Game | undefined>;
+  readonly wonFromPosition?: number | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly status: TicketStatus | keyof typeof TicketStatus;
+  readonly assignedAt: string;
+  readonly expiryDate?: string | null;
+  readonly usedInGameId?: string | null;
+  readonly usedAt?: string | null;
+  readonly ticketValue?: number | null;
+  readonly programName?: string | null;
+  readonly awardReason?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 export declare type PlayerTicket = LazyLoading extends LazyLoadingDisabled ? EagerPlayerTicket : LazyPlayerTicket
@@ -6744,6 +6998,7 @@ type EagerS3Storage = {
   readonly url: string;
   readonly tournamentId: number;
   readonly entityId: string;
+  readonly entityTournamentKey?: string | null;
   readonly s3Key: string;
   readonly s3Bucket: string;
   readonly scrapedAt: string;
@@ -6782,6 +7037,7 @@ type LazyS3Storage = {
   readonly url: string;
   readonly tournamentId: number;
   readonly entityId: string;
+  readonly entityTournamentKey?: string | null;
   readonly s3Key: string;
   readonly s3Bucket: string;
   readonly scrapedAt: string;
@@ -6965,6 +7221,7 @@ type EagerSocialPost = {
   readonly primaryLinkedGameId?: string | null;
   readonly linkedGameCount?: number | null;
   readonly hasUnverifiedLinks?: boolean | null;
+  readonly postYearMonth?: string | null;
   readonly socialAccountId: string;
   readonly socialAccount?: SocialAccount | null;
   readonly entityId?: string | null;
@@ -7027,6 +7284,7 @@ type LazySocialPost = {
   readonly primaryLinkedGameId?: string | null;
   readonly linkedGameCount?: number | null;
   readonly hasUnverifiedLinks?: boolean | null;
+  readonly postYearMonth?: string | null;
   readonly socialAccountId: string;
   readonly socialAccount: AsyncItem<SocialAccount | undefined>;
   readonly entityId?: string | null;
@@ -7217,9 +7475,11 @@ type EagerSocialPostGameData = {
   readonly extractedTournamentUrl?: string | null;
   readonly extractedTournamentId?: number | null;
   readonly extractedVenueName?: string | null;
+  readonly extractedVenueId?: string | null;
   readonly suggestedVenueId?: string | null;
   readonly venueMatchConfidence?: number | null;
   readonly venueMatchReason?: string | null;
+  readonly venueMatchSource?: string | null;
   readonly extractedDate?: string | null;
   readonly extractedDayOfWeek?: string | null;
   readonly extractedStartTime?: string | null;
@@ -7229,12 +7489,14 @@ type EagerSocialPostGameData = {
   readonly extractedPrizePool?: number | null;
   readonly extractedFirstPlacePrize?: number | null;
   readonly extractedTotalPrizesPaid?: number | null;
+  readonly extractedRake?: number | null;
   readonly extractedTotalEntries?: number | null;
   readonly extractedTotalUniquePlayers?: number | null;
   readonly extractedGameType?: GameType | keyof typeof GameType | null;
   readonly extractedTournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly extractedGameVariant?: GameVariant | keyof typeof GameVariant | null;
   readonly extractedGameTypes?: (string | null)[] | null;
+  readonly extractedRecurringGameName?: string | null;
   readonly extractedSeriesName?: string | null;
   readonly extractedEventNumber?: number | null;
   readonly extractedDayNumber?: number | null;
@@ -7269,9 +7531,11 @@ type LazySocialPostGameData = {
   readonly extractedTournamentUrl?: string | null;
   readonly extractedTournamentId?: number | null;
   readonly extractedVenueName?: string | null;
+  readonly extractedVenueId?: string | null;
   readonly suggestedVenueId?: string | null;
   readonly venueMatchConfidence?: number | null;
   readonly venueMatchReason?: string | null;
+  readonly venueMatchSource?: string | null;
   readonly extractedDate?: string | null;
   readonly extractedDayOfWeek?: string | null;
   readonly extractedStartTime?: string | null;
@@ -7281,12 +7545,14 @@ type LazySocialPostGameData = {
   readonly extractedPrizePool?: number | null;
   readonly extractedFirstPlacePrize?: number | null;
   readonly extractedTotalPrizesPaid?: number | null;
+  readonly extractedRake?: number | null;
   readonly extractedTotalEntries?: number | null;
   readonly extractedTotalUniquePlayers?: number | null;
   readonly extractedGameType?: GameType | keyof typeof GameType | null;
   readonly extractedTournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly extractedGameVariant?: GameVariant | keyof typeof GameVariant | null;
   readonly extractedGameTypes?: (string | null)[] | null;
+  readonly extractedRecurringGameName?: string | null;
   readonly extractedSeriesName?: string | null;
   readonly extractedEventNumber?: number | null;
   readonly extractedDayNumber?: number | null;

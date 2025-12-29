@@ -14,6 +14,7 @@ import {
   type AuthUser,
 } from '@aws-amplify/auth';
 import { generateClient } from '@aws-amplify/api';
+import { createStandaloneLogger } from '../hooks/useActivityLogger';
 
 // ============================================
 // TYPES
@@ -166,6 +167,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const handleSignOut = useCallback(async () => {
     try {
       console.log('[AuthContext] Signing out...');
+      
+      // Log logout BEFORE destroying the session (while credentials still valid)
+      if (user?.id) {
+        try {
+          const logger = createStandaloneLogger(user.id);
+          await logger('LOGOUT', '/auth', { 
+            loggedOutAt: new Date().toISOString() 
+          });
+        } catch (logError) {
+          // Don't block sign out if logging fails
+          console.warn('[AuthContext] Failed to log logout:', logError);
+        }
+      }
+      
       await amplifySignOut({ global: true });
       setUser(null);
       
@@ -182,7 +197,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('[AuthContext] Sign out error:', error);
       setUser(null);
     }
-  }, []);
+  }, [user?.id]);
 
   /**
    * Fetch existing user from DynamoDB or create new one

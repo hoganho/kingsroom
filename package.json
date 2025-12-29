@@ -28,6 +28,7 @@
     "axios": "^1.12.2",
     "cheerio": "^1.1.2",
     "clsx": "^2.1.1",
+    "csv-parse": "^6.1.0",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.548.0",

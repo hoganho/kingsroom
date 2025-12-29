@@ -58,8 +58,7 @@ type VenueDetails @model(subscriptions: null) @auth(rules: [{ allow: private }])
   averageUniquePlayersPerGame: Float
   averageEntriesPerGame: Float
   gameNights: [String]
-  venueId: ID!
-  @index(name: "byVenue")
+  venueId: ID! @index(name: "byVenue")
   venue: Venue @belongsTo(fields: ["venueId"])
 }
 

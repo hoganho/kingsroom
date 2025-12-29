@@ -163,6 +163,22 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "gameToSocialMatcher": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "getDatabaseMetrics": {
       "build": true,
       "dependsOn": [],
@@ -581,6 +597,22 @@
         }
       ]
     },
+    "AMPLIFY_function_gameToSocialMatcher_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "gameToSocialMatcher"
+        }
+      ]
+    },
+    "AMPLIFY_function_gameToSocialMatcher_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "gameToSocialMatcher"
+        }
+      ]
+    },
     "AMPLIFY_function_getDatabaseMetrics_deploymentBucketName": {
       "usedBy": [
         {
@@ -958,6 +990,14 @@
       ]
     },
     "AMPLIFY_function_webScraperFunction_saveGameFunctionName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "webScraperFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_webScraperFunction_scraperApiKey": {
       "usedBy": [
         {
           "category": "function",
