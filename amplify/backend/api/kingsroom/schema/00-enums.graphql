@@ -78,10 +78,16 @@ enum RegistrationStatus {
 }
 
 enum TournamentType { 
-  FREEZEOUT
-  REBUY
-  SATELLITE
-  DEEPSTACK
+    FREEZEOUT
+    REENTRY
+    RE_ENTRY
+    REBUY
+    BOUNTY
+    KNOCKOUT
+    SATELLITE
+    TURBO
+    HYPERTURBO
+    DEEPSTACK
 }
 
 enum PaymentSourceType { 

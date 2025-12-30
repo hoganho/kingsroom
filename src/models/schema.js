@@ -14683,8 +14683,14 @@ export const schema = {
             "name": "TournamentType",
             "values": [
                 "FREEZEOUT",
+                "REENTRY",
+                "RE_ENTRY",
                 "REBUY",
+                "BOUNTY",
+                "KNOCKOUT",
                 "SATELLITE",
+                "TURBO",
+                "HYPERTURBO",
                 "DEEPSTACK"
             ]
         },

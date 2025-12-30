@@ -28,6 +28,10 @@
     {
       "cloudFormationParameterName": "fbAccessToken",
       "environmentVariableName": "FB_ACCESS_TOKEN"
+    },
+    {
+      "cloudFormationParameterName": "socialPostProcessorFunction",
+      "environmentVariableName": "SOCIAL_POST_PROCESSOR_FUNCTION"
     }
   ]
 }

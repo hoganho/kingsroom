@@ -853,6 +853,14 @@
         }
       ]
     },
+    "AMPLIFY_function_socialFetcher_socialPostProcessorFunction": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialFetcher"
+        }
+      ]
+    },
     "AMPLIFY_function_socialPostProcessor_deploymentBucketName": {
       "usedBy": [
         {

@@ -22,6 +22,15 @@ export function override(resources: AmplifyAuthCognitoStackTemplate) {
             Resource: [
               'arn:aws:s3:::pokerpro-scraper-storage/social-media/post-attachments/*'
             ]
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              's3:GetObject'
+            ],
+            Resource: [
+              'arn:aws:s3:::pokerpro-scraper-storage/entities/*/html/*'
+            ]
           }
         ]
       },

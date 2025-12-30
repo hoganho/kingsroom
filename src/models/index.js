@@ -76,8 +76,14 @@ const RegistrationStatus = {
 
 const TournamentType = {
   "FREEZEOUT": "FREEZEOUT",
+  "REENTRY": "REENTRY",
+  "RE_ENTRY": "RE_ENTRY",
   "REBUY": "REBUY",
+  "BOUNTY": "BOUNTY",
+  "KNOCKOUT": "KNOCKOUT",
   "SATELLITE": "SATELLITE",
+  "TURBO": "TURBO",
+  "HYPERTURBO": "HYPERTURBO",
   "DEEPSTACK": "DEEPSTACK"
 };
 

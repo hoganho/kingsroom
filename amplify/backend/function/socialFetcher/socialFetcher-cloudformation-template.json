@@ -22,6 +22,9 @@
     },
     "fbAccessToken": {
       "Type": "String"
+    },
+    "socialPostProcessorFunction": {
+      "Type": "String"
     }
   },
   "Conditions": {
@@ -186,6 +189,9 @@
             },
             "FB_ACCESS_TOKEN": {
               "Ref": "fbAccessToken"
+            },
+            "SOCIAL_POST_PROCESSOR_FUNCTION": {
+              "Ref": "socialPostProcessorFunction"
             }
           }
         },
@@ -603,6 +609,15 @@
               ],
               "Resource": [
                 "arn:aws:s3:::pokerpro-scraper-storage/social-media/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "lambda:InvokeFunction"
+              ],
+              "Resource": [
+                "arn:aws:lambda:ap-southeast-2:*:function:*socialPostProcessor*"
               ],
               "Effect": "Allow"
             }

@@ -1,17 +1,15 @@
-// backupThenClearCloudwatchLogs_perStream.js
+// backupThenClearCloudwatchLogs_directDiscovery.js
 // 
-// 1. Searches AWS directly for Log Groups matching your ENV_SUFFIX and API_ID.
+// 1. Searches AWS directly for Log Groups matching your ENV_SUFFIX.
 // 2. Backs up each stream to a JSON file.
 // 3. Deletes the Log Group.
-//
-// Updated to match filtering logic from backupDevData-csv-timestamped.js
 
 import {
   CloudWatchLogsClient,
   DeleteLogGroupCommand,
   DescribeLogStreamsCommand,
   GetLogEventsCommand,
-  DescribeLogGroupsCommand,
+  DescribeLogGroupsCommand, // <--- New Import
 } from '@aws-sdk/client-cloudwatch-logs';
 import * as readline from 'readline';
 import { promises as fs } from 'fs';
@@ -23,19 +21,11 @@ import * as path from 'path';
 
 const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 
-// Filter settings (matching backupDevData-csv-timestamped.js pattern)
-// - ENV_SUFFIX: only log groups ending with "-dev" (default "dev")
-// - API_ID_FILTER: only log groups containing this amplify apiId
-// - LOG_GROUP_PREFIX_FILTER: only log groups starting with a string (e.g. "/aws/lambda/")
+// We search for groups containing this suffix
+// e.g. "staging" will match "/aws/lambda/myFunc-staging"
 const ENV_SUFFIX = process.env.ENV_SUFFIX || 'dev';
-const API_ID_FILTER = process.env.API_ID_FILTER || 'ht3nugt6lvddpeeuwj3x6mkite';
-const LOG_GROUP_PREFIX_FILTER = process.env.LOG_GROUP_PREFIX_FILTER || '/aws/lambda/';
 
-// If set to 1, we don't backup or delete; we just print which groups would be processed.
 const DRY_RUN = process.env.DRY_RUN === '1';
-
-// Set to 1 to skip the deletion step (backup only)
-const BACKUP_ONLY = process.env.BACKUP_ONLY === '1';
 
 // ------------------------------------------------------------------
 // AWS CLIENT & LOGGER
@@ -53,60 +43,48 @@ const logger = {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // ------------------------------------------------------------------
-// FILTERING LOGIC (matching backupDevData-csv-timestamped.js)
-// ------------------------------------------------------------------
-
-function logGroupMatchesFilters(logGroupName) {
-  // If user wants only groups ending with "-dev" etc
-  if (ENV_SUFFIX && !logGroupName.endsWith(`-${ENV_SUFFIX}`)) return false;
-
-  // If user wants only groups for a given amplify apiId
-  if (API_ID_FILTER && !logGroupName.includes(API_ID_FILTER)) return false;
-
-  // Optional prefix filter (e.g. "/aws/lambda/")
-  if (LOG_GROUP_PREFIX_FILTER && !logGroupName.startsWith(LOG_GROUP_PREFIX_FILTER)) return false;
-
-  return true;
-}
-
-// ------------------------------------------------------------------
-// DISCOVER LOG GROUPS FROM AWS
+// NEW: DISCOVER LOG GROUPS FROM AWS (NOT LOCAL FOLDERS)
 // ------------------------------------------------------------------
 
 async function getLogGroupsFromAWS() {
-  logger.info(`Scanning AWS CloudWatch for log groups...`);
-  logger.info(`Filters: ENV_SUFFIX="${ENV_SUFFIX}", API_ID_FILTER="${API_ID_FILTER || '(none)'}", PREFIX="${LOG_GROUP_PREFIX_FILTER || '(none)'}"`);
+  logger.info(`Scanning AWS CloudWatch for groups matching suffix: "${ENV_SUFFIX}"...`);
   
   let nextToken;
   const matchingGroups = [];
+  
+  // We filter for Lambda groups generally to speed it up, 
+  // but you can remove the prefix if you have non-lambda logs.
+  const LOG_PREFIX = '/aws/lambda/';
 
   do {
+    // 1. Fetch a batch of log groups
     const command = new DescribeLogGroupsCommand({
       limit: 50,
       nextToken: nextToken,
-      // Use prefix filter if provided to speed up the scan
-      ...(LOG_GROUP_PREFIX_FILTER ? { logGroupNamePrefix: LOG_GROUP_PREFIX_FILTER } : {}),
+      logGroupNamePrefix: LOG_PREFIX, 
     });
 
     const response = await cwClient.send(command);
     
-    // Filter groups in memory using our combined filter logic
+    // 2. Filter them in memory
     for (const group of response.logGroups || []) {
       const name = group.logGroupName;
       
-      if (logGroupMatchesFilters(name)) {
+      // Ensure it ends with our suffix (e.g. "-staging")
+      // We check for `-${ENV_SUFFIX}` to avoid partial matches like "pre-staging"
+      if (name.endsWith(`-${ENV_SUFFIX}`)) {
         matchingGroups.push(name);
       }
     }
 
     nextToken = response.nextToken;
     
-    // Protect against API rate limits
+    // Protect against API rate limits if you have thousands of groups
     if (nextToken) await sleep(100); 
 
   } while (nextToken);
 
-  return matchingGroups.sort();
+  return matchingGroups;
 }
 
 // ------------------------------------------------------------------
@@ -143,15 +121,6 @@ function formatTimestamp(timestamp) {
 function sanitizeFilename(name) {
   // Replace slashes and colons with underscores for file safety
   return name.replace(/[\/:\$\[\]]/g, '_');
-}
-
-function makeTimestampedDirName(prefix = 'logbackup') {
-  const now = new Date();
-  const pad = (n) => n.toString().padStart(2, '0');
-  const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(
-    now.getHours()
-  )}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-  return `${prefix}_${timestamp}`;
 }
 
 // ------------------------------------------------------------------
@@ -253,12 +222,8 @@ async function backupLogGroup(logGroupName, groupBackupDir) {
 // ------------------------------------------------------------------
 
 async function deleteLogGroup(logGroupName) {
-  if (DRY_RUN || BACKUP_ONLY) {
-    if (BACKUP_ONLY) {
-      logger.info(`[BACKUP_ONLY] Skipping delete for: ${logGroupName}`);
-    } else {
-      logger.warn(`[DRY RUN] Would delete log group: ${logGroupName}`);
-    }
+  if (DRY_RUN) {
+    logger.warn(`[DRY RUN] Would delete log group: ${logGroupName}`);
     return;
   }
   try {
@@ -274,35 +239,26 @@ async function deleteLogGroup(logGroupName) {
 // ------------------------------------------------------------------
 
 async function main() {
-  logger.warn('--- CLOUDWATCH LOG BACKUP & DELETE ---');
-  logger.info(`Region: ${REGION}`);
-  logger.info(`Filters: ENV_SUFFIX="${ENV_SUFFIX}", API_ID_FILTER="${API_ID_FILTER || '(none)'}", PREFIX="${LOG_GROUP_PREFIX_FILTER || '(none)'}"`);
-
-  if (DRY_RUN) {
-    logger.warn('DRY_RUN=1 is set - no backups or deletes will occur');
-  }
-  if (BACKUP_ONLY) {
-    logger.warn('BACKUP_ONLY=1 is set - logs will be backed up but not deleted');
-  }
+  logger.warn('--- CLOUDWATCH LOG BACKUP & DELETE (DIRECT AWS DISCOVERY) ---');
+  logger.warn(`Target Suffix: "${ENV_SUFFIX}"`);
 
   if (!process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_PROFILE) {
     logger.warn('No AWS credentials in ENV. Using default local profile...');
   }
 
-  // 1. Get matching groups from AWS
+  // 1. Get real groups from AWS
   const foundGroups = await getLogGroupsFromAWS();
 
   if (foundGroups.length === 0) {
-    logger.warn('No log groups matched your filters. Nothing to process.');
-    logger.info('Tip: try running with ENV_SUFFIX="" or API_ID_FILTER="" to include more groups.');
+    logger.info(`No log groups found in AWS ending with "-${ENV_SUFFIX}".`);
     return;
   }
 
   // 2. Count streams
-  logger.info(`Found ${foundGroups.length} matching groups. Counting streams...`);
+  logger.info(`Found ${foundGroups.length} groups. Counting streams...`);
   
   console.log('\n------------------------------------------------------------');
-  console.log(' ' + 'LOG GROUP NAME'.padEnd(55) + ' | ' + 'STREAMS');
+  console.log(' ' + 'LOG GROUP NAME'.padEnd(45) + ' | ' + 'STREAMS');
   console.log('------------------------------------------------------------');
 
   const groupsToProcess = [];
@@ -317,12 +273,10 @@ async function main() {
       totalStreams += count;
       
       let displayName = groupName;
-      if (displayName.length > 53) displayName = '...' + displayName.slice(-50);
-      console.log(` ${displayName.padEnd(55)} | ${count}`);
+      if (displayName.length > 43) displayName = '...' + displayName.slice(-40);
+      console.log(` ${displayName.padEnd(45)} | ${count}`);
     }
   }
-  console.log('------------------------------------------------------------');
-  console.log(` ${'TOTAL'.padEnd(55)} | ${totalStreams}`);
   console.log('------------------------------------------------------------\n');
 
   if (groupsToProcess.length === 0) {
@@ -330,25 +284,20 @@ async function main() {
     return;
   }
 
-  if (DRY_RUN) {
-    logger.warn('\nDRY_RUN=1 set, so no backups or deletes will be performed.');
-    return;
-  }
-
   // 3. Confirm
-  const backupDirName = makeTimestampedDirName('logbackup');
-
-  const actionWord = BACKUP_ONLY ? 'backup' : 'backup and DELETE';
-  const confirmation = await askQuestion(`\nThis will ${actionWord} ${groupsToProcess.length} log groups.\nType "proceed" to continue: `);
-  if (confirmation.toLowerCase() !== 'proceed') {
-    logger.info('Aborted by user.');
-    return;
-  }
+  const now = new Date();
+  const pad = (n) => n.toString().padStart(2, '0');
+  const backupDirName = `logbackup_${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 
   await fs.mkdir(backupDirName, { recursive: true });
-  logger.info(`Saving backups to directory: ./${backupDirName}`);
 
-  // 4. Process each group
+  const confirmation = await askQuestion('\nType "proceed" to continue: ');
+  if (confirmation.toLowerCase() !== 'proceed') {
+    logger.info('Aborted.');
+    return;
+  }
+
+  // 4. Process
   for (const logGroupName of groupsToProcess) {
     try {
       logger.info(`\n--- ${logGroupName} ---`);
@@ -360,16 +309,14 @@ async function main() {
       await deleteLogGroup(logGroupName);
     } catch (err) {
       logger.error(`Error processing ${logGroupName}: ${err.message}`);
-      logger.error('Continuing to next group...');
     }
   }
 
-  logger.success('\nAll matched log groups have been processed.');
-  logger.success(`Backup data is located in: ./${backupDirName}`);
+  logger.success('Done.');
 }
 
 main().catch((err) => {
-  console.error("FULL ERROR DETAILS:", err);
+  console.error("FULL ERROR DETAILS:", err); // Print the whole object
   logger.error('Unhandled failure: ' + (err.message || "Unknown Error"));
   process.exit(1);
 });

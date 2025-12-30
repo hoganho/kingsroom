@@ -1,8 +1,10 @@
 // src/pages/debug/SocialDebug.tsx
 // Debug page for viewing social posts and accounts data
+// Updated with post detail modal popup
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
+import { format, formatDistanceToNow } from 'date-fns';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { 
@@ -17,8 +19,13 @@ import {
   ExternalLink,
   CheckCircle,
   XCircle,
-  TrendingUp
+  TrendingUp,
+  X,
+  Facebook,
+  Instagram,
+  Linkedin,
 } from 'lucide-react';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 // ==========================================
 // TYPES
@@ -149,7 +156,86 @@ const listSocialScrapeAttemptsForDebug = /* GraphQL */ `
   }
 `;
 
-// Note: We don't have a getAllCounts query for social, so we'll count from loaded data
+// Full post query with extracted data for modal view
+const getSocialPostWithExtractedData = /* GraphQL */ `
+  query GetSocialPostWithExtractedData($id: ID!) {
+    getSocialPost(id: $id) {
+      id
+      platformPostId
+      postUrl
+      postType
+      accountName
+      accountProfileImageUrl
+      platform
+      businessLocation
+      content
+      contentPreview
+      mediaUrls
+      thumbnailUrl
+      videoUrl
+      videoThumbnailUrl
+      videoTitle
+      likeCount
+      commentCount
+      shareCount
+      viewCount
+      postedAt
+      isTournamentRelated
+      isTournamentResult
+      isPromotional
+      tags
+      contentType
+      contentTypeConfidence
+      processingStatus
+      linkedGameId
+      linkedGameCount
+      extractedGameDataId
+      extractedGameData {
+        id
+        contentType
+        contentTypeConfidence
+        extractedName
+        extractedVenueName
+        extractedDate
+        extractedDayOfWeek
+        extractedStartTime
+        extractedBuyIn
+        extractedGuarantee
+        extractedPrizePool
+        extractedFirstPlacePrize
+        extractedTotalEntries
+        extractedTotalUniquePlayers
+        extractedGameType
+        extractedTournamentType
+        extractedSeriesName
+        extractedEventNumber
+        extractedWinnerName
+        extractedWinnerPrize
+        placementCount
+        extractedAt
+        placements {
+          items {
+            id
+            place
+            playerName
+            cashPrize
+            hasNonCashPrize
+            nonCashPrizes
+            totalEstimatedValue
+            wasChop
+          }
+        }
+      }
+      socialAccount {
+        id
+        accountName
+        accountHandle
+        profileImageUrl
+        platform
+      }
+    }
+  }
+`;
 
 // ==========================================
 // HELPER COMPONENTS
@@ -197,6 +283,483 @@ const PostTypeIcon: React.FC<{ postType: string }> = ({ postType }) => {
   }
 };
 
+const PlatformIcon: React.FC<{ platform?: string | null; className?: string }> = ({ 
+  platform, 
+  className = 'w-4 h-4' 
+}) => {
+  switch (platform) {
+    case 'FACEBOOK':
+      return <Facebook className={`text-blue-600 ${className}`} />;
+    case 'INSTAGRAM':
+      return <Instagram className={`text-pink-600 ${className}`} />;
+    case 'LINKEDIN':
+      return <Linkedin className={`text-blue-700 ${className}`} />;
+    default:
+      return <Share2 className={`text-gray-500 ${className}`} />;
+  }
+};
+
+const ContentTypeBadge: React.FC<{ contentType?: string | null }> = ({ contentType }) => {
+  if (!contentType) return null;
+  
+  const config: Record<string, { color: string; label: string }> = {
+    RESULT: { color: 'bg-green-100 text-green-700 border-green-200', label: 'Result' },
+    PROMOTIONAL: { color: 'bg-blue-100 text-blue-700 border-blue-200', label: 'Promo' },
+    GENERAL: { color: 'bg-gray-100 text-gray-700 border-gray-200', label: 'General' },
+    COMMENT: { color: 'bg-purple-100 text-purple-700 border-purple-200', label: 'Comment' },
+  };
+  
+  const { color, label } = config[contentType] || config.GENERAL;
+  
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${color}`}>
+      {label}
+    </span>
+  );
+};
+
+// ==========================================
+// POST DETAIL MODAL COMPONENT
+// ==========================================
+
+interface PostDetailModalProps {
+  postId: string | null;
+  onClose: () => void;
+}
+
+const PostDetailModal: React.FC<PostDetailModalProps> = ({ postId, onClose }) => {
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showPlacements, setShowPlacements] = useState(false);
+  
+  const client = useMemo(() => generateClient(), []);
+  
+  useEffect(() => {
+    if (!postId) return;
+    
+    const fetchPost = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const response = await client.graphql({
+          query: getSocialPostWithExtractedData,
+          variables: { id: postId }
+        }) as any;
+        
+        setPost(response.data?.getSocialPost);
+      } catch (err) {
+        console.error('Error fetching post:', err);
+        setError('Failed to load post details');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPost();
+  }, [postId, client]);
+  
+  if (!postId) return null;
+  
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return 'Unknown';
+    try {
+      return formatDistanceToNow(new Date(dateStr), { addSuffix: true });
+    } catch {
+      return 'Unknown';
+    }
+  };
+  
+  const formatFullDate = (dateStr?: string | null) => {
+    if (!dateStr) return '';
+    try {
+      return format(new Date(dateStr), "EEE, dd MMM yyyy 'at' HH:mm");
+    } catch {
+      return '';
+    }
+  };
+  
+  const formatExtractedDate = (dateStr?: string | null) => {
+    if (!dateStr) return null;
+    try {
+      return format(new Date(dateStr), 'EEE, dd MMM yyyy');
+    } catch {
+      return null;
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-black/50 transition-opacity" 
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="relative bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+          {/* Header */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+            <h2 className="text-lg font-semibold text-gray-900">Post Details</h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+          
+          {/* Content */}
+          <div className="overflow-y-auto max-h-[calc(90vh-80px)] p-6">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <RefreshCw className="w-8 h-8 text-gray-400 animate-spin" />
+                <span className="ml-3 text-gray-500">Loading post details...</span>
+              </div>
+            ) : error ? (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                <p className="text-red-600">{error}</p>
+              </div>
+            ) : post ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Column - Post Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  {/* Post Header */}
+                  <div className="p-4 flex items-center justify-between border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        {post.accountProfileImageUrl || post.socialAccount?.profileImageUrl ? (
+                          <img
+                            src={post.accountProfileImageUrl || post.socialAccount?.profileImageUrl}
+                            alt={post.accountName}
+                            className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-gray-100">
+                            {post.accountName?.charAt(0) || '?'}
+                          </div>
+                        )}
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm border border-gray-100">
+                          <PlatformIcon platform={post.platform} className="w-3 h-3" />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 text-sm truncate max-w-[200px]">
+                          {post.accountName || post.socialAccount?.accountName || 'Unknown'}
+                        </h4>
+                        <p className="text-xs text-gray-500" title={formatFullDate(post.postedAt)}>
+                          {formatDate(post.postedAt)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {post.postType === 'VIDEO' && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-100 text-purple-700">
+                          <Video className="w-3 h-3 mr-1" />
+                          Video
+                        </span>
+                      )}
+                      <ContentTypeBadge contentType={post.contentType} />
+                    </div>
+                  </div>
+
+                  {/* Post Content */}
+                  <div className="p-4">
+                    {post.content && (
+                      <div className="text-sm text-gray-700 leading-relaxed">
+                        <p className={`whitespace-pre-wrap ${!isExpanded && post.content.length > 300 ? 'line-clamp-6' : ''}`}>
+                          {post.content}
+                        </p>
+                        {post.content.length > 300 && (
+                          <button
+                            onClick={() => setIsExpanded(!isExpanded)}
+                            className="mt-2 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                          >
+                            {isExpanded ? 'Show less' : 'Show more'}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Post Media */}
+                  {post.mediaUrls?.length > 0 && (
+                    <div className="px-4 pb-4">
+                      <div className={`grid gap-1 ${post.mediaUrls.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                        {post.mediaUrls.slice(0, 4).map((url: string, idx: number) => (
+                          <div 
+                            key={idx} 
+                            className={`relative rounded-lg overflow-hidden bg-gray-100 ${post.mediaUrls.length > 1 ? 'aspect-square' : ''}`}
+                          >
+                            <img
+                              src={url}
+                              alt=""
+                              className={`w-full ${post.mediaUrls.length > 1 ? 'h-full object-cover' : 'h-auto'}`}
+                              loading="lazy"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                            {idx === 3 && post.mediaUrls.length > 4 && (
+                              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <span className="text-white text-xl font-bold">+{post.mediaUrls.length - 4}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Post Footer */}
+                  <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+                    <div className="flex items-center gap-4">
+                      <span className="flex items-center gap-1.5 text-gray-500">
+                        <Heart className="w-4 h-4" />
+                        <span className="text-xs font-medium">{(post.likeCount || 0).toLocaleString()}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-gray-500">
+                        <MessageSquare className="w-4 h-4" />
+                        <span className="text-xs font-medium">{(post.commentCount || 0).toLocaleString()}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-gray-500">
+                        <Share2 className="w-4 h-4" />
+                        <span className="text-xs font-medium">{(post.shareCount || 0).toLocaleString()}</span>
+                      </span>
+                    </div>
+                    {post.postUrl && (
+                      <a
+                        href={post.postUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        View Original
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Column - Extracted Data */}
+                <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-indigo-500" />
+                      <span className="text-sm font-semibold text-gray-900">Extracted Data</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <StatusBadge status={post.processingStatus || 'PENDING'} />
+                      {post.contentTypeConfidence && (
+                        <span className="text-xs text-gray-500">
+                          {Math.round(post.contentTypeConfidence)}% confidence
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Game Link Info */}
+                  {post.linkedGameId && (
+                    <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                      <p className="text-sm text-green-700 font-medium">
+                        ✓ Linked to {post.linkedGameCount || 1} game(s)
+                      </p>
+                      <p className="text-xs text-green-600 mt-1">Game ID: {post.linkedGameId}</p>
+                    </div>
+                  )}
+
+                  {/* Extracted Game Data */}
+                  {post.extractedGameData ? (
+                    <>
+                      <div className="grid grid-cols-2 gap-3">
+                        {post.extractedGameData.extractedVenueName && (
+                          <div className="bg-white rounded-lg p-3 border border-gray-100">
+                            <div className="text-xs text-gray-500 mb-1">Venue</div>
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {post.extractedGameData.extractedVenueName}
+                            </p>
+                          </div>
+                        )}
+                        
+                        {post.extractedGameData.extractedDate && (
+                          <div className="bg-white rounded-lg p-3 border border-gray-100">
+                            <div className="text-xs text-gray-500 mb-1">Date</div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {formatExtractedDate(post.extractedGameData.extractedDate)}
+                            </p>
+                            {post.extractedGameData.extractedStartTime && (
+                              <p className="text-xs text-gray-500">{post.extractedGameData.extractedStartTime}</p>
+                            )}
+                          </div>
+                        )}
+                        
+                        {post.extractedGameData.extractedBuyIn && (
+                          <div className="bg-white rounded-lg p-3 border border-gray-100">
+                            <div className="text-xs text-gray-500 mb-1">Buy-In</div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {formatCurrency(post.extractedGameData.extractedBuyIn)}
+                            </p>
+                          </div>
+                        )}
+                        
+                        {post.extractedGameData.extractedGuarantee && (
+                          <div className="bg-white rounded-lg p-3 border border-gray-100">
+                            <div className="text-xs text-gray-500 mb-1">Guarantee</div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {formatCurrency(post.extractedGameData.extractedGuarantee)}
+                            </p>
+                          </div>
+                        )}
+                        
+                        {post.extractedGameData.extractedPrizePool && (
+                          <div className="bg-white rounded-lg p-3 border border-gray-100">
+                            <div className="text-xs text-gray-500 mb-1">Prize Pool</div>
+                            <p className="text-sm font-semibold text-green-600">
+                              {formatCurrency(post.extractedGameData.extractedPrizePool)}
+                            </p>
+                          </div>
+                        )}
+                        
+                        {post.extractedGameData.extractedTotalEntries && (
+                          <div className="bg-white rounded-lg p-3 border border-gray-100">
+                            <div className="text-xs text-gray-500 mb-1">Entries</div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {post.extractedGameData.extractedTotalEntries}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Winner Info */}
+                      {post.extractedGameData.extractedWinnerName && (
+                        <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">🏆</span>
+                            <span className="text-xs font-medium text-yellow-700">Winner</span>
+                          </div>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {post.extractedGameData.extractedWinnerName}
+                          </p>
+                          {post.extractedGameData.extractedWinnerPrize && (
+                            <p className="text-sm text-green-600 font-medium">
+                              {formatCurrency(post.extractedGameData.extractedWinnerPrize)}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Placements */}
+                      {post.extractedGameData.placements?.items?.length > 0 && (
+                        <div className="pt-2">
+                          <button
+                            onClick={() => setShowPlacements(!showPlacements)}
+                            className="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-gray-900"
+                          >
+                            <span>
+                              Extracted Results ({post.extractedGameData.placements.items.length})
+                            </span>
+                            <span className="text-xs text-indigo-600">
+                              {showPlacements ? '▲ Hide' : '▼ Show'}
+                            </span>
+                          </button>
+                          
+                          {showPlacements && (
+                            <div className="mt-3 bg-white rounded-lg border border-gray-100 overflow-hidden max-h-64 overflow-y-auto">
+                              <table className="min-w-full divide-y divide-gray-100 text-sm">
+                                <thead className="bg-gray-50 sticky top-0">
+                                  <tr>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">#</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Player</th>
+                                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">Prize</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                  {post.extractedGameData.placements.items.map((p: any) => (
+                                    <tr key={p.id} className="hover:bg-gray-50">
+                                      <td className="px-3 py-2 text-gray-900 font-medium">
+                                        {p.place === 1 ? '🥇' : p.place === 2 ? '🥈' : p.place === 3 ? '🥉' : p.place}
+                                      </td>
+                                      <td className="px-3 py-2 text-gray-700">{p.playerName}</td>
+                                      <td className="px-3 py-2 text-right">
+                                        {p.cashPrize ? (
+                                          <span className="text-green-600 font-medium">
+                                            {formatCurrency(p.cashPrize)}
+                                          </span>
+                                        ) : p.hasNonCashPrize ? (
+                                          <span className="text-purple-600 text-xs">Non-cash</span>
+                                        ) : (
+                                          '-'
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Additional Info */}
+                      {(post.extractedGameData.extractedSeriesName || 
+                        post.extractedGameData.extractedGameType || 
+                        post.extractedGameData.extractedTournamentType) && (
+                        <div className="pt-2 border-t border-gray-200">
+                          <div className="flex flex-wrap gap-2">
+                            {post.extractedGameData.extractedSeriesName && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-indigo-100 text-indigo-700">
+                                {post.extractedGameData.extractedSeriesName}
+                                {post.extractedGameData.extractedEventNumber && ` #${post.extractedGameData.extractedEventNumber}`}
+                              </span>
+                            )}
+                            {post.extractedGameData.extractedGameType && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
+                                {post.extractedGameData.extractedGameType}
+                              </span>
+                            )}
+                            {post.extractedGameData.extractedTournamentType && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
+                                {post.extractedGameData.extractedTournamentType}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">No extracted data available</p>
+                      <p className="text-xs mt-1">This post hasn't been processed yet</p>
+                    </div>
+                  )}
+
+                  {/* Post Metadata */}
+                  <div className="pt-3 border-t border-gray-200 text-xs text-gray-400 space-y-1">
+                    <p>Post ID: {post.id}</p>
+                    <p>Platform ID: {post.platformPostId}</p>
+                    {post.extractedGameDataId && (
+                      <p>Extracted Data ID: {post.extractedGameDataId}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                Post not found
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ==========================================
 // MAIN COMPONENT
 // ==========================================
@@ -223,6 +786,9 @@ export const SocialDebug = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Modal state
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
   // Fetch data for a tab
   const fetchData = useCallback(async (tab: TabType, nextToken?: string | null, isLoadMore = false) => {
@@ -456,16 +1022,12 @@ export const SocialDebug = () => {
                     <div className="text-sm text-gray-900 truncate" title={post.content}>
                       {post.contentPreview || post.content?.substring(0, 100) || '-'}
                     </div>
-                    {post.postUrl && (
-                      <a 
-                        href={post.postUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-xs text-indigo-600 hover:underline"
-                      >
-                        View Post ↗
-                      </a>
-                    )}
+                    <button 
+                      onClick={() => setSelectedPostId(post.id)}
+                      className="text-xs text-indigo-600 hover:underline hover:text-indigo-800"
+                    >
+                      View Post →
+                    </button>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                     {formatDateTime(post.postedAt)}
@@ -755,6 +1317,14 @@ export const SocialDebug = () => {
 
   return (
     <PageWrapper title="Social (Debug)" maxWidth="7xl">
+      {/* Post Detail Modal */}
+      {selectedPostId && (
+        <PostDetailModal 
+          postId={selectedPostId} 
+          onClose={() => setSelectedPostId(null)} 
+        />
+      )}
+
       {/* Debug Banner */}
       <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-6">
         <div className="flex justify-between items-center">

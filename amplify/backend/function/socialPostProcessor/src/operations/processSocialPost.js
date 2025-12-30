@@ -183,6 +183,18 @@ const processSocialPost = async (input) => {
       delete extractionRecord.extractedTournamentId;
     }
 
+    const findNaN = (obj, path = '') => {
+        for (const [k, v] of Object.entries(obj)) {
+            const p = path ? `${path}.${k}` : k;
+            if (typeof v === 'number' && !Number.isFinite(v)) {
+            console.error(`[DEBUG] ❌ NaN/Infinity at: ${p} = ${v}`);
+            } else if (v && typeof v === 'object' && !Array.isArray(v) && !(v instanceof Date)) {
+            findNaN(v, p);
+            }
+        }
+    };
+    findNaN(extractionRecord);
+
     await createSocialPostGameData(extractionRecord);
     result.extractedGameData = extractionRecord;
     

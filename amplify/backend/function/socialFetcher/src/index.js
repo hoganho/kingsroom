@@ -35,12 +35,14 @@ Amplify Params - DO NOT EDIT */
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 const { S3Client, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 const https = require('https');
 
 // Initialize clients
 const ddbClient = new DynamoDBClient({ region: process.env.REGION || 'ap-southeast-2' });
 const docClient = DynamoDBDocumentClient.from(ddbClient);
 const s3Client = new S3Client({ region: process.env.REGION || 'ap-southeast-2' });
+const lambdaClient = new LambdaClient({ region: process.env.REGION || 'ap-southeast-2' });
 
 // Table names from environment
 const SOCIAL_ACCOUNT_TABLE = process.env.API_KINGSROOM_SOCIALACCOUNTTABLE_NAME;
@@ -62,6 +64,24 @@ const FB_API_VERSION = process.env.FB_API_VERSION || 'v19.0';
 const MAX_POSTS_PER_PAGE = 100; // Facebook allows up to 100 per request
 const MAX_PAGES_TO_FETCH = 50; // Safety limit: 50 pages * 100 posts = 5000 posts max
 
+// ============================================
+// Social Post Processor Configuration
+// ============================================
+
+// Name of the socialPostProcessor Lambda function
+// You can find this in the AWS Lambda console or your amplify outputs
+// Common patterns:
+//   - Amplify Gen 1: amplify-{appname}-{env}-{functionname}
+//   - Amplify Gen 2: {appname}-{functionname}-{env}
+//   - Or set via environment variable
+const SOCIAL_POST_PROCESSOR_FUNCTION = process.env.SOCIAL_POST_PROCESSOR_FUNCTION;
+
+// Whether to automatically process new posts (can be disabled via env var)
+const AUTO_PROCESS_POSTS = process.env.AUTO_PROCESS_POSTS !== 'false';
+
+// Maximum posts to process in parallel (to avoid overwhelming the processor)
+const MAX_PARALLEL_PROCESSING = parseInt(process.env.MAX_PARALLEL_PROCESSING || '5', 10);
+
 /**
  * Main handler
  */
@@ -79,13 +99,15 @@ exports.handler = async (event) => {
     } else if (event.arguments?.socialAccountId) {
       // Direct invocation via AppSync (alternative format)
       const options = {
-        fetchAllHistory: event.arguments?.fetchAllHistory || false
+        fetchAllHistory: event.arguments?.fetchAllHistory || false,
+        skipProcessing: event.arguments?.skipProcessing || false
       };
       return triggerScrape(event.arguments.socialAccountId, options);
     } else if (event.socialAccountId) {
       // Direct Lambda invocation with accountId
       const options = {
-        fetchAllHistory: event.fetchAllHistory || false
+        fetchAllHistory: event.fetchAllHistory || false,
+        skipProcessing: event.skipProcessing || false
       };
       return triggerScrape(event.socialAccountId, options);
     } else {
@@ -121,10 +143,16 @@ async function handleGraphQLRequest(event) {
       if (!args.socialAccountId) {
         throw new Error('Missing required argument: socialAccountId');
       }
-      return triggerScrape(args.socialAccountId, { fetchAllHistory: false });
+      return triggerScrape(args.socialAccountId, { 
+        fetchAllHistory: false,
+        skipProcessing: args.skipProcessing || false 
+      });
     case 'triggerFullSync':
       // Full historical sync - fetches ALL posts
-      return triggerScrape(args.socialAccountId, { fetchAllHistory: true });
+      return triggerScrape(args.socialAccountId, { 
+        fetchAllHistory: true,
+        skipProcessing: args.skipProcessing || false 
+      });
     case 'syncPageInfo':
       // Sync page info including logo without fetching posts
       // forceRefresh option to re-download logo even if it exists
@@ -148,6 +176,7 @@ async function handleScheduledScrape() {
     success: 0,
     failed: 0,
     totalNewPosts: 0,
+    totalPostsProcessed: 0,
   };
 
   for (const account of accountsDue) {
@@ -159,6 +188,7 @@ async function handleScheduledScrape() {
       if (result.success) {
         results.success++;
         results.totalNewPosts += result.newPostsAdded;
+        results.totalPostsProcessed += result.postsProcessed || 0;
       } else {
         results.failed++;
       }
@@ -298,6 +328,7 @@ async function scrapeAccount(account, options = {}) {
   const startTime = Date.now();
   let attemptId;
   const fetchAllHistory = options.fetchAllHistory || false;
+  const skipProcessing = options.skipProcessing || false;
   
   // Determine the "since" timestamp for incremental fetches
   // Use lastSuccessfulScrapeAt if available and not doing full sync
@@ -395,8 +426,36 @@ async function scrapeAccount(account, options = {}) {
     console.log(`Fetched ${posts.length} posts from ${account.accountName}`);
 
     // Process and save new posts
-    const newPosts = await processAndSavePosts(account, posts);
+    const { newPosts, savedPostIds } = await processAndSavePosts(account, posts);
     console.log(`Saved ${newPosts.length} new posts`);
+
+    // ============================================
+    // Trigger socialPostProcessor for new posts
+    // ============================================
+    let postsProcessed = 0;
+    let processingResults = [];
+    
+    if (AUTO_PROCESS_POSTS && !skipProcessing && savedPostIds.length > 0) {
+      if (!SOCIAL_POST_PROCESSOR_FUNCTION) {
+        console.warn('[PROCESSOR] SOCIAL_POST_PROCESSOR_FUNCTION not configured - skipping auto-processing');
+        console.warn('[PROCESSOR] Set this environment variable to enable automatic game matching');
+      } else {
+        console.log(`[PROCESSOR] Auto-processing ${savedPostIds.length} new posts via ${SOCIAL_POST_PROCESSOR_FUNCTION}...`);
+        
+        try {
+          processingResults = await triggerPostProcessing(savedPostIds);
+          postsProcessed = processingResults.filter(r => r.success).length;
+          console.log(`[PROCESSOR] Triggered processing for ${postsProcessed}/${savedPostIds.length} posts`);
+        } catch (processingError) {
+          console.error('[PROCESSOR] Error triggering post processing:', processingError);
+          // Don't fail the scrape if processing fails - posts are already saved
+        }
+      }
+    } else if (skipProcessing) {
+      console.log('[PROCESSOR] Skipping post processing (skipProcessing=true)');
+    } else if (!AUTO_PROCESS_POSTS) {
+      console.log('[PROCESSOR] Auto-processing disabled (AUTO_PROCESS_POSTS=false)');
+    }
 
     // Calculate new total post count
     const newPostCount = (account.postCount || 0) + newPosts.length;
@@ -419,16 +478,18 @@ async function scrapeAccount(account, options = {}) {
       durationMs: Date.now() - startTime,
       postsFound: posts.length,
       newPostsAdded: newPosts.length,
+      postsProcessed,
       syncType,
     });
 
     return {
       success: true,
       message: newPosts.length > 0 
-        ? `Found ${newPosts.length} new posts (scanned ${posts.length} total)` 
+        ? `Found ${newPosts.length} new posts (scanned ${posts.length} total), triggered processing for ${postsProcessed}` 
         : `No new posts (scanned ${posts.length} total)`,
       postsFound: posts.length,
       newPostsAdded: newPosts.length,
+      postsProcessed,
     };
 
   } catch (error) {
@@ -461,6 +522,66 @@ async function scrapeAccount(account, options = {}) {
       newPostsAdded: 0,
     };
   }
+}
+
+// ============================================
+// Post Processing Trigger Functions
+// ============================================
+
+/**
+ * Trigger processing for new posts
+ * Uses async Lambda invocation so we don't wait for completion
+ * 
+ * @param {string[]} postIds - Array of social post IDs to process
+ * @returns {Promise<Array>} Array of processing results
+ */
+async function triggerPostProcessing(postIds) {
+  const results = [];
+  
+  // Process in chunks to limit parallelism
+  for (let i = 0; i < postIds.length; i += MAX_PARALLEL_PROCESSING) {
+    const chunk = postIds.slice(i, i + MAX_PARALLEL_PROCESSING);
+    
+    const chunkPromises = chunk.map(async (postId) => {
+      try {
+        await invokeSocialPostProcessor({ socialPostId: postId });
+        return { postId, success: true };
+      } catch (error) {
+        console.error(`[PROCESSOR] Failed to trigger for ${postId}:`, error.message);
+        return { postId, success: false, error: error.message };
+      }
+    });
+    
+    const chunkResults = await Promise.all(chunkPromises);
+    results.push(...chunkResults);
+  }
+  
+  return results;
+}
+
+/**
+ * Invoke the socialPostProcessor Lambda function
+ * Uses async invocation (InvocationType: 'Event') so we don't wait for response
+ * 
+ * @param {Object} payload - The payload to send to the processor
+ */
+async function invokeSocialPostProcessor(payload) {
+  console.log(`[PROCESSOR] Invoking ${SOCIAL_POST_PROCESSOR_FUNCTION} with postId: ${payload.socialPostId}`);
+  
+  const command = new InvokeCommand({
+    FunctionName: SOCIAL_POST_PROCESSOR_FUNCTION,
+    InvocationType: 'Event', // Async - don't wait for response
+    Payload: JSON.stringify(payload),
+  });
+  
+  const response = await lambdaClient.send(command);
+  
+  // For async invocation, StatusCode 202 means accepted
+  if (response.StatusCode !== 202) {
+    throw new Error(`Unexpected status code: ${response.StatusCode}`);
+  }
+  
+  return response;
 }
 
 /**
@@ -807,9 +928,11 @@ async function fetchFacebookPostsSince(pageId, sinceTimestamp) {
 
 /**
  * Process posts and save new ones to DynamoDB
+ * Returns both newPosts array and savedPostIds for processing trigger
  */
 async function processAndSavePosts(account, posts) {
   const newPosts = [];
+  const savedPostIds = [];
   const now = new Date().toISOString();
 
   console.log(`Processing ${posts.length} posts for account ${account.accountName}`);
@@ -861,6 +984,7 @@ async function processAndSavePosts(account, posts) {
         postYearMonth: getPostYearMonth(postedAt),
         scrapedAt: now,
         status: 'ACTIVE',
+        processingStatus: 'PENDING', // Ready for socialPostProcessor
         isPromotional: detectPromotional(fbPost.message),
         isTournamentRelated: detectTournamentRelated(fbPost.message),
         tags: extractTags(fbPost.message),
@@ -882,10 +1006,11 @@ async function processAndSavePosts(account, posts) {
 
       await savePost(newPost);
       newPosts.push(newPost);
+      savedPostIds.push(postId);
     }
   }
 
-  return newPosts;
+  return { newPosts, savedPostIds };
 }
 
 /**

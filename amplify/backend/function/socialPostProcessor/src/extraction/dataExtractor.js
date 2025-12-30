@@ -10,6 +10,7 @@
  * - Blind level duration extraction
  * - Smarter first place / total prizes calculation
  * - Venue matching from database
+ * - NaN/Infinity sanitization for DynamoDB compatibility
  */
 
 const { 
@@ -20,6 +21,79 @@ const {
 } = require('../utils/patterns');
 const { getDayOfWeek, parseTimeString, inferGameDate } = require('../utils/dateUtils');
 const { getAllVenues } = require('../utils/graphql');
+
+// ===================================================================
+// NUMERIC SANITIZATION HELPERS
+// ===================================================================
+
+/**
+ * Safely parse an integer, returning null instead of NaN
+ * @param {string|number} value - Value to parse
+ * @param {number} radix - Radix for parseInt (default 10)
+ * @returns {number|null} Parsed integer or null
+ */
+const safeParseInt = (value, radix = 10) => {
+  if (value === null || value === undefined) return null;
+  const parsed = parseInt(value, radix);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+/**
+ * Safely parse a float, returning null instead of NaN
+ * @param {string|number} value - Value to parse
+ * @returns {number|null} Parsed float or null
+ */
+const safeParseFloat = (value) => {
+  if (value === null || value === undefined) return null;
+  const parsed = parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+/**
+ * Sanitize a numeric value - convert NaN/Infinity to null
+ * @param {any} value - Value to sanitize
+ * @returns {number|null} Sanitized value
+ */
+const sanitizeNumeric = (value) => {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== 'number') return value;
+  return Number.isFinite(value) ? value : null;
+};
+
+/**
+ * Recursively sanitize an object, removing NaN/Infinity values
+ * Required because DynamoDB throws on NaN/Infinity
+ * @param {Object} obj - Object to sanitize
+ * @returns {Object} Sanitized object
+ */
+const sanitizeForDynamoDB = (obj) => {
+  if (obj === null || obj === undefined) return obj;
+  
+  if (typeof obj === 'number') {
+    if (!Number.isFinite(obj)) {
+      console.error(`[DEBUG] ❌ NaN/Infinity detected, converting to null`);
+      return null;
+    }
+    return obj;
+  }
+  
+  if (typeof obj !== 'object') return obj;
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeForDynamoDB(item));
+  }
+  
+  const sanitized = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const sanitizedValue = sanitizeForDynamoDB(value);
+    // Log if we're fixing a NaN/Infinity
+    if (typeof value === 'number' && !Number.isFinite(value)) {
+      console.error(`[DEBUG] ❌ NaN/Infinity at: ${key} = ${value}`);
+    }
+    sanitized[key] = sanitizedValue;
+  }
+  return sanitized;
+};
 
 // ===================================================================
 // VENUE CACHE (like series-resolver.js)
@@ -137,7 +211,7 @@ const DAY_KEYWORDS = {
  * Extract all game-related data from a social post
  * 
  * @param {Object} post - Social post object
- * @returns {Object} Extracted data
+ * @returns {Object} Extracted data (sanitized for DynamoDB)
  */
 const extractGameData = async (post) => {
   const content = post.content || '';
@@ -213,8 +287,10 @@ const extractGameData = async (post) => {
     
     const idMatch = extracted.extractedTournamentUrl.match(EXTRACTION_PATTERNS.tournamentId);
     if (idMatch) {
-      extracted.extractedTournamentId = parseInt(idMatch[1], 10);
-      console.log(`[EXTRACTOR] Found tournament ID: ${extracted.extractedTournamentId}`);
+      extracted.extractedTournamentId = safeParseInt(idMatch[1]);
+      if (extracted.extractedTournamentId) {
+        console.log(`[EXTRACTOR] Found tournament ID: ${extracted.extractedTournamentId}`);
+      }
     }
   }
   
@@ -230,48 +306,48 @@ const extractGameData = async (post) => {
   // === BUY-IN (Enhanced with breakdown) ===
   const buyInResult = extractBuyInWithBreakdown(content);
   if (buyInResult) {
-    extracted.extractedBuyIn = buyInResult.total;
-    extracted.extractedBuyInPrizepool = buyInResult.prizepool;
-    extracted.extractedRake = buyInResult.rake;
+    extracted.extractedBuyIn = sanitizeNumeric(buyInResult.total);
+    extracted.extractedBuyInPrizepool = sanitizeNumeric(buyInResult.prizepool);
+    extracted.extractedRake = sanitizeNumeric(buyInResult.rake);
     console.log(`[EXTRACTOR] Buy-in: $${buyInResult.total} (prizepool: $${buyInResult.prizepool || 'N/A'}, rake: $${buyInResult.rake || 'N/A'})`);
   }
   
   // === GUARANTEE ===
   const guaranteeStr = extractFirst(content, EXTRACTION_PATTERNS.guarantee);
   if (guaranteeStr) {
-    extracted.extractedGuarantee = parseDollarAmount(guaranteeStr);
+    extracted.extractedGuarantee = sanitizeNumeric(parseDollarAmount(guaranteeStr));
   }
   
   // === PRIZEPOOL ===
   const prizepoolStr = extractFirst(content, EXTRACTION_PATTERNS.prizepool);
   if (prizepoolStr) {
-    extracted.extractedPrizePool = parseDollarAmount(prizepoolStr);
+    extracted.extractedPrizePool = sanitizeNumeric(parseDollarAmount(prizepoolStr));
   }
   
   // === ENTRIES ===
   const entriesStr = extractFirst(content, EXTRACTION_PATTERNS.entries);
   if (entriesStr) {
-    extracted.extractedTotalEntries = parseInt(entriesStr, 10);
+    extracted.extractedTotalEntries = safeParseInt(entriesStr);
   }
   
   // === BAD BEAT JACKPOT (NEW) ===
   const badBeatJackpot = extractBadBeatJackpot(content);
   if (badBeatJackpot) {
-    extracted.extractedBadBeatJackpot = badBeatJackpot;
+    extracted.extractedBadBeatJackpot = sanitizeNumeric(badBeatJackpot);
     console.log(`[EXTRACTOR] Bad beat jackpot: $${badBeatJackpot}`);
   }
   
   // === STARTING STACK (NEW) ===
   const startingStack = extractStartingStack(content);
   if (startingStack) {
-    extracted.extractedStartingStack = startingStack;
+    extracted.extractedStartingStack = sanitizeNumeric(startingStack);
     console.log(`[EXTRACTOR] Starting stack: ${startingStack}`);
   }
   
   // === BLIND LEVELS (NEW) ===
   const blindMinutes = extractBlindLevelMinutes(content);
   if (blindMinutes) {
-    extracted.extractedBlindLevelMinutes = blindMinutes;
+    extracted.extractedBlindLevelMinutes = sanitizeNumeric(blindMinutes);
     console.log(`[EXTRACTOR] Blind levels: ${blindMinutes} minutes`);
   }
   
@@ -279,15 +355,15 @@ const extractGameData = async (post) => {
   const lateReg = extractLateRegistration(content);
   if (lateReg) {
     extracted.extractedLateRegTime = lateReg.time;
-    extracted.extractedLateRegLevel = lateReg.level;
+    extracted.extractedLateRegLevel = sanitizeNumeric(lateReg.level);
     console.log(`[EXTRACTOR] Late reg: ${lateReg.time || `level ${lateReg.level}`}`);
   }
   
   // === PLACEMENTS & PRIZES (Enhanced - only from placement lines) ===
   const placementResult = extractPlacementsAndPrizes(content);
   extracted.extractedPlacements = placementResult.placements;
-  extracted.extractedFirstPlacePrize = placementResult.firstPlacePrize;
-  extracted.extractedTotalPrizesPaid = placementResult.totalPrizesPaid;
+  extracted.extractedFirstPlacePrize = sanitizeNumeric(placementResult.firstPlacePrize);
+  extracted.extractedTotalPrizesPaid = sanitizeNumeric(placementResult.totalPrizesPaid);
   
   if (placementResult.placements.length > 0) {
     console.log(`[EXTRACTOR] Found ${placementResult.placements.length} placements, total: $${placementResult.totalPrizesPaid}`);
@@ -298,7 +374,7 @@ const extractGameData = async (post) => {
   if (venueMatch) {
     extracted.extractedVenueName = venueMatch.venueName;
     extracted.extractedVenueId = venueMatch.venueId;
-    extracted.venueMatchConfidence = venueMatch.confidence;
+    extracted.venueMatchConfidence = sanitizeNumeric(venueMatch.confidence);
     extracted.venueMatchSource = venueMatch.matchSource;
   }
   
@@ -343,7 +419,7 @@ const extractGameData = async (post) => {
     console.log(`[EXTRACTOR] Tournament type: ${tournamentType.type} (indicators: ${tournamentType.indicators.join(', ')})`);
   }
   
-  // === SERIES INFO ===
+  // === SERIES INFO (with safe parseInt) ===
   const seriesPatterns = EXTRACTION_PATTERNS.series;
   
   const seriesNameMatch = content.match(seriesPatterns.name);
@@ -353,14 +429,20 @@ const extractGameData = async (post) => {
   }
   
   const eventNumMatch = content.match(seriesPatterns.eventNumber);
-  if (eventNumMatch) {
-    extracted.extractedEventNumber = parseInt(eventNumMatch[1], 10);
-    extracted.isSeriesEvent = true;
+  if (eventNumMatch && eventNumMatch[1]) {
+    const parsedEventNum = safeParseInt(eventNumMatch[1]);
+    if (parsedEventNum !== null) {
+      extracted.extractedEventNumber = parsedEventNum;
+      extracted.isSeriesEvent = true;
+    }
   }
   
   const dayNumMatch = content.match(seriesPatterns.dayNumber);
-  if (dayNumMatch) {
-    extracted.extractedDayNumber = parseInt(dayNumMatch[1], 10);
+  if (dayNumMatch && dayNumMatch[1]) {
+    const parsedDayNum = safeParseInt(dayNumMatch[1]);
+    if (parsedDayNum !== null) {
+      extracted.extractedDayNumber = parsedDayNum;
+    }
   }
   
   const flightMatch = content.match(seriesPatterns.flight);
@@ -370,7 +452,11 @@ const extractGameData = async (post) => {
   
   extracted.extractionDurationMs = Date.now() - startTime;
   
-  return extracted;
+  // === FINAL SANITIZATION PASS ===
+  // Ensure no NaN/Infinity values make it to DynamoDB
+  const sanitized = sanitizeForDynamoDB(extracted);
+  
+  return sanitized;
 };
 
 // ===================================================================
@@ -398,57 +484,48 @@ const extractRecurringGameName = (content) => {
   const headerText = lines.join(' ');
   
   // Try to extract a recurring game name pattern
-  // Look for: "DAY_NAME + WORD(S)" like "THURSDAY GRIND", "FRIDAY SHOT CLOCK", "MONDAY MADNESS"
+  // Look for patterns like "THURSDAY GRIND", "MONDAY MADNESS", "SATURDAY SPECIAL"
+  const patterns = [
+    // Day + Event name: "THURSDAY GRIND", "MONDAY MADNESS"
+    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)?)\b/i,
+    // Event name + Day: "GRIND THURSDAY", "SPECIAL SATURDAY"
+    /\b([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)?)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i,
+    // Just event name in caps at start of header
+    /^([A-Z]{2,}(?:\s+[A-Z]{2,})*)/
+  ];
   
-  let detectedDay = null;
-  let gameName = null;
-  
-  // Check for day keywords
-  for (const [keyword, day] of Object.entries(DAY_KEYWORDS)) {
-    const regex = new RegExp(`\\b(${keyword})\\s+([A-Za-z]+(?:\\s+[A-Za-z]+)?)\\b`, 'i');
-    const match = headerText.match(regex);
-    
+  for (const pattern of patterns) {
+    const match = headerText.match(pattern);
     if (match) {
-      detectedDay = day;
-      // Combine day + following words as the game name
-      gameName = match[0].toUpperCase();
-      break;
-    }
-  }
-  
-  // If no day-prefixed name found, try to extract a prominent name
-  // Look for ALL CAPS phrases or quoted names
-  if (!gameName) {
-    // Pattern for ALL CAPS words (at least 2 characters, possibly with spaces)
-    const allCapsMatch = headerText.match(/\b([A-Z]{2,}(?:\s+[A-Z]{2,})*)\b/);
-    if (allCapsMatch && allCapsMatch[1].length >= 4) {
-      gameName = allCapsMatch[1];
+      let name = null;
+      let dayOfWeek = null;
       
-      // Try to detect day from the full header even if not adjacent
-      for (const [keyword, day] of Object.entries(DAY_KEYWORDS)) {
-        const dayRegex = new RegExp(`\\b${keyword}\\b`, 'i');
-        if (dayRegex.test(headerText)) {
-          detectedDay = day;
-          break;
+      // Check which capture groups matched
+      if (match[1] && match[2]) {
+        const first = match[1].toLowerCase();
+        const second = match[2].toLowerCase();
+        
+        if (DAY_KEYWORDS[first]) {
+          dayOfWeek = DAY_KEYWORDS[first];
+          name = `${match[1].toUpperCase()} ${match[2].toUpperCase()}`;
+        } else if (DAY_KEYWORDS[second]) {
+          dayOfWeek = DAY_KEYWORDS[second];
+          name = `${match[1].toUpperCase()} ${match[2].toUpperCase()}`;
+        }
+      } else if (match[1]) {
+        name = match[1].trim();
+        // Try to detect day from elsewhere in header
+        for (const [key, value] of Object.entries(DAY_KEYWORDS)) {
+          if (headerText.toLowerCase().includes(key)) {
+            dayOfWeek = value;
+            break;
+          }
         }
       }
-    }
-  }
-  
-  // Clean up the name - remove emojis, special chars, but keep spaces
-  if (gameName) {
-    gameName = gameName
-      .replace(/[^\w\s]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    // Must be at least 4 chars to be meaningful
-    if (gameName.length >= 4) {
-      return {
-        name: gameName,
-        dayOfWeek: detectedDay,
-        sourceLines: lines
-      };
+      
+      if (name && name.length >= 3) {
+        return { name, dayOfWeek };
+      }
     }
   }
   
@@ -456,115 +533,88 @@ const extractRecurringGameName = (content) => {
 };
 
 /**
- * Extract buy-in with prizepool/rake breakdown
- * ENHANCED: Scans ALL parentheses in content for breakdown patterns
- * Handles: "$120 ($98 + $22)" or "Buy-in: $120 (Fully Dealt, $98 + $22)"
+ * Extract buy-in with optional breakdown (prizepool + rake)
+ * 
+ * @param {string} content - Post content
+ * @returns {Object|null} { total, prizepool, rake } or null
  */
 const extractBuyInWithBreakdown = (content) => {
-  // First, extract the total buy-in
-  let total = null;
+  if (!content) return null;
   
+  // Try full buy-in line first: "Buy-in: $120 (Fully Dealt, $98 + $22)"
   const fullMatch = content.match(ENHANCED_PATTERNS.buyInFull);
   if (fullMatch) {
-    total = parseDollarAmount(fullMatch[1]);
-  } else {
-    const buyInStr = extractFirst(content, EXTRACTION_PATTERNS.buyIn);
-    if (buyInStr) {
-      total = parseDollarAmount(buyInStr);
-    }
-  }
-  
-  if (!total) return null;
-  
-  // Now scan ALL parentheses in content for breakdown patterns
-  // Pattern: any (... $X + $Y ...) or (... X + Y ...)
-  const parenPattern = /\(([^)]+)\)/g;
-  let parenMatch;
-  
-  while ((parenMatch = parenPattern.exec(content)) !== null) {
-    const parenContent = parenMatch[1];
+    const total = sanitizeNumeric(parseDollarAmount(fullMatch[1]));
+    const prizepool = fullMatch[2] ? sanitizeNumeric(parseDollarAmount(fullMatch[2])) : null;
+    const rake = fullMatch[3] ? sanitizeNumeric(parseDollarAmount(fullMatch[3])) : null;
     
-    // Look for X + Y pattern inside parentheses
-    const breakdownMatch = parenContent.match(/\$?\s*([\d,]+)\s*\+\s*\$?\s*([\d,]+)/);
-    if (breakdownMatch) {
-      const amount1 = parseDollarAmount(breakdownMatch[1]);
-      const amount2 = parseDollarAmount(breakdownMatch[2]);
-      
-      // Skip if amounts seem too large (probably not buy-in breakdown)
-      if (amount1 > 5000 || amount2 > 5000) continue;
-      
-      // Validate that sum equals or is close to total buy-in
-      const sum = amount1 + amount2;
-      if (Math.abs(sum - total) <= 5) {
-        // Larger amount is typically prizepool, smaller is rake
-        const prizepool = Math.max(amount1, amount2);
-        const rake = Math.min(amount1, amount2);
-        
-        console.log(`[EXTRACTOR] Found buy-in breakdown in parentheses: $${prizepool} + $${rake} = $${sum}`);
-        return { total, prizepool, rake };
-      }
+    if (total) {
+      return { total, prizepool, rake };
     }
   }
   
-  // No breakdown found
-  return { total, prizepool: null, rake: null };
+  // Try basic buy-in pattern
+  const basicMatch = extractFirst(content, EXTRACTION_PATTERNS.buyIn);
+  if (basicMatch) {
+    const total = sanitizeNumeric(parseDollarAmount(basicMatch));
+    
+    // Look for breakdown near the buy-in mention
+    const breakdownMatch = content.match(ENHANCED_PATTERNS.buyInBreakdown);
+    if (breakdownMatch) {
+      const prizepool = sanitizeNumeric(parseDollarAmount(breakdownMatch[1]));
+      const rake = sanitizeNumeric(parseDollarAmount(breakdownMatch[2]));
+      return { total, prizepool, rake };
+    }
+    
+    return { total, prizepool: null, rake: null };
+  }
+  
+  return null;
 };
 
 /**
  * Extract bad beat jackpot amount
+ * 
+ * @param {string} content - Post content
+ * @returns {number|null} Jackpot amount or null
  */
 const extractBadBeatJackpot = (content) => {
+  if (!content) return null;
+  
   for (const pattern of ENHANCED_PATTERNS.badBeatJackpot) {
     const match = content.match(pattern);
-    if (match) {
-      return parseDollarAmount(match[1]);
+    if (match && match[1]) {
+      return sanitizeNumeric(parseDollarAmount(match[1]));
     }
   }
+  
   return null;
 };
 
 /**
- * Extract starting stack
- * ENHANCED: 
- * - "ss" suffix indicates starting stack (e.g., "30000ss", "30kss")
- * - Starting stacks are typically >= 10,000 (buy-ins rarely > 5,000)
- * - Numbers followed by "k" or in the 10k-100k range are likely stacks
+ * Extract starting stack amount
+ * 
+ * @param {string} content - Post content
+ * @returns {number|null} Starting stack or null
  */
 const extractStartingStack = (content) => {
-  // Try each pattern
+  if (!content) return null;
+  
   for (const pattern of ENHANCED_PATTERNS.startingStack) {
     const match = content.match(pattern);
-    if (match) {
+    if (match && match[1]) {
       let value = match[1].replace(/,/g, '');
-      let stack = parseInt(value, 10);
+      let stack = safeParseInt(value);
       
-      // Handle "k" suffix (30k = 30000)
-      const hasK = /k/i.test(match[0]);
-      if (hasK && stack < 1000) {
-        stack *= 1000;
+      // Handle 'k' suffix (30k = 30000)
+      if (stack && match[0].toLowerCase().includes('k') && stack < 1000) {
+        stack = stack * 1000;
       }
       
-      // Sanity check - starting stacks are typically 10k-500k
-      // This helps distinguish from buy-ins (typically < $5000)
-      if (stack >= 10000 && stack <= 500000) {
-        return stack;
+      // Reasonable stack range
+      if (stack && stack >= 1000 && stack <= 1000000) {
+        return sanitizeNumeric(stack);
       }
-      
-      // Lower bound exception: if "ss" suffix is present, trust it more
-      if (/ss\b/i.test(match[0]) && stack >= 5000) {
-        return stack;
-      }
-    }
-  }
-  
-  // Additional heuristic: Look for standalone large numbers that are likely stacks
-  // Pattern: number >= 10000 followed by "chips" or near "stack" context
-  const contextPattern = /\b(\d{2,3})[,.]?(\d{3})\s*(?:chips?|stack)/i;
-  const contextMatch = content.match(contextPattern);
-  if (contextMatch) {
-    const stack = parseInt(contextMatch[1] + contextMatch[2], 10);
-    if (stack >= 10000 && stack <= 500000) {
-      return stack;
     }
   }
   
@@ -573,90 +623,145 @@ const extractStartingStack = (content) => {
 
 /**
  * Extract blind level duration in minutes
+ * 
+ * @param {string} content - Post content
+ * @returns {number|null} Minutes per level or null
  */
 const extractBlindLevelMinutes = (content) => {
+  if (!content) return null;
+  
   for (const pattern of ENHANCED_PATTERNS.blindLevels) {
     const match = content.match(pattern);
-    if (match) {
-      const minutes = parseInt(match[1], 10);
-      // Sanity check - blind levels are typically 10-60 minutes
-      if (minutes >= 5 && minutes <= 120) {
-        return minutes;
+    if (match && match[1]) {
+      const minutes = safeParseInt(match[1]);
+      // Reasonable range: 5 to 60 minutes
+      if (minutes && minutes >= 5 && minutes <= 60) {
+        return sanitizeNumeric(minutes);
       }
     }
   }
+  
   return null;
 };
 
 /**
  * Extract late registration info
+ * 
+ * @param {string} content - Post content
+ * @returns {Object|null} { time, level } or null
  */
 const extractLateRegistration = (content) => {
+  if (!content) return null;
+  
   for (const pattern of ENHANCED_PATTERNS.lateReg) {
     const match = content.match(pattern);
-    if (match) {
-      const value = match[1];
-      
-      // Check if it's a time or level
-      if (/\d{1,2}:\d{2}/.test(value)) {
-        return { time: value, level: null };
+    if (match && match[1]) {
+      // Check if it's a time or a level
+      if (match[1].includes(':')) {
+        return { time: match[1], level: null };
       } else {
-        return { time: null, level: parseInt(value, 10) };
+        return { time: null, level: safeParseInt(match[1]) };
       }
     }
   }
+  
   return null;
 };
 
+// Valid TournamentType enum values from GraphQL schema
+// Update this list to match your schema.graphql TournamentType enum
+const VALID_TOURNAMENT_TYPES = [
+  'FREEZEOUT',
+  'REENTRY', 
+  'RE_ENTRY',  // Alternative naming
+  'REBUY',
+  'BOUNTY',
+  'KNOCKOUT',
+  'SATELLITE',
+  'TURBO',
+  'HYPER_TURBO',
+  'HYPERTURBO',
+  'DEEPSTACK',
+  'DEEP_STACK',
+  'SHOOTOUT',
+  'HEADS_UP',
+  'SIT_AND_GO',
+  'MTT',
+  'STANDARD',
+];
+
 /**
- * Extract tournament type from indicators
+ * Extract tournament type (FREEZEOUT, REENTRY, REBUY, etc.)
+ * 
+ * @param {string} content - Post content
+ * @returns {Object} { type, indicators }
  */
 const extractTournamentType = (content) => {
+  if (!content) return { type: null, indicators: [] };
+  
   const indicators = [];
   let type = null;
-  
-  // Check for re-entry (REBUY)
-  for (const pattern of ENHANCED_PATTERNS.reEntry) {
-    if (pattern.test(content)) {
-      indicators.push('RE-ENTRY');
-      type = 'REBUY';
-      break;
-    }
-  }
   
   // Check for freezeout
   for (const pattern of ENHANCED_PATTERNS.freezeout) {
     if (pattern.test(content)) {
       indicators.push('FREEZEOUT');
-      type = 'FREEZEOUT';
+      if (!type) type = 'FREEZEOUT';
       break;
     }
   }
   
-  // Check other patterns from EXTRACTION_PATTERNS
-  const typePatterns = EXTRACTION_PATTERNS.tournamentType;
+  // Check for re-entry (takes precedence over freezeout if both found)
+  for (const pattern of ENHANCED_PATTERNS.reEntry) {
+    if (pattern.test(content)) {
+      indicators.push('REENTRY');
+      type = 'REENTRY'; // Re-entry takes precedence
+      break;
+    }
+  }
   
-  if (typePatterns.bounty && typePatterns.bounty.test(content)) {
-    indicators.push('BOUNTY');
-    if (!type) type = 'REBUY'; // Bounty tournaments are typically rebuy
-  }
-  if (typePatterns.satellite && typePatterns.satellite.test(content)) {
-    indicators.push('SATELLITE');
-    if (!type) type = 'SATELLITE';
-  }
-  if (typePatterns.deepstack && typePatterns.deepstack.test(content)) {
-    indicators.push('DEEPSTACK');
-    if (!type) type = 'DEEPSTACK';
-  }
-  if (typePatterns.turbo && typePatterns.turbo.test(content)) {
-    indicators.push('TURBO');
-  }
-  if (typePatterns.rebuy && typePatterns.rebuy.test(content)) {
+  // Check for rebuy/addon
+  if (/\brebuy\b/i.test(content)) {
     indicators.push('REBUY');
     if (!type) type = 'REBUY';
   }
   
-  return { type, indicators };
+  if (/\badd[- ]?on\b/i.test(content)) {
+    indicators.push('ADDON');
+  }
+  
+  // Check for bounty/knockout
+  if (/\b(bounty|knockout|ko)\b/i.test(content)) {
+    indicators.push('BOUNTY');
+    if (!type) type = 'BOUNTY';
+  }
+  
+  // Check for satellite
+  if (/\bsatellite\b/i.test(content)) {
+    indicators.push('SATELLITE');
+    if (!type) type = 'SATELLITE';
+  }
+  
+  // Check for turbo/hyper
+  if (/\bhyper[- ]?turbo\b/i.test(content)) {
+    indicators.push('HYPERTURBO');
+    if (!type) type = 'HYPERTURBO';
+  } else if (/\bturbo\b/i.test(content)) {
+    indicators.push('TURBO');
+    if (!type) type = 'TURBO';
+  }
+  
+  // Check for deepstack
+  if (/\bdeep[- ]?stack\b/i.test(content)) {
+    indicators.push('DEEPSTACK');
+    if (!type) type = 'DEEPSTACK';
+  }
+  
+  // IMPORTANT: Only return type if it's a valid enum value
+  // This prevents GraphQL serialization errors
+  const validatedType = type && VALID_TOURNAMENT_TYPES.includes(type) ? type : null;
+  
+  return { type: validatedType, indicators };
 };
 
 /**
@@ -682,11 +787,11 @@ const extractPlacementsAndPrizes = (content) => {
     let match = trimmed.match(/^(\d+)(?:st|nd|rd|th)\s*[-–—:.\s]+\s*([A-Za-z][A-Za-z\s.']+?)\s*[-–—:\s]+\s*\$?([\d,]+(?:\.\d{2})?)/i);
     
     if (match) {
-      const place = parseInt(match[1], 10);
+      const place = safeParseInt(match[1]);
       const name = cleanPlayerName(match[2]);
-      const prize = parseDollarAmount(match[3]);
+      const prize = sanitizeNumeric(parseDollarAmount(match[3]));
       
-      if (place > 0 && place <= 100 && name && prize > 0) {
+      if (place && place > 0 && place <= 100 && name && prize && prize > 0) {
         placements.push({ place, name, prize, raw: trimmed });
         continue;
       }
@@ -699,9 +804,9 @@ const extractPlacementsAndPrizes = (content) => {
       const medal = match[1];
       const place = medalToPlace[medal];
       const name = cleanPlayerName(match[2]);
-      const prize = parseDollarAmount(match[3]);
+      const prize = sanitizeNumeric(parseDollarAmount(match[3]));
       
-      if (place && name && prize > 0) {
+      if (place && name && prize && prize > 0) {
         placements.push({ place, name, prize, raw: trimmed });
         continue;
       }
@@ -711,11 +816,11 @@ const extractPlacementsAndPrizes = (content) => {
     match = trimmed.match(/^(\d+)[.)]\s+([A-Za-z][A-Za-z\s.']+?)\s*[-–—:\s]+\s*\$?([\d,]+(?:\.\d{2})?)/);
     
     if (match) {
-      const place = parseInt(match[1], 10);
+      const place = safeParseInt(match[1]);
       const name = cleanPlayerName(match[2]);
-      const prize = parseDollarAmount(match[3]);
+      const prize = sanitizeNumeric(parseDollarAmount(match[3]));
       
-      if (place > 0 && place <= 100 && name && prize > 0) {
+      if (place && place > 0 && place <= 100 && name && prize && prize > 0) {
         placements.push({ place, name, prize, raw: trimmed });
       }
     }
@@ -737,8 +842,8 @@ const extractPlacementsAndPrizes = (content) => {
   
   return {
     placements: uniquePlacements,
-    firstPlacePrize,
-    totalPrizesPaid: totalPrizesPaid > 0 ? totalPrizesPaid : null
+    firstPlacePrize: sanitizeNumeric(firstPlacePrize),
+    totalPrizesPaid: totalPrizesPaid > 0 ? sanitizeNumeric(totalPrizesPaid) : null
   };
 };
 
@@ -899,12 +1004,17 @@ module.exports = {
   extractBadBeatJackpot,
   extractStartingStack,
   extractBlindLevelMinutes,
+  extractLateRegistration,
   extractTournamentType,
   extractPlacementsAndPrizes,
   extractVenueFromDatabase,
   extractVenueFromPatterns,
   getVenuesWithCache,
   clearVenueCache,
+  safeParseInt,
+  safeParseFloat,
+  sanitizeNumeric,
+  sanitizeForDynamoDB,
   ENHANCED_PATTERNS,
   DAY_KEYWORDS
 };

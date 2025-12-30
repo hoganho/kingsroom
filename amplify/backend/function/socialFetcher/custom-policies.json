@@ -36,5 +36,13 @@
     "Resource": [
       "arn:aws:s3:::pokerpro-scraper-storage/social-media/*"
     ]
+  },
+  {
+    "Action": [
+      "lambda:InvokeFunction"
+    ],
+    "Resource": [
+      "arn:aws:lambda:ap-southeast-2:*:function:*socialPostProcessor*"
+    ]
   }
 ]
