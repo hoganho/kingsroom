@@ -23,9 +23,11 @@ Amplify Params - DO NOT EDIT *//**
  * GAME FINANCIALS PROCESSOR LAMBDA
  * ===================================================================
  * 
- * VERSION: 1.3.0
+ * VERSION: 1.4.0
  * 
  * CHANGELOG:
+ * - v1.4.0: Updates Game.gameCostId and Game.gameFinancialSnapshotId after saving
+ *           (supports new @hasOne foreign key schema for efficient lookups)
  * - v1.3.0: Added tournamentSeriesId, seriesName, recurringGameId for metrics partitioning
  * - v1.2.0: Added isSeries and isSeriesParent flags for filtering/aggregation
  * 
@@ -41,6 +43,7 @@ Amplify Params - DO NOT EDIT *//**
  * RESPONSIBILITIES:
  * - Calculates GameCost (operational costs)
  * - Calculates GameFinancialSnapshot (reporting metrics)
+ * - Updates Game.gameCostId and Game.gameFinancialSnapshotId for @hasOne lookups
  * - Supports preview for FE confirmation workflows
  * 
  * SERIES HANDLING:
@@ -70,6 +73,7 @@ Amplify Params - DO NOT EDIT *//**
  * │       ├──▶ Preview Mode: Return calculated data                 │
  * │       │                                                          │
  * │       └──▶ Save Mode: Write to GameCost + GameFinancialSnapshot │
+ * │                       + Update Game.gameCostId/snapshotId       │
  * └─────────────────────────────────────────────────────────────────┘
  * 
  * ┌─────────────────────────────────────────────────────────────────┐
@@ -584,6 +588,74 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
 };
 
 // ===================================================================
+// UPDATE GAME WITH FOREIGN KEYS (NEW in v1.4.0)
+// ===================================================================
+
+/**
+ * Update Game record with gameCostId and gameFinancialSnapshotId
+ * This enables efficient @hasOne lookups without GSI queries
+ * 
+ * @param {string} gameId - Game ID to update
+ * @param {Object} costSaveResult - Result from saveGameCost
+ * @param {Object} snapshotSaveResult - Result from saveGameFinancialSnapshot
+ */
+const updateGameFinancialForeignKeys = async (gameId, costSaveResult, snapshotSaveResult) => {
+    const updates = {};
+    
+    // Only update if we have new IDs (CREATED action)
+    if (costSaveResult?.action === 'CREATED' && costSaveResult?.costId) {
+        updates.gameCostId = costSaveResult.costId;
+    }
+    
+    if (snapshotSaveResult?.action === 'CREATED' && snapshotSaveResult?.snapshotId) {
+        updates.gameFinancialSnapshotId = snapshotSaveResult.snapshotId;
+    }
+    
+    // Skip if nothing to update
+    if (Object.keys(updates).length === 0) {
+        console.log(`[FINANCIALS] No FK updates needed for game ${gameId}`);
+        return { updated: false };
+    }
+    
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+    
+    try {
+        const updateExpression = 'SET ' + 
+            Object.keys(updates).map(key => `#${key} = :${key}`).join(', ') + 
+            ', updatedAt = :now, #lastChanged = :ts';
+        
+        const expressionAttributeNames = {
+            ...Object.fromEntries(Object.keys(updates).map(k => [`#${k}`, k])),
+            '#lastChanged': '_lastChangedAt'
+        };
+        
+        const expressionAttributeValues = {
+            ...Object.fromEntries(Object.keys(updates).map(k => [`:${k}`, updates[k]])),
+            ':now': now,
+            ':ts': timestamp
+        };
+        
+        await ddbDocClient.send(new UpdateCommand({
+            TableName: getTableName('Game'),
+            Key: { id: gameId },
+            UpdateExpression: updateExpression,
+            ExpressionAttributeNames: expressionAttributeNames,
+            ExpressionAttributeValues: expressionAttributeValues,
+            ConditionExpression: 'attribute_exists(id)'
+        }));
+        
+        console.log(`[FINANCIALS] ✅ Updated Game ${gameId} with FK:`, updates);
+        return { updated: true, fields: Object.keys(updates) };
+        
+    } catch (error) {
+        // Don't fail the whole operation if FK update fails
+        console.error(`[FINANCIALS] ⚠️ Failed to update Game FKs for ${gameId}:`, error.message);
+        return { updated: false, error: error.message };
+    }
+};
+
+// ===================================================================
 // CORE PROCESSING FUNCTION
 // ===================================================================
 
@@ -668,6 +740,7 @@ const processGameFinancials = async (game, options = {}) => {
         // Save results (only populated when saveToDatabase is true)
         costSaveResult: null,
         snapshotSaveResult: null,
+        gameFkUpdateResult: null, // NEW in v1.4.0
         
         processingTimeMs: 0
     };
@@ -676,6 +749,13 @@ const processGameFinancials = async (game, options = {}) => {
     if (saveToDatabase) {
         result.costSaveResult = await saveGameCost(costData, existingCost);
         result.snapshotSaveResult = await saveGameFinancialSnapshot(snapshotData, result.costSaveResult);
+        
+        // NEW in v1.4.0: Update Game with foreign keys for efficient @hasOne lookups
+        result.gameFkUpdateResult = await updateGameFinancialForeignKeys(
+            game.id, 
+            result.costSaveResult, 
+            result.snapshotSaveResult
+        );
     }
     
     result.processingTimeMs = Date.now() - startTime;
@@ -822,7 +902,8 @@ const handleStreamEvent = async (event) => {
                 tournamentSeriesId: result.summary?.tournamentSeriesId,
                 recurringGameId: result.summary?.recurringGameId,
                 cost: result.costSaveResult,
-                snapshot: result.snapshotSaveResult
+                snapshot: result.snapshotSaveResult,
+                gameFkUpdate: result.gameFkUpdateResult // NEW in v1.4.0
             });
             
         } catch (error) {
@@ -885,6 +966,7 @@ exports.batchProcess = async (event) => {
                 isSeriesParent: processResult.summary?.isSeriesParent,
                 tournamentSeriesId: processResult.summary?.tournamentSeriesId,
                 recurringGameId: processResult.summary?.recurringGameId,
+                gameFkUpdate: processResult.gameFkUpdateResult, // NEW in v1.4.0
                 ...processResult
             });
             

@@ -242,7 +242,7 @@ enum SeriesAssignmentStatus {
 }
 
 # ===================================================================
-# NEW: RECURRING GAME ASSIGNMENT STATUS
+# RECURRING GAME ASSIGNMENT STATUS
 # ===================================================================
 
 enum RecurringGameAssignmentStatus {
@@ -428,6 +428,7 @@ enum SocialScrapeStatus {
   FAILED
   SKIPPED
   RATE_LIMITED
+  TIMEOUT
   NO_NEW_CONTENT
 }
 
@@ -445,8 +446,17 @@ enum ScheduledPostStatus {
   CANCELLED
 }
 
+# Status for real-time sync progress subscription events
+enum SyncEventStatus {
+  STARTED
+  IN_PROGRESS
+  COMPLETED
+  RATE_LIMITED
+  FAILED
+}
+
 # ===================================================================
-# SOCIAL POST PROCESSING ENUMS (NEW)
+# SOCIAL POST PROCESSING ENUMS
 # ===================================================================
 
 # Content classification for social posts (distinct from SocialPostType which is media type)
@@ -482,13 +492,38 @@ enum SocialPostLinkType {
 
 # Types of non-cash prizes extracted from tournament results
 enum NonCashPrizeType {
-  ACCUMULATOR_TICKET   # Entry to accumulator freeroll
-  TOURNAMENT_ENTRY     # Entry to specific tournament
-  SATELLITE_TICKET     # Satellite seat
-  BOUNTY_TICKET        # Bounty hunter entry
-  MERCHANDISE          # Physical prizes
-  POINTS               # League/loyalty points
-  OTHER                # Catch-all for other non-cash prizes
+  # === TOURNAMENT ENTRY TICKETS ===
+  ACCUMULATOR_TICKET     # Entry to accumulator freeroll (most common in AU)
+  SATELLITE_TICKET       # Satellite seat to larger event
+  BOUNTY_TICKET          # Bounty hunter / PKO tournament entry
+  TOURNAMENT_ENTRY       # Generic tournament entry ticket
+  SERIES_TICKET          # Entry to series event (WSOP, APT, WPT, etc.)
+  
+  # === HIGH-VALUE SEATS ===
+  MAIN_EVENT_SEAT        # Main event / championship entry
+  VALUED_SEAT            # Seat with explicit value (e.g., "$1100 seat")
+  
+  # === PACKAGES ===
+  TRAVEL_PACKAGE         # Travel + accommodation + entry package
+  ACCOMMODATION_PACKAGE  # Hotel/accommodation only
+  
+  # === VENUE CREDITS ===
+  VOUCHER                # General venue voucher
+  FOOD_CREDIT            # F&B credit
+  CASINO_CREDIT          # Casino credit / match play
+  
+  # === OTHER ===
+  MERCHANDISE            # Physical prizes (hoodie, chips, etc.)
+  POINTS                 # League/loyalty points
+  OTHER                  # Catch-all for unrecognized prizes
+}
+
+enum TicketAwardSource {
+  SOCIAL_POST_RESULT      # Extracted from result post placements
+  SOCIAL_POST_PROMO       # Advertised in promotional post
+  SCRAPED_DATA            # From tournament data scraping
+  MANUAL_ENTRY            # Manually entered by admin
+  RECURRING_GAME_DEFAULT  # Inherited from recurring game template
 }
 
 # ===================================================================
@@ -504,8 +539,8 @@ enum BackgroundTaskType {
   DATA_MIGRATION
   REPORT_GENERATION
   VENUE_DETAILS_RECALC
-  RECURRING_GAME_DETECTION    # NEW
-  METRICS_CALCULATION         # NEW
+  RECURRING_GAME_DETECTION
+  METRICS_CALCULATION
 }
 
 enum BackgroundTaskStatus {

@@ -189,10 +189,12 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   tournamentSeriesId: ID @index(name: "byTournamentSeries", sortKeyFields: ["gameStartDateTime"])
   tournamentSeries: TournamentSeries @belongsTo(fields: ["tournamentSeriesId"])
   structure: TournamentStructure @hasOne
-  gameCost: GameCost @hasOne(fields: ["id"])
-  gameFinancialSnapshots: [GameFinancialSnapshot] @hasMany(indexName: "byGameFinancialSnapshot", fields: ["id"])
   playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
+  gameCostId: ID
+  gameCost: GameCost @hasOne(fields: ["gameCostId"])
+  gameFinancialSnapshotId: ID
+  gameFinancialSnapshot: GameFinancialSnapshot @hasOne(fields: ["gameFinancialSnapshotId"])
 
   # === SOCIAL PULSE RELATIONSHIPS ===
   linkedSocialPosts: [SocialPost] @hasMany(indexName: "bySocialPostGame", fields: ["id"])
@@ -693,6 +695,7 @@ input StartScraperJobInput {
   maxConsecutiveErrors: Int
   maxConsecutiveBlanks: Int
   maxTotalErrors: Int
+  scraperApiKey: String
 }
 
 input SaveGameInput {

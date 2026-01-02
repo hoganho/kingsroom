@@ -8,10 +8,15 @@
  * - Social Post Game Data (extractions)
  * - Social Post Game Links
  * - Venues
+ * 
+ * TIMEZONE NOTE:
+ * Year-month calculations use AEST to ensure correct GSI partition queries
+ * for Australian business context.
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
+const { getYearMonthsInRange: getYearMonthsInRangeAEST } = require('./dateUtils');
 
 // ===================================================================
 // CLIENT INITIALIZATION
@@ -112,6 +117,8 @@ const updateSocialPost = async (postId, updates) => {
  * Query social posts by date range
  * Uses byPostMonth GSI (postYearMonth + postedAt)
  * 
+ * NOTE: Uses AEST-aware year-month calculation to query correct partitions
+ * 
  * @param {string} startDate - ISO date string
  * @param {string} endDate - ISO date string
  * @param {Object} options - Query options
@@ -119,8 +126,10 @@ const updateSocialPost = async (postId, updates) => {
 const querySocialPostsByDateRange = async (startDate, endDate, options = {}) => {
   const { limit = 100 } = options;
   
-  // Extract year-months to query
-  const yearMonths = getYearMonthsInRange(startDate, endDate);
+  // Extract year-months to query (AEST-aware)
+  const yearMonths = getYearMonthsInRangeAEST(startDate, endDate);
+  
+  console.log(`[GRAPHQL] Querying byPostMonth GSI for AEST months: ${yearMonths.join(', ')}`);
   
   let allPosts = [];
   
@@ -153,8 +162,7 @@ const querySocialPostsByDateRange = async (startDate, endDate, options = {}) => 
       const result = await ddbDocClient.send(new QueryCommand({
         TableName: getTableName('SocialPost'),
         IndexName: 'byProcessingStatus',
-        KeyConditionExpression: 'processingStatus = :status',
-        FilterExpression: 'postedAt BETWEEN :start AND :end',
+        KeyConditionExpression: 'processingStatus = :status AND postedAt BETWEEN :start AND :end',
         ExpressionAttributeValues: {
           ':status': status,
           ':start': startDate,
@@ -186,7 +194,7 @@ const querySocialPostsByVenueAndDate = async (venueId, startDate, endDate, optio
   // First, find social accounts for this venue
   const accountsResult = await ddbDocClient.send(new QueryCommand({
     TableName: getTableName('SocialAccount'),
-    IndexName: 'byVenue',
+    IndexName: 'bySocialAccountVenue',
     KeyConditionExpression: 'venueId = :venueId',
     ExpressionAttributeValues: {
       ':venueId': venueId
@@ -229,6 +237,7 @@ const querySocialPostsByVenueAndDate = async (venueId, startDate, endDate, optio
  * This requires having indexed the extractedTournamentId
  * 
  * @param {string} tournamentId - Tournament ID to search for
+ * @returns {Array} Posts with _extraction attached for caching
  */
 const querySocialPostsByTournamentId = async (tournamentId) => {
   // First check SocialPostGameData for posts with this tournament ID
@@ -248,12 +257,14 @@ const querySocialPostsByTournamentId = async (tournamentId) => {
       return [];
     }
     
-    // Get the actual posts
+    // Get the actual posts and attach extractions for caching
     const posts = [];
     for (const extraction of extractions) {
       if (extraction.socialPostId) {
         const post = await getSocialPost(extraction.socialPostId);
         if (post) {
+          // Attach extraction to post for caching (avoids re-lookup)
+          post._cachedExtraction = extraction;
           posts.push(post);
         }
       }
@@ -272,57 +283,234 @@ const querySocialPostsByTournamentId = async (tournamentId) => {
 // SOCIAL POST GAME DATA (EXTRACTION) OPERATIONS
 // ===================================================================
 
+// Cache GSI availability to avoid repeated failed lookups
+let extractionGSIStatus = {
+  checked: false,
+  availableIndex: null  // Will be set to the working index name, or 'NONE' if none work
+};
+
 /**
  * Get extraction data for a social post
  */
 const getExtractionBySocialPost = async (socialPostId) => {
-  const result = await ddbDocClient.send(new QueryCommand({
-    TableName: getTableName('SocialPostGameData'),
-    IndexName: 'bySocialPost',
-    KeyConditionExpression: 'socialPostId = :pid',
-    ExpressionAttributeValues: {
-      ':pid': socialPostId
-    },
-    Limit: 1
-  }));
+  // If we've already determined no GSI is available, return null immediately
+  if (extractionGSIStatus.checked && extractionGSIStatus.availableIndex === 'NONE') {
+    return null;
+  }
   
-  return result.Items?.[0] || null;
+  // If we found a working index before, use it directly
+  if (extractionGSIStatus.checked && extractionGSIStatus.availableIndex) {
+    try {
+      const result = await ddbDocClient.send(new QueryCommand({
+        TableName: getTableName('SocialPostGameData'),
+        IndexName: extractionGSIStatus.availableIndex,
+        KeyConditionExpression: 'socialPostId = :pid',
+        ExpressionAttributeValues: {
+          ':pid': socialPostId
+        },
+        Limit: 1
+      }));
+      
+      return result.Items?.[0] || null;
+    } catch (error) {
+      // Index might have been deleted, reset and retry
+      extractionGSIStatus.checked = false;
+      extractionGSIStatus.availableIndex = null;
+    }
+  }
+  
+  // Try to find a working GSI
+  const indexesToTry = [
+    'bySocialPost',
+    'bySocialPostGameDataSocialPostId',
+    'gsi-SocialPostGameData.socialPostId',
+    'socialPostId-index'
+  ];
+  
+  for (const indexName of indexesToTry) {
+    try {
+      const result = await ddbDocClient.send(new QueryCommand({
+        TableName: getTableName('SocialPostGameData'),
+        IndexName: indexName,
+        KeyConditionExpression: 'socialPostId = :pid',
+        ExpressionAttributeValues: {
+          ':pid': socialPostId
+        },
+        Limit: 1
+      }));
+      
+      // This index works! Cache it for future calls
+      console.log(`[GRAPHQL] Found working extraction GSI: ${indexName}`);
+      extractionGSIStatus.checked = true;
+      extractionGSIStatus.availableIndex = indexName;
+      
+      return result.Items?.[0] || null;
+    } catch (error) {
+      if (error.name === 'ValidationException' && error.message.includes('specified index')) {
+        // This index doesn't exist, try next
+        continue;
+      }
+      // Some other error, throw it
+      throw error;
+    }
+  }
+  
+  // No GSI available - cache this result
+  console.log(`[GRAPHQL] No usable GSI for SocialPostGameData.socialPostId - extraction lookups will be skipped`);
+  extractionGSIStatus.checked = true;
+  extractionGSIStatus.availableIndex = 'NONE';
+  
+  return null;
 };
 
 // ===================================================================
 // SOCIAL POST GAME LINK OPERATIONS
 // ===================================================================
 
+// Cache GSI availability for link queries
+let linkGSIStatus = {
+  bySocialPostLink: { checked: false, availableIndex: null },
+  byGameSocialPostLink: { checked: false, availableIndex: null }
+};
+
 /**
  * Get all links for a social post
  */
 const getLinksBySocialPost = async (socialPostId) => {
-  const result = await ddbDocClient.send(new QueryCommand({
-    TableName: getTableName('SocialPostGameLink'),
-    IndexName: 'bySocialPostLink',
-    KeyConditionExpression: 'socialPostId = :pid',
-    ExpressionAttributeValues: {
-      ':pid': socialPostId
-    }
-  }));
+  const gsiKey = 'bySocialPostLink';
   
-  return (result.Items || []).filter(l => l.linkType !== 'REJECTED');
+  // If we've determined no GSI is available, return empty array
+  if (linkGSIStatus[gsiKey].checked && linkGSIStatus[gsiKey].availableIndex === 'NONE') {
+    return [];
+  }
+  
+  // If we found a working index before, use it
+  if (linkGSIStatus[gsiKey].checked && linkGSIStatus[gsiKey].availableIndex) {
+    try {
+      const result = await ddbDocClient.send(new QueryCommand({
+        TableName: getTableName('SocialPostGameLink'),
+        IndexName: linkGSIStatus[gsiKey].availableIndex,
+        KeyConditionExpression: 'socialPostId = :pid',
+        ExpressionAttributeValues: {
+          ':pid': socialPostId
+        }
+      }));
+      return (result.Items || []).filter(l => l.linkType !== 'REJECTED');
+    } catch (error) {
+      // Reset and retry
+      linkGSIStatus[gsiKey].checked = false;
+      linkGSIStatus[gsiKey].availableIndex = null;
+    }
+  }
+  
+  // Try to find a working GSI
+  const indexesToTry = [
+    'bySocialPostLink',
+    'bySocialPostGameLinkSocialPostId',
+    'gsi-SocialPostGameLink.socialPostId',
+    'socialPostId-index'
+  ];
+  
+  for (const indexName of indexesToTry) {
+    try {
+      const result = await ddbDocClient.send(new QueryCommand({
+        TableName: getTableName('SocialPostGameLink'),
+        IndexName: indexName,
+        KeyConditionExpression: 'socialPostId = :pid',
+        ExpressionAttributeValues: {
+          ':pid': socialPostId
+        }
+      }));
+      
+      console.log(`[GRAPHQL] Found working link GSI (socialPostId): ${indexName}`);
+      linkGSIStatus[gsiKey].checked = true;
+      linkGSIStatus[gsiKey].availableIndex = indexName;
+      
+      return (result.Items || []).filter(l => l.linkType !== 'REJECTED');
+    } catch (error) {
+      if (error.name === 'ValidationException' && error.message.includes('specified index')) {
+        continue;
+      }
+      throw error;
+    }
+  }
+  
+  // No GSI available
+  console.log(`[GRAPHQL] No usable GSI for SocialPostGameLink.socialPostId - link lookups will return empty`);
+  linkGSIStatus[gsiKey].checked = true;
+  linkGSIStatus[gsiKey].availableIndex = 'NONE';
+  
+  return [];
 };
 
 /**
  * Get all links for a game
  */
 const getLinksByGame = async (gameId) => {
-  const result = await ddbDocClient.send(new QueryCommand({
-    TableName: getTableName('SocialPostGameLink'),
-    IndexName: 'byGameSocialPostLink',
-    KeyConditionExpression: 'gameId = :gid',
-    ExpressionAttributeValues: {
-      ':gid': gameId
-    }
-  }));
+  const gsiKey = 'byGameSocialPostLink';
   
-  return (result.Items || []).filter(l => l.linkType !== 'REJECTED');
+  // If we've determined no GSI is available, return empty array
+  if (linkGSIStatus[gsiKey].checked && linkGSIStatus[gsiKey].availableIndex === 'NONE') {
+    return [];
+  }
+  
+  // If we found a working index before, use it
+  if (linkGSIStatus[gsiKey].checked && linkGSIStatus[gsiKey].availableIndex) {
+    try {
+      const result = await ddbDocClient.send(new QueryCommand({
+        TableName: getTableName('SocialPostGameLink'),
+        IndexName: linkGSIStatus[gsiKey].availableIndex,
+        KeyConditionExpression: 'gameId = :gid',
+        ExpressionAttributeValues: {
+          ':gid': gameId
+        }
+      }));
+      return (result.Items || []).filter(l => l.linkType !== 'REJECTED');
+    } catch (error) {
+      // Reset and retry
+      linkGSIStatus[gsiKey].checked = false;
+      linkGSIStatus[gsiKey].availableIndex = null;
+    }
+  }
+  
+  // Try to find a working GSI
+  const indexesToTry = [
+    'byGameSocialPostLink',
+    'bySocialPostGameLinkGameId',
+    'gsi-SocialPostGameLink.gameId',
+    'gameId-index'
+  ];
+  
+  for (const indexName of indexesToTry) {
+    try {
+      const result = await ddbDocClient.send(new QueryCommand({
+        TableName: getTableName('SocialPostGameLink'),
+        IndexName: indexName,
+        KeyConditionExpression: 'gameId = :gid',
+        ExpressionAttributeValues: {
+          ':gid': gameId
+        }
+      }));
+      
+      console.log(`[GRAPHQL] Found working link GSI (gameId): ${indexName}`);
+      linkGSIStatus[gsiKey].checked = true;
+      linkGSIStatus[gsiKey].availableIndex = indexName;
+      
+      return (result.Items || []).filter(l => l.linkType !== 'REJECTED');
+    } catch (error) {
+      if (error.name === 'ValidationException' && error.message.includes('specified index')) {
+        continue;
+      }
+      throw error;
+    }
+  }
+  
+  // No GSI available
+  console.log(`[GRAPHQL] No usable GSI for SocialPostGameLink.gameId - link lookups will return empty`);
+  linkGSIStatus[gsiKey].checked = true;
+  linkGSIStatus[gsiKey].availableIndex = 'NONE';
+  
+  return [];
 };
 
 /**
@@ -381,23 +569,13 @@ const updateSocialPostGameLink = async (linkId, updates) => {
 // ===================================================================
 
 /**
- * Get array of YYYY-MM strings between two dates
+ * Get array of YYYY-MM strings between two dates (AEST-aware)
+ * 
+ * @deprecated Use getYearMonthsInRangeAEST from dateUtils instead
+ * This is kept for backward compatibility and delegates to the AEST version
  */
 const getYearMonthsInRange = (startDate, endDate) => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const yearMonths = [];
-  
-  const current = new Date(start.getFullYear(), start.getMonth(), 1);
-  const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
-  
-  while (current <= endMonth) {
-    const ym = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}`;
-    yearMonths.push(ym);
-    current.setMonth(current.getMonth() + 1);
-  }
-  
-  return yearMonths;
+  return getYearMonthsInRangeAEST(startDate, endDate);
 };
 
 // ===================================================================

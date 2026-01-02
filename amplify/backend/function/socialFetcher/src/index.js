@@ -1,5 +1,6 @@
 /* Amplify Params - DO NOT EDIT
 	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
 	API_KINGSROOM_SOCIALACCOUNTTABLE_ARN
 	API_KINGSROOM_SOCIALACCOUNTTABLE_NAME
 	API_KINGSROOM_SOCIALPOSTTABLE_ARN
@@ -18,7 +19,11 @@ Amplify Params - DO NOT EDIT */
  * Fetches posts from Facebook pages using the Graph API with an App Access Token.
  * 
  * Features:
+ * - SMART FULL SYNC: Only fetches posts outside your existing date range (saves API calls!)
  * - Fetches ALL historical posts with pagination (triggerFullSync)
+ * - INCREMENTAL SAVING: Saves posts as each page is fetched (not at the end)
+ * - RESUMABLE: Tracks oldest post fetched so full sync can resume after rate limits
+ * - REAL-TIME UPDATES: Publishes progress to AppSync subscriptions
  * - Incremental fetching - only gets posts since last successful scrape
  * - Downloads and stores page profile pictures to S3
  * - Downloads and stores post images/media to S3 (consistent with manual uploads)
@@ -33,9 +38,12 @@ Amplify Params - DO NOT EDIT */
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { S3Client, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
+const { SignatureV4 } = require('@aws-sdk/signature-v4');
+const { Sha256 } = require('@aws-crypto/sha256-js');
+const { defaultProvider } = require('@aws-sdk/credential-provider-node');
 const https = require('https');
 
 // Initialize clients
@@ -49,67 +57,217 @@ const SOCIAL_ACCOUNT_TABLE = process.env.API_KINGSROOM_SOCIALACCOUNTTABLE_NAME;
 const SOCIAL_POST_TABLE = process.env.API_KINGSROOM_SOCIALPOSTTABLE_NAME;
 const SOCIAL_SCRAPE_ATTEMPT_TABLE = process.env.API_KINGSROOM_SOCIALSCRAPEATTEMPTTABLE_NAME;
 
+// AppSync endpoint for publishing subscription events
+const APPSYNC_ENDPOINT = process.env.API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT || process.env.APPSYNC_ENDPOINT;
+const APPSYNC_REGION = process.env.REGION || 'ap-southeast-2';
+
 // S3 bucket for storing page logos/profile images
-// Use your specific bucket or fall back to Amplify storage bucket
 const S3_BUCKET = process.env.SOCIAL_MEDIA_BUCKET || 'pokerpro-scraper-storage';
 const S3_PREFIX = 'social-media/page-logos/';
 const S3_POST_ATTACHMENTS_PREFIX = 'social-media/post-attachments/';
 
 // Facebook App Access Token (format: app_id|app_secret)
-// This never expires - just concatenate your app ID and secret with a pipe
 const FB_ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
 const FB_API_VERSION = process.env.FB_API_VERSION || 'v19.0';
 
 // Configuration
-const MAX_POSTS_PER_PAGE = 100; // Facebook allows up to 100 per request
-const MAX_PAGES_TO_FETCH = 50; // Safety limit: 50 pages * 100 posts = 5000 posts max
+const MAX_POSTS_PER_PAGE = 100;
+const MAX_PAGES_TO_FETCH = 50;
 
-// ============================================
+// Progress update frequency (publish every N pages)
+const PROGRESS_UPDATE_FREQUENCY = 3;
+
 // Social Post Processor Configuration
-// ============================================
-
-// Name of the socialPostProcessor Lambda function
-// You can find this in the AWS Lambda console or your amplify outputs
-// Common patterns:
-//   - Amplify Gen 1: amplify-{appname}-{env}-{functionname}
-//   - Amplify Gen 2: {appname}-{functionname}-{env}
-//   - Or set via environment variable
 const SOCIAL_POST_PROCESSOR_FUNCTION = process.env.SOCIAL_POST_PROCESSOR_FUNCTION;
-
-// Whether to automatically process new posts (can be disabled via env var)
 const AUTO_PROCESS_POSTS = process.env.AUTO_PROCESS_POSTS !== 'false';
-
-// Maximum posts to process in parallel (to avoid overwhelming the processor)
 const MAX_PARALLEL_PROCESSING = parseInt(process.env.MAX_PARALLEL_PROCESSING || '5', 10);
 
+// ============================================
+// AppSync Subscription Publishing
+// ============================================
+
 /**
- * Main handler
+ * Publish sync progress to AppSync subscription
+ * This allows the frontend to receive real-time updates
+ * 
+ * Enhanced with download progress tracking:
+ * - currentAction: What's happening now (e.g., "Downloading media...")
+ * - downloadCurrent: Current item being processed
+ * - downloadTotal: Total items to process
  */
-exports.handler = async (event) => {
+async function publishSyncProgress(socialAccountId, status, data = {}) {
+  if (!APPSYNC_ENDPOINT) {
+    console.warn('APPSYNC_ENDPOINT not configured - skipping subscription publish');
+    return;
+  }
+
+  const mutation = `
+    mutation PublishSyncProgress(
+      $socialAccountId: ID!
+      $status: SyncEventStatus!
+      $message: String
+      $postsFound: Int
+      $newPostsAdded: Int
+      $rateLimited: Boolean
+      $pagesCompleted: Int
+    ) {
+      publishSyncProgress(
+        socialAccountId: $socialAccountId
+        status: $status
+        message: $message
+        postsFound: $postsFound
+        newPostsAdded: $newPostsAdded
+        rateLimited: $rateLimited
+        pagesCompleted: $pagesCompleted
+      ) {
+        socialAccountId
+        status
+        message
+        postsFound
+        newPostsAdded
+        rateLimited
+        pagesCompleted
+        completedAt
+      }
+    }
+  `;
+
+  const variables = {
+    socialAccountId,
+    status,
+    message: data.message || null,
+    postsFound: data.postsFound || 0,
+    newPostsAdded: data.newPostsAdded || 0,
+    rateLimited: data.rateLimited || false,
+    pagesCompleted: data.pagesCompleted || 0,
+  };
+
+  try {
+    await executeAppSyncMutation(mutation, variables);
+    // Only log non-download updates to reduce noise
+    if (!data.isDownloadProgress) {
+      console.log(`[SUBSCRIPTION] Published: ${status} for ${socialAccountId} (${data.newPostsAdded || 0} new posts)`);
+    }
+  } catch (error) {
+    console.error('[SUBSCRIPTION] Failed to publish sync progress:', error.message);
+    // Don't throw - subscription publishing is non-critical
+  }
+}
+
+// Throttle download progress updates to avoid overwhelming subscriptions
+let lastDownloadProgressUpdate = 0;
+const DOWNLOAD_PROGRESS_THROTTLE_MS = 500; // Max one update per 500ms
+
+async function publishDownloadProgress(socialAccountId, current, total, postDate, hasMedia) {
+  const now = Date.now();
+  
+  // Throttle updates unless it's the first or last item
+  if (current !== 1 && current !== total && (now - lastDownloadProgressUpdate) < DOWNLOAD_PROGRESS_THROTTLE_MS) {
+    return;
+  }
+  
+  lastDownloadProgressUpdate = now;
+  
+  const mediaIndicator = hasMedia ? ' 📷' : '';
+  const dateStr = postDate ? ` (${new Date(postDate).toLocaleDateString()})` : '';
+  const message = `Downloading post ${current} of ${total}${mediaIndicator}${dateStr}`;
+  
+  await publishSyncProgress(socialAccountId, 'IN_PROGRESS', {
+    message,
+    postsFound: total,
+    newPostsAdded: current,
+    pagesCompleted: 0,
+    isDownloadProgress: true,
+  });
+}
+
+/**
+ * Execute AppSync mutation with IAM auth (for Lambda-to-AppSync calls)
+ */
+async function executeAppSyncMutation(mutation, variables) {
+  const endpoint = new URL(APPSYNC_ENDPOINT);
+  
+  const body = JSON.stringify({
+    query: mutation,
+    variables,
+  });
+
+  const signer = new SignatureV4({
+    credentials: defaultProvider(),
+    region: APPSYNC_REGION,
+    service: 'appsync',
+    sha256: Sha256,
+  });
+
+  const request = {
+    method: 'POST',
+    hostname: endpoint.hostname,
+    path: endpoint.pathname,
+    protocol: endpoint.protocol,
+    headers: {
+      'Content-Type': 'application/json',
+      host: endpoint.hostname,
+    },
+    body,
+  };
+
+  const signedRequest = await signer.sign(request);
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      {
+        hostname: endpoint.hostname,
+        path: endpoint.pathname,
+        method: 'POST',
+        headers: signedRequest.headers,
+      },
+      (res) => {
+        let responseData = '';
+        res.on('data', (chunk) => (responseData += chunk));
+        res.on('end', () => {
+          try {
+            const response = JSON.parse(responseData);
+            if (response.errors && response.errors.length > 0) {
+              reject(new Error(JSON.stringify(response.errors)));
+            } else {
+              resolve(response.data);
+            }
+          } catch (parseError) {
+            reject(new Error(`Failed to parse response: ${responseData}`));
+          }
+        });
+      }
+    );
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
+// ============================================
+// Main Handler
+// ============================================
+
+exports.handler = async (event, context) => {
   console.log('Event:', JSON.stringify(event, null, 2));
 
   try {
-    // Handle different event types
     if (event.source === 'aws.events') {
-      // EventBridge scheduled trigger - scrape all due accounts
-      return handleScheduledScrape();
+      return handleScheduledScrape(context);
     } else if (event.fieldName) {
-      // GraphQL resolver (AppSync) - uses fieldName not field
-      return handleGraphQLRequest(event);
+      return handleGraphQLRequest(event, context);
     } else if (event.arguments?.socialAccountId) {
-      // Direct invocation via AppSync (alternative format)
       const options = {
         fetchAllHistory: event.arguments?.fetchAllHistory || false,
         skipProcessing: event.arguments?.skipProcessing || false
       };
-      return triggerScrape(event.arguments.socialAccountId, options);
+      return triggerScrape(event.arguments.socialAccountId, options, context);
     } else if (event.socialAccountId) {
-      // Direct Lambda invocation with accountId
       const options = {
         fetchAllHistory: event.fetchAllHistory || false,
         skipProcessing: event.skipProcessing || false
       };
-      return triggerScrape(event.socialAccountId, options);
+      return triggerScrape(event.socialAccountId, options, context);
     } else {
       console.error('Unknown event format:', event);
       return {
@@ -133,30 +291,32 @@ exports.handler = async (event) => {
 /**
  * Handle GraphQL resolver requests
  */
-async function handleGraphQLRequest(event) {
+async function handleGraphQLRequest(event, context) {
   const args = event.arguments || {}; 
   const fieldName = event.fieldName;
 
   switch (fieldName) {
     case 'triggerSocialScrape':
-      // Safety check: ensure socialAccountId exists before calling triggerScrape
       if (!args.socialAccountId) {
         throw new Error('Missing required argument: socialAccountId');
       }
       return triggerScrape(args.socialAccountId, { 
         fetchAllHistory: false,
         skipProcessing: args.skipProcessing || false 
-      });
+      }, context);
+    
     case 'triggerFullSync':
-      // Full historical sync - fetches ALL posts
+      if (!args.socialAccountId) {
+        throw new Error('Missing required argument: socialAccountId');
+      }
       return triggerScrape(args.socialAccountId, { 
         fetchAllHistory: true,
         skipProcessing: args.skipProcessing || false 
-      });
+      }, context);
+    
     case 'syncPageInfo':
-      // Sync page info including logo without fetching posts
-      // forceRefresh option to re-download logo even if it exists
       return syncPageInfo(args.socialAccountId, { forceRefresh: args.forceRefresh || false });
+    
     default:
       throw new Error(`Unknown field: ${fieldName}`);
   }
@@ -165,7 +325,7 @@ async function handleGraphQLRequest(event) {
 /**
  * Handle scheduled scrapes (hourly EventBridge trigger)
  */
-async function handleScheduledScrape() {
+async function handleScheduledScrape(context) {
   console.log('Running scheduled scrape');
 
   const accountsDue = await getAccountsDueForScrape();
@@ -181,8 +341,7 @@ async function handleScheduledScrape() {
 
   for (const account of accountsDue) {
     try {
-      // For scheduled scrapes, only fetch posts since last scrape (incremental)
-      const result = await scrapeAccount(account, { fetchAllHistory: false });
+      const result = await scrapeAccount(account, { fetchAllHistory: false }, context);
       results.processed++;
 
       if (result.success) {
@@ -205,10 +364,9 @@ async function handleScheduledScrape() {
 /**
  * Trigger scrape for a specific account
  */
-async function triggerScrape(socialAccountId, options = {}) {
+async function triggerScrape(socialAccountId, options = {}, context = null) {
   console.log('Triggering scrape for account:', socialAccountId, 'Options:', options);
 
-  // Check for FB token first
   if (!FB_ACCESS_TOKEN) {
     console.error('FB_ACCESS_TOKEN not configured');
     return {
@@ -248,13 +406,11 @@ async function triggerScrape(socialAccountId, options = {}) {
     };
   }
 
-  return scrapeAccount(account, options);
+  return scrapeAccount(account, options, context);
 }
 
 /**
  * Sync page info (logo, follower count, etc.) without fetching posts
- * @param {string} socialAccountId - Account ID to sync
- * @param {object} options - { forceRefresh: boolean } - force re-download of logo
  */
 async function syncPageInfo(socialAccountId, options = {}) {
   console.log('Syncing page info for account:', socialAccountId, 'Options:', options);
@@ -277,93 +433,200 @@ async function syncPageInfo(socialAccountId, options = {}) {
     };
   }
 
+  const pageId = account.platformAccountId || extractPageIdFromUrl(account.accountUrl);
+  if (!pageId) {
+    return { 
+      success: false, 
+      message: 'Could not determine Facebook page ID',
+      logoUrl: null
+    };
+  }
+
   try {
-    const pageId = account.platformAccountId || extractPageIdFromUrl(account.accountUrl);
     const pageInfo = await fetchPageInfo(pageId);
     
-    // Download and store the logo if available
     let storedLogoUrl = null;
     if (pageInfo.picture?.data?.url) {
       storedLogoUrl = await downloadAndStorePageLogo(
         account.id,
         pageInfo.picture.data.url,
-        pageInfo.name,
-        forceRefresh // Pass forceRefresh option
+        pageInfo.name || account.accountName,
+        forceRefresh
       );
     }
 
-    // Update account with page info
     await updateAccountAfterScrape(account.id, {
       accountName: pageInfo.name || account.accountName,
       profileImageUrl: storedLogoUrl || pageInfo.picture?.data?.url || account.profileImageUrl,
       followerCount: pageInfo.followers_count || pageInfo.fan_count || account.followerCount,
       pageDescription: pageInfo.about || pageInfo.description || null,
       category: pageInfo.category || null,
-      website: pageInfo.website || null,
     });
-
-    const message = forceRefresh 
-      ? 'Logo refreshed and page info synced successfully'
-      : 'Page info synced successfully';
 
     return {
       success: true,
-      message,
-      logoUrl: storedLogoUrl || pageInfo.picture?.data?.url || null
+      message: 'Page info synced successfully',
+      logoUrl: storedLogoUrl || pageInfo.picture?.data?.url,
+      followerCount: pageInfo.followers_count || pageInfo.fan_count,
+      pageName: pageInfo.name
     };
   } catch (error) {
     console.error('Error syncing page info:', error);
-    return { 
-      success: false, 
+    return {
+      success: false,
       message: error.message,
       logoUrl: null
     };
   }
 }
 
+// ============================================
+// NEW: Smart Post Date Range Query
+// ============================================
+
 /**
- * Scrape a Facebook account for posts
+ * Get the oldest and newest post dates for an account
+ * Uses the bySocialAccount GSI with postedAt as sort key
+ * Returns null values if no posts exist
  */
-async function scrapeAccount(account, options = {}) {
+async function getPostDateRange(socialAccountId) {
+  console.log(`[SMART SYNC] Getting post date range for account ${socialAccountId}...`);
+  
+  try {
+    // Get oldest post (ascending order, limit 1)
+    const oldestResult = await docClient.send(new QueryCommand({
+      TableName: SOCIAL_POST_TABLE,
+      IndexName: 'bySocialAccount',
+      KeyConditionExpression: 'socialAccountId = :accountId',
+      ExpressionAttributeValues: {
+        ':accountId': socialAccountId
+      },
+      ScanIndexForward: true, // Ascending (oldest first)
+      Limit: 1,
+      ProjectionExpression: 'id, postedAt'
+    }));
+    
+    // Get newest post (descending order, limit 1)
+    const newestResult = await docClient.send(new QueryCommand({
+      TableName: SOCIAL_POST_TABLE,
+      IndexName: 'bySocialAccount',
+      KeyConditionExpression: 'socialAccountId = :accountId',
+      ExpressionAttributeValues: {
+        ':accountId': socialAccountId
+      },
+      ScanIndexForward: false, // Descending (newest first)
+      Limit: 1,
+      ProjectionExpression: 'id, postedAt'
+    }));
+    
+    // Get total count for logging
+    const countResult = await docClient.send(new QueryCommand({
+      TableName: SOCIAL_POST_TABLE,
+      IndexName: 'bySocialAccount',
+      KeyConditionExpression: 'socialAccountId = :accountId',
+      ExpressionAttributeValues: {
+        ':accountId': socialAccountId
+      },
+      Select: 'COUNT'
+    }));
+    
+    const oldestPost = oldestResult.Items?.[0];
+    const newestPost = newestResult.Items?.[0];
+    const totalPosts = countResult.Count || 0;
+    
+    if (!oldestPost || !newestPost) {
+      console.log(`[SMART SYNC] No existing posts found for account`);
+      return {
+        oldestPostDate: null,
+        newestPostDate: null,
+        oldestTimestamp: null,
+        newestTimestamp: null,
+        totalPosts: 0
+      };
+    }
+    
+    const oldestDate = oldestPost.postedAt;
+    const newestDate = newestPost.postedAt;
+    
+    // Convert to Unix timestamps for Facebook API
+    const oldestTimestamp = Math.floor(new Date(oldestDate).getTime() / 1000);
+    const newestTimestamp = Math.floor(new Date(newestDate).getTime() / 1000);
+    
+    console.log(`[SMART SYNC] Found ${totalPosts} existing posts:`);
+    console.log(`  - Oldest: ${oldestDate} (timestamp: ${oldestTimestamp})`);
+    console.log(`  - Newest: ${newestDate} (timestamp: ${newestTimestamp})`);
+    
+    return {
+      oldestPostDate: oldestDate,
+      newestPostDate: newestDate,
+      oldestTimestamp,
+      newestTimestamp,
+      totalPosts
+    };
+    
+  } catch (error) {
+    console.error('[SMART SYNC] Error getting post date range:', error);
+    // Return nulls on error - will fall back to full fetch
+    return {
+      oldestPostDate: null,
+      newestPostDate: null,
+      oldestTimestamp: null,
+      newestTimestamp: null,
+      totalPosts: 0
+    };
+  }
+}
+
+/**
+ * Main scrape function for an account
+ * Features SMART FULL SYNC, incremental saving, and real-time subscription updates
+ */
+async function scrapeAccount(account, options = {}, context = null) {
   const startTime = Date.now();
-  let attemptId;
+  let attemptId = null;
+  
   const fetchAllHistory = options.fetchAllHistory || false;
   const skipProcessing = options.skipProcessing || false;
   
-  // Determine the "since" timestamp for incremental fetches
-  // Use lastSuccessfulScrapeAt if available and not doing full sync
+  // Track progress
+  let totalPostsScanned = 0;
+  let totalNewPostsSaved = 0;
+  let allSavedPostIds = [];
+  let oldestPostDate = null;
+  let wasRateLimited = false;
+  let wasTimeout = false;
+  let pagesCompleted = 0;
+  
+  // Track API efficiency for logging
+  let apiCallsSaved = 0;
+  
+  // Determine "since" timestamp for incremental fetches
   let sinceTimestamp = null;
   if (!fetchAllHistory && account.lastSuccessfulScrapeAt) {
-    // We need to cover TWO gaps:
-    // 1. Posts created since last scrape (time gap)
-    // 2. Posts created before last scrape but delayed in Facebook API (24h buffer)
-    // Use whichever gives us the EARLIER timestamp (larger coverage)
-    
     const now = Date.now();
     const lastScrapeTime = new Date(account.lastSuccessfulScrapeAt).getTime();
-    
-    // Option 1: 24 hours before NOW (catches recent API delays)
     const option1 = now - (24 * 60 * 60 * 1000);
-    
-    // Option 2: 24 hours before last scrape (catches old API delays + entire gap)
     const option2 = lastScrapeTime - (24 * 60 * 60 * 1000);
-    
-    // Use the earlier timestamp (minimum value = earlier = larger coverage)
     const sinceMs = Math.min(option1, option2);
-    sinceTimestamp = Math.floor(sinceMs / 1000); // Unix timestamp in seconds
+    sinceTimestamp = Math.floor(sinceMs / 1000);
     
     const sinceDate = new Date(sinceMs);
     const hoursSinceLastScrape = Math.round((now - lastScrapeTime) / (60 * 60 * 1000));
     console.log(`Incremental fetch: last scrape was ${hoursSinceLastScrape}h ago`);
-    console.log(`Looking back to ${sinceDate.toISOString()} (using ${sinceMs === option1 ? '24h from now' : '24h before last scrape'})`);
+    console.log(`Looking back to ${sinceDate.toISOString()}`);
   }
 
+  // Publish "STARTED" event
+  await publishSyncProgress(account.id, 'STARTED', {
+    message: `Starting ${fetchAllHistory ? 'full' : 'incremental'} sync for ${account.accountName}`,
+    postsFound: 0,
+    newPostsAdded: 0,
+  });
+
   try {
-    // Create scrape attempt record
     const syncType = fetchAllHistory ? 'FULL_SYNC' : 'INCREMENTAL';
     attemptId = await createScrapeAttempt(account.id, syncType);
 
-    // Get the Facebook page ID from the account
     const pageId = account.platformAccountId || extractPageIdFromUrl(account.accountUrl);
     console.log('Using page ID:', pageId);
 
@@ -371,24 +634,22 @@ async function scrapeAccount(account, options = {}) {
       throw new Error('Could not determine Facebook page ID');
     }
 
-    // Fetch page info and logo first (on first sync or if no profile image)
+    // Fetch page info and logo first
     if (!account.profileImageUrl || fetchAllHistory) {
       console.log('Fetching page info and logo...');
       try {
         const pageInfo = await fetchPageInfo(pageId);
         
-        // Download and store the logo (force refresh on full sync)
         let storedLogoUrl = null;
         if (pageInfo.picture?.data?.url) {
           storedLogoUrl = await downloadAndStorePageLogo(
             account.id,
             pageInfo.picture.data.url,
             pageInfo.name || account.accountName,
-            fetchAllHistory // Force refresh on full sync
+            fetchAllHistory
           );
         }
 
-        // Update account with page info
         await updateAccountAfterScrape(account.id, {
           accountName: pageInfo.name || account.accountName,
           profileImageUrl: storedLogoUrl || pageInfo.picture?.data?.url || account.profileImageUrl,
@@ -397,7 +658,6 @@ async function scrapeAccount(account, options = {}) {
           category: pageInfo.category || null,
         });
 
-        // Refresh account object with updated values
         account.profileImageUrl = storedLogoUrl || pageInfo.picture?.data?.url;
         account.followerCount = pageInfo.followers_count || pageInfo.fan_count;
       } catch (pageInfoError) {
@@ -405,29 +665,173 @@ async function scrapeAccount(account, options = {}) {
       }
     }
 
-    // Fetch posts from Facebook Graph API
-    let posts = [];
+    // ================================================================
+    // FETCH POSTS WITH INCREMENTAL SAVING AND PROGRESS UPDATES
+    // ================================================================
+    
     let isFullSync = fetchAllHistory;
     
+    // Callback to process each page of posts
+    const onPageFetched = async (posts, pageNumber) => {
+      console.log(`Processing page ${pageNumber} with ${posts.length} posts...`);
+      
+      // Publish "fetching" status before processing
+      await publishSyncProgress(account.id, 'IN_PROGRESS', {
+        message: `Page ${pageNumber}: Checking ${posts.length} posts for new content...`,
+        postsFound: totalPostsScanned + posts.length,
+        newPostsAdded: totalNewPostsSaved,
+        pagesCompleted: pageNumber,
+      });
+      
+      const { newPosts, savedPostIds, oldestDate } = await processAndSavePostsBatch(account, posts);
+      
+      totalPostsScanned += posts.length;
+      totalNewPostsSaved += newPosts.length;
+      allSavedPostIds.push(...savedPostIds);
+      pagesCompleted = pageNumber;
+      
+      if (oldestDate) {
+        if (!oldestPostDate || oldestDate < oldestPostDate) {
+          oldestPostDate = oldestDate;
+        }
+      }
+      
+      console.log(`Page ${pageNumber}: ${newPosts.length} new posts saved (total: ${totalNewPostsSaved} new, ${totalPostsScanned} scanned)`);
+      
+      // Publish page completion status
+      const statusMessage = newPosts.length > 0
+        ? `Page ${pageNumber} complete: Downloaded ${newPosts.length} new posts (${totalNewPostsSaved} total)`
+        : `Page ${pageNumber} complete: No new posts (${totalPostsScanned} scanned)`;
+      
+      await publishSyncProgress(account.id, 'IN_PROGRESS', {
+        message: statusMessage,
+        postsFound: totalPostsScanned,
+        newPostsAdded: totalNewPostsSaved,
+        pagesCompleted: pageNumber,
+      });
+      
+      return { newPosts, savedPostIds };
+    };
+    
     if (fetchAllHistory) {
-      console.log('Fetching ALL historical posts with pagination...');
-      posts = await fetchAllFacebookPosts(pageId);
+      // ================================================================
+      // SMART FULL SYNC - Only fetch posts outside existing date range
+      // ================================================================
+      console.log('[SMART SYNC] Starting smart full sync...');
+      
+      const dateRange = await getPostDateRange(account.id);
+      
+      if (dateRange.totalPosts > 0 && dateRange.oldestTimestamp && dateRange.newestTimestamp) {
+        // We have existing posts - do smart sync
+        console.log(`[SMART SYNC] Found ${dateRange.totalPosts} existing posts, fetching only new content...`);
+        
+        // Publish smart sync info
+        await publishSyncProgress(account.id, 'IN_PROGRESS', {
+          message: `Smart sync: ${dateRange.totalPosts} posts already downloaded, fetching only missing posts...`,
+          postsFound: 0,
+          newPostsAdded: 0,
+          pagesCompleted: 0,
+        });
+        
+        let newerResult = { rateLimited: false, timeout: false, pagesCompleted: 0 };
+        let olderResult = { rateLimited: false, timeout: false, pagesCompleted: 0 };
+        
+        // Step 1: Fetch NEWER posts (since our newest post)
+        // Add 1 second to avoid re-fetching the exact same post
+        const sinceNewest = dateRange.newestTimestamp + 1;
+        console.log(`[SMART SYNC] Step 1: Fetching posts NEWER than ${dateRange.newestPostDate}...`);
+        
+        const newerPosts = await fetchFacebookPostsSince(pageId, sinceNewest);
+        if (newerPosts.length > 0) {
+          console.log(`[SMART SYNC] Found ${newerPosts.length} newer posts`);
+          await onPageFetched(newerPosts, 1);
+          newerResult.pagesCompleted = 1;
+        } else {
+          console.log('[SMART SYNC] No newer posts found');
+        }
+        
+        // Check for timeout/rate limit before continuing
+        if (context && typeof context.getRemainingTimeInMillis === 'function') {
+          const remainingTime = context.getRemainingTimeInMillis();
+          if (remainingTime < 30000) {
+            console.warn(`[SMART SYNC] Low time remaining (${remainingTime}ms), skipping older posts fetch`);
+            wasTimeout = true;
+          }
+        }
+        
+        // Step 2: Fetch OLDER posts (until our oldest post) - if not rate limited/timed out
+        if (!wasTimeout && !wasRateLimited) {
+          // Subtract 1 second to avoid re-fetching the exact same post
+          const untilOldest = dateRange.oldestTimestamp - 1;
+          console.log(`[SMART SYNC] Step 2: Fetching posts OLDER than ${dateRange.oldestPostDate}...`);
+          
+          // Check if we're resuming from a previous partial sync
+          const resumeFromDate = account.fullSyncOldestPostDate;
+          if (resumeFromDate && new Date(resumeFromDate) < new Date(dateRange.oldestPostDate)) {
+            console.log(`[SMART SYNC] Resuming from previous sync point: ${resumeFromDate}`);
+          }
+          
+          olderResult = await fetchFacebookPostsUntil(
+            pageId, 
+            untilOldest, 
+            onPageFetched, 
+            context,
+            pagesCompleted
+          );
+          
+          wasRateLimited = olderResult.rateLimited;
+          wasTimeout = olderResult.timeout;
+        }
+        
+        pagesCompleted = newerResult.pagesCompleted + olderResult.pagesCompleted;
+        
+        // Calculate API calls saved
+        const estimatedFullSyncPages = Math.ceil(dateRange.totalPosts / MAX_POSTS_PER_PAGE);
+        apiCallsSaved = Math.max(0, estimatedFullSyncPages - pagesCompleted);
+        console.log(`[SMART SYNC] Complete! Saved approximately ${apiCallsSaved} API calls by skipping existing posts`);
+        
+      } else {
+        // No existing posts - do full fetch
+        console.log('[SMART SYNC] No existing posts found, doing full historical fetch...');
+        
+        const resumeFromDate = account.fullSyncOldestPostDate;
+        if (resumeFromDate) {
+          console.log(`Resuming full sync from: ${resumeFromDate}`);
+        }
+        
+        const result = await fetchAllFacebookPostsWithCallback(
+          pageId, 
+          onPageFetched, 
+          context,
+          resumeFromDate
+        );
+        
+        wasRateLimited = result.rateLimited;
+        wasTimeout = result.timeout;
+        pagesCompleted = result.pagesCompleted;
+      }
+      
     } else if (sinceTimestamp) {
       console.log(`Fetching posts since timestamp: ${sinceTimestamp}`);
-      posts = await fetchFacebookPostsSince(pageId, sinceTimestamp);
+      const posts = await fetchFacebookPostsSince(pageId, sinceTimestamp);
+      
+      if (posts.length > 0) {
+        await onPageFetched(posts, 1);
+      }
+      pagesCompleted = 1;
+      
     } else {
-      // First fetch for this account - do a FULL sync to get all historical posts
-      // This ensures we don't miss any posts on initial setup
       console.log('First fetch - getting ALL historical posts with pagination...');
-      posts = await fetchAllFacebookPosts(pageId);
-      isFullSync = true; // Mark as full sync for the hasFullHistory flag
+      
+      const result = await fetchAllFacebookPostsWithCallback(pageId, onPageFetched, context);
+      
+      wasRateLimited = result.rateLimited;
+      wasTimeout = result.timeout;
+      pagesCompleted = result.pagesCompleted;
+      isFullSync = true;
     }
     
-    console.log(`Fetched ${posts.length} posts from ${account.accountName}`);
-
-    // Process and save new posts
-    const { newPosts, savedPostIds } = await processAndSavePosts(account, posts);
-    console.log(`Saved ${newPosts.length} new posts`);
+    console.log(`Fetch complete: ${totalNewPostsSaved} new posts saved, ${totalPostsScanned} total scanned`);
 
     // ============================================
     // Trigger socialPostProcessor for new posts
@@ -435,163 +839,207 @@ async function scrapeAccount(account, options = {}) {
     let postsProcessed = 0;
     let processingResults = [];
     
-    if (AUTO_PROCESS_POSTS && !skipProcessing && savedPostIds.length > 0) {
+    if (AUTO_PROCESS_POSTS && !skipProcessing && allSavedPostIds.length > 0) {
       if (!SOCIAL_POST_PROCESSOR_FUNCTION) {
-        console.warn('[PROCESSOR] SOCIAL_POST_PROCESSOR_FUNCTION not configured - skipping auto-processing');
-        console.warn('[PROCESSOR] Set this environment variable to enable automatic game matching');
+        console.warn('[PROCESSOR] SOCIAL_POST_PROCESSOR_FUNCTION not configured');
       } else {
-        console.log(`[PROCESSOR] Auto-processing ${savedPostIds.length} new posts via ${SOCIAL_POST_PROCESSOR_FUNCTION}...`);
+        console.log(`[PROCESSOR] Auto-processing ${allSavedPostIds.length} new posts...`);
         
         try {
-          processingResults = await triggerPostProcessing(savedPostIds);
+          processingResults = await triggerPostProcessing(allSavedPostIds);
           postsProcessed = processingResults.filter(r => r.success).length;
-          console.log(`[PROCESSOR] Triggered processing for ${postsProcessed}/${savedPostIds.length} posts`);
+          console.log(`[PROCESSOR] Triggered processing for ${postsProcessed}/${allSavedPostIds.length} posts`);
         } catch (processingError) {
           console.error('[PROCESSOR] Error triggering post processing:', processingError);
-          // Don't fail the scrape if processing fails - posts are already saved
         }
       }
-    } else if (skipProcessing) {
-      console.log('[PROCESSOR] Skipping post processing (skipProcessing=true)');
-    } else if (!AUTO_PROCESS_POSTS) {
-      console.log('[PROCESSOR] Auto-processing disabled (AUTO_PROCESS_POSTS=false)');
     }
 
-    // Calculate new total post count
-    const newPostCount = (account.postCount || 0) + newPosts.length;
+    const newPostCount = (account.postCount || 0) + totalNewPostsSaved;
 
-    // Update account with success
-    await updateAccountAfterScrape(account.id, {
+    // Determine final status
+    let status = 'ACTIVE';
+    let message = '';
+    let syncEventStatus = 'COMPLETED';
+    
+    if (wasRateLimited) {
+      status = 'RATE_LIMITED';
+      syncEventStatus = 'RATE_LIMITED';
+      message = `Rate limited after saving ${totalNewPostsSaved} new posts (${totalPostsScanned} scanned). Run again to continue.`;
+    } else if (wasTimeout) {
+      status = 'ACTIVE';
+      syncEventStatus = 'COMPLETED'; // Still completed from our perspective
+      message = `Timeout after saving ${totalNewPostsSaved} new posts (${totalPostsScanned} scanned). Run again to continue.`;
+    } else {
+      message = totalNewPostsSaved > 0 
+        ? `Found ${totalNewPostsSaved} new posts (scanned ${totalPostsScanned} total)` 
+        : `No new posts (scanned ${totalPostsScanned} total)`;
+      
+      // Add API efficiency info for smart sync
+      if (apiCallsSaved > 0) {
+        message += ` [Smart sync saved ~${apiCallsSaved} API calls]`;
+      }
+    }
+
+    // Update account
+    const accountUpdate = {
       lastScrapedAt: new Date().toISOString(),
-      lastSuccessfulScrapeAt: new Date().toISOString(),
       consecutiveFailures: 0,
-      lastErrorMessage: null,
-      status: 'ACTIVE',
+      lastErrorMessage: wasRateLimited ? 'Rate limited - will resume on next sync' : null,
+      status,
       postCount: newPostCount,
-      hasFullHistory: isFullSync ? true : (account.hasFullHistory || false),
-    });
+    };
+    
+    if (fetchAllHistory || isFullSync) {
+      if (wasRateLimited || wasTimeout) {
+        accountUpdate.fullSyncOldestPostDate = oldestPostDate;
+        accountUpdate.hasFullHistory = false;
+      } else {
+        accountUpdate.fullSyncOldestPostDate = null;
+        accountUpdate.hasFullHistory = true;
+        accountUpdate.lastSuccessfulScrapeAt = new Date().toISOString();
+      }
+    } else {
+      if (!wasRateLimited && !wasTimeout) {
+        accountUpdate.lastSuccessfulScrapeAt = new Date().toISOString();
+      }
+    }
+    
+    await updateAccountAfterScrape(account.id, accountUpdate);
 
     // Update scrape attempt
     await updateScrapeAttempt(attemptId, {
-      status: 'SUCCESS',
+      status: wasRateLimited ? 'RATE_LIMITED' : (wasTimeout ? 'TIMEOUT' : 'SUCCESS'),
       completedAt: new Date().toISOString(),
       durationMs: Date.now() - startTime,
-      postsFound: posts.length,
-      newPostsAdded: newPosts.length,
+      postsFound: totalPostsScanned,
+      newPostsAdded: totalNewPostsSaved,
       postsProcessed,
-      syncType,
+      syncType: isFullSync ? 'FULL_SYNC' : 'INCREMENTAL',
+      oldestPostDate,
+    });
+
+    // Publish completion event
+    await publishSyncProgress(account.id, syncEventStatus, {
+      message,
+      postsFound: totalPostsScanned,
+      newPostsAdded: totalNewPostsSaved,
+      rateLimited: wasRateLimited,
+      pagesCompleted,
     });
 
     return {
-      success: true,
-      message: newPosts.length > 0 
-        ? `Found ${newPosts.length} new posts (scanned ${posts.length} total), triggered processing for ${postsProcessed}` 
-        : `No new posts (scanned ${posts.length} total)`,
-      postsFound: posts.length,
-      newPostsAdded: newPosts.length,
+      success: !wasRateLimited,
+      message,
+      postsFound: totalPostsScanned,
+      newPostsAdded: totalNewPostsSaved,
       postsProcessed,
+      rateLimited: wasRateLimited,
+      timeout: wasTimeout,
+      oldestPostDate,
     };
 
   } catch (error) {
     console.error(`Scrape failed for account ${account.id}:`, error);
 
     const consecutiveFailures = (account.consecutiveFailures || 0) + 1;
+    const newPostCount = (account.postCount || 0) + totalNewPostsSaved;
 
-    // Update account with failure
     await updateAccountAfterScrape(account.id, {
       lastScrapedAt: new Date().toISOString(),
       consecutiveFailures,
       lastErrorMessage: error.message,
       status: consecutiveFailures >= 3 ? 'ERROR' : account.status,
+      postCount: newPostCount,
+      fullSyncOldestPostDate: oldestPostDate || account.fullSyncOldestPostDate,
     });
 
-    // Update scrape attempt
     if (attemptId) {
       await updateScrapeAttempt(attemptId, {
         status: 'FAILED',
         completedAt: new Date().toISOString(),
         durationMs: Date.now() - startTime,
         errorMessage: error.message,
+        postsFound: totalPostsScanned,
+        newPostsAdded: totalNewPostsSaved,
       });
     }
+
+    // Publish failure event
+    await publishSyncProgress(account.id, 'FAILED', {
+      message: error.message,
+      postsFound: totalPostsScanned,
+      newPostsAdded: totalNewPostsSaved,
+      pagesCompleted,
+    });
 
     return {
       success: false,
       message: error.message,
-      postsFound: 0,
-      newPostsAdded: 0,
+      postsFound: totalPostsScanned,
+      newPostsAdded: totalNewPostsSaved,
+      rateLimited: wasRateLimited,
+      timeout: wasTimeout,
     };
   }
 }
 
 // ============================================
-// Post Processing Trigger Functions
+// Social Post Processor Integration
 // ============================================
 
-/**
- * Trigger processing for new posts
- * Uses async Lambda invocation so we don't wait for completion
- * 
- * @param {string[]} postIds - Array of social post IDs to process
- * @returns {Promise<Array>} Array of processing results
- */
 async function triggerPostProcessing(postIds) {
   const results = [];
   
-  // Process in chunks to limit parallelism
+  // Process in batches to avoid overwhelming the processor
+  const batches = [];
   for (let i = 0; i < postIds.length; i += MAX_PARALLEL_PROCESSING) {
-    const chunk = postIds.slice(i, i + MAX_PARALLEL_PROCESSING);
-    
-    const chunkPromises = chunk.map(async (postId) => {
+    batches.push(postIds.slice(i, i + MAX_PARALLEL_PROCESSING));
+  }
+  
+  for (const batch of batches) {
+    const batchPromises = batch.map(async (postId) => {
       try {
-        await invokeSocialPostProcessor({ socialPostId: postId });
+        const payload = {
+          fieldName: 'processSocialPost',
+          arguments: {
+            input: {
+              socialPostId: postId,
+              skipLinking: false,
+              skipMatching: false
+            }
+          }
+        };
+        
+        await lambdaClient.send(new InvokeCommand({
+          FunctionName: SOCIAL_POST_PROCESSOR_FUNCTION,
+          InvocationType: 'Event', // Async
+          Payload: JSON.stringify(payload)
+        }));
+        
         return { postId, success: true };
       } catch (error) {
-        console.error(`[PROCESSOR] Failed to trigger for ${postId}:`, error.message);
+        console.error(`Failed to trigger processing for post ${postId}:`, error.message);
         return { postId, success: false, error: error.message };
       }
     });
     
-    const chunkResults = await Promise.all(chunkPromises);
-    results.push(...chunkResults);
+    const batchResults = await Promise.all(batchPromises);
+    results.push(...batchResults);
   }
   
   return results;
 }
 
-/**
- * Invoke the socialPostProcessor Lambda function
- * Uses async invocation (InvocationType: 'Event') so we don't wait for response
- * 
- * @param {Object} payload - The payload to send to the processor
- */
-async function invokeSocialPostProcessor(payload) {
-  console.log(`[PROCESSOR] Invoking ${SOCIAL_POST_PROCESSOR_FUNCTION} with postId: ${payload.socialPostId}`);
-  
-  const command = new InvokeCommand({
-    FunctionName: SOCIAL_POST_PROCESSOR_FUNCTION,
-    InvocationType: 'Event', // Async - don't wait for response
-    Payload: JSON.stringify(payload),
-  });
-  
-  const response = await lambdaClient.send(command);
-  
-  // For async invocation, StatusCode 202 means accepted
-  if (response.StatusCode !== 202) {
-    throw new Error(`Unexpected status code: ${response.StatusCode}`);
-  }
-  
-  return response;
-}
+// ============================================
+// Facebook API Functions
+// ============================================
 
-/**
- * Fetch page info including profile picture
- */
 async function fetchPageInfo(pageId) {
-  const fields = 'id,name,about,description,category,fan_count,followers_count,website,picture.width(200).height(200)';
+  const fields = 'id,name,about,description,category,picture.type(large),followers_count,fan_count,website';
   const url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}?fields=${fields}&access_token=${FB_ACCESS_TOKEN}`;
 
-  console.log('Fetching page info:', `${FB_API_VERSION}/${pageId}`);
+  console.log('Fetching page info...');
 
   const response = await httpGet(url);
   const data = JSON.parse(response);
@@ -604,107 +1052,80 @@ async function fetchPageInfo(pageId) {
   return data;
 }
 
-/**
- * Download page logo and store in S3
- * @param {string} accountId - Social account ID
- * @param {string} imageUrl - URL of the image to download
- * @param {string} pageName - Name of the page (for filename)
- * @param {boolean} forceRefresh - If true, delete existing and re-download
- */
-async function downloadAndStorePageLogo(accountId, imageUrl, pageName, forceRefresh = false) {
-  if (!S3_BUCKET) {
-    console.warn('S3_BUCKET not configured, skipping logo storage');
-    return null;
+async function downloadAndStorePageLogo(accountId, sourceUrl, pageName, forceRefresh = false) {
+  const s3Key = `${S3_PREFIX}${accountId}/profile.jpg`;
+  const region = process.env.REGION || 'ap-southeast-2';
+
+  // Check if logo already exists (unless forcing refresh)
+  if (!forceRefresh) {
+    try {
+      await s3Client.send(new HeadObjectCommand({
+        Bucket: S3_BUCKET,
+        Key: s3Key
+      }));
+      console.log('Logo already exists in S3, skipping download');
+      return `https://${S3_BUCKET}.s3.${region}.amazonaws.com/${s3Key}`;
+    } catch (error) {
+      // File doesn't exist, continue with download
+    }
+  } else {
+    // Force refresh - delete existing
+    try {
+      await s3Client.send(new DeleteObjectCommand({
+        Bucket: S3_BUCKET,
+        Key: s3Key
+      }));
+      console.log('Deleted existing logo for refresh');
+    } catch {
+      // Ignore delete errors
+    }
   }
 
   try {
-    // Create a clean filename from the page name
-    const cleanName = (pageName || 'page')
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .substring(0, 50);
-    
-    const s3Key = `${S3_PREFIX}${accountId}/${cleanName}-logo.jpg`;
+    console.log('Downloading page logo...');
+    const imageBuffer = await downloadImage(sourceUrl);
 
-    // Check if we already have this logo (skip if forceRefresh)
-    if (!forceRefresh) {
-      try {
-        await s3Client.send(new HeadObjectCommand({
-          Bucket: S3_BUCKET,
-          Key: s3Key
-        }));
-        // Logo already exists, return the URL
-        console.log('Logo already exists in S3:', s3Key);
-        return `https://${S3_BUCKET}.s3.${process.env.REGION || 'ap-southeast-2'}.amazonaws.com/${s3Key}`;
-      } catch (headError) {
-        // Logo doesn't exist, continue to download
-      }
-    } else {
-      // Force refresh - delete existing logo first
-      console.log('Force refresh requested, deleting existing logo if present...');
-      try {
-        await s3Client.send(new DeleteObjectCommand({
-          Bucket: S3_BUCKET,
-          Key: s3Key
-        }));
-        console.log('Existing logo deleted');
-      } catch (deleteError) {
-        // Logo didn't exist, continue
-      }
-    }
-
-    // Download the image
-    console.log('Downloading logo from:', imageUrl);
-    const imageBuffer = await downloadImage(imageUrl);
-
-    // Upload to S3
     await s3Client.send(new PutObjectCommand({
       Bucket: S3_BUCKET,
       Key: s3Key,
       Body: imageBuffer,
       ContentType: 'image/jpeg',
-      CacheControl: 'max-age=31536000', // Cache for 1 year
+      CacheControl: 'max-age=86400',
       Metadata: {
-        'source-url': imageUrl,
         'page-name': pageName || 'unknown',
+        'source-url': sourceUrl.substring(0, 500),
         'downloaded-at': new Date().toISOString()
       }
     }));
 
-    const storedUrl = `https://${S3_BUCKET}.s3.${process.env.REGION || 'ap-southeast-2'}.amazonaws.com/${s3Key}`;
-    console.log('Logo stored at:', storedUrl);
-    
+    const storedUrl = `https://${S3_BUCKET}.s3.${region}.amazonaws.com/${s3Key}`;
+    console.log('Logo stored to S3:', storedUrl);
+
     return storedUrl;
   } catch (error) {
-    console.error('Error storing logo in S3:', error);
-    return null; // Return null to fall back to the original URL
+    console.error('Error storing logo to S3:', error);
+    return sourceUrl;
   }
 }
 
-/**
- * Download image from URL and return as Buffer
- */
-function downloadImage(url) {
+async function downloadImage(imageUrl) {
   return new Promise((resolve, reject) => {
-    // Handle redirects (Facebook often redirects image URLs)
-    const makeRequest = (requestUrl, redirectCount = 0) => {
+    const makeRequest = (url, redirectCount = 0) => {
       if (redirectCount > 5) {
         reject(new Error('Too many redirects'));
         return;
       }
 
-      const protocol = requestUrl.startsWith('https') ? https : require('http');
-      
-      protocol.get(requestUrl, (res) => {
-        // Handle redirects
+      const protocol = url.startsWith('https') ? https : require('http');
+
+      protocol.get(url, (res) => {
         if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
           makeRequest(res.headers.location, redirectCount + 1);
           return;
         }
 
         if (res.statusCode !== 200) {
-          reject(new Error(`Failed to download image: ${res.statusCode}`));
+          reject(new Error(`Failed to download: HTTP ${res.statusCode}`));
           return;
         }
 
@@ -715,18 +1136,10 @@ function downloadImage(url) {
       }).on('error', reject);
     };
 
-    makeRequest(url);
+    makeRequest(imageUrl);
   });
 }
 
-/**
- * Download and store post media (images) to S3
- * Returns array of S3 URLs for the stored media
- * @param {string} accountId - Social account ID
- * @param {string} postId - The platform post ID (e.g., Facebook post ID)
- * @param {string[]} mediaUrls - Array of media URLs to download
- * @returns {Promise<{storedUrls: string[], thumbnailUrl: string|null}>}
- */
 async function downloadAndStorePostMedia(accountId, postId, mediaUrls) {
   if (!mediaUrls || mediaUrls.length === 0) {
     return { storedUrls: [], thumbnailUrl: null };
@@ -741,41 +1154,34 @@ async function downloadAndStorePostMedia(accountId, postId, mediaUrls) {
     const imageUrl = mediaUrls[i];
     
     try {
-      // Generate a unique filename
-      // Extract original filename from URL or generate one
       let filename;
       try {
         const urlPath = new URL(imageUrl).pathname;
         const originalName = urlPath.split('/').pop().split('?')[0];
-        // Clean the filename and add index prefix for uniqueness
         filename = `${timestamp}-${i}-${originalName}`.substring(0, 100);
       } catch {
         filename = `${timestamp}-${i}-image.jpg`;
       }
       
-      // S3 key: social-media/post-attachments/{accountId}/{postId}/{filename}
       const s3Key = `${S3_POST_ATTACHMENTS_PREFIX}${accountId}/${postId}/${filename}`;
 
-      console.log(`Downloading media ${i + 1}/${mediaUrls.length} from:`, imageUrl.substring(0, 100) + '...');
+      console.log(`Downloading media ${i + 1}/${mediaUrls.length}...`);
       
-      // Download the image
       const imageBuffer = await downloadImage(imageUrl);
       
-      // Determine content type from URL or default to jpeg
       let contentType = 'image/jpeg';
       if (imageUrl.includes('.png')) contentType = 'image/png';
       else if (imageUrl.includes('.gif')) contentType = 'image/gif';
       else if (imageUrl.includes('.webp')) contentType = 'image/webp';
 
-      // Upload to S3
       await s3Client.send(new PutObjectCommand({
         Bucket: S3_BUCKET,
         Key: s3Key,
         Body: imageBuffer,
         ContentType: contentType,
-        CacheControl: 'max-age=31536000', // Cache for 1 year
+        CacheControl: 'max-age=31536000',
         Metadata: {
-          'source-url': imageUrl.substring(0, 500), // Truncate long URLs
+          'source-url': imageUrl.substring(0, 500),
           'downloaded-at': new Date().toISOString(),
           'post-id': postId
         }
@@ -784,16 +1190,12 @@ async function downloadAndStorePostMedia(accountId, postId, mediaUrls) {
       const storedUrl = `https://${S3_BUCKET}.s3.${region}.amazonaws.com/${s3Key}`;
       storedUrls.push(storedUrl);
       
-      // First image becomes the thumbnail
       if (i === 0) {
         thumbnailUrl = storedUrl;
       }
       
-      console.log(`Media ${i + 1} stored at:`, storedUrl);
-      
     } catch (error) {
       console.error(`Error downloading media ${i + 1}:`, error.message);
-      // Continue with other images, but keep the original URL as fallback
       storedUrls.push(imageUrl);
       if (i === 0) {
         thumbnailUrl = imageUrl;
@@ -804,9 +1206,6 @@ async function downloadAndStorePostMedia(accountId, postId, mediaUrls) {
   return { storedUrls, thumbnailUrl };
 }
 
-/**
- * Fetch posts from Facebook Graph API (single page, most recent)
- */
 async function fetchFacebookPosts(pageId, limit = 25) {
   const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
   const url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${limit}`;
@@ -824,18 +1223,111 @@ async function fetchFacebookPosts(pageId, limit = 25) {
   return data.data || [];
 }
 
-/**
- * Fetch ALL posts from Facebook with pagination
- * Used for initial full sync of an account
- */
-async function fetchAllFacebookPosts(pageId) {
+async function fetchAllFacebookPostsWithCallback(pageId, onPageFetched, context = null, resumeFromDate = null) {
   const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
+  
   let url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${MAX_POSTS_PER_PAGE}`;
+  
+  if (resumeFromDate) {
+    const untilTimestamp = Math.floor(new Date(resumeFromDate).getTime() / 1000);
+    url += `&until=${untilTimestamp}`;
+    console.log(`Resuming from ${resumeFromDate} (until=${untilTimestamp})`);
+  }
+  
+  let pageCount = 0;
+  const SAFETY_MARGIN_MS = 10000;
+
+  console.log('Starting full post fetch with incremental saving...');
+
+  while (url && pageCount < MAX_PAGES_TO_FETCH) {
+    if (context && typeof context.getRemainingTimeInMillis === 'function') {
+      const remainingTime = context.getRemainingTimeInMillis();
+      if (remainingTime < SAFETY_MARGIN_MS) {
+        console.warn(`Approaching timeout (${remainingTime}ms remaining), stopping at page ${pageCount}`);
+        return { 
+          rateLimited: false, 
+          timeout: true, 
+          pagesCompleted: pageCount 
+        };
+      }
+    }
+    
+    pageCount++;
+    console.log(`Fetching page ${pageCount}...`);
+    
+    let data;
+    try {
+      const response = await httpGet(url);
+      data = JSON.parse(response);
+    } catch (error) {
+      console.error(`Network error on page ${pageCount}:`, error.message);
+      return { 
+        rateLimited: false, 
+        timeout: false, 
+        networkError: true,
+        pagesCompleted: pageCount - 1 
+      };
+    }
+
+    if (data.error) {
+      console.error('Facebook API error:', data.error);
+      
+      if (data.error.code === 4 || data.error.message?.includes('limit')) {
+        console.warn('Rate limit reached - saving progress and stopping');
+        return { 
+          rateLimited: true, 
+          timeout: false, 
+          pagesCompleted: pageCount - 1,
+          error: data.error.message
+        };
+      }
+      
+      throw new Error(data.error.message || 'Facebook API error');
+    }
+
+    const posts = data.data || [];
+    
+    if (posts.length === 0) {
+      console.log('No more posts to fetch');
+      break;
+    }
+
+    console.log(`Page ${pageCount}: Got ${posts.length} posts`);
+    
+    await onPageFetched(posts, pageCount);
+
+    url = data.paging?.next || null;
+    
+    if (!url) {
+      console.log('Reached end of posts (no next page)');
+    }
+  }
+
+  if (pageCount >= MAX_PAGES_TO_FETCH) {
+    console.log(`Reached maximum page limit (${MAX_PAGES_TO_FETCH})`);
+  }
+
+  console.log(`Pagination complete: ${pageCount} pages fetched`);
+  
+  return { 
+    rateLimited: false, 
+    timeout: false, 
+    pagesCompleted: pageCount 
+  };
+}
+
+/**
+ * Fetch posts NEWER than a timestamp (using 'since' parameter)
+ * Returns all posts in a single array (no callback, for simpler newer-posts fetch)
+ */
+async function fetchFacebookPostsSince(pageId, sinceTimestamp) {
+  const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
+  let url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${MAX_POSTS_PER_PAGE}&since=${sinceTimestamp}`;
   
   const allPosts = [];
   let pageCount = 0;
 
-  console.log('Starting full post fetch with pagination...');
+  console.log(`Starting incremental fetch (since ${new Date(sinceTimestamp * 1000).toISOString()})...`);
 
   while (url && pageCount < MAX_PAGES_TO_FETCH) {
     pageCount++;
@@ -851,181 +1343,236 @@ async function fetchAllFacebookPosts(pageId) {
 
     const posts = data.data || [];
     allPosts.push(...posts);
-    
     console.log(`Page ${pageCount}: Got ${posts.length} posts (total: ${allPosts.length})`);
 
-    // Get next page URL if available
-    url = data.paging?.next || null;
-
-    // Small delay to avoid rate limiting
-    if (url) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    if (posts.length === 0) {
+      break;
     }
+
+    url = data.paging?.next || null;
   }
 
-  if (pageCount >= MAX_PAGES_TO_FETCH) {
-    console.warn(`Reached max page limit (${MAX_PAGES_TO_FETCH}), some older posts may not be fetched`);
-  }
-
-  console.log(`Full fetch complete: ${allPosts.length} posts from ${pageCount} pages`);
+  console.log(`Incremental fetch complete: ${allPosts.length} posts in ${pageCount} pages`);
+  
   return allPosts;
 }
 
 /**
- * Fetch posts since a specific timestamp (for incremental updates)
+ * NEW: Fetch posts OLDER than a timestamp (using 'until' parameter)
+ * Uses callback pattern for incremental saving
  */
-async function fetchFacebookPostsSince(pageId, sinceTimestamp) {
+async function fetchFacebookPostsUntil(pageId, untilTimestamp, onPageFetched, context = null, startingPageCount = 0) {
   const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
-  let url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${MAX_POSTS_PER_PAGE}&since=${sinceTimestamp}`;
+  let url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${MAX_POSTS_PER_PAGE}&until=${untilTimestamp}`;
   
-  const allPosts = [];
-  let pageCount = 0;
+  let pageCount = startingPageCount;
+  const SAFETY_MARGIN_MS = 10000;
 
-  const sinceDate = new Date(sinceTimestamp * 1000);
-  console.log(`Fetching posts since timestamp ${sinceTimestamp} (${sinceDate.toISOString()})...`);
-  console.log(`API URL (without token): ${FB_API_VERSION}/${pageId}/posts?since=${sinceTimestamp}`);
+  console.log(`Starting older posts fetch (until ${new Date(untilTimestamp * 1000).toISOString()})...`);
 
   while (url && pageCount < MAX_PAGES_TO_FETCH) {
-    pageCount++;
+    // Check for Lambda timeout
+    if (context && typeof context.getRemainingTimeInMillis === 'function') {
+      const remainingTime = context.getRemainingTimeInMillis();
+      if (remainingTime < SAFETY_MARGIN_MS) {
+        console.warn(`[UNTIL] Approaching timeout (${remainingTime}ms remaining), stopping at page ${pageCount}`);
+        return { 
+          rateLimited: false, 
+          timeout: true, 
+          pagesCompleted: pageCount - startingPageCount
+        };
+      }
+    }
     
-    const response = await httpGet(url);
-    const data = JSON.parse(response);
+    pageCount++;
+    console.log(`[UNTIL] Fetching page ${pageCount}...`);
+    
+    let data;
+    try {
+      const response = await httpGet(url);
+      data = JSON.parse(response);
+    } catch (error) {
+      console.error(`[UNTIL] Network error on page ${pageCount}:`, error.message);
+      return { 
+        rateLimited: false, 
+        timeout: false, 
+        networkError: true,
+        pagesCompleted: pageCount - startingPageCount - 1
+      };
+    }
 
     if (data.error) {
-      console.error('Facebook API error:', data.error);
+      console.error('[UNTIL] Facebook API error:', data.error);
+      
+      if (data.error.code === 4 || data.error.message?.includes('limit')) {
+        console.warn('[UNTIL] Rate limit reached - saving progress and stopping');
+        return { 
+          rateLimited: true, 
+          timeout: false, 
+          pagesCompleted: pageCount - startingPageCount - 1,
+          error: data.error.message
+        };
+      }
+      
       throw new Error(data.error.message || 'Facebook API error');
     }
 
     const posts = data.data || [];
-    allPosts.push(...posts);
     
-    console.log(`Page ${pageCount}: Got ${posts.length} posts since ${sinceTimestamp}`);
-    if (posts.length > 0) {
-      console.log(`  First post: ${posts[0].id} at ${posts[0].created_time}`);
-      console.log(`  Last post: ${posts[posts.length - 1].id} at ${posts[posts.length - 1].created_time}`);
+    if (posts.length === 0) {
+      console.log('[UNTIL] No more older posts to fetch');
+      break;
     }
 
-    // Get next page URL if available
+    console.log(`[UNTIL] Page ${pageCount}: Got ${posts.length} posts`);
+    
+    await onPageFetched(posts, pageCount);
+
     url = data.paging?.next || null;
-
-    // Small delay to avoid rate limiting
-    if (url) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    
+    if (!url) {
+      console.log('[UNTIL] Reached end of posts (no next page)');
     }
   }
 
-  console.log(`Incremental fetch complete: ${allPosts.length} posts from ${pageCount} pages`);
-  
-  if (allPosts.length === 0) {
-    console.log('No posts returned from Facebook API. This could mean:');
-    console.log('  1. No new posts since the timestamp');
-    console.log('  2. API caching/delay (try again in a few minutes)');
-    console.log('  3. Access token permission issues');
+  if (pageCount >= MAX_PAGES_TO_FETCH) {
+    console.log(`[UNTIL] Reached maximum page limit (${MAX_PAGES_TO_FETCH})`);
   }
+
+  console.log(`[UNTIL] Older posts fetch complete: ${pageCount - startingPageCount} pages fetched`);
   
-  return allPosts;
+  return { 
+    rateLimited: false, 
+    timeout: false, 
+    pagesCompleted: pageCount - startingPageCount
+  };
 }
 
-/**
- * Process posts and save new ones to DynamoDB
- * Returns both newPosts array and savedPostIds for processing trigger
- */
-async function processAndSavePosts(account, posts) {
+// ============================================
+// Post Processing Functions
+// ============================================
+
+async function processAndSavePostsBatch(account, posts) {
   const newPosts = [];
   const savedPostIds = [];
+  let oldestDate = null;
   const now = new Date().toISOString();
 
-  console.log(`Processing ${posts.length} posts for account ${account.accountName}`);
-
+  // First pass: identify which posts are new (for accurate progress tracking)
+  const newPostsToProcess = [];
   for (const fbPost of posts) {
-    // Create a deterministic ID from platform + post ID
+    const postDate = fbPost.created_time;
+    if (postDate) {
+        // Convert to proper ISO format (AWSDateTime compatible)
+        const normalizedDate = new Date(postDate).toISOString();
+        if (!oldestDate || normalizedDate < oldestDate) {
+            oldestDate = normalizedDate;
+        }
+    }
+    
     const postId = `${account.platform}_${fbPost.id}`;
-
-    // Check if post already exists
     const existingPost = await getExistingPost(postId);
-
-    if (existingPost) {
-      console.log(`Post ${postId} already exists, skipping (posted: ${fbPost.created_time})`);
-    } else {
-      console.log(`NEW post found: ${postId} (posted: ${fbPost.created_time})`);
-      // Convert Facebook datetime format to ISO 8601
-      const postedAt = new Date(fbPost.created_time).toISOString();
-      
-      // Download and store media to S3 (if present)
-      // This ensures images are served from our S3 bucket instead of Facebook CDN
-      let mediaUrls = [];
-      let thumbnailUrl = null;
-      
-      if (fbPost.full_picture) {
-        console.log(`Downloading media for post ${fbPost.id}...`);
-        const mediaResult = await downloadAndStorePostMedia(
-          account.id,
-          fbPost.id,
-          [fbPost.full_picture]
-        );
-        mediaUrls = mediaResult.storedUrls;
-        thumbnailUrl = mediaResult.thumbnailUrl;
-      }
-      
-      // Create new post - matching your existing data structure
-      const newPost = {
-        id: postId,
-        platformPostId: fbPost.id,
-        postUrl: fbPost.permalink_url,
-        postType: fbPost.full_picture ? 'IMAGE' : 'TEXT',
-        content: fbPost.message || '',
-        contentPreview: (fbPost.message || '').substring(0, 200),
-        mediaUrls: mediaUrls,
-        thumbnailUrl: thumbnailUrl,
-        likeCount: fbPost.reactions?.summary?.total_count || 0,
-        commentCount: fbPost.comments?.summary?.total_count || 0,
-        shareCount: fbPost.shares?.count || 0,
-        postedAt,
-        postYearMonth: getPostYearMonth(postedAt),
-        scrapedAt: now,
-        status: 'ACTIVE',
-        processingStatus: 'PENDING', // Ready for socialPostProcessor
-        isPromotional: detectPromotional(fbPost.message),
-        isTournamentRelated: detectTournamentRelated(fbPost.message),
-        tags: extractTags(fbPost.message),
-        socialAccountId: account.id,
-        // Store account info for display purposes (denormalized for fast queries)
-        accountName: account.accountName,
-        accountProfileImageUrl: account.profileImageUrl,
-        platform: account.platform,
-        createdAt: now,
-        updatedAt: now,
-        __typename: 'SocialPost',
-        _version: 1,
-        _lastChangedAt: Date.now(),
-      };
-      
-      // Only add entityId/venueId if they exist (avoid null for GSI)
-      if (account.entityId) newPost.entityId = account.entityId;
-      if (account.venueId) newPost.venueId = account.venueId;
-
-      await savePost(newPost);
-      newPosts.push(newPost);
-      savedPostIds.push(postId);
+    
+    if (!existingPost) {
+      newPostsToProcess.push({ fbPost, postId, postDate });
     }
   }
+  
+  // If we have new posts to download, publish initial progress
+  if (newPostsToProcess.length > 0) {
+    console.log(`[DOWNLOAD] Found ${newPostsToProcess.length} new posts to download`);
+    await publishDownloadProgress(
+      account.id, 
+      0, 
+      newPostsToProcess.length, 
+      null, 
+      false
+    );
+  }
+  
+  // Second pass: process and save new posts with progress updates
+  for (let i = 0; i < newPostsToProcess.length; i++) {
+    const { fbPost, postId, postDate } = newPostsToProcess[i];
+    const hasMedia = !!fbPost.full_picture;
+    
+    // Publish download progress
+    await publishDownloadProgress(
+      account.id, 
+      i + 1, 
+      newPostsToProcess.length, 
+      postDate,
+      hasMedia
+    );
+    
+    console.log(`NEW post found: ${postId} (posted: ${fbPost.created_time})`);
+    
+    const postedAt = new Date(fbPost.created_time).toISOString();
+    
+    let mediaUrls = [];
+    let thumbnailUrl = null;
+    
+    if (fbPost.full_picture) {
+      const mediaResult = await downloadAndStorePostMedia(
+        account.id,
+        fbPost.id,
+        [fbPost.full_picture]
+      );
+      mediaUrls = mediaResult.storedUrls;
+      thumbnailUrl = mediaResult.thumbnailUrl;
+    }
+    
+    const newPost = {
+      id: postId,
+      platformPostId: fbPost.id,
+      postUrl: fbPost.permalink_url,
+      postType: fbPost.full_picture ? 'IMAGE' : 'TEXT',
+      content: fbPost.message || '',
+      contentPreview: (fbPost.message || '').substring(0, 200),
+      mediaUrls: mediaUrls,
+      thumbnailUrl: thumbnailUrl,
+      likeCount: fbPost.reactions?.summary?.total_count || 0,
+      commentCount: fbPost.comments?.summary?.total_count || 0,
+      shareCount: fbPost.shares?.count || 0,
+      postedAt,
+      postYearMonth: getPostYearMonth(postedAt),
+      scrapedAt: now,
+      status: 'ACTIVE',
+      processingStatus: 'PENDING',
+      isPromotional: detectPromotional(fbPost.message),
+      isTournamentRelated: detectTournamentRelated(fbPost.message),
+      tags: extractTags(fbPost.message),
+      socialAccountId: account.id,
+      accountName: account.accountName,
+      accountProfileImageUrl: account.profileImageUrl,
+      platform: account.platform,
+      createdAt: now,
+      updatedAt: now,
+      __typename: 'SocialPost',
+      _version: 1,
+      _lastChangedAt: Date.now(),
+    };
+    
+    if (account.entityId) newPost.entityId = account.entityId;
+    if (account.venueId) newPost.venueId = account.venueId;
 
-  return { newPosts, savedPostIds };
+    await savePost(newPost);
+    newPosts.push(newPost);
+    savedPostIds.push(postId);
+  }
+
+  return { newPosts, savedPostIds, oldestDate };
 }
 
-/**
- * Extract page ID from Facebook URL
- */
+// ============================================
+// Utility Functions
+// ============================================
+
 function extractPageIdFromUrl(url) {
   if (!url) return null;
 
   try {
     const urlObj = new URL(url);
     const pathParts = urlObj.pathname.split('/').filter(Boolean);
-
-    // facebook.com/pagename
-    // facebook.com/pages/pagename/123456
-    // facebook.com/profile.php?id=123456
 
     if (pathParts[0] === 'pages' && pathParts.length >= 3) {
       return pathParts[2];
@@ -1042,13 +1589,6 @@ function extractPageIdFromUrl(url) {
   }
 }
 
-/**
- * Calculate postYearMonth from a date string
- * Format: "YYYY-MM" (e.g., "2025-01" for January 2025)
- * 
- * @param {string} dateString - ISO date string
- * @returns {string|null} Year-month string or null
- */
 function getPostYearMonth(dateString) {
   if (!dateString) return null;
   try {
@@ -1062,9 +1602,6 @@ function getPostYearMonth(dateString) {
   }
 }
 
-/**
- * Detect if post is promotional
- */
 function detectPromotional(content) {
   if (!content) return false;
 
@@ -1078,9 +1615,6 @@ function detectPromotional(content) {
   return keywords.some(kw => lower.includes(kw));
 }
 
-/**
- * Detect if post is tournament related
- */
 function detectTournamentRelated(content) {
   if (!content) return false;
 
@@ -1095,9 +1629,6 @@ function detectTournamentRelated(content) {
   return keywords.some(kw => lower.includes(kw));
 }
 
-/**
- * Extract hashtags as tags
- */
 function extractTags(content) {
   if (!content) return [];
 
@@ -1176,7 +1707,7 @@ async function updateAccountAfterScrape(id, updates) {
 
 async function createScrapeAttempt(socialAccountId, syncType = 'INCREMENTAL') {
   if (!SOCIAL_SCRAPE_ATTEMPT_TABLE) {
-    console.warn('SOCIAL_SCRAPE_ATTEMPT_TABLE not configured, skipping attempt tracking');
+    console.warn('SOCIAL_SCRAPE_ATTEMPT_TABLE not configured');
     return null;
   }
 
@@ -1208,7 +1739,6 @@ async function updateScrapeAttempt(id, updates) {
     return;
   }
 
-  // Always add updatedAt
   updates.updatedAt = new Date().toISOString();
 
   const updateParts = [];
@@ -1216,9 +1746,11 @@ async function updateScrapeAttempt(id, updates) {
   const values = {};
 
   Object.entries(updates).forEach(([key, value]) => {
-    updateParts.push(`#${key} = :${key}`);
-    names[`#${key}`] = key;
-    values[`:${key}`] = value;
+    if (value !== undefined) {
+      updateParts.push(`#${key} = :${key}`);
+      names[`#${key}`] = key;
+      values[`:${key}`] = value;
+    }
   });
 
   await docClient.send(new UpdateCommand({

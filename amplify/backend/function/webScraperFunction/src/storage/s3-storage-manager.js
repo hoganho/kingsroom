@@ -212,6 +212,7 @@ const upsertS3StorageRecord = async (params, context) => {
                     previousVersions = :previousVersions,
                     versionNumber = :versionNumber,
                     totalVersions = :totalVersions,
+                    entityTournamentKey = :entityTournamentKey,
                     #lca = :timestamp,
                     #v = if_not_exists(#v, :zero) + :one
             `,
@@ -236,6 +237,7 @@ const upsertS3StorageRecord = async (params, context) => {
                 ':previousVersions': previousVersions,
                 ':versionNumber': newVersionNumber,
                 ':totalVersions': previousVersions.length + 1,
+                ':entityTournamentKey': `${entityId}#${tournamentId}`,
                 ':timestamp': timestamp,
                 ':zero': 0,
                 ':one': 1
@@ -259,6 +261,8 @@ const upsertS3StorageRecord = async (params, context) => {
             url,
             tournamentId,
             entityId,
+            // Composite key for byEntityTournament GSI
+            entityTournamentKey: `${entityId}#${tournamentId}`,
             s3Key,
             s3Bucket: S3_BUCKET,
             contentSize,
@@ -364,19 +368,25 @@ const updateS3StorageWithParsedData = async (s3Key, scrapedData, foundKeys, opti
         // Find the S3Storage record
         let queryResult = null;
         
-        // Strategy 1: By tournamentId + entityId using byEntityTournament GSI (PREFERRED)
-        // This GSI doesn't require scrapedAt, so it finds all records
+        // Strategy 1: By entityTournamentKey composite GSI (PREFERRED)
+        // GSI: byEntityTournament on entityTournamentKey field
+        // Format: "{entityId}#{tournamentId}"
         if (tournamentId && entityId) {
-            queryResult = await ddbDocClient.send(new QueryCommand({
-                TableName: s3StorageTable,
-                IndexName: 'byEntityTournament',
-                KeyConditionExpression: 'entityId = :eid AND tournamentId = :tid',
-                ExpressionAttributeValues: {
-                    ':tid': tournamentId,
-                    ':eid': entityId
-                },
-                Limit: 1
-            }));
+            try {
+                const compositeKey = `${entityId}#${tournamentId}`;
+                queryResult = await ddbDocClient.send(new QueryCommand({
+                    TableName: s3StorageTable,
+                    IndexName: 'byEntityTournament',
+                    KeyConditionExpression: 'entityTournamentKey = :key',
+                    ExpressionAttributeValues: {
+                        ':key': compositeKey
+                    },
+                    Limit: 1
+                }));
+            } catch (gsiError) {
+                console.warn(`[S3StorageManager] byEntityTournament GSI query failed:`, gsiError.message);
+                // Fall through to other strategies
+            }
         }
         
         // Strategy 2: By s3Key

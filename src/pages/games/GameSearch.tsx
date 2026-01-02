@@ -12,7 +12,7 @@ import { formatCurrency } from '../../utils/generalHelpers';
 
 interface Game {
   id: string;
-  tournamentId?: string;
+  tournamentId?: number;
   name: string;
   gameType: string;
   gameStatus: string;
@@ -55,56 +55,100 @@ export const GameSearch = () => {
     setSearching(true);
     try {
       const client = getClient();
-      const response = await client.graphql({
-        query: /* GraphQL */ `
-          query SearchGames($searchTerm: String!) {
-            listGames(
-              filter: {
-                or: [
-                  { name: { contains: $searchTerm } },
-                  { tournamentId: { contains: $searchTerm } }
-                ]
-              }
-              limit: 100
-            ) {
-              items {
-                id
-                tournamentId
-                name
-                gameType
-                gameStatus
-                gameStartDateTime
-                buyIn
-                totalUniquePlayers  
-                totalInitialEntries
-                totalEntries
-                playersRemaining
-                prizepoolPaid
-                prizepoolCalculated
-                sourceUrl
-                venue {
+      
+      // Check if the search term is a number (for tournamentId search)
+      const isNumeric = /^\d+$/.test(term.trim());
+      
+      let searchResults: Game[] = [];
+
+      if (isNumeric) {
+        // Use the GSI query for efficient tournamentId lookup
+        const tournamentIdValue = parseInt(term.trim(), 10);
+        
+        const response = await client.graphql({
+          query: /* GraphQL */ `
+            query GamesByTournamentId($tournamentId: Int!, $limit: Int) {
+              gamesByTournamentId(tournamentId: $tournamentId, limit: $limit) {
+                items {
+                  id
+                  tournamentId
                   name
+                  gameType
+                  gameStatus
+                  gameStartDateTime
+                  buyIn
+                  totalUniquePlayers  
+                  totalInitialEntries
+                  totalEntries
+                  playersRemaining
+                  prizepoolPaid
+                  prizepoolCalculated
+                  sourceUrl
+                  venue {
+                    name
+                  }
                 }
               }
             }
+          `,
+          variables: {
+            tournamentId: tournamentIdValue,
+            limit: 100
           }
-        `,
-        variables: {
-          searchTerm: term
-        }
-      });
+        });
 
-      if ('data' in response && response.data) {
-        const searchResults = response.data.listGames.items
-          .filter(Boolean)
-          .sort((a: Game, b: Game) => {
-            const dateA = new Date(a.gameStartDateTime);
-            const dateB = new Date(b.gameStartDateTime);
-            return dateB.getTime() - dateA.getTime();
-          }) as Game[];
-        
-        setGames(searchResults);
+        if ('data' in response && response.data) {
+          searchResults = (response.data as any).gamesByTournamentId?.items?.filter(Boolean) || [];
+        }
+      } else {
+        // Search by name using filter
+        const response = await client.graphql({
+          query: /* GraphQL */ `
+            query SearchGames($filter: ModelGameFilterInput!) {
+              listGames(
+                filter: $filter
+                limit: 100
+              ) {
+                items {
+                  id
+                  tournamentId
+                  name
+                  gameType
+                  gameStatus
+                  gameStartDateTime
+                  buyIn
+                  totalUniquePlayers  
+                  totalInitialEntries
+                  totalEntries
+                  playersRemaining
+                  prizepoolPaid
+                  prizepoolCalculated
+                  sourceUrl
+                  venue {
+                    name
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            filter: { name: { contains: term } }
+          }
+        });
+
+        if ('data' in response && response.data) {
+          searchResults = (response.data as any).listGames?.items?.filter(Boolean) || [];
+        }
       }
+
+      // Sort results by date
+      searchResults.sort((a: Game, b: Game) => {
+        const dateA = new Date(a.gameStartDateTime);
+        const dateB = new Date(b.gameStartDateTime);
+        return dateB.getTime() - dateA.getTime();
+      });
+      
+      setGames(searchResults);
     } catch (error) {
       console.error('Error searching games:', error);
     } finally {

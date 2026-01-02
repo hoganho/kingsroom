@@ -95,27 +95,27 @@ const CONFIG = {
 
 // CSV file mappings (filename -> table config)
 const CSV_MAPPINGS = {
-  'Entity-fosb7ek5argnhctz4odpt52eia-staging.csv': {
+  'Entity-ht3nugt6lvddpeeuwj3x6mkite-dev.csv': {
     tableName: CONFIG.SEED_TABLES.ENTITY,
     keyField: 'id',
   },
-  'Venue-fosb7ek5argnhctz4odpt52eia-staging.csv': {
+  'Venue-ht3nugt6lvddpeeuwj3x6mkite-dev.csv': {
     tableName: CONFIG.SEED_TABLES.VENUE,
     keyField: 'id',
   },
-  'RecurringGame-fosb7ek5argnhctz4odpt52eia-staging.csv': {
+  'RecurringGame-ht3nugt6lvddpeeuwj3x6mkite-dev.csv': {
     tableName: CONFIG.SEED_TABLES.RECURRING_GAME,
     keyField: 'id',
   },
-  'SocialAccount-fosb7ek5argnhctz4odpt52eia-staging.csv': {
+  'SocialAccount-ht3nugt6lvddpeeuwj3x6mkite-dev.csv': {
     tableName: CONFIG.SEED_TABLES.SOCIAL_ACCOUNT,
     keyField: 'id',
   },
-  'TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging.csv': {
+  'TournamentSeries-ht3nugt6lvddpeeuwj3x6mkite-dev.csv': {
     tableName: CONFIG.SEED_TABLES.TOURNAMENT_SERIES,
     keyField: 'id',
   },
-  'TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging.csv': {
+  'TournamentSeriesTitle-ht3nugt6lvddpeeuwj3x6mkite-dev.csv': {
     tableName: CONFIG.SEED_TABLES.TOURNAMENT_SERIES_TITLE,
     keyField: 'id',
   },
@@ -612,12 +612,12 @@ async function seedFromCSV() {
   
   // Process in dependency order
   const orderedFiles = [
-    'TournamentSeriesTitle-fosb7ek5argnhctz4odpt52eia-staging.csv',
-    'Entity-fosb7ek5argnhctz4odpt52eia-staging.csv',
-    'Venue-fosb7ek5argnhctz4odpt52eia-staging.csv',
-    'TournamentSeries-fosb7ek5argnhctz4odpt52eia-staging.csv',
-    'RecurringGame-fosb7ek5argnhctz4odpt52eia-staging.csv',
-    'SocialAccount-fosb7ek5argnhctz4odpt52eia-staging.csv',
+    'TournamentSeriesTitle-ht3nugt6lvddpeeuwj3x6mkite-dev.csv',
+    'Entity-ht3nugt6lvddpeeuwj3x6mkite-dev.csv',
+    'Venue-ht3nugt6lvddpeeuwj3x6mkite-dev.csv',
+    'TournamentSeries-ht3nugt6lvddpeeuwj3x6mkite-dev.csv',
+    'RecurringGame-ht3nugt6lvddpeeuwj3x6mkite-dev.csv',
+    'SocialAccount-ht3nugt6lvddpeeuwj3x6mkite-dev.csv',
   ];
   
   for (const filename of orderedFiles) {

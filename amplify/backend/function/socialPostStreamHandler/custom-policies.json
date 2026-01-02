@@ -1,0 +1,22 @@
+[
+  {
+    "Action": [
+      "dynamodb:GetRecords",
+      "dynamodb:GetShardIterator",
+      "dynamodb:DescribeStream",
+      "dynamodb:ListStreams"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:495599763953:table/SocialPost-*/stream/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:UpdateItem",
+      "dynamodb:GetItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:495599763953:table/SocialAccount-*"
+    ]
+  }
+]

@@ -17,6 +17,9 @@ import * as path from 'path';
 
 const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 
+// Output directory - saves outside project root to ../Data
+const DATA_OUTPUT_DIR = process.env.DATA_OUTPUT_DIR || '../../Data';
+
 // Optional filters (recommended)
 // - ENV_SUFFIX: only tables ending with "-dev" (default "dev")
 // - API_ID_FILTER: only tables containing this amplify apiId (e.g. "fosb7ek5argnhctz4odpt52eia")
@@ -214,6 +217,7 @@ async function main() {
   }
 
   logger.info(`Region: ${REGION}`);
+  logger.info(`Output Directory: ${DATA_OUTPUT_DIR}`);
   logger.info(`Filters: ENV_SUFFIX="${ENV_SUFFIX}", API_ID_FILTER="${API_ID_FILTER || '(none)'}", TABLE_PREFIX_FILTER="${TABLE_PREFIX_FILTER || '(none)'}"`);
 
   const TABLES_TO_BACKUP = await getTablesToBackup();
@@ -238,19 +242,25 @@ async function main() {
     return;
   }
 
+  // Create timestamped backup directory inside DATA_OUTPUT_DIR
   const backupDirName = makeTimestampedDirName('dbbackup');
+  const fullBackupPath = path.join(DATA_OUTPUT_DIR, backupDirName);
+  
   try {
-    await fs.mkdir(backupDirName, { recursive: true });
-    logger.info(`Saving backups to directory: ./${backupDirName}`);
+    // Ensure parent Data directory exists
+    await fs.mkdir(DATA_OUTPUT_DIR, { recursive: true });
+    // Create the timestamped backup subdirectory
+    await fs.mkdir(fullBackupPath, { recursive: true });
+    logger.info(`Saving backups to directory: ${fullBackupPath}`);
   } catch (mkdirErr) {
-    logger.error(`Failed to create backup directory ${backupDirName}: ${mkdirErr.message}`);
+    logger.error(`Failed to create backup directory ${fullBackupPath}: ${mkdirErr.message}`);
     return;
   }
 
   for (const tableName of TABLES_TO_BACKUP) {
     try {
       logger.info(`\nProcessing table: ${tableName}`);
-      await backupTableData(tableName, backupDirName);
+      await backupTableData(tableName, fullBackupPath);
     } catch (err) {
       logger.error(`Error while processing ${tableName}: ${err.message}`);
       logger.error('Continuing to the next table...');
@@ -258,7 +268,7 @@ async function main() {
   }
 
   logger.success('\nAll matched tables have been processed.');
-  logger.success(`Backup data is located in: ./${backupDirName}`);
+  logger.success(`Backup data is located in: ${fullBackupPath}`);
 }
 
 main().catch((err) => {

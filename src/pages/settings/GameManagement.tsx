@@ -1,10 +1,12 @@
 // src/pages/settings/GameManagement.tsx
-// UPDATED: Integrated GameEditorModal for create/edit functionality
+// UPDATED: Added delete game functionality with confirmation modal
+// UPDATED: Added dedicated backend search by Game ID
 
 import { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import type { ColumnDef } from "@tanstack/react-table";
 import { cx, formatCurrency, formatDateTimeAEST } from '../../lib/utils';
+import { debounce } from 'lodash';
 
 // --- UI Components ---
 import { Card } from '../../components/ui/Card'; 
@@ -27,7 +29,10 @@ import {
     FunnelIcon,
     PlusIcon,
     PencilSquareIcon,
+    TrashIcon,
     CheckIcon,
+    MagnifyingGlassIcon,
+    XMarkIcon,
 } from '@heroicons/react/24/outline';
 
 // --- Context & Services ---
@@ -59,6 +64,7 @@ const UNASSIGNED_VENUE_ID = getUnassignedVenueId();
 interface Game {
     id: string;
     name: string;
+    tournamentId?: number;
     gameStartDateTime: string;
     gameStatus: string;
     registrationStatus?: string;
@@ -85,6 +91,8 @@ interface Game {
     isSeries?: boolean;
     seriesName?: string;
     recurringGameId?: string;
+    consolidationType?: string;
+    parentGameId?: string;
 }
 
 interface Venue {
@@ -136,6 +144,7 @@ const listGamesForManagement = /* GraphQL */ `
             items {
                 id
                 name
+                tournamentId
                 gameStartDateTime
                 gameStatus
                 registrationStatus
@@ -159,11 +168,95 @@ const listGamesForManagement = /* GraphQL */ `
                 isSeries
                 seriesName
                 recurringGameId
+                consolidationType
+                parentGameId
                 entityId
                 venue { id name }
                 entity { id entityName }
             }
             nextToken
+        }
+    }
+`;
+
+// Query to search games by name (for backend search)
+const searchGamesByName = /* GraphQL */ `
+    query SearchGames($filter: ModelGameFilterInput!, $limit: Int) {
+        listGames(filter: $filter, limit: $limit) {
+            items {
+                id
+                name
+                tournamentId
+                gameStartDateTime
+                gameStatus
+                registrationStatus
+                venueId
+                venueAssignmentStatus
+                venueAssignmentConfidence
+                suggestedVenueName
+                totalUniquePlayers
+                totalInitialEntries
+                totalEntries
+                totalRebuys
+                totalAddons
+                buyIn
+                rake
+                startingStack
+                hasGuarantee
+                guaranteeAmount
+                prizepoolPaid
+                gameVariant
+                tournamentType
+                isSeries
+                seriesName
+                recurringGameId
+                consolidationType
+                parentGameId
+                entityId
+                venue { id name }
+                entity { id entityName }
+            }
+        }
+    }
+`;
+
+// Query to search games by tournamentId using GSI (efficient lookup)
+const searchGamesByTournamentId = /* GraphQL */ `
+    query GamesByTournamentId($tournamentId: Int!, $limit: Int) {
+        gamesByTournamentId(tournamentId: $tournamentId, limit: $limit) {
+            items {
+                id
+                name
+                tournamentId
+                gameStartDateTime
+                gameStatus
+                registrationStatus
+                venueId
+                venueAssignmentStatus
+                venueAssignmentConfidence
+                suggestedVenueName
+                totalUniquePlayers
+                totalInitialEntries
+                totalEntries
+                totalRebuys
+                totalAddons
+                buyIn
+                rake
+                startingStack
+                hasGuarantee
+                guaranteeAmount
+                prizepoolPaid
+                gameVariant
+                tournamentType
+                isSeries
+                seriesName
+                recurringGameId
+                consolidationType
+                parentGameId
+                entityId
+                venue { id name }
+                entity { id entityName }
+            }
         }
     }
 `;
@@ -223,6 +316,29 @@ const listSeriesQuery = /* GraphQL */ `
     }
 `;
 
+// NEW: Delete game mutation (invokes deleteGameFunction Lambda)
+const deleteGameWithCleanupMutation = /* GraphQL */ `
+    mutation DeleteGameWithCleanup($input: DeleteGameWithCleanupInput!) {
+        deleteGameWithCleanup(input: $input) {
+            success
+            message
+            gameId
+            gameName
+            deletions {
+                gameCost { deleted error }
+                gameFinancialSnapshot { deleted error }
+                scrapeURL { deleted error }
+                scrapeAttempts { deleted error }
+                playerEntries { deleted error }
+                playerResults { deleted error }
+                playerTransactions { deleted error }
+                playerStats { summariesUpdated venuesUpdated }
+                game { deleted error }
+            }
+        }
+    }
+`;
+
 // ===================================================================
 // COMPONENT
 // ===================================================================
@@ -244,10 +360,17 @@ export const GameManagement = () => {
     const [nextToken, setNextToken] = useState<string | null>(null);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-    // Filter State
+    // Filter State (local filtering)
     const [searchQuery, setSearchQuery] = useState('');
     const [venueFilter, setVenueFilter] = useState<VenueFilterType>('needs_review');
     
+    // === NEW: Backend Search State ===
+    const [idSearchQuery, setIdSearchQuery] = useState('');
+    const [idSearchResults, setIdSearchResults] = useState<Game[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
+    const [showSearchResults, setShowSearchResults] = useState(false);
+
     // Selection State
     const [selectedGameIds, setSelectedGameIds] = useState<Set<string>>(new Set());
     const [selectAll, setSelectAll] = useState(false);
@@ -263,9 +386,15 @@ export const GameManagement = () => {
         gameEntities: string[];
     }>({ show: false, targetVenueEntity: null, gameEntities: [] });
 
-    // === NEW: Game Editor Modal State ===
+    // Game Editor Modal State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingGame, setEditingGame] = useState<Game | null>(null);
+
+    // === NEW: Delete Game Modal State ===
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [gameToDelete, setGameToDelete] = useState<Game | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
 
     // --- Data Fetching ---
 
@@ -292,7 +421,6 @@ export const GameManagement = () => {
         }
 
         try {
-            // Fetch recurring games for selected entities' venues
             const venueIds = venues
                 .filter(v => selectedEntities.some(e => e.id === v.entityId))
                 .map(v => v.id);
@@ -345,7 +473,6 @@ export const GameManagement = () => {
                 venueName: s.venue?.name
             }));
             
-            // Sort by year (newest first), then by name
             setSeries(items.sort((a: Series, b: Series) => {
                 const yearDiff = (b.year || 0) - (a.year || 0);
                 if (yearDiff !== 0) return yearDiff;
@@ -387,7 +514,6 @@ export const GameManagement = () => {
                 ? { entityId: { eq: selectedEntities[0].id } }
                 : { or: entityFilters };
 
-            // Always exclude NOT_PUBLISHED games
             const notPublishedFilter = { gameStatus: { ne: 'NOT_PUBLISHED' } };
 
             if (statusConditions.length > 0) {
@@ -424,6 +550,95 @@ export const GameManagement = () => {
         }
     };
 
+    // === NEW: Backend Search Function ===
+    const searchGamesBackend = async (query: string) => {
+        if (!query.trim()) {
+            setIdSearchResults([]);
+            setShowSearchResults(false);
+            return;
+        }
+
+        setIsSearching(true);
+        setSearchError(null);
+        setShowSearchResults(true);
+
+        try {
+            const trimmedQuery = query.trim();
+            let results: Game[] = [];
+
+            // Check if query is numeric (for tournamentId search)
+            const isNumeric = /^\d+$/.test(trimmedQuery);
+            
+            if (isNumeric) {
+                // Use the GSI query for efficient tournamentId lookup
+                const tournamentIdValue = parseInt(trimmedQuery, 10);
+                
+                const response: any = await getClient().graphql({
+                    query: searchGamesByTournamentId,
+                    variables: {
+                        tournamentId: tournamentIdValue,
+                        limit: 50
+                    }
+                });
+
+                const items = response.data?.gamesByTournamentId?.items?.filter(Boolean) || [];
+                results = items.map((game: any) => ({
+                    ...game,
+                    venueName: game.venue?.name || (game.venueId === UNASSIGNED_VENUE_ID ? 'Unassigned' : 'Unknown'),
+                    entityName: game.entity?.entityName || 'Unknown'
+                }));
+            } else {
+                // Search by name using filter
+                const response: any = await getClient().graphql({
+                    query: searchGamesByName,
+                    variables: {
+                        filter: { name: { contains: trimmedQuery } },
+                        limit: 50
+                    }
+                });
+
+                const items = response.data?.listGames?.items?.filter(Boolean) || [];
+                results = items.map((game: any) => ({
+                    ...game,
+                    venueName: game.venue?.name || (game.venueId === UNASSIGNED_VENUE_ID ? 'Unassigned' : 'Unknown'),
+                    entityName: game.entity?.entityName || 'Unknown'
+                }));
+            }
+
+            setIdSearchResults(results);
+        } catch (error: any) {
+            console.error('Error searching games:', error);
+            setSearchError(error.message || 'Failed to search games');
+            setIdSearchResults([]);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    // Debounced search
+    const debouncedSearch = useMemo(
+        () => debounce((query: string) => searchGamesBackend(query), 400),
+        []
+    );
+
+    const handleIdSearchChange = (value: string) => {
+        setIdSearchQuery(value);
+        if (value.trim()) {
+            debouncedSearch(value);
+        } else {
+            setIdSearchResults([]);
+            setShowSearchResults(false);
+        }
+    };
+
+    const clearSearch = () => {
+        setIdSearchQuery('');
+        setIdSearchResults([]);
+        setShowSearchResults(false);
+        setSearchError(null);
+        debouncedSearch.cancel();
+    };
+
     // --- Effects ---
 
     useEffect(() => {
@@ -434,7 +649,6 @@ export const GameManagement = () => {
 
     useEffect(() => { fetchVenues(); }, []);
 
-    // Fetch recurring games and series when venues or entities change
     useEffect(() => {
         if (venues.length > 0 && selectedEntities.length > 0) {
             fetchRecurringGames();
@@ -448,155 +662,228 @@ export const GameManagement = () => {
             setSelectAll(false);
             fetchGames();
         }
-    }, [selectedEntities, venueFilter, entitiesLoading, activeTab]);
+    }, [selectedEntities, venueFilter, activeTab, entitiesLoading]);
 
-    // --- Table Logic ---
+    // Cleanup debounce on unmount
+    useEffect(() => {
+        return () => {
+            debouncedSearch.cancel();
+        };
+    }, [debouncedSearch]);
 
+    // --- Filtered Games (local filtering) ---
     const filteredGames = useMemo(() => {
         if (!searchQuery) return games;
         const query = searchQuery.toLowerCase();
-        return games.filter(g => 
-            g.name.toLowerCase().includes(query) || 
-            g.venueName?.toLowerCase().includes(query)
+        return games.filter(game => 
+            game.name.toLowerCase().includes(query) ||
+            game.venueName?.toLowerCase().includes(query) ||
+            game.entityName?.toLowerCase().includes(query)
         );
     }, [games, searchQuery]);
 
-    // Handle "Select All" Logic
-    const handleSelectAll = () => {
-        if (selectAll) {
-            setSelectedGameIds(new Set());
-        } else {
-            const allIds = filteredGames.map(g => g.id);
-            setSelectedGameIds(new Set(allIds));
-        }
-        setSelectAll(!selectAll);
+    // --- Game Editor Options ---
+    const entityOptions: EntityOption[] = selectedEntities.map(e => ({
+        id: e.id,
+        entityName: e.entityName
+    }));
+
+    const venueOptions: VenueOption[] = venues.map(v => ({
+        id: v.id,
+        name: v.name,
+        entityId: v.entityId
+    }));
+
+    const recurringGameOptions: RecurringGameOption[] = recurringGames.map(rg => ({
+        id: rg.id,
+        name: rg.displayName || rg.name,
+        venueId: rg.venueId,
+        entityId: rg.entityId,
+        dayOfWeek: rg.dayOfWeek,
+        startTime: rg.startTime || '',
+        typicalBuyIn: rg.typicalBuyIn
+    }));
+
+    const seriesOptions: SeriesOption[] = series.map(s => ({
+        id: s.id,
+        name: s.name,
+        venueId: s.venueId,
+        entityId: s.entityId
+    }));
+
+    // --- Game Handlers ---
+    const handleEditGame = (game: Game) => {
+        setEditingGame(game);
     };
 
-    // === NEW: Prepare dropdown options for editor ===
-    const entityOptions: EntityOption[] = useMemo(() => 
-        selectedEntities.map(e => ({ id: e.id, entityName: e.entityName || e.id })),
-        [selectedEntities]
-    );
-
-    const venueOptions: VenueOption[] = useMemo(() => 
-        venues.map(v => ({ 
-            id: v.id, 
-            name: v.name, 
-            entityId: v.entityId, 
-            entityName: v.entityName 
-        })),
-        [venues]
-    );
-
-    const recurringGameOptions: RecurringGameOption[] = useMemo(() => 
-        recurringGames
-            .filter(rg => rg.isActive !== false) // Only show active recurring games
-            .map(rg => ({
-                id: rg.id,
-                name: rg.displayName || rg.name,
-                venueId: rg.venueId,
-                venueName: rg.venueName,
-                entityId: rg.entityId,
-                dayOfWeek: rg.dayOfWeek,
-                startTime: rg.startTime,
-                // Map typical values to standard field names for auto-populate
-                buyIn: rg.typicalBuyIn,
-                rake: rg.typicalRake,
-                startingStack: rg.typicalStartingStack,
-                guaranteeAmount: rg.typicalGuarantee,
-                gameVariant: rg.gameVariant,
-                gameType: rg.gameType,
-                isSignature: rg.isSignature,
-                isBounty: rg.isBounty,
-            })),
-        [recurringGames]
-    );
-
-    const seriesOptions: SeriesOption[] = useMemo(() => 
-        series
-            .filter(s => s.status !== 'CANCELLED') // Exclude cancelled series
-            .map(s => ({
-                id: s.id,
-                name: s.name,
-                year: s.year,
-                venueId: s.venueId,
-                status: s.status,
-            })),
-        [series]
-    );
-
-    // === NEW: Handle editor callbacks ===
     const handleCreateSuccess = (result: SaveGameResult) => {
         console.log('Game created:', result);
         setIsCreateModalOpen(false);
-        fetchGames(); // Refresh the list
+        fetchGames();
     };
 
     const handleEditSuccess = (result: SaveGameResult) => {
         console.log('Game updated:', result);
         setEditingGame(null);
-        fetchGames(); // Refresh the list
+        fetchGames();
+        // Also refresh search results if showing
+        if (showSearchResults && idSearchQuery) {
+            searchGamesBackend(idSearchQuery);
+        }
     };
 
-    const handleEditGame = (game: Game) => {
-        setEditingGame(game);
+    // === NEW: Delete Game Handlers ===
+    const handleDeleteClick = (game: Game) => {
+        setGameToDelete(game);
+        setDeleteError(null);
+        setIsDeleteModalOpen(true);
     };
 
-    const columns = useMemo<ColumnDef<Game>[]>(() => [
+    const handleDeleteConfirm = async () => {
+        if (!gameToDelete) return;
+        
+        setIsDeleting(true);
+        setDeleteError(null);
+        
+        try {
+            const response: any = await getClient().graphql({
+                query: deleteGameWithCleanupMutation,
+                variables: {
+                    input: { gameId: gameToDelete.id }
+                }
+            });
+            
+            const result = response.data?.deleteGameWithCleanup;
+            
+            if (result?.success) {
+                console.log('Game deleted successfully:', result);
+                setIsDeleteModalOpen(false);
+                setGameToDelete(null);
+                // Remove from local state immediately
+                setGames(prev => prev.filter(g => g.id !== gameToDelete.id));
+                setSelectedGameIds(prev => {
+                    const next = new Set(prev);
+                    next.delete(gameToDelete.id);
+                    return next;
+                });
+                // Also remove from search results if showing
+                if (showSearchResults) {
+                    setIdSearchResults(prev => prev.filter(g => g.id !== gameToDelete.id));
+                }
+            } else {
+                setDeleteError(result?.message || 'Failed to delete game');
+            }
+        } catch (error: any) {
+            console.error('Error deleting game:', error);
+            setDeleteError(error.message || 'An unexpected error occurred');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setGameToDelete(null);
+        setDeleteError(null);
+    };
+
+    // --- Selection Handlers ---
+    const handleSelectGame = (gameId: string, checked: boolean) => {
+        setSelectedGameIds(prev => {
+            const next = new Set(prev);
+            if (checked) next.add(gameId);
+            else next.delete(gameId);
+            return next;
+        });
+    };
+
+    const handleSelectAll = (checked: boolean) => {
+        setSelectAll(checked);
+        if (checked) {
+            setSelectedGameIds(new Set(filteredGames.map(g => g.id)));
+        } else {
+            setSelectedGameIds(new Set());
+        }
+    };
+
+    // --- Columns ---
+    const columns: ColumnDef<Game>[] = useMemo(() => [
         {
             id: 'select',
             header: () => (
-                <div className="px-1">
-                    <input
-                        type="checkbox"
-                        checked={selectAll}
-                        onChange={handleSelectAll}
-                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
-                    />
-                </div>
+                <input 
+                    type="checkbox" 
+                    checked={selectAll}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
             ),
             cell: ({ row }) => (
-                <div className="px-1">
-                    <input
-                        type="checkbox"
-                        checked={selectedGameIds.has(row.original.id)}
-                        onChange={() => {
-                            const id = row.original.id;
-                            setSelectedGameIds(prev => {
-                                const next = new Set(prev);
-                                next.has(id) ? next.delete(id) : next.add(id);
-                                return next;
-                            });
-                        }}
-                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
-                    />
-                </div>
-            ),
-        },
-        {
-            accessorKey: 'gameStartDateTime',
-            header: 'Date',
-            cell: ({ getValue }) => (
-                <span className="whitespace-nowrap font-medium">
-                    {formatDateTimeAEST(new Date(getValue() as string))}
-                </span>
+                <input 
+                    type="checkbox"
+                    checked={selectedGameIds.has(row.original.id)}
+                    onChange={(e) => handleSelectGame(row.original.id, e.target.checked)}
+                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
             ),
         },
         {
             accessorKey: 'name',
-            header: 'Name',
-            cell: ({ getValue }) => (
-                <span className="font-medium text-gray-900 dark:text-gray-50 truncate max-w-[200px] block" title={getValue() as string}>
-                    {getValue() as string}
-                </span>
+            header: 'Game',
+            cell: ({ row }) => (
+                <div>
+                    <p className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-xs">
+                        {row.original.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {formatDateTimeAEST(new Date(row.original.gameStartDateTime))}
+                    </p>
+                    {/* Show consolidation type badge */}
+                    {row.original.consolidationType && (
+                        <span className={cx(
+                            "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium mt-1",
+                            row.original.consolidationType === 'PARENT' 
+                                ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                                : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                        )}>
+                            {row.original.consolidationType}
+                        </span>
+                    )}
+                </div>
             ),
         },
         {
-            accessorKey: 'recurringGameId',
-            header: 'Recurring',
-            cell: ({ getValue }) => (
-                getValue() ? (
-                    <CheckIcon className="h-5 w-5 text-green-600" />
+            accessorKey: 'gameStatus',
+            header: 'Status',
+            cell: ({ getValue }) => {
+                const status = getValue() as string;
+                return (
+                    <span className={cx(
+                        "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                        status === 'FINISHED' && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+                        status === 'RUNNING' && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+                        status === 'SCHEDULED' && "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+                        status === 'CANCELLED' && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                    )}>
+                        {status}
+                    </span>
+                );
+            }
+        },
+        {
+            accessorKey: 'venueAssignmentStatus',
+            header: 'Assignment',
+            cell: ({ row }) => (
+                row.original.venueAssignmentStatus ? (
+                    <span className={cx(
+                        "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                        row.original.venueAssignmentStatus === 'MANUALLY_ASSIGNED' && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+                        row.original.venueAssignmentStatus === 'AUTO_ASSIGNED' && "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+                        row.original.venueAssignmentStatus === 'PENDING_ASSIGNMENT' && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                    )}>
+                        {row.original.venueAssignmentStatus === 'MANUALLY_ASSIGNED' && <CheckIcon className="h-3 w-3 mr-1" />}
+                        {row.original.venueAssignmentStatus.replace(/_/g, ' ')}
+                    </span>
                 ) : null
             ),
         },
@@ -620,23 +907,37 @@ export const GameManagement = () => {
             header: 'Entries',
             cell: ({ getValue }) => (getValue() as number)?.toLocaleString() || 0,
         },
-        // === Actions column ===
+        // === Actions column with Edit and Delete ===
         {
             id: 'actions',
             header: '',
             cell: ({ row }) => (
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditGame(row.original);
-                    }}
-                    className="h-8 w-8 p-0"
-                    title="Edit Game"
-                >
-                    <PencilSquareIcon className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditGame(row.original);
+                        }}
+                        className="h-8 w-8 p-0"
+                        title="Edit Game"
+                    >
+                        <PencilSquareIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(row.original);
+                        }}
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                        title="Delete Game"
+                    >
+                        <TrashIcon className="h-4 w-4" />
+                    </Button>
+                </div>
             ),
         },
     ], [selectedGameIds, selectAll, filteredGames]);
@@ -738,7 +1039,6 @@ export const GameManagement = () => {
                         </span>
                     )}
                     
-                    {/* === NEW: Add Game Button === */}
                     <Button 
                         size="sm"
                         onClick={() => setIsCreateModalOpen(true)}
@@ -792,6 +1092,126 @@ export const GameManagement = () => {
             {/* --- INDIVIDUAL GAMES TAB --- */}
             {activeTab === 'games' && (
                 <div className="space-y-4">
+
+                    {/* === NEW: Backend Search Section === */}
+                    <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border-indigo-200 dark:border-indigo-800">
+                        <div className="p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <MagnifyingGlassIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    Search All Games
+                                </h3>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    (searches entire database)
+                                </span>
+                            </div>
+                            
+                            <div className="flex gap-2">
+                                <div className="relative flex-1 max-w-md">
+                                    <Input 
+                                        type="text"
+                                        placeholder="Enter Tournament ID or search by name..."
+                                        value={idSearchQuery}
+                                        onChange={(e) => handleIdSearchChange(e.target.value)}
+                                        className="pr-10"
+                                    />
+                                    {idSearchQuery && (
+                                        <button
+                                            onClick={clearSearch}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                        >
+                                            <XMarkIcon className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                </div>
+                                {isSearching && (
+                                    <div className="flex items-center text-sm text-gray-500">
+                                        <div className="animate-spin h-4 w-4 border-2 border-indigo-500 border-t-transparent rounded-full mr-2" />
+                                        Searching...
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Search Results */}
+                            {showSearchResults && (
+                                <div className="mt-4">
+                                    {searchError ? (
+                                        <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-md border border-red-200 dark:border-red-800">
+                                            <p className="text-sm text-red-700 dark:text-red-300">{searchError}</p>
+                                        </div>
+                                    ) : idSearchResults.length === 0 && !isSearching ? (
+                                        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                No games found matching "{idSearchQuery}"
+                                            </p>
+                                        </div>
+                                    ) : idSearchResults.length > 0 ? (
+                                        <div className="bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                            <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                                                    Found {idSearchResults.length} game{idSearchResults.length !== 1 ? 's' : ''}
+                                                </p>
+                                            </div>
+                                            <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-80 overflow-y-auto">
+                                                {idSearchResults.map((game) => (
+                                                    <div 
+                                                        key={game.id} 
+                                                        className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 flex items-center justify-between gap-4"
+                                                    >
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                                {game.name}
+                                                            </p>
+                                                            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                                <span>{formatDateTimeAEST(new Date(game.gameStartDateTime))}</span>
+                                                                <span>•</span>
+                                                                <span>{game.venueName}</span>
+                                                                <span>•</span>
+                                                                <span>{game.entityName}</span>
+                                                            </div>
+                                                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 font-mono">
+                                                                Tournament ID: {game.tournamentId || 'N/A'}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 shrink-0">
+                                                            <span className={cx(
+                                                                "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                                                                game.gameStatus === 'FINISHED' && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+                                                                game.gameStatus === 'RUNNING' && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+                                                                game.gameStatus === 'SCHEDULED' && "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+                                                                game.gameStatus === 'CANCELLED' && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                                                            )}>
+                                                                {game.gameStatus}
+                                                            </span>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleEditGame(game)}
+                                                                className="h-8 w-8 p-0"
+                                                                title="Edit Game"
+                                                            >
+                                                                <PencilSquareIcon className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleDeleteClick(game)}
+                                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                                                                title="Delete Game"
+                                                            >
+                                                                <TrashIcon className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            )}
+                        </div>
+                    </Card>
+
                     {/* Filters Container */}
                     <div className="bg-white dark:bg-gray-950 p-4 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm">
                         
@@ -800,24 +1220,25 @@ export const GameManagement = () => {
                             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filters</span>
                             <Button 
                                 variant="ghost" 
-                                size="sm" 
+                                size="sm"
                                 onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
                             >
-                                <FunnelIcon className="h-4 w-4 mr-1" />
-                                {isMobileFiltersOpen ? 'Hide' : 'Show'}
+                                <FunnelIcon className="h-4 w-4" />
                             </Button>
                         </div>
 
+                        {/* Filter Controls */}
                         <div className={cx(
-                            "flex flex-col sm:flex-row items-center gap-3",
-                            "transition-all duration-200 ease-in-out",
-                            isMobileFiltersOpen ? "block" : "hidden sm:flex"
+                            "grid gap-4",
+                            isMobileFiltersOpen ? "grid-cols-1" : "hidden sm:grid sm:grid-cols-4"
                         )}>
-                            <div className="w-full sm:flex-1 min-w-[200px] max-w-xs">
-                                <MultiEntitySelector showLabel={false} />
+                            <div className="col-span-1">
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Entity</label>
+                                <MultiEntitySelector className="w-full" />
                             </div>
                             
-                            <div className="w-full sm:w-48">
+                            <div className="col-span-1">
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Assignment Status</label>
                                 <Select 
                                     value={venueFilter} 
                                     onChange={(e) => setVenueFilter(e.target.value as VenueFilterType)}
@@ -830,49 +1251,27 @@ export const GameManagement = () => {
                                 </Select>
                             </div>
                             
-                            <div className="w-full sm:flex-1">
-                                <Input
-                                    type="search"
-                                    placeholder="Search by name or venue..."
+                            <div className="col-span-1">
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Filter Results</label>
+                                <Input 
+                                    type="text"
+                                    placeholder="Filter loaded games..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
+                            
+                            <div className="col-span-1 flex items-end">
+                                <Button
+                                    onClick={handleReassignOpen}
+                                    disabled={selectedGameIds.size === 0}
+                                    className="w-full"
+                                >
+                                    Reassign Venue ({selectedGameIds.size})
+                                </Button>
+                            </div>
                         </div>
                     </div>
-
-                    {/* Batch Actions Bar */}
-                    {selectedGameIds.size > 0 && (
-                        <div className="flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-950/30 rounded-md border border-indigo-100 dark:border-indigo-900/50 animate-in fade-in slide-in-from-top-2 duration-200">
-                            <div className="flex items-center gap-2">
-                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
-                                    {selectedGameIds.size}
-                                </span>
-                                <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
-                                    games selected
-                                </span>
-                            </div>
-                            <div className="flex gap-2">
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    onClick={() => {
-                                        setSelectedGameIds(new Set());
-                                        setSelectAll(false);
-                                    }}
-                                    className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/50"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button 
-                                    size="sm"
-                                    onClick={handleReassignOpen}
-                                >
-                                    Reassign Venue
-                                </Button>
-                            </div>
-                        </div>
-                    )}
 
                     {/* Data Table Card */}
                     <Card className="overflow-hidden">
@@ -908,7 +1307,7 @@ export const GameManagement = () => {
                 <RecurringGamesManager venues={venues} />
             )}
 
-            {/* === NEW: Create Game Modal === */}
+            {/* === Create Game Modal === */}
             <GameEditorModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
@@ -923,7 +1322,7 @@ export const GameManagement = () => {
                 showAdvanced={false}
             />
 
-            {/* === NEW: Edit Game Modal === */}
+            {/* === Edit Game Modal === */}
             {editingGame && (
                 <GameEditorModal
                     isOpen={!!editingGame}
@@ -967,6 +1366,121 @@ export const GameManagement = () => {
                     showAdvanced={true}
                 />
             )}
+
+            {/* === Delete Confirmation Modal === */}
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                title="Delete Game"
+            >
+                <div className="space-y-4">
+                    {/* Warning */}
+                    <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md border border-red-200 dark:border-red-800">
+                        <div className="flex gap-3">
+                            <ExclamationTriangleIcon className="h-5 w-5 text-red-600 dark:text-red-500 shrink-0" />
+                            <div>
+                                <h4 className="text-sm font-medium text-red-800 dark:text-red-400">
+                                    This action cannot be undone
+                                </h4>
+                                <p className="text-xs text-red-700 dark:text-red-500 mt-1">
+                                    This will permanently delete the game and all associated data including:
+                                    player entries, results, transactions, financial snapshots, and costs.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Game Details */}
+                    {gameToDelete && (
+                        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-md">
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                                Game to delete:
+                            </h4>
+                            <dl className="text-sm space-y-1">
+                                <div className="flex justify-between">
+                                    <dt className="text-gray-500 dark:text-gray-400">Name:</dt>
+                                    <dd className="text-gray-900 dark:text-gray-100 font-medium truncate max-w-xs">
+                                        {gameToDelete.name}
+                                    </dd>
+                                </div>
+                                <div className="flex justify-between">
+                                    <dt className="text-gray-500 dark:text-gray-400">Date:</dt>
+                                    <dd className="text-gray-900 dark:text-gray-100">
+                                        {formatDateTimeAEST(new Date(gameToDelete.gameStartDateTime))}
+                                    </dd>
+                                </div>
+                                <div className="flex justify-between">
+                                    <dt className="text-gray-500 dark:text-gray-400">Venue:</dt>
+                                    <dd className="text-gray-900 dark:text-gray-100">{gameToDelete.venueName}</dd>
+                                </div>
+                                <div className="flex justify-between">
+                                    <dt className="text-gray-500 dark:text-gray-400">Players:</dt>
+                                    <dd className="text-gray-900 dark:text-gray-100">{gameToDelete.totalUniquePlayers}</dd>
+                                </div>
+                                {gameToDelete.consolidationType && (
+                                    <div className="flex justify-between">
+                                        <dt className="text-gray-500 dark:text-gray-400">Type:</dt>
+                                        <dd className="text-gray-900 dark:text-gray-100">
+                                            <span className={cx(
+                                                "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium",
+                                                gameToDelete.consolidationType === 'PARENT' 
+                                                    ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                                                    : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                            )}>
+                                                {gameToDelete.consolidationType}
+                                            </span>
+                                        </dd>
+                                    </div>
+                                )}
+                            </dl>
+                            
+                            {/* Parent/Child Warning */}
+                            {gameToDelete.consolidationType === 'PARENT' && (
+                                <div className="mt-3 p-2 bg-amber-50 dark:bg-amber-900/20 rounded border border-amber-200 dark:border-amber-800">
+                                    <p className="text-xs text-amber-800 dark:text-amber-300">
+                                        <strong>Note:</strong> This is a consolidated PARENT game. Deleting it will unlink all child flights/days.
+                                    </p>
+                                </div>
+                            )}
+                            
+                            {gameToDelete.consolidationType === 'CHILD' && (
+                                <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                                    <p className="text-xs text-blue-800 dark:text-blue-300">
+                                        <strong>Note:</strong> This is a CHILD game (flight/day). The parent totals will be recalculated.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Error Message */}
+                    {deleteError && (
+                        <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-md border border-red-200 dark:border-red-800">
+                            <p className="text-sm text-red-700 dark:text-red-300">
+                                {deleteError}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <Button 
+                            variant="secondary" 
+                            onClick={handleDeleteCancel}
+                            disabled={isDeleting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button 
+                            variant="destructive"
+                            onClick={handleDeleteConfirm}
+                            isLoading={isDeleting}
+                        >
+                            Delete Game
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
 
             {/* Reassign Modal */}
             <Modal

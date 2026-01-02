@@ -33,15 +33,15 @@ const CONFIG = {
   
   // Tables to clear (order: children first, parents last)
   TABLES_TO_CLEAR: [
-    'ScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging',
-    'ScraperJob-fosb7ek5argnhctz4odpt52eia-staging',
-    'ScraperState-fosb7ek5argnhctz4odpt52eia-staging',
-    'ScrapeStructure-fosb7ek5argnhctz4odpt52eia-staging',
-    'ScrapeURL-fosb7ek5argnhctz4odpt52eia-staging',
+    'ScrapeAttempt-ht3nugt6lvddpeeuwj3x6mkite-dev',
+    'ScraperJob-ht3nugt6lvddpeeuwj3x6mkite-dev',
+    'ScraperState-ht3nugt6lvddpeeuwj3x6mkite-dev',
+    'ScrapeStructure-ht3nugt6lvddpeeuwj3x6mkite-dev',
+    'ScrapeURL-ht3nugt6lvddpeeuwj3x6mkite-dev',
   ],
   
   // NOTE: S3Storage is intentionally NOT in this list
-  // 'S3Storage-fosb7ek5argnhctz4odpt52eia-staging' - PRESERVED
+  // 'S3Storage-ht3nugt6lvddpeeuwj3x6mkite-dev' - PRESERVED
   
   REGION: process.env.AWS_REGION || 'ap-southeast-2',
 };

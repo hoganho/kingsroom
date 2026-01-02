@@ -1,5 +1,11 @@
 # 85-social.graphql
 # ==========================================
+# Social Pulse - Core Models and Types
+# ==========================================
+
+# ===================================================================
+# 1. CORE MODELS
+# ===================================================================
 
 type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
@@ -17,6 +23,7 @@ type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]
   followingCount: Int
   postCount: Int
   hasFullHistory: Boolean @default(value: "false")
+  fullSyncOldestPostDate: AWSDateTime
   pageDescription: String
   category: String
   website: String
@@ -86,7 +93,7 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   linkedGameId: ID @index(name: "bySocialPostGame")
   linkedGame: Game @belongsTo(fields: ["linkedGameId"])
   
-  # === NEW: PROCESSING STATUS ===
+  # === PROCESSING STATUS ===
   processingStatus: SocialPostProcessingStatus 
     @default(value: "PENDING")
     @index(name: "byProcessingStatus", sortKeyFields: ["postedAt"])
@@ -94,27 +101,31 @@ type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   processingError: String
   processingVersion: String              # Track which version processed this
   
-  # === NEW: CONTENT CLASSIFICATION ===
+  # === CONTENT CLASSIFICATION ===
   contentType: SocialPostContentType     # RESULT, PROMOTIONAL, GENERAL, COMMENT
   contentTypeConfidence: Float
   
-  # === NEW: EXTRACTION RELATIONSHIP ===
+  # === EXTRACTION RELATIONSHIP ===
   extractedGameDataId: ID
   extractedGameData: SocialPostGameData @hasOne(fields: ["extractedGameDataId"])
   
-  # === NEW: GAME LINKS (many-to-many via junction table) ===
+  # === GAME LINKS (many-to-many via junction table) ===
   gameLinks: [SocialPostGameLink] @hasMany(indexName: "bySocialPostGameLink", fields: ["id"])
   
-  # === NEW: CONVENIENCE FIELDS (denormalized from links) ===
+  # === CONVENIENCE FIELDS (denormalized from links) ===
   primaryLinkedGameId: ID                # First/main game referenced (also synced to linkedGameId)
   linkedGameCount: Int @default(value: "0")
   hasUnverifiedLinks: Boolean @default(value: "false")
   
-  # === NEW: YEAR-MONTH PARTITION KEY FOR DATE QUERIES ===
+  # === YEAR-MONTH PARTITION KEY FOR DATE QUERIES ===
   # Format: "2025-01" - enables efficient date range queries via byPostMonth GSI
   # Set automatically when post is created/updated based on postedAt
   postYearMonth: String @index(name: "byPostMonth", sortKeyFields: ["postedAt"])
   
+  # === EFFECTIVE GAME DATE (Computed, denormalized) ===
+  effectiveGameDate: AWSDateTime
+  effectiveGameDateSource: String
+
   # === RELATIONSHIPS ===
   socialAccountId: ID! @index(name: "bySocialAccount", sortKeyFields: ["postedAt"])
   socialAccount: SocialAccount @belongsTo(fields: ["socialAccountId"])
@@ -162,7 +173,7 @@ type SocialScheduledPost @model(subscriptions: null) @auth(rules: [{ allow: priv
 }
 
 # ===================================================================
-# 7. NON-MODEL TYPES & RESPONSES
+# 2. CONNECTION TYPES (Paginated)
 # ===================================================================
 
 type SocialFeedConnection {
@@ -181,6 +192,10 @@ type SocialAccountConnection {
   nextToken: String
 }
 
+# ===================================================================
+# 3. METRICS & RESPONSE TYPES
+# ===================================================================
+
 type SocialAccountMetrics {
   accountId: ID!
   totalPosts: Int!
@@ -193,12 +208,40 @@ type SocialAccountMetrics {
   topPerformingPosts: [SocialPost!]
 }
 
+# Result type for social scrape/sync mutations
 type SocialScrapeResult {
   success: Boolean!
   message: String
   postsFound: Int
   newPostsAdded: Int
+  postsProcessed: Int
+  rateLimited: Boolean
+  timeout: Boolean
+  oldestPostDate: String
 }
+
+# Result type for page info sync mutation
+type SyncPageInfoResult {
+  success: Boolean!
+  message: String
+  logoUrl: String
+}
+
+# Event type for real-time sync progress subscription updates
+type SocialSyncEvent {
+  socialAccountId: ID!
+  status: SyncEventStatus!
+  message: String
+  postsFound: Int
+  newPostsAdded: Int
+  rateLimited: Boolean
+  pagesCompleted: Int
+  completedAt: AWSDateTime
+}
+
+# ===================================================================
+# 4. INPUT TYPES
+# ===================================================================
 
 input AddSocialAccountInput {
   platform: SocialPlatform!

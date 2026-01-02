@@ -2,7 +2,7 @@
  * extraction/dataExtractor.js
  * Extract structured game data from social post content
  * 
- * ENHANCED:
+ * ENHANCED (v2.0):
  * - Bad beat jackpot extraction
  * - Buy-in breakdown parsing (prizepool + rake)
  * - Tournament type from "Unlimited Re-Entries" etc.
@@ -11,6 +11,13 @@
  * - Smarter first place / total prizes calculation
  * - Venue matching from database
  * - NaN/Infinity sanitization for DynamoDB compatibility
+ * 
+ * NEW (v3.0 - Ticket Integration):
+ * - Comprehensive ticket extraction from placement lines
+ * - Aggregate ticket statistics for reconciliation
+ * - Promotional ticket extraction from promo posts
+ * - Enhanced winner info with ticket details
+ * - Reconciliation fields mapping to Game model
  */
 
 const { 
@@ -19,8 +26,24 @@ const {
   extractAll, 
   parseDollarAmount 
 } = require('../utils/patterns');
-const { getDayOfWeek, parseTimeString, inferGameDate } = require('../utils/dateUtils');
+const { getDayOfWeek, inferGameDate, toAEST } = require('../utils/dateUtils');
 const { getAllVenues } = require('../utils/graphql');
+
+// Import ticket extraction functions from placementParser
+const {
+  parsePlacements,
+  createPlacementRecords,
+  extractTickets,
+  hasTicketIndicator,
+  extractTicketValue,
+  extractPromoTickets,
+  calculateTicketAggregates,
+  generateTicketSummary,
+  extractEnhancedWinnerInfo,
+  cleanPlayerName,
+  TICKET_PATTERNS,
+  TICKET_TYPE_MAP
+} = require('./placementParser');
 
 // ===================================================================
 // NUMERIC SANITIZATION HELPERS
@@ -135,7 +158,7 @@ const clearVenueCache = () => {
 };
 
 // ===================================================================
-// NEW: ENHANCED EXTRACTION PATTERNS
+// ENHANCED EXTRACTION PATTERNS
 // ===================================================================
 
 const ENHANCED_PATTERNS = {
@@ -157,7 +180,7 @@ const ENHANCED_PATTERNS = {
     /starting\s*stack[:\s]+\$?([\d,]+)(?:k)?(?:\s*chips)?/i,
     /([\d,]+)(?:k)?\s*(?:chips?)?\s*starting/i,
     /start(?:ing)?\s*(?:with\s+)?([\d,]+)(?:k)?(?:\s*chips)?/i,
-    /([\d,]+)(?:k)?\s*ss\b/i  // NEW: "30000ss" or "30kss" pattern
+    /([\d,]+)(?:k)?\s*ss\b/i  // "30000ss" or "30kss" pattern
   ],
   
   // Blind levels: "20-minute levels" or "Blinds: 15 min" or "20min levels"
@@ -211,9 +234,12 @@ const DAY_KEYWORDS = {
  * Extract all game-related data from a social post
  * 
  * @param {Object} post - Social post object
+ * @param {Object} options - Extraction options
+ * @param {string} options.socialPostId - ID of the social post (for placement records)
+ * @param {string} options.socialPostGameDataId - ID of the game data record (for placement records)
  * @returns {Object} Extracted data (sanitized for DynamoDB)
  */
-const extractGameData = async (post) => {
+const extractGameData = async (post, options = {}) => {
   const content = post.content || '';
   const startTime = Date.now();
   
@@ -223,7 +249,7 @@ const extractGameData = async (post) => {
     extractedTournamentUrl: null,
     extractedTournamentId: null,
     
-    // NEW: Recurring game detection (from first 2 lines)
+    // Recurring game detection (from first 2 lines)
     extractedRecurringGameName: null,
     extractedRecurringDayOfWeek: null,
     
@@ -239,16 +265,20 @@ const extractGameData = async (post) => {
     extractedStartTime: null,
     dateSource: null,
     
+    // Effective game date (computed: extractedDate priority, postedAt fallback)
+    effectiveGameDate: null,
+    effectiveGameDateSource: null,       // "extracted" | "posted_at"
+    
     // Financials
     extractedBuyIn: null,
-    extractedBuyInPrizepool: null,    // NEW: Amount going to prizepool
-    extractedRake: null,               // NEW: Rake portion of buy-in
+    extractedBuyInPrizepool: null,
+    extractedRake: null,
     extractedGuarantee: null,
     extractedPrizePool: null,
     extractedFirstPlacePrize: null,
     extractedTotalPrizesPaid: null,
     
-    // NEW: Bad beat jackpot
+    // Bad beat jackpot
     extractedBadBeatJackpot: null,
     
     // Entries
@@ -261,7 +291,7 @@ const extractGameData = async (post) => {
     extractedGameVariant: null,
     extractedGameTypes: [],
     
-    // NEW: Structure details
+    // Structure details
     extractedStartingStack: null,
     extractedBlindLevelMinutes: null,
     extractedLateRegTime: null,
@@ -274,10 +304,54 @@ const extractGameData = async (post) => {
     extractedFlightLetter: null,
     isSeriesEvent: false,
     
+    // ===================================================================
+    // WINNER EXTRACTION (First Place - Quick Access)
+    // ===================================================================
+    extractedWinnerName: null,
+    extractedWinnerPrize: null,           // Legacy: cash only
+    extractedWinnerCashPrize: null,       // NEW: Just the cash portion
+    extractedWinnerHasTicket: false,
+    extractedWinnerTicketType: null,
+    extractedWinnerTicketValue: null,
+    extractedWinnerTotalValue: null,      // Cash + ticket combined
+    placementCount: 0,
+    
+    // ===================================================================
+    // TICKET AGGREGATION (NEW - For Reconciliation)
+    // ===================================================================
+    totalTicketsExtracted: 0,
+    totalTicketValue: null,
+    ticketCountByType: null,              // AWSJSON: { "ACCUMULATOR_TICKET": 5 }
+    ticketValueByType: null,              // AWSJSON: { "ACCUMULATOR_TICKET": 750 }
+    totalCashPaid: null,
+    totalPrizesWithTickets: 0,
+    totalTicketOnlyPrizes: 0,
+    
+    // ===================================================================
+    // PROMOTIONAL TICKET INFO (NEW)
+    // ===================================================================
+    hasAdvertisedTickets: false,
+    advertisedTicketCount: null,
+    advertisedTicketType: null,
+    advertisedTicketValue: null,
+    advertisedTicketDescription: null,
+    advertisedTickets: null,              // AWSJSON array
+    
+    // ===================================================================
+    // RECONCILIATION FIELDS (NEW - Map to Game model)
+    // ===================================================================
+    reconciliation_accumulatorTicketCount: 0,
+    reconciliation_accumulatorTicketValue: null,
+    reconciliation_totalPrizepoolPaid: null,
+    reconciliation_cashPlusTotalTicketValue: null,
+    hasReconciliationDiscrepancy: false,
+    reconciliationNotes: null,
+    
     // Raw data for debugging
     patternMatches: {},
     extractedPrizes: [],
-    extractedPlacements: []           // NEW: Structured placement data
+    extractedPlacements: [],              // Structured placement data (legacy format)
+    placementRecords: []                  // NEW: Full placement records with ticket data
   };
   
   // === TOURNAMENT URL & ID ===
@@ -299,7 +373,7 @@ const extractGameData = async (post) => {
   if (recurringInfo) {
     extracted.extractedRecurringGameName = recurringInfo.name;
     extracted.extractedRecurringDayOfWeek = recurringInfo.dayOfWeek;
-    extracted.extractedName = recurringInfo.name; // Also set as primary name
+    extracted.extractedName = recurringInfo.name;
     console.log(`[EXTRACTOR] Recurring game: "${recurringInfo.name}" (${recurringInfo.dayOfWeek || 'no day detected'})`);
   }
   
@@ -330,28 +404,28 @@ const extractGameData = async (post) => {
     extracted.extractedTotalEntries = safeParseInt(entriesStr);
   }
   
-  // === BAD BEAT JACKPOT (NEW) ===
+  // === BAD BEAT JACKPOT ===
   const badBeatJackpot = extractBadBeatJackpot(content);
   if (badBeatJackpot) {
     extracted.extractedBadBeatJackpot = sanitizeNumeric(badBeatJackpot);
     console.log(`[EXTRACTOR] Bad beat jackpot: $${badBeatJackpot}`);
   }
   
-  // === STARTING STACK (NEW) ===
+  // === STARTING STACK ===
   const startingStack = extractStartingStack(content);
   if (startingStack) {
     extracted.extractedStartingStack = sanitizeNumeric(startingStack);
     console.log(`[EXTRACTOR] Starting stack: ${startingStack}`);
   }
   
-  // === BLIND LEVELS (NEW) ===
+  // === BLIND LEVELS ===
   const blindMinutes = extractBlindLevelMinutes(content);
   if (blindMinutes) {
     extracted.extractedBlindLevelMinutes = sanitizeNumeric(blindMinutes);
     console.log(`[EXTRACTOR] Blind levels: ${blindMinutes} minutes`);
   }
   
-  // === LATE REGISTRATION (NEW) ===
+  // === LATE REGISTRATION ===
   const lateReg = extractLateRegistration(content);
   if (lateReg) {
     extracted.extractedLateRegTime = lateReg.time;
@@ -359,14 +433,93 @@ const extractGameData = async (post) => {
     console.log(`[EXTRACTOR] Late reg: ${lateReg.time || `level ${lateReg.level}`}`);
   }
   
-  // === PLACEMENTS & PRIZES (Enhanced - only from placement lines) ===
-  const placementResult = extractPlacementsAndPrizes(content);
-  extracted.extractedPlacements = placementResult.placements;
-  extracted.extractedFirstPlacePrize = sanitizeNumeric(placementResult.firstPlacePrize);
-  extracted.extractedTotalPrizesPaid = sanitizeNumeric(placementResult.totalPrizesPaid);
+  // ===================================================================
+  // PLACEMENTS & PRIZES (Enhanced with Ticket Extraction)
+  // ===================================================================
   
-  if (placementResult.placements.length > 0) {
-    console.log(`[EXTRACTOR] Found ${placementResult.placements.length} placements, total: $${placementResult.totalPrizesPaid}`);
+  // Parse placements using the new placementParser with ticket support
+  const rawPlacements = parsePlacements(content);
+  
+  // Create full placement records (with ticket data)
+  const placementRecords = createPlacementRecords(
+    rawPlacements, 
+    options.socialPostId || null,
+    options.socialPostGameDataId || null
+  );
+  
+  extracted.placementRecords = placementRecords;
+  extracted.placementCount = placementRecords.length;
+  
+  // Legacy format for backward compatibility
+  extracted.extractedPlacements = rawPlacements.map(p => ({
+    place: p.place,
+    name: p.playerName,
+    prize: p.cashPrize,
+    raw: p.rawText
+  }));
+  
+  // Calculate legacy totals
+  const firstPlace = placementRecords.find(p => p.place === 1);
+  extracted.extractedFirstPlacePrize = sanitizeNumeric(firstPlace?.cashPrize || null);
+  extracted.extractedTotalPrizesPaid = sanitizeNumeric(
+    placementRecords.reduce((sum, p) => sum + (p.cashPrize || 0), 0) || null
+  );
+  
+  if (placementRecords.length > 0) {
+    console.log(`[EXTRACTOR] Found ${placementRecords.length} placements, total cash: $${extracted.extractedTotalPrizesPaid}`);
+    
+    // ===================================================================
+    // NEW: Calculate ticket aggregates for reconciliation
+    // ===================================================================
+    const ticketAggregates = calculateTicketAggregates(placementRecords);
+    
+    // Merge aggregates into extracted object
+    Object.assign(extracted, {
+      totalTicketsExtracted: ticketAggregates.totalTicketsExtracted,
+      totalTicketValue: ticketAggregates.totalTicketValue,
+      ticketCountByType: ticketAggregates.ticketCountByType,
+      ticketValueByType: ticketAggregates.ticketValueByType,
+      totalCashPaid: ticketAggregates.totalCashPaid,
+      totalPrizesWithTickets: ticketAggregates.totalPrizesWithTickets,
+      totalTicketOnlyPrizes: ticketAggregates.totalTicketOnlyPrizes,
+      reconciliation_accumulatorTicketCount: ticketAggregates.reconciliation_accumulatorTicketCount,
+      reconciliation_accumulatorTicketValue: ticketAggregates.reconciliation_accumulatorTicketValue,
+      reconciliation_totalPrizepoolPaid: ticketAggregates.reconciliation_totalPrizepoolPaid,
+      reconciliation_cashPlusTotalTicketValue: ticketAggregates.reconciliation_cashPlusTotalTicketValue,
+    });
+    
+    if (ticketAggregates.totalTicketsExtracted > 0) {
+      console.log(`[EXTRACTOR] Tickets extracted: ${ticketAggregates.totalTicketsExtracted}, total value: $${ticketAggregates.totalTicketValue || 'unknown'}`);
+    }
+    
+    // ===================================================================
+    // NEW: Enhanced winner info with ticket details
+    // ===================================================================
+    const winnerInfo = extractEnhancedWinnerInfo(placementRecords);
+    Object.assign(extracted, winnerInfo);
+    
+    // Also set legacy field
+    extracted.extractedWinnerPrize = winnerInfo.extractedWinnerCashPrize;
+  }
+  
+  // ===================================================================
+  // NEW: Extract promotional ticket info (for promo posts)
+  // ===================================================================
+  const promoTicketInfo = extractPromoTickets(content);
+  if (promoTicketInfo.hasTicketPrizes) {
+    extracted.hasAdvertisedTickets = true;
+    extracted.advertisedTickets = promoTicketInfo.ticketPrizes;
+    extracted.advertisedTicketCount = promoTicketInfo.ticketSummary?.totalTicketCount || null;
+    extracted.advertisedTicketValue = promoTicketInfo.ticketSummary?.totalEstimatedValue || null;
+    
+    // Get primary advertised ticket
+    if (promoTicketInfo.ticketPrizes?.length > 0) {
+      const primary = promoTicketInfo.ticketPrizes[0];
+      extracted.advertisedTicketType = primary.prizeType;
+      extracted.advertisedTicketDescription = primary.description;
+    }
+    
+    console.log(`[EXTRACTOR] Promotional tickets found: ${extracted.advertisedTicketCount} ticket(s), value: $${extracted.advertisedTicketValue || 'unknown'}`);
   }
   
   // === VENUE NAME (FROM DATABASE) ===
@@ -382,13 +535,30 @@ const extractGameData = async (post) => {
   const dayMatch = content.match(EXTRACTION_PATTERNS.date[1]);
   if (dayMatch) {
     extracted.extractedDayOfWeek = dayMatch[0].toUpperCase();
+    // inferGameDate now returns AEST-aware date
     extracted.extractedDate = inferGameDate(post.postedAt, extracted.extractedDayOfWeek).toISOString();
     extracted.dateSource = 'post_content';
   } else {
+    // Use AEST day of week from the post date
     extracted.extractedDate = post.postedAt;
-    extracted.extractedDayOfWeek = getDayOfWeek(post.postedAt);
+    extracted.extractedDayOfWeek = getDayOfWeek(post.postedAt); // Now returns AEST day
     extracted.dateSource = 'posted_at';
   }
+  
+  // === EFFECTIVE GAME DATE (Computed) ===
+  // Priority: extractedDate (from content) > postedAt (fallback)
+  // This provides a single canonical date for queries and sorting
+  if (extracted.extractedDate && extracted.dateSource === 'post_content') {
+    // Use the date extracted from post content (highest priority)
+    extracted.effectiveGameDate = extracted.extractedDate;
+    extracted.effectiveGameDateSource = 'extracted';
+  } else if (post.postedAt) {
+    // Fall back to when the post was published
+    extracted.effectiveGameDate = post.postedAt;
+    extracted.effectiveGameDateSource = 'posted_at';
+  }
+  
+  console.log(`[EXTRACTOR] Effective game date: ${extracted.effectiveGameDate} (source: ${extracted.effectiveGameDateSource})`);
   
   // === START TIME ===
   const timeMatch = content.match(EXTRACTION_PATTERNS.time[0]);
@@ -460,7 +630,7 @@ const extractGameData = async (post) => {
 };
 
 // ===================================================================
-// NEW: ENHANCED EXTRACTION FUNCTIONS
+// ENHANCED EXTRACTION FUNCTIONS
 // ===================================================================
 
 /**
@@ -669,11 +839,10 @@ const extractLateRegistration = (content) => {
 };
 
 // Valid TournamentType enum values from GraphQL schema
-// Update this list to match your schema.graphql TournamentType enum
 const VALID_TOURNAMENT_TYPES = [
   'FREEZEOUT',
   'REENTRY', 
-  'RE_ENTRY',  // Alternative naming
+  'RE_ENTRY',
   'REBUY',
   'BOUNTY',
   'KNOCKOUT',
@@ -757,16 +926,17 @@ const extractTournamentType = (content) => {
     if (!type) type = 'DEEPSTACK';
   }
   
-  // IMPORTANT: Only return type if it's a valid enum value
-  // This prevents GraphQL serialization errors
+  // Only return type if it's a valid enum value
   const validatedType = type && VALID_TOURNAMENT_TYPES.includes(type) ? type : null;
   
   return { type: validatedType, indicators };
 };
 
 /**
- * Extract placements and calculate prizes ONLY from placement lines
- * This prevents adding up random dollar amounts in the content
+ * LEGACY: Extract placements and calculate prizes ONLY from placement lines
+ * This is kept for backward compatibility - new code should use parsePlacements()
+ * 
+ * @deprecated Use parsePlacements() from placementParser.js instead
  */
 const extractPlacementsAndPrizes = (content) => {
   const placements = [];
@@ -845,25 +1015,6 @@ const extractPlacementsAndPrizes = (content) => {
     firstPlacePrize: sanitizeNumeric(firstPlacePrize),
     totalPrizesPaid: totalPrizesPaid > 0 ? sanitizeNumeric(totalPrizesPaid) : null
   };
-};
-
-/**
- * Clean player name
- */
-const cleanPlayerName = (name) => {
-  if (!name) return null;
-  
-  let cleaned = name
-    .trim()
-    .replace(/\s+/g, ' ')
-    .replace(/[-–—:.,]+$/, '')
-    .replace(/^\s*[-–—:.,]+/, '')
-    .trim();
-  
-  if (cleaned.length < 2 || cleaned.length > 50) return null;
-  if (!/^[A-Za-z]/.test(cleaned)) return null;
-  
-  return cleaned;
 };
 
 // ===================================================================
@@ -994,11 +1145,99 @@ const extractVenueFromPatterns = (content) => {
 };
 
 // ===================================================================
+// NEW: TICKET SUMMARY GENERATION (for API responses)
+// ===================================================================
+
+/**
+ * Generate a TicketExtractionSummary for API response
+ * Wraps the generateTicketSummary from placementParser for convenience
+ * 
+ * @param {Array} placementRecords - Placement records from extractGameData
+ * @returns {Object} TicketExtractionSummary compatible object
+ */
+const buildTicketSummary = (placementRecords) => {
+  return generateTicketSummary(placementRecords);
+};
+
+// ===================================================================
+// NEW: RECONCILIATION HELPER
+// ===================================================================
+
+/**
+ * Compare extracted data with a Game record and identify discrepancies
+ * 
+ * @param {Object} extracted - Extracted data from extractGameData
+ * @param {Object} game - Game record from database
+ * @returns {Object} SocialToGameReconciliation compatible object
+ */
+const compareWithGame = (extracted, game) => {
+  const reconciliation = {
+    social_totalCashPaid: extracted.totalCashPaid,
+    social_totalTicketCount: extracted.totalTicketsExtracted,
+    social_totalTicketValue: extracted.totalTicketValue,
+    social_accumulatorCount: extracted.reconciliation_accumulatorTicketCount,
+    social_accumulatorValue: extracted.reconciliation_accumulatorTicketValue,
+    social_totalPlacements: extracted.placementCount,
+    social_prizepoolTotal: extracted.reconciliation_cashPlusTotalTicketValue,
+    
+    game_prizepoolPaid: game?.prizepoolPaid || null,
+    game_numberOfAccumulatorTicketsPaid: game?.numberOfAccumulatorTicketsPaid || null,
+    game_accumulatorTicketValue: game?.accumulatorTicketValue || null,
+    game_totalEntries: game?.totalEntries || null,
+    game_hasAccumulatorTickets: game?.hasAccumulatorTickets || false,
+    
+    cashDifference: null,
+    ticketCountDifference: null,
+    ticketValueDifference: null,
+    hasDiscrepancy: false,
+    discrepancySeverity: 'NONE',
+    discrepancyNotes: [],
+    suggestedAction: null
+  };
+  
+  if (!game) {
+    return reconciliation;
+  }
+  
+  // Calculate differences
+  reconciliation.cashDifference = (extracted.totalCashPaid || 0) - (game.prizepoolPaid || 0);
+  reconciliation.ticketCountDifference = (extracted.reconciliation_accumulatorTicketCount || 0) - (game.numberOfAccumulatorTicketsPaid || 0);
+  reconciliation.ticketValueDifference = (extracted.reconciliation_accumulatorTicketValue || 0) - (game.accumulatorTicketValue || 0);
+  
+  // Determine if there's a discrepancy
+  const hasCashDiscrepancy = Math.abs(reconciliation.cashDifference) > 1; // $1 tolerance
+  const hasTicketCountDiscrepancy = reconciliation.ticketCountDifference !== 0;
+  
+  reconciliation.hasDiscrepancy = hasCashDiscrepancy || hasTicketCountDiscrepancy;
+  
+  if (reconciliation.hasDiscrepancy) {
+    if (hasCashDiscrepancy) {
+      reconciliation.discrepancyNotes.push(
+        `Cash: Social=$${extracted.totalCashPaid || 0}, Game=$${game.prizepoolPaid || 0}`
+      );
+    }
+    if (hasTicketCountDiscrepancy) {
+      reconciliation.discrepancyNotes.push(
+        `Tickets: Social=${extracted.reconciliation_accumulatorTicketCount || 0}, Game=${game.numberOfAccumulatorTicketsPaid || 0}`
+      );
+    }
+    
+    reconciliation.discrepancySeverity = Math.abs(reconciliation.cashDifference) > 100 ? 'MAJOR' : 'MINOR';
+    reconciliation.suggestedAction = 'MANUAL_REVIEW';
+  }
+  
+  return reconciliation;
+};
+
+// ===================================================================
 // EXPORTS
 // ===================================================================
 
 module.exports = {
+  // Main extraction
   extractGameData,
+  
+  // Sub-extractors
   extractRecurringGameName,
   extractBuyInWithBreakdown,
   extractBadBeatJackpot,
@@ -1006,15 +1245,38 @@ module.exports = {
   extractBlindLevelMinutes,
   extractLateRegistration,
   extractTournamentType,
-  extractPlacementsAndPrizes,
+  extractPlacementsAndPrizes, // Legacy - kept for backward compatibility
+  
+  // Venue extraction
   extractVenueFromDatabase,
   extractVenueFromPatterns,
   getVenuesWithCache,
   clearVenueCache,
+  
+  // Numeric utilities
   safeParseInt,
   safeParseFloat,
   sanitizeNumeric,
   sanitizeForDynamoDB,
+  
+  // NEW: Ticket extraction (re-exported from placementParser)
+  parsePlacements,
+  createPlacementRecords,
+  extractTickets,
+  hasTicketIndicator,
+  extractTicketValue,
+  extractPromoTickets,
+  calculateTicketAggregates,
+  generateTicketSummary,
+  extractEnhancedWinnerInfo,
+  
+  // NEW: API helpers
+  buildTicketSummary,
+  compareWithGame,
+  
+  // Constants
   ENHANCED_PATTERNS,
-  DAY_KEYWORDS
+  DAY_KEYWORDS,
+  TICKET_PATTERNS,
+  TICKET_TYPE_MAP
 };

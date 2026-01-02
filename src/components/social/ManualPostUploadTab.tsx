@@ -3,6 +3,13 @@
 // - Tap Results/Promo/General cards to toggle selection for upload
 // - Skipped posts card shows reasons for skipping
 // - All categories selected by default with highlighted borders
+// - SEQUENTIAL PROCESSING: When a post needs manual review during batch upload,
+//   processing pauses until user takes action (link/skip) before continuing to next post
+// - SKIP BELOW THRESHOLD: Option to automatically skip posts that don't meet the
+//   auto-link threshold instead of showing manual review modal (enabled by default)
+// - FIXED: Progress display now shows correct values during Lambda processing phase
+// - COLLAPSIBLE CONFIG: Configuration section collapses when files are loaded
+// - SOURCE DISPLAY: After folder/file selection, upload zone shows selected source with change options
 
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
@@ -25,6 +32,7 @@ import {
   CogIcon,
   PlayIcon,
   EyeIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { Loader2 } from 'lucide-react';
 
@@ -49,6 +57,7 @@ import {
   getConfidenceBadge,
 } from '../../types/socialPostUpload';
 import type { SocialAccount, ProcessSocialPostResult, SocialPostProcessingStatus } from '../../API';
+import { formatAEST } from '../../utils/dateUtils';
 
 // ===================================================================
 // TYPES
@@ -195,7 +204,7 @@ const PostPreviewCard: React.FC<{
           {/* Top Row: Date, Author, Badges */}
           <div className="flex items-center gap-2 flex-wrap mb-2">
             <span className="text-sm text-gray-500">
-              {new Date(post.postedAt).toLocaleDateString()}
+                {formatAEST(post.postedAt, { includeDay: true, shortDay: true })}
             </span>
             <span className="text-sm font-medium text-gray-700">
               {post.author.name}
@@ -376,6 +385,8 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [showProcessingOptions, setShowProcessingOptions] = useState(false);
   const [showSkippedDetails, setShowSkippedDetails] = useState(false);
+  const [configSectionOpen, setConfigSectionOpen] = useState(true);
+  const [selectedSourceName, setSelectedSourceName] = useState<string>('');
   
   // Processing flow (NEW - like scraper's scrape_only/scrape_save)
   const [processingFlow, setProcessingFlow] = useState<ProcessingFlow>('upload_process');
@@ -389,6 +400,22 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
   const [processingModalOpen, setProcessingModalOpen] = useState(false);
   const [currentModalResult, setCurrentModalResult] = useState<ProcessSocialPostResult | null>(null);
   const [currentModalPost, setCurrentModalPost] = useState<ReviewablePostWithAttachments | null>(null);
+  
+  // Batch processing context for modal (shows progress during batch)
+   const [batchProcessingContext, setBatchProcessingContext] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
+  
+  // Lambda processing progress (separate from upload progress)
+  const [lambdaProgress, setLambdaProgress] = useState<{
+    current: number;
+    total: number;
+    stage: string;
+  } | null>(null);
+  
+  // Promise resolver for sequential processing - allows waiting for modal action
+  const modalResolverRef = useRef<((action: 'linked' | 'skipped' | 'cancelled') => void) | null>(null);
   
   // =========================================================================
   // HOOKS
@@ -433,8 +460,6 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
   // =========================================================================
   // COMPUTED VALUES
   // =========================================================================
-  
-  // const selectedAccount = accounts.find(a => a.id === selectedAccountId);
   
   const attachmentStats = useMemo(() => {
     const postsWithAttachments = reviewablePosts.filter(
@@ -535,7 +560,29 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
   // Handle file selection
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      await loadPostsFromFiles(e.target.files);
+      const files = e.target.files;
+      
+      // Extract source name from files
+      // For folder uploads, get the folder name from the path
+      // For JSON files, get the file name
+      let sourceName = '';
+      const firstFile = files[0];
+      if (firstFile.webkitRelativePath) {
+        // Folder upload - extract folder name from path
+        const pathParts = firstFile.webkitRelativePath.split('/');
+        sourceName = pathParts[0] || firstFile.name;
+      } else {
+        // Single file(s) - use file name(s)
+        sourceName = files.length === 1 
+          ? firstFile.name 
+          : `${files.length} files`;
+      }
+      
+      setSelectedSourceName(sourceName);
+      await loadPostsFromFiles(files);
+      
+      // Collapse config section after files are loaded
+      setConfigSectionOpen(false);
     }
   }, [loadPostsFromFiles]);
   
@@ -544,7 +591,20 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
     console.log('[ManualPostUpload] Cancel requested');
     cancelRef.current = true;
     setIsCancelling(true);
+    
+    // If modal is waiting for user action, resolve with 'cancelled'
+    if (modalResolverRef.current) {
+      modalResolverRef.current('cancelled');
+      modalResolverRef.current = null;
+    }
   }, []);
+  
+  // Handle clear all - clears posts and resets source selection
+  const handleClearAll = useCallback(() => {
+    clearPosts();
+    setSelectedSourceName('');
+    setConfigSectionOpen(true);
+  }, [clearPosts]);
   
   // Handle upload with optional processing
   const handleUpload = useCallback(async () => {
@@ -556,6 +616,9 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
     // Reset cancel state
     cancelRef.current = false;
     setIsCancelling(false);
+    
+    // Collapse config section when processing starts
+    setConfigSectionOpen(false);
     
     console.log('[ManualPostUpload] Starting upload with flow:', processingFlow);
     console.log('[ManualPostUpload] Processing options:', processingOptions);
@@ -607,8 +670,19 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
       let processedCount = 0;
       let errorCount = 0;
       let cancelledAt = -1;
+      let skippedBelowThreshold = 0;  // Track posts skipped due to low confidence
+      
+      // Initialize Lambda processing progress
+      setLambdaProgress({ current: 0, total: successfulUploads.length, stage: 'Processing posts...' });
       
       for (let i = 0; i < successfulUploads.length; i++) {
+        // Update progress
+        setLambdaProgress({ 
+          current: i + 1, 
+          total: successfulUploads.length, 
+          stage: `Processing post ${i + 1} of ${successfulUploads.length}...` 
+        });
+        
         // Check for cancellation
         if (cancelRef.current) {
           console.log('[ManualPostUpload] Processing cancelled at post', i + 1);
@@ -661,18 +735,52 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
               updatePostField(originalPost.postId, '_processingResult', summary);
               updatePostField(originalPost.postId, '_matchCandidates', result.matchCandidates);
               
-              // If has matches but no auto-links, show modal for review
+              // If has matches but no auto-links, decide whether to show modal or skip
               if (!processingOptions.skipLinking && 
                   result.linksCreated === 0 && 
                   result.matchCandidates && 
                   result.matchCandidates.length > 0) {
-                setCurrentModalResult(result);
-                setCurrentModalPost(originalPost);
-                setProcessingModalOpen(true);
                 
-                // Wait for modal to close before continuing
-                // (In production, use a promise-based modal pattern)
-                await new Promise(resolve => setTimeout(resolve, 100));
+                // If skipBelowThreshold is enabled, automatically skip without showing modal
+                if (processingOptions.skipBelowThreshold) {
+                  console.log(`[ManualPostUpload] Skipping post ${i + 1} - below threshold (${result.primaryMatch?.matchConfidence || 0}% < ${processingOptions.matchThreshold}%)`);
+                  skippedBelowThreshold++;
+                  // Continue to next post without showing modal
+                } else {
+                  // Show modal for manual review
+                  setCurrentModalResult(result);
+                  setCurrentModalPost(originalPost);
+                  setBatchProcessingContext({ current: i + 1, total: successfulUploads.length });
+                  setProcessingModalOpen(true);
+                  
+                  // Wait for user to take action on the modal before continuing
+                  const modalAction = await new Promise<'linked' | 'skipped' | 'cancelled'>((resolve) => {
+                    modalResolverRef.current = resolve;
+                  });
+                  
+                  console.log(`[ManualPostUpload] Modal action: ${modalAction} for post ${i + 1}`);
+                  
+                  // Close the modal state after action
+                  setProcessingModalOpen(false);
+                  setCurrentModalResult(null);
+                  setCurrentModalPost(null);
+                  setBatchProcessingContext(null);
+                  
+                  // Handle different actions
+                  if (modalAction === 'cancelled') {
+                    cancelledAt = i;
+                    break; // Exit the loop
+                  } else if (modalAction === 'linked') {
+                    totalLinksCreated++;
+                    if (originalPost) {
+                      updatePostField(originalPost.postId, '_processingResult', {
+                        ...summary,
+                        linksCreated: 1,
+                      });
+                    }
+                  }
+                  // 'skipped' - just continue to next post
+                }
               }
             }
           } else {
@@ -717,8 +825,9 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
         }
       }
       
-      // Reset cancel state
+      // Reset cancel state and clear progress
       setIsCancelling(false);
+      setLambdaProgress(null);
       
       // Show final summary
       const wasCancelled = cancelledAt >= 0;
@@ -728,6 +837,7 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
         `⏭️ Skipped (duplicates): ${uploadResult.skippedCount}\n` +
         `⚙️ Processed: ${processedCount}${wasCancelled ? ` / ${successfulUploads.length}` : ''}\n` +
         `🔗 Links Created: ${totalLinksCreated}\n` +
+        (skippedBelowThreshold > 0 ? `⬇️ Skipped (< ${processingOptions.matchThreshold}% threshold): ${skippedBelowThreshold}\n` : '') +
         `❌ Errors: ${uploadResult.errorCount + errorCount}\n` +
         (wasCancelled ? `\n⚠️ Stopped at post ${cancelledAt + 1}` : '') +
         (uploadResult.errors.length > 0 ? `\nFirst upload error: ${uploadResult.errors[0]?.error}` : '')
@@ -825,18 +935,35 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
       throw new Error('No social post ID available');
     }
     
-    return processor.linkToGame({
+    const result = await processor.linkToGame({
       socialPostId: currentModalResult.socialPostId,
       gameId,
       isPrimaryGame: isPrimary,
     });
+    
+    // Resolve the modal promise to continue processing
+    if (modalResolverRef.current) {
+      modalResolverRef.current('linked');
+      modalResolverRef.current = null;
+    }
+    
+    return result;
   }, [currentModalResult, processor]);
   
-  // Handle modal close
+  // Handle modal close (skip this post)
   const handleCloseModal = useCallback(() => {
-    setProcessingModalOpen(false);
-    setCurrentModalResult(null);
-    setCurrentModalPost(null);
+    // If we're in batch processing mode, just resolve the promise
+    // The processing loop will handle clearing the modal state
+    if (modalResolverRef.current) {
+      modalResolverRef.current('skipped');
+      modalResolverRef.current = null;
+    } else {
+      // Not in batch processing - clear modal state directly
+      setProcessingModalOpen(false);
+      setCurrentModalResult(null);
+      setCurrentModalPost(null);
+      setBatchProcessingContext(null);
+    }
   }, []);
   
   // Toggle expand for a post
@@ -853,296 +980,388 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
   return (
     <div className="space-y-6">
       {/* ================================================================= */}
-      {/* HEADER SECTION */}
+      {/* HEADER SECTION - Collapsible Configuration */}
       {/* ================================================================= */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Manual Post Upload
-        </h2>
-        
-        <p className="text-sm text-gray-600 mb-6">
-          Upload scraped Facebook posts from the Chrome extension. Posts will be 
-          {processingFlow === 'upload_process' 
-            ? ' uploaded and automatically processed to extract data and match to games.'
-            : ' uploaded for later processing.'}
-        </p>
-        
-        {/* Account Selection (Required) */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Social Account <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={selectedAccountId}
-            onChange={(e) => {
-              setSelectedAccountId(e.target.value);
-              setSelectedEntityId('');
-              setSelectedVenueId('');
-            }}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          >
-            <option value="">Select account...</option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.accountName} ({account.platform})
-                {account.businessLocation ? ` — ${account.businessLocation}` : ''}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        {/* Account Context Info */}
-        {accountContext && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <div className="flex items-start gap-2">
-              <InformationCircleIcon className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-              <div className="text-sm">
-                <p className="font-medium text-blue-800">Account Context</p>
-                <p className="text-blue-700">
-                  Posts will be linked to <strong>{accountContext.accountName}</strong>
-                  {accountContext.businessLocation && ` (${accountContext.businessLocation})`}
-                </p>
-                {(accountContext.entityId || accountContext.venueId) && (
-                  <p className="text-blue-600 text-xs mt-1">
-                    {accountContext.entityId && '✓ Entity linked from account'}
-                    {accountContext.entityId && accountContext.venueId && ' • '}
-                    {accountContext.venueId && '✓ Venue linked from account'}
-                  </p>
-                )}
-              </div>
-            </div>
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {/* Collapsible Header */}
+        <button
+          type="button"
+          onClick={() => setConfigSectionOpen(!configSectionOpen)}
+          className="w-full px-6 py-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+        >
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <CogIcon className="w-5 h-5" />
+            Manual Post Upload
+            {!configSectionOpen && selectedAccountId && (
+              <span className="text-sm font-normal text-gray-500 ml-2">
+                — {accounts.find(a => a.id === selectedAccountId)?.accountName || 'Account selected'}
+              </span>
+            )}
+          </h2>
+          <div className="flex items-center gap-2">
+            {!configSectionOpen && stats && stats.totalPosts > 0 && (
+              <span className="text-sm text-gray-500">
+                {stats.totalPosts} posts loaded
+              </span>
+            )}
+            <ChevronDownIcon 
+              className={`w-5 h-5 text-gray-500 transition-transform ${
+                configSectionOpen ? 'rotate-180' : ''
+              }`} 
+            />
           </div>
-        )}
+        </button>
         
-        {/* ================================================================= */}
-        {/* PROCESSING FLOW SELECTOR (NEW) */}
-        {/* ================================================================= */}
-        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <CogIcon className="w-4 h-4" />
-            Processing Flow
-          </h4>
-          <div className="flex gap-6">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="radio"
-                name="processingFlow"
-                value="upload_process"
-                checked={processingFlow === 'upload_process'}
-                onChange={() => setProcessingFlow('upload_process')}
-                className="mt-1 w-4 h-4 text-green-600 focus:ring-green-500"
-              />
-              <div>
-                <div className="font-medium text-gray-900 flex items-center gap-2">
-                  Upload + Process
-                  <span className="px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded">
-                    Recommended
-                  </span>
-                </div>
-                <div className="text-xs text-gray-500">
-                  Upload, extract data, match to games, and auto-link high confidence matches.
-                </div>
-              </div>
-            </label>
+        {/* Collapsible Content */}
+        {configSectionOpen && (
+          <div className="p-6 border-t border-gray-200">
+            <p className="text-sm text-gray-600 mb-6">
+              Upload scraped Facebook posts from the Chrome extension. Posts will be 
+              {processingFlow === 'upload_process' 
+                ? ' uploaded and automatically processed to extract data and match to games.'
+                : ' uploaded for later processing.'}
+            </p>
             
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="radio"
-                name="processingFlow"
-                value="upload_only"
-                checked={processingFlow === 'upload_only'}
-                onChange={() => setProcessingFlow('upload_only')}
-                className="mt-1 w-4 h-4 text-indigo-600 focus:ring-indigo-500"
-              />
-              <div>
-                <div className="font-medium text-gray-900">Upload Only</div>
-                <div className="text-xs text-gray-500">
-                  Save posts to database. Process and match to games later.
+            {/* Account Selection (Required) */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Social Account <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedAccountId}
+                onChange={(e) => {
+                  setSelectedAccountId(e.target.value);
+                  setSelectedEntityId('');
+                  setSelectedVenueId('');
+                }}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              >
+                <option value="">Select account...</option>
+                {accounts.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.accountName} ({account.platform})
+                    {account.businessLocation ? ` — ${account.businessLocation}` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Account Context Info */}
+            {accountContext && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="flex items-start gap-2">
+                  <InformationCircleIcon className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-800">Account Context</p>
+                    <p className="text-blue-700">
+                      Posts will be linked to <strong>{accountContext.accountName}</strong>
+                      {accountContext.businessLocation && ` (${accountContext.businessLocation})`}
+                    </p>
+                    {(accountContext.entityId || accountContext.venueId) && (
+                      <p className="text-blue-600 text-xs mt-1">
+                        {accountContext.entityId && '✓ Entity linked from account'}
+                        {accountContext.entityId && accountContext.venueId && ' • '}
+                        {accountContext.venueId && '✓ Venue linked from account'}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </label>
-          </div>
-          
-          {/* Processing Options (when upload_process selected) */}
-          {processingFlow === 'upload_process' && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <button
-                onClick={() => setShowProcessingOptions(!showProcessingOptions)}
-                className="text-sm text-indigo-600 hover:text-indigo-800"
-              >
-                {showProcessingOptions ? '− Hide' : '+ Show'} processing options
-              </button>
-              
-              {showProcessingOptions && (
-                <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={!processingOptions.skipLinking}
-                      onChange={(e) => setProcessingOptions(prev => ({ 
-                        ...prev, 
-                        skipLinking: !e.target.checked 
-                      }))}
-                      className="w-4 h-4 rounded text-indigo-600"
-                    />
-                    <span className="text-sm text-gray-700">Auto-link matches</span>
-                  </label>
-                  
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-700">Threshold:</label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      value={processingOptions.matchThreshold}
-                      onChange={(e) => setProcessingOptions(prev => ({
-                        ...prev,
-                        matchThreshold: parseInt(e.target.value) || 80
-                      }))}
-                      className="w-16 px-2 py-1 border rounded text-sm"
-                    />
-                    <span className="text-sm text-gray-500">%</span>
+            )}
+            
+            {/* ================================================================= */}
+            {/* PROCESSING FLOW SELECTOR */}
+            {/* ================================================================= */}
+            <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <CogIcon className="w-4 h-4" />
+                Processing Flow
+              </h4>
+              <div className="flex gap-6">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="processingFlow"
+                    value="upload_process"
+                    checked={processingFlow === 'upload_process'}
+                    onChange={() => setProcessingFlow('upload_process')}
+                    className="mt-1 w-4 h-4 text-green-600 focus:ring-green-500"
+                  />
+                  <div>
+                    <div className="font-medium text-gray-900 flex items-center gap-2">
+                      Upload + Process
+                      <span className="px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded">
+                        Recommended
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Upload, extract data, match to games, and auto-link high confidence matches.
+                    </div>
                   </div>
+                </label>
+                
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="processingFlow"
+                    value="upload_only"
+                    checked={processingFlow === 'upload_only'}
+                    onChange={() => setProcessingFlow('upload_only')}
+                    className="mt-1 w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <div>
+                    <div className="font-medium text-gray-900">Upload Only</div>
+                    <div className="text-xs text-gray-500">
+                      Save posts to database. Process and match to games later.
+                    </div>
+                  </div>
+                </label>
+              </div>
+              
+              {/* Processing Options (when upload_process selected) */}
+              {processingFlow === 'upload_process' && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => setShowProcessingOptions(!showProcessingOptions)}
+                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    {showProcessingOptions ? '− Hide' : '+ Show'} processing options
+                  </button>
                   
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={!processingOptions.skipMatching}
-                      onChange={(e) => setProcessingOptions(prev => ({ 
-                        ...prev, 
-                        skipMatching: !e.target.checked 
-                      }))}
-                      className="w-4 h-4 rounded text-indigo-600"
-                    />
-                    <span className="text-sm text-gray-700">Match to games</span>
-                  </label>
-                  
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={processingOptions.forceReprocess || false}
-                      onChange={(e) => setProcessingOptions(prev => ({ 
-                        ...prev, 
-                        forceReprocess: e.target.checked 
-                      }))}
-                      className="w-4 h-4 rounded text-indigo-600"
-                    />
-                    <span className="text-sm text-gray-700">Force reprocess</span>
-                  </label>
+                  {showProcessingOptions && (
+                    <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={!processingOptions.skipLinking}
+                          onChange={(e) => setProcessingOptions(prev => ({ 
+                            ...prev, 
+                            skipLinking: !e.target.checked 
+                          }))}
+                          className="w-4 h-4 rounded text-indigo-600"
+                        />
+                        <span className="text-sm text-gray-700">Auto-link matches</span>
+                      </label>
+                      
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm text-gray-700">Threshold:</label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={processingOptions.matchThreshold}
+                          onChange={(e) => setProcessingOptions(prev => ({
+                            ...prev,
+                            matchThreshold: parseInt(e.target.value) || 80
+                          }))}
+                          className="w-16 px-2 py-1 border rounded text-sm"
+                        />
+                        <span className="text-sm text-gray-500">%</span>
+                      </div>
+                      
+                      <label className="flex items-center gap-2" title="Skip posts that don't meet the auto-link threshold instead of showing manual review">
+                        <input
+                          type="checkbox"
+                          checked={processingOptions.skipBelowThreshold ?? true}
+                          onChange={(e) => setProcessingOptions(prev => ({ 
+                            ...prev, 
+                            skipBelowThreshold: e.target.checked 
+                          }))}
+                          className="w-4 h-4 rounded text-indigo-600"
+                        />
+                        <span className="text-sm text-gray-700">Skip if &lt; threshold</span>
+                      </label>
+                      
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={!processingOptions.skipMatching}
+                          onChange={(e) => setProcessingOptions(prev => ({ 
+                            ...prev, 
+                            skipMatching: !e.target.checked 
+                          }))}
+                          className="w-4 h-4 rounded text-indigo-600"
+                        />
+                        <span className="text-sm text-gray-700">Match to games</span>
+                      </label>
+                      
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={processingOptions.forceReprocess || false}
+                          onChange={(e) => setProcessingOptions(prev => ({ 
+                            ...prev, 
+                            forceReprocess: e.target.checked 
+                          }))}
+                          className="w-4 h-4 rounded text-indigo-600"
+                        />
+                        <span className="text-sm text-gray-700">Force reprocess</span>
+                      </label>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
-        
-        {/* Advanced Options Toggle */}
-        {(entities.length > 0 || venues.length > 0) && (
-          <div className="mb-4">
-            <button
-              onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-              className="text-sm text-indigo-600 hover:text-indigo-800"
-            >
-              {showAdvancedOptions ? '− Hide' : '+ Show'} entity/venue overrides
-            </button>
-          </div>
-        )}
-        
-        {/* Optional Entity/Venue Overrides */}
-        {showAdvancedOptions && (
-          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-md">
-            {entities.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Override Entity (optional)
-                </label>
-                <select
-                  value={selectedEntityId}
-                  onChange={(e) => setSelectedEntityId(e.target.value)}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            
+            {/* Advanced Options Toggle */}
+            {(entities.length > 0 || venues.length > 0) && (
+              <div className="mb-4">
+                <button
+                  onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                  className="text-sm text-indigo-600 hover:text-indigo-800"
                 >
-                  <option value="">Use account default</option>
-                  {entities.map((entity) => (
-                    <option key={entity.id} value={entity.id}>
-                      {entity.entityName}
-                    </option>
-                  ))}
-                </select>
+                  {showAdvancedOptions ? '− Hide' : '+ Show'} entity/venue overrides
+                </button>
               </div>
             )}
             
-            {venues.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Override Venue (optional)
-                </label>
-                <select
-                  value={selectedVenueId}
-                  onChange={(e) => setSelectedVenueId(e.target.value)}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                >
-                  <option value="">Use account default</option>
-                  {venues.map((venue) => (
-                    <option key={venue.id} value={venue.id}>
-                      {venue.name}
-                    </option>
-                  ))}
-                </select>
+            {/* Optional Entity/Venue Overrides */}
+            {showAdvancedOptions && (
+              <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-md">
+                {entities.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Override Entity (optional)
+                    </label>
+                    <select
+                      value={selectedEntityId}
+                      onChange={(e) => setSelectedEntityId(e.target.value)}
+                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    >
+                      <option value="">Use account default</option>
+                      {entities.map((entity) => (
+                        <option key={entity.id} value={entity.id}>
+                          {entity.entityName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                {venues.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Override Venue (optional)
+                    </label>
+                    <select
+                      value={selectedVenueId}
+                      onChange={(e) => setSelectedVenueId(e.target.value)}
+                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    >
+                      <option value="">Use account default</option>
+                      {venues.map((venue) => (
+                        <option key={venue.id} value={venue.id}>
+                          {venue.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
-        
-        {/* Upload Zone */}
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors">
-          <FolderOpenIcon className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-          <p className="text-sm text-gray-600 mb-4">
-            Drop folders containing scraped posts or click to browse
-          </p>
-          
-          <div className="flex justify-center gap-3">
-            {/* Folder Upload */}
-            <label className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
-              <FolderOpenIcon className="w-4 h-4 mr-2" />
-              Select Folder
-              <input
-                ref={folderInputRef}
-                type="file"
-                className="hidden"
-                webkitdirectory="true"
-                directory=""
-                multiple
-                onChange={handleFileSelect}
-              />
-            </label>
             
-            {/* JSON File Upload */}
-            <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
-              <DocumentTextIcon className="w-4 h-4 mr-2" />
-              Select JSON File
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                className="hidden"
-                multiple
-                onChange={handleFileSelect}
-              />
-            </label>
-          </div>
-        </div>
-        
-        {/* Loading State */}
-        {isLoading && (
-          <div className="mt-4 flex items-center justify-center gap-2 text-indigo-600">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span>Processing files...</span>
-          </div>
-        )}
-        
-        {/* Error Display */}
-        {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-            {error}
+            {/* Upload Zone */}
+            {stats && stats.totalPosts > 0 && selectedSourceName ? (
+              // Source Selected State - Show folder/file info with change option
+              <div className="border-2 border-solid border-green-300 bg-green-50 rounded-lg p-4 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                      <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-green-800">Source loaded</p>
+                      <p className="text-sm text-green-700">{selectedSourceName}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {/* Reselect Folder */}
+                    <label className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+                      <FolderOpenIcon className="w-3.5 h-3.5 mr-1.5" />
+                      Change Folder
+                      <input
+                        ref={folderInputRef}
+                        type="file"
+                        className="hidden"
+                        webkitdirectory="true"
+                        directory=""
+                        multiple
+                        onChange={handleFileSelect}
+                      />
+                    </label>
+                    
+                    {/* Reselect JSON */}
+                    <label className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+                      <DocumentTextIcon className="w-3.5 h-3.5 mr-1.5" />
+                      Change File
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".json"
+                        className="hidden"
+                        multiple
+                        onChange={handleFileSelect}
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Empty State - Show upload options
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors">
+                <FolderOpenIcon className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                <p className="text-sm text-gray-600 mb-4">
+                  Drop folders containing scraped posts or click to browse
+                </p>
+                
+                <div className="flex justify-center gap-3">
+                  {/* Folder Upload */}
+                  <label className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
+                    <FolderOpenIcon className="w-4 h-4 mr-2" />
+                    Select Folder
+                    <input
+                      ref={folderInputRef}
+                      type="file"
+                      className="hidden"
+                      webkitdirectory="true"
+                      directory=""
+                      multiple
+                      onChange={handleFileSelect}
+                    />
+                  </label>
+                  
+                  {/* JSON File Upload */}
+                  <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+                    <DocumentTextIcon className="w-4 h-4 mr-2" />
+                    Select JSON File
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".json"
+                      className="hidden"
+                      multiple
+                      onChange={handleFileSelect}
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
+            
+            {/* Loading State */}
+            {isLoading && (
+              <div className="mt-4 flex items-center justify-center gap-2 text-indigo-600">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Processing files...</span>
+              </div>
+            )}
+            
+            {/* Error Display */}
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+                {error}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -1309,7 +1528,7 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
                           {(post as any).skipReason || 'Comment/Reply'}
                         </span>
                         <span className="text-gray-400 text-xs ml-auto">
-                          {new Date(post.postedAt).toLocaleDateString()}
+                          {formatAEST(post.postedAt, { includeDay: true, shortDay: true })}
                         </span>
                       </div>
                       <p className="text-gray-600 text-sm line-clamp-2 mt-1">
@@ -1366,7 +1585,7 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
             <div className="border-l border-gray-300 h-6 mx-2" />
             
             <button
-              onClick={clearPosts}
+              onClick={handleClearAll}
               className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200"
             >
               <TrashIcon className="w-4 h-4 mr-1" />
@@ -1520,7 +1739,11 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
             {isProcessing ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                {uploadProgress?.stage || `Processing ${uploadProgress?.current}/${uploadProgress?.total}...`}
+                {/* Use lambdaProgress for processing phase, uploadProgress for upload phase */}
+                {lambdaProgress 
+                  ? lambdaProgress.stage 
+                  : uploadProgress?.stage || `Uploading ${uploadProgress?.current || 0}/${uploadProgress?.total || 0}...`
+                }
                 {isCancelling && <span className="text-amber-600">(Cancelling...)</span>}
               </span>
             ) : (
@@ -1575,7 +1798,10 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
               {isProcessing ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {uploadProgress?.current}/{uploadProgress?.total}
+                  {lambdaProgress 
+                    ? `${lambdaProgress.current}/${lambdaProgress.total}`
+                    : `${uploadProgress?.current || 0}/${uploadProgress?.total || 0}`
+                  }
                 </>
               ) : (
                 <>
@@ -1609,6 +1835,7 @@ export const ManualPostUploadTab: React.FC<ManualPostUploadTabProps> = ({
           postDate={currentModalPost?.postedAt}
           postUrl={currentModalPost?.url}
           onLinkToGame={handleLinkToGame}
+          batchContext={batchProcessingContext} 
           onReprocess={() => {
             // For preview mode (no socialPostId), re-call previewContent
             if (!currentModalResult?.socialPostId && currentModalPost) {

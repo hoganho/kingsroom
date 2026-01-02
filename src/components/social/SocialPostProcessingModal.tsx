@@ -3,6 +3,7 @@
 // Shows extraction data, match candidates, placements, and allows linking
 //
 // UPDATED: Now imports MatchesTab from separate file with detailed signal breakdown
+// UPDATED: Added batchContext prop to show progress during batch processing
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { 
@@ -36,6 +37,11 @@ import type {
 // TYPES
 // ===================================================================
 
+interface BatchProcessingContext {
+  current: number;
+  total: number;
+}
+
 interface SocialPostProcessingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -53,6 +59,9 @@ interface SocialPostProcessingModalProps {
   // Options
   showActions?: boolean;
   autoMode?: boolean;
+  
+  // NEW: Batch processing context
+  batchContext?: BatchProcessingContext | null;
 }
 
 interface ModalTab {
@@ -67,27 +76,6 @@ interface ModalTab {
 // ===================================================================
 // SUB-COMPONENTS
 // ===================================================================
-
-// Confidence Badge
-const ConfidenceBadge: React.FC<{ confidence: number; size?: 'sm' | 'md' }> = ({ 
-  confidence, 
-  size = 'md' 
-}) => {
-  const getColor = () => {
-    if (confidence >= 80) return 'bg-green-100 text-green-800 border-green-200';
-    if (confidence >= 60) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    if (confidence >= 40) return 'bg-orange-100 text-orange-800 border-orange-200';
-    return 'bg-red-100 text-red-800 border-red-200';
-  };
-  
-  const sizeClasses = size === 'sm' ? 'text-xs px-1.5 py-0.5' : 'text-sm px-2 py-1';
-  
-  return (
-    <span className={`inline-flex items-center rounded-full border font-medium ${getColor()} ${sizeClasses}`}>
-      {Math.round(confidence)}%
-    </span>
-  );
-};
 
 // Content Type Badge
 const ContentTypeBadge: React.FC<{ contentType: string; confidence?: number }> = ({ 
@@ -237,298 +225,173 @@ const PostPreviewTab: React.FC<{
                   src={img} 
                   alt={`Post image ${i + 1}`}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
                 />
               </div>
             ))}
           </div>
         )}
         
-        {/* Footer */}
-        <div className="px-4 py-2 border-t border-gray-100 bg-gray-50 flex items-center justify-between text-xs text-gray-500">
-          <span>
-            {content?.length || 0} characters
-          </span>
-          {url && (
-            <span className="truncate max-w-xs" title={url}>
-              {url.replace(/^https?:\/\/(www\.)?/, '').substring(0, 40)}...
-            </span>
-          )}
-        </div>
-      </div>
-      
-      {/* Actions */}
-      <div className="flex items-center justify-center gap-3">
-        {url && (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-            View on {platform}
-          </a>
-        )}
-        {content && (
-          <button
-            type="button"
+        {/* Footer Actions */}
+        <div className="px-4 py-2 border-t border-gray-100 flex items-center gap-4 text-xs text-gray-500">
+          <button 
             onClick={handleCopy}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+            className="flex items-center gap-1 hover:text-gray-700 transition-colors"
           >
             <ClipboardDocumentIcon className="w-4 h-4" />
             {copied ? 'Copied!' : 'Copy Text'}
           </button>
-        )}
+          {url && (
+            <a 
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-gray-700 transition-colors"
+            >
+              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+              View Original
+            </a>
+          )}
+        </div>
       </div>
-      
-      {/* Raw Content (collapsible) */}
-      <details className="mt-4 bg-gray-50 rounded-lg">
-        <summary className="px-4 py-2 text-sm text-gray-600 cursor-pointer hover:bg-gray-100 rounded-lg">
-          View raw content
-        </summary>
-        <pre className="px-4 py-3 text-xs text-gray-700 overflow-x-auto whitespace-pre-wrap font-mono border-t border-gray-200 max-h-60 overflow-y-auto">
-          {content || 'No content'}
-        </pre>
-      </details>
     </div>
   );
 };
 
-// Extraction Tab
-const ExtractionTab: React.FC<{ 
+// Extraction Tab - Shows extracted data from the post
+const ExtractionTab: React.FC<{
   extraction: SocialPostGameData | null;
   postContent?: string;
 }> = ({ extraction, postContent: _postContent }) => {
   if (!extraction) {
     return (
       <div className="p-8 text-center text-gray-500">
-        <DocumentTextIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+        <DocumentTextIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
         <p>No extraction data available</p>
       </div>
     );
   }
   
   return (
-    <div className="p-4 space-y-6">
-      {/* Classification */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">📊 Classification</h4>
-        <div className="flex items-center gap-3 flex-wrap">
-          <ContentTypeBadge 
-            contentType={extraction.contentType || 'UNKNOWN'} 
-            confidence={extraction.contentTypeConfidence || 0}
-          />
-          {extraction.resultScore !== undefined && extraction.resultScore !== null && (
-            <span className="text-xs text-gray-500">
-              Result score: {extraction.resultScore}
-            </span>
-          )}
-          {extraction.promoScore !== undefined && extraction.promoScore !== null && (
-            <span className="text-xs text-gray-500">
-              Promo score: {extraction.promoScore}
-            </span>
-          )}
-        </div>
-      </div>
-      
-      {/* Tournament Identity */}
-      <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-2">🎯 Tournament Identity</h4>
-        <dl className="divide-y divide-gray-100">
-          <FieldRow 
-            label="Tournament URL" 
-            value={extraction.extractedTournamentUrl && (
-              <a 
-                href={extraction.extractedTournamentUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline break-all"
-              >
-                {extraction.extractedTournamentUrl}
-              </a>
-            )}
-            highlight={!!extraction.extractedTournamentId}
-          />
-          <FieldRow 
-            label="Tournament ID" 
-            value={extraction.extractedTournamentId && (
-              <span className="font-mono bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                {extraction.extractedTournamentId}
-              </span>
-            )}
-            highlight={!!extraction.extractedTournamentId}
-          />
-          <FieldRow label="Extracted Name" value={extraction.extractedName} />
-        </dl>
-      </div>
-      
-      {/* Financials */}
-      <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-2">💰 Financials</h4>
-        <dl className="divide-y divide-gray-100">
-          <FieldRow 
-            label="Buy-in" 
-            value={extraction.extractedBuyIn && `$${extraction.extractedBuyIn.toLocaleString()}`}
-            icon={<CurrencyDollarIcon className="w-4 h-4" />}
-          />
-          <FieldRow 
-            label="Guarantee" 
-            value={extraction.extractedGuarantee && `$${extraction.extractedGuarantee.toLocaleString()}`}
-          />
-          <FieldRow 
-            label="Prize Pool" 
-            value={extraction.extractedPrizePool && `$${extraction.extractedPrizePool.toLocaleString()}`}
-          />
-          <FieldRow 
-            label="First Place" 
-            value={extraction.extractedFirstPlacePrize && `$${extraction.extractedFirstPlacePrize.toLocaleString()}`}
-          />
-          <FieldRow 
-            label="Total Prizes Paid" 
-            value={extraction.extractedTotalPrizesPaid && `$${extraction.extractedTotalPrizesPaid.toLocaleString()}`}
-          />
-        </dl>
-      </div>
-      
-      {/* Date & Time */}
-      <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-2">📅 Date & Time</h4>
-        <dl className="divide-y divide-gray-100">
-          <FieldRow 
-            label="Date" 
-            value={extraction.extractedDate && new Date(extraction.extractedDate).toLocaleDateString()}
-            icon={<CalendarIcon className="w-4 h-4" />}
-          />
-          <FieldRow label="Day of Week" value={extraction.extractedDayOfWeek} />
-          <FieldRow label="Start Time" value={extraction.extractedStartTime} />
-          <FieldRow 
-            label="Date Source" 
-            value={extraction.dateSource && (
-              <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">
-                {extraction.dateSource}
-              </span>
-            )}
-          />
-        </dl>
-      </div>
-      
-      {/* Venue */}
-      <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-2">📍 Venue</h4>
-        <dl className="divide-y divide-gray-100">
-          <FieldRow 
-            label="Extracted Venue" 
-            value={extraction.extractedVenueName}
-            icon={<MapPinIcon className="w-4 h-4" />}
-          />
-          {extraction.suggestedVenueId && (
+    <div className="p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left Column - Core Data */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b pb-2">
+            Extracted Information
+          </h4>
+          
+          <dl className="space-y-1">
             <FieldRow 
-              label="Matched Venue" 
-              value={
-                <span className="flex items-center gap-2">
-                  <span className="text-green-600">✓ Matched</span>
-                  <ConfidenceBadge confidence={extraction.venueMatchConfidence || 0} size="sm" />
-                </span>
-              }
+              label="Content Type" 
+              value={extraction.contentType && (
+                <ContentTypeBadge 
+                  contentType={extraction.contentType} 
+                  confidence={extraction.contentTypeConfidence || 0}
+                />
+              )}
+              icon={<DocumentTextIcon className="w-4 h-4" />}
             />
-          )}
-        </dl>
-      </div>
-      
-      {/* Game Type */}
-      <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-2">🎲 Game Type</h4>
-        <dl className="divide-y divide-gray-100">
-          <FieldRow label="Game Type" value={extraction.extractedGameType} />
-          <FieldRow label="Tournament Type" value={extraction.extractedTournamentType} />
-          <FieldRow label="Variant" value={extraction.extractedGameVariant} />
-          <FieldRow 
-            label="Total Entries" 
-            value={extraction.extractedTotalEntries}
-            icon={<UserGroupIcon className="w-4 h-4" />}
-          />
-        </dl>
-      </div>
-      
-      {/* Series Info */}
-      {extraction.isSeriesEvent && (
-        <div>
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">📚 Series</h4>
-          <dl className="divide-y divide-gray-100">
-            <FieldRow label="Series Name" value={extraction.extractedSeriesName} />
-            <FieldRow label="Event #" value={extraction.extractedEventNumber} />
-            <FieldRow label="Day #" value={extraction.extractedDayNumber} />
-            <FieldRow label="Flight" value={extraction.extractedFlightLetter} />
+            
+            <FieldRow 
+              label="Tournament Name" 
+              value={extraction.extractedName}
+              icon={<TrophyIcon className="w-4 h-4" />}
+              highlight={!!extraction.extractedName}
+            />
+            
+            <FieldRow 
+              label="Buy-In" 
+              value={extraction.extractedBuyIn && `$${extraction.extractedBuyIn}`}
+              icon={<CurrencyDollarIcon className="w-4 h-4" />}
+            />
+            
+            <FieldRow 
+              label="Prize Pool" 
+              value={extraction.extractedPrizePool && `$${extraction.extractedPrizePool.toLocaleString()}`}
+              icon={<CurrencyDollarIcon className="w-4 h-4" />}
+            />
+            
+            <FieldRow 
+              label="Total Entries" 
+              value={extraction.extractedTotalEntries}
+              icon={<UserGroupIcon className="w-4 h-4" />}
+            />
+            
+            <FieldRow 
+              label="Venue" 
+              value={extraction.extractedVenueName}
+              icon={<MapPinIcon className="w-4 h-4" />}
+            />
           </dl>
         </div>
-      )}
-      
-      {/* Winner (for results) */}
-      {extraction.extractedWinnerName && (
-        <div className="bg-yellow-50 rounded-lg p-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">🏆 Winner</h4>
-          <div className="flex items-center gap-3">
-            <TrophyIcon className="w-8 h-8 text-yellow-500" />
-            <div>
-              <div className="font-medium text-gray-900">{extraction.extractedWinnerName}</div>
-              {extraction.extractedWinnerPrize && (
-                <div className="text-sm text-gray-600">${extraction.extractedWinnerPrize.toLocaleString()}</div>
-              )}
-            </div>
+        
+        {/* Right Column - Winner & Placements */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b pb-2">
+            Winner Information
+          </h4>
+          
+          <dl className="space-y-1">
+            <FieldRow 
+              label="Winner Name" 
+              value={extraction.extractedWinnerName}
+              icon={<TrophyIcon className="w-4 h-4" />}
+              highlight={!!extraction.extractedWinnerName}
+            />
+            
+            <FieldRow 
+              label="Winner Prize" 
+              value={extraction.extractedWinnerPrize && `$${extraction.extractedWinnerPrize.toLocaleString()}`}
+              icon={<CurrencyDollarIcon className="w-4 h-4" />}
+            />
+            
+            <FieldRow 
+              label="Placements Found" 
+              value={extraction.placementCount}
+              icon={<ChartBarIcon className="w-4 h-4" />}
+            />
+          </dl>
+          
+          {/* Extraction metadata */}
+          <div className="mt-6 p-3 bg-gray-50 rounded-lg text-xs text-gray-500">
+            <p>Extracted at: {extraction.extractedAt && new Date(extraction.extractedAt).toLocaleString()}</p>
+            {extraction.id && <p className="truncate">ID: {extraction.id}</p>}
           </div>
-          {extraction.placementCount && extraction.placementCount > 1 && (
-            <div className="mt-2 text-xs text-gray-500">
-              +{extraction.placementCount - 1} more placements extracted
-            </div>
-          )}
         </div>
-      )}
-      
-      {/* Processing Meta */}
-      <div className="text-xs text-gray-400 pt-4 border-t">
-        Extracted at {extraction.extractedAt && new Date(extraction.extractedAt).toLocaleString()} 
-        {extraction.extractionDurationMs && ` • ${extraction.extractionDurationMs}ms`}
-        {extraction.extractionVersion && ` • v${extraction.extractionVersion}`}
       </div>
     </div>
   );
 };
 
-// NOTE: MatchesTab is now imported from './MatchesTab'
-// It includes detailed signal breakdown for each match candidate
-
-// Placements Tab
+// Placements Tab - Shows extracted placement data
 const PlacementsTab: React.FC<{
   placementCount: number;
   winnerName?: string;
   winnerPrize?: number;
 }> = ({ placementCount, winnerName, winnerPrize }) => {
-  if (placementCount === 0 && !winnerName) {
+  if (placementCount === 0) {
     return (
       <div className="p-8 text-center text-gray-500">
-        <TrophyIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-        <p>No placements extracted</p>
-        <p className="text-sm mt-1">This post may not contain result information</p>
+        <TrophyIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+        <p>No placements extracted from this post</p>
+        <p className="text-xs mt-2">This may not be a results post</p>
       </div>
     );
   }
   
   return (
     <div className="p-4">
-      <div className="bg-yellow-50 rounded-lg p-4 mb-4">
+      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4 mb-4">
         <div className="flex items-center gap-3">
-          <TrophyIcon className="w-10 h-10 text-yellow-500" />
+          <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <TrophyIcon className="w-6 h-6 text-yellow-600" />
+          </div>
           <div>
-            <h4 className="font-medium text-gray-900">
-              {placementCount} placement{placementCount !== 1 ? 's' : ''} extracted
-            </h4>
+            <h4 className="font-semibold text-gray-900">{placementCount} Placements Found</h4>
             {winnerName && (
               <p className="text-sm text-gray-600">
                 Winner: <span className="font-medium">{winnerName}</span>
-                {winnerPrize && ` - $${winnerPrize.toLocaleString()}`}
+                {winnerPrize && <span className="text-green-600 ml-2">${winnerPrize.toLocaleString()}</span>}
               </p>
             )}
           </div>
@@ -536,112 +399,81 @@ const PlacementsTab: React.FC<{
       </div>
       
       <p className="text-sm text-gray-500">
-        Full placement details will be available after processing and linking.
+        Detailed placement data will be linked when this post is associated with a game.
       </p>
     </div>
   );
 };
 
-// Review Tab
+// Review Tab - Shows processing status and issues
 const ReviewTab: React.FC<{
   result: ProcessSocialPostResult;
   selectedGameId: string | null;
 }> = ({ result, selectedGameId }) => {
-  const hasWarnings = result.warnings && result.warnings.length > 0;
-  const hasError = !!result.error;
-  
   return (
     <div className="p-4 space-y-4">
       {/* Status Summary */}
-      <div className={`rounded-lg p-4 ${result.success ? 'bg-green-50' : 'bg-red-50'}`}>
-        <div className="flex items-start gap-3">
+      <div className={`p-4 rounded-lg border ${
+        result.success 
+          ? 'bg-green-50 border-green-200' 
+          : 'bg-red-50 border-red-200'
+      }`}>
+        <div className="flex items-center gap-3">
           {result.success ? (
-            <CheckCircleIcon className="w-6 h-6 text-green-500 flex-shrink-0" />
+            <CheckCircleIcon className="w-6 h-6 text-green-600" />
           ) : (
-            <ExclamationTriangleIcon className="w-6 h-6 text-red-500 flex-shrink-0" />
+            <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
           )}
           <div>
-            <h4 className={`font-medium ${result.success ? 'text-green-800' : 'text-red-800'}`}>
-              {result.success ? 'Processing Complete' : 'Processing Failed'}
+            <h4 className={`font-semibold ${result.success ? 'text-green-800' : 'text-red-800'}`}>
+              {result.success ? 'Processing Successful' : 'Processing Failed'}
             </h4>
-            <p className="text-sm mt-1 text-gray-600">
-              {result.processingStatus}
-            </p>
-            {hasError && (
-              <p className="text-sm mt-2 text-red-600">{result.error}</p>
+            {result.error && (
+              <p className="text-sm text-red-700 mt-1">{result.error}</p>
             )}
           </div>
         </div>
       </div>
       
       {/* Warnings */}
-      {hasWarnings && (
-        <div className="bg-yellow-50 rounded-lg p-4">
-          <h4 className="font-medium text-yellow-800 mb-2 flex items-center gap-2">
-            <ExclamationTriangleIcon className="w-5 h-5" />
-            Warnings
-          </h4>
-          <ul className="text-sm text-yellow-700 space-y-1">
-            {result.warnings?.map((warning, idx) => (
-              <li key={idx}>• {warning}</li>
+      {result.warnings && result.warnings.length > 0 && (
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <h4 className="font-semibold text-yellow-800 mb-2">Warnings</h4>
+          <ul className="list-disc list-inside text-sm text-yellow-700 space-y-1">
+            {result.warnings.map((warning, i) => (
+              <li key={i}>{warning}</li>
             ))}
           </ul>
         </div>
       )}
       
-      {/* Processing Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-gray-900">
-            {result.matchCandidates?.length || 0}
+      {/* Processing Details */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h4 className="font-semibold text-gray-900 mb-3">Processing Details</h4>
+        <dl className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <dt className="text-gray-500">Post ID</dt>
+            <dd className="font-mono text-xs truncate">{result.socialPostId || 'N/A'}</dd>
           </div>
-          <div className="text-sm text-gray-500">Match candidates</div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-gray-900">
-            {result.placementsExtracted || 0}
+          <div>
+            <dt className="text-gray-500">Status</dt>
+            <dd>{result.processingStatus}</dd>
           </div>
-          <div className="text-sm text-gray-500">Placements extracted</div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-gray-900">
-            {result.linksCreated || 0}
+          <div>
+            <dt className="text-gray-500">Links Created</dt>
+            <dd>{result.linksCreated || 0}</dd>
           </div>
-          <div className="text-sm text-gray-500">Links created</div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-gray-900">
-            {result.processingTimeMs || 0}ms
+          <div>
+            <dt className="text-gray-500">Selected Game</dt>
+            <dd className="font-mono text-xs truncate">{selectedGameId || 'None'}</dd>
           </div>
-          <div className="text-sm text-gray-500">Processing time</div>
-        </div>
-      </div>
-      
-      {/* Selected Game */}
-      {selectedGameId && (
-        <div className="bg-blue-50 rounded-lg p-4">
-          <h4 className="font-medium text-blue-800 mb-1">Selected for Linking</h4>
-          <p className="text-sm text-blue-600 font-mono">{selectedGameId}</p>
-        </div>
-      )}
-      
-      {/* Next Steps */}
-      <div className="border-t pt-4">
-        <h4 className="font-medium text-gray-700 mb-2">Next Steps</h4>
-        <ul className="text-sm text-gray-600 space-y-1">
-          {result.primaryMatch?.wouldAutoLink && (
-            <li className="text-green-600">• ⚡ High confidence match available for auto-linking</li>
+          {result.processingTimeMs && (
+            <div>
+              <dt className="text-gray-500">Processing Time</dt>
+              <dd>{result.processingTimeMs}ms</dd>
+            </div>
           )}
-          {selectedGameId && !result.linksCreated && (
-            <li>• Click "Link to Selected Game" to create the link</li>
-          )}
-          {result.linksCreated && result.linksCreated > 0 && (
-            <li>• Links have been created automatically based on confidence threshold</li>
-          )}
-          {!result.matchCandidates || result.matchCandidates.length === 0 && (
-            <li>• No matching games found - you may need to create the game first</li>
-          )}
-        </ul>
+        </dl>
       </div>
     </div>
   );
@@ -664,6 +496,7 @@ export const SocialPostProcessingModal: React.FC<SocialPostProcessingModalProps>
   onReprocess,
   showActions = true,
   autoMode = false,
+  batchContext,  // NEW: Batch processing context
 }) => {
   const [activeTab, setActiveTab] = useState('post');
   const [selectedGameId, setSelectedGameId] = useState<string | null>(
@@ -773,6 +606,12 @@ export const SocialPostProcessingModal: React.FC<SocialPostProcessingModalProps>
           <div>
             <h3 className="text-lg font-semibold flex items-center gap-2">
               {autoMode ? '⚡' : '🔍'} Social Post Processing Results
+              {/* NEW: Batch progress indicator */}
+              {batchContext && (
+                <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
+                  {batchContext.current} / {batchContext.total}
+                </span>
+              )}
             </h3>
             <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-2">
               {result.extractedGameData?.contentType && (
@@ -795,6 +634,31 @@ export const SocialPostProcessingModal: React.FC<SocialPostProcessingModalProps>
             <XMarkIcon className="w-5 h-5 text-gray-500" />
           </button>
         </div>
+        
+        {/* NEW: Batch progress banner when in batch mode */}
+        {batchContext && (
+          <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-blue-700">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>
+                Processing post <span className="font-semibold">{batchContext.current}</span> of{' '}
+                <span className="font-semibold">{batchContext.total}</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Progress bar */}
+              <div className="w-32 h-2 bg-blue-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-blue-600 transition-all duration-300"
+                  style={{ width: `${(batchContext.current / batchContext.total) * 100}%` }}
+                />
+              </div>
+              <span className="text-xs text-blue-600 font-medium">
+                {Math.round((batchContext.current / batchContext.total) * 100)}%
+              </span>
+            </div>
+          </div>
+        )}
         
         {/* Tabs */}
         <div className="border-b flex">
@@ -830,6 +694,12 @@ export const SocialPostProcessingModal: React.FC<SocialPostProcessingModalProps>
           <div className="px-4 py-3 border-t flex items-center justify-between">
             <div className="text-sm text-gray-500">
               {result.processingTimeMs && `Processed in ${result.processingTimeMs}ms`}
+              {/* Show batch context in footer too */}
+              {batchContext && (
+                <span className="ml-2 text-blue-600">
+                  • Post {batchContext.current}/{batchContext.total}
+                </span>
+              )}
             </div>
             
             <div className="flex items-center gap-2">
@@ -847,7 +717,7 @@ export const SocialPostProcessingModal: React.FC<SocialPostProcessingModalProps>
                 onClick={onClose}
                 className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
               >
-                {result.linksCreated ? 'Close' : 'Cancel'}
+                {batchContext ? 'Skip' : (result.linksCreated ? 'Close' : 'Cancel')}
               </button>
               
               {selectedGameId && onLinkToGame && !result.linksCreated && (

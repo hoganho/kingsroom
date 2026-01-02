@@ -19,6 +19,7 @@ const {
   DeleteCommand,
   ScanCommand
 } = require('@aws-sdk/lib-dynamodb');
+const { getYearMonthAEST } = require('./dateUtils');
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION || 'ap-southeast-2' });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -279,17 +280,14 @@ const getYearMonthsInRange = (startDate, endDate) => {
   
   const current = new Date(start);
   while (current <= end) {
-    const ym = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}`;
-    yearMonths.add(ym);
-    current.setMonth(current.getMonth() + 1);
-    current.setDate(1); // Move to first of next month
+    yearMonths.add(getYearMonthAEST(current));
+    current.setDate(current.getDate() + 1); // Increment by day to catch month boundaries properly
   }
   
   // Also add the end month explicitly
-  const endYm = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}`;
-  yearMonths.add(endYm);
+  yearMonths.add(getYearMonthAEST(end));
   
-  return Array.from(yearMonths).sort();
+  return Array.from(yearMonths).filter(Boolean).sort();
 };
 
 // Kept for other use cases (not used in social post matching)
@@ -362,6 +360,14 @@ const deleteSocialPostGameLink = async (id) => deleteItem(TABLES.SocialPostGameL
 const createSocialPostGameData = async (data) => {
   const now = new Date().toISOString();
   return putItem(TABLES.SocialPostGameData(), { ...data, createdAt: now, updatedAt: now });
+};
+
+/**
+ * Update extraction data record
+ * Used to save match candidates and other updates after initial extraction
+ */
+const updateSocialPostGameData = async (id, updates) => {
+  return updateItem(TABLES.SocialPostGameData(), id, updates);
 };
 
 const getExtractionBySocialPost = async (socialPostId) => {
@@ -444,7 +450,7 @@ module.exports = {
   queryGameByEntityAndTournamentId,
   createSocialPostGameLink, getSocialPostGameLink, updateSocialPostGameLink,
   deleteSocialPostGameLink, getLinksBySocialPost, getLinksByGame,
-  createSocialPostGameData, getExtractionBySocialPost,
+  createSocialPostGameData, updateSocialPostGameData, getExtractionBySocialPost,
   createSocialPostPlacement, getPlacementsByExtraction,
   getVenue, getEntity, queryVenuesByEntity, getAllVenues,
   TABLES

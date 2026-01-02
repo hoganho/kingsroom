@@ -1,11 +1,16 @@
 // src/hooks/scraper/useBatchJobMonitor.ts
-// Real-time batch job monitoring with polling fallback and live duration tracking
-// FIXED: Proper duration reset when job changes, better start time handling
+// Real-time batch job monitoring with subscription-first approach and polling fallback
+// UPDATED v2.1: Fixed TypeScript errors - added missing ScraperJob fields, removed unused variables
+//
+// This hook now uses the onJobProgress subscription for real-time updates,
+// eliminating the need for polling and avoiding API rate limits.
+// Falls back to a single initial fetch + manual refresh.
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { ScraperJob } from '../../API';
 import { getScraperJobsReport } from '../../graphql/queries';
+import { useJobProgressSubscription } from './useJobProgressSubscription';
 
 const getClient = () => generateClient();
 
@@ -24,10 +29,14 @@ export interface BatchJobStats {
 }
 
 export interface UseBatchJobMonitorConfig {
-  pollingInterval?: number; // Default 3000ms (3 seconds)
-  enablePolling?: boolean; // Default true
+  /** @deprecated Polling is no longer used - subscription provides real-time updates */
+  pollingInterval?: number;
+  /** @deprecated Polling is no longer used */
+  enablePolling?: boolean;
   onJobComplete?: (job: ScraperJob) => void;
   onStatsChange?: (stats: BatchJobStats, prevStats: BatchJobStats) => void;
+  /** @deprecated Polling is no longer used */
+  maxBackoffInterval?: number;
 }
 
 // ===================================================================
@@ -57,12 +66,11 @@ const statsEqual = (a: BatchJobStats, b: BatchJobStats): boolean => {
 
 /**
  * Check if a job status indicates the job is still running
- * Note: Backend may use values not in GraphQL enum (RUNNING, IN_PROGRESS, etc.)
  */
 export const isJobRunning = (status: string | null | undefined): boolean => {
   if (!status) return false;
   const s = status.toUpperCase();
-  const runningStatuses = ['QUEUED', 'RUNNING', 'IN_PROGRESS', 'PROCESSING'];
+  const runningStatuses = ['QUEUED', 'RUNNING', 'IN_PROGRESS', 'PROCESSING', 'PENDING'];
   return runningStatuses.includes(s);
 };
 
@@ -86,16 +94,13 @@ export const isJobComplete = (status: string | null | undefined): boolean => {
 const parseStartTime = (startTime: unknown): number | null => {
   if (!startTime) return null;
   
-  // If it's already a number (Unix timestamp in ms or seconds)
   if (typeof startTime === 'number') {
-    // If it's in seconds (less than year 2100 in ms), convert to ms
     if (startTime < 10000000000) {
       return startTime * 1000;
     }
     return startTime;
   }
   
-  // If it's a string, try to parse it
   if (typeof startTime === 'string') {
     const parsed = new Date(startTime).getTime();
     if (!isNaN(parsed)) {
@@ -115,8 +120,6 @@ export const useBatchJobMonitor = (
   config: UseBatchJobMonitorConfig = {}
 ) => {
   const {
-    pollingInterval = 3000,
-    enablePolling = true,
     onJobComplete,
     onStatsChange,
   } = config;
@@ -129,249 +132,276 @@ export const useBatchJobMonitor = (
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Refs - track the CURRENT job ID to detect changes
+  // Refs
   const prevStatsRef = useRef<BatchJobStats>(extractStats(null));
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const jobStartTimeRef = useRef<number | null>(null);
   const completionNotifiedRef = useRef<boolean>(false);
   const currentJobIdRef = useRef<string | null>(null);
 
-  // Computed
+  // ===================================================================
+  // SUBSCRIPTION FOR REAL-TIME UPDATES
+  // ===================================================================
+
+  const {
+    event: subscriptionEvent,
+    isSubscribed,
+    status: subscriptionStatus,
+    durationSeconds: subscriptionDuration,
+    startId: subscriptionStartId,
+    endId: subscriptionEndId,
+    currentId: subscriptionCurrentId,
+    lastErrorMessage: subscriptionErrorMessage,
+  } = useJobProgressSubscription(jobId, {
+    onStatusChange: (status, prevStatus) => {
+      console.log(`[useBatchJobMonitor] Status via subscription: ${prevStatus} -> ${status}`);
+    },
+    onJobComplete: (event) => {
+      console.log('[useBatchJobMonitor] Job completed via subscription:', event.status);
+      // Create a ScraperJob-like object from the subscription event
+      const jobFromEvent: ScraperJob = {
+        __typename: 'ScraperJob',
+        id: event.jobId,
+        jobId: event.jobId,
+        status: event.status as ScraperJob['status'],
+        triggerSource: job?.triggerSource ?? ('MANUAL' as ScraperJob['triggerSource']),
+        startTime: event.startTime || new Date().toISOString(),
+        endTime: new Date().toISOString(),
+        totalURLsProcessed: event.totalURLsProcessed,
+        newGamesScraped: event.newGamesScraped,
+        gamesUpdated: event.gamesUpdated,
+        gamesSkipped: event.gamesSkipped,
+        errors: event.errors,
+        blanks: event.blanks,
+        entityId: event.entityId,
+        durationSeconds: event.durationSeconds,
+        s3CacheHits: event.s3CacheHits,
+        successRate: event.successRate,
+        stopReason: event.stopReason,
+        lastErrorMessage: event.lastErrorMessage,
+        currentId: event.currentId,
+        startId: event.startId,
+        endId: event.endId,
+        createdAt: job?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        _version: job?._version ?? 1,
+        _lastChangedAt: Date.now(),
+      };
+      
+      if (!completionNotifiedRef.current) {
+        completionNotifiedRef.current = true;
+        onJobComplete?.(jobFromEvent);
+      }
+    },
+    onError: (err) => {
+      console.error('[useBatchJobMonitor] Subscription error:', err);
+      setError(err.message);
+    },
+  });
+
+  // Update job state from subscription events
+  useEffect(() => {
+    if (!subscriptionEvent) return;
+
+    // Build a ScraperJob from the subscription event
+    const jobFromEvent: ScraperJob = {
+      __typename: 'ScraperJob',
+      id: subscriptionEvent.jobId,
+      jobId: subscriptionEvent.jobId,
+      status: subscriptionEvent.status as ScraperJob['status'],
+      triggerSource: job?.triggerSource ?? ('MANUAL' as ScraperJob['triggerSource']),
+      startTime: subscriptionEvent.startTime || job?.startTime || new Date().toISOString(),
+      endTime: isJobComplete(subscriptionEvent.status) ? new Date().toISOString() : null,
+      totalURLsProcessed: subscriptionEvent.totalURLsProcessed,
+      newGamesScraped: subscriptionEvent.newGamesScraped,
+      gamesUpdated: subscriptionEvent.gamesUpdated,
+      gamesSkipped: subscriptionEvent.gamesSkipped,
+      errors: subscriptionEvent.errors,
+      blanks: subscriptionEvent.blanks,
+      entityId: subscriptionEvent.entityId,
+      durationSeconds: subscriptionEvent.durationSeconds,
+      s3CacheHits: subscriptionEvent.s3CacheHits,
+      successRate: subscriptionEvent.successRate,
+      stopReason: subscriptionEvent.stopReason,
+      lastErrorMessage: subscriptionEvent.lastErrorMessage,
+      currentId: subscriptionEvent.currentId,
+      startId: subscriptionEvent.startId,
+      endId: subscriptionEvent.endId,
+      createdAt: job?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      _version: job?._version ?? 1,
+      _lastChangedAt: Date.now(),
+    };
+
+    // Check for stats changes
+    const newStats = extractStats(jobFromEvent);
+    const changed = !statsEqual(newStats, prevStatsRef.current);
+    
+    if (changed) {
+      console.log('[useBatchJobMonitor] Stats changed via subscription:', {
+        prev: prevStatsRef.current,
+        new: newStats
+      });
+      onStatsChange?.(newStats, prevStatsRef.current);
+    }
+
+    setHasChanges(changed);
+    prevStatsRef.current = newStats;
+    setJob(jobFromEvent);
+    setLastUpdated(new Date());
+    
+    // Use subscription duration directly
+    if (subscriptionDuration >= 0) {
+      setLiveDuration(subscriptionDuration);
+    }
+  }, [subscriptionEvent, subscriptionDuration, onStatsChange, job?.triggerSource, job?.startTime, job?.createdAt, job?._version]);
+
+  // Computed values from subscription
   const stats = useMemo(() => extractStats(job), [job]);
-  const isActive = useMemo(() => isJobRunning(job?.status), [job?.status]);
-  const isCompleteStatus = useMemo(() => isJobComplete(job?.status), [job?.status]);
+  const isActive = useMemo(() => {
+    // Prefer subscription status if available
+    if (subscriptionStatus) {
+      return isJobRunning(subscriptionStatus);
+    }
+    return isJobRunning(job?.status);
+  }, [subscriptionStatus, job?.status]);
+  
+  const isCompleteStatus = useMemo(() => {
+    if (subscriptionStatus) {
+      return isJobComplete(subscriptionStatus);
+    }
+    return isJobComplete(job?.status);
+  }, [subscriptionStatus, job?.status]);
 
   // ===================================================================
-  // FETCH JOB DATA
+  // INITIAL FETCH (single fetch on mount, no polling)
   // ===================================================================
 
   const fetchJob = useCallback(async (): Promise<ScraperJob | null> => {
     if (!jobId) return null;
+    
+    setIsPolling(true);
 
     try {
       const client = getClient();
       
       const response = await client.graphql({
         query: getScraperJobsReport,
-        variables: { 
-          limit: 50
-        }
+        variables: { limit: 50 }
       }) as { data?: { getScraperJobsReport?: { items?: ScraperJob[] } }; errors?: unknown[] };
 
-      if (response?.data?.getScraperJobsReport?.items) {
-        const foundJob = response.data.getScraperJobsReport.items.find(
-          (j: ScraperJob) => j.id === jobId || j.jobId === jobId
-        );
-        
-        if (foundJob) {
-          return foundJob;
-        }
+      if (response?.errors && response.errors.length > 0) {
+        console.error('[useBatchJobMonitor] GraphQL errors:', response.errors);
+        setError('Failed to fetch job data');
+        return null;
       }
 
-      console.warn('[useBatchJobMonitor] Job not found in recent jobs:', jobId);
-      return null;
+      const jobs = response?.data?.getScraperJobsReport?.items || [];
+      const foundJob = jobs.find(j => j.id === jobId || j.jobId === jobId) || null;
+
+      if (foundJob) {
+        // Only update if we don't have subscription data yet
+        if (!subscriptionEvent) {
+          setJob(foundJob);
+          setLastUpdated(new Date());
+          
+          if (foundJob.durationSeconds != null) {
+            setLiveDuration(foundJob.durationSeconds);
+          }
+        }
+        setError(null);
+      }
+
+      return foundJob;
+
     } catch (err) {
       console.error('[useBatchJobMonitor] Error fetching job:', err);
-      setError('Failed to fetch job status');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMessage);
       return null;
+    } finally {
+      setIsPolling(false);
     }
-  }, [jobId]);
+  }, [jobId, subscriptionEvent]);
+
+  const refresh = useCallback(() => {
+    fetchJob();
+  }, [fetchJob]);
 
   // ===================================================================
-  // MANUAL REFRESH
-  // ===================================================================
-
-  const refresh = useCallback(async () => {
-    setIsPolling(true);
-    const fetchedJob = await fetchJob();
-    
-    if (fetchedJob) {
-      const newStats = extractStats(fetchedJob);
-      const changed = !statsEqual(newStats, prevStatsRef.current);
-      
-      if (changed && onStatsChange) {
-        onStatsChange(newStats, prevStatsRef.current);
-      }
-      
-      setHasChanges(changed);
-      prevStatsRef.current = newStats;
-      setJob(fetchedJob);
-      setLastUpdated(new Date());
-
-      // Update duration from server if available and makes sense
-      if (fetchedJob.durationSeconds != null && fetchedJob.durationSeconds >= 0) {
-        // Only use server duration if it's reasonable (less than 24 hours)
-        if (fetchedJob.durationSeconds < 86400) {
-          setLiveDuration(fetchedJob.durationSeconds);
-        }
-      }
-
-      // Handle completion callback
-      if (isJobComplete(fetchedJob.status) && !completionNotifiedRef.current) {
-        completionNotifiedRef.current = true;
-        onJobComplete?.(fetchedJob);
-      }
-    }
-    
-    setIsPolling(false);
-    return fetchedJob;
-  }, [fetchJob, onStatsChange, onJobComplete]);
-
-  // ===================================================================
-  // RESET WHEN JOB ID CHANGES - MUST BE BEFORE POLLING EFFECT
+  // RESET STATE WHEN JOB ID CHANGES
   // ===================================================================
 
   useEffect(() => {
-    // Check if job ID actually changed
     if (currentJobIdRef.current !== jobId) {
-      console.log('[useBatchJobMonitor] Job ID changed:', currentJobIdRef.current, '->', jobId);
-      currentJobIdRef.current = jobId;
+      console.log(`[useBatchJobMonitor] Job ID changed: ${currentJobIdRef.current} -> ${jobId}`);
       
-      // Clear all state for the new job
+      currentJobIdRef.current = jobId;
+      completionNotifiedRef.current = false;
+      prevStatsRef.current = extractStats(null);
+      jobStartTimeRef.current = null;
+      
       setJob(null);
       setLiveDuration(0);
       setHasChanges(false);
       setError(null);
-      prevStatsRef.current = extractStats(null);
-      completionNotifiedRef.current = false;
-      jobStartTimeRef.current = null;
-      
-      // Clear intervals
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
-      if (durationIntervalRef.current) {
-        clearInterval(durationIntervalRef.current);
-        durationIntervalRef.current = null;
-      }
     }
   }, [jobId]);
 
   // ===================================================================
-  // POLLING EFFECT
+  // INITIAL FETCH EFFECT
   // ===================================================================
 
   useEffect(() => {
-    if (!jobId || !enablePolling) {
-      return;
-    }
-
-    // Initial fetch
+    if (!jobId) return;
+    
+    // Do a single initial fetch to get job data
     refresh();
-
-    // Set up polling interval
-    const startPolling = () => {
-      pollIntervalRef.current = setInterval(async () => {
-        const fetchedJob = await fetchJob();
-        
-        if (fetchedJob) {
-          const newStats = extractStats(fetchedJob);
-          const changed = !statsEqual(newStats, prevStatsRef.current);
-          
-          if (changed) {
-            console.log('[useBatchJobMonitor] Stats changed:', {
-              prev: prevStatsRef.current,
-              new: newStats
-            });
-            onStatsChange?.(newStats, prevStatsRef.current);
-          }
-          
-          setHasChanges(changed);
-          prevStatsRef.current = newStats;
-          setJob(fetchedJob);
-          setLastUpdated(new Date());
-
-          // Update duration from server if reasonable
-          if (fetchedJob.durationSeconds != null && 
-              fetchedJob.durationSeconds >= 0 && 
-              fetchedJob.durationSeconds < 86400) {
-            setLiveDuration(fetchedJob.durationSeconds);
-          }
-
-          // Stop polling and notify when complete
-          if (isJobComplete(fetchedJob.status)) {
-            if (!completionNotifiedRef.current) {
-              completionNotifiedRef.current = true;
-              onJobComplete?.(fetchedJob);
-            }
-            
-            // Stop polling after a short delay to get final stats
-            setTimeout(() => {
-              if (pollIntervalRef.current) {
-                clearInterval(pollIntervalRef.current);
-                pollIntervalRef.current = null;
-              }
-            }, 1000);
-          }
-        }
-      }, pollingInterval);
-    };
-
-    startPolling();
-
-    return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
-    };
-  }, [jobId, enablePolling, pollingInterval, fetchJob, onStatsChange, onJobComplete, refresh]);
+  }, [jobId, refresh]);
 
   // ===================================================================
   // LIVE DURATION COUNTER EFFECT
   // ===================================================================
 
   useEffect(() => {
-    // Clear existing interval first
     if (durationIntervalRef.current) {
       clearInterval(durationIntervalRef.current);
       durationIntervalRef.current = null;
     }
 
-    // Don't run counter if no job or job is complete
-    if (!job || !isActive) {
+    // Don't run counter if no job, job is complete, or subscription is providing duration
+    if (!job || !isActive || isSubscribed) {
       return;
     }
 
-    // Parse start time from job
     const parsedStartTime = parseStartTime(job.startTime);
     
-    // If we have a valid start time from the job, use it
     if (parsedStartTime) {
       jobStartTimeRef.current = parsedStartTime;
       
-      // Calculate initial duration
       const initialDuration = Math.floor((Date.now() - parsedStartTime) / 1000);
       
-      // Sanity check: if duration seems unreasonable (> 1 hour for a bulk job), 
-      // fall back to server duration or 0
       if (initialDuration > 3600 && job.durationSeconds != null && job.durationSeconds < initialDuration) {
-        console.warn('[useBatchJobMonitor] Calculated duration seems too high, using server duration', {
-          calculated: initialDuration,
-          server: job.durationSeconds
-        });
         setLiveDuration(job.durationSeconds);
       } else if (initialDuration >= 0) {
         setLiveDuration(initialDuration);
       }
     } else {
-      // No start time - use when we first saw this job
       jobStartTimeRef.current = Date.now();
       setLiveDuration(job.durationSeconds ?? 0);
     }
 
-    // Start live counter
-    durationIntervalRef.current = setInterval(() => {
-      if (jobStartTimeRef.current) {
-        const elapsed = Math.floor((Date.now() - jobStartTimeRef.current) / 1000);
-        // Sanity check: don't show more than 1 hour unless server confirms
-        if (elapsed < 3600 || (job.durationSeconds && elapsed <= job.durationSeconds + 60)) {
-          setLiveDuration(elapsed);
+    // Only start counter if subscription isn't active
+    if (!isSubscribed) {
+      durationIntervalRef.current = setInterval(() => {
+        if (jobStartTimeRef.current) {
+          const elapsed = Math.floor((Date.now() - jobStartTimeRef.current) / 1000);
+          if (elapsed < 3600 || (job.durationSeconds && elapsed <= job.durationSeconds + 60)) {
+            setLiveDuration(elapsed);
+          }
         }
-      }
-    }, 1000);
+      }, 1000);
+    }
 
     return () => {
       if (durationIntervalRef.current) {
@@ -379,7 +409,7 @@ export const useBatchJobMonitor = (
         durationIntervalRef.current = null;
       }
     };
-  }, [job?.id, job?.jobId, isActive, job?.startTime, job?.durationSeconds]);
+  }, [job?.id, job?.jobId, isActive, job?.startTime, job?.durationSeconds, isSubscribed]);
 
   // ===================================================================
   // FORMAT DURATION HELPER
@@ -417,6 +447,20 @@ export const useBatchJobMonitor = (
     hasChanges,
     error,
 
+    // Subscription state
+    isSubscribed,
+    
+    // Subscription-provided values (use these for display)
+    currentId: subscriptionCurrentId ?? job?.currentId ?? null,
+    startId: subscriptionStartId ?? job?.startId ?? null,
+    endId: subscriptionEndId ?? job?.endId ?? null,
+    lastErrorMessage: subscriptionErrorMessage ?? job?.lastErrorMessage ?? null,
+
+    // @deprecated - Rate limiting no longer applies with subscription approach
+    isRateLimited: false,
+    // @deprecated - Polling interval no longer used
+    currentPollInterval: 0,
+
     // Actions
     refresh,
 
@@ -433,6 +477,7 @@ export const getJobStatusLabel = (status: string | null | undefined): string => 
   if (!status) return 'Unknown';
   
   const labels: Record<string, string> = {
+    'PENDING': 'Starting...',
     'QUEUED': 'Queued',
     'RUNNING': 'Running',
     'IN_PROGRESS': 'Running',

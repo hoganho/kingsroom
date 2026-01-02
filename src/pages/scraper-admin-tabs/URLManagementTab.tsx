@@ -1,14 +1,14 @@
 // src/pages/scraper-admin-tabs/URLManagementTab.tsx
-// COMPLETE VERSION: All original features + entity context integration
+// ENHANCED VERSION: Search-first approach with quick filters
 // 
-// Changes from original:
-// 1. Added useEntity hook integration
-// 2. Pass entityId(s) to searchScrapeURLs query
-// 3. Added entity column when viewing multiple entities
-// 4. Added entity info banner
-// 5. PRESERVED: Statistics Cards, Dynamic recommendations, Filter Summary, etc.
+// Features:
+// 1. Search interface with quick-select buttons for common statuses
+// 2. No auto-load on page load - user initiates search
+// 3. Checkbox filters for additional client-side refinement
+// 4. "Send to Scraper" action to load selected IDs into multi-ID mode
+// 5. Full pagination support
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import {
     RefreshCw, 
@@ -18,7 +18,15 @@ import {
     ChevronUp,
     AlertCircle,
     Filter,
-    Building2  // NEW: Entity icon
+    Copy,
+    Play,
+    XCircle,
+    Clock,
+    Ban,
+    FileQuestion,
+    AlertOctagon,
+    Search,
+    Download
 } from 'lucide-react';
 import { 
     bulkModifyScrapeURLs 
@@ -26,10 +34,102 @@ import {
 import { ScrapeURL, ScrapeURLStatus, GameStatus } from '../../API';
 import { URLStatusBadge, GameStatusBadge } from '../../components/scraper/shared/StatusBadges';
 import { SkippedIDsAnalyzer } from '../../components/scraper/admin/SkippedIDsAnalyzer';
-import { useEntity } from '../../contexts/EntityContext';  // NEW: Import entity context
+import { useEntity } from '../../contexts/EntityContext';
 
-// NEW: Custom query that supports entity filtering
-// This should match your schema after you add entityId/entityIds parameters
+// ===================================================================
+// TYPES & CONSTANTS
+// ===================================================================
+
+interface SearchPreset {
+    id: string;
+    label: string;
+    description: string;
+    icon: React.ReactNode;
+    color: string;
+    bgColor: string;
+    hoverColor: string;
+    // Client-side filter function (applied after fetch)
+    filterFn: (url: ScrapeURL) => boolean;
+}
+
+// Quick search presets - these define what users can quickly search for
+const SEARCH_PRESETS: SearchPreset[] = [
+    {
+        id: 'errors',
+        label: 'Errors',
+        description: 'URLs with scrape errors or failures',
+        icon: <XCircle className="h-4 w-4" />,
+        color: 'text-red-700',
+        bgColor: 'bg-red-100',
+        hoverColor: 'hover:bg-red-200',
+        filterFn: (url) => 
+            url.lastScrapeStatus?.toUpperCase() === 'ERROR' ||
+            url.status?.toString().toUpperCase() === 'ERROR' ||
+            (url.timesFailed ?? 0) > 0
+    },
+    {
+        id: 'not_found',
+        label: 'Not Found',
+        description: '404s and blank pages',
+        icon: <FileQuestion className="h-4 w-4" />,
+        color: 'text-orange-700',
+        bgColor: 'bg-orange-100',
+        hoverColor: 'hover:bg-orange-200',
+        filterFn: (url) => 
+            url.lastScrapeStatus?.toUpperCase() === 'NOT_FOUND' ||
+            url.lastScrapeStatus?.toUpperCase() === 'BLANK' ||
+            url.gameStatus?.toString().toUpperCase() === 'NOT_FOUND'
+    },
+    {
+        id: 'not_published',
+        label: 'Not Published',
+        description: 'Future tournaments',
+        icon: <Clock className="h-4 w-4" />,
+        color: 'text-yellow-700',
+        bgColor: 'bg-yellow-100',
+        hoverColor: 'hover:bg-yellow-200',
+        filterFn: (url) => 
+            url.gameStatus?.toString().toUpperCase() === 'NOT_PUBLISHED' ||
+            url.lastScrapeStatus?.toUpperCase() === 'NOT_PUBLISHED'
+    },
+    {
+        id: 'consecutive_failures',
+        label: 'Consecutive Failures',
+        description: '2+ failures in a row',
+        icon: <AlertOctagon className="h-4 w-4" />,
+        color: 'text-purple-700',
+        bgColor: 'bg-purple-100',
+        hoverColor: 'hover:bg-purple-200',
+        filterFn: (url) => (url.consecutiveFailures ?? 0) >= 2
+    },
+    {
+        id: 'never_successful',
+        label: 'Never Successful',
+        description: 'Tried but never worked',
+        icon: <AlertTriangle className="h-4 w-4" />,
+        color: 'text-pink-700',
+        bgColor: 'bg-pink-100',
+        hoverColor: 'hover:bg-pink-200',
+        filterFn: (url) => 
+            (url.timesSuccessful ?? 0) === 0 && 
+            (url.timesScraped ?? 0) > 0
+    },
+    {
+        id: 'do_not_scrape',
+        label: 'Do Not Scrape',
+        description: 'Blocked URLs',
+        icon: <Ban className="h-4 w-4" />,
+        color: 'text-gray-700',
+        bgColor: 'bg-gray-200',
+        hoverColor: 'hover:bg-gray-300',
+        filterFn: (url) => url.doNotScrape === true
+    }
+];
+
+// ===================================================================
+// GRAPHQL QUERY
+// ===================================================================
+
 const searchScrapeURLsWithEntity = /* GraphQL */ `
   query SearchScrapeURLsWithEntity(
     $entityId: ID
@@ -76,27 +176,39 @@ const searchScrapeURLsWithEntity = /* GraphQL */ `
   }
 `;
 
+// ===================================================================
+// MAIN COMPONENT
+// ===================================================================
+
 export const URLManagementTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
     
-    // NEW: Get entity context
+    // Entity context
     const { 
         entities, 
         selectedEntities, 
         loading: entitiesLoading 
     } = useEntity();
     
+    // Data state
     const [urls, setURLs] = useState<ScrapeURL[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [graphqlErrors, setGraphqlErrors] = useState<any[]>([]);
-    const [statusFilter, setStatusFilter] = useState<ScrapeURLStatus | 'ALL'>('ALL');
+    const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
+    const [loadingProgress, setLoadingProgress] = useState<string>('');
+    
+    // Search/Filter state
+    const [activePreset, setActivePreset] = useState<string | null>(null);
     const [gameStatusFilter, setGameStatusFilter] = useState<GameStatus | 'ALL' | 'UNPARSED'>('ALL');
+    
+    // Selection state
     const [selectedURLs, setSelectedURLs] = useState<Set<string>>(new Set());
+    
+    // UI state
     const [showSkippedAnalyzer, setShowSkippedAnalyzer] = useState(false);
-    const [showErrorDetails, setShowErrorDetails] = useState(false);
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [copySuccess, setCopySuccess] = useState(false);
 
-    // NEW: Create entity lookup map for display
+    // Entity lookup map
     const entityMap = useMemo(() => {
         return entities.reduce((acc, entity) => {
             acc[entity.id] = entity;
@@ -104,492 +216,507 @@ export const URLManagementTab: React.FC = () => {
         }, {} as Record<string, typeof entities[0]>);
     }, [entities]);
 
-    // NEW: Get selected entity IDs for query
+    // Selected entity IDs for query
     const selectedEntityIds = useMemo(() => {
         return selectedEntities.map(e => e.id);
     }, [selectedEntities]);
 
-    const loadURLs = useCallback(async () => {
-        // Wait for entities to load
-        if (entitiesLoading) {
-            return;
-        }
+    // ===================================================================
+    // DATA LOADING (with pagination)
+    // ===================================================================
 
-        // If no entities selected, show empty state
+    const loadURLs = useCallback(async (presetId?: string | null) => {
+        if (entitiesLoading) return;
         if (selectedEntityIds.length === 0) {
             setURLs([]);
-            setLoading(false);
             return;
         }
 
         try {
             setLoading(true);
-            setError(null);
-            setGraphqlErrors([]);
+            setHasSearched(true);
+            setLoadingProgress('Loading...');
+            setSelectedURLs(new Set()); // Clear selection on new search
             
-            // NEW: Pass entity filter to query
-            // Use searchScrapeURLsWithEntity if schema is updated, 
-            // otherwise fall back to searchScrapeURLs
-            const response = await client.graphql({
-                query: searchScrapeURLsWithEntity,
-                variables: { 
-                    // If only one entity selected, use entityId; otherwise use entityIds array
-                    entityId: selectedEntityIds.length === 1 ? selectedEntityIds[0] : null,
-                    entityIds: selectedEntityIds.length > 1 ? selectedEntityIds : null,
-                    status: statusFilter === 'ALL' ? null : statusFilter,
-                    limit: 100 
-                }
-            }) as any;
+            const allItems: ScrapeURL[] = [];
+            let nextToken: string | null = null;
+            let pageCount = 0;
+            const maxPages = 50; // Safety limit: 50 pages * 500 = 25,000 max URLs
             
-            // Check for GraphQL errors
-            if (response.errors && response.errors.length > 0) {
-                console.warn('GraphQL errors detected:', response.errors);
-                setGraphqlErrors(response.errors);
+            do {
+                pageCount++;
+                setLoadingProgress(`Loading page ${pageCount}... (${allItems.length} URLs so far)`);
                 
-                // Categorize errors
-                const nullFieldErrors = response.errors.filter((e: any) => 
-                    e.message?.includes('Cannot return null for non-nullable')
-                );
-                const enumErrors = response.errors.filter((e: any) => 
-                    e.message?.includes('Invalid input for Enum')
-                );
-                const gameStatusEnumErrors = enumErrors.filter((e: any) =>
-                    e.message?.includes('GameStatus')
-                );
+                const response = await client.graphql({
+                    query: searchScrapeURLsWithEntity,
+                    variables: { 
+                        entityId: selectedEntityIds.length === 1 ? selectedEntityIds[0] : null,
+                        entityIds: selectedEntityIds.length > 1 ? selectedEntityIds : null,
+                        status: null,  // Get all statuses, filter client-side
+                        limit: 500,
+                        nextToken
+                    }
+                }) as any;
                 
-                if (nullFieldErrors.length > 0) {
-                    setError(
-                        `Warning: ${nullFieldErrors.length} records have missing required fields. ` +
-                        `These records will be skipped. Consider updating your schema to make these fields nullable.`
-                    );
+                if (response.errors && response.errors.length > 0) {
+                    console.warn('GraphQL errors detected:', response.errors);
                 }
                 
-                if (gameStatusEnumErrors.length > 0) {
-                    const errorMsg = `${gameStatusEnumErrors.length} records have invalid GameStatus values. ` +
-                        `Some games have status values not defined in your schema. ` +
-                        `These records will be loaded but their game status will not display. `;
-                    setError((prev) => (prev || '') + errorMsg);
-                } else if (enumErrors.length > 0) {
-                    setError((prev) => 
-                        (prev || '') + ` ${enumErrors.length} records have invalid enum values.`
-                    );
+                const items = response?.data?.searchScrapeURLs?.items || [];
+                allItems.push(...items.filter(Boolean));
+                
+                nextToken = response?.data?.searchScrapeURLs?.nextToken || null;
+                
+                // Safety check
+                if (pageCount >= maxPages) {
+                    console.warn(`[URLManagement] Reached max pages limit (${maxPages}), stopping pagination`);
+                    break;
                 }
+                
+            } while (nextToken);
+            
+            console.log(`[URLManagement] Loaded ${allItems.length} URLs in ${pageCount} pages`);
+            
+            // Apply preset filter if specified
+            if (presetId) {
+                const preset = SEARCH_PRESETS.find(p => p.id === presetId);
+                if (preset) {
+                    const filtered = allItems.filter(preset.filterFn);
+                    console.log(`[URLManagement] Applied preset '${presetId}': ${filtered.length} of ${allItems.length} match`);
+                    setURLs(filtered);
+                    setActivePreset(presetId);
+                } else {
+                    setURLs(allItems);
+                    setActivePreset(null);
+                }
+            } else {
+                setURLs(allItems);
+                setActivePreset(null);
             }
             
-            // Even with errors, we might have partial data
-            if (response.data?.searchScrapeURLs?.items) {
-                // Filter out any null or malformed items
-                const validItems = response.data.searchScrapeURLs.items.filter((item: any) => 
-                    item && item.url && item.id
-                );
-                setURLs(validItems as ScrapeURL[]);
-                
-                if (validItems.length === 0 && response.errors?.length > 0) {
-                    setError('All records failed to load due to data integrity issues. Please check the error details.');
-                }
-            } else if (response.errors?.length === 0) {
-                // No data and no errors - empty result
-                setURLs([]);
-            }
-        } catch (err) {
+            setLoadingProgress('');
+            
+        } catch (err: any) {
             console.error('Error loading URLs:', err);
-            setError(`Failed to load URLs: ${err instanceof Error ? err.message : 'Unknown error'}`);
-            setURLs([]);
+            setLoadingProgress('');
+            
+            if (err?.data?.searchScrapeURLs?.items) {
+                setURLs(err.data.searchScrapeURLs.items.filter(Boolean));
+            }
         } finally {
             setLoading(false);
         }
-    }, [client, statusFilter, selectedEntityIds, entitiesLoading]);
+    }, [client, selectedEntityIds, entitiesLoading]);
 
-    // Reload when filters or entity selection changes
-    useEffect(() => {
-        loadURLs();
+    // Handle preset button click
+    const handlePresetClick = useCallback((presetId: string) => {
+        loadURLs(presetId);
     }, [loadURLs]);
 
-    // Also listen for entity change events
-    useEffect(() => {
-        const handleEntityChange = () => {
-            loadURLs();
-        };
-        
-        window.addEventListener('selectedEntitiesChanged', handleEntityChange);
-        return () => window.removeEventListener('selectedEntitiesChanged', handleEntityChange);
+    // Handle "Load All" click
+    const handleLoadAll = useCallback(() => {
+        loadURLs(null);
     }, [loadURLs]);
 
-    const handleToggleURL = (url: string) => {
-        const newSelection = new Set(selectedURLs);
-        if (newSelection.has(url)) {
-            newSelection.delete(url);
-        } else {
-            newSelection.add(url);
-        }
-        setSelectedURLs(newSelection);
-    };
-    
-    const handleToggleAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.checked) {
-            setSelectedURLs(new Set(filteredURLs.map(u => u.url)));
-        } else {
-            setSelectedURLs(new Set());
-        }
-    };
+    // ===================================================================
+    // ADDITIONAL CLIENT-SIDE FILTERING
+    // ===================================================================
 
-    const handleBulkUpdate = useCallback(async (status: ScrapeURLStatus, doNotScrape?: boolean) => {
-        if (selectedURLs.size === 0) {
-            alert('Please select URLs to update');
-            return;
-        }
-
-        try {
-            await client.graphql({
-                query: bulkModifyScrapeURLs,
-                variables: {
-                    urls: Array.from(selectedURLs),
-                    status,
-                    doNotScrape
-                }
-            });
-            setSelectedURLs(new Set());
-            loadURLs(); // Refresh the list
-        } catch (error) {
-            console.error('Error updating URLs:', error);
-            alert('Failed to update URLs. See console for details.');
-        }
-    }, [client, selectedURLs, loadURLs]);
-    
-    // Calculate statistics for display
-    const stats = useMemo(() => {
-        const byStatus = urls.reduce((acc, url) => {
-            acc[url.status] = (acc[url.status] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
-        
-        const byGameStatus = urls.reduce((acc, url) => {
-            const status = url.gameStatus || 'UNPARSED';
-            acc[status] = (acc[status] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
-        
-        // NEW: Stats by entity
-        const byEntity = urls.reduce((acc, url) => {
-            const entityId = url.entityId || 'unknown';
-            acc[entityId] = (acc[entityId] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
-        
-        const totalErrors = urls.filter(u => u.status === 'ERROR').length;
-        const totalParsed = urls.filter(u => u.gameStatus).length;
-        const totalUnparsed = urls.length - totalParsed;
-        const avgSuccessRate = urls.length > 0
-            ? urls.reduce((sum, u) => sum + (u.timesSuccessful / Math.max(u.timesScraped, 1)), 0) / urls.length * 100
-            : 0;
-        
-        return {
-            total: urls.length,
-            byStatus,
-            byGameStatus,
-            byEntity,
-            totalErrors,
-            totalParsed,
-            totalUnparsed,
-            avgSuccessRate: avgSuccessRate.toFixed(1)
-        };
-    }, [urls]);
-    
     const filteredURLs = useMemo(() => {
-        let filtered = urls;
+        let result = urls;
         
-        // Filter by URL status
-        if (statusFilter !== 'ALL') {
-            filtered = filtered.filter(u => u.status === statusFilter);
-        }
-        
-        // Filter by game status
+        // Apply game status filter
         if (gameStatusFilter !== 'ALL') {
             if (gameStatusFilter === 'UNPARSED') {
-                filtered = filtered.filter(u => !u.gameStatus);
+                result = result.filter(url => !url.gameStatus);
             } else {
-                filtered = filtered.filter(u => u.gameStatus === gameStatusFilter);
+                result = result.filter(url => url.gameStatus === gameStatusFilter);
             }
         }
         
-        return filtered;
-    }, [urls, statusFilter, gameStatusFilter]);
+        // Sort by tournament ID descending
+        return result.sort((a, b) => (b.tournamentId ?? 0) - (a.tournamentId ?? 0));
+    }, [urls, gameStatusFilter]);
 
-    // NEW: Show entity info banner when multiple entities are selected or none
-    const EntityInfoBanner = () => {
-        if (selectedEntities.length === 0) {
-            return (
-                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-                    <div className="flex items-center">
-                        <Building2 className="h-5 w-5 text-yellow-400 mr-2" />
-                        <span className="text-yellow-800">No entities selected. Please select at least one entity to view URLs.</span>
-                    </div>
-                </div>
-            );
+    // ===================================================================
+    // SELECTION HANDLERS
+    // ===================================================================
+
+    const handleToggleURL = useCallback((url: string) => {
+        setSelectedURLs(prev => {
+            const next = new Set(prev);
+            if (next.has(url)) {
+                next.delete(url);
+            } else {
+                next.add(url);
+            }
+            return next;
+        });
+    }, []);
+
+    const handleToggleAll = useCallback(() => {
+        if (selectedURLs.size === filteredURLs.length) {
+            setSelectedURLs(new Set());
+        } else {
+            setSelectedURLs(new Set(filteredURLs.map(u => u.url)));
+        }
+    }, [filteredURLs, selectedURLs.size]);
+
+    const handleSelectVisible = useCallback(() => {
+        setSelectedURLs(new Set(filteredURLs.map(u => u.url)));
+    }, [filteredURLs]);
+
+    const handleClearSelection = useCallback(() => {
+        setSelectedURLs(new Set());
+    }, []);
+
+    // ===================================================================
+    // ACTIONS
+    // ===================================================================
+
+    // Get selected tournament IDs
+    const getSelectedTournamentIds = useCallback((): number[] => {
+        const ids: number[] = [];
+        filteredURLs.forEach(url => {
+            if (selectedURLs.has(url.url) && url.tournamentId) {
+                ids.push(url.tournamentId);
+            }
+        });
+        return ids.sort((a, b) => a - b);
+    }, [filteredURLs, selectedURLs]);
+
+    // Copy IDs to clipboard
+    const handleCopyToClipboard = useCallback(async () => {
+        const ids = getSelectedTournamentIds();
+        if (ids.length === 0) {
+            alert('No URLs selected');
+            return;
         }
         
-        if (selectedEntities.length === 1) {
-            return null; // Single entity, no need for banner
+        const idString = ids.join(', ');
+        
+        try {
+            await navigator.clipboard.writeText(idString);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+            const textarea = document.createElement('textarea');
+            textarea.value = idString;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        }
+    }, [getSelectedTournamentIds]);
+
+    // Navigate to ScraperTab with IDs
+    const handleSendToScraper = useCallback(() => {
+        const ids = getSelectedTournamentIds();
+        if (ids.length === 0) {
+            alert('No URLs selected');
+            return;
         }
         
-        return (
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                        <Building2 className="h-4 w-4 text-blue-500 mr-2" />
-                        <span className="text-sm text-blue-700">
-                            Showing URLs from {selectedEntities.length} entities: {' '}
-                            <strong>{selectedEntities.map(e => e.entityName).join(', ')}</strong>
-                        </span>
-                    </div>
-                    <div className="text-xs text-blue-600">
-                        {Object.entries(stats.byEntity || {}).map(([entityId, count]) => (
-                            <span key={entityId} className="mr-3">
-                                {entityMap[entityId]?.entityName || 'Unknown'}: {count}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            </div>
+        const idString = ids.join(', ');
+        localStorage.setItem('pendingMultiIds', idString);
+        localStorage.setItem('pendingMultiIdsTimestamp', Date.now().toString());
+        
+        const confirmed = window.confirm(
+            `${ids.length} tournament IDs have been prepared for reprocessing.\n\n` +
+            `IDs: ${ids.slice(0, 10).join(', ')}${ids.length > 10 ? ` ... and ${ids.length - 10} more` : ''}\n\n` +
+            `Click OK to go to the Scraper tab, or Cancel to stay here.\n\n` +
+            `The IDs will be automatically loaded into Multi-ID mode.`
         );
+        
+        if (confirmed) {
+            window.location.hash = '#scraper';
+        }
+    }, [getSelectedTournamentIds]);
+
+    // Bulk update handler
+    const handleBulkUpdate = async (newStatus: ScrapeURLStatus, doNotScrape?: boolean) => {
+        if (selectedURLs.size === 0) return;
+        
+        try {
+            const urlsToUpdate = filteredURLs
+                .filter(u => selectedURLs.has(u.url))
+                .map(u => u.url);
+            
+            await client.graphql({
+                query: bulkModifyScrapeURLs,
+                variables: {
+                    urls: urlsToUpdate,
+                    status: newStatus,
+                    doNotScrape: doNotScrape ?? undefined
+                }
+            });
+            
+            alert(`Updated ${urlsToUpdate.length} URLs`);
+            setSelectedURLs(new Set());
+            // Reload with same preset
+            loadURLs(activePreset);
+        } catch (err) {
+            console.error('Bulk update failed:', err);
+            alert('Failed to update URLs');
+        }
     };
+
+    // ===================================================================
+    // RENDER
+    // ===================================================================
 
     return (
         <div className="space-y-6">
-            {/* NEW: Entity info banner */}
-            <EntityInfoBanner />
-            
-            {/* Error Banner - PRESERVED from original */}
-            {error && (
-                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                    <div className="flex items-start">
-                        <AlertCircle className="h-5 w-5 text-yellow-400 mr-3 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1">
-                            <p className="text-sm text-yellow-800">{error}</p>
-                            {graphqlErrors.length > 0 && (
-                                <div className="mt-2">
-                                    <button
-                                        onClick={() => setShowErrorDetails(!showErrorDetails)}
-                                        className="text-xs text-yellow-700 hover:text-yellow-900 underline flex items-center"
-                                    >
-                                        {showErrorDetails ? 'Hide' : 'Show'} error details ({graphqlErrors.length} errors)
-                                        {showErrorDetails ? (
-                                            <ChevronUp className="ml-1 h-3 w-3" />
-                                        ) : (
-                                            <ChevronDown className="ml-1 h-3 w-3" />
-                                        )}
-                                    </button>
-                                    {showErrorDetails && (
-                                        <div className="mt-2 p-3 bg-yellow-100 rounded text-xs font-mono overflow-x-auto max-h-64 overflow-y-auto">
-                                            <pre>{JSON.stringify(graphqlErrors.slice(0, 10), null, 2)}</pre>
-                                            {graphqlErrors.length > 10 && (
-                                                <p className="mt-2 text-yellow-700">... and {graphqlErrors.length - 10} more errors</p>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                            {/* Dynamic recommendations based on error types - PRESERVED from original */}
-                            <div className="mt-2 text-xs text-yellow-700">
-                                <strong>Recommended fixes:</strong>
-                                {graphqlErrors.some((e: any) => e.message?.includes('GameStatus')) && (
-                                    <div className="mt-1">
-                                        • <strong>GameStatus errors:</strong> Your database has game status values not defined in the schema. 
-                                        You can fix this by:
-                                        <div className="ml-4 mt-1">
-                                            1. Finding invalid values: Check error details above<br/>
-                                            2. Update records in DynamoDB to use valid values, OR<br/>
-                                            3. Add missing values to the GameStatus enum in your schema
-                                        </div>
-                                    </div>
-                                )}
-                                {graphqlErrors.some((e: any) => e.message?.includes('sourceSystem') || e.message?.includes('consecutiveFailures')) && (
-                                    <div className="mt-1">
-                                        • <strong>Null field errors:</strong> Update your schema to make <code>sourceSystem</code> and <code>consecutiveFailures</code> nullable.
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-            
-            {/* Statistics Cards - PRESERVED from original */}
-            <div className="grid grid-cols-5 gap-4">
-                <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-sm text-gray-500">Total URLs</p>
-                    <p className="text-2xl font-bold">{stats.total}</p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-sm text-gray-500">Active</p>
-                    <p className="text-2xl font-bold text-green-600">{stats.byStatus.ACTIVE || 0}</p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-sm text-gray-500">Parsed</p>
-                    <p className="text-2xl font-bold text-blue-600">{stats.totalParsed}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                        {stats.totalUnparsed} unparsed
+            {/* Header */}
+            <div className="flex justify-between items-center">
+                <div>
+                    <h2 className="text-xl font-semibold">URL Management</h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                        Search and filter URLs • Select to reprocess
                     </p>
                 </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-sm text-gray-500">Errors</p>
-                    <p className="text-2xl font-bold text-red-600">{stats.totalErrors}</p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-sm text-gray-500">Success Rate</p>
-                    <p className="text-2xl font-bold text-purple-600">{stats.avgSuccessRate}%</p>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setShowSkippedAnalyzer(!showSkippedAnalyzer)}
+                        className="px-3 py-2 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 flex items-center gap-1"
+                    >
+                        <AlertTriangle className="h-4 w-4" />
+                        Gap Analysis
+                    </button>
                 </div>
             </div>
 
-            {/* Skipped IDs Analyzer - PRESERVED from original */}
-            <div className="bg-white rounded-lg shadow">
-                <button
-                    onClick={() => setShowSkippedAnalyzer(!showSkippedAnalyzer)}
-                    className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
-                >
-                    <span className="font-medium flex items-center">
-                        <AlertTriangle className="h-5 w-5 mr-2 text-yellow-600" />
-                        Gap Analysis & Skipped IDs
-                    </span>
-                    {showSkippedAnalyzer ? (
-                        <ChevronUp className="h-5 w-5" />
-                    ) : (
-                        <ChevronDown className="h-5 w-5" />
+            {/* Gap Analysis Panel */}
+            {showSkippedAnalyzer && (
+                <div className="bg-white rounded-lg shadow-lg border">
+                    <SkippedIDsAnalyzer />
+                </div>
+            )}
+
+            {/* Search Section */}
+            <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex items-center gap-2 mb-4">
+                    <Search className="h-5 w-5 text-gray-400" />
+                    <h3 className="font-medium">Search URLs</h3>
+                    {selectedEntityIds.length === 0 && (
+                        <span className="text-sm text-amber-600 ml-2">
+                            ⚠ Select an entity first
+                        </span>
                     )}
-                </button>
+                </div>
                 
-                {showSkippedAnalyzer && (
-                    <div className="border-t p-4">
-                        <SkippedIDsAnalyzer />
+                {/* Quick Search Buttons */}
+                <div className="space-y-3">
+                    <p className="text-sm text-gray-600">Quick search by status:</p>
+                    <div className="flex flex-wrap gap-2">
+                        {SEARCH_PRESETS.map(preset => (
+                            <button
+                                key={preset.id}
+                                onClick={() => handlePresetClick(preset.id)}
+                                disabled={loading || selectedEntityIds.length === 0}
+                                title={preset.description}
+                                className={`
+                                    flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
+                                    transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                                    ${activePreset === preset.id 
+                                        ? `${preset.bgColor} ${preset.color} ring-2 ring-offset-1 ring-current` 
+                                        : `${preset.bgColor} ${preset.color} ${preset.hoverColor}`
+                                    }
+                                `}
+                            >
+                                {preset.icon}
+                                {preset.label}
+                            </button>
+                        ))}
                     </div>
-                )}
+                    
+                    {/* Load All Button */}
+                    <div className="flex items-center gap-3 pt-2">
+                        <button
+                            onClick={handleLoadAll}
+                            disabled={loading || selectedEntityIds.length === 0}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Download className="h-4 w-4" />
+                            Load All URLs
+                        </button>
+                        
+                        {loading && (
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <RefreshCw className="h-4 w-4 animate-spin" />
+                                {loadingProgress}
+                            </div>
+                        )}
+                        
+                        {hasSearched && !loading && (
+                            <span className="text-sm text-gray-500">
+                                {urls.length} URLs loaded
+                                {activePreset && (
+                                    <span className="ml-1">
+                                        (filtered by: <span className="font-medium">{SEARCH_PRESETS.find(p => p.id === activePreset)?.label}</span>)
+                                    </span>
+                                )}
+                            </span>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            {/* URL Management - PRESERVED layout from original */}
-            <div className="bg-white rounded-lg shadow">
-                <div className="p-4 border-b">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold">URL Management</h3>
-                        <div className="flex items-center space-x-2">
-                            <div className="flex items-center space-x-2">
-                                <Filter className="h-4 w-4 text-gray-500" />
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value as any)}
-                                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                >
-                                    <option value="ALL">All URL Statuses</option>
-                                    <option value="ACTIVE">Active</option>
-                                    <option value="INACTIVE">Inactive</option>
-                                    <option value="ERROR">Error</option>
-                                    <option value="DO_NOT_SCRAPE">Do Not Scrape</option>
-                                    <option value="ARCHIVED">Archived</option>
-                                </select>
+            {/* Additional Filters (only show when data loaded) */}
+            {hasSearched && urls.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-4">
+                    <button
+                        onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                        className="flex items-center gap-2 text-sm font-medium text-gray-700"
+                    >
+                        <Filter className="h-4 w-4" />
+                        Additional Filters
+                        {showAdvancedFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
+                    
+                    {showAdvancedFilters && (
+                        <div className="mt-3 pt-3 border-t flex flex-wrap gap-4">
+                            <div>
+                                <label className="block text-xs text-gray-500 mb-1">Game Status</label>
                                 <select
                                     value={gameStatusFilter}
                                     onChange={(e) => setGameStatusFilter(e.target.value as any)}
-                                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    className="px-3 py-1.5 border rounded text-sm"
                                 >
                                     <option value="ALL">All Game Statuses</option>
                                     <option value="UNPARSED">Unparsed</option>
-                                    <option value="SCHEDULED">Scheduled</option>
-                                    <option value="REGISTERING">Registering</option>
-                                    <option value="RUNNING">Running</option>
-                                    <option value="FINISHED">Finished</option>
-                                    <option value="CANCELLED">Cancelled</option>
-                                    <option value="CLOCK_STOPPED">Clock Stopped</option>
+                                    {Object.values(GameStatus).map(status => (
+                                        <option key={status} value={status}>{status}</option>
+                                    ))}
                                 </select>
                             </div>
-                            <button
-                                onClick={loadURLs}
-                                disabled={loading}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center"
-                            >
-                                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                                Refresh
-                            </button>
-                        </div>
-                    </div>
-                    
-                    {/* Filter Summary - PRESERVED from original */}
-                    {(statusFilter !== 'ALL' || gameStatusFilter !== 'ALL') && (
-                        <div className="mt-3 flex items-center gap-2 text-sm">
-                            <span className="text-gray-600">Showing:</span>
-                            {statusFilter !== 'ALL' && (
-                                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-                                    URL: {statusFilter}
-                                </span>
-                            )}
+                            
                             {gameStatusFilter !== 'ALL' && (
-                                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
-                                    Game: {gameStatusFilter}
-                                </span>
+                                <div className="flex items-end">
+                                    <button
+                                        onClick={() => setGameStatusFilter('ALL')}
+                                        className="text-xs text-gray-500 hover:text-gray-700 underline"
+                                    >
+                                        Clear filter
+                                    </button>
+                                </div>
                             )}
-                            <button
-                                onClick={() => {
-                                    setStatusFilter('ALL');
-                                    setGameStatusFilter('ALL');
-                                }}
-                                className="text-blue-600 hover:text-blue-800 text-xs underline"
-                            >
-                                Clear filters
-                            </button>
                         </div>
                     )}
                 </div>
+            )}
 
-                {/* Bulk Actions - PRESERVED from original */}
-                {selectedURLs.size > 0 && (
-                    <div className="p-4 bg-blue-50 border-b flex items-center justify-between">
-                        <span className="text-sm text-blue-700">
-                            {selectedURLs.size} URL(s) selected
-                        </span>
-                        <div className="flex items-center space-x-2">
-                            <button
-                                onClick={() => handleBulkUpdate(ScrapeURLStatus.ACTIVE)}
-                                className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-                            >
-                                Mark Active
-                            </button>
-                            <button
-                                onClick={() => handleBulkUpdate(ScrapeURLStatus.INACTIVE)}
-                                className="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700"
-                            >
-                                Mark Inactive
-                            </button>
-                            <button
-                                onClick={() => handleBulkUpdate(ScrapeURLStatus.DO_NOT_SCRAPE, true)}
-                                className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-                            >
-                                Do Not Scrape
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* URL List */}
-                <div className="overflow-x-auto">
-                    {loading ? (
-                        <div className="p-8 text-center">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-600"></div>
-                            <p className="mt-2 text-gray-500">Loading URLs...</p>
-                        </div>
-                    ) : filteredURLs.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500">
-                            <p>No URLs found matching the current filters</p>
-                            {(statusFilter !== 'ALL' || gameStatusFilter !== 'ALL') && (
+            {/* Results Summary & Actions */}
+            {urls.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm text-gray-600">
+                                {gameStatusFilter !== 'ALL' ? (
+                                    <>
+                                        <span className="font-medium">{filteredURLs.length}</span>
+                                        <span className="text-gray-400"> of </span>
+                                        <span>{urls.length}</span> URLs shown
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="font-medium">{urls.length}</span> URLs
+                                    </>
+                                )}
+                                {selectedURLs.size > 0 && (
+                                    <span className="ml-2 text-blue-600">
+                                        • <span className="font-medium">{selectedURLs.size}</span> selected
+                                    </span>
+                                )}
+                            </span>
+                            
+                            <div className="flex items-center gap-2">
                                 <button
-                                    onClick={() => {
-                                        setStatusFilter('ALL');
-                                        setGameStatusFilter('ALL');
-                                    }}
-                                    className="mt-2 text-blue-600 hover:text-blue-800 text-sm underline"
+                                    onClick={handleSelectVisible}
+                                    className="text-xs text-blue-600 hover:text-blue-800"
                                 >
-                                    Clear filters
+                                    Select All ({filteredURLs.length})
                                 </button>
-                            )}
+                                {selectedURLs.size > 0 && (
+                                    <>
+                                        <span className="text-gray-300">|</span>
+                                        <button
+                                            onClick={handleClearSelection}
+                                            className="text-xs text-gray-600 hover:text-gray-800"
+                                        >
+                                            Clear Selection
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                    ) : (
+                        
+                        {/* Action Buttons */}
+                        {selectedURLs.size > 0 && (
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handleCopyToClipboard}
+                                    className={`
+                                        px-3 py-1.5 rounded text-sm flex items-center gap-1 transition-colors
+                                        ${copySuccess 
+                                            ? 'bg-green-100 text-green-700' 
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }
+                                    `}
+                                >
+                                    <Copy className="h-4 w-4" />
+                                    {copySuccess ? 'Copied!' : 'Copy IDs'}
+                                </button>
+                                <button
+                                    onClick={handleSendToScraper}
+                                    className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 flex items-center gap-1"
+                                >
+                                    <Play className="h-4 w-4" />
+                                    Send to Scraper ({selectedURLs.size})
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Main Table */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+                {!hasSearched ? (
+                    <div className="p-12 text-center text-gray-500">
+                        <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p className="font-medium text-gray-600">Search for URLs</p>
+                        <p className="text-sm mt-1">
+                            Use the quick search buttons above to find URLs by status,<br />
+                            or click "Load All URLs" to see everything.
+                        </p>
+                    </div>
+                ) : loading ? (
+                    <div className="p-8 text-center">
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-600"></div>
+                        <p className="mt-2 text-gray-500">{loadingProgress || 'Loading URLs...'}</p>
+                    </div>
+                ) : filteredURLs.length === 0 ? (
+                    <div className="p-8 text-center text-gray-500">
+                        <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                        <p className="font-medium">No URLs found</p>
+                        {activePreset && (
+                            <p className="text-sm mt-1">
+                                No URLs match the "{SEARCH_PRESETS.find(p => p.id === activePreset)?.label}" filter
+                            </p>
+                        )}
+                        <button
+                            onClick={handleLoadAll}
+                            className="mt-3 text-blue-600 hover:text-blue-800 text-sm underline"
+                        >
+                            Load all URLs instead
+                        </button>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
@@ -601,22 +728,25 @@ export const URLManagementTab: React.FC = () => {
                                             className="h-4 w-4"
                                         />
                                     </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tournament ID</th>
-                                    {/* NEW: Entity column when multiple entities selected */}
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
                                     {selectedEntities.length > 1 && (
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entity</th>
                                     )}
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">URL Status</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Game Status</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Game Name</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Scrape Stats</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Status</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Message</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stats</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Scraped</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {filteredURLs.map((url) => (
-                                    <tr key={url.id} className="hover:bg-gray-50">
+                                    <tr 
+                                        key={url.id} 
+                                        className={`hover:bg-gray-50 ${selectedURLs.has(url.url) ? 'bg-blue-50' : ''}`}
+                                    >
                                         <td className="px-4 py-3">
                                             <input
                                                 type="checkbox"
@@ -625,14 +755,12 @@ export const URLManagementTab: React.FC = () => {
                                                 className="h-4 w-4"
                                             />
                                         </td>
-                                        <td className="px-4 py-3 text-sm font-medium">{url.tournamentId}</td>
-                                        {/* NEW: Entity cell when multiple entities selected */}
+                                        <td className="px-4 py-3 text-sm font-medium">
+                                            {url.tournamentId}
+                                        </td>
                                         {selectedEntities.length > 1 && (
                                             <td className="px-4 py-3 text-sm">
-                                                <span 
-                                                    className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-700"
-                                                    title={url.entityId || 'Unknown'}
-                                                >
+                                                <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-700">
                                                     {entityMap[url.entityId || '']?.entityName || 'Unknown'}
                                                 </span>
                                             </td>
@@ -649,22 +777,42 @@ export const URLManagementTab: React.FC = () => {
                                             <GameStatusBadge status={url.gameStatus} />
                                         </td>
                                         <td className="px-4 py-3 text-sm">
-                                            <div className="max-w-xs truncate" title={url.gameName || undefined}>
-                                                {url.gameName || <span className="text-gray-400 italic">No name</span>}
-                                            </div>
+                                            <span className={`
+                                                px-2 py-1 rounded text-xs
+                                                ${url.lastScrapeStatus?.toUpperCase() === 'ERROR' ? 'bg-red-100 text-red-700' :
+                                                  url.lastScrapeStatus?.toUpperCase() === 'NOT_FOUND' ? 'bg-orange-100 text-orange-700' :
+                                                  url.lastScrapeStatus?.toUpperCase() === 'NOT_PUBLISHED' ? 'bg-yellow-100 text-yellow-700' :
+                                                  url.lastScrapeStatus?.toUpperCase() === 'SUCCESS' ? 'bg-green-100 text-green-700' :
+                                                  'bg-gray-100 text-gray-700'
+                                                }
+                                            `}>
+                                                {url.lastScrapeStatus || 'N/A'}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm">
+                                            {url.lastScrapeMessage ? (
+                                                <div 
+                                                    className="max-w-xs truncate text-xs text-gray-600"
+                                                    title={url.lastScrapeMessage}
+                                                >
+                                                    {url.lastScrapeMessage}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 text-xs">—</span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-3 text-sm">
                                             <div className="text-xs space-y-1">
                                                 <div>
-                                                    <span className="text-green-600 font-medium">{url.timesSuccessful}</span>
+                                                    <span className="text-green-600 font-medium">{url.timesSuccessful ?? 0}</span>
                                                     <span className="text-gray-400"> / </span>
-                                                    <span className="text-red-600 font-medium">{url.timesFailed}</span>
+                                                    <span className="text-red-600 font-medium">{url.timesFailed ?? 0}</span>
                                                     <span className="text-gray-400"> / </span>
-                                                    <span className="text-gray-500">{url.timesScraped} total</span>
+                                                    <span className="text-gray-500">{url.timesScraped ?? 0}</span>
                                                 </div>
                                                 {(url.consecutiveFailures ?? 0) > 0 && (
                                                     <div className="text-red-600 font-medium">
-                                                        ⚠ {url.consecutiveFailures} consecutive failures
+                                                        ⚠ {url.consecutiveFailures} consecutive
                                                     </div>
                                                 )}
                                             </div>
@@ -685,7 +833,7 @@ export const URLManagementTab: React.FC = () => {
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-blue-600 hover:text-blue-800"
-                                                title="Open URL in new tab"
+                                                title="Open URL"
                                             >
                                                 <ExternalLink className="h-4 w-4" />
                                             </a>
@@ -694,21 +842,45 @@ export const URLManagementTab: React.FC = () => {
                                 ))}
                             </tbody>
                         </table>
-                    )}
-                </div>
-                
-                {/* Results Summary - PRESERVED from original */}
-                {!loading && filteredURLs.length > 0 && (
-                    <div className="p-4 bg-gray-50 border-t text-sm text-gray-600">
-                        Showing {filteredURLs.length} of {stats.total} total URLs
-                        {selectedEntities.length > 1 && (
-                            <span className="ml-2">
-                                across {selectedEntities.length} entities
-                            </span>
-                        )}
                     </div>
                 )}
             </div>
+
+            {/* Bulk Actions (when selected) */}
+            {selectedURLs.size > 0 && (
+                <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-4 z-50">
+                    <span className="text-sm">
+                        <span className="font-medium">{selectedURLs.size}</span> URLs selected
+                    </span>
+                    <div className="h-4 w-px bg-gray-600" />
+                    <button
+                        onClick={handleCopyToClipboard}
+                        className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm flex items-center gap-1"
+                    >
+                        <Copy className="h-4 w-4" />
+                        Copy IDs
+                    </button>
+                    <button
+                        onClick={handleSendToScraper}
+                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm flex items-center gap-1"
+                    >
+                        <Play className="h-4 w-4" />
+                        Reprocess
+                    </button>
+                    <button
+                        onClick={() => handleBulkUpdate(ScrapeURLStatus.ACTIVE)}
+                        className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-sm"
+                    >
+                        Mark Active
+                    </button>
+                    <button
+                        onClick={() => handleBulkUpdate(ScrapeURLStatus.DO_NOT_SCRAPE, true)}
+                        className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                    >
+                        Do Not Scrape
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

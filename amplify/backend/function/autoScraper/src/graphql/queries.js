@@ -3,6 +3,10 @@
  * 
  * Extracted from index.js for maintainability
  * 
+ * UPDATED: v1.2.0
+ * - Added PUBLISH_JOB_PROGRESS mutation for real-time job monitoring
+ *   This triggers the onJobProgress subscription for live UI updates
+ * 
  * FIXED: v1.1.0
  * - Added full results fields (name, winnings, points, isQualification) 
  * - Added entries array
@@ -138,8 +142,50 @@ const PUBLISH_GAME_PROCESSED = /* GraphQL */ `
     }
 `;
 
+/**
+ * NEW in v1.2.0: Publish job progress events for real-time monitoring
+ * 
+ * This mutation triggers the onJobProgress subscription, allowing the frontend
+ * to receive live updates about job status without polling.
+ * 
+ * Called by JobProgressPublisher in index.js:
+ * - On job start (RUNNING status)
+ * - Periodically during processing (~every 1 second, rate-limited)
+ * - On job completion (COMPLETED, FAILED, STOPPED_*, etc.)
+ */
+const PUBLISH_JOB_PROGRESS = /* GraphQL */ `
+    mutation PublishJobProgress($jobId: ID!, $event: JobProgressEventInput!) {
+        publishJobProgress(jobId: $jobId, event: $event) {
+            jobId
+            entityId
+            status
+            stopReason
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            currentId
+            startId
+            endId
+            startTime
+            durationSeconds
+            successRate
+            averageScrapingTime
+            s3CacheHits
+            consecutiveNotFound
+            consecutiveErrors
+            consecutiveBlanks
+            lastErrorMessage
+            publishedAt
+        }
+    }
+`;
+
 module.exports = {
     FETCH_TOURNAMENT_DATA,
     SAVE_TOURNAMENT_DATA,
-    PUBLISH_GAME_PROCESSED
+    PUBLISH_GAME_PROCESSED,
+    PUBLISH_JOB_PROGRESS
 };

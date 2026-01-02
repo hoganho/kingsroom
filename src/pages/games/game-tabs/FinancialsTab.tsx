@@ -43,7 +43,7 @@ export const FinancialsTab: React.FC<FinancialsTabProps> = ({
           icon={BanknotesIcon}
           label="Buy-In"
           value={formatCurrency(game.buyIn)}
-          subValue={game.rake ? `+ ${formatCurrency(game.rake)} rake` : undefined}
+          subValue={game.rake ? `incl. ${formatCurrency(game.rake)} rake` : undefined}
           iconColor="text-green-500"
         />
         <StatCard 
@@ -54,17 +54,17 @@ export const FinancialsTab: React.FC<FinancialsTabProps> = ({
           iconColor="text-yellow-500"
         />
         <StatCard 
-          icon={game.gameProfit && game.gameProfit >= 0 ? ArrowTrendingUpIcon : ArrowTrendingDownIcon}
-          label="Game Profit"
-          value={formatCurrency(game.gameProfit)}
-          subValue={financialSnapshot?.profitMargin ? `${financialSnapshot.profitMargin.toFixed(1)}% margin` : undefined}
-          iconColor={game.gameProfit && game.gameProfit >= 0 ? 'text-green-500' : 'text-red-500'}
+          icon={financialSnapshot?.netProfit && financialSnapshot.netProfit >= 0 ? ArrowTrendingUpIcon : ArrowTrendingDownIcon}
+          label="Total Profit"
+          value={formatCurrency(financialSnapshot?.netProfit)}
+          subValue={financialSnapshot?.profitMargin ? `${(financialSnapshot.profitMargin * 100).toFixed(1)}% margin` : undefined}
+          iconColor={financialSnapshot?.netProfit && financialSnapshot.netProfit >= 0 ? 'text-green-500' : 'text-red-500'}
         />
         <StatCard 
           icon={UserGroupIcon}
-          label="Revenue per Player"
-          value={formatCurrency(financialSnapshot?.revenuePerPlayer)}
-          iconColor="text-blue-500"
+          label="Profit per Player"
+          value={formatCurrency(financialSnapshot?.profitPerPlayer)}
+          iconColor={(financialSnapshot?.profitPerPlayer ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'}
         />
       </div>
 
@@ -112,7 +112,7 @@ export const FinancialsTab: React.FC<FinancialsTabProps> = ({
         <SectionCard title="Prizepool Breakdown" icon={TrophyIcon}>
           <dl className="divide-y divide-gray-100">
             <DetailRow label="Player Contributions" value={formatCurrency(game.prizepoolPlayerContributions)} />
-            <DetailRow label="Added Value" value={formatCurrency(game.prizepoolAddedValue)} />
+            <DetailRow label="Added Value (Overlay)" value={formatCurrency(game.prizepoolAddedValue)} />
             <DetailRow label="Prizepool Surplus" value={formatCurrency(game.prizepoolSurplus)} />
             {game.hasJackpotContributions && (
               <DetailRow 

@@ -2,12 +2,15 @@
 # ===================================================================
 # SOCIAL POST PROCESSOR - Models, Types, and API
 # ===================================================================
+# UPDATED: Added comprehensive ticket tracking for reconciliation
+# 
 # This file contains:
 # 1. New models for social post processing (junction table, extraction data, placements)
 # 2. Embedded types for non-cash prizes
 # 3. Input/output types for the processor API
 # 4. Mutations and queries for the socialPostProcessor Lambda
 # 5. Mutations and queries for the gameToSocialMatcher Lambda (reverse matching)
+# 6. NEW: Ticket aggregation and reconciliation types
 #
 # DEPENDENCIES:
 # - 00-enums.graphql: SocialPostContentType, SocialPostProcessingStatus, 
@@ -51,6 +54,22 @@ type SocialPostGameLink
   extractedDate: AWSDateTime
   extractedBuyIn: Float
   extractedGuarantee: Float
+  effectiveGameDate: AWSDateTime           # Copied from SocialPostGameData
+
+  # === TICKET DATA (NEW - for gameToSocialMatcher) ===
+  socialPostGameDataId: ID
+  hasTicketData: Boolean @default(value: "false")
+  ticketData: AWSJSON
+  reconciliationPreview: AWSJSON
+  hasReconciliationDiscrepancy: Boolean @default(value: "false")
+  reconciliationDiscrepancySeverity: String
+  
+  # === EXTRACTED DATA SNAPSHOT (additional) ===
+  extractedWinnerName: String
+  extractedWinnerPrize: Float
+  extractedTotalEntries: Int
+  placementCount: Int
+  contentType: SocialPostContentType
   
   # === AUDIT TRAIL ===
   linkedAt: AWSDateTime!
@@ -110,6 +129,12 @@ type SocialPostGameData
   extractedStartTime: String             # "6:00 PM", "7:30 PM"
   dateSource: String                     # "post_content", "posted_at", "url"
   
+  # === EFFECTIVE GAME DATE (Computed) ===
+  # Priority: extractedDate > postedAt
+  # Use this field for all date-based queries and sorting
+  effectiveGameDate: AWSDateTime @index(name: "byEffectiveGameDate", sortKeyFields: ["extractedAt"])
+  effectiveGameDateSource: String          # "extracted" | "posted_at" | "inferred"
+
   # === EXTRACTED FINANCIALS ===
   extractedBuyIn: Float
   extractedGuarantee: Float
@@ -138,14 +163,72 @@ type SocialPostGameData
   extractedFlightLetter: String
   isSeriesEvent: Boolean
   
-  # === WINNER EXTRACTION (for RESULT posts) ===
+  # ===================================================================
+  # WINNER EXTRACTION (First Place Only - Quick Access)
+  # For full placement data, use the placements relationship
+  # ===================================================================
   extractedWinnerName: String
-  extractedWinnerPrize: Float
+  extractedWinnerPrize: Float            # Cash prize only
+  extractedWinnerHasTicket: Boolean @default(value: "false")
+  extractedWinnerTicketType: NonCashPrizeType
+  extractedWinnerTicketValue: Float
+  extractedWinnerTotalValue: Float       # Cash + ticket combined
   placementCount: Int                    # Number of placements extracted
+  
+  # ===================================================================
+  # TICKET AGGREGATION (NEW - For Reconciliation)
+  # Totals across ALL placements for matching with Game financials
+  # ===================================================================
+  
+  # === TOTAL TICKET COUNTS ===
+  totalTicketsExtracted: Int @default(value: "0")
+  totalTicketValue: Float                # Sum of all ticket estimated values
+  
+  # === BY-TYPE BREAKDOWN ===
+  # Stored as AWSJSON: { "ACCUMULATOR_TICKET": 5, "SATELLITE_TICKET": 2 }
+  ticketCountByType: AWSJSON
+  ticketValueByType: AWSJSON
+  
+  # === CASH VS TICKET BREAKDOWN ===
+  totalCashPaid: Float                   # Sum of all cash prizes from placements
+  totalPrizesWithTickets: Int            # Count of placements that included tickets
+  totalTicketOnlyPrizes: Int             # Count of placements with ONLY tickets (no cash)
+  
+  # ===================================================================
+  # PROMOTIONAL POST TICKET INFO (NEW)
+  # For posts advertising tickets as prizes (not result posts)
+  # ===================================================================
+  
+  hasAdvertisedTickets: Boolean @default(value: "false")
+  advertisedTicketCount: Int             # "Top 5 get accumulator tickets" → 5
+  advertisedTicketType: NonCashPrizeType
+  advertisedTicketValue: Float           # "$550 satellite seat" → 550
+  advertisedTicketDescription: String    # Raw text of ticket prize
+  advertisedTickets: AWSJSON             # Full array of advertised ticket objects
+  
+  # ===================================================================
+  # RECONCILIATION FIELDS (NEW)
+  # These map directly to Game model fields for comparison
+  # ===================================================================
+  
+  # Maps to Game.numberOfAccumulatorTicketsPaid
+  reconciliation_accumulatorTicketCount: Int
+  # Maps to Game.accumulatorTicketValue (per ticket)
+  reconciliation_accumulatorTicketValue: Float
+  # Maps to Game.prizepoolPaid (cash only)
+  reconciliation_totalPrizepoolPaid: Float
+  # totalCashPaid + totalTicketValue (for total value verification)
+  reconciliation_cashPlusTotalTicketValue: Float
+  
+  # Discrepancy tracking
+  hasReconciliationDiscrepancy: Boolean @default(value: "false")
+  reconciliationNotes: String
+  reconciliationCheckedAt: AWSDateTime
   
   # === MATCHING HINTS ===
   suggestedGameId: ID                    # Best match game ID
   matchCandidateCount: Int               # How many games were candidates
+  matchCandidates: AWSJSON               # Full match candidate details for manual review
   
   # === RAW PATTERN DATA (for debugging) ===
   patternMatches: AWSJSON                # { resultMatches: [], promoMatches: [] }
@@ -168,7 +251,8 @@ type SocialPostGameData
 # 3. PLACEMENT RECORDS: SocialPostPlacement
 # ===================================================================
 # Individual prize records extracted from tournament results
-# Handles both cash and non-cash prizes (accumulator tickets, etc.)
+# Each placement captures: position, player, cash prize, AND ticket info
+# This is the SOURCE OF TRUTH for per-position prize data
 
 type SocialPostPlacement 
   @model(subscriptions: null) 
@@ -190,22 +274,33 @@ type SocialPostPlacement
   cashPrize: Float                       # Dollar amount (e.g., 570)
   cashPrizeRaw: String                   # Original text (e.g., "$570")
   
-  # === NON-CASH PRIZES ===
+  # === NON-CASH PRIZES (Full Detail) ===
   hasNonCashPrize: Boolean @default(value: "false")
   nonCashPrizes: AWSJSON                 # Array of SocialPostNonCashPrize objects
   
+  # === PRIMARY TICKET (Quick Access) ===
+  # For placements with multiple tickets, this is the most significant one
+  primaryTicketType: NonCashPrizeType
+  primaryTicketValue: Float
+  primaryTicketDescription: String       # "Accumulator Ticket", "$550 Main Event Seat"
+  ticketCount: Int @default(value: "0")  # Total tickets for this placement
+  
   # === TOTAL VALUE ===
-  totalEstimatedValue: Float             # cashPrize + estimated value of non-cash
+  totalEstimatedValue: Float             # cashPrize + all ticket values
   
   # === DEAL INFORMATION ===
   wasChop: Boolean @default(value: "false")
   wasICMDeal: Boolean @default(value: "false")
+  chopDetails: String                    # "3-way chop", "ICM deal heads up"
   
   # === RAW DATA ===
   rawText: String                        # Original line from post
   
-  # === LINKED PLAYER (future enhancement) ===
-  linkedPlayerId: ID                     # If we can match to Player record
+  # === PLAYER LINKING ===
+  linkedPlayerId: ID                     # If matched to Player record
+  linkedPlayerTicketId: ID               # If PlayerTicket created from this
+  playerLinkConfidence: Float
+  playerLinkMethod: String               # "exact_name", "fuzzy_match", "manual"
   
   # === STANDARD FIELDS ===
   createdAt: AWSDateTime!
@@ -216,23 +311,30 @@ type SocialPostPlacement
 # 4. EMBEDDED TYPE: Non-Cash Prize
 # ===================================================================
 # Stored as AWSJSON in SocialPostPlacement.nonCashPrizes
-# This is the structure of each item in that array
+# This documents the structure of each item in that array
 
 # Note: This is NOT a @model - it's an embedded type for documentation
 # The actual data is stored as AWSJSON and parsed in the Lambda
 type SocialPostNonCashPrize @aws_iam @aws_cognito_user_pools {
-  prizeType: NonCashPrizeType!
-  description: String                    # "Accumulator Ticket", "KR Event Entry"
-  estimatedValue: Float                  # Estimated dollar value
-  rawText: String                        # Original text (e.g., "Accumulator Ticket*")
+  prizeType: NonCashPrizeType!           # ACCUMULATOR_TICKET, MAIN_EVENT_SEAT, etc.
+  description: String                     # "Accumulator Ticket", "Sydney Millions Entry"
+  estimatedValue: Float                   # Estimated dollar value
+  rawText: String                         # Original text from post
   
   # For tournament entry prizes
-  targetTournamentName: String
-  targetTournamentBuyIn: Float
+  targetTournamentName: String            # "Sydney Millions Main Event"
+  targetTournamentBuyIn: Float            # 550, 1100, etc.
+  targetTournamentId: Int                 # If extractable from URL
   
   # For ticket prizes
-  ticketType: String                     # "ACCUMULATOR", "SATELLITE", "BOUNTY_HUNTER"
-  ticketQuantity: Int
+  ticketType: String                      # "ACCUMULATOR", "SATELLITE", "BOUNTY"
+  ticketQuantity: Int                     # Usually 1, but could be multiple
+  
+  # For packages
+  packageIncludes: [String]               # ["Hotel", "Flights", "Tournament Entry"]
+  
+  # Source tracking
+  extractionConfidence: Float             # How confident in this extraction
 }
 
 # ===================================================================
@@ -307,7 +409,7 @@ input GetMatchingStatsInput {
   dateTo: AWSDateTime
 }
 
-# NEW: Preview extraction on raw content without saving to database
+# Preview extraction on raw content without saving to database
 input PreviewContentExtractionInput {
   content: String!                        # Post content to analyze
   postedAt: AWSDateTime                   # Optional: Posted date for matching
@@ -342,6 +444,28 @@ input PreviewGameToSocialMatchInput {
 }
 
 # ===================================================================
+# 5c. INPUT TYPES - TICKET RECONCILIATION
+# ===================================================================
+
+input TicketReconciliationInput {
+  gameId: ID                             # Specific game
+  entityId: ID                           # All games for entity
+  venueId: ID                            # All games for venue
+  dateFrom: AWSDateTime
+  dateTo: AWSDateTime
+  onlyDiscrepancies: Boolean             # Only return mismatches
+  limit: Int
+  nextToken: String
+}
+
+input ReconcileSocialToGameInput {
+  socialPostGameDataId: ID!
+  gameId: ID!
+  applyToGame: Boolean                   # If true, update Game with extracted values
+  notes: String
+}
+
+# ===================================================================
 # 6. OUTPUT TYPES - SOCIAL POST PROCESSOR
 # ===================================================================
 
@@ -358,6 +482,9 @@ type ProcessSocialPostResult @aws_iam @aws_cognito_user_pools {
   extractedGameData: SocialPostGameData
   placementsExtracted: Int
   
+  # Ticket extraction summary
+  ticketSummary: TicketExtractionSummary
+  
   # Matching results
   matchCandidates: [GameMatchCandidate!]
   primaryMatch: GameMatchCandidate
@@ -366,6 +493,9 @@ type ProcessSocialPostResult @aws_iam @aws_cognito_user_pools {
   linksCreated: Int
   linksSkipped: Int                      # Below threshold
   linkDetails: [SocialPostGameLink!]
+  
+  # Reconciliation preview (if game was matched)
+  reconciliationPreview: SocialToGameReconciliation
   
   # Metadata
   processingTimeMs: Int
@@ -411,6 +541,10 @@ type ProcessBatchResult @aws_iam @aws_cognito_user_pools {
   totalExtractionsDone: Int
   averageConfidence: Float
   
+  # Aggregate ticket stats
+  totalTicketsExtracted: Int
+  totalTicketValue: Float
+  
   # Timing
   processingTimeMs: Int
 }
@@ -452,7 +586,126 @@ type SocialPostWithMatchInfo @aws_iam @aws_cognito_user_pools {
 }
 
 # ===================================================================
-# 6b. OUTPUT TYPES - GAME TO SOCIAL MATCHER
+# 6b. OUTPUT TYPES - TICKET EXTRACTION SUMMARY
+# ===================================================================
+
+type TicketExtractionSummary @aws_iam @aws_cognito_user_pools {
+  # Placement counts
+  totalPlacements: Int!
+  placementsWithCash: Int!
+  placementsWithTickets: Int!
+  placementsWithBoth: Int!               # Cash AND ticket
+  placementsWithTicketOnly: Int!         # Ticket but NO cash
+  
+  # Value totals
+  totalCashPaid: Float!
+  totalTicketValue: Float!
+  totalCombinedValue: Float!             # Cash + Tickets
+  
+  # Ticket breakdown by type
+  ticketsByType: [TicketTypeCount!]!
+  
+  # Top placements preview (first 5-10)
+  topPlacements: [PlacementPreview!]!
+}
+
+type TicketTypeCount @aws_iam @aws_cognito_user_pools {
+  ticketType: NonCashPrizeType!
+  count: Int!
+  totalValue: Float
+}
+
+type PlacementPreview @aws_iam @aws_cognito_user_pools {
+  place: Int!
+  playerName: String!
+  cashPrize: Float
+  ticketType: NonCashPrizeType
+  ticketValue: Float
+  ticketDescription: String
+  totalValue: Float
+  rawText: String
+}
+
+# ===================================================================
+# 6c. OUTPUT TYPES - RECONCILIATION
+# ===================================================================
+
+type SocialToGameReconciliation @aws_iam @aws_cognito_user_pools {
+  # Source identifiers
+  socialPostId: ID!
+  socialPostGameDataId: ID
+  gameId: ID
+  gameName: String
+  gameDate: AWSDateTime
+  
+  # === SOCIAL POST EXTRACTED VALUES ===
+  social_totalCashPaid: Float
+  social_totalTicketCount: Int
+  social_totalTicketValue: Float
+  social_accumulatorCount: Int
+  social_accumulatorValue: Float
+  social_totalPlacements: Int
+  social_prizepoolTotal: Float           # Cash + Tickets
+  
+  # === GAME RECORD VALUES (for comparison) ===
+  game_prizepoolPaid: Float
+  game_numberOfAccumulatorTicketsPaid: Int
+  game_accumulatorTicketValue: Float     # Per-ticket value from RecurringGame
+  game_totalEntries: Int
+  game_hasAccumulatorTickets: Boolean
+  
+  # === CALCULATED DISCREPANCIES ===
+  cashDifference: Float                  # social - game
+  ticketCountDifference: Int             # social - game
+  ticketValueDifference: Float           # social - game
+  
+  # === STATUS ===
+  hasDiscrepancy: Boolean!
+  discrepancySeverity: String            # "NONE", "MINOR", "MAJOR"
+  discrepancyNotes: [String]
+  suggestedAction: String                # "VERIFY_GAME", "UPDATE_GAME", "MANUAL_REVIEW"
+  
+  # === METADATA ===
+  reconciledAt: AWSDateTime
+  reconciledBy: String
+}
+
+type TicketReconciliationReport @aws_iam @aws_cognito_user_pools {
+  # Summary counts
+  totalGamesChecked: Int!
+  gamesWithSocialData: Int!
+  gamesWithDiscrepancies: Int!
+  gamesMatched: Int!                     # Social matches Game exactly
+  
+  # Aggregate discrepancies
+  totalCashDifference: Float
+  totalTicketCountDifference: Int
+  totalTicketValueDifference: Float
+  
+  # Individual reconciliations
+  reconciliations: [SocialToGameReconciliation!]!
+  
+  # Pagination
+  nextToken: String
+}
+
+type ReconcileResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  socialPostGameDataId: ID
+  gameId: ID
+  
+  # What was updated
+  fieldsUpdated: [String]
+  previousValues: AWSJSON
+  newValues: AWSJSON
+  
+  # Status
+  message: String
+  error: String
+}
+
+# ===================================================================
+# 6d. OUTPUT TYPES - GAME TO SOCIAL MATCHER
 # ===================================================================
 
 type GameToSocialMatchResult @aws_iam @aws_cognito_user_pools {
@@ -586,6 +839,16 @@ extend type Mutation {
     @function(name: "gameToSocialMatcher-${env}")
     @aws_iam
     @aws_cognito_user_pools
+  
+  # =========================================================
+  # RECONCILIATION
+  # =========================================================
+  
+  # Apply social post extracted data to Game record
+  reconcileSocialToGame(input: ReconcileSocialToGameInput!): ReconcileResult
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
 }
 
 # ===================================================================
@@ -599,7 +862,7 @@ extend type Query {
     @aws_iam
     @aws_cognito_user_pools
   
-  # NEW: Preview extraction on raw content WITHOUT saving
+  # Preview extraction on raw content WITHOUT saving
   # Use this to see what would be extracted before uploading a post
   previewContentExtraction(input: PreviewContentExtractionInput!): ProcessSocialPostResult
     @function(name: "socialPostProcessor-${env}")
@@ -625,6 +888,34 @@ extend type Query {
   # Preview which posts would match a game (no links created)
   previewGameToSocialMatch(input: PreviewGameToSocialMatchInput!): GameToSocialMatchResult
     @function(name: "gameToSocialMatcher-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # =========================================================
+  # TICKET RECONCILIATION
+  # =========================================================
+  
+  # Get ticket extraction data for a specific game
+  getSocialPostTicketsForGame(gameId: ID!): [SocialPostGameData!]
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Get placements for a specific post (with full ticket detail)
+  getSocialPostPlacements(socialPostId: ID!): [SocialPostPlacement!]
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Get reconciliation report comparing social vs game data
+  getTicketReconciliationReport(input: TicketReconciliationInput!): TicketReconciliationReport
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Preview reconciliation for a single post/game pair
+  previewReconciliation(socialPostGameDataId: ID!, gameId: ID!): SocialToGameReconciliation
+    @function(name: "socialPostProcessor-${env}")
     @aws_iam
     @aws_cognito_user_pools
 }

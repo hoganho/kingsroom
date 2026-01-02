@@ -1,10 +1,14 @@
 // src/types/scraper.ts
 // Centralized types for the scraper system
-// UPDATED v2.1: Added game streaming types for real-time batch job display
+// UPDATED v3.0: Added job progress subscription types for real-time batch job monitoring
 //
 // Architecture:
 // - 'single': Frontend handles (interactive with modals) using useSingleScrape
 // - All other modes: Backend Lambda handles via useScraperJobs.startJob()
+//
+// Subscriptions:
+// - onGameProcessed: Per-tournament events (game details)
+// - onJobProgress: Per-job events (aggregate stats) - NEW in v3.0
 
 import { ScrapedGameData } from '../API';
 
@@ -267,6 +271,164 @@ export interface ScraperTabProps {
 }
 
 // ===================================================================
+// JOB STATUS CONSTANTS
+// ===================================================================
+
+/**
+ * Statuses that indicate a job is actively running
+ */
+export const JOB_RUNNING_STATUSES = [
+  'QUEUED',
+  'RUNNING', 
+  'IN_PROGRESS',
+  'PROCESSING',
+  'PENDING',
+] as const;
+
+/**
+ * Statuses that indicate a job has completed (successfully or not)
+ */
+export const JOB_COMPLETE_STATUSES = [
+  'COMPLETED',
+  'FAILED',
+  'CANCELLED',
+  'TIMEOUT',
+  'STOPPED_NOT_FOUND',
+  'STOPPED_BLANKS',
+  'STOPPED_MAX_ID',
+  'STOPPED_ERROR',
+  'STOPPED_MANUAL',
+] as const;
+
+export type JobRunningStatus = typeof JOB_RUNNING_STATUSES[number];
+export type JobCompleteStatus = typeof JOB_COMPLETE_STATUSES[number];
+export type JobStatus = JobRunningStatus | JobCompleteStatus;
+
+// ===================================================================
+// JOB PROGRESS SUBSCRIPTION TYPES (NEW in v3.0)
+// For real-time batch job monitoring via onJobProgress subscription
+// ===================================================================
+
+/**
+ * Job progress event received from onJobProgress subscription
+ * Published by Lambda via publishJobProgress mutation
+ * 
+ * This subscription REPLACES polling-based monitoring and provides:
+ * - Real-time status updates (RUNNING → COMPLETED, etc.)
+ * - Live counters (processed, created, updated, errors)
+ * - Duration tracking
+ * - Error and stop reason information
+ */
+export interface JobProgressEvent {
+  /** Job identifier */
+  jobId: string;
+  /** Entity this job belongs to */
+  entityId: string;
+  /** Current job status (QUEUED, RUNNING, COMPLETED, etc.) */
+  status: string;
+  /** Reason job stopped (if applicable) */
+  stopReason?: string | null;
+  /** Total URLs/tournaments processed */
+  totalURLsProcessed: number;
+  /** New games created in database */
+  newGamesScraped: number;
+  /** Existing games updated */
+  gamesUpdated: number;
+  /** Games skipped (already up-to-date, etc.) */
+  gamesSkipped: number;
+  /** Processing errors encountered */
+  errors: number;
+  /** Blank/empty responses */
+  blanks: number;
+  /** Current tournament ID being processed */
+  currentId?: number | null;
+  /** Start of ID range (for range/bulk jobs) */
+  startId?: number | null;
+  /** End of ID range */
+  endId?: number | null;
+  /** Job start time ISO string */
+  startTime?: string | null;
+  /** Elapsed time in seconds */
+  durationSeconds: number;
+  /** Calculated success rate percentage */
+  successRate?: number | null;
+  /** Average time per game in ms */
+  averageScrapingTime?: number | null;
+  /** Number of S3 cache hits */
+  s3CacheHits?: number | null;
+  /** Consecutive not-found count (for stop threshold) */
+  consecutiveNotFound?: number | null;
+  /** Consecutive error count */
+  consecutiveErrors?: number | null;
+  /** Consecutive blank count */
+  consecutiveBlanks?: number | null;
+  /** Most recent error message */
+  lastErrorMessage?: string | null;
+  /** Timestamp when this event was published */
+  publishedAt: string;
+}
+
+/**
+ * Stats extracted from job progress events
+ * Matches the BatchJobStats interface in useBatchJobMonitor
+ */
+export interface JobProgressStats {
+  processed: number;
+  newGames: number;
+  updated: number;
+  errors: number;
+  skipped: number;
+  blanks: number;
+  successRate: number | null;
+}
+
+/**
+ * Options for useJobProgressSubscription hook
+ */
+export interface JobProgressSubscriptionOptions {
+  /** Called when job status changes */
+  onStatusChange?: (status: string, prevStatus: string | null) => void;
+  /** Called when job reaches a completion status */
+  onJobComplete?: (event: JobProgressEvent) => void;
+  /** Called on subscription error */
+  onError?: (error: Error) => void;
+  /** Called when subscription is established */
+  onSubscribed?: () => void;
+}
+
+/**
+ * Result from useJobProgressSubscription hook
+ */
+export interface JobProgressSubscriptionResult {
+  /** Latest progress event received */
+  event: JobProgressEvent | null;
+  /** Computed stats from latest event */
+  stats: JobProgressStats;
+  /** Current job status string */
+  status: string | null;
+  /** Whether job is in an active (running) state */
+  isActive: boolean;
+  /** Whether job is in a complete state */
+  isComplete: boolean;
+  /** Duration in seconds from latest event */
+  durationSeconds: number;
+  /** Job start time ISO string */
+  startTime: string | null;
+  /** Current tournament ID being processed */
+  currentId: number | null;
+  /** Start of ID range */
+  startId: number | null;
+  /** End of ID range */
+  endId: number | null;
+  /** Whether subscription is active */
+  isSubscribed: boolean;
+  /** Subscription error if any */
+  subscriptionError: Error | null;
+  /** Timestamp of last received event */
+  lastUpdated: Date | null;
+}
+
+// ===================================================================
 // GAME STREAMING TYPES (for real-time batch job display)
 // ===================================================================
 
@@ -400,6 +562,22 @@ export const isSingleMode = (mode: IdSelectionMode): boolean => {
  */
 export const normalizeMode = (mode: IdSelectionMode): IdSelectionMode => {
   return mode === 'next' ? 'single' : mode;
+};
+
+/**
+ * Check if a job status indicates the job is still running
+ */
+export const isJobRunningStatus = (status: string | null | undefined): boolean => {
+  if (!status) return false;
+  return JOB_RUNNING_STATUSES.includes(status.toUpperCase() as JobRunningStatus);
+};
+
+/**
+ * Check if a job status indicates completion (success or failure)
+ */
+export const isJobCompleteStatus = (status: string | null | undefined): boolean => {
+  if (!status) return false;
+  return JOB_COMPLETE_STATUSES.includes(status.toUpperCase() as JobCompleteStatus);
 };
 
 // ===================================================================
@@ -597,4 +775,112 @@ export const eventDataSourceToType = (dataSource?: string): DataSourceType => {
   if (lower === 's3' || lower === 's3_cache' || lower === 'http_304_cache') return 's3';
   if (lower === 'web' || lower === 'live') return 'web';
   return 'none';
+};
+
+/**
+ * Extract JobProgressStats from a JobProgressEvent
+ */
+export const extractJobProgressStats = (event: JobProgressEvent | null): JobProgressStats => {
+  if (!event) {
+    return {
+      processed: 0,
+      newGames: 0,
+      updated: 0,
+      errors: 0,
+      skipped: 0,
+      blanks: 0,
+      successRate: null,
+    };
+  }
+  
+  return {
+    processed: event.totalURLsProcessed,
+    newGames: event.newGamesScraped,
+    updated: event.gamesUpdated,
+    errors: event.errors,
+    skipped: event.gamesSkipped,
+    blanks: event.blanks,
+    successRate: event.successRate ?? null,
+  };
+};
+
+/**
+ * Calculate success rate from job stats
+ */
+export const calculateSuccessRate = (stats: JobProgressStats): number | null => {
+  const total = stats.newGames + stats.updated + stats.errors + stats.skipped;
+  if (total === 0) return null;
+  return ((stats.newGames + stats.updated) / total) * 100;
+};
+
+/**
+ * Format duration in seconds to human-readable string
+ */
+export const formatJobDuration = (seconds: number): string => {
+  if (seconds < 0) return '0s';
+  if (seconds < 60) return `${seconds}s`;
+  
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  
+  if (mins < 60) {
+    return `${mins}m ${secs}s`;
+  }
+  
+  const hours = Math.floor(mins / 60);
+  const remainingMins = mins % 60;
+  return `${hours}h ${remainingMins}m`;
+};
+
+/**
+ * Get human-readable label for job status
+ */
+export const getJobStatusLabel = (status: string | null | undefined): string => {
+  if (!status) return 'Unknown';
+  
+  const labels: Record<string, string> = {
+    'PENDING': 'Starting...',
+    'QUEUED': 'Queued',
+    'RUNNING': 'Running',
+    'IN_PROGRESS': 'Running',
+    'PROCESSING': 'Processing',
+    'COMPLETED': 'Completed',
+    'FAILED': 'Failed',
+    'CANCELLED': 'Cancelled',
+    'TIMEOUT': 'Timed Out',
+    'STOPPED_NOT_FOUND': 'Stopped (Not Found)',
+    'STOPPED_BLANKS': 'Stopped (Blanks)',
+    'STOPPED_MAX_ID': 'Stopped (Max ID)',
+    'STOPPED_ERROR': 'Stopped (Error)',
+    'STOPPED_MANUAL': 'Stopped (Manual)',
+  };
+
+  return labels[status.toUpperCase()] || status;
+};
+
+/**
+ * Get Tailwind CSS classes for job status badge
+ */
+export const getJobStatusColor = (status: string | null | undefined): string => {
+  if (!status) return 'bg-gray-100 text-gray-700';
+  
+  const s = status.toUpperCase();
+  
+  if (isJobRunningStatus(s)) {
+    return 'bg-blue-100 text-blue-700';
+  }
+  
+  if (s === 'COMPLETED') {
+    return 'bg-green-100 text-green-700';
+  }
+  
+  if (['STOPPED_NOT_FOUND', 'STOPPED_BLANKS', 'STOPPED_MAX_ID'].includes(s)) {
+    return 'bg-yellow-100 text-yellow-700';
+  }
+  
+  if (['FAILED', 'CANCELLED', 'TIMEOUT', 'STOPPED_ERROR', 'STOPPED_MANUAL'].includes(s)) {
+    return 'bg-red-100 text-red-700';
+  }
+  
+  return 'bg-gray-100 text-gray-700';
 };

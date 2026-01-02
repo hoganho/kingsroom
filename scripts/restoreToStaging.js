@@ -148,7 +148,7 @@ function parseCSV(csvContent) {
 }
 
 function getNewTableName(oldTableName) {
-  // Game-fosb7ek5argnhctz4odpt52eia-staging -> Game-fosb7ek5argnhctz4odpt52eia-staging
+  // Game-ht3nugt6lvddpeeuwj3x6mkite-dev -> Game-ht3nugt6lvddpeeuwj3x6mkite-dev
   const modelName = oldTableName.replace(`-${OLD_API_ID}-${OLD_ENV}`, '');
   return `${modelName}-${NEW_API_ID}-${NEW_ENV}`;
 }
@@ -299,7 +299,7 @@ async function main() {
   const csvFiles = files
     .filter(f => f.endsWith('.csv'))
     .filter(f => {
-      // Extract model name from filename (e.g., "Entity-fosb7ek5argnhctz4odpt52eia-staging.csv" -> "Entity")
+      // Extract model name from filename (e.g., "Entity-ht3nugt6lvddpeeuwj3x6mkite-dev.csv" -> "Entity")
       const tableName = f.replace('.csv', '');
       const modelName = tableName.replace(`-${OLD_API_ID}-${OLD_ENV}`, '');
       return TABLES_TO_RESTORE.includes(modelName);

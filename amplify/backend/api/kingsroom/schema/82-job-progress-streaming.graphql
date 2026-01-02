@@ -1,0 +1,144 @@
+# 82-job-progress-streaming.graphql
+# ==========================================
+# Job Progress Streaming - Real-time batch job status updates
+# 
+# This replaces polling-based job monitoring with a subscription-based approach.
+# The Lambda publishes progress updates via publishJobProgress mutation,
+# and clients subscribe via onJobProgress subscription.
+#
+# USAGE (Lambda side):
+#   await client.graphql({
+#     query: publishJobProgress,
+#     variables: {
+#       jobId: 'xxx',
+#       event: {
+#         jobId: 'xxx',
+#         entityId: 'yyy',
+#         status: 'RUNNING',
+#         // ... other fields
+#       }
+#     }
+#   });
+#
+# USAGE (Client side):
+#   const subscription = client.graphql({
+#     query: onJobProgress,
+#     variables: { jobId: 'xxx' }
+#   }).subscribe({...});
+# ==========================================
+
+# =============================================================================
+# JOB PROGRESS EVENT TYPE
+# =============================================================================
+
+type JobProgressEvent @aws_iam @aws_cognito_user_pools {
+  # Identifiers
+  jobId: ID!
+  entityId: ID!
+  
+  # Status
+  status: String!                   # QUEUED, RUNNING, COMPLETED, FAILED, etc.
+  stopReason: String                # Why job stopped (if applicable)
+  
+  # Progress counters
+  totalURLsProcessed: Int!
+  newGamesScraped: Int!
+  gamesUpdated: Int!
+  gamesSkipped: Int!
+  errors: Int!
+  blanks: Int!
+  
+  # Current position (for range scans)
+  currentId: Int
+  startId: Int
+  endId: Int
+  
+  # Timing
+  startTime: AWSDateTime
+  durationSeconds: Int!
+  
+  # Rates & metrics
+  successRate: Float
+  averageScrapingTime: Float
+  
+  # Cache stats
+  s3CacheHits: Int
+  
+  # Error tracking
+  consecutiveNotFound: Int
+  consecutiveErrors: Int
+  consecutiveBlanks: Int
+  lastErrorMessage: String
+  
+  # Timestamp of this event
+  publishedAt: AWSDateTime!
+}
+
+# =============================================================================
+# INPUT TYPE
+# =============================================================================
+
+input JobProgressEventInput {
+  # Identifiers
+  jobId: ID!
+  entityId: ID!
+  
+  # Status
+  status: String!
+  stopReason: String
+  
+  # Progress counters
+  totalURLsProcessed: Int!
+  newGamesScraped: Int!
+  gamesUpdated: Int!
+  gamesSkipped: Int!
+  errors: Int!
+  blanks: Int!
+  
+  # Current position
+  currentId: Int
+  startId: Int
+  endId: Int
+  
+  # Timing
+  startTime: AWSDateTime
+  durationSeconds: Int!
+  
+  # Rates & metrics
+  successRate: Float
+  averageScrapingTime: Float
+  
+  # Cache stats
+  s3CacheHits: Int
+  
+  # Error tracking
+  consecutiveNotFound: Int
+  consecutiveErrors: Int
+  consecutiveBlanks: Int
+  lastErrorMessage: String
+}
+
+# =============================================================================
+# EXTEND MUTATION - Add publishJobProgress
+# =============================================================================
+
+extend type Mutation {
+  # Publish job progress event (called by autoScraper/bulkGamesScraper Lambda)
+  # This triggers the onJobProgress subscription for all listeners
+  publishJobProgress(jobId: ID!, event: JobProgressEventInput!): JobProgressEvent
+    @aws_iam
+    @aws_cognito_user_pools
+}
+
+# =============================================================================
+# EXTEND SUBSCRIPTION - Add onJobProgress
+# =============================================================================
+
+extend type Subscription {
+  # Subscribe to job progress events for a specific job
+  # Clients receive real-time updates as the job processes
+  onJobProgress(jobId: ID!): JobProgressEvent
+    @aws_subscribe(mutations: ["publishJobProgress"])
+    @aws_iam
+    @aws_cognito_user_pools
+}

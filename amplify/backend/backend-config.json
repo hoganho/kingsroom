@@ -100,6 +100,22 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "deleteGameFunction": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "entityVenueDashMetricCounter": {
       "build": true,
       "dependsOn": [
@@ -416,6 +432,22 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "socialPostStreamHandler": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "tournamentConsolidator": {
       "build": true,
       "dependsOn": [
@@ -530,6 +562,22 @@
         {
           "category": "function",
           "resourceName": "autoScraper"
+        }
+      ]
+    },
+    "AMPLIFY_function_deleteGameFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "deleteGameFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_deleteGameFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "deleteGameFunction"
         }
       ]
     },
@@ -874,6 +922,22 @@
         {
           "category": "function",
           "resourceName": "socialPostProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialPostStreamHandler_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialPostStreamHandler"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialPostStreamHandler_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialPostStreamHandler"
         }
       ]
     },

@@ -11,6 +11,7 @@
   },
   {
     "Action": [
+      "dynamodb:GetItem",
       "dynamodb:PutItem",
       "dynamodb:UpdateItem"
     ],
@@ -45,11 +46,21 @@
     ]
   },
   {
-    "Action": ["appsync:GraphQL"],
+    "Action": [
+      "appsync:GraphQL"
+    ],
     "Resource": [
       "arn:aws:appsync:*:*:apis/*/types/Mutation/fields/fetchTournamentData",
       "arn:aws:appsync:*:*:apis/*/types/Mutation/fields/enrichGameData",
       "arn:aws:appsync:*:*:apis/*/types/Mutation/fields/publishGameProcessed"
+    ]
+  },
+  {
+    "Action": [
+      "lambda:InvokeFunction"
+    ],
+    "Resource": [
+      "arn:aws:lambda:ap-southeast-2:*:function:autoScraper-*"
     ]
   }
 ]

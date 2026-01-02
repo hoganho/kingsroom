@@ -354,6 +354,11 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({
                 {(post as any).textContent && (
                   <p className="text-sm text-gray-700 mt-2 line-clamp-2">{(post as any).textContent}</p>
                 )}
+                {!(post as any).textContent && ((post as any).content || (post as any).contentPreview) && (
+                  <p className="text-sm text-gray-700 mt-2 line-clamp-2">
+                    {(post as any).contentPreview || (post as any).content}
+                  </p>
+                )}
                 <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                   <span>❤️ {post.likeCount || 0}</span>
                   <span>💬 {post.commentCount || 0}</span>

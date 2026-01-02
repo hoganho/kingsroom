@@ -10,6 +10,10 @@ const {
 } = require('../utils/graphql');
 const { findMatchingGames } = require('../matching/gameMatcher');
 
+const updateSocialPostGameData = async (id, updates) => {
+  return updateItem(TABLES.SocialPostGameData(), id, updates);
+};
+
 /**
  * Get social posts that need manual review
  * 

@@ -1,14 +1,14 @@
 // src/components/scraper/admin/BatchJobProgress.tsx
-// Enhanced batch job progress display with real-time game streaming
-// UPDATED: Fixed nested button DOM warning by converting accordion header to interactive div
-// UPDATED: Added onStop prop and stop button next to Processing badge for better UX
+// ==========================================
+// Enhanced batch job progress display with real-time streaming
 //
-// New features:
-// - Real-time GameListItem display as games are processed
-// - Live subscription indicator
-// - Collapsible game list
-// - Stats derived from both polling and streaming
-// - Stop button visible next to Processing badge when job is active
+// REFACTORED v2.0: Subscription-based updates
+// - Removed rate limit indicators (no longer relevant)
+// - Added subscription status indicator
+// - Simplified polling indicator to show subscription state
+// - Real-time game streaming via useBatchGameStream
+// - Real-time job progress via useBatchJobMonitor (now subscription-based)
+// ==========================================
 
 import React, { useMemo, useState } from 'react';
 import { 
@@ -25,7 +25,9 @@ import {
   ChevronDown,
   ChevronUp,
   Radio,
-  Square
+  Square,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 import { ScraperJob } from '../../../API';
 import { 
@@ -45,11 +47,11 @@ interface BatchJobProgressProps {
   entityId?: string;
   onClear?: () => void;
   onComplete?: (job: ScraperJob) => void;
-  onStop?: () => void;              // NEW: Callback to stop the batch job
+  onStop?: () => void;
   showDetailedStats?: boolean;
-  showStreamingGames?: boolean;  // NEW: Enable real-time game list
+  showStreamingGames?: boolean;
   compact?: boolean;
-  maxStreamedGames?: number;     // NEW: Limit streamed games (default: 50)
+  maxStreamedGames?: number;
 }
 
 interface StatCardProps {
@@ -224,7 +226,60 @@ const ProgressBar: React.FC<{
 };
 
 // ===================================================================
-// STREAMING GAMES LIST - NEW
+// SUBSCRIPTION STATUS INDICATOR
+// ===================================================================
+
+interface SubscriptionIndicatorProps {
+  isJobSubscribed: boolean;
+  isGameStreamSubscribed: boolean;
+  showGameStream: boolean;
+}
+
+const SubscriptionIndicator: React.FC<SubscriptionIndicatorProps> = ({
+  isJobSubscribed,
+  isGameStreamSubscribed,
+  showGameStream,
+}) => {
+  const bothConnected = isJobSubscribed && (!showGameStream || isGameStreamSubscribed);
+  const anyConnected = isJobSubscribed || isGameStreamSubscribed;
+  
+  if (bothConnected) {
+    return (
+      <span 
+        className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full"
+        title="Real-time updates active"
+      >
+        <Wifi className="h-3 w-3" />
+        Live
+      </span>
+    );
+  }
+  
+  if (anyConnected) {
+    return (
+      <span 
+        className="flex items-center gap-1 text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full"
+        title="Partial connection - some real-time updates active"
+      >
+        <Wifi className="h-3 w-3" />
+        Partial
+      </span>
+    );
+  }
+  
+  return (
+    <span 
+      className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full"
+      title="Connecting to real-time updates..."
+    >
+      <WifiOff className="h-3 w-3" />
+      Connecting
+    </span>
+  );
+};
+
+// ===================================================================
+// STREAMING GAMES LIST
 // ===================================================================
 
 interface StreamingGamesListProps {
@@ -246,7 +301,7 @@ const StreamingGamesList: React.FC<StreamingGamesListProps> = ({
 
   return (
     <div className="border-t border-gray-100">
-      {/* Header - Changed from button to div to avoid nested button issues */}
+      {/* Header */}
       <div
         role="button"
         tabIndex={0}
@@ -317,7 +372,6 @@ const StreamingGamesList: React.FC<StreamingGamesListProps> = ({
                     compact={true}
                     showVenueSelector={false}
                     showActions={false}
-                    // FIXED: Pass dataSource from game for pipeline display
                     dataSource={game.dataSource}
                     processingStatus={
                       game.saveResult?.action === 'CREATED' ? 'success' :
@@ -348,18 +402,17 @@ const StreamingGamesList: React.FC<StreamingGamesListProps> = ({
 
 export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
   jobId,
-  // entityId is available via props but not currently used - reserved for future filtering
   onClear,
   onComplete,
-  onStop,                           // NEW: Stop callback
+  onStop,
   showDetailedStats = true,
-  showStreamingGames = false,  // NEW: Default off for backward compatibility
+  showStreamingGames = false,
   compact = false,
   maxStreamedGames = 50,
 }) => {
   const [showErrorsModal, setShowErrorsModal] = useState(false);
 
-  // Use the monitoring hook for job status polling
+  // Use the monitoring hook for job status (now subscription-based)
   const {
     job,
     stats,
@@ -367,20 +420,20 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
     isActive,
     isComplete,
     isPolling,
+    isSubscribed: isJobSubscribed,
     hasChanges,
     refresh,
     formatDuration,
+    error,
   } = useBatchJobMonitor(jobId, {
-    pollingInterval: 2000,
     onJobComplete: onComplete,
   });
 
-  // NEW: Use the streaming hook for real-time game events
+  // Use the streaming hook for real-time game events
   const {
     games: streamedGames,
-    isSubscribed,
+    isSubscribed: isGameStreamSubscribed,
     clear: clearStream,
-    // stats from streaming available as streamStats if needed for display
   } = useBatchGameStream(
     showStreamingGames ? jobId : null,
     {
@@ -469,13 +522,12 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Subscription indicator */}
-            {showStreamingGames && isSubscribed && (
-              <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
-                Streaming
-              </span>
-            )}
+            {/* Subscription status indicator */}
+            <SubscriptionIndicator
+              isJobSubscribed={isJobSubscribed}
+              isGameStreamSubscribed={isGameStreamSubscribed}
+              showGameStream={showStreamingGames}
+            />
             
             {/* Activity indicator */}
             <ActivityIndicator isActive={isActive} />
@@ -489,7 +541,7 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
               {statusLabel}
             </span>
             
-            {/* NEW: Stop button - only shown when job is active */}
+            {/* Stop button - only shown when job is active */}
             {isActive && onStop && (
               <button
                 onClick={onStop}
@@ -512,6 +564,14 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Connection error banner */}
+        {error && !isJobSubscribed && (
+          <div className="px-4 py-2 bg-yellow-50 border-b border-yellow-100 text-xs text-yellow-700 flex items-center gap-2">
+            <WifiOff className="h-4 w-4 flex-shrink-0" />
+            <span>Connection issue: {error}. Using cached data.</span>
+          </div>
+        )}
 
         {/* Progress bar */}
         {progressTotal && (
@@ -603,11 +663,11 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
           )}
         </div>
 
-        {/* NEW: Streamed Games List */}
+        {/* Streamed Games List */}
         {showStreamingGames && !compact && (
           <StreamingGamesList
             games={streamedGames}
-            isSubscribed={isSubscribed}
+            isSubscribed={isGameStreamSubscribed}
             isJobActive={isActive}
             onClear={clearStream}
           />

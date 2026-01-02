@@ -267,6 +267,9 @@ async function startScraperJob({ input }, event) {
         skipInProgress = false,
         ignoreDoNotScrape = false,
         
+        // API Key for scraping
+        scraperApiKey = null,
+        
         // Save options
         saveToDatabase = true,
         defaultVenueId,
@@ -323,6 +326,7 @@ async function startScraperJob({ input }, event) {
             ignoreDoNotScrape,
             saveToDatabase,
             defaultVenueId: defaultVenueId || null,
+            scraperApiKey: scraperApiKey || null,
             
             // Mode-specific params
             bulkCount: bulkCount || null,
@@ -396,6 +400,7 @@ async function startScraperJob({ input }, event) {
             ignoreDoNotScrape,
             saveToDatabase,
             defaultVenueId,
+            scraperApiKey,
             
             // Mode params
             bulkCount,

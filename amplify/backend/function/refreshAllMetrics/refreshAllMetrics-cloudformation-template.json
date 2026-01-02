@@ -424,7 +424,10 @@
                 "arn:aws:dynamodb:*:*:table/RecurringGame-*/index/*",
                 "arn:aws:dynamodb:*:*:table/EntityMetrics-*",
                 "arn:aws:dynamodb:*:*:table/VenueMetrics-*",
-                "arn:aws:dynamodb:*:*:table/RecurringGameMetrics-*"
+                "arn:aws:dynamodb:*:*:table/RecurringGameMetrics-*",
+                "arn:aws:dynamodb:*:*:table/TournamentSeries-*",
+                "arn:aws:dynamodb:*:*:table/TournamentSeries-*/index/*",
+                "arn:aws:dynamodb:*:*:table/TournamentSeriesMetrics-*"
               ]
             }
           ]

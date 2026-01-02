@@ -10,6 +10,12 @@
  * UPDATED: Now auto-creates TournamentSeriesTitle for pattern/heuristic detected series
  * to ensure tournamentSeriesTitleId is always populated.
  * 
+ * FIX (2026-01-01): Now includes entityId when creating TournamentSeries records.
+ * This is required for refreshAllMetrics to find series when querying by entity.
+ * entityId is passed through the chain: resolveSeriesAssignment -> resolveSeriesInstance/
+ * resolveSeriesFromName -> createTournamentSeries. If entityId is not provided directly,
+ * createTournamentSeries will look it up from the venue.
+ * 
  * DETECTION ORDER:
  * 1. Database matching against TournamentSeriesTitle (exact + fuzzy)
  * 2. Pattern-based detection (WSOP, WPT, etc.)
@@ -666,17 +672,85 @@ const findOrCreateSeriesTitle = async (titleName, seriesCategory = 'SPECIAL') =>
 };
 
 // ===================================================================
-// CREATE TOURNAMENT SERIES (UPDATED)
+// ENTITY ID LOOKUP HELPER (FIX for TournamentSeriesMetrics)
 // ===================================================================
 
+/**
+ * Helper to get entityId from venueId
+ * Used when creating TournamentSeries to ensure entityId is always populated
+ * 
+ * @param {string} venueId - Venue ID to look up
+ * @returns {string|null} Entity ID or null if not found
+ */
+const getEntityIdFromVenue = async (venueId) => {
+  if (!venueId) return null;
+  
+  const client = getDocClient();
+  const tableName = getTableName('Venue');
+  
+  try {
+    const result = await client.send(new GetCommand({
+      TableName: tableName,
+      Key: { id: venueId },
+      ProjectionExpression: 'entityId'
+    }));
+    return result.Item?.entityId || null;
+  } catch (error) {
+    console.error(`[SERIES] Failed to get entityId from venue ${venueId}:`, error.message);
+    return null;
+  }
+};
+
+// ===================================================================
+// CREATE TOURNAMENT SERIES (UPDATED - Now includes entityId)
+// ===================================================================
+
+/**
+ * Create a new TournamentSeries record
+ * 
+ * UPDATED: Now includes entityId, either from direct parameter or looked up from venue.
+ * This is REQUIRED for refreshAllMetrics to find series when querying by entity.
+ * 
+ * @param {Object} seriesData - Series data to create
+ * @param {string} seriesData.name - Series name (required)
+ * @param {number} seriesData.year - Year (required)
+ * @param {string} seriesData.seriesCategory - Category (optional, defaults to REGULAR)
+ * @param {string} seriesData.tournamentSeriesTitleId - Title ID (should always be provided)
+ * @param {string} seriesData.venueId - Venue ID (optional)
+ * @param {string} seriesData.entityId - Entity ID (optional, will be looked up from venue if not provided)
+ * @param {string} seriesData.startDate - Start date (optional)
+ * @returns {Object} Created series record
+ */
 const createTournamentSeries = async (seriesData) => {
   const client = getDocClient();
   const tableName = getTableName('TournamentSeries');
+  
+  // =====================================================
+  // FIX: Ensure entityId is populated
+  // =====================================================
+  let entityId = seriesData.entityId;
+  
+  if (!entityId && seriesData.venueId) {
+    console.log(`[SERIES] Looking up entityId from venue ${seriesData.venueId}`);
+    entityId = await getEntityIdFromVenue(seriesData.venueId);
+    
+    if (entityId) {
+      console.log(`[SERIES] Found entityId: ${entityId}`);
+    } else {
+      console.warn(`[SERIES] WARNING: Could not find entityId for venue ${seriesData.venueId}`);
+    }
+  }
+  
+  if (!entityId) {
+    console.warn('[SERIES] WARNING: Creating TournamentSeries without entityId - metrics will not work!');
+  }
+  // =====================================================
   
   const now = new Date().toISOString();
   const newSeries = {
     id: uuidv4(),
     ...seriesData,
+    entityId,  // FIX: Include entityId in the record
     status: 'SCHEDULED',
     numberOfEvents: 0,
     createdAt: now,
@@ -688,7 +762,7 @@ const createTournamentSeries = async (seriesData) => {
   };
   
   // Remove null/undefined/empty values to keep DynamoDB clean
-  // But KEEP tournamentSeriesTitleId even if it would be filtered
+  // But KEEP tournamentSeriesTitleId and entityId even if they would be filtered
   const cleanedSeries = Object.fromEntries(
     Object.entries(newSeries).filter(([key, v]) => {
       // Never filter out tournamentSeriesTitleId - it should always be present now
@@ -696,6 +770,10 @@ const createTournamentSeries = async (seriesData) => {
         if (!v) {
           console.error('[SERIES] WARNING: Attempting to create TournamentSeries without tournamentSeriesTitleId!');
         }
+        return !!v;  // Only include if truthy
+      }
+      // Keep entityId if present
+      if (key === 'entityId') {
         return !!v;  // Only include if truthy
       }
       if (v === null || v === undefined) return false;
@@ -709,7 +787,7 @@ const createTournamentSeries = async (seriesData) => {
     Item: cleanedSeries
   }));
   
-  console.log(`[SERIES] Created new TournamentSeries: ${newSeries.name} (${newSeries.id}) -> Title: ${seriesData.tournamentSeriesTitleId}`);
+  console.log(`[SERIES] Created new TournamentSeries: ${newSeries.name} (${newSeries.id}) -> Title: ${seriesData.tournamentSeriesTitleId}, Entity: ${entityId || 'NONE'}`);
   return newSeries;
 };
 
@@ -819,6 +897,7 @@ const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoC
       gameName,
       gameStartDateTime,
       venueId,
+      entityId,  // FIX: Pass entityId to resolveSeriesInstance
       year,
       month,
       quarter,
@@ -843,6 +922,7 @@ const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoC
       gameName,
       gameStartDateTime,
       venueId,
+      entityId,  // FIX: Pass entityId to resolveSeriesFromName
       year,
       month,
       quarter,
@@ -882,6 +962,7 @@ const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoC
       gameName,
       gameStartDateTime,
       venueId,
+      entityId,  // FIX: Pass entityId to resolveSeriesFromName
       year,
       month,
       quarter,
@@ -920,6 +1001,7 @@ const resolveSeriesInstance = async ({
   gameName,
   gameStartDateTime,
   venueId,
+  entityId,  // FIX: Added entityId parameter
   year,
   month,
   quarter,
@@ -971,6 +1053,7 @@ const resolveSeriesInstance = async ({
         seriesCategory: seriesCategory || 'REGULAR',
         tournamentSeriesTitleId: seriesTitleId,
         venueId: venueId || null,
+        entityId: entityId || null,  // FIX: Pass entityId to createTournamentSeries
         startDate: gameStartDateTime
       });
       
@@ -1035,6 +1118,7 @@ const resolveSeriesFromName = async ({
   gameName,
   gameStartDateTime,
   venueId,
+  entityId,  // FIX: Added entityId parameter
   year,
   month,
   quarter,
@@ -1113,6 +1197,7 @@ const resolveSeriesFromName = async ({
         seriesCategory,
         tournamentSeriesTitleId: seriesTitle.id,  // NOW ALWAYS POPULATED
         venueId: venueId || null,
+        entityId: entityId || null,  // FIX: Pass entityId to createTournamentSeries
         startDate: gameStartDateTime
       });
       

@@ -1,24 +1,11 @@
 # 99-mutations.graphql
 # ==========================================
+# Root Operations: Query, Mutation, Subscription
+# Plus supporting types that don't belong in domain-specific files
+# ==========================================
 
 # ===================================================================
-
-# 1. ENUMS
-
-# ===================================================================
-
-# --- Social Pulse Enums ---
-
-# --- Background Task Enums (NEW) ---
-
-# ===================================================================
-
-# ===================================================================
-
-# ===================================================================
-
-# 3. GAME DOMAIN & CONSOLIDATION
-
+# 1. GAME DOMAIN & CONSOLIDATION
 # ===================================================================
 
 type DetectedMultiDayPattern {
@@ -31,36 +18,8 @@ type DetectedMultiDayPattern {
 }
 
 # ===================================================================
-
-# 4. PLAYER DOMAIN
-
+# 2. USER MANAGEMENT RESPONSES
 # ===================================================================
-
-# ===================================================================
-
-# 5. SCRAPER & INGESTION ENGINE
-
-# ===================================================================
-
-# ===================================================================
-
-# 6. SYSTEM, ADMIN & ASSETS
-
-# ===================================================================
-
-# ===================================================================
-
-# 6.5 BACKGROUND TASK (NEW)
-
-# ===================================================================
-
-# ===================================================================
-
-# 6.6 SOCIAL PULSE
-
-# ===================================================================
-
-# --- User Management Responses ---
 
 type ResetPasswordResponse {
   success: Boolean!
@@ -68,7 +27,9 @@ type ResetPasswordResponse {
   temporaryPassword: String
 }
 
-# --- Scraper Types ---
+# ===================================================================
+# 3. SCRAPER TYPES
+# ===================================================================
 
 type ErrorMetric {
   errorType: String!
@@ -92,8 +53,6 @@ type EntityScraperMetrics {
   totalURLsScraped: Int!
 }
 
-# NEW: Entity-level summary (optional but useful)
-
 type EntityJobSummary {
   entityId: ID!
   entityName: String
@@ -103,7 +62,9 @@ type EntityJobSummary {
   failedJobs: Int
 }
 
-# --- Gap Detection Types ---
+# ===================================================================
+# 4. GAP DETECTION TYPES
+# ===================================================================
 
 type TournamentIdBounds {
   entityId: ID!
@@ -113,7 +74,9 @@ type TournamentIdBounds {
   lastUpdated: AWSDateTime!
 }
 
-# --- S3 & Caching Types ---
+# ===================================================================
+# 5. S3 & CACHING TYPES
+# ===================================================================
 
 type CacheActivityLog {
   url: AWSURL!
@@ -122,7 +85,9 @@ type CacheActivityLog {
   reason: String
 }
 
-# --- Structure Types ---
+# ===================================================================
+# 6. STRUCTURE TYPES
+# ===================================================================
 
 type TournamentLevel {
   levelNumber: Int!
@@ -137,7 +102,9 @@ type Break {
   durationMinutes: Int
 }
 
-# --- Metrics Types ---
+# ===================================================================
+# 7. METRICS TYPES
+# ===================================================================
 
 type ClientMetricResponse {
   success: Boolean!
@@ -186,15 +153,9 @@ type BackgroundTaskInfo {
   completedAt: AWSDateTime
 }
 
-# --- Social Pulse Response Types ---
-
-type SyncPageInfoResult {
-  success: Boolean!
-  message: String
-  logoUrl: String
-}
-
-# --- Misc Response Types ---
+# ===================================================================
+# 8. MISC RESPONSE TYPES
+# ===================================================================
 
 type RefreshResponse {
   message: String!
@@ -208,7 +169,9 @@ type SaveSeriesAssignmentInfo @aws_iam @aws_cognito_user_pools {
   confidence: Float
 }
 
-# --- Connection Types (Paginated) ---
+# ===================================================================
+# 9. CONNECTION TYPES (Paginated)
+# ===================================================================
 
 type UnfinishedGamesConnection {
   items: [Game!]!
@@ -217,19 +180,17 @@ type UnfinishedGamesConnection {
 }
 
 # ===================================================================
-# 8. INPUT TYPES
+# 10. INPUT TYPES
 # ===================================================================
 
-# --- Input Types for User Management ---
-
+# --- User Management ---
 input ResetUserPasswordInput {
   userId: ID!
   temporaryPassword: String
   sendEmail: Boolean
 }
 
-# --- Existing Input Types ---
-
+# --- Metrics ---
 input ClientMetricInput {
   metricName: String!
   value: Float!
@@ -239,6 +200,7 @@ input ClientMetricInput {
   metadata: String
 }
 
+# --- S3 & Scraper ---
 input ManualHTMLUploadInput {
   htmlContent: String!
   url: AWSURL!
@@ -284,12 +246,8 @@ input SeriesReferenceInput {
   finalDay: Boolean
 }
 
-# --- Social Pulse Input Types ---
-
 # ===================================================================
-
-# 9. ROOT OPERATIONS
-
+# 11. ROOT OPERATIONS
 # ===================================================================
 
 type Query {
@@ -320,8 +278,8 @@ type Query {
     @function(name: "scraperManagementFunction-${env}")
 
   getScraperJobsReport(
-    entityId: ID              # NEW: Filter by single entity
-    entityIds: [ID]           # NEW: Filter by multiple entities
+    entityId: ID
+    entityIds: [ID]
     status: ScraperJobStatus
     limit: Int
     nextToken: String
@@ -332,8 +290,8 @@ type Query {
     @function(name: "scraperManagement-${env}")
 
   searchScrapeURLs(
-    entityId: ID              # NEW: Filter by single entity
-    entityIds: [ID]           # NEW: Filter by multiple entities  
+    entityId: ID
+    entityIds: [ID]
     status: ScrapeURLStatus
     limit: Int
     nextToken: String
@@ -341,15 +299,15 @@ type Query {
     @function(name: "scraperManagement-${env}")
 
   getScraperMetrics(
-    entityId: ID              # NEW: Filter by single entity
-    entityIds: [ID]           # NEW: Filter by multiple entities
+    entityId: ID
+    entityIds: [ID]
     timeRange: TimeRange
   ): ScraperMetrics
     @function(name: "scraperManagement-${env}")
 
   getUpdateCandidateURLs(
-    entityId: ID              # NEW
-    entityIds: [ID]           # NEW
+    entityId: ID
+    entityIds: [ID]
     limit: Int
   ): [ScrapeURL]
     @function(name: "scraperManagement-${env}")
@@ -373,7 +331,7 @@ type Query {
   getVenueAssignmentSummary(entityId: ID): VenueAssignmentSummary
     @function(name: "venueAssignmentService-${env}")
 
-  # --- Venue Reassignment Queries (NEW) ---
+  # --- Venue Reassignment Queries ---
   getReassignmentStatus(taskId: ID!): GetReassignmentStatusResult
     @function(name: "venueAssignmentService-${env}")
 
@@ -528,7 +486,6 @@ type Mutation {
     @function(name: "venueDetailsUpdater-${env}")
 
   # Publish game processing event (called by autoScraper Lambda)
-  # Uses @aws_iam for Lambda access - no resolver Lambda needed, this is a passthrough
   publishGameProcessed(jobId: ID!, event: GameProcessedEventInput!): GameProcessedEvent
     @aws_iam
     @aws_cognito_user_pools
@@ -540,7 +497,7 @@ type Mutation {
   batchAssignVenues(assignments: [VenueAssignment!]!): BatchVenueAssignmentResult
     @function(name: "venueAssignmentService-${env}")
 
-  # --- Venue Reassignment (NEW) ---
+  # --- Venue Reassignment ---
   reassignGameVenue(input: ReassignGameVenueInput!): ReassignGameVenueResult
     @function(name: "venueAssignmentService-${env}")
 
@@ -555,6 +512,7 @@ type Mutation {
   uploadManualHTML(input: ManualHTMLUploadInput!): S3Storage
 
   # --- Social Pulse Mutations ---
+  # Note: SocialScrapeResult and SyncPageInfoResult types are defined in 85-social.graphql
   triggerSocialScrape(socialAccountId: ID!): SocialScrapeResult
     @function(name: "socialFetcher-${env}")
 
@@ -563,6 +521,20 @@ type Mutation {
 
   syncPageInfo(socialAccountId: ID!, forceRefresh: Boolean): SyncPageInfoResult
     @function(name: "socialFetcher-${env}")
+
+  # Note: SocialSyncEvent type is defined in 85-social.graphql
+  # Note: SyncEventStatus enum is defined in 00-enums.graphql
+  publishSyncProgress(
+    socialAccountId: ID!
+    status: SyncEventStatus!
+    message: String
+    postsFound: Int
+    newPostsAdded: Int
+    rateLimited: Boolean
+    pagesCompleted: Int
+  ): SocialSyncEvent
+    @aws_iam
+    @aws_cognito_user_pools
 }
 
 type Subscription {
@@ -573,9 +545,13 @@ type Subscription {
     @aws_subscribe(mutations: ["modifyScrapeURLStatus"])
 
   # Subscribe to game processing events for a specific job
-  # Filter by jobId to only receive events for the job you're tracking
   onGameProcessed(jobId: ID!): GameProcessedEvent
     @aws_subscribe(mutations: ["publishGameProcessed"])
     @aws_iam
     @aws_cognito_user_pools
+
+  # Subscribe to social sync progress events
+  # Note: SocialSyncEvent type is defined in 85-social.graphql
+  onSyncProgress(socialAccountId: ID!): SocialSyncEvent
+    @aws_subscribe(mutations: ["publishSyncProgress"])
 }

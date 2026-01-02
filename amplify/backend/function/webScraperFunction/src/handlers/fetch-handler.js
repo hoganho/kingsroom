@@ -86,23 +86,24 @@ const findExistingS3Storage = async (url, entityId, tournamentId, context) => {
     console.log(`[FetchHandler] Looking for existing S3Storage for tournamentId: ${tournamentId}, entityId: ${entityId}`);
     
     // ─────────────────────────────────────────────────────────────────
-    // Method 1: NEW! Query by entityId + tournamentId GSI (PREFERRED)
-    // GSI: byEntityTournament (entityId + tournamentId)
+    // Method 1: Query by entityTournamentKey composite GSI (PREFERRED)
+    // GSI: byEntityTournament on entityTournamentKey field
+    // Format: "{entityId}#{tournamentId}"
     // 
     // This is now the preferred method because:
-    // 1. It directly queries by both entityId AND tournamentId
-    // 2. No FilterExpression needed (both are key conditions)
-    // 3. Works even if scrapedAt is missing (unlike byTournamentId)
+    // 1. Direct lookup using composite key - no filter needed
+    // 2. Works even if scrapedAt is missing (unlike byTournamentId)
+    // 3. Avoids Amplify transformer bug with dual @index
     // ─────────────────────────────────────────────────────────────────
     if (entityId && tournamentId) {
         try {
+            const compositeKey = `${entityId}#${tournamentId}`;
             const queryResult = await ddbDocClient.send(new QueryCommand({
                 TableName: tableName,
                 IndexName: 'byEntityTournament',
-                KeyConditionExpression: 'entityId = :eid AND tournamentId = :tid',
+                KeyConditionExpression: 'entityTournamentKey = :key',
                 ExpressionAttributeValues: { 
-                    ':eid': entityId,
-                    ':tid': tournamentId
+                    ':key': compositeKey
                 },
                 Limit: 1
             }));
@@ -112,7 +113,7 @@ const findExistingS3Storage = async (url, entityId, tournamentId, context) => {
                 console.log(`[FetchHandler] ✅ Found S3Storage via byEntityTournament GSI: ${item.s3Key}`);
                 return item;
             }
-            console.log(`[FetchHandler] No S3Storage found via byEntityTournament GSI`);
+            console.log(`[FetchHandler] No S3Storage found via byEntityTournament GSI (key: ${compositeKey})`);
         } catch (gsiError) {
             console.log(`[FetchHandler] byEntityTournament GSI query failed: ${gsiError.message}`);
             // Fall through to other methods

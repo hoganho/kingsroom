@@ -26,6 +26,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
+    "deleteGameFunction": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "entityVenueDashMetricCounter": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
@@ -161,6 +168,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Region": "string"
     },
     "socialPostProcessor": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
+    "socialPostStreamHandler": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",

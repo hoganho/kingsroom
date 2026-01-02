@@ -27,7 +27,7 @@ Amplify Params - DO NOT EDIT */
  * GAME TO SOCIAL MATCHER LAMBDA
  * ===================================================================
  * 
- * VERSION: 1.2.0
+ * VERSION: 2.0.0
  * 
  * PURPOSE:
  * Reverse matching flow - when a game is processed/finalized, find unlinked
@@ -49,6 +49,12 @@ Amplify Params - DO NOT EDIT */
  * - GameFinancialSnapshot only created for valid, processed games
  * - Avoids duplicate invocations from frequent Game table updates
  * - Acts as a "game ready" signal
+ * 
+ * UPDATES v2.0.0:
+ * - Include ticket data in SocialPostGameLink records
+ * - Store reconciliation preview for discrepancy detection
+ * - Pass postDate to scoring engine for enhanced temporal matching
+ * - Track ticket-related matches in link metadata
  * 
  * FLOW:
  * 1. Game saved → Game table stream → gameFinancialsProcessor
@@ -85,6 +91,7 @@ Amplify Params - DO NOT EDIT */
  * - SocialPostGameLink is the join table with match metadata
  * 
  * CHANGELOG:
+ * v2.0.0 - Added ticket data to links, postDate scoring, reconciliation preview
  * v1.2.0 - Changed to GameFinancialSnapshot stream (sequential after financials)
  * v1.1.0 - Changed to Game table stream (parallel)
  * v1.0.0 - Initial version (invoked by gameFinancialsProcessor)
@@ -154,6 +161,19 @@ const shouldMatchGame = (game) => {
   return { should: true, reason: 'eligible' };
 };
 
+/**
+ * Safely stringify an object for AWSJSON field
+ */
+const safeStringify = (obj) => {
+  if (!obj) return null;
+  try {
+    return JSON.stringify(obj);
+  } catch (e) {
+    console.error('[GAME-TO-SOCIAL] Failed to stringify:', e.message);
+    return null;
+  }
+};
+
 // ===================================================================
 // MAIN MATCHING FUNCTION
 // ===================================================================
@@ -170,13 +190,16 @@ const matchGameToSocialPosts = async (game, options = {}) => {
     autoLinkThreshold = DEFAULT_AUTO_LINK_THRESHOLD,
     skipLinking = false,
     maxCandidates = 100,
-    includeAlreadyLinked = false
+    includeAlreadyLinked = false,
+    includeTicketData = true,
+    includeReconciliationPreview = true
   } = options;
   
   const startTime = Date.now();
   
   console.log(`[GAME-TO-SOCIAL] Starting match for game: ${game.id}`);
   console.log(`[GAME-TO-SOCIAL] Game: ${game.name} @ ${game.gameStartDateTime}`);
+  console.log(`[GAME-TO-SOCIAL] Game has accumulator tickets: ${game.hasAccumulatorTickets || false}, count: ${game.numberOfAccumulatorTicketsPaid || 0}`);
   
   const result = {
     success: false,
@@ -190,6 +213,11 @@ const matchGameToSocialPosts = async (game, options = {}) => {
     existingLinks: 0,
     matchedPosts: [],
     linkDetails: [],
+    ticketDataSummary: {
+      postsWithTicketData: 0,
+      totalTicketsFromPosts: 0,
+      postsWithReconciliationIssues: 0
+    },
     processingTimeMs: 0,
     error: null
   };
@@ -215,13 +243,31 @@ const matchGameToSocialPosts = async (game, options = {}) => {
     console.log(`[GAME-TO-SOCIAL] Finding candidate posts...`);
     const matchResult = await findMatchingPosts(game, {
       maxCandidates,
-      excludePostIds: includeAlreadyLinked ? [] : Array.from(linkedPostIds)
+      excludePostIds: includeAlreadyLinked ? [] : Array.from(linkedPostIds),
+      includeTicketData,
+      includeReconciliationPreview
     });
     
     result.candidatesFound = matchResult.candidatesFound;
     result.candidatesScored = matchResult.candidates.length;
     
     console.log(`[GAME-TO-SOCIAL] Found ${matchResult.candidatesFound} candidates, ${matchResult.candidates.length} scored above minimum`);
+    
+    // Log ticket data summary from candidates
+    const candidatesWithTickets = matchResult.candidates.filter(c => c.hasTicketData);
+    const candidatesWithReconciliationIssues = matchResult.candidates.filter(
+      c => c.reconciliationPreview?.hasDiscrepancy
+    );
+    
+    result.ticketDataSummary.postsWithTicketData = candidatesWithTickets.length;
+    result.ticketDataSummary.totalTicketsFromPosts = candidatesWithTickets.reduce(
+      (sum, c) => sum + (c.ticketData?.totalTicketsExtracted || 0), 0
+    );
+    result.ticketDataSummary.postsWithReconciliationIssues = candidatesWithReconciliationIssues.length;
+    
+    if (candidatesWithTickets.length > 0) {
+      console.log(`[GAME-TO-SOCIAL] ${candidatesWithTickets.length} candidates have ticket data, ${candidatesWithReconciliationIssues.length} have reconciliation issues`);
+    }
     
     if (matchResult.candidates.length === 0) {
       console.log(`[GAME-TO-SOCIAL] No matching posts found`);
@@ -272,9 +318,11 @@ const matchGameToSocialPosts = async (game, options = {}) => {
           
           const now = new Date().toISOString();
           
+          // Build link record with ticket data
           const link = addDataStoreFields({
             id: uuidv4(),
             socialPostId: candidate.socialPostId,
+            socialPostGameDataId: candidate.socialPostGameDataId || null,
             gameId: game.id,
             linkType: 'AUTO_MATCHED',
             matchConfidence: candidate.matchConfidence,
@@ -284,6 +332,24 @@ const matchGameToSocialPosts = async (game, options = {}) => {
             mentionOrder,
             linkedAt: now,
             linkedBy: 'GAME_TO_SOCIAL_MATCHER',
+            
+            // NEW: Ticket data fields
+            hasTicketData: candidate.hasTicketData || false,
+            ticketData: candidate.ticketData ? safeStringify(candidate.ticketData) : null,
+            reconciliationPreview: candidate.reconciliationPreview ? safeStringify(candidate.reconciliationPreview) : null,
+            hasReconciliationDiscrepancy: candidate.reconciliationPreview?.hasDiscrepancy || false,
+            reconciliationDiscrepancySeverity: candidate.reconciliationPreview?.discrepancySeverity || null,
+            
+            // Extracted data summary for quick access
+            extractedWinnerName: candidate.extractedWinnerName || null,
+            extractedWinnerPrize: candidate.extractedWinnerPrize || null,
+            extractedTotalEntries: candidate.extractedTotalEntries || null,
+            extractedBuyIn: candidate.extractedBuyIn || null,
+            extractedDate: candidate.extractedDate || null,
+            effectiveGameDate: candidate.effectiveGameDate || null,  // NEW: Computed date for queries
+            contentType: candidate.contentType || null,
+            placementCount: candidate.placementCount || 0,
+            
             createdAt: now,
             updatedAt: now
           });
@@ -311,20 +377,24 @@ const matchGameToSocialPosts = async (game, options = {}) => {
             matchConfidence: candidate.matchConfidence,
             matchReason: candidate.matchReason,
             isPrimaryGame,
-            mentionOrder
+            mentionOrder,
+            hasTicketData: candidate.hasTicketData || false,
+            hasReconciliationDiscrepancy: candidate.reconciliationPreview?.hasDiscrepancy || false
           });
           
           result.linkDetails.push({
             socialPostId: candidate.socialPostId,
             linkId: link.id,
             status: 'CREATED',
-            matchConfidence: candidate.matchConfidence
+            matchConfidence: candidate.matchConfidence,
+            hasTicketData: candidate.hasTicketData || false,
+            hasReconciliationDiscrepancy: candidate.reconciliationPreview?.hasDiscrepancy || false
           });
           
           // Add to our set to prevent duplicate processing
           linkedPostIds.add(candidate.socialPostId);
           
-          console.log(`[GAME-TO-SOCIAL] Created link: ${candidate.socialPostId} -> ${game.id} (${candidate.matchConfidence}%)`);
+          console.log(`[GAME-TO-SOCIAL] Created link: ${candidate.socialPostId} -> ${game.id} (${candidate.matchConfidence}%, tickets: ${candidate.hasTicketData || false})`);
           
         } catch (linkError) {
           console.error(`[GAME-TO-SOCIAL] Failed to create link for post ${candidate.socialPostId}:`, linkError);
@@ -341,7 +411,10 @@ const matchGameToSocialPosts = async (game, options = {}) => {
         socialPostId: c.socialPostId,
         matchConfidence: c.matchConfidence,
         matchReason: c.matchReason,
-        wouldLink: true
+        wouldLink: true,
+        hasTicketData: c.hasTicketData || false,
+        ticketData: c.ticketData || null,
+        reconciliationPreview: c.reconciliationPreview || null
       }));
     }
     
@@ -381,6 +454,11 @@ const handleStreamEvent = async (event) => {
     errors: 0,
     linksCreated: 0,
     gamesProcessed: new Set(),  // Track unique games (avoid duplicates in batch)
+    ticketDataStats: {
+      gamesWithTicketMatches: 0,
+      totalTicketsFromPosts: 0,
+      reconciliationIssues: 0
+    },
     details: []
   };
   
@@ -439,12 +517,23 @@ const handleStreamEvent = async (event) => {
       // Match this game to social posts
       const matchResult = await matchGameToSocialPosts(game, {
         autoLinkThreshold: DEFAULT_AUTO_LINK_THRESHOLD,
-        skipLinking: false
+        skipLinking: false,
+        includeTicketData: true,
+        includeReconciliationPreview: true
       });
       
       results.processed++;
       results.linksCreated += matchResult.linksCreated || 0;
       results.gamesProcessed.add(gameId);
+      
+      // Track ticket data stats
+      if (matchResult.ticketDataSummary) {
+        if (matchResult.ticketDataSummary.postsWithTicketData > 0) {
+          results.ticketDataStats.gamesWithTicketMatches++;
+        }
+        results.ticketDataStats.totalTicketsFromPosts += matchResult.ticketDataSummary.totalTicketsFromPosts || 0;
+        results.ticketDataStats.reconciliationIssues += matchResult.ticketDataSummary.postsWithReconciliationIssues || 0;
+      }
       
       results.details.push({
         gameId: game.id,
@@ -454,6 +543,7 @@ const handleStreamEvent = async (event) => {
         candidatesFound: matchResult.candidatesFound,
         linksCreated: matchResult.linksCreated,
         linksSkipped: matchResult.linksSkipped,
+        ticketDataSummary: matchResult.ticketDataSummary,
         success: matchResult.success
       });
       
@@ -468,6 +558,7 @@ const handleStreamEvent = async (event) => {
   }
   
   console.log(`[GAME-TO-SOCIAL] Stream complete: ${results.processed} games processed, ${results.linksCreated} links created, ${results.skipped} skipped, ${results.errors} errors`);
+  console.log(`[GAME-TO-SOCIAL] Ticket stats: ${results.ticketDataStats.gamesWithTicketMatches} games with ticket matches, ${results.ticketDataStats.reconciliationIssues} reconciliation issues`);
   
   return {
     ...results,
@@ -501,7 +592,9 @@ const handleGraphQLInvocation = async (event) => {
       return await matchGameToSocialPosts(game, {
         autoLinkThreshold: input.autoLinkThreshold,
         skipLinking: input.previewOnly === true,
-        maxCandidates: input.maxCandidates
+        maxCandidates: input.maxCandidates,
+        includeTicketData: input.includeTicketData !== false,
+        includeReconciliationPreview: input.includeReconciliationPreview !== false
       });
     }
     
@@ -510,10 +603,18 @@ const handleGraphQLInvocation = async (event) => {
       const options = {
         autoLinkThreshold: input.autoLinkThreshold,
         skipLinking: input.previewOnly === true,
-        maxCandidates: input.maxCandidates
+        maxCandidates: input.maxCandidates,
+        includeTicketData: input.includeTicketData !== false,
+        includeReconciliationPreview: input.includeReconciliationPreview !== false
       };
       
       const batchResults = [];
+      const ticketStats = {
+        gamesWithTicketMatches: 0,
+        totalTicketsFromPosts: 0,
+        reconciliationIssues: 0
+      };
+      
       for (const gameId of gameIds) {
         const game = await getGame(gameId);
         if (!game) {
@@ -527,6 +628,15 @@ const handleGraphQLInvocation = async (event) => {
         
         const result = await matchGameToSocialPosts(game, options);
         batchResults.push(result);
+        
+        // Aggregate ticket stats
+        if (result.ticketDataSummary) {
+          if (result.ticketDataSummary.postsWithTicketData > 0) {
+            ticketStats.gamesWithTicketMatches++;
+          }
+          ticketStats.totalTicketsFromPosts += result.ticketDataSummary.totalTicketsFromPosts || 0;
+          ticketStats.reconciliationIssues += result.ticketDataSummary.postsWithReconciliationIssues || 0;
+        }
       }
       
       return {
@@ -534,6 +644,7 @@ const handleGraphQLInvocation = async (event) => {
         processed: batchResults.filter(r => r.success).length,
         totalLinksCreated: batchResults.reduce((sum, r) => sum + (r.linksCreated || 0), 0),
         totalLinksSkipped: batchResults.reduce((sum, r) => sum + (r.linksSkipped || 0), 0),
+        ticketStats,
         results: batchResults
       };
     }
@@ -552,7 +663,9 @@ const handleGraphQLInvocation = async (event) => {
       return await matchGameToSocialPosts(game, {
         autoLinkThreshold: input.autoLinkThreshold || 0, // Show all candidates
         skipLinking: true,
-        maxCandidates: input.maxCandidates || 50
+        maxCandidates: input.maxCandidates || 50,
+        includeTicketData: true,
+        includeReconciliationPreview: true
       });
     }
     
@@ -589,7 +702,11 @@ exports.handler = async (event, context) => {
     // (supports invocation from other Lambdas if needed)
     // =========================================================
     if (event.game) {
-      return await matchGameToSocialPosts(event.game, event.options || {});
+      return await matchGameToSocialPosts(event.game, {
+        ...(event.options || {}),
+        includeTicketData: true,
+        includeReconciliationPreview: true
+      });
     }
     
     // =========================================================
@@ -604,7 +721,11 @@ exports.handler = async (event, context) => {
           error: `Game not found: ${event.gameId}`
         };
       }
-      return await matchGameToSocialPosts(game, event.options || {});
+      return await matchGameToSocialPosts(game, {
+        ...(event.options || {}),
+        includeTicketData: true,
+        includeReconciliationPreview: true
+      });
     }
     
     return {

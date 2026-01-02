@@ -22,7 +22,7 @@ const { DynamoDBDocumentClient, ScanCommand, UpdateCommand } = require('@aws-sdk
 // ============================================================================
 
 // Table name - update this to match your environment
-const TABLE_NAME = process.env.RECURRING_GAME_TABLE || 'RecurringGame-fosb7ek5argnhctz4odpt52eia-staging';
+const TABLE_NAME = process.env.RECURRING_GAME_TABLE || 'RecurringGame-ht3nugt6lvddpeeuwj3x6mkite-dev';
 
 // Check for dry run flag
 const isDryRun = process.argv.includes('--dry-run');

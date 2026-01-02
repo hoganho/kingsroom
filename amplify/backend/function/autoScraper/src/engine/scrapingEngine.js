@@ -56,26 +56,13 @@ function isErrorResponse(parsedData) {
 
 function extractPlayerData(parsedData) {
     if (!parsedData) {
-        console.log('[ScrapingEngine] [PLAYER-DEBUG] extractPlayerData: parsedData is null/undefined');
         return undefined;
     }
-    
-    console.log('[ScrapingEngine] [PLAYER-DEBUG] extractPlayerData input:', {
-        hasResults: !!parsedData.results,
-        resultsType: typeof parsedData.results,
-        resultsIsArray: Array.isArray(parsedData.results),
-        resultsLength: Array.isArray(parsedData.results) ? parsedData.results.length : 'N/A',
-        hasEntries: !!parsedData.entries,
-        entriesLength: Array.isArray(parsedData.entries) ? parsedData.entries.length : 'N/A',
-        hasSeating: !!parsedData.seating,
-        seatingLength: Array.isArray(parsedData.seating) ? parsedData.seating.length : 'N/A'
-    });
     
     const playerMap = new Map();
     
     // Extract from results
     if (parsedData.results?.length) {
-        console.log('[ScrapingEngine] [PLAYER-DEBUG] Processing results array with', parsedData.results.length, 'items');
         parsedData.results.forEach(result => {
             if (result.name) {
                 playerMap.set(result.name.toLowerCase(), {
@@ -91,7 +78,6 @@ function extractPlayerData(parsedData) {
     
     // Extract from entries (if not already in results)
     if (parsedData.entries?.length) {
-        console.log('[ScrapingEngine] [PLAYER-DEBUG] Processing entries array with', parsedData.entries.length, 'items');
         parsedData.entries.forEach(entry => {
             const key = entry.name?.toLowerCase();
             if (key && !playerMap.has(key)) {
@@ -102,7 +88,6 @@ function extractPlayerData(parsedData) {
     
     // Extract from seating (if not already captured)
     if (parsedData.seating?.length) {
-        console.log('[ScrapingEngine] [PLAYER-DEBUG] Processing seating array with', parsedData.seating.length, 'items');
         parsedData.seating.forEach(seat => {
             const key = seat.name?.toLowerCase();
             if (key && !playerMap.has(key)) {
@@ -112,11 +97,6 @@ function extractPlayerData(parsedData) {
     }
     
     const allPlayers = Array.from(playerMap.values());
-    
-    console.log('[ScrapingEngine] [PLAYER-DEBUG] extractPlayerData result:', {
-        totalExtracted: allPlayers.length,
-        sampleNames: allPlayers.slice(0, 5).map(p => p.name)
-    });
     
     if (allPlayers.length === 0) {
         return undefined;
@@ -239,6 +219,37 @@ function buildSaveInput(entityId, url, parsedData, venueId) {
 }
 
 // ===================================================================
+// RETRY HELPER FOR RATE LIMITING
+// ===================================================================
+
+/**
+ * Retry a function with exponential backoff for 429 errors
+ */
+async function withRetry(fn, maxRetries = 3, baseDelayMs = 500) {
+    let lastError;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (error) {
+            lastError = error;
+            const errorStr = error.message || String(error);
+            const is429 = errorStr.includes('429') || 
+                          errorStr.includes('Rate Exceeded') || 
+                          errorStr.includes('TooManyRequests');
+            
+            if (!is429 || attempt === maxRetries) {
+                throw error;
+            }
+            
+            const delayMs = baseDelayMs * Math.pow(2, attempt);
+            console.log(`[ScrapingEngine] Rate limited, retrying in ${delayMs}ms (attempt ${attempt + 1}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+    }
+    throw lastError;
+}
+
+// ===================================================================
 // MAIN SCRAPING ENGINE
 // ===================================================================
 
@@ -269,7 +280,9 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         DEFAULT_MAX_CONSECUTIVE_NOT_FOUND,
         DEFAULT_MAX_CONSECUTIVE_ERRORS,
         DEFAULT_MAX_CONSECUTIVE_BLANKS,
-        DEFAULT_MAX_TOTAL_ERRORS
+        DEFAULT_MAX_TOTAL_ERRORS,
+        // Self-continuation support (optional)
+        invokeContinuation
     } = ctx;
     
     const startTime = Date.now();
@@ -282,15 +295,17 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
     
     console.log(`[ScrapingEngine] Using thresholds: NOT_FOUND=${MAX_CONSECUTIVE_NOT_FOUND}, ERRORS=${MAX_CONSECUTIVE_ERRORS}, BLANKS=${MAX_CONSECUTIVE_BLANKS}, TOTAL_ERRORS=${MAX_TOTAL_ERRORS}`);
     
+    // Initialize results - merge with accumulated results from previous invocation if continuing
+    const accumulated = options.accumulatedResults || {};
     const results = {
-        totalProcessed: 0,
-        newGamesScraped: 0,
-        gamesUpdated: 0,
-        gamesSkipped: 0,
-        errors: 0,
-        blanks: 0,
-        notFoundCount: 0,
-        s3CacheHits: 0,
+        totalProcessed: accumulated.totalProcessed || 0,
+        newGamesScraped: accumulated.newGamesScraped || 0,
+        gamesUpdated: accumulated.gamesUpdated || 0,
+        gamesSkipped: accumulated.gamesSkipped || 0,
+        errors: accumulated.errors || 0,
+        blanks: accumulated.blanks || 0,
+        notFoundCount: accumulated.notFoundCount || 0,
+        s3CacheHits: accumulated.s3CacheHits || 0,
         consecutiveBlanks: 0,
         consecutiveNotFound: 0,
         consecutiveErrors: 0,
@@ -299,6 +314,10 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         stopReason: STOP_REASON.COMPLETED,
         lastErrorMessage: null,
     };
+    
+    if (accumulated.totalProcessed) {
+        console.log(`[ScrapingEngine] Continuing from previous invocation, accumulated: ${accumulated.totalProcessed} processed`);
+    }
     
     // Determine ID range based on mode
     let currentId, endId;
@@ -373,10 +392,23 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
             break;
         }
         
-        // Check timeout
+        // Check timeout - trigger self-continuation if available
         if (Date.now() - startTime > (LAMBDA_TIMEOUT - LAMBDA_TIMEOUT_BUFFER)) {
             console.log(`[ScrapingEngine] Approaching timeout at ID ${currentId}`);
-            results.stopReason = STOP_REASON.TIMEOUT;
+            
+            // Try to continue in new invocation
+            if (invokeContinuation && currentId < endId) {
+                try {
+                    await invokeContinuation(currentId, endId, results);
+                    results.stopReason = STOP_REASON.CONTINUING || 'CONTINUING';
+                    console.log(`[ScrapingEngine] Self-continuation triggered, stopping current invocation`);
+                } catch (contErr) {
+                    console.error(`[ScrapingEngine] Failed to invoke continuation:`, contErr.message);
+                    results.stopReason = STOP_REASON.TIMEOUT;
+                }
+            } else {
+                results.stopReason = STOP_REASON.TIMEOUT;
+            }
             break;
         }
         
@@ -425,12 +457,15 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         results.totalProcessed++;
 
         try {
-            // Fetch via AppSync
-            const fetchData = await callGraphQL(FETCH_TOURNAMENT_DATA, {
-                url: url,
-                forceRefresh: options.forceRefresh || false,
-                entityId: entityId
-            });
+            // Fetch via AppSync with retry for rate limiting
+            const fetchData = await withRetry(async () => {
+                return await callGraphQL(FETCH_TOURNAMENT_DATA, {
+                    url: url,
+                    forceRefresh: options.forceRefresh || false,
+                    entityId: entityId,
+                    scraperApiKey: options.scraperApiKey || null
+                });
+            }, 3, 500);
             const parsedData = fetchData.fetchTournamentData;
 
             // Determine data source for event
@@ -569,35 +604,13 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                         
                     } else {
                         try {
-                            // DEBUG: Log what parsedData contains for player extraction
-                            console.log('[ScrapingEngine] [PLAYER-DEBUG] parsedData keys:', Object.keys(parsedData));
-                            console.log('[ScrapingEngine] [PLAYER-DEBUG] parsedData player-related fields:', {
-                                hasResults: !!parsedData.results,
-                                resultsLength: parsedData.results?.length || 0,
-                                resultsFirst3: parsedData.results?.slice(0, 3).map(r => r?.name) || [],
-                                hasEntries: !!parsedData.entries,
-                                entriesLength: parsedData.entries?.length || 0,
-                                entriesFirst3: parsedData.entries?.slice(0, 3).map(e => e?.name) || [],
-                                hasSeating: !!parsedData.seating,
-                                seatingLength: parsedData.seating?.length || 0,
-                                totalUniquePlayers: parsedData.totalUniquePlayers,
-                                totalEntries: parsedData.totalEntries,
-                                gameStatus: parsedData.gameStatus
-                            });
-                            
                             const saveInput = buildSaveInput(entityId, url, parsedData, venueId);
                             
-                            // DEBUG: Log what buildSaveInput produced for players
-                            console.log('[ScrapingEngine] [PLAYER-DEBUG] saveInput.players:', {
-                                hasPlayers: !!saveInput.players,
-                                allPlayersLength: saveInput.players?.allPlayers?.length || 0,
-                                totalUniquePlayers: saveInput.players?.totalUniquePlayers || 0,
-                                samplePlayers: saveInput.players?.allPlayers?.slice(0, 3).map(p => p?.name) || []
-                            });
-                            
-                            const saveResult = await callGraphQL(SAVE_TOURNAMENT_DATA, {
-                                input: saveInput
-                            });
+                            const saveResult = await withRetry(async () => {
+                                return await callGraphQL(SAVE_TOURNAMENT_DATA, {
+                                    input: saveInput
+                                });
+                            }, 3, 500);
                             
                             if (saveResult?.enrichGameData?.success) {
                                 const action = saveResult.enrichGameData.saveResult?.action;
@@ -804,11 +817,14 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         results.lastProcessedId = tournamentId;
         
         try {
-            const fetchData = await callGraphQL(FETCH_TOURNAMENT_DATA, {
-                url: url,
-                forceRefresh: options.forceRefresh || false,
-                entityId: entityId
-            });
+            const fetchData = await withRetry(async () => {
+                return await callGraphQL(FETCH_TOURNAMENT_DATA, {
+                    url: url,
+                    forceRefresh: options.forceRefresh || false,
+                    entityId: entityId,
+                    scraperApiKey: options.scraperApiKey || null
+                });
+            }, 3, 500);
             const parsedData = fetchData.fetchTournamentData;
             
             const dataSource = (parsedData.source === 'S3_CACHE' || parsedData.source === 'HTTP_304_CACHE') ? 's3' : 'web';
@@ -881,7 +897,9 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                 } else {
                     const saveInput = buildSaveInput(entityId, url, parsedData, venueId);
                     
-                    const saveResult = await callGraphQL(SAVE_TOURNAMENT_DATA, { input: saveInput });
+                    const saveResult = await withRetry(async () => {
+                        return await callGraphQL(SAVE_TOURNAMENT_DATA, { input: saveInput });
+                    }, 3, 500);
                     
                     if (saveResult?.enrichGameData?.success) {
                         const action = saveResult.enrichGameData.saveResult?.action;

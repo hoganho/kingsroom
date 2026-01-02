@@ -763,6 +763,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
@@ -914,6 +916,17 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             _lastChangedAt
             __typename
           }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          gameCostId
           gameCost {
             id
             gameId
@@ -955,19 +968,87 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             _lastChangedAt
             __typename
           }
-          gameFinancialSnapshots {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerEntries {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
+          gameFinancialSnapshotId
+          gameFinancialSnapshot {
+            id
+            gameId
+            gameCostId
+            entityId
+            venueId
+            gameStartDateTime
+            totalBuyInsCollected
+            rakeRevenue
+            venueFee
+            totalRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolTotal
+            prizepoolSurplus
+            prizepoolPaidDelta
+            prizepoolJackpotContributions
+            prizepoolAccumulatorTicketPayoutEstimate
+            prizepoolAccumulatorTicketPayoutActual
+            totalDealerCost
+            totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
+            totalStaffCost
+            totalPrizeContribution
+            totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalDirectGameCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalOperationsCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalComplianceCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
+            totalPromotionCost
+            totalOtherCost
+            totalCost
+            gameProfit
+            netProfit
+            profitMargin
+            revenuePerPlayer
+            costPerPlayer
+            profitPerPlayer
+            rakePerEntry
+            dealerCostPerHour
+            staffCostPerPlayer
+            promoSpendPerPlayer
+            guaranteeCoverageRate
+            guaranteeMet
+            totalUniquePlayers
+            totalEntries
+            guaranteeAmount
+            gameDurationMinutes
+            gameType
+            tournamentType
+            isSeries
+            isSeriesParent
+            parentGameId
+            tournamentSeriesId
+            seriesName
+            recurringGameId
+            entitySeriesKey
+            venueSeriesKey
+            notes
+            snapshotType
+            isReconciled
+            reconciledAt
+            reconciledBy
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           linkedSocialPosts {
@@ -1032,6 +1113,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             linkedGameCount
             hasUnverifiedLinks
             postYearMonth
+            effectiveGameDate
+            effectiveGameDateSource
             socialAccountId
             entityId
             venueId
@@ -1956,6 +2039,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           followingCount
           postCount
           hasFullHistory
+          fullSyncOldestPostDate
           pageDescription
           category
           website
@@ -2804,6 +2888,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
@@ -2955,6 +3041,17 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             _lastChangedAt
             __typename
           }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          gameCostId
           gameCost {
             id
             gameId
@@ -2996,19 +3093,87 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             _lastChangedAt
             __typename
           }
-          gameFinancialSnapshots {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerEntries {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
+          gameFinancialSnapshotId
+          gameFinancialSnapshot {
+            id
+            gameId
+            gameCostId
+            entityId
+            venueId
+            gameStartDateTime
+            totalBuyInsCollected
+            rakeRevenue
+            venueFee
+            totalRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolTotal
+            prizepoolSurplus
+            prizepoolPaidDelta
+            prizepoolJackpotContributions
+            prizepoolAccumulatorTicketPayoutEstimate
+            prizepoolAccumulatorTicketPayoutActual
+            totalDealerCost
+            totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
+            totalStaffCost
+            totalPrizeContribution
+            totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalDirectGameCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalOperationsCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalComplianceCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
+            totalPromotionCost
+            totalOtherCost
+            totalCost
+            gameProfit
+            netProfit
+            profitMargin
+            revenuePerPlayer
+            costPerPlayer
+            profitPerPlayer
+            rakePerEntry
+            dealerCostPerHour
+            staffCostPerPlayer
+            promoSpendPerPlayer
+            guaranteeCoverageRate
+            guaranteeMet
+            totalUniquePlayers
+            totalEntries
+            guaranteeAmount
+            gameDurationMinutes
+            gameType
+            tournamentType
+            isSeries
+            isSeriesParent
+            parentGameId
+            tournamentSeriesId
+            seriesName
+            recurringGameId
+            entitySeriesKey
+            venueSeriesKey
+            notes
+            snapshotType
+            isReconciled
+            reconciledAt
+            reconciledBy
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           linkedSocialPosts {
@@ -3073,6 +3238,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             linkedGameCount
             hasUnverifiedLinks
             postYearMonth
+            effectiveGameDate
+            effectiveGameDateSource
             socialAccountId
             entityId
             venueId
@@ -3997,6 +4164,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           followingCount
           postCount
           hasFullHistory
+          fullSyncOldestPostDate
           pageDescription
           category
           website
@@ -4162,6 +4330,55 @@ export const onGameProcessed = /* GraphQL */ `subscription OnGameProcessed($jobI
 ` as GeneratedSubscription<
   APITypes.OnGameProcessedSubscriptionVariables,
   APITypes.OnGameProcessedSubscription
+>;
+export const onSyncProgress = /* GraphQL */ `subscription OnSyncProgress($socialAccountId: ID!) {
+  onSyncProgress(socialAccountId: $socialAccountId) {
+    socialAccountId
+    status
+    message
+    postsFound
+    newPostsAdded
+    rateLimited
+    pagesCompleted
+    completedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnSyncProgressSubscriptionVariables,
+  APITypes.OnSyncProgressSubscription
+>;
+export const onJobProgress = /* GraphQL */ `subscription OnJobProgress($jobId: ID!) {
+  onJobProgress(jobId: $jobId) {
+    jobId
+    entityId
+    status
+    stopReason
+    totalURLsProcessed
+    newGamesScraped
+    gamesUpdated
+    gamesSkipped
+    errors
+    blanks
+    currentId
+    startId
+    endId
+    startTime
+    durationSeconds
+    successRate
+    averageScrapingTime
+    s3CacheHits
+    consecutiveNotFound
+    consecutiveErrors
+    consecutiveBlanks
+    lastErrorMessage
+    publishedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnJobProgressSubscriptionVariables,
+  APITypes.OnJobProgressSubscription
 >;
 export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob(
   $filter: ModelSubscriptionScraperJobFilterInput
@@ -4920,6 +5137,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
@@ -5071,6 +5290,17 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             _lastChangedAt
             __typename
           }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          gameCostId
           gameCost {
             id
             gameId
@@ -5112,19 +5342,87 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             _lastChangedAt
             __typename
           }
-          gameFinancialSnapshots {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerEntries {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
+          gameFinancialSnapshotId
+          gameFinancialSnapshot {
+            id
+            gameId
+            gameCostId
+            entityId
+            venueId
+            gameStartDateTime
+            totalBuyInsCollected
+            rakeRevenue
+            venueFee
+            totalRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolTotal
+            prizepoolSurplus
+            prizepoolPaidDelta
+            prizepoolJackpotContributions
+            prizepoolAccumulatorTicketPayoutEstimate
+            prizepoolAccumulatorTicketPayoutActual
+            totalDealerCost
+            totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
+            totalStaffCost
+            totalPrizeContribution
+            totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalDirectGameCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalOperationsCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalComplianceCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
+            totalPromotionCost
+            totalOtherCost
+            totalCost
+            gameProfit
+            netProfit
+            profitMargin
+            revenuePerPlayer
+            costPerPlayer
+            profitPerPlayer
+            rakePerEntry
+            dealerCostPerHour
+            staffCostPerPlayer
+            promoSpendPerPlayer
+            guaranteeCoverageRate
+            guaranteeMet
+            totalUniquePlayers
+            totalEntries
+            guaranteeAmount
+            gameDurationMinutes
+            gameType
+            tournamentType
+            isSeries
+            isSeriesParent
+            parentGameId
+            tournamentSeriesId
+            seriesName
+            recurringGameId
+            entitySeriesKey
+            venueSeriesKey
+            notes
+            snapshotType
+            isReconciled
+            reconciledAt
+            reconciledBy
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           linkedSocialPosts {
@@ -5189,6 +5487,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             linkedGameCount
             hasUnverifiedLinks
             postYearMonth
+            effectiveGameDate
+            effectiveGameDateSource
             socialAccountId
             entityId
             venueId
@@ -6113,6 +6413,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           followingCount
           postCount
           hasFullHistory
+          fullSyncOldestPostDate
           pageDescription
           category
           website
@@ -6972,6 +7273,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
@@ -7123,6 +7426,17 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             _lastChangedAt
             __typename
           }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          gameCostId
           gameCost {
             id
             gameId
@@ -7164,19 +7478,87 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             _lastChangedAt
             __typename
           }
-          gameFinancialSnapshots {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerEntries {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
+          gameFinancialSnapshotId
+          gameFinancialSnapshot {
+            id
+            gameId
+            gameCostId
+            entityId
+            venueId
+            gameStartDateTime
+            totalBuyInsCollected
+            rakeRevenue
+            venueFee
+            totalRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolTotal
+            prizepoolSurplus
+            prizepoolPaidDelta
+            prizepoolJackpotContributions
+            prizepoolAccumulatorTicketPayoutEstimate
+            prizepoolAccumulatorTicketPayoutActual
+            totalDealerCost
+            totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
+            totalStaffCost
+            totalPrizeContribution
+            totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalDirectGameCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalOperationsCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalComplianceCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
+            totalPromotionCost
+            totalOtherCost
+            totalCost
+            gameProfit
+            netProfit
+            profitMargin
+            revenuePerPlayer
+            costPerPlayer
+            profitPerPlayer
+            rakePerEntry
+            dealerCostPerHour
+            staffCostPerPlayer
+            promoSpendPerPlayer
+            guaranteeCoverageRate
+            guaranteeMet
+            totalUniquePlayers
+            totalEntries
+            guaranteeAmount
+            gameDurationMinutes
+            gameType
+            tournamentType
+            isSeries
+            isSeriesParent
+            parentGameId
+            tournamentSeriesId
+            seriesName
+            recurringGameId
+            entitySeriesKey
+            venueSeriesKey
+            notes
+            snapshotType
+            isReconciled
+            reconciledAt
+            reconciledBy
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           linkedSocialPosts {
@@ -7241,6 +7623,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             linkedGameCount
             hasUnverifiedLinks
             postYearMonth
+            effectiveGameDate
+            effectiveGameDateSource
             socialAccountId
             entityId
             venueId
@@ -8165,6 +8549,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           followingCount
           postCount
           hasFullHistory
+          fullSyncOldestPostDate
           pageDescription
           category
           website
@@ -9024,6 +9409,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
@@ -9175,6 +9562,17 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             _lastChangedAt
             __typename
           }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          gameCostId
           gameCost {
             id
             gameId
@@ -9216,19 +9614,87 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             _lastChangedAt
             __typename
           }
-          gameFinancialSnapshots {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerEntries {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
+          gameFinancialSnapshotId
+          gameFinancialSnapshot {
+            id
+            gameId
+            gameCostId
+            entityId
+            venueId
+            gameStartDateTime
+            totalBuyInsCollected
+            rakeRevenue
+            venueFee
+            totalRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolTotal
+            prizepoolSurplus
+            prizepoolPaidDelta
+            prizepoolJackpotContributions
+            prizepoolAccumulatorTicketPayoutEstimate
+            prizepoolAccumulatorTicketPayoutActual
+            totalDealerCost
+            totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
+            totalStaffCost
+            totalPrizeContribution
+            totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalDirectGameCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalOperationsCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalComplianceCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
+            totalPromotionCost
+            totalOtherCost
+            totalCost
+            gameProfit
+            netProfit
+            profitMargin
+            revenuePerPlayer
+            costPerPlayer
+            profitPerPlayer
+            rakePerEntry
+            dealerCostPerHour
+            staffCostPerPlayer
+            promoSpendPerPlayer
+            guaranteeCoverageRate
+            guaranteeMet
+            totalUniquePlayers
+            totalEntries
+            guaranteeAmount
+            gameDurationMinutes
+            gameType
+            tournamentType
+            isSeries
+            isSeriesParent
+            parentGameId
+            tournamentSeriesId
+            seriesName
+            recurringGameId
+            entitySeriesKey
+            venueSeriesKey
+            notes
+            snapshotType
+            isReconciled
+            reconciledAt
+            reconciledBy
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           linkedSocialPosts {
@@ -9293,6 +9759,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             linkedGameCount
             hasUnverifiedLinks
             postYearMonth
+            effectiveGameDate
+            effectiveGameDateSource
             socialAccountId
             entityId
             venueId
@@ -10217,6 +10685,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           followingCount
           postCount
           hasFullHistory
+          fullSyncOldestPostDate
           pageDescription
           category
           website
@@ -11065,6 +11534,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
@@ -11216,6 +11687,17 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             _lastChangedAt
             __typename
           }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          gameCostId
           gameCost {
             id
             gameId
@@ -11257,19 +11739,87 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             _lastChangedAt
             __typename
           }
-          gameFinancialSnapshots {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerEntries {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
+          gameFinancialSnapshotId
+          gameFinancialSnapshot {
+            id
+            gameId
+            gameCostId
+            entityId
+            venueId
+            gameStartDateTime
+            totalBuyInsCollected
+            rakeRevenue
+            venueFee
+            totalRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolTotal
+            prizepoolSurplus
+            prizepoolPaidDelta
+            prizepoolJackpotContributions
+            prizepoolAccumulatorTicketPayoutEstimate
+            prizepoolAccumulatorTicketPayoutActual
+            totalDealerCost
+            totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
+            totalStaffCost
+            totalPrizeContribution
+            totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalDirectGameCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalOperationsCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalComplianceCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
+            totalPromotionCost
+            totalOtherCost
+            totalCost
+            gameProfit
+            netProfit
+            profitMargin
+            revenuePerPlayer
+            costPerPlayer
+            profitPerPlayer
+            rakePerEntry
+            dealerCostPerHour
+            staffCostPerPlayer
+            promoSpendPerPlayer
+            guaranteeCoverageRate
+            guaranteeMet
+            totalUniquePlayers
+            totalEntries
+            guaranteeAmount
+            gameDurationMinutes
+            gameType
+            tournamentType
+            isSeries
+            isSeriesParent
+            parentGameId
+            tournamentSeriesId
+            seriesName
+            recurringGameId
+            entitySeriesKey
+            venueSeriesKey
+            notes
+            snapshotType
+            isReconciled
+            reconciledAt
+            reconciledBy
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           linkedSocialPosts {
@@ -11334,6 +11884,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             linkedGameCount
             hasUnverifiedLinks
             postYearMonth
+            effectiveGameDate
+            effectiveGameDateSource
             socialAccountId
             entityId
             venueId
@@ -12258,6 +12810,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           followingCount
           postCount
           hasFullHistory
+          fullSyncOldestPostDate
           pageDescription
           category
           website
@@ -13119,6 +13672,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
@@ -13270,6 +13825,17 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             _lastChangedAt
             __typename
           }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          gameCostId
           gameCost {
             id
             gameId
@@ -13311,19 +13877,87 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             _lastChangedAt
             __typename
           }
-          gameFinancialSnapshots {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerEntries {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
+          gameFinancialSnapshotId
+          gameFinancialSnapshot {
+            id
+            gameId
+            gameCostId
+            entityId
+            venueId
+            gameStartDateTime
+            totalBuyInsCollected
+            rakeRevenue
+            venueFee
+            totalRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolTotal
+            prizepoolSurplus
+            prizepoolPaidDelta
+            prizepoolJackpotContributions
+            prizepoolAccumulatorTicketPayoutEstimate
+            prizepoolAccumulatorTicketPayoutActual
+            totalDealerCost
+            totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
+            totalStaffCost
+            totalPrizeContribution
+            totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalDirectGameCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalOperationsCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalComplianceCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
+            totalPromotionCost
+            totalOtherCost
+            totalCost
+            gameProfit
+            netProfit
+            profitMargin
+            revenuePerPlayer
+            costPerPlayer
+            profitPerPlayer
+            rakePerEntry
+            dealerCostPerHour
+            staffCostPerPlayer
+            promoSpendPerPlayer
+            guaranteeCoverageRate
+            guaranteeMet
+            totalUniquePlayers
+            totalEntries
+            guaranteeAmount
+            gameDurationMinutes
+            gameType
+            tournamentType
+            isSeries
+            isSeriesParent
+            parentGameId
+            tournamentSeriesId
+            seriesName
+            recurringGameId
+            entitySeriesKey
+            venueSeriesKey
+            notes
+            snapshotType
+            isReconciled
+            reconciledAt
+            reconciledBy
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           linkedSocialPosts {
@@ -13388,6 +14022,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             linkedGameCount
             hasUnverifiedLinks
             postYearMonth
+            effectiveGameDate
+            effectiveGameDateSource
             socialAccountId
             entityId
             venueId
@@ -14312,6 +14948,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           followingCount
           postCount
           hasFullHistory
+          fullSyncOldestPostDate
           pageDescription
           category
           website
@@ -15173,6 +15810,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             lastClassifiedAt
             venueId
             tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
             linkedSocialPostCount
             hasLinkedSocialPosts
             primaryResultPostId
@@ -15324,6 +15963,17 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             _lastChangedAt
             __typename
           }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          gameCostId
           gameCost {
             id
             gameId
@@ -15365,19 +16015,87 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             _lastChangedAt
             __typename
           }
-          gameFinancialSnapshots {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerEntries {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
+          gameFinancialSnapshotId
+          gameFinancialSnapshot {
+            id
+            gameId
+            gameCostId
+            entityId
+            venueId
+            gameStartDateTime
+            totalBuyInsCollected
+            rakeRevenue
+            venueFee
+            totalRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolTotal
+            prizepoolSurplus
+            prizepoolPaidDelta
+            prizepoolJackpotContributions
+            prizepoolAccumulatorTicketPayoutEstimate
+            prizepoolAccumulatorTicketPayoutActual
+            totalDealerCost
+            totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
+            totalStaffCost
+            totalPrizeContribution
+            totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalDirectGameCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalOperationsCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalComplianceCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
+            totalPromotionCost
+            totalOtherCost
+            totalCost
+            gameProfit
+            netProfit
+            profitMargin
+            revenuePerPlayer
+            costPerPlayer
+            profitPerPlayer
+            rakePerEntry
+            dealerCostPerHour
+            staffCostPerPlayer
+            promoSpendPerPlayer
+            guaranteeCoverageRate
+            guaranteeMet
+            totalUniquePlayers
+            totalEntries
+            guaranteeAmount
+            gameDurationMinutes
+            gameType
+            tournamentType
+            isSeries
+            isSeriesParent
+            parentGameId
+            tournamentSeriesId
+            seriesName
+            recurringGameId
+            entitySeriesKey
+            venueSeriesKey
+            notes
+            snapshotType
+            isReconciled
+            reconciledAt
+            reconciledBy
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           linkedSocialPosts {
@@ -15442,6 +16160,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             linkedGameCount
             hasUnverifiedLinks
             postYearMonth
+            effectiveGameDate
+            effectiveGameDateSource
             socialAccountId
             entityId
             venueId
@@ -16366,6 +17086,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           followingCount
           postCount
           hasFullHistory
+          fullSyncOldestPostDate
           pageDescription
           category
           website

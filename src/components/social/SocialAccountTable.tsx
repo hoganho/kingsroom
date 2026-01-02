@@ -163,6 +163,9 @@ export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
               const isCurrentlyScraping = scrapingAccountId === account.id;
               const isRefreshingLogo = refreshingLogoAccountId === account.id;
               
+              // Check if this account has an incomplete full sync (can be resumed)
+              const hasIncompleteSync = !!(account as any).fullSyncOldestPostDate && !account.hasFullHistory;
+              
               return (
                 <tr key={account.id} className="hover:bg-gray-50">
                   {/* Account Info */}
@@ -196,6 +199,15 @@ export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
                             >
                               <Database className="w-3 h-3 mr-0.5" />
                               Full
+                            </span>
+                          )}
+                          {hasIncompleteSync && (
+                            <span 
+                              className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700"
+                              title={`Sync incomplete - stopped at ${new Date((account as any).fullSyncOldestPostDate).toLocaleDateString()}`}
+                            >
+                              <ClockIcon className="w-3 h-3 mr-0.5" />
+                              Partial
                             </span>
                           )}
                         </div>
@@ -286,23 +298,37 @@ export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
                         )}
                       </button>
 
-                      {/* Full Sync Button */}
+                      {/* Full Sync / Resume Sync Button */}
                       {onFullSync && (
                         <button
                           onClick={() => onFullSync(account)}
                           disabled={isCurrentlyScraping || !account.isScrapingEnabled}
                           className={`inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                            account.hasFullHistory
-                              ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
-                              : 'text-blue-600 bg-blue-50 hover:bg-blue-100'
+                            hasIncompleteSync
+                              ? 'text-green-600 bg-green-50 hover:bg-green-100'
+                              : account.hasFullHistory
+                                ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
+                                : 'text-blue-600 bg-blue-50 hover:bg-blue-100'
                           }`}
-                          title={account.hasFullHistory 
-                            ? 'Full history already synced - click to re-sync' 
-                            : 'Fetch all historical posts'
+                          title={
+                            hasIncompleteSync 
+                              ? `Resume sync from ${new Date((account as any).fullSyncOldestPostDate).toLocaleDateString()}`
+                              : account.hasFullHistory 
+                                ? 'Full history already synced - click to re-sync' 
+                                : 'Fetch all historical posts'
                           }
                         >
-                          <ArrowDownTrayIcon className="w-4 h-4" />
-                          {account.hasFullHistory ? 'Re-sync' : 'Full Sync'}
+                          {hasIncompleteSync ? (
+                            <>
+                              <PlayIcon className="w-4 h-4" />
+                              Resume Sync
+                            </>
+                          ) : (
+                            <>
+                              <ArrowDownTrayIcon className="w-4 h-4" />
+                              {account.hasFullHistory ? 'Re-sync' : 'Full Sync'}
+                            </>
+                          )}
                         </button>
                       )}
 

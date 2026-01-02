@@ -7,6 +7,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { createSocialPost } from '../graphql/mutations';
 import { getSocialAccount } from '../graphql/queries';
+import { getYearMonthAEST } from '../utils/dateUtils';
 
 import type {
   RawFacebookPost,
@@ -84,24 +85,6 @@ function sanitizeObjectForJson(obj: unknown): unknown {
     return sanitized;
   }
   return obj;
-}
-
-/**
- * Calculate postYearMonth from a date string
- * Format: "YYYY-MM" (e.g., "2025-01" for January 2025)
- * Used for the byPostMonth GSI for efficient date range queries
- */
-function getPostYearMonth(dateString: string | null | undefined): string | null {
-  if (!dateString) return null;
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return null;
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    return `${year}-${month}`;
-  } catch {
-    return null;
-  }
 }
 
 export interface UseSocialPostUploadOptions {
@@ -836,7 +819,7 @@ export const useSocialPostUpload = (
         platformPostId: post.postId,
         postType: mediaUrls.length > 0 ? SocialPostType.IMAGE : SocialPostType.TEXT,
         postedAt: post.postedAt,
-        postYearMonth: getPostYearMonth(post.postedAt),
+        postYearMonth: getYearMonthAEST(post.postedAt),
         scrapedAt: now,
         status: SocialPostStatus.ACTIVE,
         socialAccountId,

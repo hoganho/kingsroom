@@ -165,6 +165,30 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
     }
   }, [urlToReparse]);
 
+  // Check for pending multi-IDs from URL Management page
+  useEffect(() => {
+    const pendingIds = localStorage.getItem('pendingMultiIds');
+    const timestamp = localStorage.getItem('pendingMultiIdsTimestamp');
+    
+    if (pendingIds && timestamp) {
+      // Only use if less than 5 minutes old
+      const age = Date.now() - parseInt(timestamp, 10);
+      if (age < 5 * 60 * 1000) {
+        console.log('[ScraperTab] Found pending multi-IDs from URL Management:', pendingIds);
+        setIdSelectionMode('multiId');
+        setIdSelectionParams(p => ({ ...p, multiIdString: pendingIds }));
+        
+        // Clear the pending data
+        localStorage.removeItem('pendingMultiIds');
+        localStorage.removeItem('pendingMultiIdsTimestamp');
+      } else {
+        // Expired, clean up
+        localStorage.removeItem('pendingMultiIds');
+        localStorage.removeItem('pendingMultiIdsTimestamp');
+      }
+    }
+  }, []); // Only run once on mount
+
   // Calculate the "suggested next ID" - this is what would be auto-used if input is empty
   const suggestedNextId = useMemo(() => {
     // If we have a highest ID, suggest the next one
@@ -518,6 +542,22 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         'params object': JSON.stringify(idSelectionParams)
       });
 
+      // For auto mode, calculate startId from highestTournamentId
+      const autoStartId = idSelectionMode === 'auto' 
+        ? (highestTournamentId ? highestTournamentId + 1 : 1)
+        : undefined;
+      
+      // For auto mode, flatten gaps into an array of IDs to process
+      const autoGapIds = idSelectionMode === 'auto' && scrapingStatus?.gaps?.length
+        ? scrapingStatus.gaps.flatMap((gap: { start: number; end: number }) => {
+            const ids: number[] = [];
+            for (let i = gap.start; i <= gap.end; i++) {
+              ids.push(i);
+            }
+            return ids;
+          })
+        : undefined;
+
       // Build the input for startScraperJob - must match Lambda expectations
       // See sm-index.js startScraperJob() for expected fields
       const jobInput = {
@@ -537,6 +577,9 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         skipInProgress: options.skipInProgress,
         ignoreDoNotScrape: options.ignoreDoNotScrape,
         
+        // API Key for scraping (passed to fetch handler)
+        scraperApiKey: scraperApiKey || undefined,
+        
         // Save options
         saveToDatabase: scrapeFlow === 'scrape_save',
         defaultVenueId: defaultVenueId || undefined,
@@ -545,13 +588,27 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         bulkCount: idSelectionMode === 'bulk' 
             ? Math.max(1, parseInt(idSelectionParams.bulkCount) || 10) 
             : undefined,
-        startId: idSelectionMode === 'range' ? (parseInt(idSelectionParams.rangeStart) || undefined) : undefined,
-        endId: idSelectionMode === 'range' ? (parseInt(idSelectionParams.rangeEnd) || undefined) : 
-               idSelectionMode === 'auto' ? (parseInt(idSelectionParams.maxId) || undefined) : undefined,
-        maxId: idSelectionMode === 'auto' ? (parseInt(idSelectionParams.maxId) || undefined) : undefined,
-        // Use gapIds for both 'gaps' mode and 'multiId' mode (same field, different source)
-        gapIds: idSelectionMode === 'gaps' && gapIds ? gapIds 
-              : idSelectionMode === 'multiId' && multiIds ? multiIds 
+        // AUTO MODE: startId is highestTournamentId + 1
+        startId: idSelectionMode === 'range' 
+            ? (parseInt(idSelectionParams.rangeStart) || undefined) 
+            : idSelectionMode === 'auto'
+            ? autoStartId
+            : undefined,
+        endId: idSelectionMode === 'range' 
+            ? (parseInt(idSelectionParams.rangeEnd) || undefined) 
+            : idSelectionMode === 'auto' 
+            ? (parseInt(idSelectionParams.maxId) || undefined) 
+            : undefined,
+        maxId: idSelectionMode === 'auto' 
+            ? (parseInt(idSelectionParams.maxId) || undefined) 
+            : undefined,
+        // Use gapIds for 'gaps', 'multiId', OR 'auto' mode (auto includes detected gaps)
+        gapIds: idSelectionMode === 'gaps' && gapIds 
+              ? gapIds 
+              : idSelectionMode === 'multiId' && multiIds 
+              ? multiIds 
+              : idSelectionMode === 'auto' && autoGapIds?.length 
+              ? autoGapIds
               : undefined,
         
         // Stopping thresholds
@@ -560,6 +617,16 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         maxConsecutiveBlanks: batchThresholds.maxConsecutiveBlanks,
         maxTotalErrors: batchThresholds.maxTotalErrors,
       };
+
+      // Log helpful info about auto mode
+      if (idSelectionMode === 'auto') {
+        console.log('[ScraperTab] Auto mode configuration:', {
+          startId: autoStartId,
+          maxId: parseInt(idSelectionParams.maxId) || 'unlimited',
+          gapsToProcess: autoGapIds?.length || 0,
+          highestKnownId: highestTournamentId,
+        });
+      }
 
       console.log('[ScraperTab DEBUG] Batch job input:', JSON.stringify(jobInput, null, 2));
 
@@ -806,6 +873,29 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   placeholder="No limit"
                 />
+                {/* Auto mode status info */}
+                {!gapLoading && (
+                  <div className="mt-2 text-xs text-gray-600 bg-blue-50 border border-blue-200 p-2 rounded">
+                    <div className="font-medium text-blue-700 mb-1">Auto mode will:</div>
+                    <ul className="list-disc list-inside space-y-0.5 text-blue-600">
+                      <li>Start from ID <span className="font-mono font-medium">{highestTournamentId ? highestTournamentId + 1 : 1}</span></li>
+                      {scrapingStatus?.gapSummary?.totalMissingIds ? (
+                        <li>
+                          Fill <span className="font-medium">{scrapingStatus.gapSummary.totalMissingIds}</span> gap IDs 
+                          ({scrapingStatus.gapSummary.totalGaps} range{scrapingStatus.gapSummary.totalGaps !== 1 ? 's' : ''})
+                        </li>
+                      ) : (
+                        <li className="text-green-600">✓ No gaps detected</li>
+                      )}
+                      <li>Continue until threshold{idSelectionParams.maxId ? ` or ID ${idSelectionParams.maxId}` : ''}</li>
+                    </ul>
+                  </div>
+                )}
+                {gapLoading && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    Loading gap data...
+                  </div>
+                )}
               </div>
             )}
 
@@ -1028,30 +1118,35 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
             )}
           </div>
 
-          {/* API Key (only for single mode) */}
-          {isSingleMode(idSelectionMode) && (
+          {/* API Key - available for all modes */}
+          <div className="pt-2">
             <form onSubmit={(e) => e.preventDefault()}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Scraper API Key (optional)</label>
-                <div className="flex gap-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Scraper API Key (optional)
+                <span className="ml-2 text-xs text-gray-500 font-normal">
+                  Used when fetching from live site
+                </span>
+              </label>
+              <div className="flex gap-2">
                 <input
-                    type={showApiKey ? 'text' : 'password'}
-                    value={scraperApiKey}
-                    onChange={(e) => setScraperApiKey(e.target.value)}
-                    disabled={isProcessing}
-                    autoComplete="off"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter API key..."
+                  type={showApiKey ? 'text' : 'password'}
+                  value={scraperApiKey}
+                  onChange={(e) => setScraperApiKey(e.target.value)}
+                  disabled={isProcessing}
+                  autoComplete="off"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter API key..."
                 />
                 <button 
-                    type="button"
-                    onClick={() => setShowApiKey(!showApiKey)} 
-                    className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                  type="button"
+                  onClick={() => setShowApiKey(!showApiKey)} 
+                  className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
                 >
-                    {showApiKey ? 'Hide' : 'Show'}
+                  {showApiKey ? 'Hide' : 'Show'}
                 </button>
-                </div>
+              </div>
             </form>
-          )}
+          </div>
 
           {/* Start/Stop Buttons */}
           <div className="flex gap-4 pt-4 border-t border-gray-200">

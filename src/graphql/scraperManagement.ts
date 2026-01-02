@@ -105,6 +105,50 @@ export const scraperManagementQueries = {
   `,
 
   // ===================================================================
+  // MINIMAL SCRAPER JOBS REPORT QUERY
+  // This avoids the deeply nested entity relations that cause null errors
+  // ===================================================================
+  
+  getScraperJobsReportMinimal: /* GraphQL */ `
+    query GetScraperJobsReportMinimal(
+      $entityId: ID
+      $status: ScraperJobStatus
+      $limit: Int
+      $nextToken: String
+    ) {
+      getScraperJobsReport(
+        entityId: $entityId
+        status: $status
+        limit: $limit
+        nextToken: $nextToken
+      ) {
+        items {
+          id
+          jobId
+          status
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          successRate
+          entityId
+          createdAt
+          updatedAt
+        }
+        nextToken
+        totalCount
+      }
+    }
+  `,
+
+  // ===================================================================
   // QUERIES FOR SCRAPE ATTEMPTS - Fixed with correct fields from schema
   // ===================================================================
   

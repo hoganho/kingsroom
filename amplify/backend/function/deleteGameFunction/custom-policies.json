@@ -1,0 +1,58 @@
+[
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:DeleteItem",
+      "dynamodb:BatchWriteItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameCost-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameCostLineItem-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/TournamentStructure-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeAttempt-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/S3Storage-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerEntry-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerResult-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTransaction-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerCredits-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerPoints-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerTicket-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/SocialPostGameLink-*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Player-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerSummary-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/PlayerVenue-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/SocialPost-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/SocialPostGameData-*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:Query"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData"
+    ],
+    "Resource": ["*"]
+  }
+]

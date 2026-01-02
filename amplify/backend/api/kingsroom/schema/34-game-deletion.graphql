@@ -1,0 +1,59 @@
+# 34-game-deletion.graphql
+# ===================================================================
+# Delete Game with Cleanup - Schema Types
+# ===================================================================
+
+input DeleteGameWithCleanupInput {
+  gameId: ID!
+  dryRun: Boolean
+}
+
+type GameDeletionCounts {
+  deleted: Int
+  error: String
+  success: Boolean
+}
+
+type PlayerStatsUpdateCounts {
+  summariesUpdated: Int
+  venuesUpdated: Int
+}
+
+type GameDeletionDetails {
+  gameCost: GameDeletionCounts
+  gameFinancialSnapshot: GameDeletionCounts
+  scrapeURL: GameDeletionCounts
+  scrapeAttempts: GameDeletionCounts
+  playerEntries: GameDeletionCounts
+  playerResults: GameDeletionCounts
+  playerTransactions: GameDeletionCounts
+  playerStats: PlayerStatsUpdateCounts
+  game: GameDeletionCounts
+  parentGame: DeleteGameWithCleanupResult
+}
+
+type ConsolidationCleanupResult {
+  deleteParent: Boolean
+  parentId: ID
+  remainingSiblings: Int
+  childrenUnlinked: Int
+  noConsolidation: Boolean
+}
+
+type DeleteGameWithCleanupResult {
+  success: Boolean!
+  message: String
+  error: String
+  gameId: ID
+  gameName: String
+  entityId: ID
+  venueId: ID
+  dryRun: Boolean
+  deletions: GameDeletionDetails
+  consolidation: ConsolidationCleanupResult
+}
+
+extend type Mutation {
+  deleteGameWithCleanup(input: DeleteGameWithCleanupInput!): DeleteGameWithCleanupResult
+    @function(name: "deleteGameFunction-${env}")
+}

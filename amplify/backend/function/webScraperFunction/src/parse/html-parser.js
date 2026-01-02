@@ -24,6 +24,7 @@
  */
 
 const cheerio = require('cheerio');
+const { parseAESTToUTC } = require('../utils/dates');
 
 // ===================================================================
 // VARIANT MAPPING (GameVariant -> PokerVariant + BettingStructure)
@@ -326,18 +327,37 @@ const defaultStrategy = {
      * Get game start date/time
      */
     getGameStartDateTime(ctx) {
+        // Primary source: embedded JSON data
         if (ctx.gameData && ctx.gameData.start_local) {
-            ctx.add('gameStartDateTime', new Date(ctx.gameData.start_local).toISOString());
-        } else {
-            const dateText = ctx.getText('gameStartDateTime', '#cw_clock_start_date_time_local');
-            if (dateText) {
-                try {
-                    const d = new Date(dateText);
-                    if (!isNaN(d.getTime())) {
-                        ctx.data.gameStartDateTime = d.toISOString();
-                    }
-                } catch (e) {}
+            const utcIso = parseAESTToUTC(ctx.gameData.start_local);
+            if (utcIso) {
+                ctx.add('gameStartDateTime', utcIso);
+                console.log(`[HtmlParser] Parsed start_local "${ctx.gameData.start_local}" (AEST) → "${utcIso}" (UTC)`);
+                return;
             }
+        }
+        
+        // Fallback: DOM element
+        const dateText = ctx.$('#cw_clock_start_date_time_local').first().text().trim();
+        if (dateText) {
+            const utcIso = parseAESTToUTC(dateText);
+            if (utcIso) {
+                ctx.foundKeys.add('gameStartDateTime');
+                ctx.data.gameStartDateTime = utcIso;
+                console.log(`[HtmlParser] Parsed DOM date "${dateText}" (AEST) → "${utcIso}" (UTC)`);
+                return;
+            }
+            
+            // Last resort fallback
+            console.warn(`[HtmlParser] Could not parse AEST date: ${dateText}`);
+            try {
+                const d = new Date(dateText);
+                if (!isNaN(d.getTime())) {
+                    ctx.foundKeys.add('gameStartDateTime');
+                    ctx.data.gameStartDateTime = d.toISOString();
+                    console.warn(`[HtmlParser] FALLBACK: Using JS Date parser - time may be incorrect!`);
+                }
+            } catch (e) {}
         }
     },
     

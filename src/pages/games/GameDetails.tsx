@@ -204,6 +204,119 @@ const GET_GAME_QUERY = /* GraphQL */ `
       tournamentSeriesId
       recurringGameId
       
+      # Player Entries (via @hasMany relationship)
+      playerEntries(limit: 500) {
+        items {
+          id
+          status
+          registrationTime
+          eliminationTime
+          gameStartDateTime
+          lastKnownStackSize
+          tableNumber
+          seatNumber
+          numberOfReEntries
+          entryType
+          player {
+            id
+            firstName
+            lastName
+          }
+        }
+      }
+      
+      # Player Results (via @hasMany relationship)
+      playerResults(limit: 500) {
+        items {
+          id
+          finishingPlace
+          prizeWon
+          amountWon
+          pointsEarned
+          isMultiDayQualification
+          totalRunners
+          netProfitLoss
+          totalBuyInsPaid
+          player {
+            id
+            firstName
+            lastName
+          }
+        }
+      }
+      
+      # Social Post Links (via @hasMany with proper GSI)
+      # Note: socialPost relationship not defined on SocialPostGameLink, fetch separately
+      socialPostLinks(limit: 20) {
+        items {
+          id
+          socialPostId
+          linkType
+          matchConfidence
+        }
+      }
+      
+      # GameCost (via @hasOne with gameCostId foreign key)
+      gameCost {
+        id
+        gameId
+        totalDealerCost
+        totalTournamentDirectorCost
+        totalFloorStaffCost
+        totalSecurityCost
+        totalPrizeContribution
+        totalJackpotContribution
+        totalGuaranteeOverlayCost
+        totalAddedValueCost
+        totalBountyCost
+        totalVenueRentalCost
+        totalEquipmentRentalCost
+        totalFoodBeverageCost
+        totalMarketingCost
+        totalStreamingCost
+        totalInsuranceCost
+        totalLicensingCost
+        totalStaffTravelCost
+        totalPlayerAccommodationCost
+        totalPromotionCost
+        totalOtherCost
+        totalStaffCost
+        totalDirectGameCost
+        totalOperationsCost
+        totalComplianceCost
+        totalCost
+        notes
+        isEstimate
+        costStatus
+      }
+      
+      # GameFinancialSnapshot (via @hasOne with gameFinancialSnapshotId foreign key)
+      gameFinancialSnapshot {
+        id
+        gameId
+        totalRevenue
+        totalCost
+        netProfit
+        profitMargin
+        revenuePerPlayer
+        costPerPlayer
+        profitPerPlayer
+        rakePerEntry
+        guaranteeCoverageRate
+        guaranteeMet
+        totalBuyInsCollected
+        rakeRevenue
+        venueFee
+        prizepoolPlayerContributions
+        prizepoolAddedValue
+        prizepoolTotal
+        prizepoolSurplus
+        totalDealerCost
+        totalStaffCost
+        totalUniquePlayers
+        totalEntries
+      }
+      
       createdAt
       updatedAt
     }
@@ -231,52 +344,8 @@ const GET_TOURNAMENT_STRUCTURE_QUERY = /* GraphQL */ `
   }
 `;
 
-const GET_PLAYER_ENTRIES_QUERY = /* GraphQL */ `
-  query GetPlayerEntries($gameId: ID!) {
-    listPlayerEntries(filter: { gameId: { eq: $gameId } }, limit: 500) {
-      items {
-        id
-        status
-        registrationTime
-        eliminationTime
-        gameStartDateTime
-        lastKnownStackSize
-        tableNumber
-        seatNumber
-        numberOfReEntries
-        entryType
-        player {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  }
-`;
-
-const GET_PLAYER_RESULTS_QUERY = /* GraphQL */ `
-  query GetPlayerResults($gameId: ID!) {
-    listPlayerResults(filter: { gameId: { eq: $gameId } }, limit: 500) {
-      items {
-        id
-        finishingPlace
-        prizeWon
-        amountWon
-        pointsEarned
-        isMultiDayQualification
-        totalRunners
-        netProfitLoss
-        totalBuyInsPaid
-        player {
-          id
-          firstName
-          lastName
-        }
-      }
-    }
-  }
-`;
+// Note: PlayerEntries and PlayerResults are now fetched via @hasMany
+// relationships in the GET_GAME_QUERY, no need for separate list queries.
 
 const GET_RECURRING_GAME_QUERY = /* GraphQL */ `
   query GetRecurringGame($id: ID!) {
@@ -364,88 +433,38 @@ const GET_CHILD_GAMES_QUERY = /* GraphQL */ `
   }
 `;
 
-const GET_GAME_COST_QUERY = /* GraphQL */ `
-  query GetGameCost($gameId: ID!) {
-    listGameCosts(filter: { gameId: { eq: $gameId } }, limit: 1) {
-      items {
-        id
-        totalDealerCost
-        totalTournamentDirectorCost
-        totalFloorStaffCost
-        totalSecurityCost
-        totalPrizeContribution
-        totalJackpotContribution
-        totalGuaranteeOverlayCost
-        totalAddedValueCost
-        totalBountyCost
-        totalVenueRentalCost
-        totalEquipmentRentalCost
-        totalFoodBeverageCost
-        totalMarketingCost
-        totalStreamingCost
-        totalInsuranceCost
-        totalLicensingCost
-        totalStaffTravelCost
-        totalPlayerAccommodationCost
-        totalPromotionCost
-        totalOtherCost
-        totalStaffCost
-        totalDirectGameCost
-        totalOperationsCost
-        totalComplianceCost
-        totalCost
-        isEstimate
-        costStatus
-      }
-    }
-  }
-`;
+// Note: gameCost and gameFinancialSnapshot are now fetched via @hasOne relationships
+// using foreign keys (gameCostId, gameFinancialSnapshotId) on the Game model.
+// Social post links are fetched via Game.socialPostLinks @hasMany relationship,
+// then social posts are fetched separately by ID.
 
-const GET_FINANCIAL_SNAPSHOT_QUERY = /* GraphQL */ `
-  query GetGameFinancialSnapshot($gameId: ID!) {
-    listGameFinancialSnapshots(filter: { gameId: { eq: $gameId } }, limit: 1) {
-      items {
-        id
-        totalRevenue
-        totalCost
-        netProfit
-        profitMargin
-        revenuePerPlayer
-        costPerPlayer
-        profitPerPlayer
-        rakePerEntry
-        guaranteeCoverageRate
-        guaranteeMet
-      }
-    }
-  }
-`;
-
-const GET_LINKED_SOCIAL_POSTS_QUERY = /* GraphQL */ `
-  query GetLinkedSocialPosts($gameId: ID!) {
-    listSocialPosts(filter: { gameId: { eq: $gameId } }, limit: 20) {
-      items {
-        id
-        platform
-        postType
-        textContent
-        postedAt
-        likeCount
-        commentCount
-        shareCount
-        postUrl
-      }
-    }
-  }
-`;
-
-const COUNT_SOCIAL_POST_LINKS_QUERY = /* GraphQL */ `
-  query CountSocialPostLinks($gameId: ID!) {
-    listSocialPostGameLinks(filter: { gameId: { eq: $gameId } }, limit: 1) {
-      items {
-        id
-      }
-      nextToken
+const GET_SOCIAL_POST_QUERY = /* GraphQL */ `
+  query GetSocialPost($id: ID!) {
+    getSocialPost(id: $id) {
+      id
+      platformPostId
+      platform
+      postType
+      postUrl
+      accountName
+      accountProfileImageUrl
+      content
+      contentPreview
+      mediaUrls
+      thumbnailUrl
+      likeCount
+      commentCount
+      shareCount
+      reactionCount
+      viewCount
+      postedAt
+      scrapedAt
+      isTournamentResult
+      isTournamentRelated
+      contentType
+      contentTypeConfidence
+      primaryLinkedGameId
+      linkedGameCount
     }
   }
 `;
@@ -470,7 +489,7 @@ export const GameDetails = () => {
     try {
       const client = getClient();
 
-      // Fetch main game data
+      // Fetch main game data (includes playerEntries and playerResults via @hasMany)
       const gameResponse = await client.graphql({
         query: GET_GAME_QUERY,
         variables: { id }
@@ -480,26 +499,34 @@ export const GameDetails = () => {
         throw new Error('Game not found');
       }
 
-      const game = gameResponse.data.getGame as Game;
+      const game = gameResponse.data.getGame as any; // Use any to access nested relationships
+      
+      // Extract player entries and results from the Game query (uses GSI via @hasMany)
+      const entriesFromGame = game.playerEntries?.items || [];
+      const resultsFromGame = game.playerResults?.items || [];
+      
+      // Extract socialPostLinks from the Game query (uses GSI via @hasMany)
+      const socialPostLinksFromGame = game.socialPostLinks?.items || [];
+      
+      // Extract gameCost and gameFinancialSnapshot from the Game query (via @hasOne)
+      const gameCostFromGame = game.gameCost || null;
+      const financialSnapshotFromGame = game.gameFinancialSnapshot || null;
+      
+      console.log('[GameDetails] Data from Game query:', {
+        entriesCount: entriesFromGame.length,
+        resultsCount: resultsFromGame.length,
+        socialPostLinksCount: socialPostLinksFromGame.length,
+        hasGameCost: !!gameCostFromGame,
+        gameCostId: gameCostFromGame?.id,
+        hasFinancialSnapshot: !!financialSnapshotFromGame,
+        snapshotId: financialSnapshotFromGame?.id,
+      });
 
-      // Parallel fetch of related data
-    const [
-        structureRes,
-        entriesRes,
-        resultsRes,
-        costRes,
-        snapshotRes,
-        socialRes,
-        socialLinksRes
-    ] = await Promise.all([
-        client.graphql({ query: GET_TOURNAMENT_STRUCTURE_QUERY, variables: { gameId: id } }),
-        client.graphql({ query: GET_PLAYER_ENTRIES_QUERY, variables: { gameId: id } }),
-        client.graphql({ query: GET_PLAYER_RESULTS_QUERY, variables: { gameId: id } }),
-        client.graphql({ query: GET_GAME_COST_QUERY, variables: { gameId: id } }),
-        client.graphql({ query: GET_FINANCIAL_SNAPSHOT_QUERY, variables: { gameId: id } }),
-        client.graphql({ query: GET_LINKED_SOCIAL_POSTS_QUERY, variables: { gameId: id } }).catch(() => null),
-        client.graphql({ query: COUNT_SOCIAL_POST_LINKS_QUERY, variables: { gameId: id } }).catch(() => null)  // ADD THIS
-    ]);
+      // Fetch tournament structure (still using separate query as it's a different model)
+      const structureRes = await client.graphql({ 
+        query: GET_TOURNAMENT_STRUCTURE_QUERY, 
+        variables: { gameId: id } 
+      });
 
       // Fetch recurring game if linked
       let recurringGame: RecurringGame | undefined;
@@ -563,22 +590,62 @@ export const GameDetails = () => {
         console.warn('Failed to fetch child games:', e);
       }
 
-        const socialLinksData = socialLinksRes && 'data' in socialLinksRes 
-            ? socialLinksRes.data?.listSocialPostGameLinks 
-            : null;
-        const socialPostLinkCount = socialLinksData 
-            ? (socialLinksData.items?.length || 0) + (socialLinksData.nextToken ? 1 : 0)
-            : 0;
+        // Fetch social posts by ID from the links (parallel fetch)
+        let linkedSocialPosts: any[] = [];
+        if (socialPostLinksFromGame.length > 0) {
+          const socialPostIds = socialPostLinksFromGame
+            .map((link: any) => link.socialPostId)
+            .filter((id: string) => id != null);
+          
+          console.log('[GameDetails] Fetching social posts by ID:', socialPostIds);
+          
+          // Parallel fetch all social posts
+          const postResults = await Promise.all(
+            socialPostIds.map((postId: string) => 
+              client.graphql({
+                query: GET_SOCIAL_POST_QUERY,
+                variaebles: { id: postId }
+              }).catch((e: unknown) => {
+                console.warn(`Failed to fetch social post ${postId}:`, e);
+                return null;
+              })
+            )
+          );
+          
+          linkedSocialPosts = postResults
+            .filter((res): res is any => res !== null && 'data' in res && res.data?.getSocialPost)
+            .map((res) => res.data.getSocialPost);
+        }
+
+        // Debug logging for all fetched data
+        console.log('[GameDetails] Data fetch summary:', {
+          gameId: id,
+          gameName: game.name,
+          hasStructure: 'data' in structureRes && structureRes.data?.listTournamentStructures?.items?.length > 0,
+          entriesCount: entriesFromGame.length,
+          resultsCount: resultsFromGame.length,
+          hasGameCost: !!gameCostFromGame,
+          hasFinancialSnapshot: !!financialSnapshotFromGame,
+          hasRecurringGame: !!recurringGame,
+          hasTournamentSeries: !!tournamentSeries,
+          hasParentGame: !!parentGame,
+          childGamesCount: childGames.length,
+          socialPostLinksCount: socialPostLinksFromGame.length,
+          linkedSocialPostsCount: linkedSocialPosts.length,
+          recurringGameId: game.recurringGameId,
+          tournamentSeriesId: game.tournamentSeriesId,
+          parentGameId: game.parentGameId,
+        });
 
         setGameData({
             game,
             structure: 'data' in structureRes ? structureRes.data?.listTournamentStructures?.items?.[0] : undefined,
-            entries: 'data' in entriesRes ? entriesRes.data?.listPlayerEntries?.items || [] : [],
-            results: 'data' in resultsRes ? resultsRes.data?.listPlayerResults?.items || [] : [],
-            gameCost: 'data' in costRes ? costRes.data?.listGameCosts?.items?.[0] : undefined,
-            financialSnapshot: 'data' in snapshotRes ? snapshotRes.data?.listGameFinancialSnapshots?.items?.[0] : undefined,
-            linkedSocialPosts: socialRes && 'data' in socialRes ? socialRes.data?.listSocialPosts?.items || [] : [],
-            socialPostLinkCount,  // ADD THIS
+            entries: entriesFromGame,
+            results: resultsFromGame,
+            gameCost: gameCostFromGame,
+            financialSnapshot: financialSnapshotFromGame,
+            linkedSocialPosts: linkedSocialPosts,
+            socialPostLinkCount: socialPostLinksFromGame.length,
             recurringGame,
             tournamentSeries,
             parentGame,

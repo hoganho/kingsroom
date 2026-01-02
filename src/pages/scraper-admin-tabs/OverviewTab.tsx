@@ -1,5 +1,6 @@
 // src/pages/scraper-admin-tabs/OverviewTab.tsx
 // REFACTORED: Fixed field names to match Lambda response, added graceful error handling
+// FIXED: Uses minimal query to avoid deeply nested entity null errors
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -12,11 +13,12 @@ import {
     TrendingUp,
     AlertTriangle,
 } from 'lucide-react';
-// Import from auto-generated queries
+// Import from auto-generated queries (except getScraperJobsReport which causes issues)
 import { 
     getScraperMetrics,
-    getScraperJobsReport 
 } from '../../graphql/queries';
+// Import minimal query from custom queries
+import { scraperManagementQueries } from '../../graphql/scraperManagement';
 // Import TimeRange enum from API types
 import { TimeRange, type ScraperJob } from '../../API';
 import { MetricCard, JobStatusBadge } from '../../components/scraper/shared/StatusBadges';
@@ -175,10 +177,10 @@ export const OverviewTab: React.FC = () => {
                 // Continue to load jobs even if metrics fail
             }
 
-            // Load recent jobs
+            // Load recent jobs - FIXED: Use minimal query to avoid nested entity null errors
             try {
                 const jobsResponse = await client.graphql({
-                    query: getScraperJobsReport,
+                    query: scraperManagementQueries.getScraperJobsReportMinimal,
                     variables: { limit: 5 }
                 }) as any;
                 

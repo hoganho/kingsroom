@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "storage": {
+      "SocialAccount:@model(appsync)": [
+        "read",
+        "update"
+      ],
+      "SocialPost:@model(appsync)": [
+        "read"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

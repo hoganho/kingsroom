@@ -8,6 +8,7 @@ const {
   getSocialPost, 
   updateSocialPost, 
   createSocialPostGameData,
+  updateSocialPostGameData,
   createSocialPostPlacement,
   createSocialPostGameLink,
   getExtractionBySocialPost
@@ -235,6 +236,29 @@ const processSocialPost = async (input) => {
       
       if (matchResult.primaryMatch) {
         console.log(`[PROCESS] Primary match: ${matchResult.primaryMatch.gameId} (${matchResult.primaryMatch.matchConfidence}%)`);
+      }
+      
+      // Save match candidates to extraction record for manual review
+      if (matchResult.candidates.length > 0) {
+        console.log('[PROCESS] Saving match candidates to extraction record...');
+        await updateSocialPostGameData(extractionId, {
+          suggestedGameId: matchResult.primaryMatch?.gameId || null,
+          matchCandidateCount: matchResult.candidates.length,
+          matchCandidates: JSON.stringify(matchResult.candidates.map(c => ({
+            gameId: c.gameId,
+            gameName: c.gameName,
+            gameDate: c.gameDate,
+            venueName: c.venueName,
+            venueId: c.venueId,
+            buyIn: c.buyIn,
+            guarantee: c.guarantee,
+            matchConfidence: c.matchConfidence,
+            matchReason: c.matchReason,
+            matchSignals: c.matchSignals,
+            rank: c.rank,
+            wouldAutoLink: c.matchConfidence >= matchThreshold
+          })))
+        });
       }
       
       // Update status

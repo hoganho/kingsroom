@@ -42,67 +42,129 @@ const {
 const { getUnlinkedSocialPosts, getSocialPostMatchingStats } = require('./operations/queries');
 
 /**
+ * Extract arguments from event - handles multiple AppSync/Lambda event formats
+ */
+function extractArguments(event) {
+  // Log the full event for debugging
+  console.log('[HANDLER] Full event:', JSON.stringify(event, null, 2));
+  
+  // Format 1: AppSync with input wrapper - event.arguments.input
+  // This is the pattern when GraphQL schema uses: mutation(input: ProcessSocialPostInput!)
+  if (event.arguments?.input) {
+    console.log('[HANDLER] Using event.arguments.input');
+    return event.arguments.input;
+  }
+  
+  // Format 2: Standard AppSync resolver format - event.arguments (without input wrapper)
+  if (event.arguments) {
+    console.log('[HANDLER] Using event.arguments');
+    return event.arguments;
+  }
+  
+  // Format 3: Arguments at top level (direct Lambda invocation)
+  if (event.socialPostId || event.socialPostIds || event.linkId || event.content) {
+    console.log('[HANDLER] Using top-level arguments');
+    return event;
+  }
+  
+  // Format 4: Nested in input field at top level
+  if (event.input) {
+    console.log('[HANDLER] Using event.input');
+    return event.input;
+  }
+  
+  // Format 5: Body string (API Gateway)
+  if (event.body && typeof event.body === 'string') {
+    try {
+      const parsed = JSON.parse(event.body);
+      console.log('[HANDLER] Using parsed event.body');
+      return parsed.arguments?.input || parsed.arguments || parsed.input || parsed;
+    } catch (e) {
+      console.error('[HANDLER] Failed to parse event.body');
+    }
+  }
+  
+  // Default: return the event itself
+  console.log('[HANDLER] Using event as arguments');
+  return event;
+}
+
+/**
  * Main handler
  */
 exports.handler = async (event) => {
-  console.log('Event:', JSON.stringify(event, null, 2));
+  console.log('[HANDLER] ===== Lambda Invoked =====');
+  console.log('[HANDLER] Event type:', typeof event);
+  console.log('[HANDLER] Event keys:', Object.keys(event || {}));
   
   try {
-    // =========================================================================
-    // Handle different invocation patterns
-    // =========================================================================
+    // Extract arguments from various event formats
+    const args = extractArguments(event);
+    const fieldName = event.fieldName || event.field || args.fieldName;
     
-    // Pattern 1: GraphQL resolver (AppSync)
-    if (event.fieldName) {
-      return handleGraphQLRequest(event);
+    console.log('[HANDLER] Extracted fieldName:', fieldName);
+    console.log('[HANDLER] Extracted args:', JSON.stringify(args, null, 2));
+    
+    // =========================================================================
+    // Pattern 1: GraphQL resolver (AppSync) - has fieldName
+    // =========================================================================
+    if (fieldName) {
+      return handleGraphQLRequest(fieldName, args);
     }
     
+    // =========================================================================
     // Pattern 2: Direct invocation from socialFetcher - single post
-    // This is the async invocation pattern from socialFetcher
-    if (event.socialPostId && !event.socialPostIds) {
-      console.log(`[HANDLER] Processing single post: ${event.socialPostId}`);
+    // =========================================================================
+    if (args.socialPostId && !args.socialPostIds) {
+      console.log(`[HANDLER] Processing single post: ${args.socialPostId}`);
       return processSocialPost({
-        socialPostId: event.socialPostId,
-        forceReprocess: event.forceReprocess || false,
-        skipMatching: event.skipMatching || false,
-        skipLinking: event.skipLinking || false,
-        matchThreshold: event.matchThreshold
+        socialPostId: args.socialPostId,
+        forceReprocess: args.forceReprocess || false,
+        skipMatching: args.skipMatching || false,
+        skipLinking: args.skipLinking || false,
+        matchThreshold: args.matchThreshold
       });
     }
     
+    // =========================================================================
     // Pattern 3: Direct invocation from socialFetcher - batch mode
-    if (event.socialPostIds && Array.isArray(event.socialPostIds)) {
-      console.log(`[HANDLER] Processing batch of ${event.socialPostIds.length} posts`);
+    // =========================================================================
+    if (args.socialPostIds && Array.isArray(args.socialPostIds)) {
+      console.log(`[HANDLER] Processing batch of ${args.socialPostIds.length} posts`);
       return processBatch({
-        socialPostIds: event.socialPostIds,
-        forceReprocess: event.forceReprocess || false,
-        skipMatching: event.skipMatching || false,
-        skipLinking: event.skipLinking || false
+        socialPostIds: args.socialPostIds,
+        forceReprocess: args.forceReprocess || false,
+        skipMatching: args.skipMatching || false,
+        skipLinking: args.skipLinking || false
       });
     }
     
+    // =========================================================================
     // Pattern 4: Batch processing by criteria
-    if (event.batchMode || event.processingStatus || event.socialAccountId) {
+    // =========================================================================
+    if (args.batchMode || args.processingStatus || args.socialAccountId) {
       console.log('[HANDLER] Processing batch by criteria');
       return processBatch({
-        socialAccountId: event.socialAccountId,
-        processingStatus: event.processingStatus || 'PENDING',
-        limit: event.limit || 50,
-        forceReprocess: event.forceReprocess || false,
-        skipMatching: event.skipMatching || false,
-        skipLinking: event.skipLinking || false
+        socialAccountId: args.socialAccountId,
+        processingStatus: args.processingStatus || 'PENDING',
+        limit: args.limit || 50,
+        forceReprocess: args.forceReprocess || false,
+        skipMatching: args.skipMatching || false,
+        skipLinking: args.skipLinking || false
       });
     }
     
     // Unknown event format
-    console.error('Unknown event format:', event);
+    console.error('[HANDLER] Unknown event format - could not determine action');
+    console.error('[HANDLER] args:', JSON.stringify(args, null, 2));
     return {
       success: false,
-      error: 'Invalid event format. Expected socialPostId, socialPostIds, or batch criteria.'
+      error: 'Invalid event format. Expected socialPostId, socialPostIds, fieldName, or batch criteria.',
+      receivedKeys: Object.keys(args)
     };
     
   } catch (error) {
-    console.error('Handler error:', error);
+    console.error('[HANDLER] Error:', error);
     return {
       success: false,
       error: error.message,
@@ -114,32 +176,32 @@ exports.handler = async (event) => {
 /**
  * Handle GraphQL resolver requests
  */
-async function handleGraphQLRequest(event) {
-  const args = event.arguments || {};
-  const fieldName = event.fieldName;
-  
+async function handleGraphQLRequest(fieldName, args) {
   console.log(`[HANDLER] GraphQL request: ${fieldName}`);
+  console.log(`[HANDLER] Args for ${fieldName}:`, JSON.stringify(args, null, 2));
   
   switch (fieldName) {
     // =========================================================================
     // Processing Operations
     // =========================================================================
     
-    case 'processSocialPost':
-      // Process a single social post
-      if (!args.socialPostId) {
+    case 'processSocialPost': {
+      const socialPostId = args.socialPostId;
+      if (!socialPostId) {
+        console.error('[HANDLER] processSocialPost called without socialPostId');
+        console.error('[HANDLER] Available args:', Object.keys(args));
         throw new Error('Missing required argument: socialPostId');
       }
       return processSocialPost({
-        socialPostId: args.socialPostId,
+        socialPostId,
         forceReprocess: args.forceReprocess || false,
         skipMatching: args.skipMatching || false,
         skipLinking: args.skipLinking || false,
         matchThreshold: args.matchThreshold
       });
+    }
     
     case 'processSocialPostBatch':
-      // Process multiple posts
       return processBatch({
         socialPostIds: args.socialPostIds,
         socialAccountId: args.socialAccountId,
@@ -154,15 +216,15 @@ async function handleGraphQLRequest(event) {
         skipLinking: args.skipLinking || false
       });
     
-    case 'previewSocialPostMatch':
-      // Preview match without saving
-      if (!args.socialPostId) {
+    case 'previewSocialPostMatch': {
+      const socialPostId = args.socialPostId;
+      if (!socialPostId) {
         throw new Error('Missing required argument: socialPostId');
       }
-      return previewMatch(args.socialPostId);
+      return previewMatch(socialPostId);
+    }
     
-    case 'previewContentExtraction':
-      // Preview extraction on raw content
+    case 'previewContentExtraction': {
       if (!args.content) {
         throw new Error('Missing required argument: content');
       }
@@ -174,13 +236,13 @@ async function handleGraphQLRequest(event) {
         venueId: args.venueId,
         url: args.url
       });
+    }
     
     // =========================================================================
     // Link Operations
     // =========================================================================
     
-    case 'linkSocialPostToGame':
-      // Manually link a post to a game
+    case 'linkSocialPostToGame': {
       if (!args.socialPostId || !args.gameId) {
         throw new Error('Missing required arguments: socialPostId and gameId');
       }
@@ -191,9 +253,9 @@ async function handleGraphQLRequest(event) {
         mentionOrder: args.mentionOrder,
         notes: args.notes
       });
+    }
     
-    case 'unlinkSocialPostFromGame':
-      // Remove a link
+    case 'unlinkSocialPostFromGame': {
       if (!args.linkId) {
         throw new Error('Missing required argument: linkId');
       }
@@ -201,9 +263,9 @@ async function handleGraphQLRequest(event) {
         linkId: args.linkId,
         reason: args.reason
       });
+    }
     
-    case 'verifySocialPostLink':
-      // Verify an auto-matched link
+    case 'verifySocialPostLink': {
       if (!args.linkId) {
         throw new Error('Missing required argument: linkId');
       }
@@ -211,9 +273,9 @@ async function handleGraphQLRequest(event) {
         linkId: args.linkId,
         notes: args.notes
       });
+    }
     
-    case 'rejectSocialPostLink':
-      // Reject an auto-matched link
+    case 'rejectSocialPostLink': {
       if (!args.linkId || !args.reason) {
         throw new Error('Missing required arguments: linkId and reason');
       }
@@ -221,13 +283,13 @@ async function handleGraphQLRequest(event) {
         linkId: args.linkId,
         reason: args.reason
       });
+    }
     
     // =========================================================================
     // Query Operations
     // =========================================================================
     
     case 'getUnlinkedSocialPosts':
-      // Get posts that need manual review
       return getUnlinkedSocialPosts({
         entityId: args.entityId,
         socialAccountId: args.socialAccountId,
@@ -239,7 +301,6 @@ async function handleGraphQLRequest(event) {
       });
     
     case 'getSocialPostMatchingStats':
-      // Get matching statistics
       return getSocialPostMatchingStats({
         entityId: args.entityId,
         dateFrom: args.dateFrom,

@@ -409,6 +409,7 @@ export enum SocialScrapeStatus {
   FAILED = "FAILED",
   SKIPPED = "SKIPPED",
   RATE_LIMITED = "RATE_LIMITED",
+  TIMEOUT = "TIMEOUT",
   NO_NEW_CONTENT = "NO_NEW_CONTENT"
 }
 
@@ -424,6 +425,14 @@ export enum ScheduledPostStatus {
   PUBLISHED = "PUBLISHED",
   FAILED = "FAILED",
   CANCELLED = "CANCELLED"
+}
+
+export enum SyncEventStatus {
+  STARTED = "STARTED",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  RATE_LIMITED = "RATE_LIMITED",
+  FAILED = "FAILED"
 }
 
 export enum SocialPostContentType {
@@ -455,12 +464,28 @@ export enum SocialPostLinkType {
 
 export enum NonCashPrizeType {
   ACCUMULATOR_TICKET = "ACCUMULATOR_TICKET",
-  TOURNAMENT_ENTRY = "TOURNAMENT_ENTRY",
   SATELLITE_TICKET = "SATELLITE_TICKET",
   BOUNTY_TICKET = "BOUNTY_TICKET",
+  TOURNAMENT_ENTRY = "TOURNAMENT_ENTRY",
+  SERIES_TICKET = "SERIES_TICKET",
+  MAIN_EVENT_SEAT = "MAIN_EVENT_SEAT",
+  VALUED_SEAT = "VALUED_SEAT",
+  TRAVEL_PACKAGE = "TRAVEL_PACKAGE",
+  ACCOMMODATION_PACKAGE = "ACCOMMODATION_PACKAGE",
+  VOUCHER = "VOUCHER",
+  FOOD_CREDIT = "FOOD_CREDIT",
+  CASINO_CREDIT = "CASINO_CREDIT",
   MERCHANDISE = "MERCHANDISE",
   POINTS = "POINTS",
   OTHER = "OTHER"
+}
+
+export enum TicketAwardSource {
+  SOCIAL_POST_RESULT = "SOCIAL_POST_RESULT",
+  SOCIAL_POST_PROMO = "SOCIAL_POST_PROMO",
+  SCRAPED_DATA = "SCRAPED_DATA",
+  MANUAL_ENTRY = "MANUAL_ENTRY",
+  RECURRING_GAME_DEFAULT = "RECURRING_GAME_DEFAULT"
 }
 
 export enum BackgroundTaskType {
@@ -1961,6 +1986,116 @@ export declare type FinancialsSaveResult = LazyLoading extends LazyLoadingDisabl
 
 export declare const FinancialsSaveResult: (new (init: ModelInit<FinancialsSaveResult>) => FinancialsSaveResult)
 
+type EagerGameDeletionCounts = {
+  readonly deleted?: number | null;
+  readonly error?: string | null;
+  readonly success?: boolean | null;
+}
+
+type LazyGameDeletionCounts = {
+  readonly deleted?: number | null;
+  readonly error?: string | null;
+  readonly success?: boolean | null;
+}
+
+export declare type GameDeletionCounts = LazyLoading extends LazyLoadingDisabled ? EagerGameDeletionCounts : LazyGameDeletionCounts
+
+export declare const GameDeletionCounts: (new (init: ModelInit<GameDeletionCounts>) => GameDeletionCounts)
+
+type EagerPlayerStatsUpdateCounts = {
+  readonly summariesUpdated?: number | null;
+  readonly venuesUpdated?: number | null;
+}
+
+type LazyPlayerStatsUpdateCounts = {
+  readonly summariesUpdated?: number | null;
+  readonly venuesUpdated?: number | null;
+}
+
+export declare type PlayerStatsUpdateCounts = LazyLoading extends LazyLoadingDisabled ? EagerPlayerStatsUpdateCounts : LazyPlayerStatsUpdateCounts
+
+export declare const PlayerStatsUpdateCounts: (new (init: ModelInit<PlayerStatsUpdateCounts>) => PlayerStatsUpdateCounts)
+
+type EagerGameDeletionDetails = {
+  readonly gameCost?: GameDeletionCounts | null;
+  readonly gameFinancialSnapshot?: GameDeletionCounts | null;
+  readonly scrapeURL?: GameDeletionCounts | null;
+  readonly scrapeAttempts?: GameDeletionCounts | null;
+  readonly playerEntries?: GameDeletionCounts | null;
+  readonly playerResults?: GameDeletionCounts | null;
+  readonly playerTransactions?: GameDeletionCounts | null;
+  readonly playerStats?: PlayerStatsUpdateCounts | null;
+  readonly game?: GameDeletionCounts | null;
+  readonly parentGame?: DeleteGameWithCleanupResult | null;
+}
+
+type LazyGameDeletionDetails = {
+  readonly gameCost?: GameDeletionCounts | null;
+  readonly gameFinancialSnapshot?: GameDeletionCounts | null;
+  readonly scrapeURL?: GameDeletionCounts | null;
+  readonly scrapeAttempts?: GameDeletionCounts | null;
+  readonly playerEntries?: GameDeletionCounts | null;
+  readonly playerResults?: GameDeletionCounts | null;
+  readonly playerTransactions?: GameDeletionCounts | null;
+  readonly playerStats?: PlayerStatsUpdateCounts | null;
+  readonly game?: GameDeletionCounts | null;
+  readonly parentGame?: DeleteGameWithCleanupResult | null;
+}
+
+export declare type GameDeletionDetails = LazyLoading extends LazyLoadingDisabled ? EagerGameDeletionDetails : LazyGameDeletionDetails
+
+export declare const GameDeletionDetails: (new (init: ModelInit<GameDeletionDetails>) => GameDeletionDetails)
+
+type EagerConsolidationCleanupResult = {
+  readonly deleteParent?: boolean | null;
+  readonly parentId?: string | null;
+  readonly remainingSiblings?: number | null;
+  readonly childrenUnlinked?: number | null;
+  readonly noConsolidation?: boolean | null;
+}
+
+type LazyConsolidationCleanupResult = {
+  readonly deleteParent?: boolean | null;
+  readonly parentId?: string | null;
+  readonly remainingSiblings?: number | null;
+  readonly childrenUnlinked?: number | null;
+  readonly noConsolidation?: boolean | null;
+}
+
+export declare type ConsolidationCleanupResult = LazyLoading extends LazyLoadingDisabled ? EagerConsolidationCleanupResult : LazyConsolidationCleanupResult
+
+export declare const ConsolidationCleanupResult: (new (init: ModelInit<ConsolidationCleanupResult>) => ConsolidationCleanupResult)
+
+type EagerDeleteGameWithCleanupResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly error?: string | null;
+  readonly gameId?: string | null;
+  readonly gameName?: string | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly dryRun?: boolean | null;
+  readonly deletions?: GameDeletionDetails | null;
+  readonly consolidation?: ConsolidationCleanupResult | null;
+}
+
+type LazyDeleteGameWithCleanupResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly error?: string | null;
+  readonly gameId?: string | null;
+  readonly gameName?: string | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly dryRun?: boolean | null;
+  readonly deletions?: GameDeletionDetails | null;
+  readonly consolidation?: ConsolidationCleanupResult | null;
+}
+
+export declare type DeleteGameWithCleanupResult = LazyLoading extends LazyLoadingDisabled ? EagerDeleteGameWithCleanupResult : LazyDeleteGameWithCleanupResult
+
+export declare const DeleteGameWithCleanupResult: (new (init: ModelInit<DeleteGameWithCleanupResult>) => DeleteGameWithCleanupResult)
+
 type EagerAwardTicketResult = {
   readonly success: boolean;
   readonly ticketId?: string | null;
@@ -3113,6 +3248,62 @@ export declare type GameSaveResult = LazyLoading extends LazyLoadingDisabled ? E
 
 export declare const GameSaveResult: (new (init: ModelInit<GameSaveResult>) => GameSaveResult)
 
+type EagerJobProgressEvent = {
+  readonly jobId: string;
+  readonly entityId: string;
+  readonly status: string;
+  readonly stopReason?: string | null;
+  readonly totalURLsProcessed: number;
+  readonly newGamesScraped: number;
+  readonly gamesUpdated: number;
+  readonly gamesSkipped: number;
+  readonly errors: number;
+  readonly blanks: number;
+  readonly currentId?: number | null;
+  readonly startId?: number | null;
+  readonly endId?: number | null;
+  readonly startTime?: string | null;
+  readonly durationSeconds: number;
+  readonly successRate?: number | null;
+  readonly averageScrapingTime?: number | null;
+  readonly s3CacheHits?: number | null;
+  readonly consecutiveNotFound?: number | null;
+  readonly consecutiveErrors?: number | null;
+  readonly consecutiveBlanks?: number | null;
+  readonly lastErrorMessage?: string | null;
+  readonly publishedAt: string;
+}
+
+type LazyJobProgressEvent = {
+  readonly jobId: string;
+  readonly entityId: string;
+  readonly status: string;
+  readonly stopReason?: string | null;
+  readonly totalURLsProcessed: number;
+  readonly newGamesScraped: number;
+  readonly gamesUpdated: number;
+  readonly gamesSkipped: number;
+  readonly errors: number;
+  readonly blanks: number;
+  readonly currentId?: number | null;
+  readonly startId?: number | null;
+  readonly endId?: number | null;
+  readonly startTime?: string | null;
+  readonly durationSeconds: number;
+  readonly successRate?: number | null;
+  readonly averageScrapingTime?: number | null;
+  readonly s3CacheHits?: number | null;
+  readonly consecutiveNotFound?: number | null;
+  readonly consecutiveErrors?: number | null;
+  readonly consecutiveBlanks?: number | null;
+  readonly lastErrorMessage?: string | null;
+  readonly publishedAt: string;
+}
+
+export declare type JobProgressEvent = LazyLoading extends LazyLoadingDisabled ? EagerJobProgressEvent : LazyJobProgressEvent
+
+export declare const JobProgressEvent: (new (init: ModelInit<JobProgressEvent>) => JobProgressEvent)
+
 type EagerSocialFeedConnection = {
   readonly items: SocialPost[];
   readonly nextToken?: string | null;
@@ -3190,6 +3381,10 @@ type EagerSocialScrapeResult = {
   readonly message?: string | null;
   readonly postsFound?: number | null;
   readonly newPostsAdded?: number | null;
+  readonly postsProcessed?: number | null;
+  readonly rateLimited?: boolean | null;
+  readonly timeout?: boolean | null;
+  readonly oldestPostDate?: string | null;
 }
 
 type LazySocialScrapeResult = {
@@ -3197,11 +3392,57 @@ type LazySocialScrapeResult = {
   readonly message?: string | null;
   readonly postsFound?: number | null;
   readonly newPostsAdded?: number | null;
+  readonly postsProcessed?: number | null;
+  readonly rateLimited?: boolean | null;
+  readonly timeout?: boolean | null;
+  readonly oldestPostDate?: string | null;
 }
 
 export declare type SocialScrapeResult = LazyLoading extends LazyLoadingDisabled ? EagerSocialScrapeResult : LazySocialScrapeResult
 
 export declare const SocialScrapeResult: (new (init: ModelInit<SocialScrapeResult>) => SocialScrapeResult)
+
+type EagerSyncPageInfoResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly logoUrl?: string | null;
+}
+
+type LazySyncPageInfoResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly logoUrl?: string | null;
+}
+
+export declare type SyncPageInfoResult = LazyLoading extends LazyLoadingDisabled ? EagerSyncPageInfoResult : LazySyncPageInfoResult
+
+export declare const SyncPageInfoResult: (new (init: ModelInit<SyncPageInfoResult>) => SyncPageInfoResult)
+
+type EagerSocialSyncEvent = {
+  readonly socialAccountId: string;
+  readonly status: SyncEventStatus | keyof typeof SyncEventStatus;
+  readonly message?: string | null;
+  readonly postsFound?: number | null;
+  readonly newPostsAdded?: number | null;
+  readonly rateLimited?: boolean | null;
+  readonly pagesCompleted?: number | null;
+  readonly completedAt?: string | null;
+}
+
+type LazySocialSyncEvent = {
+  readonly socialAccountId: string;
+  readonly status: SyncEventStatus | keyof typeof SyncEventStatus;
+  readonly message?: string | null;
+  readonly postsFound?: number | null;
+  readonly newPostsAdded?: number | null;
+  readonly rateLimited?: boolean | null;
+  readonly pagesCompleted?: number | null;
+  readonly completedAt?: string | null;
+}
+
+export declare type SocialSyncEvent = LazyLoading extends LazyLoadingDisabled ? EagerSocialSyncEvent : LazySocialSyncEvent
+
+export declare const SocialSyncEvent: (new (init: ModelInit<SocialSyncEvent>) => SocialSyncEvent)
 
 type EagerSocialPostNonCashPrize = {
   readonly prizeType: NonCashPrizeType | keyof typeof NonCashPrizeType;
@@ -3210,8 +3451,11 @@ type EagerSocialPostNonCashPrize = {
   readonly rawText?: string | null;
   readonly targetTournamentName?: string | null;
   readonly targetTournamentBuyIn?: number | null;
+  readonly targetTournamentId?: number | null;
   readonly ticketType?: string | null;
   readonly ticketQuantity?: number | null;
+  readonly packageIncludes?: (string | null)[] | null;
+  readonly extractionConfidence?: number | null;
 }
 
 type LazySocialPostNonCashPrize = {
@@ -3221,8 +3465,11 @@ type LazySocialPostNonCashPrize = {
   readonly rawText?: string | null;
   readonly targetTournamentName?: string | null;
   readonly targetTournamentBuyIn?: number | null;
+  readonly targetTournamentId?: number | null;
   readonly ticketType?: string | null;
   readonly ticketQuantity?: number | null;
+  readonly packageIncludes?: (string | null)[] | null;
+  readonly extractionConfidence?: number | null;
 }
 
 export declare type SocialPostNonCashPrize = LazyLoading extends LazyLoadingDisabled ? EagerSocialPostNonCashPrize : LazySocialPostNonCashPrize
@@ -3237,11 +3484,13 @@ type EagerProcessSocialPostResult = {
   readonly warnings?: string[] | null;
   readonly extractedGameData?: SocialPostGameData | null;
   readonly placementsExtracted?: number | null;
+  readonly ticketSummary?: TicketExtractionSummary | null;
   readonly matchCandidates?: GameMatchCandidate[] | null;
   readonly primaryMatch?: GameMatchCandidate | null;
   readonly linksCreated?: number | null;
   readonly linksSkipped?: number | null;
   readonly linkDetails?: SocialPostGameLink[] | null;
+  readonly reconciliationPreview?: SocialToGameReconciliation | null;
   readonly processingTimeMs?: number | null;
 }
 
@@ -3253,11 +3502,13 @@ type LazyProcessSocialPostResult = {
   readonly warnings?: string[] | null;
   readonly extractedGameData: AsyncItem<SocialPostGameData | undefined>;
   readonly placementsExtracted?: number | null;
+  readonly ticketSummary?: TicketExtractionSummary | null;
   readonly matchCandidates?: GameMatchCandidate[] | null;
   readonly primaryMatch?: GameMatchCandidate | null;
   readonly linksCreated?: number | null;
   readonly linksSkipped?: number | null;
   readonly linkDetails: AsyncCollection<SocialPostGameLink>;
+  readonly reconciliationPreview?: SocialToGameReconciliation | null;
   readonly processingTimeMs?: number | null;
 }
 
@@ -3319,6 +3570,8 @@ type EagerProcessBatchResult = {
   readonly totalLinksCreated?: number | null;
   readonly totalExtractionsDone?: number | null;
   readonly averageConfidence?: number | null;
+  readonly totalTicketsExtracted?: number | null;
+  readonly totalTicketValue?: number | null;
   readonly processingTimeMs?: number | null;
 }
 
@@ -3332,6 +3585,8 @@ type LazyProcessBatchResult = {
   readonly totalLinksCreated?: number | null;
   readonly totalExtractionsDone?: number | null;
   readonly averageConfidence?: number | null;
+  readonly totalTicketsExtracted?: number | null;
+  readonly totalTicketValue?: number | null;
   readonly processingTimeMs?: number | null;
 }
 
@@ -3410,6 +3665,194 @@ type LazySocialPostWithMatchInfo = {
 export declare type SocialPostWithMatchInfo = LazyLoading extends LazyLoadingDisabled ? EagerSocialPostWithMatchInfo : LazySocialPostWithMatchInfo
 
 export declare const SocialPostWithMatchInfo: (new (init: ModelInit<SocialPostWithMatchInfo>) => SocialPostWithMatchInfo)
+
+type EagerTicketExtractionSummary = {
+  readonly totalPlacements: number;
+  readonly placementsWithCash: number;
+  readonly placementsWithTickets: number;
+  readonly placementsWithBoth: number;
+  readonly placementsWithTicketOnly: number;
+  readonly totalCashPaid: number;
+  readonly totalTicketValue: number;
+  readonly totalCombinedValue: number;
+  readonly ticketsByType: TicketTypeCount[];
+  readonly topPlacements: PlacementPreview[];
+}
+
+type LazyTicketExtractionSummary = {
+  readonly totalPlacements: number;
+  readonly placementsWithCash: number;
+  readonly placementsWithTickets: number;
+  readonly placementsWithBoth: number;
+  readonly placementsWithTicketOnly: number;
+  readonly totalCashPaid: number;
+  readonly totalTicketValue: number;
+  readonly totalCombinedValue: number;
+  readonly ticketsByType: TicketTypeCount[];
+  readonly topPlacements: PlacementPreview[];
+}
+
+export declare type TicketExtractionSummary = LazyLoading extends LazyLoadingDisabled ? EagerTicketExtractionSummary : LazyTicketExtractionSummary
+
+export declare const TicketExtractionSummary: (new (init: ModelInit<TicketExtractionSummary>) => TicketExtractionSummary)
+
+type EagerTicketTypeCount = {
+  readonly ticketType: NonCashPrizeType | keyof typeof NonCashPrizeType;
+  readonly count: number;
+  readonly totalValue?: number | null;
+}
+
+type LazyTicketTypeCount = {
+  readonly ticketType: NonCashPrizeType | keyof typeof NonCashPrizeType;
+  readonly count: number;
+  readonly totalValue?: number | null;
+}
+
+export declare type TicketTypeCount = LazyLoading extends LazyLoadingDisabled ? EagerTicketTypeCount : LazyTicketTypeCount
+
+export declare const TicketTypeCount: (new (init: ModelInit<TicketTypeCount>) => TicketTypeCount)
+
+type EagerPlacementPreview = {
+  readonly place: number;
+  readonly playerName: string;
+  readonly cashPrize?: number | null;
+  readonly ticketType?: NonCashPrizeType | keyof typeof NonCashPrizeType | null;
+  readonly ticketValue?: number | null;
+  readonly ticketDescription?: string | null;
+  readonly totalValue?: number | null;
+  readonly rawText?: string | null;
+}
+
+type LazyPlacementPreview = {
+  readonly place: number;
+  readonly playerName: string;
+  readonly cashPrize?: number | null;
+  readonly ticketType?: NonCashPrizeType | keyof typeof NonCashPrizeType | null;
+  readonly ticketValue?: number | null;
+  readonly ticketDescription?: string | null;
+  readonly totalValue?: number | null;
+  readonly rawText?: string | null;
+}
+
+export declare type PlacementPreview = LazyLoading extends LazyLoadingDisabled ? EagerPlacementPreview : LazyPlacementPreview
+
+export declare const PlacementPreview: (new (init: ModelInit<PlacementPreview>) => PlacementPreview)
+
+type EagerSocialToGameReconciliation = {
+  readonly socialPostId: string;
+  readonly socialPostGameDataId?: string | null;
+  readonly gameId?: string | null;
+  readonly gameName?: string | null;
+  readonly gameDate?: string | null;
+  readonly social_totalCashPaid?: number | null;
+  readonly social_totalTicketCount?: number | null;
+  readonly social_totalTicketValue?: number | null;
+  readonly social_accumulatorCount?: number | null;
+  readonly social_accumulatorValue?: number | null;
+  readonly social_totalPlacements?: number | null;
+  readonly social_prizepoolTotal?: number | null;
+  readonly game_prizepoolPaid?: number | null;
+  readonly game_numberOfAccumulatorTicketsPaid?: number | null;
+  readonly game_accumulatorTicketValue?: number | null;
+  readonly game_totalEntries?: number | null;
+  readonly game_hasAccumulatorTickets?: boolean | null;
+  readonly cashDifference?: number | null;
+  readonly ticketCountDifference?: number | null;
+  readonly ticketValueDifference?: number | null;
+  readonly hasDiscrepancy: boolean;
+  readonly discrepancySeverity?: string | null;
+  readonly discrepancyNotes?: (string | null)[] | null;
+  readonly suggestedAction?: string | null;
+  readonly reconciledAt?: string | null;
+  readonly reconciledBy?: string | null;
+}
+
+type LazySocialToGameReconciliation = {
+  readonly socialPostId: string;
+  readonly socialPostGameDataId?: string | null;
+  readonly gameId?: string | null;
+  readonly gameName?: string | null;
+  readonly gameDate?: string | null;
+  readonly social_totalCashPaid?: number | null;
+  readonly social_totalTicketCount?: number | null;
+  readonly social_totalTicketValue?: number | null;
+  readonly social_accumulatorCount?: number | null;
+  readonly social_accumulatorValue?: number | null;
+  readonly social_totalPlacements?: number | null;
+  readonly social_prizepoolTotal?: number | null;
+  readonly game_prizepoolPaid?: number | null;
+  readonly game_numberOfAccumulatorTicketsPaid?: number | null;
+  readonly game_accumulatorTicketValue?: number | null;
+  readonly game_totalEntries?: number | null;
+  readonly game_hasAccumulatorTickets?: boolean | null;
+  readonly cashDifference?: number | null;
+  readonly ticketCountDifference?: number | null;
+  readonly ticketValueDifference?: number | null;
+  readonly hasDiscrepancy: boolean;
+  readonly discrepancySeverity?: string | null;
+  readonly discrepancyNotes?: (string | null)[] | null;
+  readonly suggestedAction?: string | null;
+  readonly reconciledAt?: string | null;
+  readonly reconciledBy?: string | null;
+}
+
+export declare type SocialToGameReconciliation = LazyLoading extends LazyLoadingDisabled ? EagerSocialToGameReconciliation : LazySocialToGameReconciliation
+
+export declare const SocialToGameReconciliation: (new (init: ModelInit<SocialToGameReconciliation>) => SocialToGameReconciliation)
+
+type EagerTicketReconciliationReport = {
+  readonly totalGamesChecked: number;
+  readonly gamesWithSocialData: number;
+  readonly gamesWithDiscrepancies: number;
+  readonly gamesMatched: number;
+  readonly totalCashDifference?: number | null;
+  readonly totalTicketCountDifference?: number | null;
+  readonly totalTicketValueDifference?: number | null;
+  readonly reconciliations: SocialToGameReconciliation[];
+  readonly nextToken?: string | null;
+}
+
+type LazyTicketReconciliationReport = {
+  readonly totalGamesChecked: number;
+  readonly gamesWithSocialData: number;
+  readonly gamesWithDiscrepancies: number;
+  readonly gamesMatched: number;
+  readonly totalCashDifference?: number | null;
+  readonly totalTicketCountDifference?: number | null;
+  readonly totalTicketValueDifference?: number | null;
+  readonly reconciliations: SocialToGameReconciliation[];
+  readonly nextToken?: string | null;
+}
+
+export declare type TicketReconciliationReport = LazyLoading extends LazyLoadingDisabled ? EagerTicketReconciliationReport : LazyTicketReconciliationReport
+
+export declare const TicketReconciliationReport: (new (init: ModelInit<TicketReconciliationReport>) => TicketReconciliationReport)
+
+type EagerReconcileResult = {
+  readonly success: boolean;
+  readonly socialPostGameDataId?: string | null;
+  readonly gameId?: string | null;
+  readonly fieldsUpdated?: (string | null)[] | null;
+  readonly previousValues?: string | null;
+  readonly newValues?: string | null;
+  readonly message?: string | null;
+  readonly error?: string | null;
+}
+
+type LazyReconcileResult = {
+  readonly success: boolean;
+  readonly socialPostGameDataId?: string | null;
+  readonly gameId?: string | null;
+  readonly fieldsUpdated?: (string | null)[] | null;
+  readonly previousValues?: string | null;
+  readonly newValues?: string | null;
+  readonly message?: string | null;
+  readonly error?: string | null;
+}
+
+export declare type ReconcileResult = LazyLoading extends LazyLoadingDisabled ? EagerReconcileResult : LazyReconcileResult
+
+export declare const ReconcileResult: (new (init: ModelInit<ReconcileResult>) => ReconcileResult)
 
 type EagerGameToSocialMatchResult = {
   readonly success: boolean;
@@ -3925,22 +4368,6 @@ export declare type BackgroundTaskInfo = LazyLoading extends LazyLoadingDisabled
 
 export declare const BackgroundTaskInfo: (new (init: ModelInit<BackgroundTaskInfo>) => BackgroundTaskInfo)
 
-type EagerSyncPageInfoResult = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly logoUrl?: string | null;
-}
-
-type LazySyncPageInfoResult = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly logoUrl?: string | null;
-}
-
-export declare type SyncPageInfoResult = LazyLoading extends LazyLoadingDisabled ? EagerSyncPageInfoResult : LazySyncPageInfoResult
-
-export declare const SyncPageInfoResult: (new (init: ModelInit<SyncPageInfoResult>) => SyncPageInfoResult)
-
 type EagerRefreshResponse = {
   readonly message: string;
   readonly status: string;
@@ -4366,10 +4793,12 @@ type EagerGame = {
   readonly tournamentSeriesId?: string | null;
   readonly tournamentSeries?: TournamentSeries | null;
   readonly structure?: TournamentStructure | null;
-  readonly gameCost?: GameCost | null;
-  readonly gameFinancialSnapshots?: (GameFinancialSnapshot | null)[] | null;
   readonly playerEntries?: (PlayerEntry | null)[] | null;
   readonly playerResults?: (PlayerResult | null)[] | null;
+  readonly gameCostId?: string | null;
+  readonly gameCost?: GameCost | null;
+  readonly gameFinancialSnapshotId?: string | null;
+  readonly gameFinancialSnapshot?: GameFinancialSnapshot | null;
   readonly linkedSocialPosts?: (SocialPost | null)[] | null;
   readonly socialPostLinks?: (SocialPostGameLink | null)[] | null;
   readonly linkedSocialPostCount?: number | null;
@@ -4518,10 +4947,12 @@ type LazyGame = {
   readonly tournamentSeriesId?: string | null;
   readonly tournamentSeries: AsyncItem<TournamentSeries | undefined>;
   readonly structure: AsyncItem<TournamentStructure | undefined>;
-  readonly gameCost: AsyncItem<GameCost | undefined>;
-  readonly gameFinancialSnapshots: AsyncCollection<GameFinancialSnapshot>;
   readonly playerEntries: AsyncCollection<PlayerEntry>;
   readonly playerResults: AsyncCollection<PlayerResult>;
+  readonly gameCostId?: string | null;
+  readonly gameCost: AsyncItem<GameCost | undefined>;
+  readonly gameFinancialSnapshotId?: string | null;
+  readonly gameFinancialSnapshot: AsyncItem<GameFinancialSnapshot | undefined>;
   readonly linkedSocialPosts: AsyncCollection<SocialPost>;
   readonly socialPostLinks: AsyncCollection<SocialPostGameLink>;
   readonly linkedSocialPostCount?: number | null;
@@ -7098,6 +7529,7 @@ type EagerSocialAccount = {
   readonly followingCount?: number | null;
   readonly postCount?: number | null;
   readonly hasFullHistory?: boolean | null;
+  readonly fullSyncOldestPostDate?: string | null;
   readonly pageDescription?: string | null;
   readonly category?: string | null;
   readonly website?: string | null;
@@ -7142,6 +7574,7 @@ type LazySocialAccount = {
   readonly followingCount?: number | null;
   readonly postCount?: number | null;
   readonly hasFullHistory?: boolean | null;
+  readonly fullSyncOldestPostDate?: string | null;
   readonly pageDescription?: string | null;
   readonly category?: string | null;
   readonly website?: string | null;
@@ -7228,6 +7661,8 @@ type EagerSocialPost = {
   readonly linkedGameCount?: number | null;
   readonly hasUnverifiedLinks?: boolean | null;
   readonly postYearMonth?: string | null;
+  readonly effectiveGameDate?: string | null;
+  readonly effectiveGameDateSource?: string | null;
   readonly socialAccountId: string;
   readonly socialAccount?: SocialAccount | null;
   readonly entityId?: string | null;
@@ -7291,6 +7726,8 @@ type LazySocialPost = {
   readonly linkedGameCount?: number | null;
   readonly hasUnverifiedLinks?: boolean | null;
   readonly postYearMonth?: string | null;
+  readonly effectiveGameDate?: string | null;
+  readonly effectiveGameDateSource?: string | null;
   readonly socialAccountId: string;
   readonly socialAccount: AsyncItem<SocialAccount | undefined>;
   readonly entityId?: string | null;
@@ -7422,6 +7859,18 @@ type EagerSocialPostGameLink = {
   readonly extractedDate?: string | null;
   readonly extractedBuyIn?: number | null;
   readonly extractedGuarantee?: number | null;
+  readonly effectiveGameDate?: string | null;
+  readonly socialPostGameDataId?: string | null;
+  readonly hasTicketData?: boolean | null;
+  readonly ticketData?: string | null;
+  readonly reconciliationPreview?: string | null;
+  readonly hasReconciliationDiscrepancy?: boolean | null;
+  readonly reconciliationDiscrepancySeverity?: string | null;
+  readonly extractedWinnerName?: string | null;
+  readonly extractedWinnerPrize?: number | null;
+  readonly extractedTotalEntries?: number | null;
+  readonly placementCount?: number | null;
+  readonly contentType?: SocialPostContentType | keyof typeof SocialPostContentType | null;
   readonly linkedAt: string;
   readonly linkedBy?: string | null;
   readonly verifiedAt?: string | null;
@@ -7450,6 +7899,18 @@ type LazySocialPostGameLink = {
   readonly extractedDate?: string | null;
   readonly extractedBuyIn?: number | null;
   readonly extractedGuarantee?: number | null;
+  readonly effectiveGameDate?: string | null;
+  readonly socialPostGameDataId?: string | null;
+  readonly hasTicketData?: boolean | null;
+  readonly ticketData?: string | null;
+  readonly reconciliationPreview?: string | null;
+  readonly hasReconciliationDiscrepancy?: boolean | null;
+  readonly reconciliationDiscrepancySeverity?: string | null;
+  readonly extractedWinnerName?: string | null;
+  readonly extractedWinnerPrize?: number | null;
+  readonly extractedTotalEntries?: number | null;
+  readonly placementCount?: number | null;
+  readonly contentType?: SocialPostContentType | keyof typeof SocialPostContentType | null;
   readonly linkedAt: string;
   readonly linkedBy?: string | null;
   readonly verifiedAt?: string | null;
@@ -7490,6 +7951,8 @@ type EagerSocialPostGameData = {
   readonly extractedDayOfWeek?: string | null;
   readonly extractedStartTime?: string | null;
   readonly dateSource?: string | null;
+  readonly effectiveGameDate?: string | null;
+  readonly effectiveGameDateSource?: string | null;
   readonly extractedBuyIn?: number | null;
   readonly extractedGuarantee?: number | null;
   readonly extractedPrizePool?: number | null;
@@ -7510,9 +7973,34 @@ type EagerSocialPostGameData = {
   readonly isSeriesEvent?: boolean | null;
   readonly extractedWinnerName?: string | null;
   readonly extractedWinnerPrize?: number | null;
+  readonly extractedWinnerHasTicket?: boolean | null;
+  readonly extractedWinnerTicketType?: NonCashPrizeType | keyof typeof NonCashPrizeType | null;
+  readonly extractedWinnerTicketValue?: number | null;
+  readonly extractedWinnerTotalValue?: number | null;
   readonly placementCount?: number | null;
+  readonly totalTicketsExtracted?: number | null;
+  readonly totalTicketValue?: number | null;
+  readonly ticketCountByType?: string | null;
+  readonly ticketValueByType?: string | null;
+  readonly totalCashPaid?: number | null;
+  readonly totalPrizesWithTickets?: number | null;
+  readonly totalTicketOnlyPrizes?: number | null;
+  readonly hasAdvertisedTickets?: boolean | null;
+  readonly advertisedTicketCount?: number | null;
+  readonly advertisedTicketType?: NonCashPrizeType | keyof typeof NonCashPrizeType | null;
+  readonly advertisedTicketValue?: number | null;
+  readonly advertisedTicketDescription?: string | null;
+  readonly advertisedTickets?: string | null;
+  readonly reconciliation_accumulatorTicketCount?: number | null;
+  readonly reconciliation_accumulatorTicketValue?: number | null;
+  readonly reconciliation_totalPrizepoolPaid?: number | null;
+  readonly reconciliation_cashPlusTotalTicketValue?: number | null;
+  readonly hasReconciliationDiscrepancy?: boolean | null;
+  readonly reconciliationNotes?: string | null;
+  readonly reconciliationCheckedAt?: string | null;
   readonly suggestedGameId?: string | null;
   readonly matchCandidateCount?: number | null;
+  readonly matchCandidates?: string | null;
   readonly patternMatches?: string | null;
   readonly extractedPrizes?: string | null;
   readonly extractedAt: string;
@@ -7546,6 +8034,8 @@ type LazySocialPostGameData = {
   readonly extractedDayOfWeek?: string | null;
   readonly extractedStartTime?: string | null;
   readonly dateSource?: string | null;
+  readonly effectiveGameDate?: string | null;
+  readonly effectiveGameDateSource?: string | null;
   readonly extractedBuyIn?: number | null;
   readonly extractedGuarantee?: number | null;
   readonly extractedPrizePool?: number | null;
@@ -7566,9 +8056,34 @@ type LazySocialPostGameData = {
   readonly isSeriesEvent?: boolean | null;
   readonly extractedWinnerName?: string | null;
   readonly extractedWinnerPrize?: number | null;
+  readonly extractedWinnerHasTicket?: boolean | null;
+  readonly extractedWinnerTicketType?: NonCashPrizeType | keyof typeof NonCashPrizeType | null;
+  readonly extractedWinnerTicketValue?: number | null;
+  readonly extractedWinnerTotalValue?: number | null;
   readonly placementCount?: number | null;
+  readonly totalTicketsExtracted?: number | null;
+  readonly totalTicketValue?: number | null;
+  readonly ticketCountByType?: string | null;
+  readonly ticketValueByType?: string | null;
+  readonly totalCashPaid?: number | null;
+  readonly totalPrizesWithTickets?: number | null;
+  readonly totalTicketOnlyPrizes?: number | null;
+  readonly hasAdvertisedTickets?: boolean | null;
+  readonly advertisedTicketCount?: number | null;
+  readonly advertisedTicketType?: NonCashPrizeType | keyof typeof NonCashPrizeType | null;
+  readonly advertisedTicketValue?: number | null;
+  readonly advertisedTicketDescription?: string | null;
+  readonly advertisedTickets?: string | null;
+  readonly reconciliation_accumulatorTicketCount?: number | null;
+  readonly reconciliation_accumulatorTicketValue?: number | null;
+  readonly reconciliation_totalPrizepoolPaid?: number | null;
+  readonly reconciliation_cashPlusTotalTicketValue?: number | null;
+  readonly hasReconciliationDiscrepancy?: boolean | null;
+  readonly reconciliationNotes?: string | null;
+  readonly reconciliationCheckedAt?: string | null;
   readonly suggestedGameId?: string | null;
   readonly matchCandidateCount?: number | null;
+  readonly matchCandidates?: string | null;
   readonly patternMatches?: string | null;
   readonly extractedPrizes?: string | null;
   readonly extractedAt: string;
@@ -7598,11 +8113,19 @@ type EagerSocialPostPlacement = {
   readonly cashPrizeRaw?: string | null;
   readonly hasNonCashPrize?: boolean | null;
   readonly nonCashPrizes?: string | null;
+  readonly primaryTicketType?: NonCashPrizeType | keyof typeof NonCashPrizeType | null;
+  readonly primaryTicketValue?: number | null;
+  readonly primaryTicketDescription?: string | null;
+  readonly ticketCount?: number | null;
   readonly totalEstimatedValue?: number | null;
   readonly wasChop?: boolean | null;
   readonly wasICMDeal?: boolean | null;
+  readonly chopDetails?: string | null;
   readonly rawText?: string | null;
   readonly linkedPlayerId?: string | null;
+  readonly linkedPlayerTicketId?: string | null;
+  readonly playerLinkConfidence?: number | null;
+  readonly playerLinkMethod?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -7620,11 +8143,19 @@ type LazySocialPostPlacement = {
   readonly cashPrizeRaw?: string | null;
   readonly hasNonCashPrize?: boolean | null;
   readonly nonCashPrizes?: string | null;
+  readonly primaryTicketType?: NonCashPrizeType | keyof typeof NonCashPrizeType | null;
+  readonly primaryTicketValue?: number | null;
+  readonly primaryTicketDescription?: string | null;
+  readonly ticketCount?: number | null;
   readonly totalEstimatedValue?: number | null;
   readonly wasChop?: boolean | null;
   readonly wasICMDeal?: boolean | null;
+  readonly chopDetails?: string | null;
   readonly rawText?: string | null;
   readonly linkedPlayerId?: string | null;
+  readonly linkedPlayerTicketId?: string | null;
+  readonly playerLinkConfidence?: number | null;
+  readonly playerLinkMethod?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
-import { generateClient } from 'aws-amplify/api';
+import { getClient } from '../../../utils/apiClient';
 import {
   ShareIcon,
   HeartIcon,
@@ -713,7 +713,7 @@ export const SocialsTab: React.FC<SocialsTabProps> = ({ game }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const client = useMemo(() => generateClient(), []);
+  const client = useMemo(() => getClient(), []);
   
   // Fetch links for this game
   const fetchLinks = useCallback(async () => {

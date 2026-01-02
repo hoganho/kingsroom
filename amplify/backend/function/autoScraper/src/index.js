@@ -21,7 +21,13 @@
 Amplify Params - DO NOT EDIT */
 
 // autoScraper Lambda
-// UPDATED v4.3.0:
+// UPDATED v4.4.0:
+// - Added JobProgressPublisher for real-time job monitoring via onJobProgress subscription
+// - Progress events published periodically during processing (replaces polling on frontend)
+// - Completion events always published immediately
+// - Reduced DynamoDB update frequency (progress now primarily via subscription)
+//
+// Previous updates:
 // - Modularized: GraphQL queries, prefetch cache, and scraping engine extracted
 // - Added real-time game streaming via publishGameProcessed mutation
 // - Events published after each game is processed (fire-and-forget pattern)
@@ -40,6 +46,7 @@ const {
     PutCommand,
     UpdateCommand
 } = require("@aws-sdk/lib-dynamodb");
+const { LambdaClient, InvokeCommand } = require("@aws-sdk/client-lambda");
 const { v4: uuidv4 } = require('uuid');
 
 // AppSync Client
@@ -48,12 +55,13 @@ const fetch = require('node-fetch');
 const aws4 = require('aws4');
 
 // Extracted modules
-const { PUBLISH_GAME_PROCESSED } = require('./graphql/queries');
+const { PUBLISH_GAME_PROCESSED, PUBLISH_JOB_PROGRESS } = require('./graphql/queries');
 const { performScrapingEnhanced } = require('./engine/scrapingEngine');
 
 // Initialize AWS clients
 const ddbClient = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
+const lambdaClient = new LambdaClient({});
 
 // Lambda Monitoring
 const { LambdaMonitoring } = require('./lambda-monitoring'); 
@@ -74,10 +82,14 @@ const DEFAULT_MAX_TOTAL_ERRORS = parseInt(process.env.MAX_TOTAL_ERRORS || '15', 
 // Progress update frequency (publish every N items)
 const PROGRESS_UPDATE_FREQUENCY = 5;
 
+// Job progress publish frequency (in milliseconds) - rate limit for subscription events
+const JOB_PROGRESS_MIN_INTERVAL_MS = 1000;
+
 // Stop reason enum
 const STOP_REASON = {
     COMPLETED: 'COMPLETED',
     TIMEOUT: 'STOPPED_TIMEOUT',
+    CONTINUING: 'CONTINUING',  // Self-continuation triggered
     BLANKS: 'STOPPED_BLANKS',
     NOT_FOUND: 'STOPPED_NOT_FOUND',
     ERROR: 'STOPPED_ERROR',
@@ -176,6 +188,93 @@ async function callGraphQL(query, variables, entityId = null) {
     } catch (error) {
         console.error(`[callGraphQL] Error calling ${operationName}:`, error);
         throw error;
+    }
+}
+
+// ===================================================================
+// JOB PROGRESS PUBLISHING (NEW in v4.4.0)
+// ===================================================================
+
+/**
+ * JobProgressPublisher - Manages rate-limited publishing of job progress events
+ * Events are published to the onJobProgress subscription for real-time UI updates
+ */
+class JobProgressPublisher {
+    constructor(jobId, entityId, jobStartTime, startId = null, endId = null) {
+        this.jobId = jobId;
+        this.entityId = entityId;
+        this.jobStartTime = jobStartTime;
+        this.startId = startId;
+        this.endId = endId;
+        this.lastPublishTime = 0;
+        this.minIntervalMs = JOB_PROGRESS_MIN_INTERVAL_MS;
+    }
+
+    /**
+     * Check if enough time has passed since last publish
+     */
+    canPublish() {
+        return Date.now() - this.lastPublishTime >= this.minIntervalMs;
+    }
+
+    /**
+     * Calculate duration since job started
+     */
+    getDurationSeconds() {
+        return Math.floor((Date.now() - this.jobStartTime) / 1000);
+    }
+
+    /**
+     * Publish job progress event (rate-limited unless forced)
+     */
+    async publishProgress(stats, status = 'RUNNING', options = {}) {
+        const { force = false, stopReason = null, lastErrorMessage = null, currentId = null } = options;
+
+        // Skip if we've published too recently (unless forced)
+        if (!force && !this.canPublish()) {
+            return;
+        }
+
+        const event = {
+            jobId: this.jobId,
+            entityId: this.entityId,
+            status: status,
+            stopReason: stopReason,
+            totalURLsProcessed: stats.totalProcessed || 0,
+            newGamesScraped: stats.newGamesScraped || 0,
+            gamesUpdated: stats.gamesUpdated || 0,
+            gamesSkipped: stats.gamesSkipped || 0,
+            errors: stats.errors || 0,
+            blanks: stats.blanks || 0,
+            currentId: currentId,
+            startId: this.startId,
+            endId: this.endId,
+            startTime: new Date(this.jobStartTime).toISOString(),
+            durationSeconds: this.getDurationSeconds(),
+            successRate: stats.successRate ?? null,
+            averageScrapingTime: stats.averageScrapingTime ?? null,
+            s3CacheHits: stats.s3CacheHits ?? null,
+            consecutiveNotFound: stats.consecutiveNotFound ?? null,
+            consecutiveErrors: stats.consecutiveErrors ?? null,
+            consecutiveBlanks: stats.consecutiveBlanks ?? null,
+            lastErrorMessage: lastErrorMessage,
+        };
+
+        try {
+            await callGraphQL(PUBLISH_JOB_PROGRESS, { jobId: this.jobId, event }, this.entityId);
+            this.lastPublishTime = Date.now();
+            console.log(`[JobProgressPublisher] Published: ${status} - ${stats.totalProcessed || 0} processed`);
+        } catch (error) {
+            // Log but don't throw - subscription failures shouldn't break the job
+            console.warn(`[JobProgressPublisher] Failed to publish progress:`, error.message);
+        }
+    }
+
+    /**
+     * Publish completion event (always publishes immediately)
+     */
+    async publishCompletion(stats, finalStatus, options = {}) {
+        return this.publishProgress(stats, finalStatus, { ...options, force: true });
     }
 }
 
@@ -378,6 +477,7 @@ async function createScraperJob(entityId, triggerSource, triggeredBy, options = 
     const now = new Date().toISOString();
     const job = {
         id: uuidv4(),
+        jobId: uuidv4(),  // Also set jobId for consistency
         entityId,
         status: 'RUNNING',
         triggerSource,
@@ -395,9 +495,11 @@ async function createScraperJob(entityId, triggerSource, triggeredBy, options = 
         createdAt: now,
         updatedAt: now,
         _lastChangedAt: Date.now(),
-        _version: 1,
-        __typename: 'ScraperJob'
+        _version: 1
     };
+    
+    // Ensure jobId matches id
+    job.jobId = job.id;
     
     await monitoredDdbDocClient.send(new PutCommand({
         TableName: scraperJobTable,
@@ -408,75 +510,92 @@ async function createScraperJob(entityId, triggerSource, triggeredBy, options = 
 }
 
 // ===================================================================
-// ENTITY LOOKUP (for URL building)
+// SCRAPING CONTEXT BUILDER
 // ===================================================================
 
-const entityCache = new Map();
-
-async function getEntity(entityId) {
-    if (entityCache.has(entityId)) {
-        return entityCache.get(entityId);
-    }
+function buildScrapingContext(jobId = null, entityId = null, options = {}) {
+    const invocationStartTime = Date.now();
+    const functionName = process.env.AWS_LAMBDA_FUNCTION_NAME;
     
-    try {
-        const entityTable = getTableName('Entity');
-        const result = await monitoredDdbDocClient.send(new GetCommand({
-            TableName: entityTable,
-            Key: { id: entityId }
-        }));
-        
-        if (result.Item) {
-            entityCache.set(entityId, result.Item);
-            return result.Item;
-        }
-        
-        throw new Error(`Entity not found: ${entityId}`);
-    } catch (error) {
-        console.error(`[getEntity] Error fetching entity ${entityId}:`, error);
-        throw error;
-    }
-}
-
-// ===================================================================
-// URL BUILDING
-// ===================================================================
-
-async function buildTournamentUrl(entityId, tournamentId) {
-    const entity = await getEntity(entityId);
+    // Create job progress publisher if we have a jobId
+    const progressPublisher = jobId && entityId 
+        ? new JobProgressPublisher(
+            jobId, 
+            entityId, 
+            invocationStartTime,
+            options.startId,
+            options.endId
+          )
+        : null;
     
-    if (!entity.gameUrlDomain || !entity.gameUrlPath) {
-        throw new Error(`Entity ${entityId} missing gameUrlDomain or gameUrlPath`);
-    }
-    
-    return `${entity.gameUrlDomain}${entity.gameUrlPath}${tournamentId}`;
-}
-
-// ===================================================================
-// SCRAPING ENGINE CONTEXT
-// ===================================================================
-
-/**
- * Build context object with all dependencies for the scraping engine
- */
-function buildScrapingContext() {
     return {
-        callGraphQL,
-        getEntity,
-        buildTournamentUrl,
-        getScraperJob,
-        updateScraperJob,
-        updateScraperState,
-        publishGameProcessedEvent,
-        ddbDocClient: monitoredDdbDocClient,
-        scrapeURLTable,
-        STOP_REASON,
-        LAMBDA_TIMEOUT,
-        LAMBDA_TIMEOUT_BUFFER,
-        PROGRESS_UPDATE_FREQUENCY,
-        DEFAULT_MAX_CONSECUTIVE_NOT_FOUND,
-        DEFAULT_MAX_CONSECUTIVE_ERRORS,
-        DEFAULT_MAX_CONSECUTIVE_BLANKS,
-        DEFAULT_MAX_TOTAL_ERRORS
+        // Timing
+        invocationStartTime,
+        lambdaTimeout: LAMBDA_TIMEOUT,
+        timeoutBuffer: LAMBDA_TIMEOUT_BUFFER,
+        
+        // Thresholds (use job config or defaults)
+        maxConsecutiveBlanks: options.maxConsecutiveBlanks || DEFAULT_MAX_CONSECUTIVE_BLANKS,
+        maxConsecutiveErrors: options.maxConsecutiveErrors || DEFAULT_MAX_CONSECUTIVE_ERRORS,
+        maxConsecutiveNotFound: options.maxConsecutiveNotFound || DEFAULT_MAX_CONSECUTIVE_NOT_FOUND,
+        maxTotalErrors: options.maxTotalErrors || DEFAULT_MAX_TOTAL_ERRORS,
+        
+        // Progress tracking
+        progressUpdateFrequency: PROGRESS_UPDATE_FREQUENCY,
+        
+        // Job progress publisher (NEW in v4.4.0)
+        progressPublisher,
+        
+        // Callbacks
+        onGameProcessed: publishGameProcessedEvent,
+        onProgress: async (stats, currentId) => {
+            // Publish progress to subscription (rate-limited)
+            if (progressPublisher) {
+                await progressPublisher.publishProgress(stats, 'RUNNING', { currentId });
+            }
+        },
+        
+        // Continuation support
+        selfContinue: jobId ? async (currentId, accumulatedResults, originalOptions) => {
+            console.log(`[AutoScraper] Self-continuing from ID ${currentId}`);
+            
+            // Publish continuation status
+            if (progressPublisher) {
+                await progressPublisher.publishProgress(accumulatedResults, 'RUNNING', { 
+                    currentId,
+                    stopReason: STOP_REASON.CONTINUING 
+                });
+            }
+            
+            const continuationPayload = {
+                operation: 'executeJob',
+                jobId,
+                entityId,
+                isContinuation: true,
+                continueFromId: currentId,
+                originalEndId: originalOptions.endId || options.endId,
+                accumulatedResults: {
+                    totalProcessed: accumulatedResults.totalProcessed || 0,
+                    newGamesScraped: accumulatedResults.newGamesScraped || 0,
+                    gamesUpdated: accumulatedResults.gamesUpdated || 0,
+                    gamesSkipped: accumulatedResults.gamesSkipped || 0,
+                    errors: accumulatedResults.errors || 0,
+                    blanks: accumulatedResults.blanks || 0,
+                    notFoundCount: accumulatedResults.notFoundCount || 0,
+                    s3CacheHits: accumulatedResults.s3CacheHits || 0,
+                },
+                // Pass through original options
+                ...originalOptions,
+            };
+            
+            await lambdaClient.send(new InvokeCommand({
+                FunctionName: functionName,
+                InvocationType: 'Event',  // Async - fire and forget
+                Payload: JSON.stringify(continuationPayload),
+            }));
+            
+            console.log(`[AutoScraper] Continuation invoked successfully for job ${jobId}`);
+        } : null  // No continuation if no jobId
     };
 }
 
@@ -530,7 +649,18 @@ async function executeJob(event) {
         return { success: false, error: 'jobId and entityId required' };
     }
 
-    console.log(`[executeJob] Starting job ${jobId} for entity ${entityId}`);
+    // Handle continuation - check if this is a continuation invocation
+    const isContinuation = event.isContinuation || false;
+    const accumulatedResults = event.accumulatedResults || null;
+    const continueFromId = event.continueFromId || null;
+    const originalEndId = event.originalEndId || null;
+
+    if (isContinuation) {
+        console.log(`[executeJob] CONTINUATION for job ${jobId} from ID ${continueFromId}`);
+        console.log(`[executeJob] Accumulated results:`, JSON.stringify(accumulatedResults));
+    } else {
+        console.log(`[executeJob] Starting job ${jobId} for entity ${entityId}`);
+    }
     
     const jobStartTime = Date.now();
     
@@ -541,22 +671,43 @@ async function executeJob(event) {
     
     const scraperState = await getOrCreateScraperState(entityId);
     
-    await updateScraperState(scraperState.id, {
-        isRunning: true,
-        lastRunStartTime: new Date(jobStartTime).toISOString(),
-        currentJobId: jobId
-    });
+    // Create progress publisher for this job
+    const progressPublisher = new JobProgressPublisher(
+        jobId, 
+        entityId, 
+        jobStartTime,
+        job.startId,
+        job.endId
+    );
     
-    await updateScraperJob(jobId, { status: 'RUNNING' });
+    // Only update state if not a continuation (continuation keeps isRunning true)
+    if (!isContinuation) {
+        await updateScraperState(scraperState.id, {
+            isRunning: true,
+            lastRunStartTime: new Date(jobStartTime).toISOString(),
+            currentJobId: jobId
+        });
+        
+        await updateScraperJob(jobId, { status: 'RUNNING' });
+        
+        // Publish initial "RUNNING" status
+        await progressPublisher.publishProgress({
+            totalProcessed: 0,
+            newGamesScraped: 0,
+            gamesUpdated: 0,
+            gamesSkipped: 0,
+            errors: 0,
+            blanks: 0,
+        }, 'RUNNING', { force: true });
+    }
     
     try {
-        const ctx = buildScrapingContext();
-        
-        const results = await performScrapingEnhanced(entityId, scraperState, jobId, {
+        // Build options for scraping
+        const scrapingOptions = {
             mode: job.mode || 'bulk',
             bulkCount: job.bulkCount,
-            startId: job.startId,
-            endId: job.endId,
+            startId: isContinuation ? continueFromId : job.startId,
+            endId: isContinuation ? originalEndId : job.endId,
             maxId: job.maxId,
             gapIds: job.gapIds,
             forceRefresh: job.forceRefresh,
@@ -564,17 +715,61 @@ async function executeJob(event) {
             skipNotFoundGaps: job.skipNotFoundGaps,
             saveToDatabase: job.saveToDatabase !== false,
             defaultVenueId: job.defaultVenueId,
+            scraperApiKey: job.scraperApiKey || null,
             maxConsecutiveNotFound: job.maxConsecutiveNotFound,
             maxConsecutiveErrors: job.maxConsecutiveErrors,
             maxConsecutiveBlanks: job.maxConsecutiveBlanks,
             maxTotalErrors: job.maxTotalErrors,
-        }, ctx);
+            // Pass accumulated results for continuation
+            accumulatedResults: accumulatedResults,
+        };
+
+        // Build context with job progress publisher
+        const ctx = buildScrapingContext(jobId, entityId, scrapingOptions);
+        
+        const results = await performScrapingEnhanced(entityId, scraperState, jobId, scrapingOptions, ctx);
         
         const jobEndTime = Date.now();
         const durationSeconds = Math.floor((jobEndTime - jobStartTime) / 1000);
         
+        // Handle CONTINUING status - don't finalize the job
+        if (results.stopReason === STOP_REASON.CONTINUING || results.stopReason === 'CONTINUING') {
+            console.log(`[executeJob] Job ${jobId} continuing in new invocation from ID ${results.currentId}`);
+            
+            // Update job with progress but keep status as RUNNING
+            await updateScraperJob(jobId, {
+                totalURLsProcessed: results.totalProcessed,
+                newGamesScraped: results.newGamesScraped,
+                gamesUpdated: results.gamesUpdated,
+                gamesSkipped: results.gamesSkipped,
+                errors: results.errors,
+                notFoundCount: results.notFoundCount,
+                blanks: results.blanks,
+                s3CacheHits: results.s3CacheHits,
+                currentId: results.currentId,
+                // Don't set endTime or final status - job is still running
+            });
+            
+            // Publish continuation progress
+            await progressPublisher.publishProgress(results, 'RUNNING', {
+                currentId: results.currentId,
+                stopReason: STOP_REASON.CONTINUING,
+            });
+            
+            // Don't reset scraper state - let continuation handle it
+            return {
+                success: true,
+                jobId,
+                status: 'CONTINUING',
+                results,
+                durationSeconds,
+                message: `Continuation invoked from ID ${results.currentId}`
+            };
+        }
+        
         const finalStatus = results.stopReason || STOP_REASON.COMPLETED;
         
+        // Update DynamoDB with final results
         await updateScraperJob(jobId, {
             status: finalStatus,
             totalURLsProcessed: results.totalProcessed,
@@ -594,6 +789,13 @@ async function executeJob(event) {
             durationSeconds: durationSeconds
         });
 
+        // Publish completion event (always publishes immediately)
+        await progressPublisher.publishCompletion(results, finalStatus, {
+            stopReason: results.stopReason !== STOP_REASON.COMPLETED ? results.stopReason : null,
+            lastErrorMessage: results.lastErrorMessage,
+            currentId: results.currentId,
+        });
+
         console.log(`[executeJob] Job ${jobId} completed: ${finalStatus}`);
         console.log(`[executeJob] Results:`, JSON.stringify(results, null, 2));
 
@@ -611,6 +813,7 @@ async function executeJob(event) {
         const jobEndTime = Date.now();
         const durationSeconds = Math.floor((jobEndTime - jobStartTime) / 1000);
         
+        // Update DynamoDB with failure
         await updateScraperJob(jobId, {
             status: 'FAILED',
             stopReason: 'FAILED',
@@ -619,14 +822,33 @@ async function executeJob(event) {
             durationSeconds: durationSeconds
         });
 
+        // Publish failure event
+        await progressPublisher.publishCompletion({
+            totalProcessed: 0,
+            newGamesScraped: 0,
+            gamesUpdated: 0,
+            gamesSkipped: 0,
+            errors: 1,
+            blanks: 0,
+        }, 'FAILED', {
+            stopReason: 'FAILED',
+            lastErrorMessage: error.message,
+        });
+
         throw error;
 
     } finally {
-        await updateScraperState(scraperState.id, {
-            isRunning: false,
-            lastRunEndTime: new Date().toISOString(),
-            currentJobId: null
-        });
+        // Only reset scraper state if job is truly done (not continuing)
+        const currentJob = await getScraperJob(jobId);
+        const isStillRunning = currentJob?.status === 'RUNNING' || currentJob?.status === 'CONTINUING';
+        
+        if (!isStillRunning) {
+            await updateScraperState(scraperState.id, {
+                isRunning: false,
+                lastRunEndTime: new Date().toISOString(),
+                currentJobId: null
+            });
+        }
     }
 }
 
@@ -716,7 +938,29 @@ exports.handler = async (event) => {
                 endId: args.endId
             });
 
-            const ctx = buildScrapingContext();
+            // Create progress publisher for this job
+            const progressPublisher = new JobProgressPublisher(
+                job.id,
+                entityId,
+                jobStartTime,
+                args.startId,
+                args.endId
+            );
+
+            // Publish initial status
+            await progressPublisher.publishProgress({
+                totalProcessed: 0,
+                newGamesScraped: 0,
+                gamesUpdated: 0,
+                gamesSkipped: 0,
+                errors: 0,
+                blanks: 0,
+            }, 'RUNNING', { force: true });
+
+            const ctx = buildScrapingContext(job.id, entityId, {
+                startId: args.startId,
+                endId: args.endId,
+            });
             
             const scrapeResults = await performScrapingEnhanced(entityId, scraperState, job.id, {
                 mode: 'bulk',
@@ -747,6 +991,11 @@ exports.handler = async (event) => {
                 status: jobStatus,
                 endTime: new Date(jobEndTime).toISOString(),
                 durationSeconds: durationSeconds
+            });
+
+            // Publish completion event
+            await progressPublisher.publishCompletion(scrapeResults, jobStatus, {
+                stopReason: jobStatus !== STOP_REASON.COMPLETED ? jobStatus : null,
             });
             
             await updateScraperState(scraperState.id, {

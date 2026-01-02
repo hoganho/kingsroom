@@ -21,13 +21,15 @@ export interface ProcessingOptions {
   skipMatching?: boolean;      // Only extract, don't match to games
   skipLinking?: boolean;       // Extract and match, but don't create links
   matchThreshold?: number;     // Override default auto-link threshold (0-100)
+  skipBelowThreshold?: boolean;
 }
 
 export const DEFAULT_PROCESSING_OPTIONS: ProcessingOptions = {
   forceReprocess: false,
   skipMatching: false,
   skipLinking: false,
-  matchThreshold: 80,
+  matchThreshold: 75,
+  skipBelowThreshold: true,
 };
 
 // ===================================================================

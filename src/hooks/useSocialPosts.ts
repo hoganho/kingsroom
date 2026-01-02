@@ -19,6 +19,11 @@ import {
   ModelSortDirection
 } from '../API';
 
+// ========================================
+// AEST FIX: Import the AEST utility
+// ========================================
+import { getDaysAgoAEST } from '../lib/utils';
+
 export type { SocialPost, UpdateSocialPostInput };
 export { SocialPostStatus };
 
@@ -50,12 +55,21 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
   const { filterByEntity = true, daysBack } = options;
   const effectiveEntityId = options.entityId || (filterByEntity ? currentEntity?.id : undefined);
   
-  // Calculate the date string for filtering
+  // ========================================
+  // AEST FIX: Calculate date in AEST context
+  // ========================================
+  // OLD (wrong - uses browser timezone):
+  // const minDate = useMemo(() => {
+  //   if (!daysBack) return undefined;
+  //   const d = new Date();
+  //   d.setDate(d.getDate() - daysBack);
+  //   return d.toISOString();
+  // }, [daysBack]);
+  
+  // NEW (correct - uses AEST):
   const minDate = useMemo(() => {
     if (!daysBack) return undefined;
-    const d = new Date();
-    d.setDate(d.getDate() - daysBack);
-    return d.toISOString();
+    return getDaysAgoAEST(daysBack);
   }, [daysBack]);
 
   /**

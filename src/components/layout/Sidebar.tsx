@@ -61,7 +61,7 @@ const mainNavigation: NavItem[] = [
     name: "Series",
     href: "/series/dashboard",
     icon: TrophyIcon,
-    requiredPaths: ["/series/dashboard"],
+    requiredPaths: ["/series/dashboard", "/series/details", "/series/game"],
     children: [
       { name: "Dashboard", href: "/series/dashboard", icon: TrophyIcon, requiredPaths: ["/series/dashboard"] },
     ],
@@ -80,7 +80,7 @@ const mainNavigation: NavItem[] = [
     name: "Venues",
     href: "/venues",
     icon: BuildingOffice2Icon,
-    requiredPaths: ["/venues", "/venues/details"],
+    requiredPaths: ["/venues", "/venues/details", "/venues/game"],
   },
   {
     name: "Entities",
@@ -105,7 +105,7 @@ const settingsNavigation: NavItem[] = [
   { name: "Venue Management", href: "/settings/venue-management", icon: BuildingOffice2Icon, requiredPaths: ["/settings/venue-management"] },
   { name: "Game Management", href: "/settings/game-management", icon: BeakerIcon, requiredPaths: ["/settings/game-management"] },
   { name: "Series Management", href: "/settings/series-management", icon: TrophyIcon, requiredPaths: ["/settings/series-management"] },
-  { name: 'Metrics Management', href: '/settings/metrics-management', icon: ChartBarIcon, requiredPaths: ["/settings/series-management"] },
+  { name: 'Metrics Management', href: '/settings/metrics-management', icon: ChartBarIcon, requiredPaths: ["/settings/metrics-management"] },
   { name: "Social Accounts", href: "/settings/social-accounts", icon: HashtagIcon, requiredPaths: ["/settings/social-accounts"] },
   { name: "User Management", href: "/settings/user-management", icon: UsersIcon, requiredPaths: ["/settings/user-management"] },
 ]

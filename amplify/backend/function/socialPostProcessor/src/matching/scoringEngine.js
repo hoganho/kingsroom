@@ -6,7 +6,11 @@
  * - Evaluates ALL possible signals (not just matching ones)
  * - Returns complete breakdown showing matched, not matched, and not evaluated
  * - Similar to fieldManifest pattern for game field completeness
+ * - AEST-AWARE: All date comparisons now use Australian Eastern timezone
+ * - ENHANCED: Uses both extractedDate AND postDate for temporal matching
  */
+
+const { toAEST, getDaysDifference, getDayOfWeek } = require('../utils/dateUtils');
 
 // ===================================================================
 // THRESHOLDS
@@ -33,26 +37,28 @@ const THRESHOLDS = {
 const SIGNAL_DEFINITIONS = {
   // Identity
   tournamentId: { weight: 100, penalty: 0, category: 'identity', label: 'Tournament ID' },
-  recurringGameName: { weight: 15, penalty: 0, category: 'identity', label: 'Recurring Game Name' },  // NEW
+  recurringGameName: { weight: 15, penalty: 0, category: 'identity', label: 'Recurring Game Name' },
   
   // Financial
   buyInExact: { weight: 25, penalty: 0, category: 'financial', label: 'Buy-in (Exact)' },
   buyInClose: { weight: 12, penalty: 0, category: 'financial', label: 'Buy-in (Close)' },
   buyInMismatch: { weight: 0, penalty: -10, category: 'financial', label: 'Buy-in Mismatch' },
   guaranteeMatch: { weight: 15, penalty: 0, category: 'financial', label: 'Guarantee Amount' },
-  rakeMatch: { weight: 8, penalty: 0, category: 'financial', label: 'Rake Amount' },         // NEW
+  rakeMatch: { weight: 8, penalty: 0, category: 'financial', label: 'Rake Amount' },
   
-  // Temporal
-  dateExact: { weight: 20, penalty: 0, category: 'temporal', label: 'Date (Exact)' },
-  dateClose: { weight: 10, penalty: 0, category: 'temporal', label: 'Date (Close)' },
+  // Temporal - ENHANCED
+  dateExact: { weight: 20, penalty: 0, category: 'temporal', label: 'Extracted Date (Exact)' },
+  dateClose: { weight: 10, penalty: 0, category: 'temporal', label: 'Extracted Date (Close)' },
   dateMismatch: { weight: 0, penalty: -15, category: 'temporal', label: 'Date Mismatch' },
+  postedAtExact: { weight: 15, penalty: 0, category: 'temporal', label: 'Posted Date (Exact)' },      // NEW
+  postedAtClose: { weight: 8, penalty: 0, category: 'temporal', label: 'Posted Date (Close)' },       // NEW
   dayOfWeekMatch: { weight: 8, penalty: 0, category: 'temporal', label: 'Day of Week' },
   
   // Venue
   venueExact: { weight: 20, penalty: 0, category: 'venue', label: 'Venue (Exact)' },
   venuePartial: { weight: 10, penalty: 0, category: 'venue', label: 'Venue (Suggested)' },
   
-  // Structure (NEW category)
+  // Structure
   startingStackMatch: { weight: 8, penalty: 0, category: 'structure', label: 'Starting Stack' },
   blindLevelMatch: { weight: 6, penalty: 0, category: 'structure', label: 'Blind Levels' },
   tournamentTypeMatch: { weight: 10, penalty: 0, category: 'structure', label: 'Tournament Type' },
@@ -67,9 +73,9 @@ const SIGNAL_DEFINITIONS = {
 };
 
 const CATEGORY_META = {
-  identity: { label: 'Identity', icon: '🎯', maxPossible: 115 },    // Updated: +15 for recurring name
+  identity: { label: 'Identity', icon: '🎯', maxPossible: 115 },
   financial: { label: 'Financial', icon: '💰', maxPossible: 60 },
-  temporal: { label: 'Date/Time', icon: '📅', maxPossible: 38 },
+  temporal: { label: 'Date/Time', icon: '📅', maxPossible: 61 },    // Updated: +23 for postedAt signals
   venue: { label: 'Venue', icon: '📍', maxPossible: 30 },
   structure: { label: 'Structure', icon: '🏗️', maxPossible: 24 },
   attributes: { label: 'Attributes', icon: '📊', maxPossible: 10 },
@@ -113,6 +119,7 @@ const calculateMatchScore = (extracted, game, options = {}) => {
   console.log(`[SCORING] Scoring game: ${game.name} (${game.id})`);
   console.log(`[SCORING] Extracted: buyIn=${extracted.extractedBuyIn}, date=${extracted.extractedDate}, venue=${extracted.extractedVenueName}`);
   console.log(`[SCORING] Game: buyIn=${game.buyIn}, date=${game.gameStartDateTime}, venueId=${game.venueId}`);
+  console.log(`[SCORING] Post date (fallback): ${postDate}`);
   
   // =========================================================================
   // EVALUATE IDENTITY SIGNALS
@@ -141,8 +148,7 @@ const calculateMatchScore = (extracted, game, options = {}) => {
     }
   }
   
-  // === RECURRING GAME NAME MATCH (NEW) ===
-  // Compare extracted recurring game name against game.name or recurring game template
+  // === RECURRING GAME NAME MATCH ===
   const extractedRecurringName = extracted.extractedRecurringGameName;
   const gameName = game.name;
   
@@ -279,7 +285,7 @@ const calculateMatchScore = (extracted, game, options = {}) => {
     }
   }
   
-  // === RAKE MATCH (NEW) ===
+  // === RAKE MATCH ===
   const extractedRake = extracted.extractedRake;
   const gameRake = game.rake;
   
@@ -308,24 +314,16 @@ const calculateMatchScore = (extracted, game, options = {}) => {
   }
   
   // =========================================================================
-  // EVALUATE TEMPORAL SIGNALS
+  // EVALUATE TEMPORAL SIGNALS (AEST-AWARE) - ENHANCED
+  // Now uses BOTH extractedDate AND postDate for matching
   // =========================================================================
   
-  // Normalize dates to midnight UTC for comparison (ignore time component)
-  const normalizeToDateOnly = (date) => {
-    if (!date || isNaN(date.getTime())) return null;
-    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-  };
+  const gameAEST = game.gameStartDateTime ? toAEST(game.gameStartDateTime) : null;
+  const gameDateStr = gameAEST?.isoDate || null;
   
-  const extractedDateRaw = extracted.extractedDate ? new Date(extracted.extractedDate) : null;
-  const gameDateRaw = game.gameStartDateTime ? new Date(game.gameStartDateTime) : null;
-  
-  const extractedDate = normalizeToDateOnly(extractedDateRaw);
-  const gameDate = normalizeToDateOnly(gameDateRaw);
-  
-  // Display values (date portion only)
-  const extractedDateStr = extractedDateRaw?.toISOString()?.split('T')[0] || null;
-  const gameDateStr = gameDateRaw?.toISOString()?.split('T')[0] || null;
+  // --- SIGNAL 1: Extracted Date Match ---
+  const extractedAEST = extracted.extractedDate ? toAEST(extracted.extractedDate) : null;
+  const extractedDateStr = extractedAEST?.isoDate || null;
   
   allSignals.dateExact.extractedValue = extractedDateStr;
   allSignals.dateExact.gameValue = gameDateStr;
@@ -334,14 +332,16 @@ const calculateMatchScore = (extracted, game, options = {}) => {
   allSignals.dateMismatch.extractedValue = extractedDateStr;
   allSignals.dateMismatch.gameValue = gameDateStr;
   
-  if (!extractedDate) {
+  let extractedDateMatched = false;  // Track if extracted date gave us a match
+  
+  if (!extractedAEST) {
     allSignals.dateExact.status = 'NOT_EVALUATED';
-    allSignals.dateExact.details = 'No date extracted from post';
+    allSignals.dateExact.details = 'No date extracted from post content';
     allSignals.dateClose.status = 'NOT_EVALUATED';
-    allSignals.dateClose.details = 'No date extracted from post';
+    allSignals.dateClose.details = 'No date extracted from post content';
     allSignals.dateMismatch.status = 'NOT_APPLICABLE';
-    allSignals.dateMismatch.details = 'No date to compare';
-  } else if (!gameDate) {
+    allSignals.dateMismatch.details = 'No extracted date to compare';
+  } else if (!gameAEST) {
     allSignals.dateExact.status = 'NOT_EVALUATED';
     allSignals.dateExact.details = 'Game has no date set';
     allSignals.dateClose.status = 'NOT_EVALUATED';
@@ -349,52 +349,109 @@ const calculateMatchScore = (extracted, game, options = {}) => {
     allSignals.dateMismatch.status = 'NOT_APPLICABLE';
     allSignals.dateMismatch.details = 'Game has no date to compare';
   } else {
-    // Calculate difference in days (comparing normalized dates)
-    const daysDiff = Math.round(Math.abs(extractedDate - gameDate) / (1000 * 60 * 60 * 24));
+    // Calculate difference in AEST calendar days
+    const daysDiff = Math.abs(getDaysDifference(extracted.extractedDate, game.gameStartDateTime));
     
     if (daysDiff === 0) {
       allSignals.dateExact.status = 'MATCHED';
       allSignals.dateExact.contribution = SIGNAL_DEFINITIONS.dateExact.weight;
-      allSignals.dateExact.details = `Same date: ${gameDateStr}`;
+      allSignals.dateExact.details = `Same AEST date: ${gameDateStr}`;
       allSignals.dateClose.status = 'NOT_APPLICABLE';
       allSignals.dateClose.details = 'Exact match found';
       allSignals.dateMismatch.status = 'NOT_APPLICABLE';
       allSignals.dateMismatch.details = 'Dates match';
       totalScore += SIGNAL_DEFINITIONS.dateExact.weight;
-      console.log(`[SCORING] ✅ Date exact: +${SIGNAL_DEFINITIONS.dateExact.weight}`);
+      extractedDateMatched = true;
+      console.log(`[SCORING] ✅ Extracted date exact (AEST): +${SIGNAL_DEFINITIONS.dateExact.weight}`);
     } else if (daysDiff === 1) {
       allSignals.dateExact.status = 'NOT_MATCHED';
-      allSignals.dateExact.details = `${daysDiff} day difference`;
+      allSignals.dateExact.details = `${daysDiff} day difference (AEST)`;
       allSignals.dateClose.status = 'MATCHED';
       allSignals.dateClose.contribution = SIGNAL_DEFINITIONS.dateClose.weight;
-      allSignals.dateClose.details = `1 day apart (${extractedDateStr} vs ${gameDateStr})`;
+      allSignals.dateClose.details = `1 day apart AEST (${extractedDateStr} vs ${gameDateStr})`;
       allSignals.dateMismatch.status = 'NOT_APPLICABLE';
       allSignals.dateMismatch.details = 'Close match found';
       totalScore += SIGNAL_DEFINITIONS.dateClose.weight;
-      console.log(`[SCORING] ✅ Date close: +${SIGNAL_DEFINITIONS.dateClose.weight}`);
+      extractedDateMatched = true;
+      console.log(`[SCORING] ✅ Extracted date close (AEST): +${SIGNAL_DEFINITIONS.dateClose.weight}`);
     } else if (daysDiff <= 3) {
       allSignals.dateExact.status = 'NOT_MATCHED';
-      allSignals.dateExact.details = `${daysDiff} days difference`;
+      allSignals.dateExact.details = `${daysDiff} days difference (AEST)`;
       allSignals.dateClose.status = 'NOT_MATCHED';
-      allSignals.dateClose.details = `${daysDiff} days apart (threshold is 1)`;
+      allSignals.dateClose.details = `${daysDiff} days apart AEST (threshold is 1)`;
       allSignals.dateMismatch.status = 'NOT_APPLICABLE';
       allSignals.dateMismatch.details = 'Within tolerance';
     } else {
       allSignals.dateExact.status = 'NOT_MATCHED';
-      allSignals.dateExact.details = `${daysDiff} days difference`;
+      allSignals.dateExact.details = `${daysDiff} days difference (AEST)`;
       allSignals.dateClose.status = 'NOT_MATCHED';
-      allSignals.dateClose.details = `${daysDiff} days apart`;
+      allSignals.dateClose.details = `${daysDiff} days apart (AEST)`;
       allSignals.dateMismatch.status = 'MATCHED';
       allSignals.dateMismatch.contribution = SIGNAL_DEFINITIONS.dateMismatch.penalty;
-      allSignals.dateMismatch.details = `${daysDiff} days apart (${extractedDateStr} vs ${gameDateStr})`;
+      allSignals.dateMismatch.details = `${daysDiff} days apart AEST (${extractedDateStr} vs ${gameDateStr})`;
       totalScore += SIGNAL_DEFINITIONS.dateMismatch.penalty;
-      console.log(`[SCORING] ❌ Date mismatch: ${SIGNAL_DEFINITIONS.dateMismatch.penalty}`);
+      console.log(`[SCORING] ❌ Extracted date mismatch (AEST): ${SIGNAL_DEFINITIONS.dateMismatch.penalty}`);
     }
   }
   
-  // Day of week
-  const extractedDayOfWeek = extracted.extractedDayOfWeek?.toUpperCase() || null;
-  const gameDayOfWeek = gameDate ? gameDate.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase() : null;
+  // --- SIGNAL 2: Posted At Date Match (NEW) ---
+  // This provides additional temporal context even when extracted date doesn't match
+  // Or serves as primary temporal signal when no date was extracted from content
+  const postedAtAEST = postDate ? toAEST(postDate) : null;
+  const postedAtDateStr = postedAtAEST?.isoDate || null;
+  
+  allSignals.postedAtExact.extractedValue = postedAtDateStr;
+  allSignals.postedAtExact.gameValue = gameDateStr;
+  allSignals.postedAtClose.extractedValue = postedAtDateStr;
+  allSignals.postedAtClose.gameValue = gameDateStr;
+  
+  if (!postedAtAEST) {
+    allSignals.postedAtExact.status = 'NOT_EVALUATED';
+    allSignals.postedAtExact.details = 'No post date available';
+    allSignals.postedAtClose.status = 'NOT_EVALUATED';
+    allSignals.postedAtClose.details = 'No post date available';
+  } else if (!gameAEST) {
+    allSignals.postedAtExact.status = 'NOT_EVALUATED';
+    allSignals.postedAtExact.details = 'Game has no date set';
+    allSignals.postedAtClose.status = 'NOT_EVALUATED';
+    allSignals.postedAtClose.details = 'Game has no date set';
+  } else {
+    // Calculate difference in AEST calendar days
+    const postDaysDiff = Math.abs(getDaysDifference(postDate, game.gameStartDateTime));
+    
+    // For results posts: Posted date is often 1 day AFTER game date
+    // For promo posts: Posted date is often same day or 1 day BEFORE game date
+    // So we check 0-2 days difference for exact/close
+    
+    if (postDaysDiff === 0) {
+      allSignals.postedAtExact.status = 'MATCHED';
+      allSignals.postedAtExact.contribution = SIGNAL_DEFINITIONS.postedAtExact.weight;
+      allSignals.postedAtExact.details = `Post date matches game date: ${gameDateStr} (AEST)`;
+      allSignals.postedAtClose.status = 'NOT_APPLICABLE';
+      allSignals.postedAtClose.details = 'Exact match found';
+      totalScore += SIGNAL_DEFINITIONS.postedAtExact.weight;
+      console.log(`[SCORING] ✅ Posted at exact (AEST): +${SIGNAL_DEFINITIONS.postedAtExact.weight}`);
+    } else if (postDaysDiff <= 2) {
+      // Within 2 days is still a close match (results posted next day, promos posted day before)
+      allSignals.postedAtExact.status = 'NOT_MATCHED';
+      allSignals.postedAtExact.details = `${postDaysDiff} day(s) difference (AEST)`;
+      allSignals.postedAtClose.status = 'MATCHED';
+      allSignals.postedAtClose.contribution = SIGNAL_DEFINITIONS.postedAtClose.weight;
+      allSignals.postedAtClose.details = `${postDaysDiff} day(s) apart AEST (${postedAtDateStr} vs ${gameDateStr})`;
+      totalScore += SIGNAL_DEFINITIONS.postedAtClose.weight;
+      console.log(`[SCORING] ✅ Posted at close (AEST): +${SIGNAL_DEFINITIONS.postedAtClose.weight}`);
+    } else {
+      allSignals.postedAtExact.status = 'NOT_MATCHED';
+      allSignals.postedAtExact.details = `${postDaysDiff} days difference (AEST)`;
+      allSignals.postedAtClose.status = 'NOT_MATCHED';
+      allSignals.postedAtClose.details = `${postDaysDiff} days apart AEST (threshold is 2)`;
+    }
+  }
+  
+  // --- SIGNAL 3: Day of week - use AEST day of week ---
+  const extractedDayOfWeek = extracted.extractedDayOfWeek?.toUpperCase() || 
+    (extractedAEST ? getDayOfWeek(extracted.extractedDate) : null);
+  const gameDayOfWeek = gameAEST ? getDayOfWeek(game.gameStartDateTime) : null;
   
   allSignals.dayOfWeekMatch.extractedValue = extractedDayOfWeek;
   allSignals.dayOfWeekMatch.gameValue = gameDayOfWeek;
@@ -404,16 +461,16 @@ const calculateMatchScore = (extracted, game, options = {}) => {
     allSignals.dayOfWeekMatch.details = 'No day of week extracted';
   } else if (!gameDayOfWeek) {
     allSignals.dayOfWeekMatch.status = 'NOT_EVALUATED';
-    allSignals.dayOfWeekMatch.details = 'Game has no date';
-  } else if (gameDayOfWeek.includes(extractedDayOfWeek) || extractedDayOfWeek.includes(gameDayOfWeek.slice(0, 3))) {
+    allSignals.dayOfWeekMatch.details = 'Game has no date for day comparison';
+  } else if (extractedDayOfWeek === gameDayOfWeek) {
     allSignals.dayOfWeekMatch.status = 'MATCHED';
     allSignals.dayOfWeekMatch.contribution = SIGNAL_DEFINITIONS.dayOfWeekMatch.weight;
-    allSignals.dayOfWeekMatch.details = `${extractedDayOfWeek} matches ${gameDayOfWeek}`;
+    allSignals.dayOfWeekMatch.details = `Both on ${gameDayOfWeek} (AEST)`;
     totalScore += SIGNAL_DEFINITIONS.dayOfWeekMatch.weight;
-    console.log(`[SCORING] ✅ Day of week: +${SIGNAL_DEFINITIONS.dayOfWeekMatch.weight}`);
+    console.log(`[SCORING] ✅ Day of week match (AEST): +${SIGNAL_DEFINITIONS.dayOfWeekMatch.weight}`);
   } else {
     allSignals.dayOfWeekMatch.status = 'NOT_MATCHED';
-    allSignals.dayOfWeekMatch.details = `${extractedDayOfWeek} ≠ ${gameDayOfWeek}`;
+    allSignals.dayOfWeekMatch.details = `${extractedDayOfWeek} ≠ ${gameDayOfWeek} (AEST)`;
   }
   
   // =========================================================================
@@ -490,7 +547,7 @@ const calculateMatchScore = (extracted, game, options = {}) => {
   }
   
   // =========================================================================
-  // EVALUATE STRUCTURE SIGNALS (NEW)
+  // EVALUATE STRUCTURE SIGNALS
   // =========================================================================
   
   // === STARTING STACK ===
@@ -500,14 +557,14 @@ const calculateMatchScore = (extracted, game, options = {}) => {
   allSignals.startingStackMatch.extractedValue = extractedStack ? extractedStack.toLocaleString() : null;
   allSignals.startingStackMatch.gameValue = gameStack ? gameStack.toLocaleString() : null;
   
-  if (!extractedStack) {
+  if (extractedStack === null) {
     allSignals.startingStackMatch.status = 'NOT_EVALUATED';
     allSignals.startingStackMatch.details = 'No starting stack extracted';
-  } else if (!gameStack) {
+  } else if (gameStack === null) {
     allSignals.startingStackMatch.status = 'NOT_EVALUATED';
     allSignals.startingStackMatch.details = 'Game has no starting stack set';
   } else {
-    // Allow 10% tolerance for stacks
+    // Allow 10% tolerance for starting stack
     const stackDiff = Math.abs(extractedStack - gameStack) / Math.max(gameStack, 1);
     if (stackDiff <= 0.1) {
       allSignals.startingStackMatch.status = 'MATCHED';
@@ -522,109 +579,95 @@ const calculateMatchScore = (extracted, game, options = {}) => {
   }
   
   // === BLIND LEVEL DURATION ===
-  // Note: Game.levels is AWSJSON that may contain level duration info
-  const extractedBlindMins = extracted.extractedBlindLevelMinutes ? Number(extracted.extractedBlindLevelMinutes) : null;
-  let gameBlindMins = null;
+  const extractedBlinds = extracted.extractedBlindLevelMinutes ? Number(extracted.extractedBlindLevelMinutes) : null;
+  const gameBlinds = game.blindLevelMinutes ? Number(game.blindLevelMinutes) : null;
   
-  // Try to extract blind duration from game.levels if it exists
-  if (game.levels) {
-    try {
-      const levels = typeof game.levels === 'string' ? JSON.parse(game.levels) : game.levels;
-      if (Array.isArray(levels) && levels.length > 0 && levels[0].duration) {
-        gameBlindMins = Number(levels[0].duration);
-      }
-    } catch (e) {
-      // Ignore parse errors
-    }
-  }
+  allSignals.blindLevelMatch.extractedValue = extractedBlinds ? `${extractedBlinds} min` : null;
+  allSignals.blindLevelMatch.gameValue = gameBlinds ? `${gameBlinds} min` : null;
   
-  allSignals.blindLevelMatch.extractedValue = extractedBlindMins ? `${extractedBlindMins} min` : null;
-  allSignals.blindLevelMatch.gameValue = gameBlindMins ? `${gameBlindMins} min` : null;
-  
-  if (!extractedBlindMins) {
+  if (extractedBlinds === null) {
     allSignals.blindLevelMatch.status = 'NOT_EVALUATED';
     allSignals.blindLevelMatch.details = 'No blind level duration extracted';
-  } else if (!gameBlindMins) {
+  } else if (gameBlinds === null) {
     allSignals.blindLevelMatch.status = 'NOT_EVALUATED';
-    allSignals.blindLevelMatch.details = 'Game has no blind level info';
+    allSignals.blindLevelMatch.details = 'Game has no blind level duration set';
+  } else if (extractedBlinds === gameBlinds) {
+    allSignals.blindLevelMatch.status = 'MATCHED';
+    allSignals.blindLevelMatch.contribution = SIGNAL_DEFINITIONS.blindLevelMatch.weight;
+    allSignals.blindLevelMatch.details = `${extractedBlinds} min = ${gameBlinds} min`;
+    totalScore += SIGNAL_DEFINITIONS.blindLevelMatch.weight;
+    console.log(`[SCORING] ✅ Blind level match: +${SIGNAL_DEFINITIONS.blindLevelMatch.weight}`);
   } else {
-    // Exact match or within 5 minutes
-    const blindDiff = Math.abs(extractedBlindMins - gameBlindMins);
-    if (blindDiff <= 5) {
-      allSignals.blindLevelMatch.status = 'MATCHED';
-      allSignals.blindLevelMatch.contribution = SIGNAL_DEFINITIONS.blindLevelMatch.weight;
-      allSignals.blindLevelMatch.details = `${extractedBlindMins} min ≈ ${gameBlindMins} min`;
-      totalScore += SIGNAL_DEFINITIONS.blindLevelMatch.weight;
-      console.log(`[SCORING] ✅ Blind level match: +${SIGNAL_DEFINITIONS.blindLevelMatch.weight}`);
-    } else {
-      allSignals.blindLevelMatch.status = 'NOT_MATCHED';
-      allSignals.blindLevelMatch.details = `${extractedBlindMins} min ≠ ${gameBlindMins} min`;
-    }
+    allSignals.blindLevelMatch.status = 'NOT_MATCHED';
+    allSignals.blindLevelMatch.details = `${extractedBlinds} min ≠ ${gameBlinds} min`;
   }
   
   // === TOURNAMENT TYPE ===
-  const extractedTournType = extracted.extractedTournamentType;
-  const gameTournType = game.tournamentType;
+  const extractedType = extracted.extractedTournamentType;
+  const gameType = game.tournamentType || game.gameType;
   
-  allSignals.tournamentTypeMatch.extractedValue = extractedTournType;
-  allSignals.tournamentTypeMatch.gameValue = gameTournType;
-  allSignals.tournamentTypeMismatch.extractedValue = extractedTournType;
-  allSignals.tournamentTypeMismatch.gameValue = gameTournType;
+  allSignals.tournamentTypeMatch.extractedValue = extractedType;
+  allSignals.tournamentTypeMatch.gameValue = gameType;
+  allSignals.tournamentTypeMismatch.extractedValue = extractedType;
+  allSignals.tournamentTypeMismatch.gameValue = gameType;
   
-  if (!extractedTournType) {
+  if (!extractedType) {
     allSignals.tournamentTypeMatch.status = 'NOT_EVALUATED';
     allSignals.tournamentTypeMatch.details = 'No tournament type extracted';
     allSignals.tournamentTypeMismatch.status = 'NOT_APPLICABLE';
     allSignals.tournamentTypeMismatch.details = 'No type to compare';
-  } else if (!gameTournType) {
+  } else if (!gameType) {
     allSignals.tournamentTypeMatch.status = 'NOT_EVALUATED';
     allSignals.tournamentTypeMatch.details = 'Game has no tournament type set';
     allSignals.tournamentTypeMismatch.status = 'NOT_APPLICABLE';
     allSignals.tournamentTypeMismatch.details = 'Game has no type to compare';
-  } else if (extractedTournType === gameTournType) {
-    allSignals.tournamentTypeMatch.status = 'MATCHED';
-    allSignals.tournamentTypeMatch.contribution = SIGNAL_DEFINITIONS.tournamentTypeMatch.weight;
-    allSignals.tournamentTypeMatch.details = `Both are ${gameTournType}`;
-    allSignals.tournamentTypeMismatch.status = 'NOT_APPLICABLE';
-    allSignals.tournamentTypeMismatch.details = 'Types match';
-    totalScore += SIGNAL_DEFINITIONS.tournamentTypeMatch.weight;
-    console.log(`[SCORING] ✅ Tournament type match: +${SIGNAL_DEFINITIONS.tournamentTypeMatch.weight}`);
   } else {
-    // Check for compatible types (e.g., REBUY indicators on a DEEPSTACK game might still be ok)
-    allSignals.tournamentTypeMatch.status = 'NOT_MATCHED';
-    allSignals.tournamentTypeMatch.details = `${extractedTournType} ≠ ${gameTournType}`;
+    const normalizedExtracted = extractedType.toUpperCase().replace(/[^A-Z]/g, '');
+    const normalizedGame = gameType.toUpperCase().replace(/[^A-Z]/g, '');
     
-    // Apply penalty for clear mismatch (e.g., FREEZEOUT vs REBUY)
-    const incompatiblePairs = [
-      ['FREEZEOUT', 'REBUY'],
-      ['SATELLITE', 'REBUY'],
-      ['SATELLITE', 'FREEZEOUT']
-    ];
-    const isMismatch = incompatiblePairs.some(([a, b]) => 
-      (extractedTournType === a && gameTournType === b) ||
-      (extractedTournType === b && gameTournType === a)
-    );
-    
-    if (isMismatch) {
-      allSignals.tournamentTypeMismatch.status = 'MATCHED';
-      allSignals.tournamentTypeMismatch.contribution = SIGNAL_DEFINITIONS.tournamentTypeMismatch.penalty;
-      allSignals.tournamentTypeMismatch.details = `${extractedTournType} incompatible with ${gameTournType}`;
-      totalScore += SIGNAL_DEFINITIONS.tournamentTypeMismatch.penalty;
-      console.log(`[SCORING] ❌ Tournament type mismatch: ${SIGNAL_DEFINITIONS.tournamentTypeMismatch.penalty}`);
-    } else {
+    if (normalizedExtracted === normalizedGame || 
+        normalizedGame.includes(normalizedExtracted) || 
+        normalizedExtracted.includes(normalizedGame)) {
+      allSignals.tournamentTypeMatch.status = 'MATCHED';
+      allSignals.tournamentTypeMatch.contribution = SIGNAL_DEFINITIONS.tournamentTypeMatch.weight;
+      allSignals.tournamentTypeMatch.details = `${extractedType} matches ${gameType}`;
       allSignals.tournamentTypeMismatch.status = 'NOT_APPLICABLE';
-      allSignals.tournamentTypeMismatch.details = 'Types different but compatible';
+      allSignals.tournamentTypeMismatch.details = 'Types match';
+      totalScore += SIGNAL_DEFINITIONS.tournamentTypeMatch.weight;
+      console.log(`[SCORING] ✅ Tournament type match: +${SIGNAL_DEFINITIONS.tournamentTypeMatch.weight}`);
+    } else {
+      // Check for conflicting types (e.g., FREEZEOUT vs REENTRY)
+      const conflictingPairs = [
+        ['FREEZEOUT', 'REENTRY'],
+        ['FREEZEOUT', 'REBUY'],
+        ['SINGLE', 'UNLIMITED']
+      ];
+      
+      const isConflict = conflictingPairs.some(pair => 
+        (normalizedExtracted.includes(pair[0]) && normalizedGame.includes(pair[1])) ||
+        (normalizedExtracted.includes(pair[1]) && normalizedGame.includes(pair[0]))
+      );
+      
+      if (isConflict) {
+        allSignals.tournamentTypeMatch.status = 'NOT_MATCHED';
+        allSignals.tournamentTypeMatch.details = `${extractedType} conflicts with ${gameType}`;
+        allSignals.tournamentTypeMismatch.status = 'MATCHED';
+        allSignals.tournamentTypeMismatch.contribution = SIGNAL_DEFINITIONS.tournamentTypeMismatch.penalty;
+        allSignals.tournamentTypeMismatch.details = `Conflicting types: ${extractedType} vs ${gameType}`;
+        totalScore += SIGNAL_DEFINITIONS.tournamentTypeMismatch.penalty;
+        console.log(`[SCORING] ❌ Tournament type mismatch: ${SIGNAL_DEFINITIONS.tournamentTypeMismatch.penalty}`);
+      } else {
+        allSignals.tournamentTypeMatch.status = 'NOT_MATCHED';
+        allSignals.tournamentTypeMatch.details = `${extractedType} ≠ ${gameType}`;
+        allSignals.tournamentTypeMismatch.status = 'NOT_APPLICABLE';
+        allSignals.tournamentTypeMismatch.details = 'No direct conflict';
+      }
     }
   }
   
   // =========================================================================
   // EVALUATE CONTENT TYPE SIGNALS
   // =========================================================================
-  
-  allSignals.resultPostBonus.extractedValue = contentType;
-  allSignals.resultPostBonus.gameValue = game.gameStatus;
-  allSignals.promoPostBonus.extractedValue = contentType;
-  allSignals.promoPostBonus.gameValue = game.gameStatus;
   
   if (contentType === 'RESULT') {
     if (['FINISHED', 'COMPLETED'].includes(game.gameStatus)) {
@@ -675,10 +718,14 @@ const calculateMatchScore = (extracted, game, options = {}) => {
     reason = 'tournament_id_match';
   } else if (allSignals.buyInExact.status === 'MATCHED' && allSignals.dateExact.status === 'MATCHED') {
     reason = 'buyin_date_match';
+  } else if (allSignals.buyInExact.status === 'MATCHED' && allSignals.postedAtExact.status === 'MATCHED') {
+    reason = 'buyin_postedAt_match';
   } else if (allSignals.venueExact.status === 'MATCHED') {
     reason = 'venue_match';
   } else if (allSignals.dateExact.status === 'MATCHED') {
     reason = 'date_match';
+  } else if (allSignals.postedAtExact.status === 'MATCHED') {
+    reason = 'postedAt_match';
   } else if (allSignals.buyInExact.status === 'MATCHED') {
     reason = 'buyin_match';
   }

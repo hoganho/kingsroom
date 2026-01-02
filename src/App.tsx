@@ -24,7 +24,6 @@ import { EntityProvider } from './contexts/EntityContext';
 
 // Layout and Auth Components
 import { MainLayout } from './components/layout/MainLayout';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 // Main Pages
 import { HomePage } from './pages/HomePage';
@@ -36,6 +35,8 @@ import { PlayerProfile } from './pages/players/PlayerProfile';
 
 // Series Pages
 import { SeriesDashboard } from './pages/series/SeriesDashboard';
+import { SeriesDetails } from './pages/series/SeriesDetails';
+import { SeriesGameDetails } from './pages/series/SeriesGameDetails';
 
 // Games Pages
 import { GamesDashboard } from './pages/games/GamesDashboard';
@@ -218,26 +219,24 @@ const AuthGate = ({ children }: { children: React.ReactNode }) => {
     return null;
   }
 
-  // Auth confirmed - safe to render children (and their hooks)
   return <>{children}</>;
 };
 
 // ============================================
-// PROTECTED LAYOUT
+// PROTECTED LAYOUT COMPONENT
 // ============================================
+// Wraps authenticated pages with EntityProvider, GameProvider, and MainLayout
 const ProtectedLayout = () => {
   return (
-    <ProtectedRoute redirectIfNoAccess>
-      <AuthGate>
-        <EntityProvider>
-          <GameProvider>
-            <MainLayout>
-              <Outlet />
-            </MainLayout>
-          </GameProvider>
-        </EntityProvider>
-      </AuthGate>
-    </ProtectedRoute>
+    <AuthGate>
+      <EntityProvider>
+        <GameProvider>
+          <MainLayout>
+            <Outlet />
+          </MainLayout>
+        </GameProvider>
+      </EntityProvider>
+    </AuthGate>
   );
 };
 
@@ -248,10 +247,10 @@ const PublicRoutes = () => {
   return (
     <Routes>
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-      <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms-of-service" element={<TermsOfService />} />
-      <Route path="/terms" element={<Navigate to="/terms-of-service" replace />} />
-      <Route path="*" element={<Navigate to="/privacy-policy" replace />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
@@ -269,26 +268,26 @@ const NoAccessScreen = () => {
       await signOut();
       window.location.href = '/';
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Sign out error:', error);
       setSigningOut(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
-      <div className="max-w-md w-full text-center">
-        {/* Lock Icon */}
-        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 dark:bg-amber-900/30 mb-6">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="text-center p-8 bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-md border border-gray-200 dark:border-gray-800">
+        {/* Lock icon */}
+        <div className="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
           <svg
-            className="h-8 w-8 text-amber-600 dark:text-amber-400"
+            className="w-8 h-8 text-gray-400 dark:text-gray-500"
             fill="none"
-            viewBox="0 0 24 24"
             stroke="currentColor"
+            viewBox="0 0 24 24"
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth="2"
+              strokeWidth={2}
               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
             />
           </svg>
@@ -423,6 +422,8 @@ const AuthenticatedRoutes = () => {
             {/* Series - with parent redirect */}
             <Route path="/series" element={<Navigate to="/series/dashboard" replace />} />
             <Route path="/series/dashboard" element={<SeriesDashboard />} />
+            <Route path="/series/details" element={<SeriesDetails />} />
+            <Route path="/series/game" element={<SeriesGameDetails />} />
 
             {/* Games - with parent redirect */}
             <Route path="/games" element={<Navigate to="/games/dashboard" replace />} />

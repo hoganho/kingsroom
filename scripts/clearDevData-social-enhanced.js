@@ -6,9 +6,9 @@
 // 1. Clears all social-related tables (SocialPost, SocialPostGameLink, etc.)
 // 2. Resets Game records that were updated by socialDataAggregator
 // 3. Deletes PlayerTickets that were created from social post aggregation
-// 4. Optionally deletes auto-created TicketTemplates
+// 4. Optionally deletes auto-created TicketTemplates (set DELETE_TEMPLATES=1)
 // 5. Resets SocialAccount.postCount to 0 for all accounts
-// 6. Deletes associated media files from S3
+// 6. Optionally deletes associated media files from S3 (set DELETE_S3_MEDIA=1)
 //
 // ⚠️ WARNING: THIS IS A DESTRUCTIVE AND IRREVERSIBLE OPERATION. ⚠️
 // ⚠️ DO NOT RUN THIS ON A PRODUCTION DATABASE. ⚠️
@@ -33,11 +33,19 @@ import * as readline from 'readline';
 //
 // Override via environment variables if needed:
 //   API_ID=xxx ENV_SUFFIX=staging node clearDevData-social-enhanced.js
+//
+// Optional flags (default: false):
+//   DELETE_TEMPLATES=1  - Also delete auto-created TicketTemplates
+//   DELETE_S3_MEDIA=1   - Also delete associated S3 media files
 // ============================================================================
 
 const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 const API_ID = process.env.API_ID || 'ht3nugt6lvddpeeuwj3x6mkite';
 const ENV = process.env.ENV_SUFFIX || 'dev';
+
+// Optional cleanup flags (default to false for safety)
+const DELETE_TEMPLATES = process.env.DELETE_TEMPLATES || '1';
+const DELETE_S3_MEDIA = process.env.DELETE_S3_MEDIA || '1';
 
 // S3 Configuration for social media attachments
 const S3_CONFIG = {
@@ -77,6 +85,8 @@ console.log(`   API_ID: ${API_ID}`);
 console.log(`   ENV_SUFFIX: ${ENV}`);
 console.log(`   Region: ${REGION}`);
 console.log(`   S3 Bucket: ${S3_CONFIG.bucket}`);
+console.log(`   DELETE_TEMPLATES: ${DELETE_TEMPLATES}`);
+console.log(`   DELETE_S3_MEDIA: ${DELETE_S3_MEDIA}`);
 console.log(`   Example table: ${GAME_TABLE}\n`);
 
 // Fields to reset on Game records
@@ -660,9 +670,13 @@ async function main() {
   console.log('  1. Clear all social-related tables (SocialPost, SocialPostGameLink, etc.)');
   console.log('  2. Reset Game records that were updated by socialDataAggregator');
   console.log('  3. Delete PlayerTickets created from social post aggregation');
-  console.log('  4. Optionally delete auto-created TicketTemplates');
-  console.log('  5. Reset SocialAccount.postCount to 0 for all accounts');
-  console.log('  6. Delete associated media files from S3');
+  console.log('  4. Reset SocialAccount.postCount to 0 for all accounts');
+  if (DELETE_TEMPLATES) {
+    console.log('  5. Delete auto-created TicketTemplates (DELETE_TEMPLATES=1)');
+  }
+  if (DELETE_S3_MEDIA) {
+    console.log('  6. Delete associated media files from S3 (DELETE_S3_MEDIA=1)');
+  }
   console.log('');
   logger.warn('This action is IRREVERSIBLE. Please be absolutely sure.');
   
@@ -677,19 +691,15 @@ async function main() {
   console.log(`  - Reset affected Game records in: ${GAME_TABLE}`);
   console.log(`  - Delete related PlayerTickets in: ${PLAYER_TICKET_TABLE}`);
   console.log(`  - Reset postCount in: ${SOCIAL_ACCOUNT_TABLE}`);
-  console.log(`  - Delete media from S3: ${S3_CONFIG.bucket}`);
+  if (DELETE_S3_MEDIA) {
+    console.log(`  - Delete media from S3: ${S3_CONFIG.bucket}`);
+  }
   
   const confirmation = await askQuestion('\nType "proceed" to continue: ');
   if (confirmation.toLowerCase() !== 'proceed') {
     logger.info('Aborted by user.');
     return;
   }
-  
-  const deleteTemplates = await askQuestion('\nAlso delete auto-created TicketTemplates? (y/n): ');
-  const shouldDeleteTemplates = deleteTemplates.toLowerCase() === 'y';
-  
-  const deleteS3 = await askQuestion('\nDelete associated S3 media files? (y/n): ');
-  const shouldDeleteS3 = deleteS3.toLowerCase() === 'y';
   
   console.log('\n' + '-'.repeat(70));
   
@@ -708,7 +718,7 @@ async function main() {
   
   try {
     // Step 0: Collect media URLs BEFORE deleting posts (if S3 cleanup requested)
-    if (shouldDeleteS3) {
+    if (DELETE_S3_MEDIA) {
       stats.mediaUrls = await collectMediaUrlsFromPosts();
     }
     
@@ -739,16 +749,16 @@ async function main() {
     // Step 5: Reset game records
     stats.gamesReset = await resetGameRecords(stats.affectedGameIds);
     
-    // Step 6: Delete ticket templates (optional)
-    if (shouldDeleteTemplates) {
+    // Step 6: Delete ticket templates (if enabled)
+    if (DELETE_TEMPLATES) {
       stats.templatesDeleted = await deleteAutoCreatedTicketTemplates();
     }
     
     // Step 7: Reset SocialAccount postCounts
     stats.accountsReset = await resetSocialAccountPostCounts();
     
-    // Step 8: Delete S3 objects (optional)
-    if (shouldDeleteS3 && stats.mediaUrls.length > 0) {
+    // Step 8: Delete S3 objects (if enabled)
+    if (DELETE_S3_MEDIA && stats.mediaUrls.length > 0) {
       console.log('\n' + '-'.repeat(70));
       stats.s3ObjectsDeleted = await deleteS3ObjectsByKeys(stats.mediaUrls);
     }
@@ -766,10 +776,10 @@ async function main() {
     console.log(`  Game records reset: ${stats.gamesReset}`);
     console.log(`  PlayerTickets deleted: ${stats.ticketsDeleted}`);
     console.log(`  SocialAccounts reset: ${stats.accountsReset}`);
-    if (shouldDeleteTemplates) {
+    if (DELETE_TEMPLATES) {
       console.log(`  TicketTemplates deleted: ${stats.templatesDeleted}`);
     }
-    if (shouldDeleteS3) {
+    if (DELETE_S3_MEDIA) {
       console.log(`  S3 objects deleted: ${stats.s3ObjectsDeleted}`);
     }
     console.log('');

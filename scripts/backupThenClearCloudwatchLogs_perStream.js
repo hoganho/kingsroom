@@ -1,4 +1,4 @@
-// backupThenClearCloudwatchLogs_directDiscovery.js
+// backupThenClearCloudwatchLogs_perStream.js
 // 
 // 1. Searches AWS directly for Log Groups matching your ENV_SUFFIX.
 // 2. Backs up each stream to a JSON file.
@@ -9,7 +9,7 @@ import {
   DeleteLogGroupCommand,
   DescribeLogStreamsCommand,
   GetLogEventsCommand,
-  DescribeLogGroupsCommand, // <--- New Import
+  DescribeLogGroupsCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
 import * as readline from 'readline';
 import { promises as fs } from 'fs';
@@ -20,6 +20,9 @@ import * as path from 'path';
 // ------------------------------------------------------------------
 
 const REGION = process.env.AWS_REGION || 'ap-southeast-2';
+
+// Output directory - saves outside project root to ../Data
+const DATA_OUTPUT_DIR = process.env.DATA_OUTPUT_DIR || '../../Data';
 
 // We search for groups containing this suffix
 // e.g. "staging" will match "/aws/lambda/myFunc-staging"
@@ -43,7 +46,7 @@ const logger = {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // ------------------------------------------------------------------
-// NEW: DISCOVER LOG GROUPS FROM AWS (NOT LOCAL FOLDERS)
+// DISCOVER LOG GROUPS FROM AWS
 // ------------------------------------------------------------------
 
 async function getLogGroupsFromAWS() {
@@ -241,6 +244,7 @@ async function deleteLogGroup(logGroupName) {
 async function main() {
   logger.warn('--- CLOUDWATCH LOG BACKUP & DELETE (DIRECT AWS DISCOVERY) ---');
   logger.warn(`Target Suffix: "${ENV_SUFFIX}"`);
+  logger.info(`Output Directory: ${DATA_OUTPUT_DIR}`);
 
   if (!process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_PROFILE) {
     logger.warn('No AWS credentials in ENV. Using default local profile...');
@@ -284,12 +288,22 @@ async function main() {
     return;
   }
 
-  // 3. Confirm
+  // 3. Create backup directory inside DATA_OUTPUT_DIR
   const now = new Date();
   const pad = (n) => n.toString().padStart(2, '0');
   const backupDirName = `logbackup_${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  const fullBackupPath = path.join(DATA_OUTPUT_DIR, backupDirName);
 
-  await fs.mkdir(backupDirName, { recursive: true });
+  try {
+    // Ensure parent Data directory exists
+    await fs.mkdir(DATA_OUTPUT_DIR, { recursive: true });
+    // Create the timestamped backup subdirectory
+    await fs.mkdir(fullBackupPath, { recursive: true });
+    logger.info(`Saving backups to directory: ${fullBackupPath}`);
+  } catch (mkdirErr) {
+    logger.error(`Failed to create backup directory ${fullBackupPath}: ${mkdirErr.message}`);
+    return;
+  }
 
   const confirmation = await askQuestion('\nType "proceed" to continue: ');
   if (confirmation.toLowerCase() !== 'proceed') {
@@ -302,7 +316,7 @@ async function main() {
     try {
       logger.info(`\n--- ${logGroupName} ---`);
       const safeGroup = sanitizeFilename(logGroupName);
-      const groupBackupDir = path.join(backupDirName, safeGroup);
+      const groupBackupDir = path.join(fullBackupPath, safeGroup);
       await fs.mkdir(groupBackupDir, { recursive: true });
 
       await backupLogGroup(logGroupName, groupBackupDir);
@@ -313,6 +327,7 @@ async function main() {
   }
 
   logger.success('Done.');
+  logger.success(`Log backups saved to: ${fullBackupPath}`);
 }
 
 main().catch((err) => {

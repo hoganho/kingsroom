@@ -25,14 +25,22 @@ Amplify Params - DO NOT EDIT */
 /**
  * socialDataAggregator/index.js
  * 
- * VERSION: 2.0.0
+ * VERSION: 3.0.0
  * 
  * PURPOSE:
  * Aggregates data from linked social posts to enrich Game records.
  * Handles prizepool payouts, ticket awards, bad beat jackpots, and other
  * data that only appears in social media posts (not on the tournament page).
  * 
- * NEW IN v2.0.0:
+ * NEW IN v3.0.0:
+ * - Full integration with socialPostProcessor ticket extraction
+ * - Uses new ticket aggregate fields from SocialPostGameData
+ * - Uses reconciliation fields for discrepancy detection
+ * - Supports multiple ticket types (ACCUMULATOR_TICKET, SATELLITE_TICKET, etc.)
+ * - Reads pre-computed ticket data from SocialPostGameLink
+ * - Enhanced placement processing with ticket details
+ * 
+ * PREVIOUS IN v2.0.0:
  * - Smart ticket value calculation when count known but value unknown
  * - PlayerTicket UPSERT for players who won tickets
  * - TicketTemplate auto-creation for recurring ticket programs
@@ -46,7 +54,7 @@ Amplify Params - DO NOT EDIT */
  * 1. Social post linked to game → Stream event fires
  * 2. Fetch all linked posts for the game (including the new one)
  * 3. Aggregate extracted data from all RESULT posts
- * 4. Calculate ticket values if needed
+ * 4. Use pre-computed ticket aggregates OR calculate ticket values
  * 5. Update Game record with aggregated social data
  * 6. UPSERT PlayerTickets for players with ticket awards
  * 7. Optionally trigger gameFinancialsProcessor for recalculation
@@ -67,6 +75,36 @@ const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 const lambdaClient = new LambdaClient({ region: process.env.AWS_REGION || 'ap-southeast-2' });
 
 // ===================================================================
+// CONSTANTS
+// ===================================================================
+
+// Ticket types that count as "accumulator" tickets for Game.numberOfAccumulatorTicketsPaid
+const ACCUMULATOR_TICKET_TYPES = [
+  'ACCUMULATOR_TICKET',
+  'SATELLITE_TICKET',
+  'SERIES_TICKET'
+];
+
+// All valid ticket types (from NonCashPrizeType enum)
+const VALID_TICKET_TYPES = [
+  'ACCUMULATOR_TICKET',
+  'SATELLITE_TICKET',
+  'BOUNTY_TICKET',
+  'TOURNAMENT_ENTRY',
+  'SERIES_TICKET',
+  'MAIN_EVENT_SEAT',
+  'VALUED_SEAT',
+  'TRAVEL_PACKAGE',
+  'ACCOMMODATION_PACKAGE',
+  'VOUCHER',
+  'FOOD_CREDIT',
+  'CASINO_CREDIT',
+  'MERCHANDISE',
+  'POINTS',
+  'OTHER'
+];
+
+// ===================================================================
 // HELPERS
 // ===================================================================
 
@@ -81,12 +119,31 @@ const getTableName = (modelName) => {
 
 /**
  * Round a number UP to the nearest increment
- * @param {number} value - Value to round
- * @param {number} increment - Increment to round to (default: 10)
- * @returns {number} Rounded value
  */
 const roundUpToNearest = (value, increment = 10) => {
   return Math.ceil(value / increment) * increment;
+};
+
+/**
+ * Safely parse JSON, returning null on failure
+ */
+const safeParseJSON = (str) => {
+  if (!str) return null;
+  if (typeof str === 'object') return str;
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return null;
+  }
+};
+
+/**
+ * Get ordinal suffix for a number (1st, 2nd, 3rd, etc.)
+ */
+const getOrdinalSuffix = (n) => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
 };
 
 // ===================================================================
@@ -127,7 +184,7 @@ const getSocialPost = async (socialPostId) => {
 };
 
 /**
- * Get extracted game data for a social post
+ * Get extracted game data (SocialPostGameData) by ID
  */
 const getExtractedGameData = async (extractedGameDataId) => {
   if (!extractedGameDataId) return null;
@@ -140,6 +197,27 @@ const getExtractedGameData = async (extractedGameDataId) => {
   }));
   
   return result.Item;
+};
+
+/**
+ * Get extracted game data by social post ID
+ */
+const getExtractedGameDataByPostId = async (socialPostId) => {
+  if (!socialPostId) return null;
+  
+  const tableName = getTableName('SocialPostGameData');
+  
+  const result = await ddbDocClient.send(new QueryCommand({
+    TableName: tableName,
+    IndexName: 'bySocialPost',
+    KeyConditionExpression: 'socialPostId = :pid',
+    ExpressionAttributeValues: {
+      ':pid': socialPostId
+    },
+    Limit: 1
+  }));
+  
+  return result.Items?.[0] || null;
 };
 
 /**
@@ -179,11 +257,9 @@ const getPlayerResultsForGame = async (gameId) => {
  */
 const getOrCreateTicketTemplate = async (templateData) => {
   const tableName = getTableName('TicketTemplate');
-  const { programName, value, entityId, originGameId, validityDays = 365 } = templateData;
+  const { programName, value, entityId, originGameId, ticketType = 'ACCUMULATOR_TICKET', validityDays = 365 } = templateData;
   
-  // Try to find existing template by name and value
-  // Note: In production, you'd want a GSI for this query
-  // For now, we'll create a deterministic ID based on program name
+  // Create a deterministic ID based on program name and value
   const templateId = `TICKET_${programName.replace(/\s+/g, '_').toUpperCase()}_${value}`;
   
   const existing = await ddbDocClient.send(new GetCommand({
@@ -200,8 +276,9 @@ const getOrCreateTicketTemplate = async (templateData) => {
   const newTemplate = {
     id: templateId,
     name: `${programName} $${value} Credit`,
-    description: `Accumulator ticket for ${programName} worth $${value}`,
+    description: `${ticketType} for ${programName} worth $${value}`,
     value: value,
+    ticketType: ticketType,
     validityDays: validityDays,
     originGameId: originGameId,
     entityId: entityId,
@@ -227,7 +304,6 @@ const getOrCreateTicketTemplate = async (templateData) => {
 const getExistingPlayerTicket = async (playerId, wonFromGameId, ticketTemplateId) => {
   const tableName = getTableName('PlayerTicket');
   
-  // Query by player and filter by wonFromGameId and templateId
   const result = await ddbDocClient.send(new QueryCommand({
     TableName: tableName,
     IndexName: 'byPlayer',
@@ -244,31 +320,145 @@ const getExistingPlayerTicket = async (playerId, wonFromGameId, ticketTemplateId
 };
 
 // ===================================================================
-// PLACEMENT & PRIZE EXTRACTION
+// TICKET DATA EXTRACTION (v3.0.0 - Uses new SocialPostGameData fields)
 // ===================================================================
 
 /**
- * Parse placements from extracted data
- * Handles various formats of placement data from social posts
+ * Extract ticket aggregates from SocialPostGameData (new v3.0.0 method)
  * 
- * @param {string|Array} extractedPlacements - Raw placement data
- * @returns {Array} Normalized placement objects
+ * Uses the pre-computed fields from placementParser:
+ * - totalTicketsExtracted
+ * - totalTicketValue  
+ * - ticketCountByType
+ * - ticketValueByType
+ * - reconciliation_accumulatorTicketCount
+ * - reconciliation_accumulatorTicketValue
+ * 
+ * @param {Object} extractedData - SocialPostGameData record
+ * @returns {Object} Ticket aggregate data
+ */
+const extractTicketAggregatesFromData = (extractedData) => {
+  if (!extractedData) {
+    return { hasTickets: false };
+  }
+  
+  const result = {
+    hasTickets: false,
+    totalTicketsExtracted: 0,
+    totalTicketValue: null,
+    ticketCountByType: {},
+    ticketValueByType: {},
+    
+    // Accumulator-specific (for Game model)
+    accumulatorTicketCount: 0,
+    accumulatorTicketValue: null,
+    
+    // Winner ticket info
+    winnerHasTicket: false,
+    winnerTicketType: null,
+    winnerTicketValue: null,
+    
+    // Advertised tickets (promo posts)
+    hasAdvertisedTickets: false,
+    advertisedTicketCount: null,
+    advertisedTicketType: null,
+    advertisedTicketValue: null,
+    
+    // Reconciliation
+    reconciliation_totalPrizepoolPaid: null,
+    reconciliation_cashPlusTotalTicketValue: null,
+    
+    source: 'extracted_data'
+  };
+  
+  // Check for extracted tickets from result posts
+  if (extractedData.totalTicketsExtracted > 0) {
+    result.hasTickets = true;
+    result.totalTicketsExtracted = extractedData.totalTicketsExtracted;
+    result.totalTicketValue = extractedData.totalTicketValue;
+    
+    // Parse AWSJSON fields
+    result.ticketCountByType = safeParseJSON(extractedData.ticketCountByType) || {};
+    result.ticketValueByType = safeParseJSON(extractedData.ticketValueByType) || {};
+    
+    // Use reconciliation fields for accumulator count/value
+    result.accumulatorTicketCount = extractedData.reconciliation_accumulatorTicketCount || 0;
+    result.accumulatorTicketValue = extractedData.reconciliation_accumulatorTicketValue || null;
+    
+    // Reconciliation totals
+    result.reconciliation_totalPrizepoolPaid = extractedData.reconciliation_totalPrizepoolPaid;
+    result.reconciliation_cashPlusTotalTicketValue = extractedData.reconciliation_cashPlusTotalTicketValue;
+    
+    console.log(`[AGGREGATOR] Extracted ${result.totalTicketsExtracted} tickets (${result.accumulatorTicketCount} accumulator)`);
+  }
+  
+  // Check winner ticket info
+  if (extractedData.extractedWinnerHasTicket) {
+    result.winnerHasTicket = true;
+    result.winnerTicketType = extractedData.extractedWinnerTicketType;
+    result.winnerTicketValue = extractedData.extractedWinnerTicketValue;
+  }
+  
+  // Check for advertised tickets (promo posts)
+  if (extractedData.hasAdvertisedTickets) {
+    result.hasAdvertisedTickets = true;
+    result.advertisedTicketCount = extractedData.advertisedTicketCount;
+    result.advertisedTicketType = extractedData.advertisedTicketType;
+    result.advertisedTicketValue = extractedData.advertisedTicketValue;
+    
+    // If no result ticket data but we have promo data, use that
+    if (!result.hasTickets && result.advertisedTicketCount) {
+      result.hasTickets = true;
+      result.totalTicketsExtracted = result.advertisedTicketCount;
+      result.totalTicketValue = result.advertisedTicketValue;
+      result.source = 'advertised';
+    }
+  }
+  
+  return result;
+};
+
+/**
+ * Extract ticket data from SocialPostGameLink (pre-computed by gameToSocialMatcher)
+ * 
+ * @param {Object} link - SocialPostGameLink record
+ * @returns {Object} Ticket data from link
+ */
+const extractTicketDataFromLink = (link) => {
+  if (!link || !link.hasTicketData) {
+    return null;
+  }
+  
+  const ticketData = safeParseJSON(link.ticketData);
+  if (!ticketData) {
+    return null;
+  }
+  
+  return {
+    ...ticketData,
+    hasReconciliationDiscrepancy: link.hasReconciliationDiscrepancy || false,
+    reconciliationDiscrepancySeverity: link.reconciliationDiscrepancySeverity || null,
+    reconciliationPreview: safeParseJSON(link.reconciliationPreview),
+    source: 'link_precomputed'
+  };
+};
+
+/**
+ * Parse placements from extracted data (handles various formats)
  */
 const parsePlacements = (extractedPlacements) => {
   if (!extractedPlacements) return [];
   
-  // If it's already an array, use it
   if (Array.isArray(extractedPlacements)) {
     return extractedPlacements;
   }
   
-  // If it's a JSON string, parse it
   if (typeof extractedPlacements === 'string') {
     try {
       const parsed = JSON.parse(extractedPlacements);
       return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
-      console.warn('[AGGREGATOR] Could not parse placements string:', extractedPlacements);
+      console.warn('[AGGREGATOR] Could not parse placements string');
       return [];
     }
   }
@@ -277,25 +467,25 @@ const parsePlacements = (extractedPlacements) => {
 };
 
 /**
- * Count ticket awards from parsed placements
- * Uses the placementParser's detection of ACCUMULATOR_TICKET in nonCashPrizes
+ * Count tickets from placement records (v3.0.0 - uses new placement format)
  * 
- * The placementParser marks placements with tickets as:
- * {
- *   place: 1,
- *   playerName: "John Smith",
- *   hasNonCashPrize: true,
- *   nonCashPrizes: [{ prizeType: 'ACCUMULATOR_TICKET', ... }]
- * }
+ * New placement format from placementParser includes:
+ * - hasNonCashPrize: boolean
+ * - primaryTicketType: NonCashPrizeType
+ * - primaryTicketValue: number
+ * - ticketCount: number
+ * - nonCashPrizes: AWSJSON array
  * 
- * @param {Array} placements - Parsed placements from SocialPostGameData
- * @returns {Object} { count, positions, placements }
+ * @param {Array} placements - Parsed placements
+ * @returns {Object} Ticket count and details
  */
 const countTicketsFromPlacements = (placements) => {
   const result = {
     count: 0,
+    totalValue: 0,
     positions: [],
-    ticketPlacements: []
+    ticketPlacements: [],
+    byType: {}
   };
   
   if (!placements || placements.length === 0) {
@@ -303,62 +493,76 @@ const countTicketsFromPlacements = (placements) => {
   }
   
   for (const placement of placements) {
-    // Check if this placement has an accumulator ticket
-    const hasTicket = placement.hasNonCashPrize && 
-      placement.nonCashPrizes?.some(np => {
-        // Handle both parsed objects and JSON strings
-        const prizes = typeof np === 'string' ? JSON.parse(np) : 
-                       Array.isArray(placement.nonCashPrizes) ? placement.nonCashPrizes : [];
-        
-        if (typeof np === 'object' && np.prizeType === 'ACCUMULATOR_TICKET') {
-          return true;
-        }
-        return false;
-      });
+    let hasTicket = false;
+    let ticketType = null;
+    let ticketValue = null;
     
-    // Also check for asterisk markers which indicate tickets
-    const hasAsterisk = placement.rawText?.includes('*') || 
-                        placement.cashPrizeRaw?.includes('*');
+    // Method 1: Check new primaryTicketType field (preferred)
+    if (placement.primaryTicketType) {
+      hasTicket = true;
+      ticketType = placement.primaryTicketType;
+      ticketValue = placement.primaryTicketValue || null;
+    }
+    // Method 2: Check hasNonCashPrize and nonCashPrizes array
+    else if (placement.hasNonCashPrize && placement.nonCashPrizes) {
+      const prizes = safeParseJSON(placement.nonCashPrizes) || [];
+      const ticketPrize = prizes.find(p => VALID_TICKET_TYPES.includes(p?.prizeType));
+      if (ticketPrize) {
+        hasTicket = true;
+        ticketType = ticketPrize.prizeType;
+        ticketValue = ticketPrize.estimatedValue || null;
+      }
+    }
+    // Method 3: Legacy asterisk detection
+    else if (placement.rawText?.includes('*') || placement.cashPrizeRaw?.includes('*')) {
+      hasTicket = true;
+      ticketType = 'ACCUMULATOR_TICKET'; // Default assumption
+    }
     
-    if (hasTicket || hasAsterisk) {
+    if (hasTicket) {
       result.count++;
       result.positions.push(placement.place);
+      
+      if (ticketValue) {
+        result.totalValue += ticketValue;
+      }
+      
+      // Count by type
+      const typeKey = ticketType || 'UNKNOWN';
+      result.byType[typeKey] = (result.byType[typeKey] || 0) + 1;
+      
       result.ticketPlacements.push({
         place: placement.place,
         playerName: placement.playerName,
-        cashPrize: placement.cashPrize
+        cashPrize: placement.cashPrize,
+        ticketType,
+        ticketValue,
+        totalEstimatedValue: placement.totalEstimatedValue || null
       });
     }
   }
   
-  // Sort positions
   result.positions.sort((a, b) => a - b);
   
-  console.log(`[AGGREGATOR] Found ${result.count} ticket awards from placements at positions: ${result.positions.join(', ')}`);
+  if (result.count > 0) {
+    console.log(`[AGGREGATOR] Found ${result.count} tickets from placements at positions: ${result.positions.join(', ')}`);
+  }
   
   return result;
 };
 
 /**
- * Extract ticket awards from social post content and extracted data
- * 
- * Common patterns:
- * - "Top 9 will receive $250 Sydney Millions credit"
- * - "Prizepool includes 9 x $250 Sydney Millions credit"
- * - "Also awarding 5 x $100 accumulator tickets"
- * 
- * @param {Object} socialPost - The social post
- * @param {Object} extractedData - The SocialPostGameData
- * @returns {Object} Ticket award information
+ * Extract ticket awards from social post content (fallback method)
+ * Patterns like "Top 9 will receive $250 Sydney Millions credit"
  */
-const extractTicketAwards = (socialPost, extractedData) => {
+const extractTicketAwardsFromContent = (socialPost, extractedData) => {
   const result = {
     hasAccumulatorTickets: false,
     accumulatorTicketValue: null,
     numberOfAccumulatorTicketsPaid: null,
     ticketAwardDetails: null,
     ticketProgramName: null,
-    ticketAwardPositions: null  // Which positions get tickets
+    ticketAwardPositions: null
   };
   
   const content = socialPost?.content || '';
@@ -377,7 +581,7 @@ const extractTicketAwards = (socialPost, extractedData) => {
       value: result.accumulatorTicketValue,
       totalValue: result.numberOfAccumulatorTicketsPaid * result.accumulatorTicketValue,
       program: result.ticketProgramName,
-      source: 'social_post_content'
+      source: 'content_pattern'
     };
     return result;
   }
@@ -399,13 +603,12 @@ const extractTicketAwards = (socialPost, extractedData) => {
       value: result.accumulatorTicketValue,
       totalValue: result.numberOfAccumulatorTicketsPaid * result.accumulatorTicketValue,
       positions: result.ticketAwardPositions,
-      source: 'social_post_content'
+      source: 'content_pattern'
     };
     return result;
   }
   
-  // Pattern 3: Just detect count without value (we'll calculate later)
-  // "Top 9 finishers also receive accumulator credits"
+  // Pattern 3: Count only - "Top 9 finishers also receive accumulator credits"
   const countOnlyPattern = /top\s*(\d+)\s*(?:finishers?\s*)?(?:also\s+)?receive\s*(?:accumulator\s*)?(?:credits?|tickets?)/gi;
   match = countOnlyPattern.exec(content);
   
@@ -419,9 +622,9 @@ const extractTicketAwards = (socialPost, extractedData) => {
     );
     result.ticketAwardDetails = {
       quantity: result.numberOfAccumulatorTicketsPaid,
-      value: null, // To be calculated
+      value: null,
       positions: result.ticketAwardPositions,
-      source: 'social_post_content',
+      source: 'content_pattern',
       valueNeedsCalculation: true
     };
     return result;
@@ -450,8 +653,6 @@ const extractJackpotInfo = (socialPost, extractedData) => {
   
   // Parse from content
   const content = socialPost?.content || '';
-  
-  // Pattern: "BADBEAT Jackpot: $16377.2"
   const jackpotPattern = /(?:bad\s*beat|jackpot)[:\s]*\$?([\d,]+(?:\.\d{2})?)/gi;
   const match = jackpotPattern.exec(content);
   
@@ -470,18 +671,6 @@ const extractJackpotInfo = (socialPost, extractedData) => {
 
 /**
  * Calculate ticket value when we know the count but not individual value
- * 
- * Formula: (prizepoolPaid - prizepoolCalculated) / numberOfTickets
- * Rounded UP to nearest $10
- * 
- * This works because:
- * - prizepoolPaid = actual cash + ticket values paid out
- * - prizepoolCalculated = what players contributed (cash only)
- * - The difference = added value, which includes ticket values
- * 
- * @param {Object} game - Game record
- * @param {number} numberOfTickets - Number of tickets awarded
- * @returns {Object} Calculation result
  */
 const calculateTicketValue = (game, numberOfTickets) => {
   const result = {
@@ -524,7 +713,7 @@ const calculateTicketValue = (game, numberOfTickets) => {
     return result;
   }
   
-  // Method 2: Use guaranteeAmount - prizepoolCalculated if prizepoolPaid not available
+  // Method 2: guaranteeAmount - prizepoolCalculated
   const guaranteeAmount = game.guaranteeAmount;
   if (guaranteeAmount && prizepoolCalculated && guaranteeAmount > prizepoolCalculated) {
     const difference = guaranteeAmount - prizepoolCalculated;
@@ -549,7 +738,7 @@ const calculateTicketValue = (game, numberOfTickets) => {
     return result;
   }
   
-  // Method 3: Check if we have prizepoolAddedValue
+  // Method 3: prizepoolAddedValue
   const prizepoolAddedValue = game.prizepoolAddedValue;
   if (prizepoolAddedValue && prizepoolAddedValue > 0) {
     const rawValue = prizepoolAddedValue / numberOfTickets;
@@ -589,10 +778,6 @@ const calculateTicketValue = (game, numberOfTickets) => {
 
 /**
  * Create or update PlayerTicket records for players who won tickets
- * 
- * @param {Object} game - The game record
- * @param {Object} aggregation - Aggregation with ticket info
- * @returns {Object} Upsert result
  */
 const upsertPlayerTickets = async (game, aggregation) => {
   const result = {
@@ -613,8 +798,9 @@ const upsertPlayerTickets = async (game, aggregation) => {
   const ticketCount = aggregation.numberOfAccumulatorTicketsPaid;
   const ticketPositions = aggregation.ticketAwardPositions || 
     Array.from({ length: ticketCount }, (_, i) => i + 1);
+  const ticketType = aggregation.primaryTicketType || 'ACCUMULATOR_TICKET';
   
-  console.log(`[AGGREGATOR] Processing ${ticketCount} ticket awards for positions: ${ticketPositions.join(', ')}`);
+  console.log(`[AGGREGATOR] Processing ${ticketCount} ticket awards (${ticketType}) for positions: ${ticketPositions.join(', ')}`);
   
   // Get player results for this game
   const playerResults = await getPlayerResultsForGame(game.id);
@@ -631,7 +817,8 @@ const upsertPlayerTickets = async (game, aggregation) => {
     programName,
     value: ticketValue,
     entityId: game.entityId,
-    originGameId: game.recurringGameId || game.id
+    originGameId: game.recurringGameId || game.id,
+    ticketType
   });
   
   // Calculate expiry date (default 365 days)
@@ -641,9 +828,16 @@ const upsertPlayerTickets = async (game, aggregation) => {
   const tableName = getTableName('PlayerTicket');
   const now = new Date().toISOString();
   
+  // Get detailed ticket info for each position from aggregation
+  const ticketDetailsByPosition = {};
+  if (aggregation.ticketPlacements) {
+    for (const tp of aggregation.ticketPlacements) {
+      ticketDetailsByPosition[tp.place] = tp;
+    }
+  }
+  
   // Process each ticket-eligible position
   for (const position of ticketPositions) {
-    // Find player result at this position
     const playerResult = playerResults.find(pr => pr.finishingPlace === position);
     
     if (!playerResult || !playerResult.playerId) {
@@ -653,7 +847,6 @@ const upsertPlayerTickets = async (game, aggregation) => {
     }
     
     try {
-      // Check for existing ticket
       const existingTicket = await getExistingPlayerTicket(
         playerResult.playerId,
         game.id,
@@ -661,7 +854,6 @@ const upsertPlayerTickets = async (game, aggregation) => {
       );
       
       if (existingTicket) {
-        // Update existing ticket if needed
         console.log(`[AGGREGATOR] Ticket already exists for player ${playerResult.playerId} at position ${position}`);
         result.updated++;
         result.tickets.push({
@@ -673,6 +865,11 @@ const upsertPlayerTickets = async (game, aggregation) => {
         continue;
       }
       
+      // Get position-specific ticket details
+      const positionDetails = ticketDetailsByPosition[position] || {};
+      const positionTicketValue = positionDetails.ticketValue || ticketValue;
+      const positionTicketType = positionDetails.ticketType || ticketType;
+      
       // Create new ticket
       const ticketId = uuidv4();
       const newTicket = {
@@ -680,7 +877,7 @@ const upsertPlayerTickets = async (game, aggregation) => {
         playerId: playerResult.playerId,
         ticketTemplateId: template.id,
         
-        // NEW FIELDS - track source
+        // Source tracking
         wonFromGameId: game.id,
         wonFromPosition: position,
         entityId: game.entityId,
@@ -693,9 +890,13 @@ const upsertPlayerTickets = async (game, aggregation) => {
         usedInGameId: null,
         
         // Metadata
-        ticketValue: ticketValue,
+        ticketValue: positionTicketValue,
+        ticketType: positionTicketType,
         programName: programName,
         awardReason: `Finished ${position}${getOrdinalSuffix(position)} place`,
+        
+        // NEW: Link to social post placement
+        sourceSocialPostPlacementId: positionDetails.placementId || null,
         
         // DynamoDB fields
         createdAt: now,
@@ -715,11 +916,12 @@ const upsertPlayerTickets = async (game, aggregation) => {
         ticketId,
         playerId: playerResult.playerId,
         position,
-        value: ticketValue,
+        value: positionTicketValue,
+        type: positionTicketType,
         action: 'CREATED'
       });
       
-      console.log(`[AGGREGATOR] Created ticket ${ticketId} for player ${playerResult.playerId} (${position}${getOrdinalSuffix(position)} place)`);
+      console.log(`[AGGREGATOR] Created ticket ${ticketId} for player ${playerResult.playerId} (${position}${getOrdinalSuffix(position)} place, $${positionTicketValue})`);
       
     } catch (error) {
       console.error(`[AGGREGATOR] Error creating ticket for position ${position}:`, error);
@@ -736,17 +938,8 @@ const upsertPlayerTickets = async (game, aggregation) => {
   return result;
 };
 
-/**
- * Get ordinal suffix for a number (1st, 2nd, 3rd, etc.)
- */
-const getOrdinalSuffix = (n) => {
-  const s = ['th', 'st', 'nd', 'rd'];
-  const v = n % 100;
-  return s[(v - 20) % 10] || s[v] || s[0];
-};
-
 // ===================================================================
-// AGGREGATION LOGIC
+// AGGREGATION LOGIC (v3.0.0 - Enhanced with new ticket fields)
 // ===================================================================
 
 /**
@@ -774,14 +967,25 @@ const aggregateSocialDataForGame = async (gameId) => {
     const socialPost = await getSocialPost(link.socialPostId);
     if (!socialPost) continue;
     
-    const extractedData = socialPost.extractedGameDataId 
-      ? await getExtractedGameData(socialPost.extractedGameDataId)
-      : null;
+    // Get extracted data - try link's socialPostGameDataId first, then post's extractedGameDataId
+    let extractedData = null;
+    if (link.socialPostGameDataId) {
+      extractedData = await getExtractedGameData(link.socialPostGameDataId);
+    } else if (socialPost.extractedGameDataId) {
+      extractedData = await getExtractedGameData(socialPost.extractedGameDataId);
+    } else {
+      // Fallback: query by socialPostId
+      extractedData = await getExtractedGameDataByPostId(socialPost.id);
+    }
+    
+    // Extract pre-computed ticket data from link (if available from gameToSocialMatcher)
+    const linkTicketData = extractTicketDataFromLink(link);
     
     postDataCollection.push({
       link,
       socialPost,
       extractedData,
+      linkTicketData,
       isResult: socialPost.contentType === 'RESULT' || socialPost.isTournamentResult,
       isPromo: socialPost.contentType === 'PROMOTIONAL' || socialPost.isPromotional,
       isVerified: link.linkType === 'VERIFIED' || link.linkType === 'MANUAL_LINKED',
@@ -808,13 +1012,14 @@ const aggregateSocialDataForGame = async (gameId) => {
     socialPrizepoolPaid: null,
     socialPrizepoolSource: null,
     socialGuarantee: null,
+    socialTotalCashPaid: null,
     
     // Placement data
     placements: [],
     placementCount: 0,
     firstPlacePrize: null,
     
-    // Ticket awards
+    // Ticket awards (v3.0.0 enhanced)
     hasAccumulatorTickets: false,
     accumulatorTicketValue: null,
     numberOfAccumulatorTicketsPaid: null,
@@ -822,6 +1027,20 @@ const aggregateSocialDataForGame = async (gameId) => {
     ticketProgramName: null,
     ticketAwardPositions: null,
     ticketValueCalculation: null,
+    ticketPlacements: [],
+    primaryTicketType: null,
+    
+    // v3.0.0: Detailed ticket breakdown
+    totalTicketsExtracted: 0,
+    totalTicketValue: null,
+    ticketCountByType: {},
+    ticketValueByType: {},
+    
+    // Reconciliation data
+    hasReconciliationDiscrepancy: false,
+    reconciliationDiscrepancySeverity: null,
+    reconciliation_totalPrizepoolPaid: null,
+    reconciliation_cashPlusTotalTicketValue: null,
     
     // Jackpot
     hasJackpotContributions: false,
@@ -829,6 +1048,13 @@ const aggregateSocialDataForGame = async (gameId) => {
     
     // Entries (from social posts)
     socialTotalEntries: null,
+    
+    // Winner info
+    extractedWinnerName: null,
+    extractedWinnerCashPrize: null,
+    extractedWinnerHasTicket: false,
+    extractedWinnerTicketType: null,
+    extractedWinnerTicketValue: null,
     
     // Metadata
     aggregatedAt: new Date().toISOString(),
@@ -839,7 +1065,7 @@ const aggregateSocialDataForGame = async (gameId) => {
   
   // Process each post
   for (const item of postDataCollection) {
-    const { socialPost, extractedData, isResult, isPromo } = item;
+    const { socialPost, extractedData, linkTicketData, isResult, isPromo } = item;
     
     // Track post types
     if (isResult) {
@@ -851,8 +1077,54 @@ const aggregateSocialDataForGame = async (gameId) => {
       aggregation.promoPostIds.push(socialPost.id);
     }
     
-    // Extract data from post
+    // =========================================================================
+    // v3.0.0: First try to use pre-computed ticket data from link
+    // =========================================================================
+    if (linkTicketData && !aggregation.hasAccumulatorTickets) {
+      console.log(`[AGGREGATOR] Using pre-computed ticket data from link`);
+      
+      aggregation.hasAccumulatorTickets = linkTicketData.totalTicketsExtracted > 0;
+      aggregation.totalTicketsExtracted = linkTicketData.totalTicketsExtracted || 0;
+      aggregation.totalTicketValue = linkTicketData.totalTicketValue;
+      aggregation.ticketCountByType = linkTicketData.ticketCountByType || {};
+      aggregation.ticketValueByType = linkTicketData.ticketValueByType || {};
+      
+      aggregation.numberOfAccumulatorTicketsPaid = linkTicketData.reconciliation_accumulatorTicketCount || 0;
+      aggregation.accumulatorTicketValue = linkTicketData.reconciliation_accumulatorTicketValue;
+      
+      aggregation.socialTotalCashPaid = linkTicketData.totalCashPaid;
+      aggregation.reconciliation_totalPrizepoolPaid = linkTicketData.reconciliation_totalPrizepoolPaid;
+      aggregation.reconciliation_cashPlusTotalTicketValue = linkTicketData.reconciliation_cashPlusTotalTicketValue;
+      
+      aggregation.hasReconciliationDiscrepancy = linkTicketData.hasReconciliationDiscrepancy || false;
+      aggregation.reconciliationDiscrepancySeverity = linkTicketData.reconciliationDiscrepancySeverity;
+      
+      aggregation.extractedWinnerHasTicket = linkTicketData.extractedWinnerHasTicket || false;
+      aggregation.extractedWinnerTicketType = linkTicketData.extractedWinnerTicketType;
+      aggregation.extractedWinnerTicketValue = linkTicketData.extractedWinnerTicketValue;
+      
+      // Set positions as top N if we have count
+      if (aggregation.numberOfAccumulatorTicketsPaid > 0) {
+        aggregation.ticketAwardPositions = Array.from(
+          { length: aggregation.numberOfAccumulatorTicketsPaid },
+          (_, i) => i + 1
+        );
+      }
+      
+      aggregation.ticketAwardDetails = {
+        quantity: aggregation.numberOfAccumulatorTicketsPaid,
+        value: aggregation.accumulatorTicketValue,
+        totalValue: (aggregation.accumulatorTicketValue || 0) * (aggregation.numberOfAccumulatorTicketsPaid || 0),
+        positions: aggregation.ticketAwardPositions,
+        source: 'link_precomputed'
+      };
+    }
+    
+    // =========================================================================
+    // Extract data from SocialPostGameData
+    // =========================================================================
     if (extractedData) {
+      // Basic extraction data
       if (!aggregation.socialPrizepoolPaid && extractedData.extractedPrizePool) {
         aggregation.socialPrizepoolPaid = extractedData.extractedPrizePool;
         aggregation.socialPrizepoolSource = socialPost.id;
@@ -870,41 +1142,100 @@ const aggregateSocialDataForGame = async (gameId) => {
         aggregation.firstPlacePrize = extractedData.extractedFirstPlacePrize;
       }
       
+      // Winner info
+      if (!aggregation.extractedWinnerName && extractedData.extractedWinnerName) {
+        aggregation.extractedWinnerName = extractedData.extractedWinnerName;
+        aggregation.extractedWinnerCashPrize = extractedData.extractedWinnerCashPrize || extractedData.extractedWinnerPrize;
+      }
+      
+      // v3.0.0: Use new ticket aggregate fields if not already set from link
+      if (!aggregation.hasAccumulatorTickets) {
+        const ticketAggregates = extractTicketAggregatesFromData(extractedData);
+        
+        if (ticketAggregates.hasTickets) {
+          aggregation.hasAccumulatorTickets = true;
+          aggregation.totalTicketsExtracted = ticketAggregates.totalTicketsExtracted;
+          aggregation.totalTicketValue = ticketAggregates.totalTicketValue;
+          aggregation.ticketCountByType = ticketAggregates.ticketCountByType;
+          aggregation.ticketValueByType = ticketAggregates.ticketValueByType;
+          
+          aggregation.numberOfAccumulatorTicketsPaid = ticketAggregates.accumulatorTicketCount;
+          aggregation.accumulatorTicketValue = ticketAggregates.accumulatorTicketValue;
+          
+          aggregation.socialTotalCashPaid = extractedData.totalCashPaid;
+          aggregation.reconciliation_totalPrizepoolPaid = ticketAggregates.reconciliation_totalPrizepoolPaid;
+          aggregation.reconciliation_cashPlusTotalTicketValue = ticketAggregates.reconciliation_cashPlusTotalTicketValue;
+          
+          if (ticketAggregates.winnerHasTicket) {
+            aggregation.extractedWinnerHasTicket = true;
+            aggregation.extractedWinnerTicketType = ticketAggregates.winnerTicketType;
+            aggregation.extractedWinnerTicketValue = ticketAggregates.winnerTicketValue;
+          }
+          
+          // Set positions as top N
+          if (aggregation.numberOfAccumulatorTicketsPaid > 0) {
+            aggregation.ticketAwardPositions = Array.from(
+              { length: aggregation.numberOfAccumulatorTicketsPaid },
+              (_, i) => i + 1
+            );
+          }
+          
+          aggregation.ticketAwardDetails = {
+            quantity: aggregation.numberOfAccumulatorTicketsPaid,
+            value: aggregation.accumulatorTicketValue,
+            totalValue: (aggregation.accumulatorTicketValue || 0) * (aggregation.numberOfAccumulatorTicketsPaid || 0),
+            positions: aggregation.ticketAwardPositions,
+            source: ticketAggregates.source
+          };
+          
+          console.log(`[AGGREGATOR] Set ticket data from extraction: ${aggregation.numberOfAccumulatorTicketsPaid} tickets`);
+        }
+      }
+      
+      // Process placements
       const placements = parsePlacements(extractedData.extractedPlacements);
       if (placements.length > 0 && aggregation.placements.length === 0) {
         aggregation.placements = placements;
         aggregation.placementCount = placements.length;
         
-        // COUNT TICKETS FROM PLACEMENTS (using placementParser's detection)
-        // This is the most reliable source as it detects per-placement tickets
-        const ticketCountFromPlacements = countTicketsFromPlacements(placements);
-        if (ticketCountFromPlacements.count > 0 && !aggregation.hasAccumulatorTickets) {
-          aggregation.hasAccumulatorTickets = true;
-          aggregation.numberOfAccumulatorTicketsPaid = ticketCountFromPlacements.count;
-          aggregation.ticketAwardPositions = ticketCountFromPlacements.positions;
-          aggregation.ticketAwardDetails = {
-            quantity: ticketCountFromPlacements.count,
-            positions: ticketCountFromPlacements.positions,
-            placements: ticketCountFromPlacements.ticketPlacements,
-            source: 'placement_parser',
-            valueNeedsCalculation: true
-          };
-          console.log(`[AGGREGATOR] Set ticket count from placements: ${ticketCountFromPlacements.count}`);
+        // Count tickets from placements (fallback method)
+        if (!aggregation.hasAccumulatorTickets) {
+          const ticketCountFromPlacements = countTicketsFromPlacements(placements);
+          if (ticketCountFromPlacements.count > 0) {
+            aggregation.hasAccumulatorTickets = true;
+            aggregation.numberOfAccumulatorTicketsPaid = ticketCountFromPlacements.count;
+            aggregation.ticketAwardPositions = ticketCountFromPlacements.positions;
+            aggregation.ticketPlacements = ticketCountFromPlacements.ticketPlacements;
+            aggregation.ticketCountByType = ticketCountFromPlacements.byType;
+            
+            if (ticketCountFromPlacements.totalValue > 0) {
+              aggregation.totalTicketValue = ticketCountFromPlacements.totalValue;
+              aggregation.accumulatorTicketValue = ticketCountFromPlacements.totalValue / ticketCountFromPlacements.count;
+            }
+            
+            aggregation.ticketAwardDetails = {
+              quantity: ticketCountFromPlacements.count,
+              positions: ticketCountFromPlacements.positions,
+              placements: ticketCountFromPlacements.ticketPlacements,
+              source: 'placement_parser',
+              valueNeedsCalculation: !ticketCountFromPlacements.totalValue
+            };
+            
+            console.log(`[AGGREGATOR] Set ticket count from placements: ${ticketCountFromPlacements.count}`);
+          }
         }
       }
     }
     
-    // Extract ticket awards from post content (fallback if not found in placements)
-    // This catches patterns like "Top 9 will receive $250 Sydney Millions credit"
+    // Fallback: Extract ticket awards from post content
     if (!aggregation.hasAccumulatorTickets) {
-      const ticketInfo = extractTicketAwards(socialPost, extractedData);
+      const ticketInfo = extractTicketAwardsFromContent(socialPost, extractedData);
       if (ticketInfo.hasAccumulatorTickets) {
         aggregation.hasAccumulatorTickets = true;
         aggregation.numberOfAccumulatorTicketsPaid = ticketInfo.numberOfAccumulatorTicketsPaid;
         aggregation.ticketProgramName = ticketInfo.ticketProgramName;
         aggregation.ticketAwardPositions = ticketInfo.ticketAwardPositions;
         
-        // Set value if we have it from the content pattern
         if (ticketInfo.accumulatorTicketValue) {
           aggregation.accumulatorTicketValue = ticketInfo.accumulatorTicketValue;
           aggregation.ticketAwardDetails = ticketInfo.ticketAwardDetails;
@@ -912,15 +1243,17 @@ const aggregateSocialDataForGame = async (gameId) => {
           aggregation.ticketAwardDetails = {
             quantity: ticketInfo.numberOfAccumulatorTicketsPaid,
             positions: ticketInfo.ticketAwardPositions,
-            source: 'social_post_content',
+            source: 'content_pattern',
             valueNeedsCalculation: true
           };
         }
         console.log(`[AGGREGATOR] Set ticket count from content pattern: ${ticketInfo.numberOfAccumulatorTicketsPaid}`);
       }
-    } else if (aggregation.hasAccumulatorTickets && !aggregation.accumulatorTicketValue) {
-      // We have ticket count from placements, but try to get value from content
-      const ticketInfo = extractTicketAwards(socialPost, extractedData);
+    }
+    
+    // Try to get ticket value from content if we have count but no value
+    if (aggregation.hasAccumulatorTickets && !aggregation.accumulatorTicketValue) {
+      const ticketInfo = extractTicketAwardsFromContent(socialPost, extractedData);
       if (ticketInfo.accumulatorTicketValue) {
         aggregation.accumulatorTicketValue = ticketInfo.accumulatorTicketValue;
         aggregation.ticketProgramName = ticketInfo.ticketProgramName || aggregation.ticketProgramName;
@@ -928,7 +1261,6 @@ const aggregateSocialDataForGame = async (gameId) => {
           aggregation.ticketAwardDetails.value = ticketInfo.accumulatorTicketValue;
           aggregation.ticketAwardDetails.totalValue = ticketInfo.accumulatorTicketValue * aggregation.numberOfAccumulatorTicketsPaid;
           aggregation.ticketAwardDetails.valueNeedsCalculation = false;
-          aggregation.ticketAwardDetails.valueSource = 'social_post_content';
         }
         console.log(`[AGGREGATOR] Added ticket value from content: $${ticketInfo.accumulatorTicketValue}`);
       }
@@ -942,11 +1274,20 @@ const aggregateSocialDataForGame = async (gameId) => {
     }
   }
   
+  // Determine primary ticket type
+  if (aggregation.hasAccumulatorTickets && aggregation.ticketCountByType) {
+    const types = Object.entries(aggregation.ticketCountByType);
+    if (types.length > 0) {
+      types.sort((a, b) => b[1] - a[1]);
+      aggregation.primaryTicketType = types[0][0];
+    }
+  }
+  
   return aggregation;
 };
 
 // ===================================================================
-// GAME UPDATE
+// GAME UPDATE (v3.0.0 - Enhanced with new ticket fields)
 // ===================================================================
 
 /**
@@ -998,6 +1339,13 @@ const updateGameWithSocialData = async (gameId, aggregation, options = {}) => {
     }
   }
   
+  // v3.0.0: Store ticket breakdown
+  if (aggregation.ticketCountByType && Object.keys(aggregation.ticketCountByType).length > 0) {
+    updateParts.push('#socialTicketCountByType = :ticketByType');
+    expressionAttributeNames['#socialTicketCountByType'] = 'socialTicketCountByType';
+    expressionAttributeValues[':ticketByType'] = JSON.stringify(aggregation.ticketCountByType);
+  }
+  
   // Jackpot data
   if (aggregation.hasJackpotContributions) {
     updateParts.push('#hasJackpotContributions = :hasJackpot');
@@ -1016,6 +1364,13 @@ const updateGameWithSocialData = async (gameId, aggregation, options = {}) => {
     updateParts.push('#prizepoolPaid = :prizepoolPaid');
     expressionAttributeNames['#prizepoolPaid'] = 'prizepoolPaid';
     expressionAttributeValues[':prizepoolPaid'] = aggregation.socialPrizepoolPaid;
+  }
+  
+  // v3.0.0: Store reconciliation data
+  if (aggregation.hasReconciliationDiscrepancy) {
+    updateParts.push('#hasReconciliationDiscrepancy = :hasDiscrepancy');
+    expressionAttributeNames['#hasReconciliationDiscrepancy'] = 'hasReconciliationDiscrepancy';
+    expressionAttributeValues[':hasDiscrepancy'] = true;
   }
   
   // Store full aggregation as JSON
@@ -1162,7 +1517,10 @@ const processSocialDataForGame = async (gameId, options = {}) => {
         hasJackpotContributions: aggregation.hasJackpotContributions,
         hasPlacements: aggregation.placements.length > 0,
         hasPrizepool: !!aggregation.socialPrizepoolPaid,
-        ticketValueCalculated: !!aggregation.ticketValueCalculation
+        ticketValueCalculated: !!aggregation.ticketValueCalculation,
+        hasReconciliationDiscrepancy: aggregation.hasReconciliationDiscrepancy,
+        totalTicketsExtracted: aggregation.totalTicketsExtracted,
+        ticketCountByType: aggregation.ticketCountByType
       },
       ticketValueCalculation: aggregation.ticketValueCalculation,
       playerTickets: playerTicketResult,
@@ -1194,6 +1552,7 @@ const handleStreamEvent = async (event) => {
     skipped: 0,
     errors: 0,
     ticketsCreated: 0,
+    gamesWithDiscrepancies: 0,
     gameIds: new Set()
   };
   
@@ -1237,6 +1596,9 @@ const handleStreamEvent = async (event) => {
         if (processResult.playerTickets?.created) {
           results.ticketsCreated += processResult.playerTickets.created;
         }
+        if (processResult.dataExtracted?.hasReconciliationDiscrepancy) {
+          results.gamesWithDiscrepancies++;
+        }
       } else {
         results.errors++;
       }
@@ -1247,7 +1609,7 @@ const handleStreamEvent = async (event) => {
     }
   }
   
-  console.log(`[AGGREGATOR] Stream complete: ${results.processed} processed, ${results.ticketsCreated} tickets created, ${results.skipped} skipped, ${results.errors} errors`);
+  console.log(`[AGGREGATOR] Stream complete: ${results.processed} processed, ${results.ticketsCreated} tickets created, ${results.gamesWithDiscrepancies} discrepancies, ${results.skipped} skipped, ${results.errors} errors`);
   
   return {
     ...results,
@@ -1278,15 +1640,21 @@ exports.handler = async (event, context) => {
       case 'batchAggregateSocialData':
         const gameIds = input.gameIds || [];
         const batchResults = [];
+        let totalDiscrepancies = 0;
+        
         for (const gId of gameIds) {
           const result = await processSocialDataForGame(gId, input.options || {});
           batchResults.push(result);
+          if (result.dataExtracted?.hasReconciliationDiscrepancy) {
+            totalDiscrepancies++;
+          }
         }
         return {
           totalRequested: gameIds.length,
           processed: batchResults.filter(r => r.success).length,
           failed: batchResults.filter(r => !r.success).length,
           ticketsCreated: batchResults.reduce((sum, r) => sum + (r.playerTickets?.created || 0), 0),
+          gamesWithDiscrepancies: totalDiscrepancies,
           results: batchResults
         };
         
@@ -1316,8 +1684,13 @@ module.exports = {
   updateGameWithSocialData,
   calculateTicketValue,
   upsertPlayerTickets,
-  extractTicketAwards,
+  extractTicketAggregatesFromData,
+  extractTicketDataFromLink,
+  extractTicketAwardsFromContent,
   extractJackpotInfo,
+  countTicketsFromPlacements,
   parsePlacements,
-  roundUpToNearest
+  roundUpToNearest,
+  ACCUMULATOR_TICKET_TYPES,
+  VALID_TICKET_TYPES
 };

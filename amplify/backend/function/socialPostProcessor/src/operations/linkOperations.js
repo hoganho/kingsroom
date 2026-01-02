@@ -57,12 +57,13 @@ const linkSocialPostToGame = async (input) => {
     throw new Error(`Game not found: ${gameId}`);
   }
   
-  // Check for existing link
+  // Check for existing link - if exists, return it (idempotent operation)
   const existingLinks = await getLinksBySocialPost(socialPostId);
   const duplicateLink = existingLinks.find(l => l.gameId === gameId);
   
   if (duplicateLink) {
-    throw new Error(`Link already exists between post ${socialPostId} and game ${gameId}`);
+    console.log(`[LINK] Link already exists: ${duplicateLink.id} - returning existing link (idempotent)`);
+    return duplicateLink;
   }
   
   // Determine mention order

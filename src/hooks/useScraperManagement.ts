@@ -2,12 +2,13 @@
 // React hooks for enhanced scraper management
 // Updated to use new Unified Queries and ScrapeURL schema
 // Restored useURLHistory for auditing
+// FIXED: Uses minimal query to avoid deeply nested entity null errors
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { scraperManagementQueries } from '../graphql/scraperManagement';
 import { 
-    getScraperJobsReport,
+    // Don't import getScraperJobsReport from auto-generated - it causes null errors
     searchScrapeURLs,
     getScrapeURL,
     getUpdateCandidateURLs,
@@ -48,6 +49,7 @@ function castToType<T>(data: any): T | null {
 
 // ===================================================================
 // useScraperJobs - Manage scraper jobs (Unified System)
+// FIXED: Uses minimal query to avoid nested entity null errors
 // ===================================================================
 export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
     const client = useMemo(() => generateClient(), []);
@@ -62,9 +64,9 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
             setLoading(true);
             setError(null);
 
-            // Queries the ScraperJob table via Unified Resolver
+            // FIXED: Use minimal query to avoid deeply nested entity null errors
             const response = await client.graphql({
-                query: getScraperJobsReport,
+                query: scraperManagementQueries.getScraperJobsReportMinimal,
                 variables: {
                     status: statusFilter,
                     limit: 20,
@@ -221,22 +223,20 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
         }
     }, [client, statusFilter, nextToken]);
 
-    const modifyURLStatus = useCallback(async (
-        url: string, 
-        status?: ScrapeURLStatus, 
-        doNotScrape?: boolean
-    ) => {
+    const modifyURLStatus = useCallback(async (urlId: string, newStatus: ScrapeURLStatus) => {
         try {
             setLoading(true);
             setError(null);
             const response = await client.graphql({
                 query: modifyScrapeURLStatus,
-                variables: { url, status, doNotScrape }
+                variables: { url: urlId, status: newStatus }
             });
             if (!hasGraphQLData<any>(response)) throw new Error('Invalid response');
-            const updatedURL = castToType<ScrapeURL>(response.data.modifyScrapeURLStatus);
+            const updatedURL = castToType<ScrapeURL>(response.data?.modifyScrapeURLStatus);
             if (updatedURL) {
-                setUrls(prev => prev.map(u => u.url === url ? { ...u, ...updatedURL } : u));
+                setUrls(prev => prev.map(url =>
+                    url.id === urlId ? { ...url, ...updatedURL } : url
+                ));
             }
             return updatedURL;
         } catch (err) {
@@ -248,20 +248,16 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
         }
     }, [client]);
 
-    const bulkModifyURLStatuses = useCallback(async (
-        urlList: string[], 
-        status?: ScrapeURLStatus, 
-        doNotScrape?: boolean
-    ) => {
+    const bulkModifyURLStatuses = useCallback(async (urlIds: string[], newStatus: ScrapeURLStatus) => {
         try {
             setLoading(true);
             setError(null);
             const response = await client.graphql({
                 query: bulkModifyScrapeURLs,
-                variables: { urls: urlList, status, doNotScrape }
+                variables: { urls: urlIds, status: newStatus }
             });
             if (!hasGraphQLData<any>(response)) throw new Error('Invalid response');
-            const updatedURLs = response.data.bulkModifyScrapeURLs || [];
+            const updatedURLs = response.data?.bulkModifyScrapeURLs || [];
             const typedURLs = updatedURLs.map((u: unknown) => castToType<ScrapeURL>(u)!).filter(Boolean);
             const urlMap = new Map(typedURLs.map((u: ScrapeURL) => [u.url, u]));
             
@@ -352,6 +348,7 @@ export const useScraperMetrics = (timeRange: TimeRange = TimeRange.LAST_24_HOURS
 
 // ===================================================================
 // useJobDetails
+// FIXED: Uses minimal query to avoid nested entity null errors
 // ===================================================================
 export const useJobDetails = (jobId: string | null) => {
     const client = useMemo(() => generateClient(), []);
@@ -365,8 +362,10 @@ export const useJobDetails = (jobId: string | null) => {
         try {
             setLoading(true);
             setError(null);
+            
+            // FIXED: Use minimal query
             const jobResponse = await client.graphql({
-                query: getScraperJobsReport,
+                query: scraperManagementQueries.getScraperJobsReportMinimal,
                 variables: { limit: 1 } // Note: This is inefficient, needs a getScraperJob query
             });
             if (!hasGraphQLData<any>(jobResponse)) throw new Error('Invalid response');

@@ -1965,40 +1965,6 @@ export const schema = {
                         ]
                     }
                 },
-                "gameCost": {
-                    "name": "gameCost",
-                    "isArray": false,
-                    "type": {
-                        "model": "GameCost"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "HAS_ONE",
-                        "associatedWith": [
-                            "id"
-                        ],
-                        "targetNames": [
-                            "id"
-                        ]
-                    }
-                },
-                "gameFinancialSnapshots": {
-                    "name": "gameFinancialSnapshots",
-                    "isArray": true,
-                    "type": {
-                        "model": "GameFinancialSnapshot"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true,
-                    "association": {
-                        "connectionType": "HAS_MANY",
-                        "associatedWith": [
-                            "game"
-                        ]
-                    }
-                },
                 "playerEntries": {
                     "name": "playerEntries",
                     "isArray": true,
@@ -2028,6 +1994,56 @@ export const schema = {
                         "connectionType": "HAS_MANY",
                         "associatedWith": [
                             "game"
+                        ]
+                    }
+                },
+                "gameCostId": {
+                    "name": "gameCostId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameCost": {
+                    "name": "gameCost",
+                    "isArray": false,
+                    "type": {
+                        "model": "GameCost"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "HAS_ONE",
+                        "associatedWith": [
+                            "id"
+                        ],
+                        "targetNames": [
+                            "gameCostId"
+                        ]
+                    }
+                },
+                "gameFinancialSnapshotId": {
+                    "name": "gameFinancialSnapshotId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameFinancialSnapshot": {
+                    "name": "gameFinancialSnapshot",
+                    "isArray": false,
+                    "type": {
+                        "model": "GameFinancialSnapshot"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "HAS_ONE",
+                        "associatedWith": [
+                            "id"
+                        ],
+                        "targetNames": [
+                            "gameFinancialSnapshotId"
                         ]
                     }
                 },
@@ -10996,6 +11012,15 @@ export const schema = {
                     }
                 },
                 {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGame",
+                        "fields": [
+                            "gameId"
+                        ]
+                    }
+                },
+                {
                     "type": "auth",
                     "properties": {
                         "rules": [
@@ -11894,6 +11919,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "fullSyncOldestPostDate": {
+                    "name": "fullSyncOldestPostDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "pageDescription": {
                     "name": "pageDescription",
                     "isArray": false,
@@ -12565,6 +12597,20 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "effectiveGameDate": {
+                    "name": "effectiveGameDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "effectiveGameDateSource": {
+                    "name": "effectiveGameDateSource",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "socialAccountId": {
                     "name": "socialAccountId",
                     "isArray": false,
@@ -13184,6 +13230,92 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "effectiveGameDate": {
+                    "name": "effectiveGameDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "socialPostGameDataId": {
+                    "name": "socialPostGameDataId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasTicketData": {
+                    "name": "hasTicketData",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ticketData": {
+                    "name": "ticketData",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciliationPreview": {
+                    "name": "reconciliationPreview",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasReconciliationDiscrepancy": {
+                    "name": "hasReconciliationDiscrepancy",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciliationDiscrepancySeverity": {
+                    "name": "reconciliationDiscrepancySeverity",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedWinnerName": {
+                    "name": "extractedWinnerName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedWinnerPrize": {
+                    "name": "extractedWinnerPrize",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedTotalEntries": {
+                    "name": "extractedTotalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "placementCount": {
+                    "name": "placementCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentType": {
+                    "name": "contentType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SocialPostContentType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "linkedAt": {
                     "name": "linkedAt",
                     "isArray": false,
@@ -13433,6 +13565,20 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "effectiveGameDate": {
+                    "name": "effectiveGameDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "effectiveGameDateSource": {
+                    "name": "effectiveGameDateSource",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "extractedBuyIn": {
                     "name": "extractedBuyIn",
                     "isArray": false,
@@ -13580,10 +13726,182 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "extractedWinnerHasTicket": {
+                    "name": "extractedWinnerHasTicket",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedWinnerTicketType": {
+                    "name": "extractedWinnerTicketType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "NonCashPrizeType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedWinnerTicketValue": {
+                    "name": "extractedWinnerTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedWinnerTotalValue": {
+                    "name": "extractedWinnerTotalValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "placementCount": {
                     "name": "placementCount",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTicketsExtracted": {
+                    "name": "totalTicketsExtracted",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTicketValue": {
+                    "name": "totalTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ticketCountByType": {
+                    "name": "ticketCountByType",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ticketValueByType": {
+                    "name": "ticketValueByType",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCashPaid": {
+                    "name": "totalCashPaid",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPrizesWithTickets": {
+                    "name": "totalPrizesWithTickets",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTicketOnlyPrizes": {
+                    "name": "totalTicketOnlyPrizes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasAdvertisedTickets": {
+                    "name": "hasAdvertisedTickets",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "advertisedTicketCount": {
+                    "name": "advertisedTicketCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "advertisedTicketType": {
+                    "name": "advertisedTicketType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "NonCashPrizeType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "advertisedTicketValue": {
+                    "name": "advertisedTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "advertisedTicketDescription": {
+                    "name": "advertisedTicketDescription",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "advertisedTickets": {
+                    "name": "advertisedTickets",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciliation_accumulatorTicketCount": {
+                    "name": "reconciliation_accumulatorTicketCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciliation_accumulatorTicketValue": {
+                    "name": "reconciliation_accumulatorTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciliation_totalPrizepoolPaid": {
+                    "name": "reconciliation_totalPrizepoolPaid",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciliation_cashPlusTotalTicketValue": {
+                    "name": "reconciliation_cashPlusTotalTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasReconciliationDiscrepancy": {
+                    "name": "hasReconciliationDiscrepancy",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciliationNotes": {
+                    "name": "reconciliationNotes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciliationCheckedAt": {
+                    "name": "reconciliationCheckedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -13598,6 +13916,13 @@ export const schema = {
                     "name": "matchCandidateCount",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchCandidates": {
+                    "name": "matchCandidates",
+                    "isArray": false,
+                    "type": "AWSJSON",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -13696,6 +14021,16 @@ export const schema = {
                     }
                 },
                 {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEffectiveGameDate",
+                        "fields": [
+                            "effectiveGameDate",
+                            "extractedAt"
+                        ]
+                    }
+                },
+                {
                     "type": "auth",
                     "properties": {
                         "rules": [
@@ -13779,6 +14114,36 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "primaryTicketType": {
+                    "name": "primaryTicketType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "NonCashPrizeType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "primaryTicketValue": {
+                    "name": "primaryTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "primaryTicketDescription": {
+                    "name": "primaryTicketDescription",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ticketCount": {
+                    "name": "ticketCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "totalEstimatedValue": {
                     "name": "totalEstimatedValue",
                     "isArray": false,
@@ -13800,6 +14165,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "chopDetails": {
+                    "name": "chopDetails",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "rawText": {
                     "name": "rawText",
                     "isArray": false,
@@ -13811,6 +14183,27 @@ export const schema = {
                     "name": "linkedPlayerId",
                     "isArray": false,
                     "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "linkedPlayerTicketId": {
+                    "name": "linkedPlayerTicketId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerLinkConfidence": {
+                    "name": "playerLinkConfidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerLinkMethod": {
+                    "name": "playerLinkMethod",
+                    "isArray": false,
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -15086,6 +15479,7 @@ export const schema = {
                 "FAILED",
                 "SKIPPED",
                 "RATE_LIMITED",
+                "TIMEOUT",
                 "NO_NEW_CONTENT"
             ]
         },
@@ -15105,6 +15499,16 @@ export const schema = {
                 "PUBLISHED",
                 "FAILED",
                 "CANCELLED"
+            ]
+        },
+        "SyncEventStatus": {
+            "name": "SyncEventStatus",
+            "values": [
+                "STARTED",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "RATE_LIMITED",
+                "FAILED"
             ]
         },
         "SocialPostContentType": {
@@ -15144,12 +15548,30 @@ export const schema = {
             "name": "NonCashPrizeType",
             "values": [
                 "ACCUMULATOR_TICKET",
-                "TOURNAMENT_ENTRY",
                 "SATELLITE_TICKET",
                 "BOUNTY_TICKET",
+                "TOURNAMENT_ENTRY",
+                "SERIES_TICKET",
+                "MAIN_EVENT_SEAT",
+                "VALUED_SEAT",
+                "TRAVEL_PACKAGE",
+                "ACCOMMODATION_PACKAGE",
+                "VOUCHER",
+                "FOOD_CREDIT",
+                "CASINO_CREDIT",
                 "MERCHANDISE",
                 "POINTS",
                 "OTHER"
+            ]
+        },
+        "TicketAwardSource": {
+            "name": "TicketAwardSource",
+            "values": [
+                "SOCIAL_POST_RESULT",
+                "SOCIAL_POST_PROMO",
+                "SCRAPED_DATA",
+                "MANUAL_ENTRY",
+                "RECURRING_GAME_DEFAULT"
             ]
         },
         "BackgroundTaskType": {
@@ -18730,6 +19152,265 @@ export const schema = {
                 }
             }
         },
+        "GameDeletionCounts": {
+            "name": "GameDeletionCounts",
+            "fields": {
+                "deleted": {
+                    "name": "deleted",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "PlayerStatsUpdateCounts": {
+            "name": "PlayerStatsUpdateCounts",
+            "fields": {
+                "summariesUpdated": {
+                    "name": "summariesUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venuesUpdated": {
+                    "name": "venuesUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GameDeletionDetails": {
+            "name": "GameDeletionDetails",
+            "fields": {
+                "gameCost": {
+                    "name": "gameCost",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameDeletionCounts"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameFinancialSnapshot": {
+                    "name": "gameFinancialSnapshot",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameDeletionCounts"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapeURL": {
+                    "name": "scrapeURL",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameDeletionCounts"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapeAttempts": {
+                    "name": "scrapeAttempts",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameDeletionCounts"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerEntries": {
+                    "name": "playerEntries",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameDeletionCounts"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerResults": {
+                    "name": "playerResults",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameDeletionCounts"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerTransactions": {
+                    "name": "playerTransactions",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameDeletionCounts"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerStats": {
+                    "name": "playerStats",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "PlayerStatsUpdateCounts"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "game": {
+                    "name": "game",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameDeletionCounts"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "parentGame": {
+                    "name": "parentGame",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "DeleteGameWithCleanupResult"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ConsolidationCleanupResult": {
+            "name": "ConsolidationCleanupResult",
+            "fields": {
+                "deleteParent": {
+                    "name": "deleteParent",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "parentId": {
+                    "name": "parentId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "remainingSiblings": {
+                    "name": "remainingSiblings",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "childrenUnlinked": {
+                    "name": "childrenUnlinked",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "noConsolidation": {
+                    "name": "noConsolidation",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "DeleteGameWithCleanupResult": {
+            "name": "DeleteGameWithCleanupResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameName": {
+                    "name": "gameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dryRun": {
+                    "name": "dryRun",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "deletions": {
+                    "name": "deletions",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GameDeletionDetails"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consolidation": {
+                    "name": "consolidation",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "ConsolidationCleanupResult"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "AwardTicketResult": {
             "name": "AwardTicketResult",
             "fields": {
@@ -21594,6 +22275,172 @@ export const schema = {
                 }
             }
         },
+        "JobProgressEvent": {
+            "name": "JobProgressEvent",
+            "fields": {
+                "jobId": {
+                    "name": "jobId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "stopReason": {
+                    "name": "stopReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalURLsProcessed": {
+                    "name": "totalURLsProcessed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "newGamesScraped": {
+                    "name": "newGamesScraped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesUpdated": {
+                    "name": "gamesUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesSkipped": {
+                    "name": "gamesSkipped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "errors": {
+                    "name": "errors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "blanks": {
+                    "name": "blanks",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "currentId": {
+                    "name": "currentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startId": {
+                    "name": "startId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "endId": {
+                    "name": "endId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startTime": {
+                    "name": "startTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "durationSeconds": {
+                    "name": "durationSeconds",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "successRate": {
+                    "name": "successRate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "averageScrapingTime": {
+                    "name": "averageScrapingTime",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "s3CacheHits": {
+                    "name": "s3CacheHits",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveNotFound": {
+                    "name": "consecutiveNotFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveErrors": {
+                    "name": "consecutiveErrors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveBlanks": {
+                    "name": "consecutiveBlanks",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastErrorMessage": {
+                    "name": "lastErrorMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "publishedAt": {
+                    "name": "publishedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
         "SocialFeedConnection": {
             "name": "SocialFeedConnection",
             "fields": {
@@ -21768,6 +22615,123 @@ export const schema = {
                     "type": "Int",
                     "isRequired": false,
                     "attributes": []
+                },
+                "postsProcessed": {
+                    "name": "postsProcessed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rateLimited": {
+                    "name": "rateLimited",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "timeout": {
+                    "name": "timeout",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "oldestPostDate": {
+                    "name": "oldestPostDate",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SyncPageInfoResult": {
+            "name": "SyncPageInfoResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "logoUrl": {
+                    "name": "logoUrl",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SocialSyncEvent": {
+            "name": "SocialSyncEvent",
+            "fields": {
+                "socialAccountId": {
+                    "name": "socialAccountId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SyncEventStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "postsFound": {
+                    "name": "postsFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newPostsAdded": {
+                    "name": "newPostsAdded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rateLimited": {
+                    "name": "rateLimited",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "pagesCompleted": {
+                    "name": "pagesCompleted",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "completedAt": {
+                    "name": "completedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -21818,6 +22782,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "targetTournamentId": {
+                    "name": "targetTournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "ticketType": {
                     "name": "ticketType",
                     "isArray": false,
@@ -21829,6 +22800,21 @@ export const schema = {
                     "name": "ticketQuantity",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "packageIncludes": {
+                    "name": "packageIncludes",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "extractionConfidence": {
+                    "name": "extractionConfidence",
+                    "isArray": false,
+                    "type": "Float",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -21891,6 +22877,15 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "ticketSummary": {
+                    "name": "ticketSummary",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "TicketExtractionSummary"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "matchCandidates": {
                     "name": "matchCandidates",
                     "isArray": true,
@@ -21933,6 +22928,15 @@ export const schema = {
                     "isRequired": true,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "reconciliationPreview": {
+                    "name": "reconciliationPreview",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "SocialToGameReconciliation"
+                    },
+                    "isRequired": false,
+                    "attributes": []
                 },
                 "processingTimeMs": {
                     "name": "processingTimeMs",
@@ -22138,6 +23142,20 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "totalTicketsExtracted": {
+                    "name": "totalTicketsExtracted",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTicketValue": {
+                    "name": "totalTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "processingTimeMs": {
                     "name": "processingTimeMs",
                     "isArray": false,
@@ -22314,6 +23332,499 @@ export const schema = {
                     "name": "bestMatchConfidence",
                     "isArray": false,
                     "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "TicketExtractionSummary": {
+            "name": "TicketExtractionSummary",
+            "fields": {
+                "totalPlacements": {
+                    "name": "totalPlacements",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "placementsWithCash": {
+                    "name": "placementsWithCash",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "placementsWithTickets": {
+                    "name": "placementsWithTickets",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "placementsWithBoth": {
+                    "name": "placementsWithBoth",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "placementsWithTicketOnly": {
+                    "name": "placementsWithTicketOnly",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalCashPaid": {
+                    "name": "totalCashPaid",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalTicketValue": {
+                    "name": "totalTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalCombinedValue": {
+                    "name": "totalCombinedValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ticketsByType": {
+                    "name": "ticketsByType",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "TicketTypeCount"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "topPlacements": {
+                    "name": "topPlacements",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "PlacementPreview"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                }
+            }
+        },
+        "TicketTypeCount": {
+            "name": "TicketTypeCount",
+            "fields": {
+                "ticketType": {
+                    "name": "ticketType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "NonCashPrizeType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "count": {
+                    "name": "count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalValue": {
+                    "name": "totalValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "PlacementPreview": {
+            "name": "PlacementPreview",
+            "fields": {
+                "place": {
+                    "name": "place",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playerName": {
+                    "name": "playerName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "cashPrize": {
+                    "name": "cashPrize",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ticketType": {
+                    "name": "ticketType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "NonCashPrizeType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ticketValue": {
+                    "name": "ticketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ticketDescription": {
+                    "name": "ticketDescription",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalValue": {
+                    "name": "totalValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rawText": {
+                    "name": "rawText",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SocialToGameReconciliation": {
+            "name": "SocialToGameReconciliation",
+            "fields": {
+                "socialPostId": {
+                    "name": "socialPostId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "socialPostGameDataId": {
+                    "name": "socialPostGameDataId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameName": {
+                    "name": "gameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameDate": {
+                    "name": "gameDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "social_totalCashPaid": {
+                    "name": "social_totalCashPaid",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "social_totalTicketCount": {
+                    "name": "social_totalTicketCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "social_totalTicketValue": {
+                    "name": "social_totalTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "social_accumulatorCount": {
+                    "name": "social_accumulatorCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "social_accumulatorValue": {
+                    "name": "social_accumulatorValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "social_totalPlacements": {
+                    "name": "social_totalPlacements",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "social_prizepoolTotal": {
+                    "name": "social_prizepoolTotal",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "game_prizepoolPaid": {
+                    "name": "game_prizepoolPaid",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "game_numberOfAccumulatorTicketsPaid": {
+                    "name": "game_numberOfAccumulatorTicketsPaid",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "game_accumulatorTicketValue": {
+                    "name": "game_accumulatorTicketValue",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "game_totalEntries": {
+                    "name": "game_totalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "game_hasAccumulatorTickets": {
+                    "name": "game_hasAccumulatorTickets",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "cashDifference": {
+                    "name": "cashDifference",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ticketCountDifference": {
+                    "name": "ticketCountDifference",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ticketValueDifference": {
+                    "name": "ticketValueDifference",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasDiscrepancy": {
+                    "name": "hasDiscrepancy",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "discrepancySeverity": {
+                    "name": "discrepancySeverity",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "discrepancyNotes": {
+                    "name": "discrepancyNotes",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "suggestedAction": {
+                    "name": "suggestedAction",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciledAt": {
+                    "name": "reconciledAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciledBy": {
+                    "name": "reconciledBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "TicketReconciliationReport": {
+            "name": "TicketReconciliationReport",
+            "fields": {
+                "totalGamesChecked": {
+                    "name": "totalGamesChecked",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesWithSocialData": {
+                    "name": "gamesWithSocialData",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesWithDiscrepancies": {
+                    "name": "gamesWithDiscrepancies",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesMatched": {
+                    "name": "gamesMatched",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalCashDifference": {
+                    "name": "totalCashDifference",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTicketCountDifference": {
+                    "name": "totalTicketCountDifference",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTicketValueDifference": {
+                    "name": "totalTicketValueDifference",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reconciliations": {
+                    "name": "reconciliations",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "SocialToGameReconciliation"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ReconcileResult": {
+            "name": "ReconcileResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "socialPostGameDataId": {
+                    "name": "socialPostGameDataId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "fieldsUpdated": {
+                    "name": "fieldsUpdated",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "previousValues": {
+                    "name": "previousValues",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newValues": {
+                    "name": "newValues",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -23401,32 +24912,6 @@ export const schema = {
                 }
             }
         },
-        "SyncPageInfoResult": {
-            "name": "SyncPageInfoResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "message": {
-                    "name": "message",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "logoUrl": {
-                    "name": "logoUrl",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
         "RefreshResponse": {
             "name": "RefreshResponse",
             "fields": {
@@ -23512,5 +24997,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "27ef0bce9f05911560654924874b6478"
+    "version": "3bca373c4f649599524dbc22d52b284f"
 };

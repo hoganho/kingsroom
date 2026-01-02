@@ -3,6 +3,7 @@
 // Updated with post detail modal popup
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { generateClient } from 'aws-amplify/api';
 import { format, formatDistanceToNow } from 'date-fns';
 import { PageWrapper } from '../../components/layout/PageWrapper';
@@ -556,7 +557,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ postId, onClose }) =>
                       <StatusBadge status={post.processingStatus || 'PENDING'} />
                       {post.contentTypeConfidence && (
                         <span className="text-xs text-gray-500">
-                          {Math.round(post.contentTypeConfidence)}% confidence
+                          {Math.round(post.contentTypeConfidence * 100)}% confidence
                         </span>
                       )}
                     </div>
@@ -568,7 +569,17 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ postId, onClose }) =>
                       <p className="text-sm text-green-700 font-medium">
                         ✓ Linked to {post.linkedGameCount || 1} game(s)
                       </p>
-                      <p className="text-xs text-green-600 mt-1">Game ID: {post.linkedGameId}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-xs text-green-600">Game ID: {post.linkedGameId}</p>
+                        <Link
+                          to={`/games/details/${post.linkedGameId}`}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-green-700 hover:text-green-900 bg-green-100 hover:bg-green-200 px-2 py-1 rounded transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          View Game
+                        </Link>
+                      </div>
                     </div>
                   )}
 
@@ -1053,7 +1064,7 @@ export const SocialDebug = () => {
                       <StatusBadge status={post.processingStatus || 'PENDING'} />
                       {post.contentType && (
                         <span className="text-xs text-gray-500">
-                          {post.contentType} ({post.contentTypeConfidence?.toFixed(0)}%)
+                          {post.contentType} ({(post.contentTypeConfidence * 100)?.toFixed(0)}%)
                         </span>
                       )}
                     </div>

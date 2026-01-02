@@ -21,13 +21,13 @@ const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 // --- List of Tables to Clear ---
 // This list is based on the table names you provided.
 const TABLES_TO_CLEAR = [
-//  'SocialAccount-fosb7ek5argnhctz4odpt52eia-staging',
-  'SocialPost-fosb7ek5argnhctz4odpt52eia-staging',
-  'SocialScheduledPost-fosb7ek5argnhctz4odpt52eia-staging',
-  'SocialScrapeAttempt-fosb7ek5argnhctz4odpt52eia-staging',
-  'SocialPostGameData-fosb7ek5argnhctz4odpt52eia-staging',
-  'SocialPostGameLink-fosb7ek5argnhctz4odpt52eia-staging',
-  'SocialPostPlacement-fosb7ek5argnhctz4odpt52eia-staging'
+//  'SocialAccount-ht3nugt6lvddpeeuwj3x6mkite-dev',
+  'SocialPost-ht3nugt6lvddpeeuwj3x6mkite-dev',
+  'SocialScheduledPost-ht3nugt6lvddpeeuwj3x6mkite-dev',
+  'SocialScrapeAttempt-ht3nugt6lvddpeeuwj3x6mkite-dev',
+  'SocialPostGameData-ht3nugt6lvddpeeuwj3x6mkite-dev',
+  'SocialPostGameLink-ht3nugt6lvddpeeuwj3x6mkite-dev',
+  'SocialPostPlacement-ht3nugt6lvddpeeuwj3x6mkite-dev'
 ];
 
 // --- Logger (copied from your script) ---

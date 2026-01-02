@@ -256,6 +256,7 @@ export const venuesByEntitySimple = /* GraphQL */ `
   }
 `;
 
+// Updated query that includes fullSyncOldestPostDate for resumable syncs
 export const listSocialAccountsSimple = /* GraphQL */ `
   query ListSocialAccountsSimple(
     $filter: ModelSocialAccountFilterInput
@@ -274,24 +275,60 @@ export const listSocialAccountsSimple = /* GraphQL */ `
         followerCount
         postCount
         status
+        lastErrorMessage
         isScrapingEnabled
         lastScrapedAt
         lastSuccessfulScrapeAt
+        scrapeFrequencyMinutes
         consecutiveFailures
-        hasPostAccess
-        category
-        website
+        hasFullHistory
+        fullSyncOldestPostDate
         entityId
         venueId
         createdAt
         updatedAt
         _version
+        _deleted
         _lastChangedAt
       }
       nextToken
     }
   }
 `;
+
+// You can also add a getSocialAccount query if needed
+export const getSocialAccountSimple = /* GraphQL */ `
+  query GetSocialAccountSimple($id: ID!) {
+    getSocialAccount(id: $id) {
+      id
+      platform
+      platformAccountId
+      accountName
+      accountHandle
+      accountUrl
+      profileImageUrl
+      followerCount
+      postCount
+      status
+      lastErrorMessage
+      isScrapingEnabled
+      lastScrapedAt
+      lastSuccessfulScrapeAt
+      scrapeFrequencyMinutes
+      consecutiveFailures
+      hasFullHistory
+      fullSyncOldestPostDate
+      entityId
+      venueId
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+    }
+  }
+`;
+
 
 export const listScrapeURLsSimple = /* GraphQL */ `
   query ListScrapeURLsSimple(
@@ -511,6 +548,7 @@ export const getScrapeURLForCache = /* GraphQL */ `
     }
   }
 `;
+
 
 // ===================================================================
 // DEBUG QUERIES FOR PlayersPage.tsx

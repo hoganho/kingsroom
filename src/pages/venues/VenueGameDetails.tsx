@@ -498,37 +498,12 @@ function buildSummaryStats(snapshots: GameFinancialSnapshotWithGame[]): SummaryS
   const totalEntries = snapshots.reduce((sum, s) => sum + (s.totalEntries ?? 0), 0);
   const totalPrizepool = snapshots.reduce((sum, s) => sum + (s.prizepoolTotal ?? 0), 0);
   const totalProfit = snapshots.reduce((sum, s) => sum + (s.netProfit ?? 0), 0);
-
-  return {
-    totalGames,
-    totalRegistrations,
-    totalEntries,
-    totalPrizepool,
-    totalProfit,
-    avgProfit: totalGames > 0 ? totalProfit / totalGames : 0,
-    avgEntries: totalGames > 0 ? totalEntries / totalGames : 0,
-  };
+  const avgProfit = totalGames > 0 ? totalProfit / totalGames : 0;
+  const avgEntries = totalGames > 0 ? totalEntries / totalGames : 0;
+  return { totalGames, totalRegistrations, totalEntries, totalPrizepool, totalProfit, avgProfit, avgEntries };
 }
 
-function formatDateTimeForInput(dateStr: string | null | undefined): string {
-  if (!dateStr) return '';
-  try {
-    return format(parseISO(dateStr), "yyyy-MM-dd'T'HH:mm");
-  } catch {
-    return '';
-  }
-}
-
-function formatDateTimeForDisplay(dateStr: string | null | undefined): string {
-  if (!dateStr) return '-';
-  try {
-    return format(parseISO(dateStr), 'dd MMM yyyy HH:mm');
-  } catch {
-    return '-';
-  }
-}
-
-// ---- Game Edit Modal Component ----
+// ---- Modal Component ----
 
 interface GameEditModalProps {
   isOpen: boolean;
@@ -537,87 +512,188 @@ interface GameEditModalProps {
   onSaveSuccess: () => void;
 }
 
-function GameEditModal({ isOpen, onClose, gameId, onSaveSuccess }: GameEditModalProps) {
+const GameEditModal: React.FC<GameEditModalProps> = ({ isOpen, onClose, gameId, onSaveSuccess }) => {
   const [game, setGame] = useState<GameDetails | null>(null);
-  const [editedGame, setEditedGame] = useState<Partial<GameDetails>>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>('core');
 
+  // Form state for editable fields
+  const [formData, setFormData] = useState({
+    name: '',
+    gameStatus: '',
+    gameType: '',
+    gameVariant: '',
+    gameFrequency: '',
+    registrationStatus: '',
+    buyIn: '',
+    rake: '',
+    venueFee: '',
+    startingStack: '',
+    hasGuarantee: false,
+    guaranteeAmount: '',
+    prizepoolPaid: '',
+    prizepoolCalculated: '',
+    totalUniquePlayers: '',
+    totalInitialEntries: '',
+    totalEntries: '',
+    totalRebuys: '',
+    totalAddons: '',
+    tournamentType: '',
+    isRegular: false,
+    isSatellite: false,
+    dealerDealt: false,
+    isSeries: false,
+    seriesName: '',
+    isMainEvent: false,
+    eventNumber: '',
+    dayNumber: '',
+    flightLetter: '',
+    finalDay: false,
+    // Jackpot contributions
+    hasJackpotContributions: false,
+    jackpotContributionAmount: '',
+    // Accumulator tickets
+    hasAccumulatorTickets: false,
+    accumulatorTicketValue: '',
+    numberOfAccumulatorTicketsPaid: '',
+  });
+
+  // Fetch game details when modal opens
   useEffect(() => {
-    if (!isOpen || !gameId) {
-      setGame(null);
-      setEditedGame({});
-      setIsEditing(false);
-      setActiveSection('core');
-      return;
+    if (isOpen && gameId) {
+      fetchGameDetails(gameId);
     }
-
-    const fetchGame = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const client = getClient();
-        const response = await client.graphql({
-          query: getGameQuery,
-          variables: { id: gameId },
-        }) as any;
-
-        const gameData = response?.data?.getGame;
-        if (gameData) {
-          setGame(gameData);
-          setEditedGame(gameData);
-        } else {
-          setError('Game not found');
-        }
-      } catch (err: any) {
-        console.error('Error fetching game:', err);
-        setError(err?.message ?? 'Failed to load game details');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGame();
   }, [isOpen, gameId]);
 
-  const handleInputChange = (field: keyof GameDetails, value: any) => {
-    setEditedGame((prev) => ({ ...prev, [field]: value }));
+  const fetchGameDetails = async (id: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const client = getClient();
+      const response = await client.graphql({
+        query: getGameQuery,
+        variables: { id },
+      }) as any;
+
+      const gameData = response?.data?.getGame;
+      if (gameData) {
+        setGame(gameData);
+        // Initialize form with game data
+        setFormData({
+          name: gameData.name || '',
+          gameStatus: gameData.gameStatus || '',
+          gameType: gameData.gameType || '',
+          gameVariant: gameData.gameVariant || '',
+          gameFrequency: gameData.gameFrequency || '',
+          registrationStatus: gameData.registrationStatus || '',
+          buyIn: gameData.buyIn?.toString() || '',
+          rake: gameData.rake?.toString() || '',
+          venueFee: gameData.venueFee?.toString() || '',
+          startingStack: gameData.startingStack?.toString() || '',
+          hasGuarantee: gameData.hasGuarantee || false,
+          guaranteeAmount: gameData.guaranteeAmount?.toString() || '',
+          prizepoolPaid: gameData.prizepoolPaid?.toString() || '',
+          prizepoolCalculated: gameData.prizepoolCalculated?.toString() || '',
+          totalUniquePlayers: gameData.totalUniquePlayers?.toString() || '',
+          totalInitialEntries: gameData.totalInitialEntries?.toString() || '',
+          totalEntries: gameData.totalEntries?.toString() || '',
+          totalRebuys: gameData.totalRebuys?.toString() || '',
+          totalAddons: gameData.totalAddons?.toString() || '',
+          tournamentType: gameData.tournamentType || '',
+          isRegular: gameData.isRegular || false,
+          isSatellite: gameData.isSatellite || false,
+          dealerDealt: gameData.dealerDealt || false,
+          isSeries: gameData.isSeries || false,
+          seriesName: gameData.seriesName || '',
+          isMainEvent: gameData.isMainEvent || false,
+          eventNumber: gameData.eventNumber?.toString() || '',
+          dayNumber: gameData.dayNumber?.toString() || '',
+          flightLetter: gameData.flightLetter || '',
+          finalDay: gameData.finalDay || false,
+          // Jackpot contributions
+          hasJackpotContributions: gameData.hasJackpotContributions || false,
+          jackpotContributionAmount: gameData.jackpotContributionAmount?.toString() || '',
+          // Accumulator tickets
+          hasAccumulatorTickets: gameData.hasAccumulatorTickets || false,
+          accumulatorTicketValue: gameData.accumulatorTicketValue?.toString() || '',
+          numberOfAccumulatorTicketsPaid: gameData.numberOfAccumulatorTicketsPaid?.toString() || '',
+        });
+      } else {
+        setError('Game not found');
+      }
+    } catch (err: any) {
+      console.error('Error fetching game:', err);
+      setError(err?.message ?? 'Failed to load game');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {
-    if (!game?.id) return;
+    if (!game) return;
 
     setSaving(true);
     setError(null);
 
     try {
       const client = getClient();
-      
-      // Build update input - only include changed fields
-      const updateInput: any = { id: game.id };
-      
-      // Compare and include changed fields
-      Object.keys(editedGame).forEach((key) => {
-        const typedKey = key as keyof GameDetails;
-        if (editedGame[typedKey] !== game[typedKey] && typedKey !== 'id' && typedKey !== 'createdAt' && typedKey !== 'updatedAt') {
-          updateInput[typedKey] = editedGame[typedKey];
-        }
-      });
 
-      // Mark as edited
-      updateInput.wasEdited = true;
-      updateInput.lastEditedAt = new Date().toISOString();
+      // Build update input with only changed fields
+      const input: any = {
+        id: game.id,
+        name: formData.name,
+        gameStatus: formData.gameStatus || null,
+        gameType: formData.gameType || null,
+        gameVariant: formData.gameVariant || null,
+        gameFrequency: formData.gameFrequency || null,
+        registrationStatus: formData.registrationStatus || null,
+        buyIn: formData.buyIn ? parseFloat(formData.buyIn) : null,
+        rake: formData.rake ? parseFloat(formData.rake) : null,
+        venueFee: formData.venueFee ? parseFloat(formData.venueFee) : null,
+        startingStack: formData.startingStack ? parseInt(formData.startingStack) : null,
+        hasGuarantee: formData.hasGuarantee,
+        guaranteeAmount: formData.guaranteeAmount ? parseFloat(formData.guaranteeAmount) : null,
+        prizepoolPaid: formData.prizepoolPaid ? parseFloat(formData.prizepoolPaid) : null,
+        prizepoolCalculated: formData.prizepoolCalculated ? parseFloat(formData.prizepoolCalculated) : null,
+        totalUniquePlayers: formData.totalUniquePlayers ? parseInt(formData.totalUniquePlayers) : null,
+        totalInitialEntries: formData.totalInitialEntries ? parseInt(formData.totalInitialEntries) : null,
+        totalEntries: formData.totalEntries ? parseInt(formData.totalEntries) : null,
+        totalRebuys: formData.totalRebuys ? parseInt(formData.totalRebuys) : null,
+        totalAddons: formData.totalAddons ? parseInt(formData.totalAddons) : null,
+        tournamentType: formData.tournamentType || null,
+        isRegular: formData.isRegular,
+        isSatellite: formData.isSatellite,
+        dealerDealt: formData.dealerDealt,
+        isSeries: formData.isSeries,
+        seriesName: formData.seriesName || null,
+        isMainEvent: formData.isMainEvent,
+        eventNumber: formData.eventNumber ? parseInt(formData.eventNumber) : null,
+        dayNumber: formData.dayNumber ? parseInt(formData.dayNumber) : null,
+        flightLetter: formData.flightLetter || null,
+        finalDay: formData.finalDay,
+        // Jackpot contributions
+        hasJackpotContributions: formData.hasJackpotContributions,
+        jackpotContributionAmount: formData.jackpotContributionAmount ? parseFloat(formData.jackpotContributionAmount) : null,
+        // Accumulator tickets
+        hasAccumulatorTickets: formData.hasAccumulatorTickets,
+        accumulatorTicketValue: formData.accumulatorTicketValue ? parseFloat(formData.accumulatorTicketValue) : null,
+        numberOfAccumulatorTicketsPaid: formData.numberOfAccumulatorTicketsPaid ? parseInt(formData.numberOfAccumulatorTicketsPaid) : null,
+        // Mark as edited
+        wasEdited: true,
+        lastEditedAt: new Date().toISOString(),
+      };
 
       await client.graphql({
         query: updateGameMutation,
-        variables: { input: updateInput },
+        variables: { input },
       });
 
-      setIsEditing(false);
       onSaveSuccess();
       onClose();
     } catch (err: any) {
@@ -626,88 +702,6 @@ function GameEditModal({ isOpen, onClose, gameId, onSaveSuccess }: GameEditModal
     } finally {
       setSaving(false);
     }
-  };
-
-  const sections = [
-    { id: 'core', label: 'Core Info' },
-    { id: 'scheduling', label: 'Scheduling' },
-    { id: 'financials', label: 'Financials' },
-    { id: 'aggregates', label: 'Aggregates' },
-    { id: 'calculated', label: 'Calculated Metrics' },
-    { id: 'categorization', label: 'Categorization' },
-    { id: 'series', label: 'Series Info' },
-    { id: 'keys', label: 'Query Keys' },
-    { id: 'metadata', label: 'Metadata' },
-  ];
-
-  const renderField = (
-    label: string,
-    field: keyof GameDetails,
-    type: 'text' | 'number' | 'select' | 'datetime' | 'boolean' | 'readonly' = 'text',
-    options?: string[]
-  ) => {
-    const value = editedGame[field];
-    const displayValue = type === 'datetime' ? formatDateTimeForDisplay(value as string) : value;
-
-    if (!isEditing || type === 'readonly') {
-      return (
-        <div className="py-2 border-b border-gray-100">
-          <label className="text-xs text-gray-500 uppercase tracking-wide">{label}</label>
-          <div className="mt-0.5 text-sm font-medium text-gray-900">
-            {type === 'boolean' ? (value ? 'Yes' : 'No') : (displayValue ?? '-')}
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="py-2 border-b border-gray-100">
-        <label className="text-xs text-gray-500 uppercase tracking-wide">{label}</label>
-        {type === 'select' && options ? (
-          <select
-            value={(value as string) ?? ''}
-            onChange={(e) => handleInputChange(field, e.target.value || null)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-          >
-            <option value="">-- Select --</option>
-            {options.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-        ) : type === 'boolean' ? (
-          <select
-            value={value === true ? 'true' : value === false ? 'false' : ''}
-            onChange={(e) => handleInputChange(field, e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-          >
-            <option value="">-- Select --</option>
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        ) : type === 'datetime' ? (
-          <input
-            type="datetime-local"
-            value={formatDateTimeForInput(value as string)}
-            onChange={(e) => handleInputChange(field, e.target.value ? new Date(e.target.value).toISOString() : null)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-          />
-        ) : type === 'number' ? (
-          <input
-            type="number"
-            value={value != null && typeof value === 'number' ? value : ''}
-            onChange={(e) => handleInputChange(field, e.target.value ? parseFloat(e.target.value) : null)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-          />
-        ) : (
-          <input
-            type="text"
-            value={(value as string) ?? ''}
-            onChange={(e) => handleInputChange(field, e.target.value || null)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-          />
-        )}
-      </div>
-    );
   };
 
   return (
@@ -736,216 +730,504 @@ function GameEditModal({ isOpen, onClose, gameId, onSaveSuccess }: GameEditModal
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
-                {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
-                  <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
-                    {loading ? 'Loading...' : game?.name ?? 'Game Details'}
+              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900 flex items-center">
+                    <PencilSquareIcon className="h-5 w-5 mr-2 text-indigo-600" />
+                    Edit Game
                   </Dialog.Title>
-                  <div className="flex items-center gap-2">
-                    {!loading && game && !isEditing && (
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                      >
-                        <PencilSquareIcon className="h-4 w-4 mr-1" />
-                        Edit
-                      </button>
-                    )}
-                    <button
-                      onClick={onClose}
-                      className="p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
-                    >
-                      <XMarkIcon className="h-5 w-5" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={onClose}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <XMarkIcon className="h-6 w-6" />
+                  </button>
                 </div>
 
-                {/* Content */}
-                <div className="flex h-[70vh]">
-                  {/* Sidebar */}
-                  <div className="w-48 border-r border-gray-200 bg-gray-50 p-3">
-                    <nav className="space-y-1">
-                      {sections.map((section) => (
-                        <button
-                          key={section.id}
-                          onClick={() => setActiveSection(section.id)}
-                          className={`w-full text-left px-3 py-2 text-sm rounded-md transition ${
-                            activeSection === section.id
-                              ? 'bg-indigo-100 text-indigo-700 font-medium'
-                              : 'text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          {section.label}
-                        </button>
-                      ))}
-                    </nav>
-                  </div>
+                {loading ? (
+                  <div className="py-12 text-center text-gray-400">Loading game details…</div>
+                ) : error ? (
+                  <div className="py-12 text-center text-red-500">{error}</div>
+                ) : game ? (
+                  <div className="space-y-6">
+                    {/* Read-only Info */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Game ID:</span>
+                          <div className="font-mono text-xs">{game.id.slice(0, 12)}...</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Tournament ID:</span>
+                          <div>{game.tournamentId || '-'}</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Start Time:</span>
+                          <div>
+                            {game.gameStartDateTime
+                              ? format(parseISO(game.gameStartDateTime), 'dd MMM yyyy HH:mm')
+                              : '-'}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Source:</span>
+                          <div>
+                            {game.sourceUrl ? (
+                              <a
+                                href={game.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-indigo-600 hover:underline"
+                              >
+                                View Source
+                              </a>
+                            ) : (
+                              '-'
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                  {/* Main Content */}
-                  <div className="flex-1 overflow-y-auto p-6">
-                    {loading && (
-                      <div className="flex items-center justify-center h-full text-gray-400">
-                        Loading game details...
+                    {/* Basic Info */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Basic Information</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Name</label>
+                          <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => handleInputChange('name', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Status</label>
+                          <select
+                            value={formData.gameStatus}
+                            onChange={(e) => handleInputChange('gameStatus', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          >
+                            <option value="">Select...</option>
+                            {GAME_STATUS_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Game Type</label>
+                          <select
+                            value={formData.gameType}
+                            onChange={(e) => handleInputChange('gameType', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          >
+                            <option value="">Select...</option>
+                            {GAME_TYPE_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Variant</label>
+                          <select
+                            value={formData.gameVariant}
+                            onChange={(e) => handleInputChange('gameVariant', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          >
+                            <option value="">Select...</option>
+                            {GAME_VARIANT_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Frequency</label>
+                          <select
+                            value={formData.gameFrequency}
+                            onChange={(e) => handleInputChange('gameFrequency', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          >
+                            <option value="">Select...</option>
+                            {GAME_FREQUENCY_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Registration Status</label>
+                          <select
+                            value={formData.registrationStatus}
+                            onChange={(e) => handleInputChange('registrationStatus', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          >
+                            <option value="">Select...</option>
+                            {REGISTRATION_STATUS_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Tournament Type</label>
+                          <select
+                            value={formData.tournamentType}
+                            onChange={(e) => handleInputChange('tournamentType', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          >
+                            <option value="">Select...</option>
+                            {TOURNAMENT_TYPE_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Financial Info */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Financial Details</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Buy-in ($)</label>
+                          <input
+                            type="number"
+                            value={formData.buyIn}
+                            onChange={(e) => handleInputChange('buyIn', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Rake ($)</label>
+                          <input
+                            type="number"
+                            value={formData.rake}
+                            onChange={(e) => handleInputChange('rake', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Venue Fee ($)</label>
+                          <input
+                            type="number"
+                            value={formData.venueFee}
+                            onChange={(e) => handleInputChange('venueFee', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Starting Stack</label>
+                          <input
+                            type="number"
+                            value={formData.startingStack}
+                            onChange={(e) => handleInputChange('startingStack', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Prizepool Paid ($)</label>
+                          <input
+                            type="number"
+                            value={formData.prizepoolPaid}
+                            onChange={(e) => handleInputChange('prizepoolPaid', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Prizepool Calculated ($)</label>
+                          <input
+                            type="number"
+                            value={formData.prizepoolCalculated}
+                            onChange={(e) => handleInputChange('prizepoolCalculated', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div className="flex items-center col-span-2">
+                          <input
+                            type="checkbox"
+                            id="hasGuarantee"
+                            checked={formData.hasGuarantee}
+                            onChange={(e) => handleInputChange('hasGuarantee', e.target.checked)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor="hasGuarantee" className="ml-2 text-sm text-gray-700">
+                            Has Guarantee
+                          </label>
+                        </div>
+                        {formData.hasGuarantee && (
+                          <div className="col-span-2">
+                            <label className="block text-xs text-gray-500 mb-1">Guarantee Amount ($)</label>
+                            <input
+                              type="number"
+                              value={formData.guaranteeAmount}
+                              onChange={(e) => handleInputChange('guaranteeAmount', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Jackpot Contributions */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Jackpot Contributions</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="flex items-center col-span-2">
+                          <input
+                            type="checkbox"
+                            id="hasJackpotContributions"
+                            checked={formData.hasJackpotContributions}
+                            onChange={(e) => handleInputChange('hasJackpotContributions', e.target.checked)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor="hasJackpotContributions" className="ml-2 text-sm text-gray-700">
+                            Has Jackpot Contributions
+                          </label>
+                        </div>
+                        {formData.hasJackpotContributions && (
+                          <div className="col-span-2">
+                            <label className="block text-xs text-gray-500 mb-1">Jackpot Contribution Amount ($)</label>
+                            <input
+                              type="number"
+                              value={formData.jackpotContributionAmount}
+                              onChange={(e) => handleInputChange('jackpotContributionAmount', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Accumulator Tickets */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Accumulator Tickets</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="flex items-center col-span-2">
+                          <input
+                            type="checkbox"
+                            id="hasAccumulatorTickets"
+                            checked={formData.hasAccumulatorTickets}
+                            onChange={(e) => handleInputChange('hasAccumulatorTickets', e.target.checked)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor="hasAccumulatorTickets" className="ml-2 text-sm text-gray-700">
+                            Has Accumulator Tickets
+                          </label>
+                        </div>
+                        {formData.hasAccumulatorTickets && (
+                          <>
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">Ticket Value ($)</label>
+                              <input
+                                type="number"
+                                value={formData.accumulatorTicketValue}
+                                onChange={(e) => handleInputChange('accumulatorTicketValue', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1"># Tickets Paid</label>
+                              <input
+                                type="number"
+                                value={formData.numberOfAccumulatorTicketsPaid}
+                                onChange={(e) => handleInputChange('numberOfAccumulatorTicketsPaid', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                              />
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Player Stats */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Player Statistics</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Unique Players</label>
+                          <input
+                            type="number"
+                            value={formData.totalUniquePlayers}
+                            onChange={(e) => handleInputChange('totalUniquePlayers', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Initial Entries</label>
+                          <input
+                            type="number"
+                            value={formData.totalInitialEntries}
+                            onChange={(e) => handleInputChange('totalInitialEntries', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Total Entries</label>
+                          <input
+                            type="number"
+                            value={formData.totalEntries}
+                            onChange={(e) => handleInputChange('totalEntries', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Rebuys</label>
+                          <input
+                            type="number"
+                            value={formData.totalRebuys}
+                            onChange={(e) => handleInputChange('totalRebuys', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Add-ons</label>
+                          <input
+                            type="number"
+                            value={formData.totalAddons}
+                            onChange={(e) => handleInputChange('totalAddons', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Classification Flags */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Classification</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isRegular"
+                            checked={formData.isRegular}
+                            onChange={(e) => handleInputChange('isRegular', e.target.checked)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor="isRegular" className="ml-2 text-sm text-gray-700">Regular Game</label>
+                        </div>
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isSatellite"
+                            checked={formData.isSatellite}
+                            onChange={(e) => handleInputChange('isSatellite', e.target.checked)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor="isSatellite" className="ml-2 text-sm text-gray-700">Satellite</label>
+                        </div>
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="dealerDealt"
+                            checked={formData.dealerDealt}
+                            onChange={(e) => handleInputChange('dealerDealt', e.target.checked)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor="dealerDealt" className="ml-2 text-sm text-gray-700">Dealer Dealt</label>
+                        </div>
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isSeries"
+                            checked={formData.isSeries}
+                            onChange={(e) => handleInputChange('isSeries', e.target.checked)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor="isSeries" className="ml-2 text-sm text-gray-700">Part of Series</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Series Info (conditional) */}
+                    {formData.isSeries && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Series Information</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="col-span-2">
+                            <label className="block text-xs text-gray-500 mb-1">Series Name</label>
+                            <input
+                              type="text"
+                              value={formData.seriesName}
+                              onChange={(e) => handleInputChange('seriesName', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-500 mb-1">Event #</label>
+                            <input
+                              type="number"
+                              value={formData.eventNumber}
+                              onChange={(e) => handleInputChange('eventNumber', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-500 mb-1">Day #</label>
+                            <input
+                              type="number"
+                              value={formData.dayNumber}
+                              onChange={(e) => handleInputChange('dayNumber', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-500 mb-1">Flight Letter</label>
+                            <input
+                              type="text"
+                              value={formData.flightLetter}
+                              onChange={(e) => handleInputChange('flightLetter', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                              maxLength={2}
+                            />
+                          </div>
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id="isMainEvent"
+                              checked={formData.isMainEvent}
+                              onChange={(e) => handleInputChange('isMainEvent', e.target.checked)}
+                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                            />
+                            <label htmlFor="isMainEvent" className="ml-2 text-sm text-gray-700">Main Event</label>
+                          </div>
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id="finalDay"
+                              checked={formData.finalDay}
+                              onChange={(e) => handleInputChange('finalDay', e.target.checked)}
+                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                            />
+                            <label htmlFor="finalDay" className="ml-2 text-sm text-gray-700">Final Day</label>
+                          </div>
+                        </div>
                       </div>
                     )}
 
+                    {/* Error Display */}
                     {error && (
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
                         {error}
                       </div>
                     )}
 
-                    {!loading && game && (
-                      <div className="space-y-1">
-                        {activeSection === 'core' && (
-                          <>
-                            {renderField('ID', 'id', 'readonly')}
-                            {renderField('Name', 'name', 'text')}
-                            {renderField('Game Type', 'gameType', 'select', GAME_TYPE_OPTIONS)}
-                            {renderField('Game Variant', 'gameVariant', 'select', GAME_VARIANT_OPTIONS)}
-                            {renderField('Game Status', 'gameStatus', 'select', GAME_STATUS_OPTIONS)}
-                            {renderField('Tournament Type', 'tournamentType', 'select', TOURNAMENT_TYPE_OPTIONS)}
-                          </>
-                        )}
-
-                        {activeSection === 'scheduling' && (
-                          <>
-                            {renderField('Start Date/Time', 'gameStartDateTime', 'datetime')}
-                            {renderField('End Date/Time', 'gameEndDateTime', 'datetime')}
-                            {renderField('Registration Status', 'registrationStatus', 'select', REGISTRATION_STATUS_OPTIONS)}
-                            {renderField('Total Duration', 'totalDuration', 'text')}
-                            {renderField('Game Frequency', 'gameFrequency', 'select', GAME_FREQUENCY_OPTIONS)}
-                            {renderField('Day of Week', 'gameDayOfWeek', 'text')}
-                          </>
-                        )}
-
-                        {activeSection === 'financials' && (
-                          <>
-                            {renderField('Buy-in', 'buyIn', 'number')}
-                            {renderField('Rake', 'rake', 'number')}
-                            {renderField('Venue Fee', 'venueFee', 'number')}
-                            {renderField('Starting Stack', 'startingStack', 'number')}
-                            {renderField('Has Guarantee', 'hasGuarantee', 'boolean')}
-                            {renderField('Guarantee Amount', 'guaranteeAmount', 'number')}
-                            <div className="mt-4 pt-3 border-t border-gray-200">
-                              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Jackpot Contributions</h4>
-                            </div>
-                            {renderField('Has Jackpot Contributions', 'hasJackpotContributions', 'boolean')}
-                            {renderField('Jackpot Contribution Amount', 'jackpotContributionAmount', 'number')}
-                            <div className="mt-4 pt-3 border-t border-gray-200">
-                              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Accumulator Tickets</h4>
-                            </div>
-                            {renderField('Has Accumulator Tickets', 'hasAccumulatorTickets', 'boolean')}
-                            {renderField('Accumulator Ticket Value', 'accumulatorTicketValue', 'number')}
-                            {renderField('# Accumulator Tickets Paid', 'numberOfAccumulatorTicketsPaid', 'number')}
-                          </>
-                        )}
-
-                        {activeSection === 'aggregates' && (
-                          <>
-                            {renderField('Prizepool Paid', 'prizepoolPaid', 'number')}
-                            {renderField('Prizepool Calculated', 'prizepoolCalculated', 'number')}
-                            {renderField('Total Unique Players', 'totalUniquePlayers', 'number')}
-                            {renderField('Total Rebuys', 'totalRebuys', 'number')}
-                            {renderField('Total Add-ons', 'totalAddons', 'number')}
-                            {renderField('Total Initial Entries', 'totalInitialEntries', 'number')}
-                            {renderField('Total Entries', 'totalEntries', 'number')}
-                            {renderField('Players Remaining', 'playersRemaining', 'number')}
-                            {renderField('Total Chips in Play', 'totalChipsInPlay', 'number')}
-                            {renderField('Average Player Stack', 'averagePlayerStack', 'number')}
-                          </>
-                        )}
-
-                        {activeSection === 'calculated' && (
-                          <>
-                            {renderField('Total Buy-ins Collected', 'totalBuyInsCollected', 'number')}
-                            {renderField('Rake Revenue', 'rakeRevenue', 'number')}
-                            {renderField('Prizepool Player Contributions', 'prizepoolPlayerContributions', 'number')}
-                            {renderField('Prizepool Added Value', 'prizepoolAddedValue', 'number')}
-                            {renderField('Prizepool Surplus', 'prizepoolSurplus', 'number')}
-                            {renderField('Guarantee Overlay Cost', 'guaranteeOverlayCost', 'number')}
-                            {renderField('Game Profit', 'gameProfit', 'number')}
-                          </>
-                        )}
-
-                        {activeSection === 'categorization' && (
-                          <>
-                            {renderField('Is Regular', 'isRegular', 'boolean')}
-                            {renderField('Is Satellite', 'isSatellite', 'boolean')}
-                            {renderField('Dealer Dealt', 'dealerDealt', 'boolean')}
-                            {renderField('Is Partial Data', 'isPartialData', 'boolean')}
-                            {renderField('Missing Flight Count', 'missingFlightCount', 'number')}
-                            {renderField('Expected Total Entries', 'expectedTotalEntries', 'number')}
-                            {renderField('Buy-in Bucket', 'buyInBucket', 'text')}
-                          </>
-                        )}
-
-                        {activeSection === 'series' && (
-                          <>
-                            {renderField('Is Series', 'isSeries', 'boolean')}
-                            {renderField('Series Name', 'seriesName', 'text')}
-                            {renderField('Is Main Event', 'isMainEvent', 'boolean')}
-                            {renderField('Event Number', 'eventNumber', 'number')}
-                            {renderField('Day Number', 'dayNumber', 'number')}
-                            {renderField('Flight Letter', 'flightLetter', 'text')}
-                            {renderField('Final Day', 'finalDay', 'boolean')}
-                            {renderField('Parent Game ID', 'parentGameId', 'text')}
-                            {renderField('Consolidation Type', 'consolidationType', 'text')}
-                            {renderField('Consolidation Key', 'consolidationKey', 'text')}
-                          </>
-                        )}
-
-                        {activeSection === 'keys' && (
-                          <>
-                            {renderField('Venue Schedule Key', 'venueScheduleKey', 'text')}
-                            {renderField('Venue Game Type Key', 'venueGameTypeKey', 'text')}
-                            {renderField('Entity Query Key', 'entityQueryKey', 'text')}
-                            {renderField('Entity Game Type Key', 'entityGameTypeKey', 'text')}
-                          </>
-                        )}
-
-                        {activeSection === 'metadata' && (
-                          <>
-                            {renderField('Source URL', 'sourceUrl', 'text')}
-                            {renderField('Tournament ID', 'tournamentId', 'number')}
-                            {renderField('Venue ID', 'venueId', 'readonly')}
-                            {renderField('Entity ID', 'entityId', 'readonly')}
-                            {renderField('Tournament Series ID', 'tournamentSeriesId', 'text')}
-                            {renderField('Was Edited', 'wasEdited', 'readonly')}
-                            {renderField('Last Edited At', 'lastEditedAt', 'readonly')}
-                            {renderField('Last Edited By', 'lastEditedBy', 'readonly')}
-                            {renderField('Created At', 'createdAt', 'readonly')}
-                            {renderField('Updated At', 'updatedAt', 'readonly')}
-                          </>
-                        )}
-                      </div>
-                    )}
+                    {/* Actions */}
+                    <div className="flex justify-end space-x-3 pt-4 border-t">
+                      <button
+                        onClick={onClose}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {saving ? 'Saving…' : 'Save Changes'}
+                      </button>
+                    </div>
                   </div>
-                </div>
-
-                {/* Footer */}
-                {isEditing && (
-                  <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
-                    <button
-                      onClick={() => {
-                        setEditedGame(game ?? {});
-                        setIsEditing(false);
-                      }}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                      disabled={saving}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSave}
-                      disabled={saving}
-                      className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                    >
-                      {saving ? 'Saving...' : 'Save Changes'}
-                    </button>
-                  </div>
-                )}
+                ) : null}
               </Dialog.Panel>
             </Transition.Child>
           </div>
@@ -953,39 +1235,38 @@ function GameEditModal({ isOpen, onClose, gameId, onSaveSuccess }: GameEditModal
       </Dialog>
     </Transition>
   );
-}
+};
 
 // ---- Main Component ----
 
-const PAGE_LIMIT = 500;
+const PAGE_LIMIT = 1000;
 
 export const VenueGameDetails: React.FC = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { selectedEntities, entities, loading: entityLoading } = useEntity();
 
-  const venueId = searchParams.get('venueId');
-  const gameTypeKey = searchParams.get('gameTypeKey');
+  const venueId = searchParams.get('venueId') || '';
+  const gameTypeKey = searchParams.get('gameTypeKey') || '';
   const entityId: string | undefined = selectedEntities[0]?.id;
+  
+  // Determine if we should show the entity selector (only if user has more than 1 entity)
+  const showEntitySelector = entities && entities.length > 1;
 
-  const [timeRange, setTimeRange] = useState<TimeRangeKey>('ALL');
   const [venue, setVenue] = useState<VenueInfo | null>(null);
   const [snapshots, setSnapshots] = useState<GameFinancialSnapshotWithGame[]>([]);
-  const [gameName, setGameName] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
+  const [gameName, setGameName] = useState<string>(gameTypeKey);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [timeRange, setTimeRange] = useState<TimeRangeKey>('ALL');
 
   // Modal state
-  const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Determine if we should show the entity selector (only if user has more than 1 entity)
-  // Note: entities is already filtered by user permissions in EntityContext
-  const showEntitySelector = entities && entities.length > 1;
+  const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
 
   const fetchData = async () => {
     if (!venueId || !gameTypeKey) {
-      setError('Missing venue ID or game type key');
+      setError('Missing venueId or gameTypeKey');
       setLoading(false);
       return;
     }
@@ -996,6 +1277,7 @@ export const VenueGameDetails: React.FC = () => {
     try {
       const client = getClient();
 
+      // Fetch venue info
       const venueRes = await client.graphql({
         query: getVenueQuery,
         variables: { id: venueId },
@@ -1007,21 +1289,19 @@ export const VenueGameDetails: React.FC = () => {
         setLoading(false);
         return;
       }
-
       setVenue(venueData);
 
-      const { from, to } = getTimeRangeBounds(timeRange);
+      // Fetch snapshots with pagination
+      let nextToken: string | null = null;
       const allSnapshots: GameFinancialSnapshotWithGame[] = [];
-      let nextToken: string | null | undefined = null;
 
-      const baseFilter: any = {
-        venueId: { eq: venueId },
-      };
+      const { from, to } = getTimeRangeBounds(timeRange);
 
+      const baseFilter: any = { venueId: { eq: venueId } };
+      // Only add entityId filter if the venue belongs to the selected entity
       if (entityId && venueData.entityId === entityId) {
         baseFilter.entityId = { eq: entityId };
       }
-
       if (from && to) {
         baseFilter.gameStartDateTime = { between: [from, to] };
       }
@@ -1081,9 +1361,16 @@ export const VenueGameDetails: React.FC = () => {
     fetchData();
   }, [venueId, gameTypeKey, entityId, timeRange]);
 
+  // Handler for clicking on a row (opens edit modal)
   const handleRowClick = (gameId: string) => {
     setSelectedGameId(gameId);
     setIsModalOpen(true);
+  };
+
+  // Handler for clicking on game name (navigates to GameDetails page)
+  const handleGameNameClick = (e: React.MouseEvent, gameId: string) => {
+    e.stopPropagation(); // Prevent row click from firing
+    navigate(`/games/details/${gameId}`);
   };
 
   const handleModalClose = () => {
@@ -1192,7 +1479,7 @@ export const VenueGameDetails: React.FC = () => {
 
       <Card>
         <Text className="mb-3 text-sm font-semibold">
-          Game History (click a row to view/edit)
+          Game History (click name to view details, click row to edit)
         </Text>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -1227,9 +1514,13 @@ export const VenueGameDetails: React.FC = () => {
                     })()}
                   </td>
                   <td className="px-4 py-2 whitespace-nowrap">
-                    <span className="font-medium text-indigo-600" title={row.name}>
+                    <button
+                      onClick={(e) => handleGameNameClick(e, row.gameId)}
+                      className="font-medium text-indigo-600 hover:text-indigo-900 hover:underline text-left"
+                      title={`View details for ${row.name}`}
+                    >
                       {row.name.length > 40 ? row.name.substring(0, 40) + '...' : row.name}
-                    </span>
+                    </button>
                   </td>
                   <td className="px-4 py-2 whitespace-nowrap">{formatCurrency(row.buyIn)}</td>
                   <td className="px-4 py-2 whitespace-nowrap">{row.registrations.toLocaleString()}</td>
