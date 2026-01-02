@@ -11,6 +11,7 @@ import {
   getCurrentUser,
   signOut as amplifySignOut,
   fetchUserAttributes,
+  fetchAuthSession,
   type AuthUser,
 } from '@aws-amplify/auth';
 import { generateClient } from '@aws-amplify/api';
@@ -149,6 +150,47 @@ const customUpdateUserLogin = /* GraphQL */ `
 `;
 
 // ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Clear all Amplify auth data from localStorage
+ * This is needed when tokens are completely expired and can't be refreshed
+ */
+const clearAmplifyAuthStorage = () => {
+  const keysToRemove: string[] = [];
+  
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (
+      key.startsWith('CognitoIdentityServiceProvider') ||
+      key.startsWith('amplify-') ||
+      key.includes('cognito')
+    )) {
+      keysToRemove.push(key);
+    }
+  }
+  
+  keysToRemove.forEach(key => {
+    console.log(`[AuthContext] Removing stale auth key: ${key}`);
+    localStorage.removeItem(key);
+  });
+};
+
+/**
+ * Safely clear authentication state
+ */
+const clearAuthState = async () => {
+  try {
+    await amplifySignOut({ global: false });
+  } catch (error) {
+    // If signOut fails (e.g., no valid session), manually clear storage
+    console.warn('[AuthContext] SignOut failed, clearing storage manually');
+    clearAmplifyAuthStorage();
+  }
+};
+
+// ============================================
 // CONTEXT
 // ============================================
 
@@ -195,6 +237,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log('[AuthContext] Sign out complete');
     } catch (error) {
       console.error('[AuthContext] Sign out error:', error);
+      clearAmplifyAuthStorage();
       setUser(null);
     }
   }, [user?.id]);
@@ -292,25 +335,79 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   /**
    * Check authentication state and load user data
+   * 
+   * IMPORTANT: We validate tokens FIRST before calling getCurrentUser or fetchUserAttributes
+   * because those can return cached data even when tokens are expired.
    */
   const checkUser = useCallback(async () => {
     setLoading(true);
     
     try {
-      console.log('[AuthContext] Checking Cognito session...');
+      // Step 1: Check if we have valid tokens FIRST
+      // This is the source of truth - not getCurrentUser() which can return stale cached data
+      console.log('[AuthContext] Checking for valid auth tokens...');
+      
+      let session;
+      try {
+        session = await fetchAuthSession({ forceRefresh: false });
+      } catch (sessionError) {
+        console.warn('[AuthContext] fetchAuthSession failed:', sessionError);
+        // No valid session at all
+        setUser(null);
+        return;
+      }
+
+      // Check if we have an access token
+      if (!session.tokens?.accessToken) {
+        console.log('[AuthContext] No access token found, trying to refresh...');
+        
+        try {
+          session = await fetchAuthSession({ forceRefresh: true });
+          
+          if (!session.tokens?.accessToken) {
+            console.warn('[AuthContext] No tokens after refresh - user needs to re-login');
+            await clearAuthState();
+            setUser(null);
+            return;
+          }
+        } catch (refreshError: unknown) {
+          // Check if this is a "NotAuthorizedException" which means refresh token is invalid
+          const errorMessage = refreshError instanceof Error ? refreshError.message : String(refreshError);
+          
+          if (errorMessage.includes('NotAuthorizedException') || 
+              errorMessage.includes('Invalid Refresh Token') ||
+              errorMessage.includes('Access to Identity')) {
+            console.warn('[AuthContext] Refresh token expired/invalid - clearing stale auth data');
+            await clearAuthState();
+          } else {
+            console.error('[AuthContext] Unexpected error during token refresh:', refreshError);
+          }
+          
+          setUser(null);
+          return;
+        }
+      }
+
+      console.log('[AuthContext] Valid tokens found, checking Cognito user...');
+
+      // Step 2: Now safe to get user info since we know tokens are valid
       const cognitoUser = await getCurrentUser();
 
+      // Step 3: Fetch user attributes
       console.log('[AuthContext] Fetching user attributes...');
       let attributes: Record<string, string>;
       
       try {
         attributes = await fetchUserAttributes() as Record<string, string>;
       } catch (attrError) {
-        console.error('[AuthContext] Failed to fetch attributes - session may be stale');
+        // This shouldn't happen if we have valid tokens, but handle it anyway
+        console.error('[AuthContext] Failed to fetch attributes despite valid tokens:', attrError);
+        await clearAuthState();
         setUser(null);
         return;
       }
 
+      // Step 4: Load or create user in DynamoDB
       console.log('[AuthContext] Loading DynamoDB user...');
       const dynamoUser = await fetchOrCreateDynamoUser(cognitoUser, attributes);
 
@@ -365,7 +462,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(null);
       }
     } catch (error) {
-      console.warn('[AuthContext] No active session');
+      // getCurrentUser() throws when there's no authenticated user
+      console.warn('[AuthContext] No active session:', error);
       setUser(null);
     } finally {
       setLoading(false);

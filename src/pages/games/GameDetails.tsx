@@ -35,6 +35,7 @@ import type {
   GameCost,
   GameFinancialSnapshot,
   SocialPost,
+  SocialPostGameLink,
 } from '../../API';
 
 import { OverviewTab } from './game-tabs/OverviewTab';
@@ -251,8 +252,21 @@ const GET_GAME_QUERY = /* GraphQL */ `
         items {
           id
           socialPostId
+          gameId
           linkType
           matchConfidence
+          matchReason
+          isPrimaryGame
+          mentionOrder
+          extractedVenueName
+          extractedDate
+          extractedBuyIn
+          extractedGuarantee
+          linkedAt
+          linkedBy
+          verifiedAt
+          verifiedBy
+          createdAt
         }
       }
       
@@ -604,7 +618,7 @@ export const GameDetails = () => {
             socialPostIds.map((postId: string) => 
               client.graphql({
                 query: GET_SOCIAL_POST_QUERY,
-                variaebles: { id: postId }
+                variables: { id: postId }
               }).catch((e: unknown) => {
                 console.warn(`Failed to fetch social post ${postId}:`, e);
                 return null;
@@ -898,7 +912,7 @@ export const GameDetails = () => {
             />
           )}
           {activeTab === 'socials' && (
-            <SocialsTab game={game} />
+            <SocialsTab game={game} socialPostLinks={(game.socialPostLinks?.items || []).filter((link): link is SocialPostGameLink => link !== null)} />
           )}
         </div>
       </div>

@@ -156,6 +156,7 @@ const GET_SOCIAL_POST_QUERY = /* GraphQL */ `
 
 interface SocialsTabProps {
   game: Game;
+  socialPostLinks?: SocialPostGameLink[];
 }
 
 interface EnrichedPostLink {
@@ -707,28 +708,44 @@ const LinkedPostRow: React.FC<{ enrichedLink: EnrichedPostLink }> = ({ enrichedL
 // Main Component
 // =============================================================================
 
-export const SocialsTab: React.FC<SocialsTabProps> = ({ game }) => {
-  const [links, setLinks] = useState<SocialPostGameLink[]>([]);
+export const SocialsTab: React.FC<SocialsTabProps> = ({ game, socialPostLinks: initialLinks }) => {
+  const [links, setLinks] = useState<SocialPostGameLink[]>(initialLinks || []);
   const [enrichedLinks, setEnrichedLinks] = useState<EnrichedPostLink[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialLinks || initialLinks.length === 0);
   const [error, setError] = useState<string | null>(null);
   
   const client = useMemo(() => getClient(), []);
   
-  // Fetch links for this game
+  // Use passed links or fetch if not provided
   const fetchLinks = useCallback(async () => {
+    // If we already have links from props, use those
+    if (initialLinks && initialLinks.length > 0) {
+      console.log('[SocialsTab] Using passed socialPostLinks:', initialLinks.length);
+      setLinks(initialLinks);
+      setEnrichedLinks(initialLinks.map((link: SocialPostGameLink) => ({
+        link,
+        post: null,
+        loading: true,
+        error: null
+      })));
+      setLoading(false);
+      return;
+    }
+    
     if (!game.id) return;
     
     setLoading(true);
     setError(null);
     
     try {
+      console.log('[SocialsTab] Fetching links via query for gameId:', game.id);
       const response = await client.graphql({
         query: GET_SOCIAL_POST_LINKS_QUERY,
         variables: { gameId: game.id, limit: 50 }
       }) as any;
       
       const fetchedLinks = response.data?.listSocialPostGameLinks?.items || [];
+      console.log('[SocialsTab] Fetched links:', fetchedLinks.length);
       setLinks(fetchedLinks);
       
       // Initialize enriched links with loading state
@@ -745,7 +762,7 @@ export const SocialsTab: React.FC<SocialsTabProps> = ({ game }) => {
     } finally {
       setLoading(false);
     }
-  }, [client, game.id]);
+  }, [client, game.id, initialLinks]);
   
   // Fetch individual post details
   const fetchPostDetails = useCallback(async (link: SocialPostGameLink, index: number) => {
@@ -773,11 +790,29 @@ export const SocialsTab: React.FC<SocialsTabProps> = ({ game }) => {
     fetchLinks();
   }, [fetchLinks]);
   
+  // Initialize from passed links if available
+  useEffect(() => {
+    if (initialLinks && initialLinks.length > 0 && links.length === 0) {
+      console.log('[SocialsTab] Initializing from passed links:', initialLinks.length);
+      setLinks(initialLinks);
+      setEnrichedLinks(initialLinks.map((link: SocialPostGameLink) => ({
+        link,
+        post: null,
+        loading: true,
+        error: null
+      })));
+      setLoading(false);
+    }
+  }, [initialLinks, links.length]);
+  
   // Fetch post details when links are loaded
   useEffect(() => {
-    links.forEach((link, index) => {
-      fetchPostDetails(link, index);
-    });
+    if (links.length > 0) {
+      console.log('[SocialsTab] Fetching post details for', links.length, 'links');
+      links.forEach((link, index) => {
+        fetchPostDetails(link, index);
+      });
+    }
   }, [links, fetchPostDetails]);
   
   // Summary stats
@@ -793,6 +828,15 @@ export const SocialsTab: React.FC<SocialsTabProps> = ({ game }) => {
         : 0,
     };
   }, [links, enrichedLinks]);
+  
+  // Debug logging
+  console.log('[SocialsTab] Render state:', { 
+    loading, 
+    error, 
+    linksCount: links.length, 
+    enrichedLinksCount: enrichedLinks.length,
+    initialLinksCount: initialLinks?.length || 0
+  });
   
   if (loading) {
     return <LoadingSpinner />;

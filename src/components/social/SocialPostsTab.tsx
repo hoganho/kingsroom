@@ -788,7 +788,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ postId, onClose }) =>
                   {post.linkedGameId && (
                     <div className="pt-3 border-t border-gray-200">
                       <Link
-                        to={`/games/${post.linkedGameId}`}
+                        to={`/games/details/${post.linkedGameId}`}
                         className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
                       >
                         View Linked Game
@@ -1266,7 +1266,7 @@ const SocialPostsTab: React.FC<SocialPostsTabProps> = ({ accounts }) => {
   const yearMonthOptions: CheckboxOption[] = useMemo(() => {
     const options: CheckboxOption[] = [];
     const now = new Date();
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 24; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const value = format(d, 'yyyy-MM');
       const label = format(d, 'MMM yyyy');
