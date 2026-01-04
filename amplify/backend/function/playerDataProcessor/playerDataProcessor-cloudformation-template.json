@@ -23,6 +23,10 @@
     "apikingsroomGraphQLAPIEndpointOutput": {
       "Type": "String",
       "Default": "apikingsroomGraphQLAPIEndpointOutput"
+    },
+    "gameProcessingQueueArn": {
+      "Type": "String",
+      "Description": "ARN of the GameProcessingQueue SQS queue"
     }
   },
   "Conditions": {
@@ -380,7 +384,7 @@
         },
         "Runtime": "nodejs22.x",
         "Layers": [],
-        "Timeout": 25
+        "Timeout": 300
       }
     },
     "LambdaExecutionRole": {
@@ -1405,6 +1409,23 @@
         ]
       },
       "DependsOn": "LambdaExecutionRole"
+    },
+    "GameProcessingQueueTrigger": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "EventSourceArn": {
+          "Ref": "gameProcessingQueueArn"
+        },
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "BatchSize": 10,
+        "Enabled": true
+      },
+      "DependsOn": [
+        "LambdaFunction",
+        "CustomLambdaExecutionPolicy"
+      ]
     }
   },
   "Outputs": {

@@ -25,6 +25,10 @@
     },
     "socialPostProcessorFunction": {
       "Type": "String"
+    },
+    "appsyncEndpoint": {
+      "Type": "String",
+      "Description": "AppSync GraphQL endpoint URL"
     }
   },
   "Conditions": {
@@ -192,6 +196,9 @@
             },
             "SOCIAL_POST_PROCESSOR_FUNCTION": {
               "Ref": "socialPostProcessorFunction"
+            },
+            "APPSYNC_ENDPOINT": {
+              "Ref": "appsyncEndpoint"
             }
           }
         },
@@ -203,7 +210,7 @@
         },
         "Runtime": "nodejs22.x",
         "Layers": [],
-        "Timeout": 25
+        "Timeout": 300
       }
     },
     "LambdaExecutionRole": {

@@ -658,6 +658,14 @@
         }
       ]
     },
+    "AMPLIFY_function_playerDataProcessor_gameProcessingQueueArn": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "playerDataProcessor"
+        }
+      ]
+    },
     "AMPLIFY_function_playerDataProcessor_s3Key": {
       "usedBy": [
         {
@@ -815,6 +823,22 @@
         {
           "category": "function",
           "resourceName": "socialDataAggregator"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialDataAggregator_socialPostGameLinkTableStreamArn": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialDataAggregator"
+        }
+      ]
+    },
+    "AMPLIFY_function_socialFetcher_appsyncEndpoint": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "socialFetcher"
         }
       ]
     },

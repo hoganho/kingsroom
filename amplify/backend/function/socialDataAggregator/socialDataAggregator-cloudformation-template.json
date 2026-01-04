@@ -15,6 +15,10 @@
     },
     "s3Key": {
       "Type": "String"
+    },
+    "socialPostGameLinkTableStreamArn": {
+      "Type": "String",
+      "Description": "ARN of the SocialPostGameLink table DynamoDB stream"
     }
   },
   "Conditions": {
@@ -256,6 +260,24 @@
         ]
       },
       "DependsOn": "LambdaExecutionRole"
+    },
+    "SocialPostGameLinkTableStreamTrigger": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "EventSourceArn": {
+          "Ref": "socialPostGameLinkTableStreamArn"
+        },
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "StartingPosition": "LATEST",
+        "BatchSize": 100,
+        "Enabled": true
+      },
+      "DependsOn": [
+        "LambdaFunction",
+        "CustomLambdaExecutionPolicy"
+      ]
     }
   },
   "Outputs": {

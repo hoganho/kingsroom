@@ -32,6 +32,26 @@
     }
   },
   "Resources": {
+    "GameTableStreamTrigger": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "EventSourceArn": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:GameTable:StreamArn"
+          }
+        },
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "StartingPosition": "LATEST",
+        "BatchSize": 100,
+        "Enabled": true
+      },
+      "DependsOn": [
+        "LambdaFunction",
+        "CustomLambdaExecutionPolicy"
+      ]
+    },
     "LambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Metadata": {

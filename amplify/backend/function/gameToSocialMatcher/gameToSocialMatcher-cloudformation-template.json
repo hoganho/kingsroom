@@ -923,6 +923,26 @@
         ]
       },
       "DependsOn": "LambdaExecutionRole"
+    },
+    "GameFinancialSnapshotTableStreamTrigger": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "EventSourceArn": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:GameFinancialSnapshotTable:StreamArn"
+          }
+        },
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "StartingPosition": "LATEST",
+        "BatchSize": 100,
+        "Enabled": true
+      },
+      "DependsOn": [
+        "LambdaFunction",
+        "CustomLambdaExecutionPolicy"
+      ]
     }
   },
   "Outputs": {
