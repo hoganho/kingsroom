@@ -103,29 +103,10 @@ type Break {
 }
 
 # ===================================================================
-# 7. METRICS TYPES
+# 7. MISC RESPONSE TYPES
 # ===================================================================
-
-type ClientMetricResponse {
-  success: Boolean!
-  message: String
-  userId: String
-}
-
-type DatabaseMetric {
-  timestamp: AWSDateTime!
-  functionName: String!
-  operation: String!
-  table: String!
-  success: Boolean!
-  duration: Float
-  count: Int
-  entityId: String
-}
-
-type DatabaseMetricsResponse {
-  metrics: [DatabaseMetric!]!
-}
+# REMOVED: ClientMetricResponse, DatabaseMetric, DatabaseMetricsResponse
+# (client metrics system removed to reduce Lambda costs)
 
 type GamesNeedingVenueResponse {
   items: [Game]
@@ -153,10 +134,6 @@ type BackgroundTaskInfo {
   completedAt: AWSDateTime
 }
 
-# ===================================================================
-# 8. MISC RESPONSE TYPES
-# ===================================================================
-
 type RefreshResponse {
   message: String!
   status: String!
@@ -170,7 +147,7 @@ type SaveSeriesAssignmentInfo @aws_iam @aws_cognito_user_pools {
 }
 
 # ===================================================================
-# 9. CONNECTION TYPES (Paginated)
+# 8. CONNECTION TYPES (Paginated)
 # ===================================================================
 
 type UnfinishedGamesConnection {
@@ -180,7 +157,7 @@ type UnfinishedGamesConnection {
 }
 
 # ===================================================================
-# 10. INPUT TYPES
+# 9. INPUT TYPES
 # ===================================================================
 
 # --- User Management ---
@@ -190,15 +167,7 @@ input ResetUserPasswordInput {
   sendEmail: Boolean
 }
 
-# --- Metrics ---
-input ClientMetricInput {
-  metricName: String!
-  value: Float!
-  unit: String!
-  dimensions: String
-  timestamp: String
-  metadata: String
-}
+# REMOVED: ClientMetricInput (client metrics system removed)
 
 # --- S3 & Scraper ---
 input ManualHTMLUploadInput {
@@ -247,7 +216,7 @@ input SeriesReferenceInput {
 }
 
 # ===================================================================
-# 11. ROOT OPERATIONS
+# 10. ROOT OPERATIONS
 # ===================================================================
 
 type Query {
@@ -274,7 +243,7 @@ type Query {
   fetchUpdateCandidates: [String!]
     @function(name: "webScraperFunction-${env}")
 
-  getScraperJob(id: ID, jobId: String): ScraperJob
+  getScraperJob(id: ID, jobId: ID): ScraperJob
     @function(name: "scraperManagementFunction-${env}")
 
   getScraperJobsReport(
@@ -341,17 +310,8 @@ type Query {
   findVenueForEntity(canonicalVenueId: ID!, entityId: ID!): Venue
     @function(name: "venueAssignmentService-${env}")
 
-  # --- Metrics ---
-  getMyMetrics(timeRange: String): UserMetricsSummary
-    @function(name: "getUserMetrics-${env}")
-    @auth(rules: [{ allow: private }])
-
-  getUserMetrics(userId: String!, timeRange: String): UserMetricsSummary
-    @function(name: "getUserMetrics-${env}")
-    @auth(rules: [{ allow: groups, groups: ["Admin"] }])
-
-  getDatabaseMetrics(timeRange: String): DatabaseMetricsResponse
-    @function(name: "getDatabaseMetrics-${env}")
+  # REMOVED: getMyMetrics, getUserMetrics, getDatabaseMetrics
+  # (client metrics system removed to reduce Lambda costs)
 
   getVenueMetricsPreview(input: VenueMetricsPreviewInput!): VenueMetricsPreview
     @function(name: "venueDetailsUpdater-${env}")
@@ -466,7 +426,7 @@ type Mutation {
   startScraperJob(input: StartScraperJobInput!): ScraperJob
     @function(name: "scraperManagement-${env}")
 
-  cancelScraperJob(jobId: String!): ScraperJob
+  cancelScraperJob(jobId: ID!): ScraperJob
     @function(name: "scraperManagement-${env}")
 
   modifyScrapeURLStatus(url: AWSURL!, status: ScrapeURLStatus, doNotScrape: Boolean): ScrapeURL
@@ -504,10 +464,7 @@ type Mutation {
   bulkReassignGameVenues(input: BulkReassignGameVenuesInput!): BulkReassignGameVenuesResult
     @function(name: "venueAssignmentService-${env}")
 
-  # --- Misc & S3 ---
-  publishClientMetrics(metrics: [ClientMetricInput!]!): ClientMetricResponse
-    @function(name: "publishClientMetrics-${env}")
-    @auth(rules: [{ allow: private }])
+  # REMOVED: publishClientMetrics (client metrics system removed to reduce Lambda costs)
 
   uploadManualHTML(input: ManualHTMLUploadInput!): S3Storage
 
@@ -538,7 +495,7 @@ type Mutation {
 }
 
 type Subscription {
-  onScraperJobUpdate(jobId: String): ScraperJob
+  onScraperJobUpdate(jobId: ID): ScraperJob
     @aws_subscribe(mutations: ["cancelScraperJob"])
 
   onScrapeURLStatusChange(url: AWSURL): ScrapeURL
@@ -552,6 +509,8 @@ type Subscription {
 
   # Subscribe to social sync progress events
   # Note: SocialSyncEvent type is defined in 85-social.graphql
-  onSyncProgress(socialAccountId: ID!): SocialSyncEvent
-    @aws_subscribe(mutations: ["publishSyncProgress"])
+    onSyncProgress(socialAccountId: ID!): SocialSyncEvent
+        @aws_subscribe(mutations: ["publishSyncProgress"])
+        @aws_iam
+        @aws_cognito_user_pools
 }

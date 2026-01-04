@@ -302,7 +302,7 @@ const parsePlacementLine = (line) => {
  */
 const tryOrdinalPattern = (line) => {
   // Match: 1st, 2nd, 3rd, 4th, etc.
-  const pattern = /^(\d+)(?:st|nd|rd|th)\s*[-–—:.\s]+\s*([A-Za-z][A-Za-z\s.']+?)\s*[-–—:\s]+\s*(.+)$/i;
+  const pattern = /^(\d+)(?:st|nd|rd|th)\s*[-–—:.\s]+\s*([A-Za-z][A-Za-z\s.']+)\s*[-–—:\s]+\s*(.+)$/i;
   const match = line.match(pattern);
   
   if (match) {
@@ -683,43 +683,61 @@ const calculateTicketAggregates = (placements) => {
   let accumulatorCount = 0;
   let accumulatorValue = 0;
   
+  // =====================================================
+  // FIX: Added missing for loop!
+  // =====================================================
   for (const placement of placements) {
     // Cash tracking
-    if (placement.cashPrize && placement.cashPrize > 0) {
+    if (placement.cashPrize) {
       totalCash += placement.cashPrize;
     }
     
     // Ticket tracking
-    if (placement.hasNonCashPrize && placement.nonCashPrizes?.length > 0) {
-      prizesWithTickets++;
+    if (placement.hasNonCashPrize && placement.nonCashPrizes) {
+      // Parse JSON string if necessary
+      let ticketsArray = placement.nonCashPrizes;
       
-      // Check if ticket-only (no cash)
-      if (!placement.cashPrize || placement.cashPrize === 0) {
-        ticketOnlyPrizes++;
+      if (typeof ticketsArray === 'string') {
+        try {
+          ticketsArray = JSON.parse(ticketsArray);
+        } catch (e) {
+          console.error(`[TICKETS] Failed to parse nonCashPrizes JSON: ${e.message}`);
+          ticketsArray = [];
+        }
       }
       
-      for (const ticket of placement.nonCashPrizes) {
-        totalTickets++;
-        const ticketType = ticket.prizeType || 'OTHER';
-        const ticketVal = ticket.estimatedValue || 0;
+      // Now safely check if it's an array with items
+      if (Array.isArray(ticketsArray) && ticketsArray.length > 0) {
+        prizesWithTickets++;
         
-        // Count by type
-        countByType[ticketType] = (countByType[ticketType] || 0) + 1;
-        
-        // Value by type
-        if (ticketVal > 0) {
-          valueByType[ticketType] = (valueByType[ticketType] || 0) + ticketVal;
-          totalTicketValue += ticketVal;
+        // Check if ticket-only (no cash)
+        if (!placement.cashPrize || placement.cashPrize === 0) {
+          ticketOnlyPrizes++;
         }
         
-        // Special tracking for accumulators (most common for reconciliation)
-        if (ticketType === 'ACCUMULATOR_TICKET') {
-          accumulatorCount++;
-          accumulatorValue += ticketVal;
+        for (const ticket of ticketsArray) {
+          totalTickets++;
+          const ticketType = ticket.prizeType || 'OTHER';
+          const ticketVal = ticket.estimatedValue || 0;
+          
+          // Count by type
+          countByType[ticketType] = (countByType[ticketType] || 0) + 1;
+          
+          // Value by type
+          if (ticketVal > 0) {
+            valueByType[ticketType] = (valueByType[ticketType] || 0) + ticketVal;
+            totalTicketValue += ticketVal;
+          }
+          
+          // Special tracking for accumulators (most common for reconciliation)
+          if (ticketType === 'ACCUMULATOR_TICKET') {
+            accumulatorCount++;
+            accumulatorValue += ticketVal;
+          }
         }
       }
     }
-  }
+  } // <-- End of for loop
   
   const cashPlusTotalTicketValue = (totalCash || 0) + (totalTicketValue || 0);
   
@@ -731,7 +749,6 @@ const calculateTicketAggregates = (placements) => {
     totalCashPaid: totalCash > 0 ? totalCash : null,
     totalPrizesWithTickets: prizesWithTickets,
     totalTicketOnlyPrizes: ticketOnlyPrizes,
-    // Reconciliation fields (map to Game model)
     reconciliation_accumulatorTicketCount: accumulatorCount,
     reconciliation_accumulatorTicketValue: accumulatorValue > 0 ? accumulatorValue : null,
     reconciliation_totalPrizepoolPaid: totalCash > 0 ? totalCash : null,

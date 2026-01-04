@@ -1,0 +1,24 @@
+{
+  "lambdaLayers": [],
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "function": {
+      "webScraperFunction": [
+        "read"
+      ]
+    },
+    "storage": {
+      "ActiveGame:@model(appsync)": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  }
+}

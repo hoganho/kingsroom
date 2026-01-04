@@ -27,7 +27,7 @@
 
 type ScraperJob @model(queries: { list: null }) @auth(rules: [{ allow: private }]) {
   id: ID!
-  jobId: String! @index(name: "byJobId")
+  jobId: ID! @index(name: "byJobId")
   triggerSource: ScraperJobTriggerSource!
   triggeredBy: String
   startTime: AWSDateTime!

@@ -1,0 +1,22 @@
+[
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:UpdateItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ActiveGame-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ActiveGame-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "lambda:InvokeFunction"
+    ],
+    "Resource": [
+      "arn:aws:lambda:ap-southeast-2:*:function:webScraperFunction-*"
+    ]
+  }
+]

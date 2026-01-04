@@ -1,8 +1,12 @@
 // src/pages/venues/VenuesDashboard.tsx
-// VERSION: 2.1.0 - Replaced flip cards with per-entity series type dropdown
+// VERSION: 2.3.0 - Fixed seriesType filtering to use separate VenueMetrics records per seriesType
 //
 // REQUIRES: Metrics calculated with refreshAllMetrics v2.0.0+
 // Data format: VenueMetrics with seriesType: REGULAR | SERIES | ALL
+//
+// FIX: Previously always queried seriesType='ALL' and only filtered game count.
+//      Now fetches metrics for all three seriesTypes and uses the correct record
+//      for each metric (prizepool, profit, entries, etc.)
 
 import { useCallback, useEffect, useMemo, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
@@ -31,6 +35,7 @@ import { TimeRangeToggle, type TimeRangeKey } from "@/components/ui/TimeRangeTog
 
 import { MultiEntitySelector } from "@/components/entities/MultiEntitySelector"
 import { useEntity } from "@/contexts/EntityContext"
+import { useUserPermissions } from "@/hooks/useUserPermissions"
 import { getClient } from "@/utils/apiClient"
 
 import type { ColumnDef } from "@tanstack/react-table"
@@ -124,58 +129,6 @@ const listVenueMetricsByEntityAndSeriesType = /* GraphQL */ `
   }
 `
 
-const getEntityMetrics = /* GraphQL */ `
-  query GetEntityMetrics(
-    $entityId: ID!
-    $timeRange: String!
-    $seriesType: String!
-  ) {
-    listEntityMetrics(
-      filter: {
-        entityId: { eq: $entityId }
-        timeRange: { eq: $timeRange }
-        seriesType: { eq: $seriesType }
-      }
-      limit: 1
-    ) {
-      items {
-        id
-        entityId
-        timeRange
-        seriesType
-        
-        totalVenues
-        activeVenues
-        totalGames
-        totalSeriesGames
-        totalRegularGames
-        totalRecurringGames
-        totalOneOffGames
-        
-        totalEntries
-        totalUniquePlayers
-        totalPrizepool
-        totalRevenue
-        totalProfit
-        
-        avgEntriesPerGame
-        avgPrizepoolPerGame
-        avgProfitPerGame
-        
-        firstGameDate
-        latestGameDate
-        
-        profitTrend
-        profitTrendPercent
-        playerGrowthTrend
-        playerGrowthTrendPercent
-        
-        calculatedAt
-      }
-    }
-  }
-`
-
 // ============================================
 // TYPES
 // ============================================
@@ -230,41 +183,6 @@ interface VenueMetrics {
   
   topRecurringGames: string
   topTournamentSeries: string
-  
-  calculatedAt: string
-}
-
-interface EntityMetrics {
-  id: string
-  entityId: string
-  timeRange: string
-  seriesType: string
-  
-  totalVenues: number
-  activeVenues: number
-  totalGames: number
-  totalSeriesGames: number
-  totalRegularGames: number
-  totalRecurringGames: number
-  totalOneOffGames: number
-  
-  totalEntries: number
-  totalUniquePlayers: number
-  totalPrizepool: number
-  totalRevenue: number
-  totalProfit: number
-  
-  avgEntriesPerGame: number
-  avgPrizepoolPerGame: number
-  avgProfitPerGame: number
-  
-  firstGameDate: string | null
-  latestGameDate: string | null
-  
-  profitTrend: string
-  profitTrendPercent: number
-  playerGrowthTrend: string
-  playerGrowthTrendPercent: number
   
   calculatedAt: string
 }
@@ -369,6 +287,28 @@ function parseJsonField(jsonString: string | null | undefined): any[] {
   } catch {
     return []
   }
+}
+
+/**
+ * Format currency in a compact way for KPI cards
+ * e.g., $1,234,567 -> $1.23M, $12,345 -> $12.3K
+ */
+function formatCompactCurrency(value: number): string {
+  const isNegative = value < 0
+  const absValue = Math.abs(value)
+  
+  let formatted: string
+  if (absValue >= 1_000_000) {
+    formatted = `$${(absValue / 1_000_000).toFixed(2)}M`
+  } else if (absValue >= 10_000) {
+    formatted = `$${(absValue / 1_000).toFixed(1)}K`
+  } else if (absValue >= 1_000) {
+    formatted = `$${(absValue / 1_000).toFixed(2)}K`
+  } else {
+    formatted = `$${absValue.toFixed(0)}`
+  }
+  
+  return isNegative ? `-${formatted}` : formatted
 }
 
 // ============================================
@@ -514,104 +454,78 @@ const VenueCard: React.FC<VenueCardProps> = ({ data, seriesType, onNavigate }) =
               className="w-12 h-12 rounded-full object-cover border-2 border-slate-100"
             />
           ) : (
-            <div className={cx(
-              "w-12 h-12 rounded-full flex items-center justify-center border-2",
-              seriesType === 'SERIES' 
-                ? 'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-500 border-purple-100'
-                : seriesType === 'REGULAR'
-                  ? 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-500 border-blue-100'
-                  : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400 border-slate-100'
-            )}>
+            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 border-2 border-slate-100">
               <BuildingOffice2Icon className="w-6 h-6" />
             </div>
           )}
         </div>
-        <div className="overflow-hidden flex-1">
-          <h4 className="font-semibold text-base truncate text-slate-800">
-            {data.venueName}
-          </h4>
-          <p className="text-xs text-slate-500">
-            {data.latestGameDate 
-              ? `Latest: ${formatDateWithDaysAgo(data.latestGameDate, data.latestGameDaysAgo)}`
-              : "No games"}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-semibold text-gray-900 truncate">{data.venueName}</h3>
+          <p className="text-xs text-gray-500">
+            Latest: {data.latestGameDate 
+              ? formatDateWithDaysAgo(data.latestGameDate, data.latestGameDaysAgo) 
+              : 'No games'}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <HealthBadge health={data.overallHealth} />
-        </div>
+        <HealthBadge health={data.overallHealth} />
       </div>
 
       {/* Card Body */}
       {isEmpty ? (
-        <div className="p-8 text-center">
-          <p className="text-sm text-gray-400">
-            No {seriesType === 'SERIES' ? 'series' : seriesType === 'REGULAR' ? 'regular' : ''} games
-          </p>
+        <div className="p-6 text-center text-sm text-gray-400">
+          No {seriesType === 'ALL' ? '' : seriesType.toLowerCase()} games recorded
         </div>
       ) : (
         <>
-          <div className="p-4 grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-500">Games</span>
-              <span className="font-semibold text-gray-900">
-                {valOrDash(data.totalGames)}
-              </span>
+          {/* Stats Grid */}
+          <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-3">
+            <div>
+              <p className="text-xs text-gray-500 font-medium">Games</p>
+              <p className="text-lg font-semibold text-gray-900">{data.totalGames.toLocaleString()}</p>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-500">Prizepool</span>
-              <span className="font-semibold text-gray-900">
-                {valOrDash(data.totalPrizepool, formatCurrency)}
-              </span>
+            <div>
+              <p className="text-xs text-gray-500 font-medium">Prizepool</p>
+              <p className="text-lg font-semibold text-gray-900">{formatCurrency(data.totalPrizepool)}</p>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-500">Entries</span>
-              <div className="flex items-center gap-1">
-                <span className="font-semibold text-gray-900">
-                  {valOrDash(data.totalEntries)}
-                </span>
+            <div>
+              <p className="text-xs text-gray-500 font-medium">Entries</p>
+              <p className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                {data.totalEntries.toLocaleString()}
                 <TrendIndicator trend={data.attendanceTrend} percent={data.attendanceTrendPercent} />
-              </div>
+              </p>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-500">Profit</span>
-              <span className={cx("font-semibold", (data.totalProfit || 0) >= 0 ? "text-green-600" : "text-red-600")}>
-                {valOrDash(data.totalProfit, formatCurrency)}
-              </span>
+            <div>
+              <p className="text-xs text-gray-500 font-medium">Profit</p>
+              <p className={cx(
+                "text-lg font-semibold",
+                data.totalProfit >= 0 ? "text-green-600" : "text-red-600"
+              )}>
+                {formatCurrency(data.totalProfit)}
+              </p>
             </div>
           </div>
 
-          {/* Top Games Preview */}
-          {seriesType !== 'SERIES' && data.topRecurringGames && data.topRecurringGames.length > 0 && (
-            <div className="px-4 pb-4 pt-2 border-t border-slate-100">
-              <p className="text-xs text-gray-500 mb-2">Top Regular Games</p>
-              <div className="flex flex-wrap gap-1">
-                {data.topRecurringGames.slice(0, 3).map((rg: any, idx: number) => (
-                  <span key={idx} className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full">
-                    {rg.name}
-                  </span>
-                ))}
-                {data.topRecurringGames.length > 3 && (
-                  <span className="text-xs text-gray-400">+{data.topRecurringGames.length - 3} more</span>
-                )}
-              </div>
+          {/* Top Games */}
+          <div className="px-4 pb-4 border-t border-slate-100 pt-3">
+            <p className="text-xs text-gray-500 font-medium mb-2">
+              Top {seriesType === 'SERIES' ? 'Tournament Series' : 'Regular Games'}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {(seriesType === 'SERIES' ? data.topTournamentSeries : data.topRecurringGames).slice(0, 3).map((game, i) => (
+                <span key={i} className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-md truncate max-w-[120px]">
+                  {game.name || game.seriesName || 'Unknown'}
+                </span>
+              ))}
+              {(seriesType === 'SERIES' ? data.topTournamentSeries : data.topRecurringGames).length > 3 && (
+                <span className="px-2 py-1 text-slate-500 text-xs">
+                  +{(seriesType === 'SERIES' ? data.topTournamentSeries : data.topRecurringGames).length - 3} more
+                </span>
+              )}
+              {(seriesType === 'SERIES' ? data.topTournamentSeries : data.topRecurringGames).length === 0 && (
+                <span className="text-xs text-gray-400 italic">None recorded</span>
+              )}
             </div>
-          )}
-
-          {seriesType !== 'REGULAR' && data.topTournamentSeries && data.topTournamentSeries.length > 0 && (
-            <div className="px-4 pb-4 pt-2 border-t border-purple-100">
-              <p className="text-xs text-purple-600 mb-2">Tournament Series</p>
-              <div className="flex flex-wrap gap-1">
-                {data.topTournamentSeries.slice(0, 3).map((ts: any, idx: number) => (
-                  <span key={idx} className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">
-                    {ts.seriesName || ts.name}
-                  </span>
-                ))}
-                {data.topTournamentSeries.length > 3 && (
-                  <span className="text-xs text-purple-400">+{data.topTournamentSeries.length - 3} more</span>
-                )}
-              </div>
-            </div>
-          )}
+          </div>
         </>
       )}
     </div>
@@ -626,11 +540,17 @@ export default function VenuesDashboard() {
   const navigate = useNavigate()
   const client = getClient()
   const { selectedEntities, entities, loading: entityLoading } = useEntity()
+  
+  // Get user permissions - isSuperAdmin check for showing series type filter
+  const { isSuperAdmin } = useUserPermissions()
 
   const [timeRange, setTimeRange] = useState<TimeRangeKey>("ALL")
   const [venues, setVenues] = useState<Venue[]>([])
-  const [venueMetricsMap, setVenueMetricsMap] = useState<Record<string, VenueMetrics[]>>({}) // entityId -> metrics
-  const [entityMetrics, setEntityMetrics] = useState<EntityMetrics[]>([])
+  
+  // CHANGED: Store metrics keyed by entityId AND seriesType
+  // Format: { [entityId]: { ALL: VenueMetrics[], REGULAR: VenueMetrics[], SERIES: VenueMetrics[] } }
+  const [venueMetricsMap, setVenueMetricsMap] = useState<Record<string, Record<SeriesTypeKey, VenueMetrics[]>>>({})
+  
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
@@ -639,8 +559,12 @@ export default function VenuesDashboard() {
   // Per-entity state
   const [hideEmptyVenuesMap, setHideEmptyVenuesMap] = useState<Record<string, boolean>>({})
   const [seriesTypeMap, setSeriesTypeMap] = useState<Record<string, SeriesTypeKey>>({})
+  
+  // Table filter state
+  const [hideEmptyInTable, setHideEmptyInTable] = useState<boolean>(true)
 
   // Initialize per-entity state when entities change
+  // Default to 'REGULAR' for all users (SUPER_ADMIN can change it via selector)
   useEffect(() => {
     setHideEmptyVenuesMap(prev => {
       const updated = { ...prev }
@@ -652,7 +576,8 @@ export default function VenuesDashboard() {
     setSeriesTypeMap(prev => {
       const updated = { ...prev }
       selectedEntities.forEach(e => {
-        if (!(e.id in updated)) updated[e.id] = 'ALL'
+        // Default to REGULAR for all users
+        if (!(e.id in updated)) updated[e.id] = 'REGULAR'
       })
       return updated
     })
@@ -666,7 +591,6 @@ export default function VenuesDashboard() {
     if (selectedEntities.length === 0) {
       setVenues([])
       setVenueMetricsMap({})
-      setEntityMetrics([])
       return
     }
 
@@ -687,33 +611,35 @@ export default function VenuesDashboard() {
       const allVenues = (await Promise.all(venuePromises)).flat()
       setVenues(allVenues)
 
-      // Fetch VenueMetrics for each entity based on their selected seriesType
-      const metricsMap: Record<string, VenueMetrics[]> = {}
+      // CHANGED: Fetch VenueMetrics for ALL THREE seriesTypes for each entity
+      // This allows proper filtering when user switches between ALL/REGULAR/SERIES
+      const metricsMap: Record<string, Record<SeriesTypeKey, VenueMetrics[]>> = {}
+      const seriesTypes: SeriesTypeKey[] = ['ALL', 'REGULAR', 'SERIES']
       
       for (const entityId of entityIds) {
-        const seriesType = seriesTypeMap[entityId] || 'ALL'
+        metricsMap[entityId] = { ALL: [], REGULAR: [], SERIES: [] }
         
-        const response = await client.graphql({
-          query: listVenueMetricsByEntityAndSeriesType,
-          variables: { entityId, timeRange, seriesType, limit: 500 }
+        // Fetch metrics for all three seriesTypes in parallel
+        const fetchPromises = seriesTypes.map(async (seriesType) => {
+          const response = await client.graphql({
+            query: listVenueMetricsByEntityAndSeriesType,
+            variables: { entityId, timeRange, seriesType, limit: 500 }
+          })
+          return { seriesType, items: response.data?.listVenueMetrics?.items || [] }
         })
-        metricsMap[entityId] = response.data?.listVenueMetrics?.items || []
+        
+        const results = await Promise.all(fetchPromises)
+        results.forEach(({ seriesType, items }) => {
+          metricsMap[entityId][seriesType] = items
+        })
       }
       
       setVenueMetricsMap(metricsMap)
 
-      // Fetch EntityMetrics (ALL type for global stats)
-      const entityMetricsPromises = entityIds.map(async (entityId) => {
-        const response = await client.graphql({
-          query: getEntityMetrics,
-          variables: { entityId, timeRange, seriesType: 'ALL' }
-        })
-        return response.data?.listEntityMetrics?.items?.[0] || null
-      })
-      setEntityMetrics((await Promise.all(entityMetricsPromises)).filter(Boolean))
-
-      // Track last calculation time
-      const allMetrics = Object.values(metricsMap).flat()
+      // Track last calculation time from venue metrics
+      const allMetrics = Object.values(metricsMap).flatMap(entityMetrics => 
+        Object.values(entityMetrics).flat()
+      )
       const latestCalc = allMetrics.map(m => m.calculatedAt).filter(Boolean).sort().reverse()[0]
       if (latestCalc) setLastUpdated(new Date(latestCalc))
 
@@ -723,30 +649,35 @@ export default function VenuesDashboard() {
     } finally {
       setLoading(false)
     }
-  }, [client, selectedEntities, timeRange, seriesTypeMap, refreshTrigger])
+  }, [client, selectedEntities, timeRange, refreshTrigger])
 
   useEffect(() => {
     if (!entityLoading) fetchData()
   }, [fetchData, entityLoading])
 
-  // Handle series type change - triggers refetch
+  // Handle series type change (only for SUPER_ADMIN)
   const handleSeriesTypeChange = useCallback((entityId: string, newSeriesType: SeriesTypeKey) => {
+    if (!isSuperAdmin) return // Safety check
     setSeriesTypeMap(prev => ({ ...prev, [entityId]: newSeriesType }))
-  }, [])
+  }, [isSuperAdmin])
 
   // ============================================
   // TRANSFORM METRICS
   // ============================================
 
-  const transformMetrics = useCallback((metrics: VenueMetrics[]): VenueDisplayStats[] => {
+  // CHANGED: Transform metrics directly from the correct seriesType record
+  // No longer need to use breakdown fields - we have the actual data
+  const transformMetrics = useCallback((metrics: VenueMetrics[], displaySeriesType: SeriesTypeKey): VenueDisplayStats[] => {
     return metrics.map(m => {
       const venue = venues.find(v => v.id === m.venueId)
+      
       return {
         venueId: m.venueId,
         entityId: m.entityId,
         venueName: m.venueName || venue?.name || 'Unknown',
         venueLogo: venue?.logo,
-        seriesType: m.seriesType as SeriesTypeKey,
+        seriesType: displaySeriesType,
+        // Now all these values come from the correct seriesType record
         totalGames: m.totalGames || 0,
         totalEntries: m.totalEntries || 0,
         totalUniquePlayers: m.totalUniquePlayers || 0,
@@ -769,98 +700,103 @@ export default function VenuesDashboard() {
     })
   }, [venues])
 
-  // Get stats for a specific entity
-  const getEntityVenueStats = useCallback((entityId: string): VenueDisplayStats[] => {
-    const metrics = venueMetricsMap[entityId] || []
-    return transformMetrics(metrics)
+  // CHANGED: Get stats for a specific entity using the correct seriesType metrics
+  const getEntityVenueStats = useCallback((entityId: string, displaySeriesType: SeriesTypeKey): VenueDisplayStats[] => {
+    const entityMetrics = venueMetricsMap[entityId]
+    if (!entityMetrics) return []
+    
+    // Get metrics for the selected seriesType
+    const metrics = entityMetrics[displaySeriesType] || []
+    return transformMetrics(metrics, displaySeriesType)
   }, [venueMetricsMap, transformMetrics])
 
-  // Global stats from EntityMetrics
-  const globalStats = useMemo((): GlobalStats => {
-    return entityMetrics.reduce<GlobalStats>((acc, em) => ({
-      totalVenues: acc.totalVenues + (em.totalVenues || 0),
-      activeVenues: acc.activeVenues + (em.activeVenues || 0),
-      totalGames: acc.totalGames + (em.totalGames || 0),
-      totalSeriesGames: acc.totalSeriesGames + (em.totalSeriesGames || 0),
-      totalRegularGames: acc.totalRegularGames + (em.totalRegularGames || 0),
-      totalEntries: acc.totalEntries + (em.totalEntries || 0),
-      totalPrizepool: acc.totalPrizepool + (em.totalPrizepool || 0),
-      totalProfit: acc.totalProfit + (em.totalProfit || 0),
-      avgEntriesPerGame: 0,
-      calculatedAt: acc.calculatedAt || (em.calculatedAt ? new Date(em.calculatedAt) : null)
-    }), {
-      totalVenues: 0, activeVenues: 0, totalGames: 0, totalSeriesGames: 0, totalRegularGames: 0,
-      totalEntries: 0, totalPrizepool: 0, totalProfit: 0, avgEntriesPerGame: 0, calculatedAt: null
-    })
-  }, [entityMetrics])
+  // Combined stats for table - use REGULAR for non-SUPER_ADMIN
+  const allVenueStats = useMemo(() => {
+    const displayType = isSuperAdmin ? 'REGULAR' : 'REGULAR'
+    const allMetrics = Object.values(venueMetricsMap).flatMap(entityMetrics => 
+      entityMetrics[displayType] || []
+    )
+    return transformMetrics(allMetrics, displayType)
+  }, [venueMetricsMap, transformMetrics, isSuperAdmin])
 
-  // Combined stats for the table (all venues, all entities)
-  const allVenueStats = useMemo((): VenueDisplayStats[] => {
-    return Object.values(venueMetricsMap).flat().map(m => {
-      const venue = venues.find(v => v.id === m.venueId)
+  // Filtered stats for table display
+  const filteredTableStats = useMemo(() => {
+    if (hideEmptyInTable) {
+      return allVenueStats.filter(v => v.totalGames > 0)
+    }
+    return allVenueStats
+  }, [allVenueStats, hideEmptyInTable])
+
+  // ============================================
+  // GLOBAL STATS - Computed from venue metrics for accuracy
+  // ============================================
+
+  const globalStats = useMemo<GlobalStats>(() => {
+    // Use 'ALL' metrics for global stats to get combined totals
+    const allMetrics = Object.values(venueMetricsMap).flatMap(entityMetrics => 
+      entityMetrics['ALL'] || []
+    )
+    
+    if (allMetrics.length === 0) {
       return {
-        venueId: m.venueId,
-        entityId: m.entityId,
-        venueName: m.venueName || venue?.name || 'Unknown',
-        venueLogo: venue?.logo,
-        seriesType: m.seriesType as SeriesTypeKey,
-        totalGames: m.totalGames || 0,
-        totalEntries: m.totalEntries || 0,
-        totalUniquePlayers: m.totalUniquePlayers || 0,
-        totalPrizepool: m.totalPrizepool || 0,
-        totalProfit: m.totalProfit || 0,
-        avgEntriesPerGame: m.avgEntriesPerGame || 0,
-        firstGameDate: m.firstGameDate ? new Date(m.firstGameDate) : null,
-        firstGameDaysAgo: m.firstGameDaysAgo,
-        latestGameDate: m.latestGameDate ? new Date(m.latestGameDate) : null,
-        latestGameDaysAgo: m.latestGameDaysAgo,
-        overallHealth: m.overallHealth || 'unknown',
-        attendanceTrend: m.attendanceTrend || 'neutral',
-        attendanceTrendPercent: m.attendanceTrendPercent || 0,
-        profitTrend: m.profitTrend || 'neutral',
-        profitTrendPercent: m.profitTrendPercent || 0,
-        topRecurringGames: parseJsonField(m.topRecurringGames),
-        topTournamentSeries: parseJsonField(m.topTournamentSeries),
-        calculatedAt: m.calculatedAt ? new Date(m.calculatedAt) : null
+        totalVenues: venues.length,
+        activeVenues: 0,
+        totalGames: 0,
+        totalSeriesGames: 0,
+        totalRegularGames: 0,
+        totalEntries: 0,
+        totalPrizepool: 0,
+        totalProfit: 0,
+        avgEntriesPerGame: 0,
+        calculatedAt: null
       }
-    })
+    }
+
+    const activeVenues = allMetrics.filter(m => m.totalGames > 0).length
+    const totalGames = allMetrics.reduce((sum, m) => sum + (m.totalGames || 0), 0)
+    const totalSeriesGames = allMetrics.reduce((sum, m) => sum + (m.totalSeriesGames || 0), 0)
+    const totalRegularGames = allMetrics.reduce((sum, m) => sum + (m.totalRegularGames || 0), 0)
+    const totalEntries = allMetrics.reduce((sum, m) => sum + (m.totalEntries || 0), 0)
+    const totalPrizepool = allMetrics.reduce((sum, m) => sum + (m.totalPrizepool || 0), 0)
+    const totalProfit = allMetrics.reduce((sum, m) => sum + (m.totalProfit || 0), 0)
+
+    const latestCalc = allMetrics.map(m => m.calculatedAt).filter(Boolean).sort().reverse()[0]
+
+    return {
+      totalVenues: venues.length,
+      activeVenues,
+      totalGames,
+      totalSeriesGames,
+      totalRegularGames,
+      totalEntries,
+      totalPrizepool,
+      totalProfit,
+      avgEntriesPerGame: totalGames > 0 ? totalEntries / totalGames : 0,
+      calculatedAt: latestCalc ? new Date(latestCalc) : null
+    }
   }, [venueMetricsMap, venues])
 
   // ============================================
   // TABLE COLUMNS
   // ============================================
 
-  const columns: ColumnDef<VenueDisplayStats>[] = useMemo(() => [
-    {
-      accessorKey: 'venueName',
-      header: 'Venue',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          {row.original.venueLogo ? (
-            <img src={row.original.venueLogo} alt="" className="w-8 h-8 rounded-full object-cover" />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-              <BuildingOffice2Icon className="w-4 h-4 text-gray-400" />
-            </div>
-          )}
-          <span className="font-medium">{row.original.venueName}</span>
-        </div>
-      )
-    },
-    { accessorKey: 'seriesType', header: 'Type', cell: ({ getValue }) => {
-      const type = getValue() as string
-      const colors = { ALL: 'bg-gray-100 text-gray-700', REGULAR: 'bg-blue-100 text-blue-700', SERIES: 'bg-purple-100 text-purple-700' }
-      return <span className={cx("px-2 py-0.5 text-xs font-medium rounded-full", colors[type as keyof typeof colors] || colors.ALL)}>{type}</span>
-    }},
+  const columns = useMemo<ColumnDef<VenueDisplayStats>[]>(() => [
+    { accessorKey: 'venueName', header: 'Venue' },
     { accessorKey: 'totalGames', header: 'Games', cell: ({ getValue }) => valOrDash(getValue() as number) },
     { accessorKey: 'totalEntries', header: 'Entries', cell: ({ getValue }) => valOrDash(getValue() as number) },
-    { accessorKey: 'avgEntriesPerGame', header: 'Avg Entries', cell: ({ getValue }) => { const val = getValue() as number; return val > 0 ? val.toFixed(1) : '-' } },
     { accessorKey: 'totalPrizepool', header: 'Prizepool', cell: ({ getValue }) => valOrDash(getValue() as number, formatCurrency) },
-    { accessorKey: 'totalProfit', header: 'Profit', cell: ({ getValue }) => { const val = getValue() as number; if (!val) return '-'; return <span className={val >= 0 ? 'text-green-600' : 'text-red-600'}>{formatCurrency(val)}</span> } },
-    { accessorKey: 'attendanceTrend', header: 'Trend', cell: ({ row }) => <TrendIndicator trend={row.original.attendanceTrend} percent={row.original.attendanceTrendPercent} /> },
+    { accessorKey: 'totalProfit', header: 'Profit', cell: ({ getValue }) => {
+      const val = getValue() as number
+      if (!val) return '-'
+      return <span className={val >= 0 ? 'text-green-600' : 'text-red-600'}>{formatCurrency(val)}</span>
+    }},
+    { accessorKey: 'avgEntriesPerGame', header: 'Avg Entries', cell: ({ getValue }) => {
+      const val = getValue() as number
+      return val ? val.toFixed(1) : '-'
+    }},
     { accessorKey: 'overallHealth', header: 'Health', cell: ({ getValue }) => <HealthBadge health={getValue() as string} /> },
     { accessorKey: 'latestGameDate', header: 'Last Game', cell: ({ row }) => { const date = row.original.latestGameDate; if (!date) return '-'; return formatDateWithDaysAgo(date, row.original.latestGameDaysAgo) } }
-  ], [])
+  ], [isSuperAdmin])
 
   // ============================================
   // EVENT HANDLERS
@@ -907,21 +843,31 @@ export default function VenuesDashboard() {
         </div>
       ) : (
         <>
-          {/* Global KPI Cards */}
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          {/* Global KPI Cards - Responsive grid with gradual column increase */}
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             <KpiCard title="Total Venues" value={globalStats.totalVenues} subtitle={`${globalStats.activeVenues} active`} icon={<BuildingOffice2Icon className="h-5 w-5" />} />
-            <KpiCard title="Total Games" value={globalStats.totalGames.toLocaleString()} icon={<CalendarIcon className="h-5 w-5" />} />
-            <KpiCard title="Regular Games" value={globalStats.totalRegularGames.toLocaleString()} icon={<CalendarIcon className="h-5 w-5 text-blue-500" />} />
-            <KpiCard title="Series Games" value={globalStats.totalSeriesGames.toLocaleString()} icon={<TrophyIcon className="h-5 w-5 text-purple-500" />} />
-            <KpiCard title="Total Prizepool" value={formatCurrency(globalStats.totalPrizepool)} icon={<TrophyIcon className="h-5 w-5" />} />
-            <KpiCard title="Profit" value={formatCurrency(globalStats.totalProfit)} icon={<CurrencyDollarIcon className="h-5 w-5" />} />
+            <KpiCard 
+              title={isSuperAdmin ? "Total Games" : "Regular Games"} 
+              value={globalStats.totalGames.toLocaleString()} 
+              icon={<CalendarIcon className="h-5 w-5" />} 
+            />
+            {/* Only show breakdown KPIs for SUPER_ADMIN */}
+            {isSuperAdmin && (
+              <>
+                <KpiCard title="Regular Games" value={globalStats.totalRegularGames.toLocaleString()} icon={<CalendarIcon className="h-5 w-5 text-blue-500" />} />
+                <KpiCard title="Series Games" value={globalStats.totalSeriesGames.toLocaleString()} icon={<TrophyIcon className="h-5 w-5 text-purple-500" />} />
+              </>
+            )}
+            <KpiCard title="Total Prizepool" value={formatCompactCurrency(globalStats.totalPrizepool)} icon={<TrophyIcon className="h-5 w-5" />} />
+            <KpiCard title="Profit" value={formatCompactCurrency(globalStats.totalProfit)} icon={<CurrencyDollarIcon className="h-5 w-5" />} />
           </div>
 
           {/* Entity Venue Sections */}
           <div className="mt-12 space-y-12">
             {selectedEntities.map(entity => {
-              const seriesType = seriesTypeMap[entity.id] || 'ALL'
-              const entityVenueStats = getEntityVenueStats(entity.id)
+              // Non-SUPER_ADMIN users always see REGULAR
+              const seriesType = isSuperAdmin ? (seriesTypeMap[entity.id] || 'REGULAR') : 'REGULAR'
+              const entityVenueStats = getEntityVenueStats(entity.id, seriesType)
               const entityVenues = venues.filter(v => v.entityId === entity.id)
               
               if (entityVenues.length === 0) return null
@@ -982,37 +928,32 @@ export default function VenuesDashboard() {
                       </span>
                     </div>
 
-                    {/* Controls */}
-                    <div className="flex items-center gap-3">
-                      {/* Series Type Selector */}
-                      <SeriesTypeSelector 
-                        value={seriesType} 
-                        onChange={(newType) => handleSeriesTypeChange(entity.id, newType)} 
-                      />
-                      
-                      {/* Show/Hide Empty Toggle */}
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => toggleEntityFilter(entity.id)}
-                        className={cx("flex items-center gap-2 text-xs", isHidingEmpty ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "")}
-                      >
-                        {isHidingEmpty ? <><ListBulletIcon className="w-4 h-4" />Show all</> : <><EyeSlashIcon className="w-4 h-4" />Hide empty</>}
-                      </Button>
-                    </div>
+                    {/* Controls - Only show if there are venues to display */}
+                    {allDisplayedVenues.length > 0 && (
+                      <div className="flex items-center gap-3">
+                        {/* Series Type Selector - ONLY show for SUPER_ADMIN */}
+                        {isSuperAdmin && (
+                          <SeriesTypeSelector 
+                            value={seriesType} 
+                            onChange={(newType) => handleSeriesTypeChange(entity.id, newType)} 
+                          />
+                        )}
+                        
+                        {/* Show/Hide Empty Toggle */}
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => toggleEntityFilter(entity.id)}
+                          className={cx("flex items-center gap-2 text-xs", isHidingEmpty ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "")}
+                        >
+                          {isHidingEmpty ? <><ListBulletIcon className="w-4 h-4" />Show all</> : <><EyeSlashIcon className="w-4 h-4" />Hide empty</>}
+                        </Button>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Venue Cards */}
-                  {allDisplayedVenues.length === 0 ? (
-                    <div className="py-12 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                      <p className="text-sm text-gray-500">
-                        No venues with {seriesType === 'ALL' ? '' : seriesType.toLowerCase()} games found for this period.
-                      </p>
-                      <button onClick={() => toggleEntityFilter(entity.id)} className="mt-2 text-xs font-medium text-indigo-600 hover:text-indigo-700">
-                        Show all venues
-                      </button>
-                    </div>
-                  ) : (
+                  {/* Venue Cards - Only render if there are venues to show */}
+                  {allDisplayedVenues.length > 0 && (
                     <HorizontalScrollRow>
                       {allDisplayedVenues.map((stats) => (
                         <VenueCard
@@ -1032,11 +973,31 @@ export default function VenuesDashboard() {
           {/* Data Table */}
           <div className="mt-16">
             <Card>
-              <h2 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-50">
-                All Venue Metrics
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                  All Venue Metrics {!isSuperAdmin && '(Regular Games)'}
+                  <span className="ml-2 text-xs font-normal text-gray-500">
+                    ({filteredTableStats.length} venue{filteredTableStats.length !== 1 ? 's' : ''})
+                  </span>
+                </h2>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setHideEmptyInTable(prev => !prev)}
+                  className={cx(
+                    "flex items-center gap-2 text-xs",
+                    hideEmptyInTable ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : ""
+                  )}
+                >
+                  {hideEmptyInTable ? (
+                    <><ListBulletIcon className="w-4 h-4" />Show all</>
+                  ) : (
+                    <><EyeSlashIcon className="w-4 h-4" />Hide empty</>
+                  )}
+                </Button>
+              </div>
               <div className="-mx-4 sm:-mx-6">
-                <DataTable data={allVenueStats} columns={columns} onRowClick={handleRowClick} />
+                <DataTable data={filteredTableStats} columns={columns} onRowClick={handleRowClick} />
               </div>
             </Card>
           </div>

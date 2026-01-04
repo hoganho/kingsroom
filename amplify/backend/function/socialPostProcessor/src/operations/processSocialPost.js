@@ -1,6 +1,9 @@
 /**
  * operations/processSocialPost.js
  * Main processing logic for a single social post
+ * 
+ * UPDATED: Now sets ALL classification fields including tags
+ * This is the single source of truth for classification logic
  */
 
 const { v4: uuidv4 } = require('uuid');
@@ -19,7 +22,7 @@ const { parsePlacements, createPlacementRecords, extractWinnerInfo } = require('
 const { findMatchingGames, getAutoLinkCandidates } = require('../matching/gameMatcher');
 
 // Processing version for tracking
-const PROCESSING_VERSION = '1.0.0';
+const PROCESSING_VERSION = '1.1.0'; // Bumped for tag generation
 
 // Default auto-link threshold
 const DEFAULT_AUTO_LINK_THRESHOLD = 80;
@@ -34,6 +37,114 @@ const addDataStoreFields = (record) => {
     _version: 1,
     _lastChangedAt: Date.now(),
     _deleted: null,
+  };
+};
+
+// ============================================
+// TAG GENERATION (Single source of truth)
+// ============================================
+
+/**
+ * Extract hashtags from content
+ */
+const extractHashtags = (content) => {
+  if (!content) return [];
+  const matches = content.match(/#(\w+)/g);
+  if (!matches) return [];
+  return matches.map(tag => tag.substring(1).toLowerCase());
+};
+
+/**
+ * Generate comprehensive tags based on classification and extracted data
+ * This is THE authoritative tag generation - used by both manual upload and FB fetch
+ * 
+ * @param {Object} params
+ * @param {string} params.content - Post content
+ * @param {Object} params.classification - Result from classifyContent()
+ * @param {Object} params.extracted - Result from extractGameData()
+ * @param {number} params.placementCount - Number of placements found
+ * @param {string[]} params.existingTags - Any existing tags (e.g., hashtags already saved)
+ * @returns {string[]} Complete tag array
+ */
+const generateClassificationTags = ({ content, classification, extracted, placementCount = 0, existingTags = [] }) => {
+  const tags = new Set(existingTags);
+  
+  // 1. Extract hashtags from content
+  const hashtags = extractHashtags(content);
+  hashtags.forEach(tag => tags.add(tag));
+  
+  // 2. Classification tags based on contentType
+  if (classification.contentType === 'RESULT') {
+    tags.add('tournament-result');
+  } else if (classification.contentType === 'PROMOTIONAL') {
+    tags.add('promotional');
+  }
+  
+  // 3. Content indicator tags
+  if (placementCount > 0) {
+    tags.add('has-placements');
+  }
+  
+  if (extracted) {
+    if (extracted.extractedTotalEntries) tags.add('has-entries');
+    if (extracted.extractedPrizePool) tags.add('has-prize-pool');
+    if (extracted.extractedBuyIn) tags.add('has-buyin');
+    if (extracted.extractedGuarantee) tags.add('has-guarantee');
+    if (extracted.extractedTournamentId) tags.add('has-tournament-id');
+    if (extracted.extractedVenueId || extracted.extractedVenueName) tags.add('venue-detected');
+    
+    // Game variant tags
+    if (extracted.extractedGameVariant) {
+      const variant = extracted.extractedGameVariant.toUpperCase();
+      if (variant.includes('NLH') || variant.includes('HOLDEM')) tags.add('nlh');
+      if (variant.includes('PLO') || variant.includes('OMAHA')) tags.add('plo');
+    }
+    
+    // Tournament type tags
+    if (extracted.extractedTournamentType) {
+      const type = extracted.extractedTournamentType.toLowerCase();
+      if (type.includes('bounty') || type.includes('knockout')) tags.add('bounty');
+      if (type.includes('turbo')) tags.add('turbo');
+      if (type.includes('deep')) tags.add('deep-stack');
+      if (type.includes('satellite')) tags.add('satellite');
+    }
+  }
+  
+  // 4. Pattern-based tags from content (fallback if extracted data doesn't have them)
+  if (content) {
+    if (/\bbounty\b|\bko\b|\bknockout\b|\bpko\b/i.test(content) && !tags.has('bounty')) {
+      tags.add('bounty');
+    }
+    if (/\bnlh(?:e)?\b|\bno\s*limit\s*hold/i.test(content) && !tags.has('nlh')) {
+      tags.add('nlh');
+    }
+    if (/\bplo\b|\bpot\s*limit\s*omaha/i.test(content) && !tags.has('plo')) {
+      tags.add('plo');
+    }
+    if (/\bturbo\b/i.test(content) && !tags.has('turbo')) {
+      tags.add('turbo');
+    }
+    if (/\bdeep\s*stack\b/i.test(content) && !tags.has('deep-stack')) {
+      tags.add('deep-stack');
+    }
+    if (/\bsatellite\b|\bsat\b/i.test(content) && !tags.has('satellite')) {
+      tags.add('satellite');
+    }
+  }
+  
+  return Array.from(tags);
+};
+
+/**
+ * Build classification flags for SocialPost update
+ */
+const buildClassificationFlags = (classification) => {
+  const contentType = classification.contentType;
+  
+  return {
+    isPromotional: contentType === 'PROMOTIONAL',
+    isTournamentRelated: contentType === 'RESULT' || contentType === 'PROMOTIONAL',
+    isTournamentResult: contentType === 'RESULT',
   };
 };
 
@@ -114,11 +225,24 @@ const processSocialPost = async (input) => {
     if (classification.contentType === 'GENERAL' || classification.contentType === 'COMMENT') {
       console.log('[PROCESS] Content is GENERAL/COMMENT, marking as skipped');
       
+      // Generate tags even for skipped posts (hashtags + type)
+      const tags = generateClassificationTags({
+        content: post.content,
+        classification,
+        extracted: null,
+        placementCount: 0,
+        existingTags: post.tags || []
+      });
+      
+      const classificationFlags = buildClassificationFlags(classification);
+      
       await updateSocialPost(socialPostId, {
         processingStatus: 'SKIPPED',
         processedAt: new Date().toISOString(),
         contentType: classification.contentType,
-        contentTypeConfidence: classification.confidence
+        contentTypeConfidence: classification.confidence,
+        tags,
+        ...classificationFlags
       });
       
       result.processingStatus = 'SKIPPED';
@@ -213,12 +337,27 @@ const processSocialPost = async (input) => {
       result.placementsExtracted = placements.length;
     }
     
-    // Update post with extraction reference
+    // Generate comprehensive tags
+    const tags = generateClassificationTags({
+      content: post.content,
+      classification,
+      extracted,
+      placementCount: placements.length,
+      existingTags: post.tags || []
+    });
+    
+    const classificationFlags = buildClassificationFlags(classification);
+    
+    console.log(`[PROCESS] Generated ${tags.length} tags:`, tags);
+    
+    // Update post with extraction reference AND all classification fields
     await updateSocialPost(socialPostId, {
       extractedGameDataId: extractionId,
       contentType: classification.contentType,
       contentTypeConfidence: classification.confidence,
-      processingStatus: 'EXTRACTED'
+      processingStatus: 'EXTRACTED',
+      tags,
+      ...classificationFlags
     });
     
     result.processingStatus = 'EXTRACTED';
@@ -547,6 +686,17 @@ const previewContentExtraction = async (input) => {
     result.extractedGameData = extracted;
     result.placementsExtracted = placements.length;
     
+    // Generate tags for preview
+    const tags = generateClassificationTags({
+      content,
+      classification,
+      extracted,
+      placementCount: placements.length,
+      existingTags: []
+    });
+    result.tags = tags;
+    result.classificationFlags = buildClassificationFlags(classification);
+    
     // === STEP 4: Match to games ===
     // Only if content is RESULT or PROMOTIONAL
     if (classification.contentType !== 'GENERAL' && classification.contentType !== 'COMMENT') {
@@ -591,6 +741,10 @@ module.exports = {
   previewMatch,
   previewContentExtraction,
   addDataStoreFields,  // Export for use in other files
+  // Tag generation (for manual uploader to use if invoking processor directly)
+  generateClassificationTags,
+  buildClassificationFlags,
+  extractHashtags,
   PROCESSING_VERSION,
   DEFAULT_AUTO_LINK_THRESHOLD
 };

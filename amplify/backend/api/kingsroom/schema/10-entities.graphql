@@ -40,6 +40,7 @@ type Entity @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
 
   # Social Pulse Relationships
   socialAccounts: [SocialAccount] @hasMany(indexName: "bySocialAccountEntity", fields: ["id"])
+
 }
 
 type BackgroundTask @model(subscriptions: null) @auth(rules: [{ allow: private }]) {

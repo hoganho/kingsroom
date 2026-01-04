@@ -21,7 +21,13 @@
 Amplify Params - DO NOT EDIT */
 
 // autoScraper Lambda
-// UPDATED v4.4.0:
+// UPDATED v4.5.0:
+// - FIXED: buildScrapingContext now passes all required dependencies to scrapingEngine.js
+// - FIXED: Added getEntity and buildTournamentUrl functions
+// - FIXED: Context now includes STOP_REASON and other constants with correct key names
+// - Previous: Cannot read properties of undefined (reading 'COMPLETED') error
+//
+// v4.4.0:
 // - Added JobProgressPublisher for real-time job monitoring via onJobProgress subscription
 // - Progress events published periodically during processing (replaces polling on frontend)
 // - Completion events always published immediately
@@ -125,6 +131,39 @@ const getTableName = (modelName) => {
 const scraperStateTable = getTableName('ScraperState');
 const scraperJobTable = getTableName('ScraperJob');
 const scrapeURLTable = getTableName('ScrapeURL');
+const entityTable = getTableName('Entity');
+
+// ===================================================================
+// ENTITY HELPERS
+// ===================================================================
+
+/**
+ * Fetch entity from DynamoDB by ID
+ * Required by scrapingEngine.js for URL pattern building
+ */
+async function getEntity(entityId) {
+    const response = await monitoredDdbDocClient.send(new GetCommand({
+        TableName: entityTable,
+        Key: { id: entityId }
+    }));
+    
+    if (!response.Item) {
+        throw new Error(`Entity not found: ${entityId}`);
+    }
+    
+    return response.Item;
+}
+
+/**
+ * Build tournament URL from entity config and tournament ID
+ * Required by scrapingEngine.js for scraping
+ */
+async function buildTournamentUrl(entityId, tournamentId) {
+    const entity = await getEntity(entityId);
+    const domain = entity.gameUrlDomain || '';
+    const path = entity.gameUrlPath || '';
+    return `${domain}${path}${tournamentId}`;
+}
 
 // ===================================================================
 // ENTITY RESOLUTION
@@ -528,35 +567,45 @@ function buildScrapingContext(jobId = null, entityId = null, options = {}) {
           )
         : null;
     
+    // Return context with ALL dependencies expected by scrapingEngine.js
     return {
-        // Timing
+        // ===== Core dependencies =====
+        callGraphQL,
+        getEntity,
+        buildTournamentUrl,
+        getScraperJob,
+        updateScraperJob,
+        updateScraperState,
+        publishGameProcessedEvent,
+        ddbDocClient: monitoredDdbDocClient,
+        scrapeURLTable,
+        
+        // ===== Constants (UPPERCASE as expected by scrapingEngine) =====
+        STOP_REASON,
+        LAMBDA_TIMEOUT,
+        LAMBDA_TIMEOUT_BUFFER,
+        PROGRESS_UPDATE_FREQUENCY,
+        DEFAULT_MAX_CONSECUTIVE_NOT_FOUND,
+        DEFAULT_MAX_CONSECUTIVE_ERRORS,
+        DEFAULT_MAX_CONSECUTIVE_BLANKS,
+        DEFAULT_MAX_TOTAL_ERRORS,
+        
+        // ===== Timing =====
         invocationStartTime,
-        lambdaTimeout: LAMBDA_TIMEOUT,
-        timeoutBuffer: LAMBDA_TIMEOUT_BUFFER,
         
-        // Thresholds (use job config or defaults)
-        maxConsecutiveBlanks: options.maxConsecutiveBlanks || DEFAULT_MAX_CONSECUTIVE_BLANKS,
-        maxConsecutiveErrors: options.maxConsecutiveErrors || DEFAULT_MAX_CONSECUTIVE_ERRORS,
-        maxConsecutiveNotFound: options.maxConsecutiveNotFound || DEFAULT_MAX_CONSECUTIVE_NOT_FOUND,
-        maxTotalErrors: options.maxTotalErrors || DEFAULT_MAX_TOTAL_ERRORS,
-        
-        // Progress tracking
-        progressUpdateFrequency: PROGRESS_UPDATE_FREQUENCY,
-        
-        // Job progress publisher (NEW in v4.4.0)
+        // ===== Job progress publisher (for real-time updates) =====
         progressPublisher,
         
-        // Callbacks
+        // ===== Callbacks =====
         onGameProcessed: publishGameProcessedEvent,
         onProgress: async (stats, currentId) => {
-            // Publish progress to subscription (rate-limited)
             if (progressPublisher) {
                 await progressPublisher.publishProgress(stats, 'RUNNING', { currentId });
             }
         },
         
-        // Continuation support
-        selfContinue: jobId ? async (currentId, accumulatedResults, originalOptions) => {
+        // ===== Continuation support =====
+        invokeContinuation: jobId ? async (currentId, endId, accumulatedResults) => {
             console.log(`[AutoScraper] Self-continuing from ID ${currentId}`);
             
             // Publish continuation status
@@ -573,7 +622,7 @@ function buildScrapingContext(jobId = null, entityId = null, options = {}) {
                 entityId,
                 isContinuation: true,
                 continueFromId: currentId,
-                originalEndId: originalOptions.endId || options.endId,
+                originalEndId: endId,
                 accumulatedResults: {
                     totalProcessed: accumulatedResults.totalProcessed || 0,
                     newGamesScraped: accumulatedResults.newGamesScraped || 0,
@@ -585,7 +634,7 @@ function buildScrapingContext(jobId = null, entityId = null, options = {}) {
                     s3CacheHits: accumulatedResults.s3CacheHits || 0,
                 },
                 // Pass through original options
-                ...originalOptions,
+                ...options,
             };
             
             await lambdaClient.send(new InvokeCommand({

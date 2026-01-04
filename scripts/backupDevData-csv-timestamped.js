@@ -26,7 +26,7 @@ const DATA_OUTPUT_DIR = process.env.DATA_OUTPUT_DIR || '../../Data';
 // - TABLE_PREFIX_FILTER: only tables starting with a string (rarely needed)
 const ENV_SUFFIX = process.env.ENV_SUFFIX || 'dev';
 const API_ID_FILTER = process.env.API_ID_FILTER || 'ht3nugt6lvddpeeuwj3x6mkite'; // e.g. fosb7ek5argnhctz4odpt52eia
-const TABLE_PREFIX_FILTER = process.env.TABLE_PREFIX_FILTER || ''; // e.g. "Game-"
+const TABLE_PREFIX_FILTER = process.env.TABLE_PREFIX_FILTER || 'Game-'; // e.g. "Game-"
 
 // If set to 1, we don't scan or write files; we just print which tables would be backed up.
 const DRY_RUN = process.env.DRY_RUN === '1';

@@ -1,4 +1,5 @@
 // src/App.tsx
+// OPTIMIZED: Removed database monitoring to reduce Lambda costs
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
@@ -76,7 +77,7 @@ import { GamesDebug } from './pages/debug/GamesDebug';
 import { PlayersDebug } from './pages/debug/PlayersDebug';
 import { SocialDebug } from './pages/debug/SocialDebug';
 import { DatabaseMonitorPage } from './pages/debug/DatabaseMonitor';
-import { getMonitoring } from './utils/enhanced-monitoring';
+// REMOVED: import { getMonitoring } from './utils/enhanced-monitoring';
 
 // Configure Amplify
 Amplify.configure(awsExports);
@@ -196,12 +197,9 @@ class ErrorBoundary extends React.Component<
 // ============================================
 // AUTH GATE - Prevents rendering until auth ready
 // ============================================
-// This ensures hooks in child components don't fire before
-// authentication is confirmed, preventing "NoSignedUser" errors
 const AuthGate = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
-  // Still loading auth state - show spinner
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -213,8 +211,6 @@ const AuthGate = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // Not authenticated - don't render children
-  // CustomAuthenticator should handle redirecting to login
   if (!user) {
     return null;
   }
@@ -225,7 +221,6 @@ const AuthGate = ({ children }: { children: React.ReactNode }) => {
 // ============================================
 // PROTECTED LAYOUT COMPONENT
 // ============================================
-// Wraps authenticated pages with EntityProvider, GameProvider, and MainLayout
 const ProtectedLayout = () => {
   return (
     <AuthGate>
@@ -276,7 +271,6 @@ const NoAccessScreen = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="text-center p-8 bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-md border border-gray-200 dark:border-gray-800">
-        {/* Lock icon */}
         <div className="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
           <svg
             className="w-8 h-8 text-gray-400 dark:text-gray-500"
@@ -305,7 +299,6 @@ const NoAccessScreen = () => {
           Please contact your administrator to request access.
         </p>
 
-        {/* User info */}
         {user && (
           <div className="mb-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
             <div className="text-gray-500 dark:text-gray-400">Signed in as</div>
@@ -353,12 +346,10 @@ const NoAccessScreen = () => {
 // ============================================
 // SMART REDIRECT COMPONENT
 // ============================================
-// Redirects users to their first accessible page, or shows NoAccessScreen
 const DefaultRoute = () => {
   const { user, loading } = useAuth();
   const { hasAnyAccess, firstAccessiblePage, canAccess } = useUserPermissions();
 
-  // 1. Wait for auth to load
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -370,25 +361,18 @@ const DefaultRoute = () => {
     );
   }
 
-  // 2. Check if user has any access at all
   if (!hasAnyAccess) {
-    console.log('[DefaultRoute] User has no page access, showing NoAccessScreen');
     return <NoAccessScreen />;
   }
 
-  // 3. Try /home first (common preference)
   if (canAccess('/home')) {
     return <Navigate to="/home" replace />;
   }
 
-  // 4. Redirect to first accessible page
   if (firstAccessiblePage) {
-    console.log(`[DefaultRoute] Redirecting to first accessible page: ${firstAccessiblePage.path}`);
     return <Navigate to={firstAccessiblePage.path} replace />;
   }
 
-  // 5. Fallback (shouldn't reach here if hasAnyAccess is true)
-  console.warn('[DefaultRoute] Unexpected state: hasAnyAccess=true but no firstAccessiblePage');
   return <NoAccessScreen />;
 };
 
@@ -488,15 +472,9 @@ const AppRouter = () => {
 // MAIN APP COMPONENT
 // ============================================
 function App() {
-  const monitoring = getMonitoring({
-    enabled: import.meta.env.VITE_ENABLE_DB_MONITOR !== 'false',
-    sendToCloudWatch: import.meta.env.VITE_CLOUDWATCH_ENABLED !== 'false',
-    logToConsole: import.meta.env.DEV,
-  });
-
-  useEffect(() => {
-    monitoring.trackMetric('AppStarted', 1, 'Count');
-  }, []);
+  // REMOVED: Database monitoring initialization
+  // const monitoring = getMonitoring({...});
+  // useEffect(() => { monitoring.trackMetric('AppStarted', 1, 'Count'); }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">

@@ -1,5 +1,6 @@
 // src/components/ui/KpiCard.tsx
 // Tremor-style KPI card - adapted from Dashboard template patterns
+// VERSION: 2.1.0 - Responsive typography with text wrapping for long values
 import React from 'react';
 import { cx } from '../../lib/utils';
 
@@ -26,8 +27,9 @@ interface KpiCardProps {
  * KpiCard - Tremor Dashboard-style KPI card
  * 
  * Mobile-first design with:
+ * - Responsive typography that scales down for smaller screens
+ * - Text wrapping for long values (e.g., large currency amounts)
  * - Compact padding on mobile
- * - Responsive typography
  * - Optional trend indicator
  */
 export const KpiCard: React.FC<KpiCardProps> = ({
@@ -60,7 +62,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
       onClick={onClick}
       className={cx(
         // Base styles
-        'relative rounded-lg border p-4 sm:p-5',
+        'relative rounded-lg border p-3 sm:p-4',
         // Colors
         'bg-white dark:bg-gray-950',
         'border-gray-200 dark:border-gray-800',
@@ -71,25 +73,25 @@ export const KpiCard: React.FC<KpiCardProps> = ({
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          {/* Title */}
-          <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1 overflow-hidden">
+          {/* Title - Small, consistent size */}
+          <p className="text-[11px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 leading-tight">
             {title}
           </p>
           
-          {/* Value */}
-          <p className="mt-1 text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-gray-50 truncate">
+          {/* Value - Responsive sizing, breaks on long values */}
+          <p className="mt-1 text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-gray-50 leading-tight break-all">
             {value}
           </p>
           
           {/* Change indicator */}
           {(change !== undefined || previousValue !== undefined) && (
-            <div className="mt-2 flex items-center gap-2 flex-wrap">
+            <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
               {change !== undefined && (
                 <span
                   className={cx(
-                    'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium',
+                    'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] sm:text-xs font-medium',
                     changeBgClass,
                     changeColorClass,
                   )}
@@ -100,7 +102,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
                 </span>
               )}
               {previousValue !== undefined && (
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
                   from {previousValue}
                 </span>
               )}
@@ -109,7 +111,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
           
           {/* Subtitle */}
           {subtitle && (
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p className="mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 leading-tight">
               {subtitle}
             </p>
           )}

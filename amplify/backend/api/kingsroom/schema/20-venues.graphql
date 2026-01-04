@@ -47,6 +47,7 @@ type Venue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
 
   entityId: ID @index(name: "byEntityVenue", sortKeyFields: ["name"], queryField: "venuesByEntity")
   entity: Entity @belongsTo(fields: ["entityId"])
+  
 }
 
 type VenueDetails @model(subscriptions: null) @auth(rules: [{ allow: private }]) {

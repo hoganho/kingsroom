@@ -219,8 +219,8 @@ exports.handler = async (event) => {
         });
         
         // Return structured error for fetch operations
-        // FIXED: Use gameStatus: 'ERROR' instead of 'SCHEDULED' so autoScraper
-        // properly recognizes this as an error, not valid tournament data
+        // FIXED: Use gameStatus: 'UNKNOWN' (valid enum value) instead of 'ERROR' (not in enum)
+        // This ensures GraphQL serialization works while still indicating an error state
         if (event.fieldName === 'fetchTournamentData' || event.fieldName === 'FETCH') {
             const args = event.arguments || event.args || event;
             const tournamentId = args.url ? extractTournamentIdFromUrl(args.url) : 0;
@@ -228,16 +228,16 @@ exports.handler = async (event) => {
             return {
                 tournamentId,
                 name: 'Error processing tournament',
-                gameStatus: 'ERROR',              // FIXED: Was 'SCHEDULED' - now properly indicates error
+                gameStatus: 'UNKNOWN',            // FIXED: Was 'ERROR' - not in GraphQL GameStatus enum
                 hasGuarantee: false,
                 doNotScrape: true,
                 s3Key: '',
                 error: error.message,
-                errorMessage: error.message,      // ADDED: Explicit error message field
-                status: 'ERROR',
+                errorMessage: error.message,      // Explicit error message field
+                status: 'ERROR',                  // Keep internal status for debugging (not gameStatus)
                 registrationStatus: 'N_A',
                 entityId: args.entityId || null,
-                source: 'ERROR'                   // ADDED: Indicate this came from error path
+                source: 'ERROR'                   // Indicate this came from error path
             };
         }
         

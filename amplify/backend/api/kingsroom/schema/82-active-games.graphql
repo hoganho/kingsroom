@@ -1,0 +1,301 @@
+# =============================================================================
+# 82-active-games.graphql
+# ACTIVE GAME TRACKING - Lightweight table for dashboard & real-time updates
+# =============================================================================
+# Version: 2.1.1 - FIXED: Changed @belongsTo to @hasOne for uni-directional links
+#
+# AMPLIFY LIMITATION: @belongsTo requires bi-directional links in V2.
+#
+# SOLUTION: 
+# - ActiveGame has @hasOne(fields: ["..."]) → allows one-way navigation TO Parent
+# - Parent types do NOT need to be modified.
+# =============================================================================
+
+type ActiveGame 
+  @model(subscriptions: { level: public })
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  
+  # === RELATIONSHIPS (one-way: ActiveGame → Parent) ===
+  gameId: ID!
+  @index(name: "byGameIdActive", queryField: "activeGameByGameId")
+  game: Game @hasOne(fields: ["gameId"]) # FIXED: @belongsTo -> @hasOne
+  
+  entityId: ID!
+  @index(name: "byEntityActiveGame", sortKeyFields: ["gameStatus"], queryField: "activeGamesByEntity")
+  entity: Entity @hasOne(fields: ["entityId"]) # FIXED: @belongsTo -> @hasOne
+  
+  venueId: ID @index(name: "byVenueActiveGame", sortKeyFields: ["gameStartDateTime"], queryField: "activeGamesByVenue")
+  venue: Venue @hasOne(fields: ["venueId"]) # FIXED: @belongsTo -> @hasOne
+  
+  tournamentId: Int @index(name: "byTournamentIdActive", queryField: "activeGameByTournamentId")
+  
+  # === STATUS ===
+  gameStatus: GameStatus!
+  @index(name: "byActiveGameStatus", sortKeyFields: ["gameStartDateTime"], queryField: "activeGamesByStatus")
+  registrationStatus: RegistrationStatus
+  previousStatus: GameStatus
+  statusChangedAt: AWSDateTime
+  
+  # === DENORMALIZED DISPLAY FIELDS ===
+  name: String!
+  venueName: String
+  venueLogoCached: AWSURL
+  entityName: String
+  gameStartDateTime: AWSDateTime!
+  gameEndDateTime: AWSDateTime
+  totalEntries: Int
+  totalUniquePlayers: Int
+  playersRemaining: Int
+  totalChipsInPlay: Float
+  averagePlayerStack: Float
+  buyIn: Float
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  guaranteeAmount: Float
+  hasGuarantee: Boolean
+  gameType: GameType
+  gameVariant: GameVariant
+  tournamentType: TournamentType
+  isSeries: Boolean
+  seriesName: String
+  sourceUrl: AWSURL
+  
+  # === REFRESH SCHEDULING ===
+  refreshEnabled: Boolean @default(value: "true")
+  refreshIntervalMinutes: Int @default(value: "15")
+  lastRefreshedAt: AWSDateTime
+  nextRefreshAt: AWSDateTime @index(name: "byNextRefresh", queryField: "activeGamesNeedingRefresh")
+  refreshCount: Int @default(value: "0")
+  consecutiveRefreshFailures: Int @default(value: "0")
+  lastRefreshError: String
+  
+  # === FLAGS ===
+  isPriority: Boolean @default(value: "false")
+  hasOverlay: Boolean @default(value: "false")
+  isMainEvent: Boolean @default(value: "false")
+  
+  # === METADATA ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  activatedAt: AWSDateTime!
+  activatedBy: String
+}
+
+# =============================================================================
+# RECENTLY FINISHED GAME
+# =============================================================================
+
+type RecentlyFinishedGame
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  gameId: ID! @index(name: "byGameIdFinished", queryField: "recentlyFinishedByGameId")
+  game: Game @hasOne(fields: ["gameId"]) # FIXED: @belongsTo -> @hasOne
+  
+  entityId: ID!
+  @index(name: "byEntityRecentFinished", sortKeyFields: ["finishedAt"], queryField: "recentlyFinishedByEntity")
+  entity: Entity @hasOne(fields: ["entityId"]) # FIXED: @belongsTo -> @hasOne
+  
+  venueId: ID @index(name: "byVenueRecentFinished", sortKeyFields: ["finishedAt"], queryField: "recentlyFinishedByVenue")
+  venue: Venue @hasOne(fields: ["venueId"]) # FIXED: @belongsTo -> @hasOne
+  
+  tournamentId: Int
+  
+  name: String!
+  venueName: String
+  venueLogoCached: AWSURL
+  entityName: String
+  gameStartDateTime: AWSDateTime!
+  finishedAt: AWSDateTime!
+  @index(name: "byFinishedAt", queryField: "recentlyFinishedGames")
+  totalDuration: String
+  totalEntries: Int
+  totalUniquePlayers: Int
+  prizepoolPaid: Float
+  prizepoolCalculated: Float
+  buyIn: Float
+  gameType: GameType
+  isSeries: Boolean
+  seriesName: String
+  isMainEvent: Boolean
+  sourceUrl: AWSURL
+  
+  ttl: AWSTimestamp
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# =============================================================================
+# UPCOMING GAME
+# =============================================================================
+
+type UpcomingGame
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  gameId: ID! @index(name: "byGameIdUpcoming", queryField: "upcomingByGameId")
+  game: Game @hasOne(fields: ["gameId"]) # FIXED: @belongsTo -> @hasOne
+  
+  entityId: ID!
+  @index(name: "byEntityUpcoming", sortKeyFields: ["gameStartDateTime"], queryField: "upcomingGamesByEntity")
+  entity: Entity @hasOne(fields: ["entityId"]) # FIXED: @belongsTo -> @hasOne
+  
+  venueId: ID @index(name: "byVenueUpcoming", sortKeyFields: ["gameStartDateTime"], queryField: "upcomingGamesByVenue")
+  venue: Venue @hasOne(fields: ["venueId"]) # FIXED: @belongsTo -> @hasOne
+  
+  tournamentId: Int
+  
+  name: String!
+  venueName: String
+  venueLogoCached: AWSURL
+  entityName: String
+  gameStartDateTime: AWSDateTime!
+  @index(name: "byUpcomingStart", queryField: "upcomingGamesByStartTime")
+  buyIn: Float
+  guaranteeAmount: Float
+  hasGuarantee: Boolean
+  gameType: GameType
+  gameVariant: GameVariant
+  isSeries: Boolean
+  seriesName: String
+  isMainEvent: Boolean
+  sourceUrl: AWSURL
+  scheduledToStartAt: AWSDateTime
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# =============================================================================
+# DASHBOARD CACHE
+# =============================================================================
+
+type DashboardCache
+  @model(subscriptions: { level: public })
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  entityId: ID @index(name: "byEntityDashboard", queryField: "dashboardCacheByEntity")
+  entity: Entity @hasOne(fields: ["entityId"]) # FIXED: @belongsTo -> @hasOne
+  
+  isGlobal: Boolean @default(value: "false")
+  
+  runningCount: Int!
+  registeringCount: Int!
+  clockStoppedCount: Int!
+  initiatingCount: Int!
+  finishedLast24hCount: Int!
+  finishedLast7dCount: Int!
+  upcomingCount: Int!
+  totalPrizepoolLast7d: Float
+  totalEntriesLast7d: Int
+  avgEntriesPerGameLast7d: Float
+  
+  runningGames: AWSJSON
+  registeringGames: AWSJSON
+  clockStoppedGames: AWSJSON
+  recentlyFinished: AWSJSON
+  upcomingGames: AWSJSON
+  
+  lastUpdatedAt: AWSDateTime!
+  nextUpdateAt: AWSDateTime
+  updateIntervalMinutes: Int @default(value: "5")
+  version: Int @default(value: "1")
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# =============================================================================
+# INPUT/RESULT TYPES
+# =============================================================================
+
+input SyncActiveGameInput {
+  gameId: ID!
+  forceRefresh: Boolean
+}
+
+input RefreshRunningGamesInput {
+  entityId: ID
+  maxGames: Int
+  olderThanMinutes: Int
+}
+
+type SyncActiveGameResult {
+  success: Boolean!
+  action: String!
+  activeGameId: ID
+  gameStatus: GameStatus
+  message: String
+}
+
+type RefreshRunningGamesResult {
+  success: Boolean!
+  gamesRefreshed: Int!
+  gamesUpdated: Int!
+  gamesFailed: Int!
+  errors: [String]
+  executionTimeMs: Int
+}
+
+type DashboardData {
+  runningCount: Int!
+  registeringCount: Int!
+  clockStoppedCount: Int!
+  finishedLast7dCount: Int!
+  upcomingCount: Int!
+  totalPrizepoolLast7d: Float
+  runningGames: [ActiveGame]
+  registeringGames: [ActiveGame]
+  clockStoppedGames: [ActiveGame]
+  recentlyFinishedGames: [RecentlyFinishedGame]
+  upcomingGames: [UpcomingGame]
+  cachedAt: AWSDateTime
+  dataFreshness: String
+}
+
+# =============================================================================
+# MUTATIONS
+# =============================================================================
+
+extend type Mutation {
+  syncActiveGame(input: SyncActiveGameInput!): SyncActiveGameResult
+    @function(name: "syncActiveGame-${env}")
+  
+  refreshRunningGames(input: RefreshRunningGamesInput): RefreshRunningGamesResult
+    @function(name: "refreshRunningGames-${env}")
+  
+  # FIXED: Renamed from 'updateDashboardCache' to 'refreshDashboardCache' to avoid conflict
+  # with the auto-generated @model mutation.
+  refreshDashboardCache(entityId: ID): DashboardCache
+    @function(name: "updateDashboardCache-${env}")
+}
+
+# =============================================================================
+# QUERIES
+# =============================================================================
+
+extend type Query {
+  getDashboardData(entityId: ID, forceRefresh: Boolean): DashboardData
+    @function(name: "getDashboardData-${env}")
+  
+  getStaleRunningGames(olderThanMinutes: Int): [ActiveGame]
+    @function(name: "getStaleRunningGames-${env}")
+}
+
+# =============================================================================
+# SUBSCRIPTIONS
+# =============================================================================
+
+extend type Subscription {
+  onActiveGameChange(entityId: ID): ActiveGame
+    @aws_subscribe(mutations: ["createActiveGame", "updateActiveGame", "deleteActiveGame"])
+  
+  # FIXED: Updated to listen to the renamed mutation
+  onDashboardCacheUpdate(entityId: ID): DashboardCache
+    @aws_subscribe(mutations: ["refreshDashboardCache"])
+}

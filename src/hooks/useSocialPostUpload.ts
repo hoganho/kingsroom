@@ -1,5 +1,7 @@
 // src/hooks/useSocialPostUpload.ts
-// REFACTORED - Optional entity/venue, proper AWSJSON rawContent, ATTACHMENT UPLOAD SUPPORT
+// UPDATED: Minimal save + Lambda processor invocation
+// Client-side parsing still used for UI preview, but classification
+// is done by socialPostProcessor Lambda for consistency
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -30,6 +32,7 @@ import {
   SocialAccount,
   SocialPostStatus,
   SocialPostType,
+  SocialPostProcessingStatus,
   CreateSocialPostInput,
 } from '../API';
 
@@ -85,6 +88,17 @@ function sanitizeObjectForJson(obj: unknown): unknown {
     return sanitized;
   }
   return obj;
+}
+
+/**
+ * Extract hashtags from content
+ * This is the ONLY client-side tag extraction - processor adds classification tags
+ */
+function extractHashtags(content: string | null | undefined): string[] {
+  if (!content) return [];
+  const matches = content.match(/#(\w+)/g);
+  if (!matches) return [];
+  return matches.map(tag => tag.substring(1).toLowerCase());
 }
 
 export interface UseSocialPostUploadOptions {
@@ -223,6 +237,45 @@ async function uploadFileToS3(
   return url;
 }
 
+// ============================================
+// GraphQL mutation for processor invocation
+// ============================================
+
+const PROCESS_SOCIAL_POST_MUTATION = /* GraphQL */ `
+  mutation ProcessSocialPost($input: ProcessSocialPostInput!) {
+    processSocialPost(input: $input) {
+      success
+      socialPostId
+      processingStatus
+      contentType
+      contentTypeConfidence
+      extractedGameData {
+        id
+        contentType
+        extractedBuyIn
+        extractedGuarantee
+        extractedTotalEntries
+        extractedPrizePool
+      }
+      matchCandidates {
+        gameId
+        gameName
+        matchConfidence
+        matchReason
+        wouldAutoLink
+      }
+      primaryMatch {
+        gameId
+        gameName
+        matchConfidence
+      }
+      linksCreated
+      placementsExtracted
+      error
+    }
+  }
+`;
+
 export const useSocialPostUpload = (
   options: UseSocialPostUploadOptions
 ): UseSocialPostUploadReturn => {
@@ -252,7 +305,7 @@ export const useSocialPostUpload = (
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; stage?: string } | null>(null);
   
-  // Filter & Sort state
+  // Filter/sort state
   const [filterOptions, setFilterOptionsState] = useState<PostFilterOptions>({
     showResults: true,
     showPromotional: true,
@@ -265,11 +318,17 @@ export const useSocialPostUpload = (
   });
   
   const [sortOptions, setSortOptions] = useState<PostSortOptions>({
-    field: 'postType',
+    field: 'confidence',
     direction: 'desc',
   });
   
-  // Fetch SocialAccount details when socialAccountId changes
+  // ============ ACCOUNT CONTEXT ============
+  
+  // Resolve entity/venue: use provided, fall back to account's
+  const resolvedEntityId = providedEntityId || accountContext?.entityId || null;
+  const resolvedVenueId = providedVenueId || accountContext?.venueId || null;
+  
+  // Fetch account context when socialAccountId changes
   useEffect(() => {
     const fetchAccountContext = async () => {
       if (!socialAccountId) {
@@ -297,145 +356,155 @@ export const useSocialPostUpload = (
           }
         }
       } catch (err) {
-        console.warn('Failed to fetch social account context:', err);
-        setAccountContext(null);
+        console.error('Error fetching account context:', err);
       }
     };
     
     fetchAccountContext();
-  }, [client, socialAccountId]);
+  }, [socialAccountId, client]);
   
-  // Resolved entity/venue IDs (provided > inherited from account)
-  const resolvedEntityId = providedEntityId || accountContext?.entityId || null;
-  const resolvedVenueId = providedVenueId || accountContext?.venueId || null;
+  // ============ FILTER OPTIONS ============
   
-  // ============ LOAD FUNCTIONS ============
+  const setFilterOptions = useCallback((newOptions: Partial<PostFilterOptions>) => {
+    setFilterOptionsState(prev => ({ ...prev, ...newOptions }));
+  }, []);
   
-  const loadPostsFromFiles = useCallback(async (files: FileList | File[]) => {
+  // ============ FILTERED POSTS ============
+  
+  const filteredPosts = useMemo(() => {
+    let filtered = [...reviewablePosts];
+    
+    // Type filters
+    filtered = filtered.filter(p => {
+      if (p.postType === 'RESULT' && !filterOptions.showResults) return false;
+      if (p.postType === 'PROMOTIONAL' && !filterOptions.showPromotional) return false;
+      if (p.postType === 'GENERAL' && !filterOptions.showGeneral) return false;
+      if (p.isComment && !filterOptions.showComments) return false;
+      return true;
+    });
+    
+    // Confidence filter
+    if (filterOptions.minConfidence > 0) {
+      filtered = filtered.filter(p => p.confidence >= filterOptions.minConfidence);
+    }
+    
+    // Venue filter
+    if (filterOptions.hasVenueMatch === true) {
+      filtered = filtered.filter(p => p.venueMatch !== null);
+    } else if (filterOptions.hasVenueMatch === false) {
+      filtered = filtered.filter(p => p.venueMatch === null);
+    }
+    
+    // Placements filter
+    if (filterOptions.hasPlacements === true) {
+      filtered = filtered.filter(p => p.placements.length > 0);
+    } else if (filterOptions.hasPlacements === false) {
+      filtered = filtered.filter(p => p.placements.length === 0);
+    }
+    
+    // Search filter
+    if (filterOptions.searchText) {
+      const search = filterOptions.searchText.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.content.toLowerCase().includes(search) ||
+        p.author?.name?.toLowerCase().includes(search)
+      );
+    }
+    
+    // Sort
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortOptions.field) {
+        case 'confidence':
+          comparison = a.confidence - b.confidence;
+          break;
+        case 'postedAt':
+          comparison = new Date(a.postedAt).getTime() - new Date(b.postedAt).getTime();
+          break;
+        case 'engagement':
+          const engA = a.likeCount + a.commentCount + a.shareCount;
+          const engB = b.likeCount + b.commentCount + b.shareCount;
+          comparison = engA - engB;
+          break;
+        case 'prizeAmount':
+          comparison = (a.firstPlacePrize || 0) - (b.firstPlacePrize || 0);
+          break;
+        case 'postType':
+          const typeOrder = { RESULT: 0, PROMOTIONAL: 1, GENERAL: 2, COMMENT: 3 };
+          comparison = (typeOrder[a.postType] || 3) - (typeOrder[b.postType] || 3);
+          break;
+      }
+      
+      return sortOptions.direction === 'desc' ? -comparison : comparison;
+    });
+    
+    return filtered;
+  }, [reviewablePosts, filterOptions, sortOptions]);
+  
+  // ============ SELECTION ============
+  
+  const togglePostSelection = useCallback((postId: string) => {
+    setSelectedPosts(prev => {
+      const next = new Set(prev);
+      if (next.has(postId)) {
+        next.delete(postId);
+      } else {
+        next.add(postId);
+      }
+      return next;
+    });
+  }, []);
+  
+  const selectAll = useCallback(() => {
+    setSelectedPosts(new Set(filteredPosts.map(p => p.postId)));
+  }, [filteredPosts]);
+  
+  const deselectAll = useCallback(() => {
+    setSelectedPosts(new Set());
+  }, []);
+  
+  const selectByType = useCallback((types: PostType[]) => {
+    const matching = reviewablePosts.filter(p => types.includes(p.postType));
+    setSelectedPosts(new Set(matching.map(p => p.postId)));
+  }, [reviewablePosts]);
+  
+  const selectTournamentResults = useCallback(() => {
+    selectByType(['RESULT']);
+  }, [selectByType]);
+  
+  // ============ LOADING ============
+  
+  const clearPosts = useCallback(() => {
+    setRawPosts([]);
+    setParsedResult(null);
+    setReviewablePosts([]);
+    setSelectedPosts(new Set());
+    setError(null);
+  }, []);
+  
+  const loadPostsFromJson = useCallback((posts: RawFacebookPost[]) => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const posts: RawFacebookPost[] = [];
-      const fileArray = Array.from(files);
-      
-      // Group files by their parent folder
-      // Structure: { folderPath: { postJson: File, attachments: File[] } }
-      const folderMap = new Map<string, { postJson: File | null; attachments: File[] }>();
-      
-      for (const file of fileArray) {
-        // Get the folder path from webkitRelativePath or use empty string for flat uploads
-        const relativePath = (file as any).webkitRelativePath || file.name;
-        const pathParts = relativePath.split('/');
-        
-        // Determine the post folder (the folder containing post.json)
-        // Could be: "folderName/post.json" or "folderName/attachments/image.jpg"
-        let postFolder = '';
-        
-        if (file.name === 'post.json' || file.name.endsWith('.json')) {
-          // This is a post.json file
-          // The folder is everything before the filename
-          postFolder = pathParts.slice(0, -1).join('/') || 'root';
-        } else if (pathParts.includes('attachments')) {
-          // This is an attachment file
-          // Find the folder that's the parent of 'attachments'
-          const attachmentsIdx = pathParts.indexOf('attachments');
-          postFolder = pathParts.slice(0, attachmentsIdx).join('/') || 'root';
-        } else if (/\.(jpg|jpeg|png|gif|webp)$/i.test(file.name)) {
-          // Image file not in attachments folder - check if it's alongside post.json
-          postFolder = pathParts.slice(0, -1).join('/') || 'root';
-        }
-        
-        if (!folderMap.has(postFolder)) {
-          folderMap.set(postFolder, { postJson: null, attachments: [] });
-        }
-        
-        const folderData = folderMap.get(postFolder)!;
-        
-        if (file.name === 'post.json' || file.name.endsWith('.json')) {
-          folderData.postJson = file;
-        } else if (/\.(jpg|jpeg|png|gif|webp)$/i.test(file.name)) {
-          folderData.attachments.push(file);
-        }
-      }
-      
-      console.log('[useSocialPostUpload] Folder map:', 
-        Array.from(folderMap.entries()).map(([k, v]) => ({
-          folder: k,
-          hasPost: !!v.postJson,
-          attachmentCount: v.attachments.length,
-          attachmentNames: v.attachments.map(f => f.name),
-        }))
-      );
-      
-      // Process each folder
-      const postAttachmentMap = new Map<string, File[]>();
-      
-      for (const [folderPath, { postJson, attachments }] of folderMap.entries()) {
-        if (!postJson) continue;
-        
-        try {
-          const text = await postJson.text();
-          const parsed = JSON.parse(text);
-          
-          if (Array.isArray(parsed)) {
-            // Array of posts - attachments apply to all in this folder
-            for (const p of parsed) {
-              if (p.post_id) {
-                posts.push(p);
-                // Match attachments based on _attachments array if present
-                const matchedAttachments = matchAttachmentsToPost(p, attachments);
-                if (matchedAttachments.length > 0) {
-                  postAttachmentMap.set(p.post_id, matchedAttachments);
-                }
-              }
-            }
-          } else if (parsed.post_id) {
-            posts.push(parsed);
-            // Match attachments based on _attachments array or attachmentsDetails
-            const matchedAttachments = matchAttachmentsToPost(parsed, attachments);
-            if (matchedAttachments.length > 0) {
-              postAttachmentMap.set(parsed.post_id, matchedAttachments);
-            }
-          }
-        } catch (parseError) {
-          console.warn(`Failed to parse ${postJson.name} in ${folderPath}:`, parseError);
-        }
-      }
-      
-      if (posts.length === 0) {
-        setError('No valid posts found in uploaded files');
-        return;
-      }
-      
-      console.log('[useSocialPostUpload] Loaded posts with attachments:', {
-        totalPosts: posts.length,
-        postsWithAttachments: postAttachmentMap.size,
-        attachmentDetails: Array.from(postAttachmentMap.entries()).map(([id, files]) => ({
-          postId: id,
-          files: files.map(f => f.name),
-        })),
-      });
-      
-      // Parse all posts
+      // Parse all posts for UI preview
+      // NOTE: This client-side parsing is for PREVIEW only
+      // Actual classification is done by Lambda after upload
       const result = parseMultiplePosts(posts, { 
         includeRawPatterns: true,
         skipComments: false,
       });
       
-      // Convert to reviewable posts WITH attachment files
+      // Convert to reviewable posts
       const reviewable: ReviewablePostWithAttachments[] = result.allPosts.map((parsed) => {
         const rawPost = posts.find(p => p.post_id === parsed.postId) || posts[0];
-        const attachmentFiles = postAttachmentMap.get(parsed.postId) || [];
         
         return {
           ...parsed,
           isSelected: parsed.postType === 'RESULT',
           isExpanded: false,
           rawPost,
-          attachmentFiles,
-          // Update image count to reflect actual attachments found
-          imageCount: attachmentFiles.length || parsed.imageCount,
         };
       });
       
@@ -450,8 +519,8 @@ export const useSocialPostUpload = (
       setSelectedPosts(resultIds);
       
     } catch (err) {
-      console.error('Error loading posts:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load posts');
+      console.error('Error parsing posts:', err);
+      setError(err instanceof Error ? err.message : 'Failed to parse posts');
     } finally {
       setIsLoading(false);
     }
@@ -478,11 +547,10 @@ export const useSocialPostUpload = (
       }
     }
     
-    // Also try matching using attachmentsDetails (contains more detailed info)
+    // Also try matching using attachmentsDetails
     if (post.attachmentsDetails && Array.isArray(post.attachmentsDetails)) {
       for (const detail of post.attachmentsDetails) {
         if (detail.localPath) {
-          // localPath might be like "folderName/attachments/filename.jpg"
           const filename = detail.localPath.split('/').pop();
           if (filename) {
             const matchedFile = availableFiles.find(f => 
@@ -497,252 +565,236 @@ export const useSocialPostUpload = (
       }
     }
     
-    // If no specific matches, but we have exactly one post.json and attachments in same folder,
-    // assume all attachments belong to this post
-    if (matchedFiles.length === 0 && availableFiles.length > 0) {
-      console.log(`[matchAttachmentsToPost] No specific matches for post ${post.post_id}, using all ${availableFiles.length} available files`);
-      return [...availableFiles];
-    }
-    
     return matchedFiles;
   }
   
-  const loadPostsFromJson = useCallback((posts: RawFacebookPost[]) => {
-    const result = parseMultiplePosts(posts, { 
-      includeRawPatterns: true,
-      skipComments: false,
-    });
-    
-    const reviewable: ReviewablePostWithAttachments[] = result.allPosts.map((parsed) => {
-      const rawPost = posts.find(p => p.post_id === parsed.postId) || posts[0];
-      return {
-        ...parsed,
-        isSelected: parsed.postType === 'RESULT',
-        isExpanded: false,
-        rawPost,
-        attachmentFiles: [], // No attachments when loading from JSON directly
-      };
-    });
-    
-    setRawPosts(posts);
-    setParsedResult(result);
-    setReviewablePosts(reviewable);
-    
-    const resultIds = new Set(
-      reviewable.filter(p => p.postType === 'RESULT').map(p => p.postId)
-    );
-    setSelectedPosts(resultIds);
-  }, []);
-  
-  const clearPosts = useCallback(() => {
-    setRawPosts([]);
-    setParsedResult(null);
-    setReviewablePosts([]);
-    setSelectedPosts(new Set());
+  const loadPostsFromFiles = useCallback(async (files: FileList | File[]) => {
+    setIsLoading(true);
     setError(null);
-  }, []);
-  
-  // ============ SELECTION FUNCTIONS ============
-  
-  const togglePostSelection = useCallback((postId: string) => {
-    setSelectedPosts(prev => {
-      const next = new Set(prev);
-      if (next.has(postId)) {
-        next.delete(postId);
-      } else {
-        next.add(postId);
-      }
-      return next;
-    });
-  }, []);
-  
-  const selectAll = useCallback(() => {
-    const allIds = reviewablePosts
-      .filter(p => !p.isComment)
-      .map(p => p.postId);
-    setSelectedPosts(new Set(allIds));
-  }, [reviewablePosts]);
-  
-  const deselectAll = useCallback(() => {
-    setSelectedPosts(new Set());
-  }, []);
-  
-  const selectByType = useCallback((types: PostType[]) => {
-    const matchingIds = reviewablePosts
-      .filter(p => types.includes(p.postType))
-      .map(p => p.postId);
-    setSelectedPosts(new Set(matchingIds));
-  }, [reviewablePosts]);
-  
-  const selectTournamentResults = useCallback(() => {
-    selectByType(['RESULT']);
-  }, [selectByType]);
-  
-  // ============ FILTER & SORT ============
-  
-  const setFilterOptions = useCallback((options: Partial<PostFilterOptions>) => {
-    setFilterOptionsState(prev => ({ ...prev, ...options }));
-  }, []);
-  
-  const filteredPosts = useMemo(() => {
-    let posts = [...reviewablePosts];
     
-    // Apply type filters
-    posts = posts.filter(p => {
-      if (p.postType === 'RESULT' && !filterOptions.showResults) return false;
-      if (p.postType === 'PROMOTIONAL' && !filterOptions.showPromotional) return false;
-      if (p.postType === 'GENERAL' && !filterOptions.showGeneral) return false;
-      if (p.postType === 'COMMENT' && !filterOptions.showComments) return false;
-      return true;
-    });
-    
-    // Apply confidence filter
-    if (filterOptions.minConfidence > 0) {
-      posts = posts.filter(p => p.confidence >= filterOptions.minConfidence);
-    }
-    
-    // Apply venue filter
-    if (filterOptions.hasVenueMatch === true) {
-      posts = posts.filter(p => p.venueMatch !== null);
-    } else if (filterOptions.hasVenueMatch === false) {
-      posts = posts.filter(p => p.venueMatch === null);
-    }
-    
-    // Apply placements filter
-    if (filterOptions.hasPlacements === true) {
-      posts = posts.filter(p => p.placements.length > 0);
-    } else if (filterOptions.hasPlacements === false) {
-      posts = posts.filter(p => p.placements.length === 0);
-    }
-    
-    // Apply search filter
-    if (filterOptions.searchText) {
-      const search = filterOptions.searchText.toLowerCase();
-      posts = posts.filter(p => 
-        p.content.toLowerCase().includes(search) ||
-        p.author.name.toLowerCase().includes(search)
-      );
-    }
-    
-    // Apply sorting
-    posts.sort((a, b) => {
-      let comparison = 0;
-      
-      switch (sortOptions.field) {
-        case 'confidence':
-          comparison = a.confidence - b.confidence;
-          break;
-        case 'postedAt':
-          comparison = new Date(a.postedAt).getTime() - new Date(b.postedAt).getTime();
-          break;
-        case 'engagement':
-          const engA = a.likeCount + a.commentCount + a.shareCount;
-          const engB = b.likeCount + b.commentCount + b.shareCount;
-          comparison = engA - engB;
-          break;
-        case 'prizeAmount':
-          comparison = (a.firstPlacePrize || 0) - (b.firstPlacePrize || 0);
-          break;
-        case 'postType':
-          const typeOrder = { RESULT: 3, PROMOTIONAL: 2, GENERAL: 1, COMMENT: 0 };
-          comparison = typeOrder[a.postType] - typeOrder[b.postType];
-          break;
-      }
-      
-      return sortOptions.direction === 'desc' ? -comparison : comparison;
-    });
-    
-    return posts;
-  }, [reviewablePosts, filterOptions, sortOptions]);
-  
-  // ============ UPLOAD FUNCTIONS ============
-  
-  // Check if post exists by ID (primary key - how Lambda checks)
-  const checkExistingPostById = useCallback(async (id: string): Promise<boolean> => {
     try {
-      const { getSocialPost } = await import('../graphql/queries');
+      const fileArray = Array.from(files);
+      const posts: RawFacebookPost[] = [];
+      const postAttachmentMap = new Map<string, File[]>();
+      
+      // Separate JSON files and attachment files
+      const jsonFiles = fileArray.filter(f => f.name.endsWith('.json'));
+      const attachmentFiles = fileArray.filter(f => 
+        !f.name.endsWith('.json') && 
+        (f.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp)$/i.test(f.name))
+      );
+      
+      console.log('[useSocialPostUpload] Processing files:', {
+        jsonFiles: jsonFiles.length,
+        attachmentFiles: attachmentFiles.length,
+      });
+      
+      // Process JSON files
+      for (const file of jsonFiles) {
+        try {
+          const text = await file.text();
+          const data = JSON.parse(text);
+          
+          // Handle array or single post
+          const postsInFile = Array.isArray(data) ? data : [data];
+          
+          for (const post of postsInFile) {
+            if (post.post_id || post.postId) {
+              const normalizedPost: RawFacebookPost = {
+                ...post,
+                post_id: post.post_id || post.postId,
+              };
+              posts.push(normalizedPost);
+              
+              // Match attachments to this post
+              const matched = matchAttachmentsToPost(normalizedPost, attachmentFiles);
+              if (matched.length > 0) {
+                postAttachmentMap.set(normalizedPost.post_id, matched);
+              }
+            }
+          }
+        } catch (parseError) {
+          console.warn(`Failed to parse ${file.name}:`, parseError);
+        }
+      }
+      
+      if (posts.length === 0) {
+        setError('No valid posts found in uploaded files');
+        return;
+      }
+      
+      console.log('[useSocialPostUpload] Loaded posts with attachments:', {
+        totalPosts: posts.length,
+        postsWithAttachments: postAttachmentMap.size,
+      });
+      
+      // Parse all posts for UI preview
+      const result = parseMultiplePosts(posts, { 
+        includeRawPatterns: true,
+        skipComments: false,
+      });
+      
+      // Convert to reviewable posts WITH attachment files
+      const reviewable: ReviewablePostWithAttachments[] = result.allPosts.map((parsed) => {
+        const rawPost = posts.find(p => p.post_id === parsed.postId) || posts[0];
+        const attachmentFilesForPost = postAttachmentMap.get(parsed.postId) || [];
+        
+        return {
+          ...parsed,
+          isSelected: parsed.postType === 'RESULT',
+          isExpanded: false,
+          rawPost,
+          attachmentFiles: attachmentFilesForPost,
+          imageCount: attachmentFilesForPost.length || parsed.imageCount,
+        };
+      });
+      
+      setRawPosts(posts);
+      setParsedResult(result);
+      setReviewablePosts(reviewable);
+      
+      // Auto-select tournament results
+      const resultIds = new Set(
+        reviewable.filter(p => p.postType === 'RESULT').map(p => p.postId)
+      );
+      setSelectedPosts(resultIds);
+      
+    } catch (err) {
+      console.error('Error loading posts:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load posts');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  
+  // ============ DUPLICATE CHECKING ============
+  
+  const checkExistingPostById = useCallback(async (id: string): Promise<string | null> => {
+    try {
+      const query = /* GraphQL */ `
+        query GetSocialPost($id: ID!) {
+          getSocialPost(id: $id) {
+            id
+          }
+        }
+      `;
+      
       const response = await client.graphql({
-        query: getSocialPost,
+        query,
         variables: { id },
       });
       
-      if (hasGraphQLData<{ getSocialPost: SocialPost | null }>(response)) {
-        return response.data.getSocialPost !== null;
+      if (hasGraphQLData<{ getSocialPost: { id: string } | null }>(response)) {
+        return response.data.getSocialPost?.id || null;
       }
-      return false;
+      return null;
     } catch {
-      return false;
+      return null;
     }
   }, [client]);
   
-  // Check if post exists by platformPostId (GSI - fallback check)
   const checkExistingPostByPlatformId = useCallback(async (platformPostId: string): Promise<string | null> => {
     try {
-      // Use the byPlatformPostId index
-      const { socialPostByPlatformId } = await import('../graphql/queries');
+      const query = /* GraphQL */ `
+        query ListByPlatformPostId($platformPostId: String!) {
+          listSocialPosts(filter: { platformPostId: { eq: $platformPostId } }, limit: 1) {
+            items {
+              id
+            }
+          }
+        }
+      `;
+      
       const response = await client.graphql({
-        query: socialPostByPlatformId,
+        query,
+        variables: { platformPostId },
+      });
+      
+      if (hasGraphQLData<{ listSocialPosts: { items: Array<{ id: string }> } }>(response)) {
+        return response.data.listSocialPosts.items[0]?.id || null;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [client]);
+  
+  // ============ PROCESSOR INVOCATION ============
+  
+  /**
+   * Invoke socialPostProcessor Lambda for a single post
+   * This sets the authoritative classification (contentType, tags, etc.)
+   */
+  const invokeProcessor = useCallback(async (socialPostId: string): Promise<{
+    success: boolean;
+    contentType?: string;
+    linksCreated?: number;
+    error?: string;
+  }> => {
+    try {
+      console.log(`[useSocialPostUpload] Invoking processor for post ${socialPostId}`);
+      
+      const response = await client.graphql({
+        query: PROCESS_SOCIAL_POST_MUTATION,
         variables: {
-          platformPostId,
-          limit: 1,
+          input: {
+            socialPostId,
+            forceReprocess: false,
+            skipMatching: false,
+            skipLinking: false,
+          },
         },
       });
       
-      if (hasGraphQLData<{ socialPostByPlatformId: { items: SocialPost[] } }>(response)) {
-        const items = response.data.socialPostByPlatformId?.items || [];
-        return items.length > 0 ? items[0].id : null;
+      if (hasGraphQLData<{ processSocialPost: { 
+        success: boolean; 
+        contentType?: string;
+        linksCreated?: number;
+        error?: string;
+      } }>(response)) {
+        const result = response.data.processSocialPost;
+        console.log(`[useSocialPostUpload] Processor result:`, result);
+        return {
+          success: result.success,
+          contentType: result.contentType,
+          linksCreated: result.linksCreated,
+          error: result.error,
+        };
       }
-      return null;
-    } catch {
-      return null;
+      
+      return { success: false, error: 'Unknown response format' };
+    } catch (err) {
+      console.error(`[useSocialPostUpload] Processor invocation failed:`, err);
+      return { 
+        success: false, 
+        error: err instanceof Error ? err.message : 'Processor invocation failed' 
+      };
     }
   }, [client]);
   
+  // ============ UPLOAD ============
+  
   const uploadSinglePost = useCallback(async (
     post: ReviewablePostWithAttachments,
-    _createGame = false
+    _createGame?: boolean
   ): Promise<SingleUploadResult> => {
     try {
-      // Skip comments
-      if (post.isComment) {
-        return {
-          postId: post.postId,
-          success: false,
-          skipped: true,
-          skipReason: 'Post is a comment',
-        };
-      }
-      
-      // Validate required field
-      if (!socialAccountId) {
-        return {
-          postId: post.postId,
-          success: false,
-          error: 'Social Account is required',
-        };
-      }
-      
-      // Determine platform (from account context or raw post)
-      const platform = accountContext?.platform || post.rawPost?.platform || 'FACEBOOK';
-      
-      // Generate deterministic ID matching Lambda format: ${platform}_${platformPostId}
-      // This ensures consistency between automated scrapes and manual uploads
+      // Generate ID to match Lambda format: `${platform}_${platformPostId}`
+      const platform = accountContext?.platform || 'FACEBOOK';
       const generatedId = `${platform}_${post.postId}`;
       
-      // Check for duplicates - MATCH LAMBDA BEHAVIOR
-      // Lambda checks by the generated ID (primary key), so we do the same
-      const existsById = await checkExistingPostById(generatedId);
-      if (existsById) {
+      // Check for duplicates
+      const existingById = await checkExistingPostById(generatedId);
+      if (existingById) {
         return {
           postId: post.postId,
           success: false,
           skipped: true,
           skipReason: 'Post already exists (matched by ID)',
-          socialPostId: generatedId,
+          socialPostId: existingById,
         };
       }
       
-      // Also check by platformPostId (fallback for posts created with different ID format)
       const existingByPlatformId = await checkExistingPostByPlatformId(post.postId);
       if (existingByPlatformId) {
         return {
@@ -768,51 +820,46 @@ export const useSocialPostUpload = (
             mediaUrls.push(s3Url);
           } catch (uploadError) {
             console.error(`[uploadSinglePost] Failed to upload attachment ${file.name}:`, uploadError);
-            // Continue with other files even if one fails
           }
         }
         
         console.log(`[uploadSinglePost] Successfully uploaded ${mediaUrls.length} attachments to S3`);
       }
       
-      // If no attachments were uploaded but post has external image URLs (from scraper), use those
+      // If no attachments were uploaded but post has external image URLs, use those
       if (mediaUrls.length === 0 && post.images && post.images.length > 0) {
         mediaUrls = post.images;
       }
       
       // Sanitize content
       const sanitizedContent = sanitizeForGraphQL(post.content);
-      // Use 200 chars for contentPreview to match Lambda
       const contentPreview = sanitizedContent.substring(0, 200);
       
-      // Build rawContent as AWSJSON - include the full raw post data
+      // ================================================================
+      // BUILD rawContent - This is the AUTHORITATIVE source
+      // Processor will use this for classification
+      // ================================================================
       const rawContentObject = sanitizeObjectForJson({
+        // Full raw post data from scraper
         ...post.rawPost,
-        // Add parsed metadata
-        _parsed: {
-          placements: post.placements,
-          prizes: post.prizes,
-          metadata: post.metadata,
-          postType: post.postType,
-          confidence: post.confidence,
-          matchedPatterns: post.matchedPatterns,
-        },
-        // Track that attachments were uploaded to S3
+        
+        // Uploaded attachments info (if any)
         _uploadedAttachments: mediaUrls.length > 0 ? {
           count: mediaUrls.length,
           urls: mediaUrls,
           uploadedAt: now,
         } : null,
+        
+        // Source tracking
+        _source: 'manualUpload',
+        _uploadedAt: now,
       });
       
-      // Build the input - matching Lambda's field structure for consistency
-      // Key differences from Lambda:
-      // - Lambda writes directly to DynamoDB, we use GraphQL mutation
-      // - We include additional parsed data fields (rawContent, isTournamentResult, etc.)
+      // ================================================================
+      // BUILD MINIMAL INPUT - Processor handles classification
+      // ================================================================
       const input: CreateSocialPostInput = {
-        // ===== ID GENERATION - MUST MATCH LAMBDA =====
-        // Lambda uses: `${account.platform}_${fbPost.id}`
-        // We generate the same format for consistency
+        // ID to match Lambda format
         id: generatedId,
         
         // Required fields
@@ -822,15 +869,16 @@ export const useSocialPostUpload = (
         postYearMonth: getYearMonthAEST(post.postedAt),
         scrapedAt: now,
         status: SocialPostStatus.ACTIVE,
+        processingStatus: SocialPostProcessingStatus.PENDING, // Processor will update this
         socialAccountId,
         
         // Content fields
         postUrl: post.url,
         content: sanitizedContent,
-        contentPreview, // 200 chars to match Lambda
-        rawContent: JSON.stringify(rawContentObject), // AWSJSON must be stringified
+        contentPreview,
+        rawContent: JSON.stringify(rawContentObject), // AUTHORITATIVE - processor uses this
         
-        // Account info (inherited from context) - MATCH LAMBDA FIELDS
+        // Account info
         accountName: accountContext?.accountName || sanitizeForGraphQL(post.author?.name),
         accountProfileImageUrl: accountContext?.profileImageUrl || post.author?.avatar || null,
         platform: platform,
@@ -840,25 +888,32 @@ export const useSocialPostUpload = (
         likeCount: post.likeCount,
         commentCount: post.commentCount,
         shareCount: post.shareCount,
-        reactionCount: post.likeCount, // Facebook uses reactions
+        reactionCount: post.likeCount,
         
-        // Media - USE EMPTY ARRAY (not null) TO MATCH LAMBDA
+        // Media
         mediaUrls: mediaUrls.length > 0 ? mediaUrls : [],
         thumbnailUrl: mediaUrls.length > 0 ? mediaUrls[0] : null,
         
-        // Classification - Lambda has isPromotional and isTournamentRelated
-        // We add isTournamentResult as additional parsed field
-        isTournamentResult: post.isTournamentResult,
-        isTournamentRelated: post.isTournamentResult || post.isPromotional,
-        isPromotional: post.isPromotional,
-        tags: post.tags.length > 0 ? post.tags : [],
+        // ================================================================
+        // MINIMAL TAGS - Just hashtags, processor adds classification tags
+        // ================================================================
+        tags: extractHashtags(post.content),
+        
+        // ================================================================
+        // NO CLASSIFICATION FIELDS - Processor sets these:
+        // - contentType
+        // - contentTypeConfidence  
+        // - isPromotional
+        // - isTournamentRelated
+        // - isTournamentResult
+        // ================================================================
         
         // Optional entity/venue (inherited from account if not provided)
-        // Lambda: Only adds if truthy to avoid null in GSI
         ...(resolvedEntityId && { entityId: resolvedEntityId }),
         ...(resolvedVenueId && { venueId: resolvedVenueId }),
       };
       
+      // Save to DynamoDB via GraphQL
       const response = await client.graphql({
         query: createSocialPost,
         variables: { input },
@@ -874,10 +929,20 @@ export const useSocialPostUpload = (
             : p
         ));
         
+        // ================================================================
+        // INVOKE PROCESSOR - This sets classification
+        // ================================================================
+        const processingResult = await invokeProcessor(savedPost.id);
+        
         return {
           postId: post.postId,
           success: true,
           socialPostId: savedPost.id,
+          // Include processing results
+          processingSuccess: processingResult.success,
+          processingError: processingResult.error,
+          contentType: processingResult.contentType as any,
+          linksCreated: processingResult.linksCreated,
         };
       }
       
@@ -899,7 +964,7 @@ export const useSocialPostUpload = (
         error: errorMessage,
       };
     }
-  }, [client, socialAccountId, accountContext, resolvedEntityId, resolvedVenueId, checkExistingPostById, checkExistingPostByPlatformId]);
+  }, [client, socialAccountId, accountContext, resolvedEntityId, resolvedVenueId, checkExistingPostById, checkExistingPostByPlatformId, invokeProcessor]);
   
   const uploadSelectedPosts = useCallback(async (
     uploadOptions: Partial<UploadOptions> = {},
@@ -913,12 +978,13 @@ export const useSocialPostUpload = (
       createGameRecords: _createGameRecords = false,
       skipDuplicates: _skipDuplicates = true,
       dryRun = false,
+      processingFlow = 'upload_process', // Default: upload then process
     } = uploadOptions;
     
     // Get posts to upload based on selection and type filters
     let postsToUpload = reviewablePosts.filter(p => selectedPosts.has(p.postId));
     
-    // Apply type filters
+    // Apply type filters (client-side preview types)
     postsToUpload = postsToUpload.filter(p => {
       if (p.isComment) return false;
       if (p.postType === 'RESULT' && !includeResults) return false;
@@ -943,23 +1009,19 @@ export const useSocialPostUpload = (
       };
     }
     
-    // Count total attachments
-    const totalAttachments = postsToUpload.reduce(
-      (sum, p) => sum + (p.attachmentFiles?.length || 0), 
-      0
-    );
-    
-    console.log(`[uploadSelectedPosts] Starting upload of ${postsToUpload.length} posts with ${totalAttachments} total attachments`);
+    console.log(`[uploadSelectedPosts] Starting upload of ${postsToUpload.length} posts (flow: ${processingFlow})`);
     
     setIsUploading(true);
     setUploadProgress({ current: 0, total: postsToUpload.length, stage: 'Starting...' });
     
     const results: SingleUploadResult[] = [];
     const errors: Array<{ postId: string; error: string }> = [];
+    const successfulPostIds: string[] = [];
     
     try {
+      // Upload posts one by one
       for (let i = 0; i < postsToUpload.length; i++) {
-        // Check for cancellation before processing each post
+        // Check for cancellation
         if (onShouldCancel?.()) {
           console.log(`[uploadSelectedPosts] Cancelled at post ${i + 1}/${postsToUpload.length}`);
           break;
@@ -985,8 +1047,13 @@ export const useSocialPostUpload = (
           continue;
         }
         
+        // Upload with inline processing (each post processed immediately after save)
         const result = await uploadSinglePost(post, _createGameRecords);
         results.push(result);
+        
+        if (result.success && result.socialPostId) {
+          successfulPostIds.push(result.socialPostId);
+        }
         
         if (!result.success && !result.skipped) {
           errors.push({ postId: post.postId, error: result.error || 'Unknown error' });
@@ -1001,6 +1068,8 @@ export const useSocialPostUpload = (
                 _uploadError: result.error,
                 _savedPostId: result.socialPostId,
                 _savedGameId: result.gameId,
+                _processingStatus: result.processingSuccess ? 'success' : 'error',
+                _processingError: result.processingError,
               }
             : p
         ));
@@ -1008,19 +1077,36 @@ export const useSocialPostUpload = (
         // Small delay between uploads to avoid rate limiting
         await new Promise(r => setTimeout(r, 100));
       }
+      
+      // Calculate totals
+      const successCount = results.filter(r => r.success).length;
+      const totalLinksCreated = results.reduce((sum, r) => sum + (r.linksCreated || 0), 0);
+      
+      // Content type breakdown from processing results
+      const contentTypeBreakdown = {
+        result: results.filter(r => r.contentType === 'RESULT').length,
+        promotional: results.filter(r => r.contentType === 'PROMOTIONAL').length,
+        general: results.filter(r => r.contentType === 'GENERAL').length,
+      };
+      
+      return {
+        totalProcessed: postsToUpload.length,
+        successCount,
+        errorCount: results.filter(r => !r.success && !r.skipped).length,
+        skippedCount: results.filter(r => r.skipped).length,
+        results,
+        errors,
+        // Processing stats
+        processedCount: successfulPostIds.length,
+        processErrorCount: results.filter(r => r.success && !r.processingSuccess).length,
+        totalLinksCreated,
+        contentTypeBreakdown,
+      };
+      
     } finally {
       setIsUploading(false);
       setUploadProgress(null);
     }
-    
-    return {
-      totalProcessed: postsToUpload.length,
-      successCount: results.filter(r => r.success).length,
-      errorCount: results.filter(r => !r.success && !r.skipped).length,
-      skippedCount: results.filter(r => r.skipped).length,
-      results,
-      errors,
-    };
   }, [reviewablePosts, selectedPosts, uploadSinglePost]);
   
   // ============ EDITING ============

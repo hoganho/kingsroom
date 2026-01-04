@@ -195,12 +195,6 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "getDatabaseMetrics": {
-      "build": true,
-      "dependsOn": [],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
     "getModelCount": {
       "build": true,
       "dependsOn": [
@@ -210,28 +204,6 @@
           ],
           "category": "api",
           "resourceName": "kingsroom"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "getUserMetrics": {
-      "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "GraphQLAPIIdOutput",
-            "GraphQLAPIEndpointOutput"
-          ],
-          "category": "api",
-          "resourceName": "kingsroom"
-        },
-        {
-          "attributes": [
-            "UserPoolId"
-          ],
-          "category": "auth",
-          "resourceName": "kingsroomauth"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -247,28 +219,6 @@
           ],
           "category": "api",
           "resourceName": "kingsroom"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "publishClientMetrics": {
-      "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "GraphQLAPIIdOutput",
-            "GraphQLAPIEndpointOutput"
-          ],
-          "category": "api",
-          "resourceName": "kingsroom"
-        },
-        {
-          "attributes": [
-            "UserPoolId"
-          ],
-          "category": "auth",
-          "resourceName": "kingsroomauth"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -301,6 +251,29 @@
           ],
           "category": "api",
           "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "refreshRunningGames": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "webScraperFunction"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -661,22 +634,6 @@
         }
       ]
     },
-    "AMPLIFY_function_getDatabaseMetrics_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "getDatabaseMetrics"
-        }
-      ]
-    },
-    "AMPLIFY_function_getDatabaseMetrics_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "getDatabaseMetrics"
-        }
-      ]
-    },
     "AMPLIFY_function_getModelCount_deploymentBucketName": {
       "usedBy": [
         {
@@ -693,22 +650,6 @@
         }
       ]
     },
-    "AMPLIFY_function_getUserMetrics_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "getUserMetrics"
-        }
-      ]
-    },
-    "AMPLIFY_function_getUserMetrics_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "getUserMetrics"
-        }
-      ]
-    },
     "AMPLIFY_function_playerDataProcessor_deploymentBucketName": {
       "usedBy": [
         {
@@ -722,22 +663,6 @@
         {
           "category": "function",
           "resourceName": "playerDataProcessor"
-        }
-      ]
-    },
-    "AMPLIFY_function_publishClientMetrics_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "publishClientMetrics"
-        }
-      ]
-    },
-    "AMPLIFY_function_publishClientMetrics_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "publishClientMetrics"
         }
       ]
     },
@@ -770,6 +695,22 @@
         {
           "category": "function",
           "resourceName": "refreshAllMetrics"
+        }
+      ]
+    },
+    "AMPLIFY_function_refreshRunningGames_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "refreshRunningGames"
+        }
+      ]
+    },
+    "AMPLIFY_function_refreshRunningGames_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "refreshRunningGames"
         }
       ]
     },

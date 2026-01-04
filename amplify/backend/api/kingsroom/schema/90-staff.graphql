@@ -86,15 +86,7 @@ type UsersConnection {
   totalCount: Int
 }
 
-type UserMetricsSummary {
-  userId: String!
-  userName: String
-  totalActions: Int
-  totalPageViews: Int
-  totalErrors: Int
-  lastActive: String
-  mostUsedFeature: String
-}
+# REMOVED: UserMetricsSummary type (was used by client metrics system)
 
 input CreateUserInput {
   id: ID

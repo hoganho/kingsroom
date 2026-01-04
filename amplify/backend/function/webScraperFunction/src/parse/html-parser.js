@@ -8,7 +8,13 @@
  * 
  * Extracted from: scraperStrategies.js
  * 
- * UPDATED: v2.1.0
+ * UPDATED: v2.2.0
+ * - FIXED: gameStatus now uses only valid GraphQL GameStatus enum values
+ * - Changed 'NOT_FOUND' to 'NOT_IN_USE' (NOT_FOUND not in enum)
+ * - Changed 'ERROR' to 'UNKNOWN' (ERROR not in enum)
+ * - This fixes "Can't serialize value for Enum 'GameStatus'" errors
+ * 
+ * v2.1.0:
  * - Removed series matching (now handled by gameDataEnricher)
  * - Fixed getTournamentType() bug (BOUNTY/TURBO not valid enum values)
  * - Added getClassification() for new multi-dimensional taxonomy
@@ -184,7 +190,9 @@ const defaultStrategy = {
             let name = 'Tournament Status Unknown';
             
             if (warningText.includes('not found')) {
-                status = 'NOT_FOUND';
+                // NOTE: 'NOT_FOUND' is not in GraphQL GameStatus enum
+                // Use 'NOT_IN_USE' which has similar meaning and IS in the enum
+                status = 'NOT_IN_USE';
                 name = 'Tournament Not Found';
             } else if (warningText.includes('not published')) {
                 status = 'NOT_PUBLISHED';
@@ -216,7 +224,9 @@ const defaultStrategy = {
         if (pageTitle.includes('not found') || h1Text.includes('not found') ||
             pageTitle.includes('error') || h1Text.includes('error')) {
             ctx.add('tournamentId', tournamentId);
-            ctx.add('gameStatus', pageTitle.includes('error') ? 'ERROR' : 'NOT_FOUND');
+            // NOTE: 'ERROR' and 'NOT_FOUND' are not in GraphQL GameStatus enum
+            // Use 'UNKNOWN' for errors and 'NOT_IN_USE' for not found
+            ctx.add('gameStatus', pageTitle.includes('error') ? 'UNKNOWN' : 'NOT_IN_USE');
             ctx.add('name', pageTitle.includes('error') ? 'Tournament Error' : 'Tournament Not Found');
             ctx.add('doNotScrape', true);
             ctx.add('hasGuarantee', false);

@@ -430,6 +430,8 @@ enum SocialScrapeStatus {
   RATE_LIMITED
   TIMEOUT
   NO_NEW_CONTENT
+  CANCELLED
+  ERROR_STOPPED
 }
 
 enum SocialPostStatus { 
@@ -453,6 +455,8 @@ enum SyncEventStatus {
   COMPLETED
   RATE_LIMITED
   FAILED
+  CANCELLED
+  ERROR_STOPPED
 }
 
 # ===================================================================

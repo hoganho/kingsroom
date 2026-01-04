@@ -23,6 +23,8 @@ Amplify Params - DO NOT EDIT */
  * - Fetches ALL historical posts with pagination (triggerFullSync)
  * - INCREMENTAL SAVING: Saves posts as each page is fetched (not at the end)
  * - RESUMABLE: Tracks oldest post fetched so full sync can resume after rate limits
+ * - CANCELLABLE: Can be stopped mid-sync via ScrapeAttempt.cancellationRequested flag
+ * - AUTO-STOP ON ERROR: Gracefully stops and saves progress after consecutive errors
  * - REAL-TIME UPDATES: Publishes progress to AppSync subscriptions
  * - Incremental fetching - only gets posts since last successful scrape
  * - Downloads and stores page profile pictures to S3
@@ -77,10 +79,123 @@ const MAX_PAGES_TO_FETCH = 50;
 // Progress update frequency (publish every N pages)
 const PROGRESS_UPDATE_FREQUENCY = 3;
 
+// Cancellation check frequency (check every N pages to avoid excessive DynamoDB reads)
+const CANCELLATION_CHECK_FREQUENCY = 2;
+
+// Maximum consecutive errors before auto-stopping
+const MAX_CONSECUTIVE_ERRORS = 3;
+
 // Social Post Processor Configuration
 const SOCIAL_POST_PROCESSOR_FUNCTION = process.env.SOCIAL_POST_PROCESSOR_FUNCTION;
 const AUTO_PROCESS_POSTS = process.env.AUTO_PROCESS_POSTS !== 'false';
 const MAX_PARALLEL_PROCESSING = parseInt(process.env.MAX_PARALLEL_PROCESSING || '5', 10);
+
+// ============================================
+// Stop Reason Enum
+// ============================================
+
+const StopReason = {
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',        // User requested cancellation
+  RATE_LIMITED: 'RATE_LIMITED',  // Facebook API rate limit
+  TIMEOUT: 'TIMEOUT',            // Lambda timeout approaching
+  ERROR: 'ERROR',                // Too many consecutive errors
+  NETWORK_ERROR: 'NETWORK_ERROR' // Network connectivity issues
+};
+
+// ============================================
+// Cancellation Support (uses SocialScrapeAttempt)
+// ============================================
+
+/**
+ * Check if sync cancellation has been requested for a scrape attempt
+ * Returns true if cancellation was requested
+ */
+async function checkCancellationRequested(attemptId) {
+  if (!attemptId || !SOCIAL_SCRAPE_ATTEMPT_TABLE) {
+    return false;
+  }
+  
+  try {
+    const result = await docClient.send(new GetCommand({
+      TableName: SOCIAL_SCRAPE_ATTEMPT_TABLE,
+      Key: { id: attemptId },
+      ProjectionExpression: 'cancellationRequested',
+    }));
+    
+    const isCancelled = result.Item?.cancellationRequested === true;
+    if (isCancelled) {
+      console.log(`[CANCELLATION] Cancellation requested for attempt ${attemptId}`);
+    }
+    return isCancelled;
+  } catch (error) {
+    console.warn('Error checking cancellation status:', error.message);
+    return false; // Continue on error
+  }
+}
+
+/**
+ * Clear the cancellation flag after sync completes or is cancelled
+ */
+async function clearCancellationFlag(attemptId) {
+  if (!attemptId || !SOCIAL_SCRAPE_ATTEMPT_TABLE) {
+    return;
+  }
+  
+  try {
+    await docClient.send(new UpdateCommand({
+      TableName: SOCIAL_SCRAPE_ATTEMPT_TABLE,
+      Key: { id: attemptId },
+      UpdateExpression: 'SET cancellationRequested = :false, updatedAt = :now',
+      ExpressionAttributeValues: {
+        ':false': false,
+        ':now': new Date().toISOString(),
+      },
+    }));
+    console.log(`[CANCELLATION] Cleared cancellation flag for attempt ${attemptId}`);
+  } catch (error) {
+    console.warn('Error clearing cancellation flag:', error.message);
+  }
+}
+
+// ============================================
+// Minimal Pre-Processing (for display only)
+// NOTE: ALL classification is done by socialPostProcessor Lambda
+// ============================================
+
+/**
+ * Extract hashtags from content (for initial display)
+ * Processor will add classification tags
+ */
+function extractHashtags(content) {
+  if (!content) return [];
+  const matches = content.match(/#(\w+)/g);
+  if (!matches) return [];
+  return matches.map(tag => tag.substring(1).toLowerCase());
+}
+
+/**
+ * Build rawContent object for storage
+ * This is the authoritative source - processor uses this for classification
+ */
+function buildRawContent(fbPost) {
+  return JSON.stringify({
+    // Original Facebook post data (everything processor needs)
+    fb_id: fbPost.id,
+    fb_message: fbPost.message,
+    fb_created_time: fbPost.created_time,
+    fb_permalink_url: fbPost.permalink_url,
+    fb_full_picture: fbPost.full_picture,
+    fb_reactions: fbPost.reactions?.summary,
+    fb_comments: fbPost.comments?.summary,
+    fb_shares: fbPost.shares,
+    fb_attachments: fbPost.attachments,
+    
+    // Source tracking
+    _source: 'socialFetcher',
+    _fetchedAt: new Date().toISOString(),
+  });
+}
 
 // ============================================
 // AppSync Subscription Publishing
@@ -89,11 +204,6 @@ const MAX_PARALLEL_PROCESSING = parseInt(process.env.MAX_PARALLEL_PROCESSING || 
 /**
  * Publish sync progress to AppSync subscription
  * This allows the frontend to receive real-time updates
- * 
- * Enhanced with download progress tracking:
- * - currentAction: What's happening now (e.g., "Downloading media...")
- * - downloadCurrent: Current item being processed
- * - downloadTotal: Total items to process
  */
 async function publishSyncProgress(socialAccountId, status, data = {}) {
   if (!APPSYNC_ENDPOINT) {
@@ -156,12 +266,11 @@ async function publishSyncProgress(socialAccountId, status, data = {}) {
 
 // Throttle download progress updates to avoid overwhelming subscriptions
 let lastDownloadProgressUpdate = 0;
-const DOWNLOAD_PROGRESS_THROTTLE_MS = 500; // Max one update per 500ms
+const DOWNLOAD_PROGRESS_THROTTLE_MS = 500;
 
 async function publishDownloadProgress(socialAccountId, current, total, postDate, hasMedia) {
   const now = Date.now();
   
-  // Throttle updates unless it's the first or last item
   if (current !== 1 && current !== total && (now - lastDownloadProgressUpdate) < DOWNLOAD_PROGRESS_THROTTLE_MS) {
     return;
   }
@@ -481,52 +590,41 @@ async function syncPageInfo(socialAccountId, options = {}) {
 }
 
 // ============================================
-// NEW: Smart Post Date Range Query
+// Smart Post Date Range Query
 // ============================================
 
 /**
  * Get the oldest and newest post dates for an account
- * Uses the bySocialAccount GSI with postedAt as sort key
- * Returns null values if no posts exist
  */
 async function getPostDateRange(socialAccountId) {
   console.log(`[SMART SYNC] Getting post date range for account ${socialAccountId}...`);
   
   try {
-    // Get oldest post (ascending order, limit 1)
     const oldestResult = await docClient.send(new QueryCommand({
       TableName: SOCIAL_POST_TABLE,
       IndexName: 'bySocialAccount',
       KeyConditionExpression: 'socialAccountId = :accountId',
-      ExpressionAttributeValues: {
-        ':accountId': socialAccountId
-      },
-      ScanIndexForward: true, // Ascending (oldest first)
+      ExpressionAttributeValues: { ':accountId': socialAccountId },
+      ScanIndexForward: true,
       Limit: 1,
       ProjectionExpression: 'id, postedAt'
     }));
     
-    // Get newest post (descending order, limit 1)
     const newestResult = await docClient.send(new QueryCommand({
       TableName: SOCIAL_POST_TABLE,
       IndexName: 'bySocialAccount',
       KeyConditionExpression: 'socialAccountId = :accountId',
-      ExpressionAttributeValues: {
-        ':accountId': socialAccountId
-      },
-      ScanIndexForward: false, // Descending (newest first)
+      ExpressionAttributeValues: { ':accountId': socialAccountId },
+      ScanIndexForward: false,
       Limit: 1,
       ProjectionExpression: 'id, postedAt'
     }));
     
-    // Get total count for logging
     const countResult = await docClient.send(new QueryCommand({
       TableName: SOCIAL_POST_TABLE,
       IndexName: 'bySocialAccount',
       KeyConditionExpression: 'socialAccountId = :accountId',
-      ExpressionAttributeValues: {
-        ':accountId': socialAccountId
-      },
+      ExpressionAttributeValues: { ':accountId': socialAccountId },
       Select: 'COUNT'
     }));
     
@@ -536,50 +634,31 @@ async function getPostDateRange(socialAccountId) {
     
     if (!oldestPost || !newestPost) {
       console.log(`[SMART SYNC] No existing posts found for account`);
-      return {
-        oldestPostDate: null,
-        newestPostDate: null,
-        oldestTimestamp: null,
-        newestTimestamp: null,
-        totalPosts: 0
-      };
+      return { oldestPostDate: null, newestPostDate: null, oldestTimestamp: null, newestTimestamp: null, totalPosts: 0 };
     }
     
     const oldestDate = oldestPost.postedAt;
     const newestDate = newestPost.postedAt;
-    
-    // Convert to Unix timestamps for Facebook API
     const oldestTimestamp = Math.floor(new Date(oldestDate).getTime() / 1000);
     const newestTimestamp = Math.floor(new Date(newestDate).getTime() / 1000);
     
-    console.log(`[SMART SYNC] Found ${totalPosts} existing posts:`);
-    console.log(`  - Oldest: ${oldestDate} (timestamp: ${oldestTimestamp})`);
-    console.log(`  - Newest: ${newestDate} (timestamp: ${newestTimestamp})`);
+    console.log(`[SMART SYNC] Found ${totalPosts} existing posts: oldest ${oldestDate}, newest ${newestDate}`);
     
-    return {
-      oldestPostDate: oldestDate,
-      newestPostDate: newestDate,
-      oldestTimestamp,
-      newestTimestamp,
-      totalPosts
-    };
+    return { oldestPostDate: oldestDate, newestPostDate: newestDate, oldestTimestamp, newestTimestamp, totalPosts };
     
   } catch (error) {
     console.error('[SMART SYNC] Error getting post date range:', error);
-    // Return nulls on error - will fall back to full fetch
-    return {
-      oldestPostDate: null,
-      newestPostDate: null,
-      oldestTimestamp: null,
-      newestTimestamp: null,
-      totalPosts: 0
-    };
+    return { oldestPostDate: null, newestPostDate: null, oldestTimestamp: null, newestTimestamp: null, totalPosts: 0 };
   }
 }
 
+// ============================================
+// Main Scrape Function
+// ============================================
+
 /**
  * Main scrape function for an account
- * Features SMART FULL SYNC, incremental saving, and real-time subscription updates
+ * Features: SMART FULL SYNC, incremental saving, cancellation support, auto-stop on error
  */
 async function scrapeAccount(account, options = {}, context = null) {
   const startTime = Date.now();
@@ -593,12 +672,13 @@ async function scrapeAccount(account, options = {}, context = null) {
   let totalNewPostsSaved = 0;
   let allSavedPostIds = [];
   let oldestPostDate = null;
-  let wasRateLimited = false;
-  let wasTimeout = false;
   let pagesCompleted = 0;
-  
-  // Track API efficiency for logging
   let apiCallsSaved = 0;
+  
+  // Stop tracking
+  let stopReason = StopReason.COMPLETED;
+  let stopMessage = null;
+  let lastError = null;
   
   // Determine "since" timestamp for incremental fetches
   let sinceTimestamp = null;
@@ -610,10 +690,8 @@ async function scrapeAccount(account, options = {}, context = null) {
     const sinceMs = Math.min(option1, option2);
     sinceTimestamp = Math.floor(sinceMs / 1000);
     
-    const sinceDate = new Date(sinceMs);
     const hoursSinceLastScrape = Math.round((now - lastScrapeTime) / (60 * 60 * 1000));
-    console.log(`Incremental fetch: last scrape was ${hoursSinceLastScrape}h ago`);
-    console.log(`Looking back to ${sinceDate.toISOString()}`);
+    console.log(`Incremental fetch: last scrape was ${hoursSinceLastScrape}h ago, looking back to ${new Date(sinceMs).toISOString()}`);
   }
 
   // Publish "STARTED" event
@@ -626,6 +704,8 @@ async function scrapeAccount(account, options = {}, context = null) {
   try {
     const syncType = fetchAllHistory ? 'FULL_SYNC' : 'INCREMENTAL';
     attemptId = await createScrapeAttempt(account.id, syncType);
+    
+    console.log(`[SYNC] Created attempt ${attemptId} for account ${account.id}`);
 
     const pageId = account.platformAccountId || extractPageIdFromUrl(account.accountUrl);
     console.log('Using page ID:', pageId);
@@ -675,7 +755,6 @@ async function scrapeAccount(account, options = {}, context = null) {
     const onPageFetched = async (posts, pageNumber) => {
       console.log(`Processing page ${pageNumber} with ${posts.length} posts...`);
       
-      // Publish "fetching" status before processing
       await publishSyncProgress(account.id, 'IN_PROGRESS', {
         message: `Page ${pageNumber}: Checking ${posts.length} posts for new content...`,
         postsFound: totalPostsScanned + posts.length,
@@ -690,15 +769,12 @@ async function scrapeAccount(account, options = {}, context = null) {
       allSavedPostIds.push(...savedPostIds);
       pagesCompleted = pageNumber;
       
-      if (oldestDate) {
-        if (!oldestPostDate || oldestDate < oldestPostDate) {
-          oldestPostDate = oldestDate;
-        }
+      if (oldestDate && (!oldestPostDate || oldestDate < oldestPostDate)) {
+        oldestPostDate = oldestDate;
       }
       
       console.log(`Page ${pageNumber}: ${newPosts.length} new posts saved (total: ${totalNewPostsSaved} new, ${totalPostsScanned} scanned)`);
       
-      // Publish page completion status
       const statusMessage = newPosts.length > 0
         ? `Page ${pageNumber} complete: Downloaded ${newPosts.length} new posts (${totalNewPostsSaved} total)`
         : `Page ${pageNumber} complete: No new posts (${totalPostsScanned} scanned)`;
@@ -713,19 +789,24 @@ async function scrapeAccount(account, options = {}, context = null) {
       return { newPosts, savedPostIds };
     };
     
+    // Create sync context with attemptId for cancellation checks
+    const syncContext = {
+      lambdaContext: context,
+      attemptId,
+      accountId: account.id,
+    };
+    
     if (fetchAllHistory) {
       // ================================================================
-      // SMART FULL SYNC - Only fetch posts outside existing date range
+      // SMART FULL SYNC
       // ================================================================
       console.log('[SMART SYNC] Starting smart full sync...');
       
       const dateRange = await getPostDateRange(account.id);
       
       if (dateRange.totalPosts > 0 && dateRange.oldestTimestamp && dateRange.newestTimestamp) {
-        // We have existing posts - do smart sync
         console.log(`[SMART SYNC] Found ${dateRange.totalPosts} existing posts, fetching only new content...`);
         
-        // Publish smart sync info
         await publishSyncProgress(account.id, 'IN_PROGRESS', {
           message: `Smart sync: ${dateRange.totalPosts} posts already downloaded, fetching only missing posts...`,
           postsFound: 0,
@@ -733,62 +814,64 @@ async function scrapeAccount(account, options = {}, context = null) {
           pagesCompleted: 0,
         });
         
-        let newerResult = { rateLimited: false, timeout: false, pagesCompleted: 0 };
-        let olderResult = { rateLimited: false, timeout: false, pagesCompleted: 0 };
+        let newerResult = { stopReason: StopReason.COMPLETED, pagesCompleted: 0 };
+        let olderResult = { stopReason: StopReason.COMPLETED, pagesCompleted: 0 };
         
-        // Step 1: Fetch NEWER posts (since our newest post)
-        // Add 1 second to avoid re-fetching the exact same post
+        // Step 1: Fetch NEWER posts
         const sinceNewest = dateRange.newestTimestamp + 1;
         console.log(`[SMART SYNC] Step 1: Fetching posts NEWER than ${dateRange.newestPostDate}...`);
         
-        const newerPosts = await fetchFacebookPostsSince(pageId, sinceNewest);
-        if (newerPosts.length > 0) {
-          console.log(`[SMART SYNC] Found ${newerPosts.length} newer posts`);
-          await onPageFetched(newerPosts, 1);
-          newerResult.pagesCompleted = 1;
-        } else {
-          console.log('[SMART SYNC] No newer posts found');
-        }
-        
-        // Check for timeout/rate limit before continuing
-        if (context && typeof context.getRemainingTimeInMillis === 'function') {
-          const remainingTime = context.getRemainingTimeInMillis();
-          if (remainingTime < 30000) {
-            console.warn(`[SMART SYNC] Low time remaining (${remainingTime}ms), skipping older posts fetch`);
-            wasTimeout = true;
+        try {
+          const newerPosts = await fetchFacebookPostsSince(pageId, sinceNewest);
+          if (newerPosts.length > 0) {
+            console.log(`[SMART SYNC] Found ${newerPosts.length} newer posts`);
+            await onPageFetched(newerPosts, 1);
+            newerResult.pagesCompleted = 1;
+          } else {
+            console.log('[SMART SYNC] No newer posts found');
           }
+        } catch (newerError) {
+          console.error('[SMART SYNC] Error fetching newer posts:', newerError.message);
+          lastError = newerError;
+          // Continue to try older posts
         }
         
-        // Step 2: Fetch OLDER posts (until our oldest post) - if not rate limited/timed out
-        if (!wasTimeout && !wasRateLimited) {
-          // Subtract 1 second to avoid re-fetching the exact same post
+        // Check for cancellation before continuing
+        if (await checkCancellationRequested(attemptId)) {
+          stopReason = StopReason.CANCELLED;
+          stopMessage = 'Sync cancelled by user';
+        }
+        
+        // Check for timeout
+        if (stopReason === StopReason.COMPLETED && context?.getRemainingTimeInMillis?.() < 30000) {
+          console.warn(`[SMART SYNC] Low time remaining, skipping older posts fetch`);
+          stopReason = StopReason.TIMEOUT;
+          stopMessage = 'Lambda timeout approaching';
+        }
+        
+        // Step 2: Fetch OLDER posts
+        if (stopReason === StopReason.COMPLETED) {
           const untilOldest = dateRange.oldestTimestamp - 1;
           console.log(`[SMART SYNC] Step 2: Fetching posts OLDER than ${dateRange.oldestPostDate}...`);
-          
-          // Check if we're resuming from a previous partial sync
-          const resumeFromDate = account.fullSyncOldestPostDate;
-          if (resumeFromDate && new Date(resumeFromDate) < new Date(dateRange.oldestPostDate)) {
-            console.log(`[SMART SYNC] Resuming from previous sync point: ${resumeFromDate}`);
-          }
           
           olderResult = await fetchFacebookPostsUntil(
             pageId, 
             untilOldest, 
             onPageFetched, 
-            context,
+            syncContext,
             pagesCompleted
           );
           
-          wasRateLimited = olderResult.rateLimited;
-          wasTimeout = olderResult.timeout;
+          stopReason = olderResult.stopReason;
+          stopMessage = olderResult.stopMessage;
+          if (olderResult.lastError) lastError = olderResult.lastError;
         }
         
         pagesCompleted = newerResult.pagesCompleted + olderResult.pagesCompleted;
         
-        // Calculate API calls saved
         const estimatedFullSyncPages = Math.ceil(dateRange.totalPosts / MAX_POSTS_PER_PAGE);
         apiCallsSaved = Math.max(0, estimatedFullSyncPages - pagesCompleted);
-        console.log(`[SMART SYNC] Complete! Saved approximately ${apiCallsSaved} API calls by skipping existing posts`);
+        console.log(`[SMART SYNC] Complete! Saved approximately ${apiCallsSaved} API calls`);
         
       } else {
         // No existing posts - do full fetch
@@ -802,96 +885,125 @@ async function scrapeAccount(account, options = {}, context = null) {
         const result = await fetchAllFacebookPostsWithCallback(
           pageId, 
           onPageFetched, 
-          context,
+          syncContext,
           resumeFromDate
         );
         
-        wasRateLimited = result.rateLimited;
-        wasTimeout = result.timeout;
+        stopReason = result.stopReason;
+        stopMessage = result.stopMessage;
         pagesCompleted = result.pagesCompleted;
+        if (result.lastError) lastError = result.lastError;
       }
       
     } else if (sinceTimestamp) {
       console.log(`Fetching posts since timestamp: ${sinceTimestamp}`);
-      const posts = await fetchFacebookPostsSince(pageId, sinceTimestamp);
-      
-      if (posts.length > 0) {
-        await onPageFetched(posts, 1);
+      try {
+        const posts = await fetchFacebookPostsSince(pageId, sinceTimestamp);
+        
+        if (posts.length > 0) {
+          await onPageFetched(posts, 1);
+        }
+        pagesCompleted = 1;
+      } catch (fetchError) {
+        console.error('Error fetching incremental posts:', fetchError.message);
+        stopReason = StopReason.ERROR;
+        stopMessage = fetchError.message;
+        lastError = fetchError;
       }
-      pagesCompleted = 1;
       
     } else {
       console.log('First fetch - getting ALL historical posts with pagination...');
       
-      const result = await fetchAllFacebookPostsWithCallback(pageId, onPageFetched, context);
+      const result = await fetchAllFacebookPostsWithCallback(pageId, onPageFetched, syncContext);
       
-      wasRateLimited = result.rateLimited;
-      wasTimeout = result.timeout;
+      stopReason = result.stopReason;
+      stopMessage = result.stopMessage;
       pagesCompleted = result.pagesCompleted;
+      if (result.lastError) lastError = result.lastError;
       isFullSync = true;
     }
     
-    console.log(`Fetch complete: ${totalNewPostsSaved} new posts saved, ${totalPostsScanned} total scanned`);
+    console.log(`Fetch complete: ${totalNewPostsSaved} new posts saved, ${totalPostsScanned} scanned, stopReason: ${stopReason}`);
 
     // ============================================
     // Trigger socialPostProcessor for new posts
     // ============================================
     let postsProcessed = 0;
-    let processingResults = [];
     
-    if (AUTO_PROCESS_POSTS && !skipProcessing && allSavedPostIds.length > 0) {
-      if (!SOCIAL_POST_PROCESSOR_FUNCTION) {
-        console.warn('[PROCESSOR] SOCIAL_POST_PROCESSOR_FUNCTION not configured');
-      } else {
-        console.log(`[PROCESSOR] Auto-processing ${allSavedPostIds.length} new posts...`);
-        
-        try {
-          processingResults = await triggerPostProcessing(allSavedPostIds);
-          postsProcessed = processingResults.filter(r => r.success).length;
-          console.log(`[PROCESSOR] Triggered processing for ${postsProcessed}/${allSavedPostIds.length} posts`);
-        } catch (processingError) {
-          console.error('[PROCESSOR] Error triggering post processing:', processingError);
-        }
+    // Only process if completed successfully or cancelled (not on errors)
+    const shouldProcess = AUTO_PROCESS_POSTS && !skipProcessing && allSavedPostIds.length > 0 && 
+      (stopReason === StopReason.COMPLETED || stopReason === StopReason.CANCELLED);
+    
+    if (shouldProcess && SOCIAL_POST_PROCESSOR_FUNCTION) {
+      console.log(`[PROCESSOR] Auto-processing ${allSavedPostIds.length} new posts...`);
+      
+      try {
+        const processingResults = await triggerPostProcessing(allSavedPostIds);
+        postsProcessed = processingResults.filter(r => r.success).length;
+        console.log(`[PROCESSOR] Triggered processing for ${postsProcessed}/${allSavedPostIds.length} posts`);
+      } catch (processingError) {
+        console.error('[PROCESSOR] Error triggering post processing:', processingError);
       }
     }
 
+    // ============================================
+    // Determine final status and update records
+    // ============================================
     const newPostCount = (account.postCount || 0) + totalNewPostsSaved;
-
-    // Determine final status
     let status = 'ACTIVE';
     let message = '';
     let syncEventStatus = 'COMPLETED';
+    let scrapeAttemptStatus = 'SUCCESS';
     
-    if (wasRateLimited) {
-      status = 'RATE_LIMITED';
-      syncEventStatus = 'RATE_LIMITED';
-      message = `Rate limited after saving ${totalNewPostsSaved} new posts (${totalPostsScanned} scanned). Run again to continue.`;
-    } else if (wasTimeout) {
-      status = 'ACTIVE';
-      syncEventStatus = 'COMPLETED'; // Still completed from our perspective
-      message = `Timeout after saving ${totalNewPostsSaved} new posts (${totalPostsScanned} scanned). Run again to continue.`;
-    } else {
-      message = totalNewPostsSaved > 0 
-        ? `Found ${totalNewPostsSaved} new posts (scanned ${totalPostsScanned} total)` 
-        : `No new posts (scanned ${totalPostsScanned} total)`;
-      
-      // Add API efficiency info for smart sync
-      if (apiCallsSaved > 0) {
-        message += ` [Smart sync saved ~${apiCallsSaved} API calls]`;
-      }
+    switch (stopReason) {
+      case StopReason.CANCELLED:
+        syncEventStatus = 'CANCELLED';
+        scrapeAttemptStatus = 'CANCELLED';
+        message = `Sync cancelled by user. Saved ${totalNewPostsSaved} posts (${totalPostsScanned} scanned).`;
+        break;
+        
+      case StopReason.RATE_LIMITED:
+        status = 'RATE_LIMITED';
+        syncEventStatus = 'RATE_LIMITED';
+        scrapeAttemptStatus = 'RATE_LIMITED';
+        message = `Rate limited after saving ${totalNewPostsSaved} posts (${totalPostsScanned} scanned). Run again to continue.`;
+        break;
+        
+      case StopReason.TIMEOUT:
+        scrapeAttemptStatus = 'TIMEOUT';
+        message = `Timeout after saving ${totalNewPostsSaved} posts (${totalPostsScanned} scanned). Run again to continue.`;
+        break;
+        
+      case StopReason.ERROR:
+      case StopReason.NETWORK_ERROR:
+        syncEventStatus = 'ERROR_STOPPED';
+        scrapeAttemptStatus = 'ERROR_STOPPED';
+        message = `Stopped due to errors after saving ${totalNewPostsSaved} posts. Error: ${stopMessage || lastError?.message || 'Unknown error'}`;
+        break;
+        
+      case StopReason.COMPLETED:
+      default:
+        message = totalNewPostsSaved > 0 
+          ? `Found ${totalNewPostsSaved} new posts (scanned ${totalPostsScanned} total)` 
+          : `No new posts (scanned ${totalPostsScanned} total)`;
+        if (apiCallsSaved > 0) {
+          message += ` [Smart sync saved ~${apiCallsSaved} API calls]`;
+        }
+        break;
     }
 
     // Update account
     const accountUpdate = {
       lastScrapedAt: new Date().toISOString(),
-      consecutiveFailures: 0,
-      lastErrorMessage: wasRateLimited ? 'Rate limited - will resume on next sync' : null,
+      consecutiveFailures: stopReason === StopReason.ERROR ? (account.consecutiveFailures || 0) + 1 : 0,
+      lastErrorMessage: stopReason !== StopReason.COMPLETED ? (stopMessage || lastError?.message || null) : null,
       status,
       postCount: newPostCount,
     };
     
     if (fetchAllHistory || isFullSync) {
-      if (wasRateLimited || wasTimeout) {
+      const didNotComplete = stopReason !== StopReason.COMPLETED;
+      if (didNotComplete) {
         accountUpdate.fullSyncOldestPostDate = oldestPostDate;
         accountUpdate.hasFullHistory = false;
       } else {
@@ -900,16 +1012,19 @@ async function scrapeAccount(account, options = {}, context = null) {
         accountUpdate.lastSuccessfulScrapeAt = new Date().toISOString();
       }
     } else {
-      if (!wasRateLimited && !wasTimeout) {
+      if (stopReason === StopReason.COMPLETED) {
         accountUpdate.lastSuccessfulScrapeAt = new Date().toISOString();
       }
     }
     
     await updateAccountAfterScrape(account.id, accountUpdate);
+    
+    // Clear cancellation flag
+    await clearCancellationFlag(attemptId);
 
     // Update scrape attempt
     await updateScrapeAttempt(attemptId, {
-      status: wasRateLimited ? 'RATE_LIMITED' : (wasTimeout ? 'TIMEOUT' : 'SUCCESS'),
+      status: scrapeAttemptStatus,
       completedAt: new Date().toISOString(),
       durationMs: Date.now() - startTime,
       postsFound: totalPostsScanned,
@@ -917,6 +1032,7 @@ async function scrapeAccount(account, options = {}, context = null) {
       postsProcessed,
       syncType: isFullSync ? 'FULL_SYNC' : 'INCREMENTAL',
       oldestPostDate,
+      errorMessage: stopReason !== StopReason.COMPLETED ? (stopMessage || lastError?.message) : null,
     });
 
     // Publish completion event
@@ -924,19 +1040,22 @@ async function scrapeAccount(account, options = {}, context = null) {
       message,
       postsFound: totalPostsScanned,
       newPostsAdded: totalNewPostsSaved,
-      rateLimited: wasRateLimited,
+      rateLimited: stopReason === StopReason.RATE_LIMITED,
       pagesCompleted,
     });
 
     return {
-      success: !wasRateLimited,
+      success: stopReason === StopReason.COMPLETED,
       message,
       postsFound: totalPostsScanned,
       newPostsAdded: totalNewPostsSaved,
       postsProcessed,
-      rateLimited: wasRateLimited,
-      timeout: wasTimeout,
+      rateLimited: stopReason === StopReason.RATE_LIMITED,
+      timeout: stopReason === StopReason.TIMEOUT,
+      cancelled: stopReason === StopReason.CANCELLED,
+      errorStopped: stopReason === StopReason.ERROR || stopReason === StopReason.NETWORK_ERROR,
       oldestPostDate,
+      attemptId,
     };
 
   } catch (error) {
@@ -953,6 +1072,8 @@ async function scrapeAccount(account, options = {}, context = null) {
       postCount: newPostCount,
       fullSyncOldestPostDate: oldestPostDate || account.fullSyncOldestPostDate,
     });
+    
+    await clearCancellationFlag(attemptId);
 
     if (attemptId) {
       await updateScrapeAttempt(attemptId, {
@@ -965,7 +1086,6 @@ async function scrapeAccount(account, options = {}, context = null) {
       });
     }
 
-    // Publish failure event
     await publishSyncProgress(account.id, 'FAILED', {
       message: error.message,
       postsFound: totalPostsScanned,
@@ -978,35 +1098,40 @@ async function scrapeAccount(account, options = {}, context = null) {
       message: error.message,
       postsFound: totalPostsScanned,
       newPostsAdded: totalNewPostsSaved,
-      rateLimited: wasRateLimited,
-      timeout: wasTimeout,
+      rateLimited: false,
+      timeout: false,
+      cancelled: false,
+      errorStopped: true,
+      attemptId,
     };
   }
 }
 
 // ============================================
-// Social Post Processor Integration
+// Post Processor Trigger
 // ============================================
 
 async function triggerPostProcessing(postIds) {
-  const results = [];
-  
-  // Process in batches to avoid overwhelming the processor
-  const batches = [];
-  for (let i = 0; i < postIds.length; i += MAX_PARALLEL_PROCESSING) {
-    batches.push(postIds.slice(i, i + MAX_PARALLEL_PROCESSING));
+  if (!SOCIAL_POST_PROCESSOR_FUNCTION || postIds.length === 0) {
+    return [];
   }
   
-  for (const batch of batches) {
+  console.log(`[PROCESSOR] Triggering processing for ${postIds.length} posts`);
+  
+  const results = [];
+  
+  // Process in batches to avoid overwhelming Lambda
+  for (let i = 0; i < postIds.length; i += MAX_PARALLEL_PROCESSING) {
+    const batch = postIds.slice(i, i + MAX_PARALLEL_PROCESSING);
+    
     const batchPromises = batch.map(async (postId) => {
       try {
         const payload = {
-          fieldName: 'processSocialPost',
+          operation: 'processPost',
           arguments: {
             input: {
               socialPostId: postId,
-              skipLinking: false,
-              skipMatching: false
+              forceReprocess: false
             }
           }
         };
@@ -1223,7 +1348,11 @@ async function fetchFacebookPosts(pageId, limit = 25) {
   return data.data || [];
 }
 
-async function fetchAllFacebookPostsWithCallback(pageId, onPageFetched, context = null, resumeFromDate = null) {
+/**
+ * Fetch ALL posts with pagination, incremental saving, cancellation & error handling
+ */
+async function fetchAllFacebookPostsWithCallback(pageId, onPageFetched, syncContext = {}, resumeFromDate = null) {
+  const { lambdaContext, attemptId } = syncContext;
   const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
   
   let url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${MAX_POSTS_PER_PAGE}`;
@@ -1235,21 +1364,33 @@ async function fetchAllFacebookPostsWithCallback(pageId, onPageFetched, context 
   }
   
   let pageCount = 0;
+  let consecutiveErrors = 0;
+  let lastError = null;
   const SAFETY_MARGIN_MS = 10000;
 
   console.log('Starting full post fetch with incremental saving...');
 
   while (url && pageCount < MAX_PAGES_TO_FETCH) {
-    if (context && typeof context.getRemainingTimeInMillis === 'function') {
-      const remainingTime = context.getRemainingTimeInMillis();
-      if (remainingTime < SAFETY_MARGIN_MS) {
-        console.warn(`Approaching timeout (${remainingTime}ms remaining), stopping at page ${pageCount}`);
+    // Check for cancellation periodically
+    if (attemptId && pageCount > 0 && pageCount % CANCELLATION_CHECK_FREQUENCY === 0) {
+      if (await checkCancellationRequested(attemptId)) {
+        console.log(`[CANCELLATION] Sync cancelled by user at page ${pageCount}`);
         return { 
-          rateLimited: false, 
-          timeout: true, 
+          stopReason: StopReason.CANCELLED, 
+          stopMessage: 'Cancelled by user',
           pagesCompleted: pageCount 
         };
       }
+    }
+    
+    // Check for timeout
+    if (lambdaContext?.getRemainingTimeInMillis?.() < SAFETY_MARGIN_MS) {
+      console.warn(`Approaching timeout (${lambdaContext.getRemainingTimeInMillis()}ms remaining), stopping at page ${pageCount}`);
+      return { 
+        stopReason: StopReason.TIMEOUT, 
+        stopMessage: 'Lambda timeout approaching',
+        pagesCompleted: pageCount 
+      };
     }
     
     pageCount++;
@@ -1259,14 +1400,26 @@ async function fetchAllFacebookPostsWithCallback(pageId, onPageFetched, context 
     try {
       const response = await httpGet(url);
       data = JSON.parse(response);
+      consecutiveErrors = 0; // Reset on success
     } catch (error) {
       console.error(`Network error on page ${pageCount}:`, error.message);
-      return { 
-        rateLimited: false, 
-        timeout: false, 
-        networkError: true,
-        pagesCompleted: pageCount - 1 
-      };
+      consecutiveErrors++;
+      lastError = error;
+      
+      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+        console.error(`[AUTO-STOP] ${consecutiveErrors} consecutive network errors, stopping`);
+        return { 
+          stopReason: StopReason.NETWORK_ERROR, 
+          stopMessage: `${consecutiveErrors} consecutive network errors: ${error.message}`,
+          lastError,
+          pagesCompleted: pageCount - 1 
+        };
+      }
+      
+      // Wait and retry
+      console.log(`Waiting 2s before retry (${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS})...`);
+      await new Promise(r => setTimeout(r, 2000));
+      continue;
     }
 
     if (data.error) {
@@ -1275,14 +1428,29 @@ async function fetchAllFacebookPostsWithCallback(pageId, onPageFetched, context 
       if (data.error.code === 4 || data.error.message?.includes('limit')) {
         console.warn('Rate limit reached - saving progress and stopping');
         return { 
-          rateLimited: true, 
-          timeout: false, 
-          pagesCompleted: pageCount - 1,
-          error: data.error.message
+          stopReason: StopReason.RATE_LIMITED, 
+          stopMessage: data.error.message,
+          pagesCompleted: pageCount - 1
         };
       }
       
-      throw new Error(data.error.message || 'Facebook API error');
+      // Other API errors - count as consecutive error
+      consecutiveErrors++;
+      lastError = new Error(data.error.message || 'Facebook API error');
+      
+      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+        console.error(`[AUTO-STOP] ${consecutiveErrors} consecutive API errors, stopping`);
+        return { 
+          stopReason: StopReason.ERROR, 
+          stopMessage: `${consecutiveErrors} consecutive errors: ${data.error.message}`,
+          lastError,
+          pagesCompleted: pageCount - 1 
+        };
+      }
+      
+      console.log(`API error, waiting 2s before retry (${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS})...`);
+      await new Promise(r => setTimeout(r, 2000));
+      continue;
     }
 
     const posts = data.data || [];
@@ -1294,7 +1462,23 @@ async function fetchAllFacebookPostsWithCallback(pageId, onPageFetched, context 
 
     console.log(`Page ${pageCount}: Got ${posts.length} posts`);
     
-    await onPageFetched(posts, pageCount);
+    try {
+      await onPageFetched(posts, pageCount);
+    } catch (processError) {
+      console.error(`Error processing page ${pageCount}:`, processError.message);
+      consecutiveErrors++;
+      lastError = processError;
+      
+      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+        console.error(`[AUTO-STOP] ${consecutiveErrors} consecutive processing errors, stopping`);
+        return { 
+          stopReason: StopReason.ERROR, 
+          stopMessage: `Error processing posts: ${processError.message}`,
+          lastError,
+          pagesCompleted: pageCount - 1 
+        };
+      }
+    }
 
     url = data.paging?.next || null;
     
@@ -1310,15 +1494,13 @@ async function fetchAllFacebookPostsWithCallback(pageId, onPageFetched, context 
   console.log(`Pagination complete: ${pageCount} pages fetched`);
   
   return { 
-    rateLimited: false, 
-    timeout: false, 
+    stopReason: StopReason.COMPLETED, 
     pagesCompleted: pageCount 
   };
 }
 
 /**
  * Fetch posts NEWER than a timestamp (using 'since' parameter)
- * Returns all posts in a single array (no callback, for simpler newer-posts fetch)
  */
 async function fetchFacebookPostsSince(pageId, sinceTimestamp) {
   const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
@@ -1358,30 +1540,41 @@ async function fetchFacebookPostsSince(pageId, sinceTimestamp) {
 }
 
 /**
- * NEW: Fetch posts OLDER than a timestamp (using 'until' parameter)
- * Uses callback pattern for incremental saving
+ * Fetch posts OLDER than a timestamp with cancellation & error handling
  */
-async function fetchFacebookPostsUntil(pageId, untilTimestamp, onPageFetched, context = null, startingPageCount = 0) {
+async function fetchFacebookPostsUntil(pageId, untilTimestamp, onPageFetched, syncContext = {}, startingPageCount = 0) {
+  const { lambdaContext, attemptId } = syncContext;
   const fields = 'id,created_time,permalink_url,message,full_picture,shares,reactions.summary(true),comments.summary(true)';
   let url = `https://graph.facebook.com/${FB_API_VERSION}/${pageId}/posts?fields=${fields}&access_token=${FB_ACCESS_TOKEN}&limit=${MAX_POSTS_PER_PAGE}&until=${untilTimestamp}`;
   
   let pageCount = startingPageCount;
+  let consecutiveErrors = 0;
+  let lastError = null;
   const SAFETY_MARGIN_MS = 10000;
 
-  console.log(`Starting older posts fetch (until ${new Date(untilTimestamp * 1000).toISOString()})...`);
+  console.log(`[UNTIL] Starting older posts fetch (until ${new Date(untilTimestamp * 1000).toISOString()})...`);
 
-  while (url && pageCount < MAX_PAGES_TO_FETCH) {
-    // Check for Lambda timeout
-    if (context && typeof context.getRemainingTimeInMillis === 'function') {
-      const remainingTime = context.getRemainingTimeInMillis();
-      if (remainingTime < SAFETY_MARGIN_MS) {
-        console.warn(`[UNTIL] Approaching timeout (${remainingTime}ms remaining), stopping at page ${pageCount}`);
+  while (url && pageCount < MAX_PAGES_TO_FETCH + startingPageCount) {
+    // Check for cancellation
+    if (attemptId && (pageCount - startingPageCount) > 0 && (pageCount - startingPageCount) % CANCELLATION_CHECK_FREQUENCY === 0) {
+      if (await checkCancellationRequested(attemptId)) {
+        console.log(`[CANCELLATION] Sync cancelled by user at page ${pageCount}`);
         return { 
-          rateLimited: false, 
-          timeout: true, 
-          pagesCompleted: pageCount - startingPageCount
+          stopReason: StopReason.CANCELLED, 
+          stopMessage: 'Cancelled by user',
+          pagesCompleted: pageCount - startingPageCount 
         };
       }
+    }
+    
+    // Check for Lambda timeout
+    if (lambdaContext?.getRemainingTimeInMillis?.() < SAFETY_MARGIN_MS) {
+      console.warn(`[UNTIL] Approaching timeout (${lambdaContext.getRemainingTimeInMillis()}ms remaining), stopping at page ${pageCount}`);
+      return { 
+        stopReason: StopReason.TIMEOUT, 
+        stopMessage: 'Lambda timeout approaching',
+        pagesCompleted: pageCount - startingPageCount
+      };
     }
     
     pageCount++;
@@ -1391,14 +1584,24 @@ async function fetchFacebookPostsUntil(pageId, untilTimestamp, onPageFetched, co
     try {
       const response = await httpGet(url);
       data = JSON.parse(response);
+      consecutiveErrors = 0;
     } catch (error) {
       console.error(`[UNTIL] Network error on page ${pageCount}:`, error.message);
-      return { 
-        rateLimited: false, 
-        timeout: false, 
-        networkError: true,
-        pagesCompleted: pageCount - startingPageCount - 1
-      };
+      consecutiveErrors++;
+      lastError = error;
+      
+      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+        console.error(`[AUTO-STOP] ${consecutiveErrors} consecutive network errors, stopping`);
+        return { 
+          stopReason: StopReason.NETWORK_ERROR, 
+          stopMessage: `${consecutiveErrors} consecutive network errors: ${error.message}`,
+          lastError,
+          pagesCompleted: pageCount - startingPageCount - 1
+        };
+      }
+      
+      await new Promise(r => setTimeout(r, 2000));
+      continue;
     }
 
     if (data.error) {
@@ -1407,14 +1610,27 @@ async function fetchFacebookPostsUntil(pageId, untilTimestamp, onPageFetched, co
       if (data.error.code === 4 || data.error.message?.includes('limit')) {
         console.warn('[UNTIL] Rate limit reached - saving progress and stopping');
         return { 
-          rateLimited: true, 
-          timeout: false, 
-          pagesCompleted: pageCount - startingPageCount - 1,
-          error: data.error.message
+          stopReason: StopReason.RATE_LIMITED, 
+          stopMessage: data.error.message,
+          pagesCompleted: pageCount - startingPageCount - 1
         };
       }
       
-      throw new Error(data.error.message || 'Facebook API error');
+      consecutiveErrors++;
+      lastError = new Error(data.error.message || 'Facebook API error');
+      
+      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+        console.error(`[AUTO-STOP] ${consecutiveErrors} consecutive API errors, stopping`);
+        return { 
+          stopReason: StopReason.ERROR, 
+          stopMessage: `${consecutiveErrors} consecutive errors: ${data.error.message}`,
+          lastError,
+          pagesCompleted: pageCount - startingPageCount - 1
+        };
+      }
+      
+      await new Promise(r => setTimeout(r, 2000));
+      continue;
     }
 
     const posts = data.data || [];
@@ -1426,7 +1642,23 @@ async function fetchFacebookPostsUntil(pageId, untilTimestamp, onPageFetched, co
 
     console.log(`[UNTIL] Page ${pageCount}: Got ${posts.length} posts`);
     
-    await onPageFetched(posts, pageCount);
+    try {
+      await onPageFetched(posts, pageCount);
+    } catch (processError) {
+      console.error(`[UNTIL] Error processing page ${pageCount}:`, processError.message);
+      consecutiveErrors++;
+      lastError = processError;
+      
+      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+        console.error(`[AUTO-STOP] ${consecutiveErrors} consecutive processing errors, stopping`);
+        return { 
+          stopReason: StopReason.ERROR, 
+          stopMessage: `Error processing posts: ${processError.message}`,
+          lastError,
+          pagesCompleted: pageCount - startingPageCount - 1
+        };
+      }
+    }
 
     url = data.paging?.next || null;
     
@@ -1435,15 +1667,14 @@ async function fetchFacebookPostsUntil(pageId, untilTimestamp, onPageFetched, co
     }
   }
 
-  if (pageCount >= MAX_PAGES_TO_FETCH) {
+  if (pageCount >= MAX_PAGES_TO_FETCH + startingPageCount) {
     console.log(`[UNTIL] Reached maximum page limit (${MAX_PAGES_TO_FETCH})`);
   }
 
   console.log(`[UNTIL] Older posts fetch complete: ${pageCount - startingPageCount} pages fetched`);
   
   return { 
-    rateLimited: false, 
-    timeout: false, 
+    stopReason: StopReason.COMPLETED, 
     pagesCompleted: pageCount - startingPageCount
   };
 }
@@ -1521,30 +1752,51 @@ async function processAndSavePostsBatch(account, posts) {
       thumbnailUrl = mediaResult.thumbnailUrl;
     }
     
+    // ===== Save minimal data - processor handles ALL classification =====
+    const content = fbPost.message || '';
+    const rawContent = buildRawContent(fbPost);
+    const hashtags = extractHashtags(content); // Just hashtags for initial display
+    
     const newPost = {
       id: postId,
       platformPostId: fbPost.id,
       postUrl: fbPost.permalink_url,
       postType: fbPost.full_picture ? 'IMAGE' : 'TEXT',
-      content: fbPost.message || '',
-      contentPreview: (fbPost.message || '').substring(0, 200),
+      
+      // Content fields
+      content: content,
+      contentPreview: content.substring(0, 200),
+      rawContent: rawContent, // AUTHORITATIVE - processor uses this for classification
+      
+      // Media
       mediaUrls: mediaUrls,
       thumbnailUrl: thumbnailUrl,
+      
+      // Engagement metrics
       likeCount: fbPost.reactions?.summary?.total_count || 0,
       commentCount: fbPost.comments?.summary?.total_count || 0,
       shareCount: fbPost.shares?.count || 0,
+      reactionCount: fbPost.reactions?.summary?.total_count || 0,
+      
+      // Timestamps
       postedAt,
       postYearMonth: getPostYearMonth(postedAt),
       scrapedAt: now,
+      
+      // Status - PENDING for processor to handle ALL classification
       status: 'ACTIVE',
       processingStatus: 'PENDING',
-      isPromotional: detectPromotional(fbPost.message),
-      isTournamentRelated: detectTournamentRelated(fbPost.message),
-      tags: extractTags(fbPost.message),
+      
+      // Just hashtags - processor adds classification tags
+      tags: hashtags,
+      
+      // Account context
       socialAccountId: account.id,
       accountName: account.accountName,
       accountProfileImageUrl: account.profileImageUrl,
       platform: account.platform,
+      
+      // DynamoDB metadata
       createdAt: now,
       updatedAt: now,
       __typename: 'SocialPost',
@@ -1600,42 +1852,6 @@ function getPostYearMonth(dateString) {
   } catch {
     return null;
   }
-}
-
-function detectPromotional(content) {
-  if (!content) return false;
-
-  const keywords = [
-    'discount', 'sale', 'offer', 'promo', 'deal', 'special',
-    'buy now', 'limited time', 'register now', 'sign up',
-    'book now', 'early bird', 'free entry', 'freeroll',
-  ];
-
-  const lower = content.toLowerCase();
-  return keywords.some(kw => lower.includes(kw));
-}
-
-function detectTournamentRelated(content) {
-  if (!content) return false;
-
-  const keywords = [
-    'tournament', 'tourney', 'event', 'series', 'main event',
-    'satellite', 'qualifier', 'gtd', 'guaranteed', 'buy-in',
-    'buyin', 'stack', 'levels', 'blind', 'final table',
-    'winner', 'champion', 'prize', 'prizepool', 'nlhe', 'plo',
-  ];
-
-  const lower = content.toLowerCase();
-  return keywords.some(kw => lower.includes(kw));
-}
-
-function extractTags(content) {
-  if (!content) return [];
-
-  const matches = content.match(/#(\w+)/g);
-  if (!matches) return [];
-
-  return matches.map(tag => tag.substring(1).toLowerCase());
 }
 
 // ============================================
@@ -1723,6 +1939,7 @@ async function createScrapeAttempt(socialAccountId, syncType = 'INCREMENTAL') {
       startedAt: now,
       triggerSource: 'MANUAL',
       syncType,
+      cancellationRequested: false,  // NEW: Initialize cancellation flag
       createdAt: now,
       updatedAt: now,
       __typename: 'SocialScrapeAttempt',

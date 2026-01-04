@@ -1,6 +1,10 @@
 // src/hooks/scraper/useBatchJobMonitor.ts
 // Real-time batch job monitoring with subscription-first approach and polling fallback
-// UPDATED v2.1: Fixed TypeScript errors - added missing ScraperJob fields, removed unused variables
+// UPDATED v2.3: CRITICAL FIX - onJobComplete now called when job is already complete on
+//               initial fetch. This fixes the UI getting stuck when Lambda crashes 
+//               immediately before the subscription is established.
+// v2.2: Fixed null _version/_lastChangedAt errors by using minimal query
+//       from scraperManagement.ts. See that file for documentation.
 //
 // This hook now uses the onJobProgress subscription for real-time updates,
 // eliminating the need for polling and avoiding API rate limits.
@@ -9,7 +13,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { ScraperJob } from '../../API';
-import { getScraperJobsReport } from '../../graphql/queries';
+import { getScraperJobsReportMinimal } from '../../graphql/scraperManagement';
 import { useJobProgressSubscription } from './useJobProgressSubscription';
 
 const getClient = () => generateClient();
@@ -286,7 +290,7 @@ export const useBatchJobMonitor = (
       const client = getClient();
       
       const response = await client.graphql({
-        query: getScraperJobsReport,
+        query: getScraperJobsReportMinimal,
         variables: { limit: 50 }
       }) as { data?: { getScraperJobsReport?: { items?: ScraperJob[] } }; errors?: unknown[] };
 
@@ -308,6 +312,15 @@ export const useBatchJobMonitor = (
           if (foundJob.durationSeconds != null) {
             setLiveDuration(foundJob.durationSeconds);
           }
+          
+          // CRITICAL FIX: If job is already complete when we first fetch it,
+          // trigger onJobComplete callback. This handles the case where the Lambda
+          // crashes immediately before our subscription is established.
+          if (isJobComplete(foundJob.status) && !completionNotifiedRef.current) {
+            console.log('[useBatchJobMonitor] Job already complete on initial fetch:', foundJob.status);
+            completionNotifiedRef.current = true;
+            onJobComplete?.(foundJob);
+          }
         }
         setError(null);
       }
@@ -322,7 +335,7 @@ export const useBatchJobMonitor = (
     } finally {
       setIsPolling(false);
     }
-  }, [jobId, subscriptionEvent]);
+  }, [jobId, subscriptionEvent, onJobComplete]);
 
   const refresh = useCallback(() => {
     fetchJob();

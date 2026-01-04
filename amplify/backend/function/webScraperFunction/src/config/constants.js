@@ -79,26 +79,33 @@ const UNASSIGNED_VENUE_NAME = 'Unassigned';
 // GAME STATUSES
 // ─────────────────────────────────────────────────────────────────────
 
-/** Valid game status values */
+/** 
+ * Valid game status values
+ * UPDATED: Must match GraphQL GameStatus enum exactly:
+ * INITIATING, SCHEDULED, REGISTERING, RUNNING, CANCELLED, FINISHED,
+ * NOT_IN_USE, NOT_PUBLISHED, CLOCK_STOPPED, UNKNOWN
+ * 
+ * NOTE: 'NOT_FOUND', 'ERROR', 'LATE_REG', 'BREAK' are NOT valid GameStatus values!
+ * Use NOT_IN_USE for not found tournaments and UNKNOWN for errors.
+ */
 const GAME_STATUSES = {
+    INITIATING: 'INITIATING',
     SCHEDULED: 'SCHEDULED',
     REGISTERING: 'REGISTERING',
-    LATE_REG: 'LATE_REG',
     RUNNING: 'RUNNING',
-    BREAK: 'BREAK',
-    FINISHED: 'FINISHED',
     CANCELLED: 'CANCELLED',
-    NOT_FOUND: 'NOT_FOUND',
-    NOT_PUBLISHED: 'NOT_PUBLISHED',
+    FINISHED: 'FINISHED',
     NOT_IN_USE: 'NOT_IN_USE',
-    CLOCK_STOPPED: 'CLOCK_STOPPED'
+    NOT_PUBLISHED: 'NOT_PUBLISHED',
+    CLOCK_STOPPED: 'CLOCK_STOPPED',
+    UNKNOWN: 'UNKNOWN'
 };
 
 /** Statuses that indicate tournament should not be scraped */
 const DO_NOT_SCRAPE_STATUSES = [
-    GAME_STATUSES.NOT_FOUND,
+    GAME_STATUSES.NOT_IN_USE,      // Includes "not found" tournaments
     GAME_STATUSES.NOT_PUBLISHED,
-    GAME_STATUSES.NOT_IN_USE
+    GAME_STATUSES.UNKNOWN          // Error states
 ];
 
 /** Statuses that indicate tournament is completed */
@@ -109,10 +116,9 @@ const COMPLETED_STATUSES = [
 
 /** Statuses that indicate tournament is active */
 const ACTIVE_STATUSES = [
+    GAME_STATUSES.INITIATING,
     GAME_STATUSES.REGISTERING,
-    GAME_STATUSES.LATE_REG,
     GAME_STATUSES.RUNNING,
-    GAME_STATUSES.BREAK,
     GAME_STATUSES.CLOCK_STOPPED
 ];
 

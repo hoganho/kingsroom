@@ -1,11 +1,10 @@
 // src/pages/debug/DatabaseMonitor.tsx
+// OPTIMIZED: Removed activity monitoring, kept useful table scanner
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { getMonitoring } from '../../utils/enhanced-monitoring';
 import { 
-    Database, Server, Monitor, Activity, RefreshCw, 
-    Play, Users, DollarSign, Globe, Share2, Shield, BarChart3,
-    FileText
+    Database, RefreshCw, Play, Users, DollarSign, Globe, 
+    Share2, Shield, BarChart3, FileText, Activity
 } from 'lucide-react';
 
 // ==========================================
@@ -143,18 +142,12 @@ interface TableScanStats {
 }
 
 export const DatabaseMonitorPage: React.FC = () => {
-    // --- State ---
-    const [clientOperations, setClientOperations] = useState<any[]>([]);
-    const [lambdaOperations] = useState<any[]>([]);
-    const [isLoadingActivity, setIsLoadingActivity] = useState(false);
-    
-    // Scanner State
+    // Scanner State (persisted to sessionStorage)
     const [tableStats, setTableStats] = useState<Record<string, TableScanStats>>(() => {
         try {
             const saved = sessionStorage.getItem('db_monitor_stats');
             if (saved) {
                 const parsed = JSON.parse(saved);
-                // We must convert the date strings back to Date objects
                 Object.keys(parsed).forEach(key => {
                     if (parsed[key].lastScan) {
                         parsed[key].lastScan = new Date(parsed[key].lastScan);
@@ -175,31 +168,7 @@ export const DatabaseMonitorPage: React.FC = () => {
         }
     }, [tableStats]);
 
-    // --- Helpers ---
     const client = useMemo(() => generateClient(), []);
-    const monitoring = useMemo(() => getMonitoring(), []);
-
-    // Subscribe to client operations
-    useEffect(() => {
-        const unsubscribe = monitoring.subscribe((op) => {
-            setClientOperations(prev => [op, ...prev].slice(0, 100));
-        });
-        return unsubscribe;
-    }, [monitoring]);
-
-    // Fetch CloudWatch metrics for lambda operations
-    const fetchCloudWatchMetrics = useCallback(async () => {
-        setIsLoadingActivity(true);
-        try {
-            // This would typically call a Lambda to get CloudWatch logs
-            // For now, we'll just simulate with existing data
-            console.log('[DatabaseMonitor] Fetching CloudWatch metrics...');
-        } catch (error) {
-            console.error('Error fetching CloudWatch metrics:', error);
-        } finally {
-            setIsLoadingActivity(false);
-        }
-    }, []);
 
     // Scan a single table
     const scanTable = useCallback(async (tableName: string, pluralName: string) => {
@@ -209,9 +178,7 @@ export const DatabaseMonitorPage: React.FC = () => {
         }));
 
         try {
-            // Build a simple list query
             const query = `query List${pluralName} { list${pluralName}(limit: 10000) { items { id } } }`;
-            
             const response = await client.graphql({ query });
             
             if ('data' in response && response.data) {
@@ -265,37 +232,6 @@ export const DatabaseMonitorPage: React.FC = () => {
         }
     }, [scanTable]);
 
-    // --- Computed Stats ---
-    const stats = useMemo(() => {
-        const clientOps = monitoring.getOperations();
-        return {
-            client: {
-                total: clientOps.length,
-                inserts: clientOps.filter(o => o.operation === 'INSERT').length,
-                updates: clientOps.filter(o => o.operation === 'UPDATE').length,
-                deletes: clientOps.filter(o => o.operation === 'DELETE').length,
-                queries: clientOps.filter(o => o.operation === 'QUERY').length,
-            },
-            lambda: {
-                total: lambdaOperations.length,
-                inserts: lambdaOperations.filter(o => o.operation?.includes('INSERT')).length,
-                updates: lambdaOperations.filter(o => o.operation?.includes('UPDATE')).length,
-                deletes: lambdaOperations.filter(o => o.operation?.includes('DELETE')).length,
-            }
-        };
-    }, [monitoring, lambdaOperations]);
-
-    // All operations combined
-    const filteredOperations = useMemo(() => {
-        const all = [
-            ...clientOperations.map(op => ({ ...op, source: 'CLIENT' })),
-            ...lambdaOperations.map(op => ({ ...op, source: 'LAMBDA' }))
-        ];
-        return all.sort((a, b) => 
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        ).slice(0, 50);
-    }, [clientOperations, lambdaOperations]);
-
     // Total record counts
     const totalRecords = useMemo(() => {
         return Object.values(tableStats)
@@ -307,6 +243,14 @@ export const DatabaseMonitorPage: React.FC = () => {
         return Object.values(tableStats).filter(s => s.status === 'COMPLETE').length;
     }, [tableStats]);
 
+    // Last scan time
+    const lastScanTime = useMemo(() => {
+        const times = Object.values(tableStats)
+            .filter(s => s.lastScan)
+            .map(s => s.lastScan!.getTime());
+        return times.length > 0 ? new Date(Math.max(...times)) : null;
+    }, [tableStats]);
+
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
             {/* ================= HEADER ================= */}
@@ -314,10 +258,15 @@ export const DatabaseMonitorPage: React.FC = () => {
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                         <Database className="w-6 h-6 text-indigo-600" />
-                        Database Monitor
+                        Database Scanner
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
                         {tablesScanned}/{ALL_TABLES.length} tables scanned • {totalRecords.toLocaleString()} total records
+                        {lastScanTime && (
+                            <span className="ml-2">
+                                • Last scan: {lastScanTime.toLocaleTimeString()}
+                            </span>
+                        )}
                     </p>
                 </div>
                 
@@ -347,7 +296,6 @@ export const DatabaseMonitorPage: React.FC = () => {
                             Clear
                         </button>
                     )}
-
                 </div>
             </div>
 
@@ -411,72 +359,21 @@ export const DatabaseMonitorPage: React.FC = () => {
                                 </tbody>
                             </table>
                         </div>
+                        
+                        {/* Group Footer with count */}
+                        <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 text-xs text-gray-500">
+                            {(() => {
+                                const groupStats = group.tables
+                                    .map(t => tableStats[t.name])
+                                    .filter(s => s?.status === 'COMPLETE');
+                                const groupTotal = groupStats.reduce((sum, s) => sum + s.count, 0);
+                                return groupStats.length > 0 
+                                    ? `${groupStats.length}/${group.tables.length} scanned • ${groupTotal.toLocaleString()} records`
+                                    : `${group.tables.length} tables`;
+                            })()}
+                        </div>
                     </div>
                 ))}
-            </div>
-
-            {/* ================= ACTIVITY FEED ================= */}
-            <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200">
-                <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                    <div>
-                        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                            <Activity className="w-5 h-5 text-gray-500" />
-                            Database Operations Feed
-                        </h2>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                            Client: {stats.client.total} ops • Lambda: {stats.lambda.total} ops
-                        </p>
-                    </div>
-                    <button
-                        onClick={fetchCloudWatchMetrics}
-                        disabled={isLoadingActivity}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded text-sm hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50"
-                    >
-                        <RefreshCw className={`w-3 h-3 ${isLoadingActivity ? 'animate-spin' : ''}`} />
-                        Refresh Feed
-                    </button>
-                </div>
-
-                <div className="p-0">
-                    <div className="divide-y divide-gray-200 max-h-[400px] overflow-y-auto">
-                        {filteredOperations.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500">
-                                <Monitor className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                                <p>No recent activity found.</p>
-                            </div>
-                        ) : (
-                            filteredOperations.map((op, index) => (
-                                <div key={`${op.timestamp}-${index}`} className="p-3 hover:bg-gray-50 flex items-center justify-between text-sm">
-                                    <div className="flex items-center gap-3">
-                                        {op.source === 'LAMBDA' 
-                                            ? <Server className="w-4 h-4 text-purple-500" /> 
-                                            : <Monitor className="w-4 h-4 text-blue-500" />
-                                        }
-                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase w-16 text-center ${
-                                            op.operation?.includes('INSERT') ? 'bg-green-100 text-green-800' :
-                                            op.operation?.includes('UPDATE') ? 'bg-yellow-100 text-yellow-800' :
-                                            op.operation?.includes('DELETE') ? 'bg-red-100 text-red-800' :
-                                            'bg-blue-100 text-blue-800'
-                                        }`}>
-                                            {op.operation}
-                                        </span>
-                                        <span className="font-medium text-gray-900 w-32 truncate" title={op.table}>
-                                            {op.table}
-                                        </span>
-                                        {op.source === 'LAMBDA' && op.functionName && (
-                                            <span className="text-xs text-gray-400 hidden sm:inline-block">
-                                                via {op.functionName.split('-').pop()}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <span className="text-xs text-gray-400 font-mono">
-                                        {new Date(op.timestamp).toLocaleTimeString()}
-                                    </span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
             </div>
         </div>
     );

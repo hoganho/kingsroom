@@ -18,7 +18,7 @@ const { DynamoDBDocumentClient, UpdateCommand } = require('@aws-sdk/lib-dynamodb
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
-const SOCIAL_ACCOUNT_TABLE = process.env.SOCIAL_ACCOUNT_TABLE || process.env.API_POKERPROLIVE_SOCIALACCOUNTTABLE_NAME;
+const SOCIAL_ACCOUNT_TABLE = process.env.SOCIAL_ACCOUNT_TABLE || process.env.API_KINGSROOM_SOCIALACCOUNTTABLE_NAME;
 
 exports.handler = async (event) => {
   // Aggregate changes by socialAccountId

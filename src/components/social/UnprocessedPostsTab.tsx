@@ -12,7 +12,7 @@ import {
   ChevronUpIcon,
   FunnelIcon,
 } from '@heroicons/react/24/outline';
-import { Loader2, RefreshCw, Play, AlertTriangle, Clock, XOctagon } from 'lucide-react';
+import { Loader2, RefreshCw, Play, AlertTriangle, Clock, XOctagon, StopCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { useSocialPostProcessor } from '../../hooks/useSocialPostProcessor';
@@ -179,6 +179,9 @@ export const UnprocessedPostsTab: React.FC<UnprocessedPostsTabProps> = ({ accoun
   
   // Track if initial fetch is complete
   const hasFetchedRef = useRef(false);
+  
+  // Track if processing should be cancelled
+  const shouldCancelRef = useRef(false);
   
   // =========================================================================
   // FETCH POSTS - Auto-paginate to get ALL posts
@@ -390,14 +393,25 @@ export const UnprocessedPostsTab: React.FC<UnprocessedPostsTabProps> = ({ accoun
     
     if (!confirmed) return;
     
+    // Reset cancel flag
+    shouldCancelRef.current = false;
+    
     setIsReprocessing(true);
     setReprocessResults(null);
     
     let successCount = 0;
     let failedCount = 0;
+    let skippedCount = 0;
     const errors: string[] = [];
     
     for (let i = 0; i < postsToProcess.length; i++) {
+      // Check for cancellation before processing each post
+      if (shouldCancelRef.current) {
+        skippedCount = postsToProcess.length - i;
+        console.log(`[UnprocessedPostsTab] Processing cancelled. Skipped ${skippedCount} remaining posts.`);
+        break;
+      }
+      
       const post = postsToProcess[i];
       
       setReprocessProgress({
@@ -441,10 +455,23 @@ export const UnprocessedPostsTab: React.FC<UnprocessedPostsTabProps> = ({ accoun
       }
     }
     
-    setReprocessResults({ success: successCount, failed: failedCount, errors });
+    setReprocessResults({ 
+      success: successCount, 
+      failed: failedCount, 
+      errors: shouldCancelRef.current 
+        ? [...errors, `Cancelled: ${skippedCount} post${skippedCount !== 1 ? 's' : ''} skipped`]
+        : errors 
+    });
     setReprocessProgress(null);
     setIsReprocessing(false);
+    shouldCancelRef.current = false; // Reset for next run
   }, [filteredPosts, selectedPosts, processor]);
+  
+  const handleStopProcessing = useCallback(() => {
+    console.log('[UnprocessedPostsTab] Stop requested');
+    shouldCancelRef.current = true;
+    setReprocessProgress(prev => prev ? { ...prev, stage: 'Stopping...' } : null);
+  }, []);
   
   const handleViewPost = useCallback(async (post: UnprocessedPost) => {
     // Preview the post processing result
@@ -931,23 +958,35 @@ export const UnprocessedPostsTab: React.FC<UnprocessedPostsTabProps> = ({ accoun
             )}
           </div>
           
-          <button
-            onClick={handleReprocessSelected}
-            disabled={isReprocessing || selectedPosts.size === 0}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <div className="flex items-center gap-2">
             {isReprocessing ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {reprocessProgress ? `${reprocessProgress.current}/${reprocessProgress.total}` : 'Processing...'}
+                {/* Stop Button */}
+                <button
+                  onClick={handleStopProcessing}
+                  className="inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  <StopCircle className="w-4 h-4 mr-2" />
+                  Stop
+                </button>
+                
+                {/* Progress indicator */}
+                <span className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600">
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {reprocessProgress ? `${reprocessProgress.current}/${reprocessProgress.total}` : 'Processing...'}
+                </span>
               </>
             ) : (
-              <>
+              <button
+                onClick={handleReprocessSelected}
+                disabled={selectedPosts.size === 0}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <Play className="w-4 h-4 mr-2" />
                 Process Selected
-              </>
+              </button>
             )}
-          </button>
+          </div>
         </div>
       )}
       

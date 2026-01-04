@@ -8,15 +8,19 @@ import { getClient } from '../../utils/apiClient';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { format } from 'date-fns';
 import { formatCurrency } from '../../utils/generalHelpers';
+import { useS3Fetch } from '../../hooks/useS3Fetch';
 import {
   UserGroupIcon,
   ClockIcon,
   MapPinIcon,
-  LinkIcon,
   ArrowPathIcon,
   TableCellsIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
+  ClipboardDocumentIcon,
+  CheckIcon,
+  CloudIcon,
+  GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 
 // Import tab components and types
@@ -495,6 +499,17 @@ export const GameDetails = () => {
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [copiedField, setCopiedField] = useState<'gameNumber' | 'gameId' | null>(null);
+  
+  // S3 file retrieval hook
+  const { openS3File, isLoading: s3Loading } = useS3Fetch();
+
+  // Copy to clipboard with visual feedback
+  const handleCopy = useCallback((text: string, field: 'gameNumber' | 'gameId') => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  }, []);
 
   const fetchGameData = useCallback(async (id: string) => {
     setLoading(true);
@@ -736,15 +751,35 @@ export const GameDetails = () => {
       actions={
         <div className="flex items-center space-x-3">
           {game.sourceUrl && (
-            <a
-              href={game.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-            >
-              <LinkIcon className="h-4 w-4 mr-2" />
-              Source
-            </a>
+            <>
+              <button
+                onClick={() => {
+                  if (game.entityId && game.tournamentId) {
+                    openS3File(game.entityId, game.tournamentId).catch(() => {
+                      // Error is already handled by the hook
+                    });
+                  } else {
+                    alert('Missing entity ID or tournament ID for S3 lookup');
+                  }
+                }}
+                disabled={s3Loading}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="View cached S3 version"
+              >
+                <CloudIcon className={`h-4 w-4 mr-2 ${s3Loading ? 'animate-pulse' : ''}`} />
+                {s3Loading ? 'Loading...' : 'S3'}
+              </button>
+              <a
+                href={game.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                title="View live source"
+              >
+                <GlobeAltIcon className="h-4 w-4 mr-2" />
+                Live
+              </a>
+            </>
           )}
           <button
             onClick={() => fetchGameData(gameId!)}
@@ -773,9 +808,35 @@ export const GameDetails = () => {
               </div>
               <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                 {game.tournamentId && (
-                  <span>Tournament #{game.tournamentId}</span>
+                  <span className="flex items-center gap-1">
+                    Game #{game.tournamentId}
+                    <button
+                      onClick={() => handleCopy(String(game.tournamentId), 'gameNumber')}
+                      className="p-0.5 hover:bg-gray-100 rounded transition-colors"
+                      title={copiedField === 'gameNumber' ? 'Copied!' : 'Copy game number'}
+                    >
+                      {copiedField === 'gameNumber' ? (
+                        <CheckIcon className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <ClipboardDocumentIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
+                  </span>
                 )}
-                <span>ID: {game.id.slice(0, 8)}...</span>
+                <span className="flex items-center gap-1">
+                  ID: {game.id.slice(0, 8)}...
+                  <button
+                    onClick={() => handleCopy(game.id, 'gameId')}
+                    className="p-0.5 hover:bg-gray-100 rounded transition-colors"
+                    title={copiedField === 'gameId' ? 'Copied!' : 'Copy full ID'}
+                  >
+                    {copiedField === 'gameId' ? (
+                      <CheckIcon className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <ClipboardDocumentIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                    )}
+                  </button>
+                </span>
               </div>
             </div>
             

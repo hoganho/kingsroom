@@ -233,6 +233,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   instanceNumber: Int 
   isReplacementInstance: Boolean @default(value: "false")
   replacementReason: String
+
 }
 
 type TournamentStructure @model(subscriptions: null) @auth(rules: [{ allow: private }]) {

@@ -29,23 +29,32 @@ Amplify Params - DO NOT EDIT */
 
 /*
  * ===================================================================
- * FINAL MERGED Player Data Processor Lambda with Database Monitoring
+ * TRANSACTIONAL Player Data Processor Lambda
  *
- * This version combines the advanced business logic from the original
- * index.js (complex targeting, wasNewVenue, skip logic) with the
- * multi-entity support from PDP-index-enhanced.js.
+ * VERSION: 2.0.0 - Transactional writes for all-or-nothing consistency
  * 
- * MONITORING ADDED: Complete database operation tracking
+ * MAJOR CHANGE: Steps 2-6 (PlayerResult, PlayerVenue, PlayerSummary, 
+ * PlayerTransactions, PlayerEntry) are now written atomically using 
+ * DynamoDB TransactWriteItems.
  * 
- * REFACTORED (Dec 2025): Removed hardcoded DEFAULT_ENTITY_ID
- * - entityId should be provided in gameData.game.entityId from upstream
- * - Falls back to process.env.DEFAULT_ENTITY_ID if not provided
- * - Logs warnings when entityId is missing (indicates upstream issue)
+ * Either ALL records are created/updated, or NONE are.
+ * This prevents orphaned PlayerResult records without matching PlayerEntry.
+ * 
+ * Step 1 (upsertPlayerRecord/Player table) remains separate because it has
+ * complex async targeting classification logic.
  * ===================================================================
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, QueryCommand, BatchWriteCommand } = require('@aws-sdk/lib-dynamodb');
+const { 
+    DynamoDBDocumentClient, 
+    PutCommand, 
+    UpdateCommand, 
+    GetCommand, 
+    QueryCommand, 
+    BatchWriteCommand,
+    TransactWriteCommand  // NEW: For atomic writes
+} = require('@aws-sdk/lib-dynamodb');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 
@@ -53,35 +62,20 @@ const { v4: uuidv4 } = require('uuid');
 const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
 const UNASSIGNED_VENUE_NAME = "Unassigned";
 
-// REMOVED: Hardcoded DEFAULT_ENTITY_ID
-// Entity ID should come from gameData.game.entityId (set by saveGameFunction/webScraperFunction)
-// Falls back to process.env.DEFAULT_ENTITY_ID if not provided
-
 // ===================================================================
 // ENTITY ID HELPER
 // ===================================================================
 
-/**
- * Resolves entityId with proper fallback and warning logging
- * @param {string|null} providedEntityId - entityId from game data
- * @param {string|null} existingEntityId - entityId from existing record (for updates)
- * @param {string} context - Description for logging
- * @returns {string} resolved entityId
- * @throws {Error} if no entityId can be resolved
- */
 const resolveEntityId = (providedEntityId, existingEntityId = null, context = 'unknown') => {
-    // Priority 1: Provided entityId (from game data)
     if (providedEntityId) {
         return providedEntityId;
     }
     
-    // Priority 2: Existing record's entityId (for updates)
     if (existingEntityId) {
         console.warn(`[ENTITY-RESOLVE] ${context}: Using existing record entityId (game data missing entityId)`);
         return existingEntityId;
     }
     
-    // Priority 3: Environment variable fallback
     if (process.env.DEFAULT_ENTITY_ID) {
         console.warn(
             `[ENTITY-RESOLVE] ${context}: entityId missing from game data, using DEFAULT_ENTITY_ID env var. ` +
@@ -90,7 +84,6 @@ const resolveEntityId = (providedEntityId, existingEntityId = null, context = 'u
         return process.env.DEFAULT_ENTITY_ID;
     }
     
-    // No entityId available - throw error
     throw new Error(
         `[playerDataProcessor] ${context}: entityId is required but was not provided. ` +
         `Expected in gameData.game.entityId. ` +
@@ -102,19 +95,10 @@ const resolveEntityId = (providedEntityId, existingEntityId = null, context = 'u
 // ENTITY-AWARE HELPERS
 // ===================================================================
 
-/**
- * Generate entity-aware visityKey for PlayerVenue lookups
- * Format: {playerId}#{entityId}#{venueId}
- */
 const generateVisitKey = (playerId, entityId, venueId) => {
     return `${playerId}#${entityId}#${venueId}`;
 };
 
-/**
- * Get venue details including canonicalVenueId
- * @param {string} venueId - Venue ID to lookup
- * @returns {Promise<{canonicalVenueId: string|null}>} Venue info
- */
 const getVenueInfo = async (venueId) => {
     if (!venueId || venueId === UNASSIGNED_VENUE_ID) {
         return { canonicalVenueId: null };
@@ -129,7 +113,6 @@ const getVenueInfo = async (venueId) => {
         }));
         
         if (result.Item) {
-            // If venue has a canonicalVenueId, use it; otherwise the venue IS the canonical
             return { 
                 canonicalVenueId: result.Item.canonicalVenueId || result.Item.id 
             };
@@ -142,18 +125,9 @@ const getVenueInfo = async (venueId) => {
     }
 };
 
-/**
- * Find existing PlayerVenue by visityKey index
- * Falls back to legacy ID format for backward compatibility
- * @param {string} visityKey - The composite lookup key
- * @param {string} playerId - Player ID for legacy fallback
- * @param {string} venueId - Venue ID for legacy fallback
- * @returns {Promise<Object|null>} Existing record or null
- */
 const findPlayerVenueByVisitKey = async (visityKey, playerId = null, venueId = null) => {
     const playerVenueTable = getTableName('PlayerVenue');
     
-    // Try visityKey index first (new schema)
     try {
         const result = await ddbDocClient.send(new QueryCommand({
             TableName: playerVenueTable,
@@ -169,7 +143,7 @@ const findPlayerVenueByVisitKey = async (visityKey, playerId = null, venueId = n
         console.warn(`[PLAYERVENUE-LOOKUP] Error querying by visityKey:`, error.message);
     }
     
-    // Fallback: Try legacy ID format (playerId#venueId) for backward compatibility
+    // Fallback: Try legacy ID format
     if (playerId && venueId) {
         try {
             const legacyId = `${playerId}#${venueId}`;
@@ -192,7 +166,6 @@ const findPlayerVenueByVisitKey = async (visityKey, playerId = null, venueId = n
 
 // === DATABASE MONITORING ===
 const { LambdaMonitoring } = require('./lambda-monitoring');
-// Initialize with placeholder - will be set per message
 const monitoring = new LambdaMonitoring('playerDataProcessor', 'pending-entity');
 
 const client = new DynamoDBClient({});
@@ -200,12 +173,9 @@ const originalDdbDocClient = DynamoDBDocumentClient.from(client);
 const ddbDocClient = monitoring.wrapDynamoDBClient(originalDdbDocClient);
 
 // ===================================================================
-// HELPER FUNCTIONS (PRESERVED FROM index.js)
+// HELPER FUNCTIONS
 // ===================================================================
 
-/**
- * Generate table names based on Amplify naming convention
- */
 const getTableName = (modelName) => {
     const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
     const env = process.env.ENV;
@@ -217,9 +187,6 @@ const getTableName = (modelName) => {
     return `${modelName}-${apiId}-${env}`;
 };
 
-/**
- * Parse player full name into first and last name
- */
 const parsePlayerName = (fullName) => {
     if (!fullName) return { firstName: 'Unknown', lastName: '', givenName: 'Unknown' };
 
@@ -248,9 +215,6 @@ const parsePlayerName = (fullName) => {
     }
 };
 
-/**
- * Calculate days between two dates
- */
 const daysBetween = (date1, date2) => {
     const d1 = new Date(date1);
     const d2 = new Date(date2);
@@ -259,10 +223,6 @@ const daysBetween = (date1, date2) => {
     return diffDays;
 };
 
-/**
- * Calculate PlayerVenue targeting classification based on flowchart logic
- * (Preserved from index.js)
- */
 const calculatePlayerVenueTargetingClassification = (lastActivityDate, membershipCreatedDate) => {
     const now = new Date();
     
@@ -271,8 +231,6 @@ const calculatePlayerVenueTargetingClassification = (lastActivityDate, membershi
         
         const daysSinceMembership = daysBetween(membershipCreatedDate, now);
         
-        // Logic for Not Activated seems mostly correct in original, 
-        // but double-check strictly against the label ranges:
         if (daysSinceMembership <= 30) return 'NotActivated_EL';
         if (daysSinceMembership <= 60) return 'NotActivated_31_60d';
         if (daysSinceMembership <= 90) return 'NotActivated_61_90d';
@@ -283,33 +241,20 @@ const calculatePlayerVenueTargetingClassification = (lastActivityDate, membershi
     } else {
         const daysSinceLastActivity = daysBetween(lastActivityDate, now);
         
-        // FIXED: Aligned thresholds to the labels
         if (daysSinceLastActivity <= 30) return 'Active_EL'; 
-        // 31-60 days inactive -> Retain Inactive 31-60
         if (daysSinceLastActivity <= 60) return 'Retain_Inactive31_60d';
-        // 61-90 days inactive -> Retain Inactive 61-90
         if (daysSinceLastActivity <= 90) return 'Retain_Inactive61_90d';
-        // 91-120 days inactive -> Churned 91-120
         if (daysSinceLastActivity <= 120) return 'Churned_91_120d';
-        // 121-180 days inactive -> Churned 121-180
         if (daysSinceLastActivity <= 180) return 'Churned_121_180d';
-        // 181-360 days inactive -> Churned 181-360
         if (daysSinceLastActivity <= 360) return 'Churned_181_360d';
         
-        // 361+ days
         return 'Churned_361d';
     }
 };
 
-/**
- * Calculate Player targeting classification based on flowchart logic
- * (Preserved from index.js)
- */
 const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, registrationDate, isNewPlayer = false) => {
     const now = new Date();
 
-    // --- HELPER FUNCTION FOR CONSISTENCY ---
-    // Since this logic is repeated twice below, using a helper prevents errors
     const getStatusFromDays = (days) => {
         if (days <= 30) return 'Active_EL';
         if (days <= 60) return 'Retain_Inactive31_60d';
@@ -358,7 +303,6 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
         const daysSinceCreation = daysBetween(registrationDate, now);
         if (daysSinceCreation <= 30 && mostRecentVenue) {
             const venueClassification = mostRecentVenue.targetingClassification;
-            // Updated list to remove vague 'Active' and include the correct bucket labels
             const newPlayerClassifications = ['Active_EL', 'Retain_Inactive31_60d', 'Retain_Inactive61_90d'];
             if (newPlayerClassifications.includes(venueClassification)) {
                 return venueClassification;
@@ -376,10 +320,6 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
     }
 };
 
-/**
- * Generate a deterministic player ID based on name and venue
- * (Preserved from index.js)
- */
 const generatePlayerId = (playerName) => {
     const normalized = playerName.toLowerCase().trim();
     const hash = crypto.createHash('sha256')
@@ -389,31 +329,15 @@ const generatePlayerId = (playerName) => {
 };
 
 // ===================================================================
-// MAIN PROCESSING FUNCTIONS (MERGED & REFACTORED)
+// PLAYER RECORD (Step 1 - Separate from transaction due to async logic)
 // ===================================================================
 
-/**
- * Create or update a Player record
- * (Merged: Preserved index.js logic, added entityId)
- *
- * ===================================================================
- * REFACTORED (Nov 2025):
- * 1. Adds conditional logic for date fields based on Game.gameStartDateTime.
- * 2. Only updates lastPlayedDate/targetingClassification if the new game is the LATEST.
- * 3. Back-fills registrationDate/firstGamePlayed/registrationVenueId if the new game is the EARLIEST.
- * 4. Adds 'firstGamePlayed' to new player records.
- * 5. Corrects registrationVenueId logic based on venueAssignmentStatus.
- * 
- * REFACTORED (Dec 2025): Uses resolveEntityId() helper instead of hardcoded fallback
- * ===================================================================
- */
 const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, entityId) => {
     console.log(`[PLAYER-UPSERT] Starting upsert for player ${playerName} (${playerId})`);
     const playerTable = getTableName('Player');
     const now = new Date().toISOString();
     const nameParts = parsePlayerName(playerName);
     
-    // Use gameStartDateTime as the authoritative timestamp for all logic
     const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
     const gameDate = gameDateTime ? (gameDateTime.includes('T') ? gameDateTime : `${gameDateTime}T00:00:00.000Z`) : now;
     const gameDateObj = new Date(gameDate);
@@ -425,7 +349,6 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
         }));
 
         if (existingPlayer.Item) {
-            // Player exists globally. Apply conditional updates.
             console.log(`[PLAYER-UPSERT] Existing player ${playerId} found. Applying conditional logic.`);
             
             monitoring.trackOperation('PLAYER_UPDATE', 'Player', playerId, {
@@ -436,14 +359,12 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
             const currentRegDate = new Date(existingPlayer.Item.registrationDate);
             const currentLastPlayed = new Date(existingPlayer.Item.lastPlayedDate || existingPlayer.Item.registrationDate);
 
-            // UPDATED: Use resolveEntityId helper
             const effectiveEntityId = resolveEntityId(
                 entityId, 
                 existingPlayer.Item.primaryEntityId, 
                 `upsertPlayerRecord(${playerId})`
             );
 
-            // Build dynamic update expression
             let updateExpression = 'SET #version = #version + :inc, #ent = :entityId, updatedAt = :now, pointsBalance = pointsBalance + :points';
             let expressionNames = { 
                 '#version': '_version',
@@ -456,14 +377,12 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
                 ':points': playerData.points || 0
             };
 
-            // REFACTOR RULE 1: Game is EARLIER than registration date
             if (gameDateObj < currentRegDate) {
-                console.log(`[PLAYER-UPSERT] Game date ${gameDate} is earlier than reg date ${existingPlayer.Item.registrationDate}. Back-filling first-play data.`);
+                console.log(`[PLAYER-UPSERT] Game date ${gameDate} is earlier than reg date. Back-filling.`);
                 updateExpression += ', registrationDate = :regDate, firstGamePlayed = :firstGame';
                 expressionValues[':regDate'] = gameDate;
                 expressionValues[':firstGame'] = gameDate;
                 
-                // Only assign reg venue if it's not pending/unassigned
                 const canAssignVenue = gameData.game.venueAssignmentStatus !== "PENDING_ASSIGNMENT" && gameData.game.venueId && gameData.game.venueId !== UNASSIGNED_VENUE_ID;
                 if (canAssignVenue) {
                     updateExpression += ', registrationVenueId = :regVenue';
@@ -471,9 +390,8 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
                 }
             }
 
-            // REFACTOR RULE 2: Game is LATER than last played date
             if (gameDateObj > currentLastPlayed) {
-                console.log(`[PLAYER-UPSERT] Game date ${gameDate} is later than last played ${existingPlayer.Item.lastPlayedDate}. Updating last-play data.`);
+                console.log(`[PLAYER-UPSERT] Game date ${gameDate} is later than last played. Updating.`);
                 const targetingClassification = await calculatePlayerTargetingClassification(
                     playerId, gameDate, existingPlayer.Item.registrationDate, false
                 );
@@ -483,8 +401,7 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
                 expressionValues[':targeting'] = targetingClassification;
             }
 
-            // Only send update if there's something to change (points or dates)
-            if (Object.keys(expressionValues).length > 4) { // More than the base 4 values
+            if (Object.keys(expressionValues).length > 4) {
                  await ddbDocClient.send(new UpdateCommand({
                     TableName: playerTable,
                     Key: { id: playerId },
@@ -499,11 +416,8 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
             return playerId;
             
         } else {
-            // Player does NOT exist globally. Create a new record.
-            // This game is by definition the first and last.
             console.log(`[PLAYER-UPSERT] New player ${playerId}. Creating record.`);
             
-            // UPDATED: Use resolveEntityId helper
             const effectiveEntityId = resolveEntityId(entityId, null, `upsertPlayerRecord-new(${playerId})`);
             
             monitoring.trackOperation('PLAYER_CREATE', 'Player', playerId, {
@@ -516,7 +430,6 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
                 playerId, gameDate, gameDate, true
             );
             
-            // Use game's venue assignment status to determine registration venue
             const canAssignVenue = gameData.game.venueAssignmentStatus !== "PENDING_ASSIGNMENT" && gameData.game.venueId && gameData.game.venueId !== UNASSIGNED_VENUE_ID;
 
             const newPlayer = {
@@ -525,13 +438,13 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
                 lastName: nameParts.lastName,
                 givenName: nameParts.givenName,
                 registrationDate: gameDate,
-                firstGamePlayed: gameDate, // REFACTOR: Added this field
-                registrationVenueId: canAssignVenue ? gameData.game.venueId : null, // REFACTOR: Corrected logic
+                firstGamePlayed: gameDate,
+                registrationVenueId: canAssignVenue ? gameData.game.venueId : null,
                 status: 'ACTIVE',
                 category: 'NEW',
                 lastPlayedDate: gameDate,
                 targetingClassification: targetingClassification,
-                venueAssignmentStatus: canAssignVenue ? 'AUTO_ASSIGNED' : 'PENDING_ASSIGNMENT', // REFACTOR: Corrected logic
+                venueAssignmentStatus: canAssignVenue ? 'AUTO_ASSIGNED' : 'PENDING_ASSIGNMENT',
                 creditBalance: 0,
                 pointsBalance: playerData.points || 0,
                 primaryEntityId: effectiveEntityId,
@@ -559,618 +472,492 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
         } else {
              console.warn(`[PLAYER-UPSERT] Condition check failed for ${playerName}, likely race condition. Skipping.`);
         }
-        // Re-throw to fail SQS message processing if it's a real error
         if (error.name !== 'ConditionalCheckFailedException') {
             throw error;
         }
     }
 };
 
-/**
- * Upserts a PlayerEntry record
- * (Merged: Preserved index.js logic [Update/Catch/Put], added entityId)
- */
-const upsertPlayerEntry = async (playerId, gameData, entityId) => {
-    console.log(`[ENTRY-UPSERT] Starting upsert for game ${gameData.game.id}.`);
-    const playerEntryTable = getTableName('PlayerEntry');
-    const entryId = `${gameData.game.id}#${playerId}`; // Preserved from index.js
-    const now = new Date().toISOString();
-    
-    // UPDATED: Use resolveEntityId helper
-    const effectiveEntityId = resolveEntityId(entityId, null, `upsertPlayerEntry(${entryId})`);
-
-    try {
-        // Try to update existing record to 'COMPLETED'
-        await ddbDocClient.send(new UpdateCommand({
-            TableName: playerEntryTable,
-            Key: { id: entryId },
-            UpdateExpression: 'SET #status = :status, updatedAt = :updatedAt, entityId = :entityId',
-            ExpressionAttributeNames: { '#status': 'status' },
-            ExpressionAttributeValues: {
-                ':status': 'COMPLETED',
-                ':updatedAt': now,
-                ':entityId': effectiveEntityId
-            },
-            ConditionExpression: 'attribute_exists(id)'
-        }));
-        console.log(`[ENTRY-UPSERT] Updated existing entry for ${playerId}.`);
-        
-        monitoring.trackOperation('ENTRY_UPDATE', 'PlayerEntry', entryId, {
-            playerId,
-            gameId: gameData.game.id,
-            entityId: effectiveEntityId
-        });
-    } catch (error) {
-        // If update fails, item does not exist, so create it
-        if (error.name === 'ConditionalCheckFailedException') {
-            console.log(`[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.`);
-            
-            monitoring.trackOperation('ENTRY_CREATE', 'PlayerEntry', entryId, {
-                playerId,
-                gameId: gameData.game.id,
-                entityId: effectiveEntityId
-            });
-            
-            const newEntry = {
-                id: entryId,
-                playerId: playerId,
-                gameId: gameData.game.id,
-                venueId: gameData.game.venueId,
-                entityId: effectiveEntityId,
-                status: 'COMPLETED',
-                registrationTime: gameData.game.gameStartDateTime,
-                gameStartDateTime: gameData.game.gameStartDateTime,
-                createdAt: now,
-                updatedAt: now,
-                _version: 1,
-                _lastChangedAt: Date.now(),
-                __typename: 'PlayerEntry'
-            };
-            
-            try {
-                await ddbDocClient.send(new PutCommand({
-                    TableName: playerEntryTable,
-                    Item: newEntry
-                }));
-                console.log(`[ENTRY-UPSERT] Created new COMPLETED entry for ${playerId}.`);
-            } catch (putError) {
-                console.error(`[ENTRY-UPSERT] CRITICAL ERROR creating entry:`, putError);
-                monitoring.trackOperation('ENTRY_ERROR', 'PlayerEntry', entryId, {
-                    error: putError.message,
-                    entityId: effectiveEntityId
-                });
-                throw putError;
-            }
-        } else {
-            console.error(`[ENTRY-UPSERT] Unexpected error:`, error);
-            monitoring.trackOperation('ENTRY_ERROR', 'PlayerEntry', entryId, {
-                error: error.message,
-                entityId: effectiveEntityId
-            });
-            throw error;
-        }
-    }
-};
+// ===================================================================
+// TRANSACTIONAL PLAYER PROCESSING (Steps 2-6)
+// ===================================================================
 
 /**
- * Create PlayerResult record
- * (Merged: Preserved index.js logic [incl. venueId], added entityId)
- */
-const createPlayerResult = async (playerId, gameData, playerData, entityId) => {
-    console.log(`[RESULT-CREATE] Attempting result creation for ${playerId}.`);
-    const playerResultTable = getTableName('PlayerResult');
-    const resultId = `${playerId}#${gameData.game.id}`;
-    const now = new Date().toISOString();
-    
-    // UPDATED: Use resolveEntityId helper
-    const effectiveEntityId = resolveEntityId(entityId, null, `createPlayerResult(${resultId})`);
-    
-    monitoring.trackOperation('RESULT_CREATE', 'PlayerResult', resultId, {
-        playerId,
-        gameId: gameData.game.id,
-        finishingPlace: playerData.rank,
-        entityId: effectiveEntityId
-    });
-    
-    try {
-        const playerResult = {
-            id: resultId,
-            playerId: playerId,
-            gameId: gameData.game.id,
-            venueId: gameData.game.venueId, // Preserved from index.js
-            entityId: effectiveEntityId,
-            finishingPlace: playerData.rank || null,
-            prizeWon: playerData.winnings > 0 || playerData.isQualification || false,
-            amountWon: playerData.winnings || 0,
-            pointsEarned: playerData.points || 0,
-            isMultiDayQualification: playerData.isQualification || false,
-            totalRunners: gameData.game.totalUniquePlayers || gameData.players.totalUniquePlayers,
-            gameStartDateTime: gameData.game.gameStartDateTime || gameData.game.gameEndDateTime || now, // Added for sorting support
-            createdAt: now,
-            updatedAt: now,
-            _version: 1,
-            _lastChangedAt: Date.now(),
-            __typename: 'PlayerResult'
-        };
-        
-        await ddbDocClient.send(new PutCommand({
-            TableName: playerResultTable,
-            Item: playerResult,
-            ConditionExpression: 'attribute_not_exists(id)'
-        }));
-        
-        console.log(`[RESULT-CREATE] Created result successfully.`);
-        return resultId;
-    } catch (error) {
-        if (error.name === 'ConditionalCheckFailedException') {
-            console.log(`[RESULT-CREATE] Result already exists, skipping.`);
-            return resultId;
-        }
-        console.error(`[RESULT-CREATE] CRITICAL ERROR creating result:`, error);
-        monitoring.trackOperation('RESULT_ERROR', 'PlayerResult', resultId, {
-            error: error.message,
-            entityId: effectiveEntityId
-        });
-        throw error;
-    }
-};
-
-/**
- * Update or create PlayerSummary record
- * (Merged: Preserved index.js logic [wasNewVenue], added entityId)
- */
-const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, entityId) => {
-    console.log(`[SUMMARY-UPSERT] Starting upsert for player ${playerId}. (NewVenue: ${wasNewVenue})`);
-    const playerSummaryTable = getTableName('PlayerSummary');
-    const summaryId = `${playerId}`;
-    const now = new Date().toISOString();
-    
-    // Use gameStartDateTime as the authoritative timestamp
-    const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
-
-    const buyInAmount = gameData.game.buyIn || 0;
-    const winningsAmount = playerData.winnings || 0;
-    const isITM = playerData.winnings > 0 || playerData.isQualification;
-    const isCash = playerData.winnings > 0;
-
-    try {
-        const existingSummary = await ddbDocClient.send(new GetCommand({
-            TableName: playerSummaryTable,
-            Key: { id: summaryId }
-        }));
-
-        if (existingSummary.Item) {
-            // UPDATED: Use resolveEntityId helper
-            const effectiveEntityId = resolveEntityId(
-                entityId, 
-                existingSummary.Item.entityId, 
-                `upsertPlayerSummary(${summaryId})`
-            );
-            
-            monitoring.trackOperation('SUMMARY_UPDATE', 'PlayerSummary', summaryId, {
-                playerId,
-                entityId: effectiveEntityId,
-                wasNewVenue
-            });
-            
-            // REFACTOR: Apply conditional date logic to lastPlayed
-            const currentLastPlayed = new Date(existingSummary.Item.lastPlayed);
-            const gameDateObj = new Date(gameDateTime);
-            
-            let updateExpression = `
-                SET sessionsPlayed = sessionsPlayed + :one,
-                    tournamentsPlayed = tournamentsPlayed + :one,
-                    tournamentWinnings = tournamentWinnings + :winnings,
-                    tournamentBuyIns = tournamentBuyIns + :buyIn,
-                    tournamentITM = tournamentITM + :itm,
-                    tournamentsCashed = tournamentsCashed + :cash,
-                    totalWinnings = totalWinnings + :winnings,
-                    totalBuyIns = totalBuyIns + :buyIn,
-                    netBalance = netBalance + :profitLoss,
-                    venuesVisited = venuesVisited + :venueInc,
-                    updatedAt = :updatedAt,
-                    #v = if_not_exists(#v, :zero) + :one,
-                    #ent = :entityId
-            `;
-            let expressionNames = {
-                '#v': '_version',
-                '#ent': 'entityId'
-            };
-            let expressionValues = {
-                ':one': 1,
-                ':winnings': winningsAmount,
-                ':buyIn': buyInAmount,
-                ':itm': isITM ? 1 : 0,
-                ':cash': isCash ? 1 : 0,
-                ':profitLoss': winningsAmount - buyInAmount,
-                ':venueInc': wasNewVenue ? 1 : 0, 
-                ':updatedAt': now,
-                ':entityId': effectiveEntityId,
-                ':zero': 0
-            };
-            
-            // REFACTOR RULE: Only update lastPlayed if this game is later
-            if (gameDateObj > currentLastPlayed) {
-                console.log(`[SUMMARY-UPSERT] Updating lastPlayed date.`);
-                updateExpression += ', #lastPlayed = :lastPlayed';
-                expressionNames['#lastPlayed'] = 'lastPlayed';
-                expressionValues[':lastPlayed'] = gameDateTime;
-            }
-
-            await ddbDocClient.send(new UpdateCommand({
-                TableName: playerSummaryTable,
-                Key: { id: summaryId },
-                UpdateExpression: updateExpression,
-                ExpressionAttributeNames: expressionNames,
-                ExpressionAttributeValues: expressionValues
-            }));
-            console.log(`[SUMMARY-UPSERT] Updated existing summary.`);
-        } else {
-            // UPDATED: Use resolveEntityId helper
-            const effectiveEntityId = resolveEntityId(entityId, null, `upsertPlayerSummary-new(${summaryId})`);
-            
-            monitoring.trackOperation('SUMMARY_CREATE', 'PlayerSummary', summaryId, {
-                playerId,
-                entityId: effectiveEntityId
-            });
-            
-            const newSummary = {
-                id: summaryId,
-                playerId: playerId,
-                entityId: effectiveEntityId,
-                sessionsPlayed: 1,
-                tournamentsPlayed: 1,
-                cashGamesPlayed: 0,
-                venuesVisited: 1, 
-                tournamentWinnings: winningsAmount,
-                tournamentBuyIns: buyInAmount,
-                tournamentITM: isITM ? 1 : 0,
-                tournamentsCashed: isCash ? 1 : 0,
-                cashGameWinnings: 0,
-                cashGameBuyIns: 0,
-                totalWinnings: winningsAmount,
-                totalBuyIns: buyInAmount,
-                netBalance: winningsAmount - buyInAmount,
-                lastPlayed: gameDateTime, // REFACTOR: Set based on game date
-                createdAt: now,
-                updatedAt: now,
-                _version: 1,
-                _lastChangedAt: Date.now(),
-                __typename: 'PlayerSummary'
-            };
-            
-            await ddbDocClient.send(new PutCommand({
-                TableName: playerSummaryTable,
-                Item: newSummary
-            }));
-            console.log(`[SUMMARY-UPSERT] Created new summary.`);
-        }
-    } catch (error) {
-        console.error(`[SUMMARY-UPSERT] CRITICAL ERROR processing summary:`, error);
-        monitoring.trackOperation('SUMMARY_ERROR', 'PlayerSummary', summaryId, {
-            error: error.message,
-            entityId
-        });
-        throw error;
-    }
-};
-
-/**
- * Update or create PlayerVenue record
- * (Merged: Preserved index.js logic [returns wasNewVenue], added entityId)
- *
- * ===================================================================
- * REFACTORED (Nov 2025):
- * 1. Adds conditional logic for date fields based on Game.gameStartDateTime.
- * 2. Only updates lastPlayedDate/targetingClassification if the new game is the LATEST for this venue.
- * 3. Back-fills firstPlayedDate if the new game is the EARLIEST for this venue.
+ * Process Steps 2-6 atomically using DynamoDB TransactWriteItems
  * 
- * ENTITY-AWARE UPDATE (Dec 2025):
- * 4. Uses visityKey (playerId#entityId#venueId) for lookups via byVisitKey index.
- * 5. Adds canonicalVenueId for cross-entity venue linking.
- * 6. Uses uuid for new record IDs.
- * 7. Uses resolveEntityId() helper instead of hardcoded fallback.
- * ===================================================================
+ * Either ALL of these are written, or NONE:
+ * - PlayerResult
+ * - PlayerVenue (update or create)
+ * - PlayerSummary (update or create)
+ * - PlayerTransaction(s)
+ * - PlayerEntry (update or create)
  */
-const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
-    console.log(`[VENUE-UPSERT] Starting upsert for player ${playerId} at venue ${gameData.game.venueId} with entity ${entityId}.`);
-    
-    // This logic is correct and preserved
-    if (!gameData.game.venueId || gameData.game.venueId === UNASSIGNED_VENUE_ID) {
-        console.log(`[VENUE-UPSERT] Skipping - venue is unassigned for game ${gameData.game.id}`);
-        return { success: true, skipped: true, wasNewVenue: false };
-    }
-    
-    const playerVenueTable = getTableName('PlayerVenue');
-    
-    // UPDATED: Use resolveEntityId helper
-    const effectiveEntityId = resolveEntityId(entityId, null, `upsertPlayerVenue(${playerId})`);
-    
-    // Generate entity-aware visityKey for lookup
-    const visityKey = generateVisitKey(playerId, effectiveEntityId, gameData.game.venueId);
-    console.log(`[VENUE-UPSERT] Looking up by visityKey: ${visityKey}`);
+const processPlayerRecordsTransactional = async (playerId, playerName, gameData, playerData, entityId) => {
+    console.log(`[TXN-PROCESS] Starting transactional processing for ${playerName} (${playerId})`);
     
     const now = new Date().toISOString();
+    const timestamp = Date.now();
     
-    // Use gameStartDateTime as the authoritative timestamp
-    const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
-    const gameDate = gameDateTime ? (gameDateTime.includes('T') ? gameDateTime : `${gameDateTime}T00:00:00.000Z`) : now;
+    // Table names
+    const playerResultTable = getTableName('PlayerResult');
+    const playerVenueTable = getTableName('PlayerVenue');
+    const playerSummaryTable = getTableName('PlayerSummary');
+    const playerTransactionTable = getTableName('PlayerTransaction');
+    const playerEntryTable = getTableName('PlayerEntry');
+    
+    // Record IDs
+    const resultId = `${playerId}#${gameData.game.id}`;
+    const summaryId = playerId;
+    const entryId = `${gameData.game.id}#${playerId}`;
+    
+    // Game metadata
+    const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime || now;
+    const gameDate = gameDateTime.includes('T') ? gameDateTime : `${gameDateTime}T00:00:00.000Z`;
     const gameDateObj = new Date(gameDate);
     
-    const currentGameBuyIn = (gameData.game.buyIn || 0);
+    const buyInAmount = gameData.game.buyIn || 0;
+    const rakeAmount = gameData.game.rake || 0;
+    const winningsAmount = playerData.winnings || 0;
+    const isITM = winningsAmount > 0 || playerData.isQualification;
+    const isCash = winningsAmount > 0;
     
-    try {
-        // Look up existing record by visityKey (entity-aware) with legacy fallback
-        const existingRecord = await findPlayerVenueByVisitKey(visityKey, playerId, gameData.game.venueId);
+    const skipVenueProcessing = !gameData.game.venueId || gameData.game.venueId === UNASSIGNED_VENUE_ID;
+    
+    // ===================================================================
+    // PHASE 1: Pre-fetch existing records (parallel)
+    // ===================================================================
+    console.log(`[TXN-PROCESS] Phase 1: Pre-fetching existing records...`);
+    
+    const visityKey = skipVenueProcessing ? null : generateVisitKey(playerId, entityId, gameData.game.venueId);
+    
+    const [existingResult, existingSummary, existingEntry, existingVenue, venueInfo] = await Promise.all([
+        // PlayerResult
+        ddbDocClient.send(new GetCommand({
+            TableName: playerResultTable,
+            Key: { id: resultId }
+        })).then(r => r.Item).catch(() => null),
         
-        if (existingRecord) {
-            // PlayerVenue exists. Apply conditional updates.
-            console.log(`[VENUE-UPSERT] Found existing record with id: ${existingRecord.id}`);
-            
-            monitoring.trackOperation('PLAYERVENUE_UPDATE', 'PlayerVenue', existingRecord.id, {
-                playerId,
+        // PlayerSummary
+        ddbDocClient.send(new GetCommand({
+            TableName: playerSummaryTable,
+            Key: { id: summaryId }
+        })).then(r => r.Item).catch(() => null),
+        
+        // PlayerEntry
+        ddbDocClient.send(new GetCommand({
+            TableName: playerEntryTable,
+            Key: { id: entryId }
+        })).then(r => r.Item).catch(() => null),
+        
+        // PlayerVenue (via index lookup)
+        skipVenueProcessing ? Promise.resolve(null) : findPlayerVenueByVisitKey(visityKey, playerId, gameData.game.venueId),
+        
+        // VenueInfo for canonicalVenueId
+        skipVenueProcessing ? Promise.resolve({ canonicalVenueId: null }) : getVenueInfo(gameData.game.venueId)
+    ]);
+    
+    // Skip if PlayerResult already exists
+    if (existingResult) {
+        console.log(`[TXN-PROCESS] PlayerResult already exists for ${playerName}, skipping`);
+        return { success: true, playerName, playerId, status: 'ALREADY_EXISTS', wasNewVenue: false };
+    }
+    
+    const wasNewVenue = !existingVenue && !skipVenueProcessing;
+    
+    console.log(`[TXN-PROCESS] Pre-fetch complete:`, {
+        existingResult: !!existingResult,
+        existingSummary: !!existingSummary,
+        existingEntry: !!existingEntry,
+        existingVenue: !!existingVenue,
+        skipVenueProcessing,
+        wasNewVenue
+    });
+    
+    // ===================================================================
+    // PHASE 2: Build transaction items
+    // ===================================================================
+    console.log(`[TXN-PROCESS] Phase 2: Building transaction items...`);
+    
+    const transactItems = [];
+    
+    // --- 1. PlayerResult (always PUT) ---
+    transactItems.push({
+        Put: {
+            TableName: playerResultTable,
+            Item: {
+                id: resultId,
+                playerId: playerId,
+                gameId: gameData.game.id,
                 venueId: gameData.game.venueId,
-                entityId: effectiveEntityId
-            });
+                entityId: entityId,
+                finishingPlace: playerData.rank || null,
+                prizeWon: isITM,
+                amountWon: winningsAmount,
+                pointsEarned: playerData.points || 0,
+                isMultiDayQualification: playerData.isQualification || false,
+                totalRunners: gameData.game.totalUniquePlayers || gameData.players?.totalUniquePlayers || 0,
+                gameStartDateTime: gameDateTime,
+                createdAt: now,
+                updatedAt: now,
+                _version: 1,
+                _lastChangedAt: timestamp,
+                __typename: 'PlayerResult'
+            },
+            ConditionExpression: 'attribute_not_exists(id)'
+        }
+    });
+    
+    // --- 2. PlayerVenue (PUT or UPDATE) ---
+    if (!skipVenueProcessing) {
+        if (existingVenue) {
+            // UPDATE existing PlayerVenue
+            const currentFirstPlayed = new Date(existingVenue.firstPlayedDate);
+            const currentLastPlayed = new Date(existingVenue.lastPlayedDate);
             
-            const currentFirstPlayed = new Date(existingRecord.firstPlayedDate);
-            const currentLastPlayed = new Date(existingRecord.lastPlayedDate);
-
-            // Calculate metrics that are always updated
-            const oldGamesPlayed = existingRecord.totalGamesPlayed || 0;
-            const oldAverageBuyIn = existingRecord.averageBuyIn || 0;
+            const oldGamesPlayed = existingVenue.totalGamesPlayed || 0;
+            const oldAverageBuyIn = existingVenue.averageBuyIn || 0;
             const newTotalGames = oldGamesPlayed + 1;
             const newAverageBuyIn = newTotalGames > 0
-                ? ((oldAverageBuyIn * oldGamesPlayed) + currentGameBuyIn) / newTotalGames
-                : currentGameBuyIn;
-
-            // Build dynamic update expression
+                ? ((oldAverageBuyIn * oldGamesPlayed) + buyInAmount) / newTotalGames
+                : buyInAmount;
+            
             let updateExpression = 'SET #version = #version + :inc, updatedAt = :updatedAt, totalGamesPlayed = totalGamesPlayed + :inc, averageBuyIn = :newAverageBuyIn';
-            let expressionNames = {
-                '#version': '_version'
-            };
-            let expressionValues = {
+            const expressionNames = { '#version': '_version' };
+            const expressionValues = {
                 ':inc': 1,
                 ':updatedAt': now,
                 ':newAverageBuyIn': newAverageBuyIn
             };
-
-            // Migrate entityId if not set (backward compat)
-            if (!existingRecord.entityId) {
+            
+            // Migrate entityId if not set
+            if (!existingVenue.entityId) {
                 updateExpression += ', entityId = :entityId';
-                expressionValues[':entityId'] = effectiveEntityId;
+                expressionValues[':entityId'] = entityId;
             }
             
-            // Migrate visityKey if not set (backward compat)
-            if (!existingRecord.visityKey) {
+            // Migrate visityKey if not set
+            if (!existingVenue.visityKey) {
                 updateExpression += ', visityKey = :visityKey';
                 expressionValues[':visityKey'] = visityKey;
             }
             
             // Migrate canonicalVenueId if not set
-            if (!existingRecord.canonicalVenueId) {
-                const venueInfo = await getVenueInfo(gameData.game.venueId);
-                if (venueInfo.canonicalVenueId) {
-                    updateExpression += ', canonicalVenueId = :canonicalVenueId';
-                    expressionValues[':canonicalVenueId'] = venueInfo.canonicalVenueId;
-                }
+            if (!existingVenue.canonicalVenueId && venueInfo.canonicalVenueId) {
+                updateExpression += ', canonicalVenueId = :canonicalVenueId';
+                expressionValues[':canonicalVenueId'] = venueInfo.canonicalVenueId;
             }
-
-            // REFACTOR RULE 1: Game is EARLIER than first played date
+            
+            // Update firstPlayedDate if this game is earlier
             if (gameDateObj < currentFirstPlayed) {
-                console.log(`[VENUE-UPSERT] Game date ${gameDate} is earlier than first played ${existingRecord.firstPlayedDate}. Back-filling.`);
                 updateExpression += ', firstPlayedDate = :firstPlayed';
                 expressionValues[':firstPlayed'] = gameDate;
             }
-
-            // REFACTOR RULE 2: Game is LATER than last played date
+            
+            // Update lastPlayedDate if this game is later
             if (gameDateObj > currentLastPlayed) {
-                console.log(`[VENUE-UPSERT] Game date ${gameDate} is later than last played ${existingRecord.lastPlayedDate}. Updating.`);
                 const targetingClassification = calculatePlayerVenueTargetingClassification(
-                    gameDate, // Use new game date as last activity
-                    existingRecord.membershipCreatedDate
+                    gameDate,
+                    existingVenue.membershipCreatedDate
                 );
-                
                 updateExpression += ', lastPlayedDate = :lastPlayed, targetingClassification = :targeting';
                 expressionValues[':lastPlayed'] = gameDate;
                 expressionValues[':targeting'] = targetingClassification;
             }
-
-            await ddbDocClient.send(new UpdateCommand({
-                TableName: playerVenueTable,
-                Key: { id: existingRecord.id },
-                UpdateExpression: updateExpression,
-                ExpressionAttributeNames: expressionNames,
-                ExpressionAttributeValues: expressionValues
-            }));
             
-            console.log(`[VENUE-UPSERT] Updated existing PlayerVenue record.`);
-            return { wasNewVenue: false };
-
-        } else {
-            // PlayerVenue does NOT exist. Create new with uuid ID.
-            // This game is by definition the first and last.
-            
-            const newPlayerVenueId = uuidv4();
-            
-            monitoring.trackOperation('PLAYERVENUE_CREATE', 'PlayerVenue', newPlayerVenueId, {
-                playerId,
-                venueId: gameData.game.venueId,
-                entityId: effectiveEntityId,
-                visityKey
+            transactItems.push({
+                Update: {
+                    TableName: playerVenueTable,
+                    Key: { id: existingVenue.id },
+                    UpdateExpression: updateExpression,
+                    ExpressionAttributeNames: expressionNames,
+                    ExpressionAttributeValues: expressionValues
+                }
             });
+        } else {
+            // PUT new PlayerVenue
+            const newPlayerVenueId = uuidv4();
+            const targetingClassification = calculatePlayerVenueTargetingClassification(gameDate, gameDate);
             
-            // Get canonical venue info
-            const venueInfo = await getVenueInfo(gameData.game.venueId);
-            
-            const targetingClassification = calculatePlayerVenueTargetingClassification(
-                gameDate, // lastActivityDate
-                gameDate  // membershipCreatedDate
-            );
-            
-            const newPlayerVenue = {
-                id: newPlayerVenueId,
-                playerId: playerId,
-                venueId: gameData.game.venueId,
-                entityId: effectiveEntityId,
-                visityKey: visityKey,
-                canonicalVenueId: venueInfo.canonicalVenueId,
-                membershipCreatedDate: gameDate,
-                firstPlayedDate: gameDate,
-                lastPlayedDate: gameDate,
-                totalGamesPlayed: 1,
-                averageBuyIn: currentGameBuyIn,
-                totalBuyIns: currentGameBuyIn,
-                totalWinnings: 0,
-                netProfit: 0,
-                targetingClassification: targetingClassification,
-                createdAt: now,
-                updatedAt: now,
-                _version: 1,
-                _lastChangedAt: Date.now(),
-                __typename: 'PlayerVenue'
-            };
-            
-            await ddbDocClient.send(new PutCommand({
-                TableName: playerVenueTable,
-                Item: newPlayerVenue
-            }));
-            console.log(`[VENUE-UPSERT] Created new PlayerVenue record with id ${newPlayerVenueId}.`);
-            return { wasNewVenue: true }; // Preserved from index.js
-        }
-        
-    } catch (error) {
-        console.error(`[VENUE-UPSERT] CRITICAL ERROR:`, error);
-        monitoring.trackOperation('PLAYERVENUE_ERROR', 'PlayerVenue', visityKey, {
-            error: error.message,
-            entityId: effectiveEntityId
-        });
-        throw error;
-    }
-};
-
-
-/**
- * Create PlayerTransaction records
- * (Merged: Preserved index.js logic [uuidv4, BatchWrite], added entityId)
- */
-const createPlayerTransactions = async (playerId, gameData, playerData, entityId) => {
-    console.log(`[TRANSACTION-CREATE] Starting creation for player ${playerId}.`);
-    const playerTransactionTable = getTableName('PlayerTransaction');
-    const transactions = [];
-    const now = new Date().toISOString();
-    
-    // UPDATED: Use resolveEntityId helper
-    const effectiveEntityId = resolveEntityId(entityId, null, `createPlayerTransactions(${playerId})`);
-    
-    // Use gameStartDateTime as the authoritative timestamp
-    const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
-
-    // Build transactions directly from gameData and playerData
-    const transactionsToCreate = [];
-    
-    // Always create BUY_IN transaction
-    const buyInAmount = (gameData.game.buyIn || 0);
-    transactionsToCreate.push({
-        type: 'BUY_IN',
-        amount: buyInAmount,
-        rake: gameData.game.rake || 0,
-        paymentSource: 'CASH'
-    });
-    
-    // Add QUALIFICATION transaction if player qualified
-    if (playerData.isQualification) {
-        transactionsToCreate.push({
-            type: 'QUALIFICATION',
-            amount: 0,
-            rake: 0,
-            paymentSource: 'UNKNOWN'
-        });
-    }
-    
-    monitoring.trackOperation('TRANSACTIONS_BATCH', 'PlayerTransaction', playerId, {
-        count: transactionsToCreate.length,
-        gameId: gameData.game.id,
-        entityId: effectiveEntityId
-    });
-    
-    try {
-        for (const transaction of transactionsToCreate) {
-            const transactionId = uuidv4(); // Preserved from index.js
-            
-            const playerTransaction = {
-                id: transactionId,
-                playerId: playerId,
-                venueId: gameData.game.venueId,
-                gameId: gameData.game.id,
-                entityId: effectiveEntityId,
-                type: transaction.type,
-                amount: transaction.amount,
-                paymentSource: transaction.paymentSource,
-                transactionDate: gameDateTime, // Use authoritative date
-                notes: `SYSTEM insert from scraped data`,
-                createdAt: now,
-                updatedAt: now,
-                _version: 1,
-                _lastChangedAt: Date.now(),
-                __typename: 'PlayerTransaction'
-            };
-            
-            if (transaction.type === 'BUY_IN' && transaction.rake) {
-                playerTransaction.rake = transaction.rake;
-            }
-            
-            transactions.push({
-                PutRequest: {
-                    Item: playerTransaction
+            transactItems.push({
+                Put: {
+                    TableName: playerVenueTable,
+                    Item: {
+                        id: newPlayerVenueId,
+                        playerId: playerId,
+                        venueId: gameData.game.venueId,
+                        entityId: entityId,
+                        visityKey: visityKey,
+                        canonicalVenueId: venueInfo.canonicalVenueId,
+                        membershipCreatedDate: gameDate,
+                        firstPlayedDate: gameDate,
+                        lastPlayedDate: gameDate,
+                        totalGamesPlayed: 1,
+                        averageBuyIn: buyInAmount,
+                        totalBuyIns: buyInAmount,
+                        totalWinnings: 0,
+                        netProfit: 0,
+                        targetingClassification: targetingClassification,
+                        createdAt: now,
+                        updatedAt: now,
+                        _version: 1,
+                        _lastChangedAt: timestamp,
+                        __typename: 'PlayerVenue'
+                    }
                 }
             });
         }
+    }
+    
+    // --- 3. PlayerSummary (PUT or UPDATE) ---
+    if (existingSummary) {
+        // UPDATE existing PlayerSummary
+        const currentLastPlayed = new Date(existingSummary.lastPlayed);
         
-        if (transactions.length > 0) {
-            const chunks = [];
-            for (let i = 0; i < transactions.length; i += 25) {
-                chunks.push(transactions.slice(i, i + 25));
-            }
-            
-            for (const chunk of chunks) {
-                await ddbDocClient.send(new BatchWriteCommand({
-                    RequestItems: {
-                        [playerTransactionTable]: chunk
-                    }
-                }));
-            }
-            
-            console.log(`[TRANSACTION-CREATE] Created ${transactions.length} transactions.`);
-        } else {
-            console.log(`[TRANSACTION-CREATE] No transactions to create.`);
+        let updateExpression = `
+            SET sessionsPlayed = sessionsPlayed + :one,
+                tournamentsPlayed = tournamentsPlayed + :one,
+                tournamentWinnings = tournamentWinnings + :winnings,
+                tournamentBuyIns = tournamentBuyIns + :buyIn,
+                tournamentITM = tournamentITM + :itm,
+                tournamentsCashed = tournamentsCashed + :cash,
+                totalWinnings = totalWinnings + :winnings,
+                totalBuyIns = totalBuyIns + :buyIn,
+                netBalance = netBalance + :profitLoss,
+                venuesVisited = venuesVisited + :venueInc,
+                updatedAt = :updatedAt,
+                #v = if_not_exists(#v, :zero) + :one,
+                #ent = :entityId
+        `;
+        const expressionNames = {
+            '#v': '_version',
+            '#ent': 'entityId'
+        };
+        const expressionValues = {
+            ':one': 1,
+            ':winnings': winningsAmount,
+            ':buyIn': buyInAmount,
+            ':itm': isITM ? 1 : 0,
+            ':cash': isCash ? 1 : 0,
+            ':profitLoss': winningsAmount - buyInAmount,
+            ':venueInc': wasNewVenue ? 1 : 0,
+            ':updatedAt': now,
+            ':entityId': entityId,
+            ':zero': 0
+        };
+        
+        // Only update lastPlayed if this game is later
+        if (gameDateObj > currentLastPlayed) {
+            updateExpression += ', #lastPlayed = :lastPlayed';
+            expressionNames['#lastPlayed'] = 'lastPlayed';
+            expressionValues[':lastPlayed'] = gameDateTime;
         }
-    } catch (error) {
-        console.error(`[TRANSACTION-CREATE] CRITICAL ERROR creating transactions:`, error);
-        monitoring.trackOperation('TRANSACTIONS_ERROR', 'PlayerTransaction', playerId, {
-            error: error.message,
-            entityId: effectiveEntityId
+        
+        transactItems.push({
+            Update: {
+                TableName: playerSummaryTable,
+                Key: { id: summaryId },
+                UpdateExpression: updateExpression.trim(),
+                ExpressionAttributeNames: expressionNames,
+                ExpressionAttributeValues: expressionValues
+            }
         });
+    } else {
+        // PUT new PlayerSummary
+        transactItems.push({
+            Put: {
+                TableName: playerSummaryTable,
+                Item: {
+                    id: summaryId,
+                    playerId: playerId,
+                    entityId: entityId,
+                    sessionsPlayed: 1,
+                    tournamentsPlayed: 1,
+                    cashGamesPlayed: 0,
+                    venuesVisited: 1,
+                    tournamentWinnings: winningsAmount,
+                    tournamentBuyIns: buyInAmount,
+                    tournamentITM: isITM ? 1 : 0,
+                    tournamentsCashed: isCash ? 1 : 0,
+                    cashGameWinnings: 0,
+                    cashGameBuyIns: 0,
+                    totalWinnings: winningsAmount,
+                    totalBuyIns: buyInAmount,
+                    netBalance: winningsAmount - buyInAmount,
+                    lastPlayed: gameDateTime,
+                    createdAt: now,
+                    updatedAt: now,
+                    _version: 1,
+                    _lastChangedAt: timestamp,
+                    __typename: 'PlayerSummary'
+                }
+            }
+        });
+    }
+    
+    // --- 4. PlayerTransactions (always PUT) ---
+    // BUY_IN transaction (always)
+    const buyInTxnId = uuidv4();
+    transactItems.push({
+        Put: {
+            TableName: playerTransactionTable,
+            Item: {
+                id: buyInTxnId,
+                playerId: playerId,
+                venueId: gameData.game.venueId,
+                gameId: gameData.game.id,
+                entityId: entityId,
+                type: 'BUY_IN',
+                amount: buyInAmount,
+                rake: rakeAmount,
+                paymentSource: 'CASH',
+                transactionDate: gameDateTime,
+                notes: 'SYSTEM insert from scraped data',
+                createdAt: now,
+                updatedAt: now,
+                _version: 1,
+                _lastChangedAt: timestamp,
+                __typename: 'PlayerTransaction'
+            }
+        }
+    });
+    
+    // QUALIFICATION transaction (if applicable)
+    if (playerData.isQualification) {
+        const qualTxnId = uuidv4();
+        transactItems.push({
+            Put: {
+                TableName: playerTransactionTable,
+                Item: {
+                    id: qualTxnId,
+                    playerId: playerId,
+                    venueId: gameData.game.venueId,
+                    gameId: gameData.game.id,
+                    entityId: entityId,
+                    type: 'QUALIFICATION',
+                    amount: 0,
+                    paymentSource: 'UNKNOWN',
+                    transactionDate: gameDateTime,
+                    notes: 'SYSTEM insert from scraped data',
+                    createdAt: now,
+                    updatedAt: now,
+                    _version: 1,
+                    _lastChangedAt: timestamp,
+                    __typename: 'PlayerTransaction'
+                }
+            }
+        });
+    }
+    
+    // --- 5. PlayerEntry (PUT or UPDATE) ---
+    if (existingEntry) {
+        transactItems.push({
+            Update: {
+                TableName: playerEntryTable,
+                Key: { id: entryId },
+                UpdateExpression: 'SET #status = :status, updatedAt = :updatedAt, entityId = :entityId',
+                ExpressionAttributeNames: { '#status': 'status' },
+                ExpressionAttributeValues: {
+                    ':status': 'COMPLETED',
+                    ':updatedAt': now,
+                    ':entityId': entityId
+                }
+            }
+        });
+    } else {
+        transactItems.push({
+            Put: {
+                TableName: playerEntryTable,
+                Item: {
+                    id: entryId,
+                    playerId: playerId,
+                    gameId: gameData.game.id,
+                    venueId: gameData.game.venueId,
+                    entityId: entityId,
+                    status: 'COMPLETED',
+                    registrationTime: gameDateTime,
+                    gameStartDateTime: gameDateTime,
+                    createdAt: now,
+                    updatedAt: now,
+                    _version: 1,
+                    _lastChangedAt: timestamp,
+                    __typename: 'PlayerEntry'
+                }
+            }
+        });
+    }
+    
+    // ===================================================================
+    // PHASE 3: Execute transaction
+    // ===================================================================
+    console.log(`[TXN-PROCESS] Phase 3: Executing transaction with ${transactItems.length} items...`);
+    
+    // DynamoDB limit is 100 items
+    if (transactItems.length > 100) {
+        throw new Error(`Transaction too large: ${transactItems.length} items (max 100)`);
+    }
+    
+    try {
+        await ddbDocClient.send(new TransactWriteCommand({
+            TransactItems: transactItems
+        }));
+        
+        console.log(`[TXN-PROCESS] ✅ Transaction SUCCESS for ${playerName} - ${transactItems.length} items committed atomically`);
+        
+        monitoring.trackOperation('PLAYER_TXN_COMPLETE', 'PlayerProcessing', playerId, {
+            playerName,
+            gameId: gameData.game.id,
+            entityId,
+            itemCount: transactItems.length,
+            wasNewVenue
+        });
+        
+        return {
+            success: true,
+            playerName,
+            playerId,
+            entityId,
+            status: 'PROCESSED',
+            wasNewVenue,
+            itemsWritten: transactItems.length
+        };
+        
+    } catch (error) {
+        console.error(`[TXN-PROCESS] ❌ Transaction FAILED for ${playerName}:`, error);
+        
+        if (error.name === 'TransactionCanceledException') {
+            console.error(`[TXN-PROCESS] Cancellation reasons:`, JSON.stringify(error.CancellationReasons, null, 2));
+        }
+        
+        monitoring.trackOperation('PLAYER_TXN_ERROR', 'PlayerProcessing', playerName, {
+            error: error.message,
+            gameId: gameData.game.id,
+            entityId
+        });
+        
         throw error;
     }
 };
 
+// ===================================================================
+// MAIN PROCESS PLAYER FUNCTION
+// ===================================================================
+
 /**
- * Process a single player
- * (Merged: Preserved index.js logic [skip, call order], added entityId)
+ * Process a single player with transactional guarantees
+ * 
+ * Step 1 (Player record) is separate due to async targeting logic.
+ * Steps 2-6 are atomic: all succeed or all fail.
  */
 const processPlayer = async (playerData, gameData) => {
     const playerName = playerData.name;
     const playerResultTable = getTableName('PlayerResult');
     
-    // UPDATED: Use resolveEntityId helper with warning for missing entityId
     const entityId = resolveEntityId(
         gameData.game.entityId, 
         null, 
         `processPlayer(${playerName})`
     );
     
-    // Update monitoring context
     monitoring.entityId = entityId;
     
     try {
@@ -1179,14 +966,13 @@ const processPlayer = async (playerData, gameData) => {
 
         console.log(`[PROCESS-PLAYER] Starting processing for player: ${playerName} (ID: ${playerId}) with entity ${entityId}`);
 
-        // Track player processing start
         monitoring.trackOperation('PLAYER_PROCESS_START', 'PlayerProcessing', playerId, {
             playerName,
             gameId: gameData.game.id,
             entityId
         });
 
-        // Preserved skip logic from index.js
+        // Check if already processed
         const existingResult = await ddbDocClient.send(new GetCommand({
             TableName: playerResultTable,
             Key: { id: resultId }
@@ -1202,33 +988,26 @@ const processPlayer = async (playerData, gameData) => {
             return { success: true, playerName, playerId, entityId, status: 'SKIPPED' };
         }
         
-        // All calls updated to pass entityId
-        
+        // Step 1: Player record (separate - has async targeting logic)
         console.log(`[PROCESS-PLAYER] Step 1: upsertPlayerRecord...`);
         await upsertPlayerRecord(playerId, playerName, gameData, playerData, entityId);
         
-        console.log(`[PROCESS-PLAYER] Step 2: createPlayerResult...`);
-        await createPlayerResult(playerId, gameData, playerData, entityId);
-        
-        // Call order preserved from index.js
-        console.log(`[PROCESS-PLAYER] Step 3: upsertPlayerVenue...`);
-        const { wasNewVenue } = await upsertPlayerVenue(playerId, gameData, playerData, entityId);
-        
-        console.log(`[PROCESS-PLAYER] Step 4: upsertPlayerSummary...`);
-        await upsertPlayerSummary(playerId, gameData, playerData, wasNewVenue, entityId);
-        
-        console.log(`[PROCESS-PLAYER] Step 5: createPlayerTransactions...`);
-        await createPlayerTransactions(playerId, gameData, playerData, entityId);
-        
-        console.log(`[PROCESS-PLAYER] Step 6: upsertPlayerEntry...`);
-        await upsertPlayerEntry(playerId, gameData, entityId);
+        // Steps 2-6: Transactional (all-or-nothing)
+        console.log(`[PROCESS-PLAYER] Steps 2-6: Transactional processing...`);
+        const txnResult = await processPlayerRecordsTransactional(
+            playerId, 
+            playerName, 
+            gameData, 
+            playerData, 
+            entityId
+        );
 
-        // Track successful completion
         monitoring.trackOperation('PLAYER_PROCESS_COMPLETE', 'PlayerProcessing', playerId, {
             playerName,
             gameId: gameData.game.id,
             entityId,
-            wasNewVenue
+            wasNewVenue: txnResult.wasNewVenue,
+            itemsWritten: txnResult.itemsWritten
         });
 
         console.log(`[PROCESS-PLAYER] SUCCESS: Player ${playerName} completely processed with entity ${entityId}`);
@@ -1247,19 +1026,17 @@ const processPlayer = async (playerData, gameData) => {
     }
 };
 
-/**
- * Main Lambda handler
- * (Merged: Added entityId reporting)
- * 
- * UPDATED (Dec 2025): Uses resolveEntityId helper with proper error handling
- */
+// ===================================================================
+// MAIN HANDLER
+// ===================================================================
+
 exports.handler = async (event) => {
-    console.log('[HANDLER] START: Player Data Processor invoked.');
+    console.log('[HANDLER] START: Player Data Processor invoked (TRANSACTIONAL MODE).');
     console.log('Received Lambda Event (Raw):', JSON.stringify(event, null, 2));
 
-    // Track Lambda invocation
     monitoring.trackOperation('LAMBDA_START', 'Handler', 'playerDataProcessor', {
-        recordCount: event.Records?.length || 0
+        recordCount: event.Records?.length || 0,
+        mode: 'TRANSACTIONAL'
     });
 
     const results = {
@@ -1288,7 +1065,6 @@ exports.handler = async (event) => {
             console.log(`[HANDLER] SUCCESS: Message body parsed.`);
             console.log(`[HANDLER] Game ID from SQS: ${gameData.game.id}`);
             
-            // UPDATED: Use resolveEntityId with warning for missing entityId
             const entityId = resolveEntityId(
                 gameData.game.entityId, 
                 null, 
@@ -1301,7 +1077,6 @@ exports.handler = async (event) => {
                 results.entityId = entityId;
             }
             
-            // Update monitoring context for this game
             monitoring.entityId = entityId;
             
             monitoring.trackOperation('GAME_PROCESS_START', 'Game', gameData.game.id, {
@@ -1342,7 +1117,6 @@ exports.handler = async (event) => {
                 });
             }
             
-            // Track game completion
             monitoring.trackOperation('GAME_PROCESS_COMPLETE', 'Game', gameData.game.id, {
                 entityId: entityId,
                 successfulPlayers: results.successful.length,
@@ -1371,7 +1145,6 @@ exports.handler = async (event) => {
     console.log(`Successful: ${results.successful.length}`);
     console.log(`Failed: ${results.failed.length}`);
     
-    // Track final results
     monitoring.trackOperation('LAMBDA_COMPLETE', 'Handler', 'playerDataProcessor', {
         entityId: results.entityId,
         totalProcessed: results.totalProcessed,
@@ -1379,7 +1152,6 @@ exports.handler = async (event) => {
         failed: results.failed.length
     });
     
-    // Flush all metrics before Lambda ends
     await monitoring.flush();
     
     if (results.failed.length > 0) {
@@ -1390,7 +1162,7 @@ exports.handler = async (event) => {
     return {
         statusCode: 200,
         body: JSON.stringify({
-            message: 'Successfully processed all messages.',
+            message: 'Successfully processed all messages (TRANSACTIONAL MODE).',
             entityId: results.entityId,
             results: {
                 totalProcessed: results.totalProcessed,

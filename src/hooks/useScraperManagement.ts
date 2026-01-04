@@ -2,11 +2,15 @@
 // React hooks for enhanced scraper management
 // Updated to use new Unified Queries and ScrapeURL schema
 // Restored useURLHistory for auditing
-// FIXED: Uses minimal query to avoid deeply nested entity null errors
+// FIXED: Uses minimal queries AND mutations from scraperManagement.ts to avoid
+//        deeply nested entity null errors. See that file for documentation.
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { scraperManagementQueries } from '../graphql/scraperManagement';
+import { 
+    scraperManagementQueries,
+    startScraperJobMinimal,
+} from '../graphql/scraperManagement';
 import { 
     // Don't import getScraperJobsReport from auto-generated - it causes null errors
     searchScrapeURLs,
@@ -15,7 +19,7 @@ import {
     getScraperMetrics,
 } from '../graphql/queries';
 import { 
-    startScraperJob,
+    // Don't import startScraperJob from auto-generated - it causes null errors due to deeply nested entity metrics
     cancelScraperJob,
     modifyScrapeURLStatus,
     bulkModifyScrapeURLs
@@ -100,8 +104,9 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
         try {
             setLoading(true);
             setError(null);
+            // FIXED: Use minimal mutation to avoid nested entity metrics null errors
             const response = await client.graphql({
-                query: startScraperJob,
+                query: startScraperJobMinimal,
                 variables: { input }
             });
             if (!hasGraphQLData<any>(response)) throw new Error('Invalid response');

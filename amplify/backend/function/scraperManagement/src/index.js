@@ -103,13 +103,9 @@ function extractErrorType(errorMessage) {
 // ===================================================================
 
 exports.handler = async (event, context) => {
-    console.log('ScraperManagement invoked:', JSON.stringify(event));
-    
     // ===== HANDLE CLOUDWATCH SCHEDULED EVENTS =====
     // CloudWatch Events have 'detail-type' and 'source' fields, not 'typeName'/'fieldName'
     if (event['detail-type'] === 'Scheduled Event' && event.source === 'aws.events') {
-        console.log('[ScraperManagement] Scheduled event received - running scheduled scrape check');
-        
         monitoring.trackOperation('SCHEDULED_EVENT', 'Handler', 'cloudwatch', { 
             ruleArn: event.resources?.[0] || 'unknown'
         });
@@ -117,7 +113,6 @@ exports.handler = async (event, context) => {
         try {
             // Option 1: No-op - just acknowledge the event
             // Uncomment the section below if you want to trigger auto-scraping
-            console.log('[ScraperManagement] Scheduled event acknowledged. No automatic action configured.');
             
             /* 
             // Option 2: Trigger auto-scraping for all active entities
@@ -141,11 +136,10 @@ exports.handler = async (event, context) => {
                 processedAt: new Date().toISOString()
             };
         } catch (error) {
-            console.error('[ScraperManagement] Scheduled event error:', error);
             monitoring.trackOperation('SCHEDULED_EVENT_ERROR', 'Handler', 'cloudwatch', { 
                 error: error.message 
             });
-            // Don't throw - just log and return gracefully for scheduled events
+            // Don't throw - just return gracefully for scheduled events
             return { 
                 statusCode: 500, 
                 body: `Scheduled event failed: ${error.message}` 
@@ -207,7 +201,6 @@ exports.handler = async (event, context) => {
                     throw new Error(`Unknown operation: ${operation}`);
             }
         } catch (error) {
-            console.error('ScraperManagement Error:', error);
             monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'fatal', { 
                 error: error.message, 
                 operationName: operation 
@@ -216,7 +209,6 @@ exports.handler = async (event, context) => {
         }
     } finally {
         if (monitoring) {
-            console.log('[ScraperManagement] Flushing monitoring metrics...');
             await monitoring.flush();
         }
     }
@@ -228,8 +220,6 @@ exports.handler = async (event, context) => {
 
 async function getScraperJob({ jobId, id }) {
     const targetId = jobId || id;
-    console.log('Getting scraper job:', targetId);
-    
     monitoring.trackOperation('GET_JOB', 'ScraperJob', targetId, { jobId: targetId });
 
     try {
@@ -241,7 +231,6 @@ async function getScraperJob({ jobId, id }) {
         
         return result.Item || null;
     } catch (error) {
-        console.error('Error getting scraper job:', error);
         throw new Error(`Failed to get scraper job: ${error.message}`);
     }
 }
@@ -251,8 +240,6 @@ async function getScraperJob({ jobId, id }) {
 // ===================================================================
 
 async function startScraperJob({ input }, event) {
-    console.log('Starting scraper job with input:', JSON.stringify(input, null, 2));
-    
     const {
         entityId,
         mode = 'bulk',
@@ -380,8 +367,6 @@ async function startScraperJob({ input }, event) {
             Item: jobRecord,
         }));
 
-        console.log(`[startScraperJob] Created job record: ${jobId}`);
-
         // =====================================================================
         // STEP 2: Invoke autoScraper ASYNCHRONOUSLY (Event type = fire-and-forget)
         // =====================================================================
@@ -420,9 +405,6 @@ async function startScraperJob({ input }, event) {
             || process.env.AUTO_SCRAPER_FUNCTION 
             || `autoScraper-${process.env.ENV}`;
 
-        console.log(`[startScraperJob] Invoking autoScraper (${functionName}) asynchronously`);
-        console.log(`[startScraperJob] Payload:`, JSON.stringify(autoScraperPayload, null, 2));
-
         monitoring.trackOperation('LAMBDA_INVOKE_ASYNC', 'Lambda', functionName, { 
             jobId,
             mode,
@@ -435,8 +417,6 @@ async function startScraperJob({ input }, event) {
             InvocationType: 'Event',  // Async! Returns immediately
             Payload: JSON.stringify(autoScraperPayload),
         }));
-
-        console.log(`[startScraperJob] autoScraper invoked asynchronously for job ${jobId}`);
 
         // =====================================================================
         // STEP 3: Update job status to RUNNING
@@ -466,7 +446,6 @@ async function startScraperJob({ input }, event) {
         };
         
     } catch (error) {
-        console.error('Error starting scraper job:', error);
         monitoring.trackOperation('START_JOB_ERROR', 'ScraperJob', 'error', { 
             error: error.message 
         });
@@ -479,8 +458,6 @@ async function startScraperJob({ input }, event) {
 // ===================================================================
 
 async function cancelScraperJob({ jobId }) {
-    console.log('Cancelling scraper job:', jobId);
-    
     monitoring.trackOperation('CANCEL_JOB_REQUEST', 'ScraperJob', jobId, { jobId });
 
     try {
@@ -542,7 +519,6 @@ async function cancelScraperJob({ jobId }) {
         return result.Attributes || { id: jobId, status: 'STOPPED_MANUAL' };
         
     } catch (error) {
-        console.error('Error cancelling job:', error);
         throw new Error(`Failed to cancel job: ${error.message}`);
     }
 }
@@ -552,8 +528,6 @@ async function cancelScraperJob({ jobId }) {
 // ===================================================================
 
 async function getScraperJobsReport({ entityId, status, limit = 20, nextToken }) {
-    console.log('Getting scraper jobs report:', { entityId, status, limit, nextToken });
-    
     monitoring.trackOperation('GET_JOBS_REPORT', 'ScraperJob', status || 'all', { status, limit });
 
     try {
@@ -610,14 +584,11 @@ async function getScraperJobsReport({ entityId, status, limit = 20, nextToken })
         };
         
     } catch (error) {
-        console.error('Error getting scraper jobs:', error);
         return { items: [], nextToken: null };
     }
 }
 
 async function searchScrapeURLs({ entityId, entityIds, status, limit = 100, nextToken }) {
-    console.log('Searching ScrapeURLs:', { entityId, entityIds, status, limit, nextToken });
-    
     monitoring.trackOperation('SEARCH_URLS', 'ScrapeURL', 'search', { 
         entityId,
         entityIdsCount: entityIds?.length || 0,
@@ -655,7 +626,7 @@ async function searchScrapeURLs({ entityId, entityIds, status, limit = 100, next
                     try {
                         params.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());
                     } catch (e) {
-                        console.warn('Invalid nextToken, ignoring');
+                        // Invalid nextToken, ignore
                     }
                 }
                 
@@ -673,7 +644,7 @@ async function searchScrapeURLs({ entityId, entityIds, status, limit = 100, next
                 };
                 
             } catch (indexError) {
-                console.warn('GSI query failed, falling back to scan:', indexError.message);
+                // GSI query failed, falling back to scan
             }
         }
         
@@ -720,7 +691,7 @@ async function searchScrapeURLs({ entityId, entityIds, status, limit = 100, next
             try {
                 scanParams.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());
             } catch (e) {
-                console.warn('Invalid nextToken, ignoring');
+                // Invalid nextToken, ignore
             }
         }
         
@@ -738,14 +709,11 @@ async function searchScrapeURLs({ entityId, entityIds, status, limit = 100, next
         };
         
     } catch (error) {
-        console.error('Error searching ScrapeURLs:', error);
         throw new Error(`Failed to search ScrapeURLs: ${error.message}`);
     }
 }
 
 async function getScraperMetrics({ timeRange, entityId }) {
-    console.log('Getting scraper metrics for:', { timeRange, entityId });
-    
     monitoring.trackOperation('GET_METRICS', 'ScraperJob', timeRange, { timeRange, entityId });
 
     try {
@@ -806,7 +774,6 @@ async function getScraperMetrics({ timeRange, entityId }) {
         };
         
     } catch (error) {
-        console.error('Error getting metrics:', error);
         // Return empty metrics instead of null to satisfy non-nullable fields
         return {
             timeRange: timeRange || 'LAST_24_HOURS',
@@ -828,8 +795,6 @@ async function getScraperMetrics({ timeRange, entityId }) {
 }
 
 async function getUpdateCandidateURLs({ entityId, limit = 50 }) {
-    console.log('Getting update candidates:', { entityId, limit });
-    
     monitoring.trackOperation('GET_UPDATE_CANDIDATES', 'ScrapeURL', entityId || 'all', { limit });
 
     try {
@@ -885,15 +850,12 @@ async function getUpdateCandidateURLs({ entityId, limit = 50 }) {
         return scoredUrls.slice(0, limit);
         
     } catch (error) {
-        console.error('Error getting update candidates:', error);
         return [];
     }
 }
 
 async function fetchScrapeURLDetails({ url, id }) {
     const targetId = url || id;
-    console.log('Fetching scrape URL details for:', targetId);
-    
     monitoring.trackOperation('GET_URL_DETAILS', 'ScrapeURL', targetId, { url: targetId });
 
     try {
@@ -904,14 +866,11 @@ async function fetchScrapeURLDetails({ url, id }) {
         }));
         return result.Item || null;
     } catch (error) {
-        console.error('Error fetching URL details:', error);
         return null;
     }
 }
 
 async function modifyScrapeURLStatus({ url, status, doNotScrape }) {
-    console.log('Modifying URL status:', { url, status, doNotScrape });
-    
     monitoring.trackOperation('MODIFY_URL_STATUS', 'ScrapeURL', url, { url, status, doNotScrape });
 
     try {
@@ -956,14 +915,11 @@ async function modifyScrapeURLStatus({ url, status, doNotScrape }) {
         return result.Attributes;
         
     } catch (error) {
-        console.error('Error modifying URL status:', error);
         throw new Error(`Failed to modify URL status: ${error.message}`);
     }
 }
 
 async function bulkModifyScrapeURLs({ urls, status, doNotScrape }) {
-    console.log('Bulk modifying URLs:', { urlCount: urls.length, status, doNotScrape });
-    
     monitoring.trackOperation('BULK_MODIFY_URLS', 'ScrapeURL', 'bulk', { 
         count: urls.length, 
         status, 
@@ -984,7 +940,6 @@ async function bulkModifyScrapeURLs({ urls, status, doNotScrape }) {
             .map((r, i) => ({ url: urls[i], error: r.reason?.message }));
         
         if (failed.length > 0) {
-            console.warn('Some URLs failed to update:', failed);
             monitoring.trackOperation('BULK_MODIFY_PARTIAL_FAILURE', 'ScrapeURL', 'bulk', { 
                 failedCount: failed.length,
                 successCount: successful.length
@@ -994,7 +949,6 @@ async function bulkModifyScrapeURLs({ urls, status, doNotScrape }) {
         return successful;
         
     } catch (error) {
-        console.error('Error in bulk modify:', error);
         throw new Error(`Bulk modify failed: ${error.message}`);
     }
 }

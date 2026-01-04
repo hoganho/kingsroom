@@ -1129,6 +1129,22 @@
                 "*"
               ],
               "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ActiveGame-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ActiveGame-*/index/*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/RecentlyFinishedGame-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/RecentlyFinishedGame-*/index/*"
+              ],
+              "Effect": "Allow"
             }
           ]
         },

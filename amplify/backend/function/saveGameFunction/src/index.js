@@ -16,16 +16,18 @@
 	API_KINGSROOM_VENUETABLE_ARN
 	API_KINGSROOM_VENUETABLE_NAME
     API_KINGSROOM_RECURRINGGAMETABLE_NAME
+    API_KINGSROOM_ACTIVEGAMETABLE_NAME
+    API_KINGSROOM_RECENTLYFINISHEDGAMETABLE_NAME
 	ENV
 	REGION
 Amplify Params - DO NOT EDIT */
 
 /**
  * ===================================================================
- * SAVEGAME LAMBDA FUNCTION - PURE WRITER (v4.1.0)
+ * SAVEGAME LAMBDA FUNCTION - PURE WRITER (v4.2.0)
  * ===================================================================
  * 
- * VERSION: 4.1.0 (Added classification fields support)
+ * VERSION: 4.2.0 (Added ActiveGame table synchronization)
  * 
  * RESPONSIBILITIES:
  * This Lambda is now a "pure writer" that accepts pre-enriched data
@@ -39,6 +41,7 @@ Amplify Params - DO NOT EDIT */
  * - Updates ScrapeURL tracking
  * - Creates ScrapeAttempt records
  * - Queues player data for processing (SQS)
+ * - NEW: Syncs ActiveGame/RecentlyFinishedGame tables for dashboard
  * 
  * NOTE: GameCost and GameFinancialSnapshot are now created by
  * gameFinancialsProcessor Lambda (triggered via DynamoDB Streams)
@@ -54,6 +57,9 @@ Amplify Params - DO NOT EDIT */
  * This Lambda REQUIRES source.entityId to be provided in the input.
  * 
  * CHANGELOG:
+ * v4.2.0 - Added ActiveGame table synchronization for dashboard queries
+ *        - Games in RUNNING/REGISTERING/CLOCK_STOPPED sync to ActiveGame
+ *        - FINISHED games move to RecentlyFinishedGame (7-day TTL)
  * v4.1.0 - Added 29 classification fields to createGame() and updateGame()
  *        - Uses entryStructure (not tournamentStructure) to avoid @model conflict
  *        - Uses cashRakeType (not rakeStructure) to avoid @model conflict
@@ -62,12 +68,15 @@ Amplify Params - DO NOT EDIT */
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, QueryCommand, BatchWriteCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, QueryCommand, BatchWriteCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
 const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
 const { v4: uuidv4 } = require('uuid');
 
 // Lambda Monitoring
 const { LambdaMonitoring } = require('./lambda-monitoring');
+
+// ActiveGame Sync
+const { syncActiveGame } = require('./syncActiveGame');
 
 // ===================================================================
 // CONSTANTS
@@ -360,11 +369,12 @@ const createScrapeAttempt = async (input, gameId, wasNewGame, fieldsUpdated) => 
 // PLAYER DATA PROCESSING (SQS)
 // ===================================================================
 
-const shouldQueueForPDP = (input, game) => {
+const shouldQueueForPDP = (input, game, wasNewGame = true, existingGame = null) => {
     const hasPlayerList = input.players?.allPlayers?.length > 0;
     const playerCount = input.players?.allPlayers?.length || 0;
     const isFinished = FINISHED_STATUSES.includes(game.gameStatus);
     const isLive = LIVE_STATUSES.includes(game.gameStatus);
+    const wasAlreadyFinished = existingGame && FINISHED_STATUSES.includes(existingGame.gameStatus);
     
     // DEBUG: Log all decision factors
     console.log('[SAVE-GAME] [SQS-DEBUG] shouldQueueForPDP evaluation:', {
@@ -374,6 +384,8 @@ const shouldQueueForPDP = (input, game) => {
         playerCount,
         isFinished,
         isLive,
+        wasNewGame,
+        wasAlreadyFinished,
         FINISHED_STATUSES,
         LIVE_STATUSES
     });
@@ -382,6 +394,14 @@ const shouldQueueForPDP = (input, game) => {
         console.log('[SAVE-GAME] [SQS-DEBUG] ❌ Decision: NO QUEUE - No player list provided');
         return { shouldQueue: false, updateEntriesOnly: false };
     }
+    
+    // FIXED: Only queue if this is a NEW transition to FINISHED status
+    // This prevents re-queueing when an already-finished game is re-scraped
+    if (isFinished && wasAlreadyFinished && !wasNewGame) {
+        console.log('[SAVE-GAME] [SQS-DEBUG] ⏭️ Decision: NO QUEUE - Game was already FINISHED (no status transition)');
+        return { shouldQueue: false, updateEntriesOnly: false };
+    }
+    
     if (isFinished) {
         console.log('[SAVE-GAME] [SQS-DEBUG] ✅ Decision: QUEUE FOR PDP - Game is finished with players');
         return { shouldQueue: true, updateEntriesOnly: false };
@@ -430,11 +450,14 @@ const queueForPDP = async (game, input) => {
         }
     };
     
+    // FIXED: Use deterministic deduplication ID based on game ID only
+    // This ensures that re-saves of the same finished game don't create duplicate SQS messages
+    // The 5-minute deduplication window will prevent duplicates from retries/re-scrapes
     const sqsParams = {
         QueueUrl: PLAYER_PROCESSOR_QUEUE_URL,
         MessageBody: JSON.stringify(messageBody),
         MessageGroupId: game.id,
-        MessageDeduplicationId: `${game.id}-${Date.now()}`
+        MessageDeduplicationId: game.id  // Deterministic - same game = same dedup ID
     };
     
     console.log('[SAVE-GAME] [SQS-DEBUG] SQS SendMessage params:', {
@@ -845,7 +868,7 @@ const updateGame = async (existingGame, input) => {
 // ===================================================================
 
 exports.handler = async (event) => {
-    console.log('[SAVE-GAME] v4.1.0 - Pure Writer (pre-enriched data) with classification fields');
+    console.log('[SAVE-GAME] v4.2.0 - Pure Writer with ActiveGame sync');
     
     // Handle both direct invocation and GraphQL resolver invocation
     const input = event.arguments?.input || event.input || event;
@@ -905,6 +928,26 @@ exports.handler = async (event) => {
 
         const { gameId, game, wasNewGame, fieldsUpdated } = saveResult;
 
+        // =====================================================
+        // NEW: Sync ActiveGame table for dashboard queries
+        // =====================================================
+        let activeGameSync = null;
+        try {
+            activeGameSync = await syncActiveGame(
+                game,           // The saved/updated Game record
+                input,          // Original input (has venue/entity info)
+                wasNewGame,     // Whether this was a new game
+                existingGame,   // Previous game state (for transition detection)
+                monitoredDdbDocClient  // DynamoDB client
+            );
+            console.log('[SAVE-GAME] ActiveGame sync result:', activeGameSync);
+        } catch (syncError) {
+            // Log but don't fail the main save operation
+            console.error('[SAVE-GAME] ActiveGame sync error (non-fatal):', syncError.message);
+            activeGameSync = { success: false, error: syncError.message };
+        }
+        // =====================================================
+
         // Update scrape tracking
         if (input.source.type === 'SCRAPE') {
             await updateScrapeURL(input.source.sourceId, gameId, game.gameStatus, input.options?.doNotScrape, input.source.wasEdited);
@@ -913,7 +956,8 @@ exports.handler = async (event) => {
 
         // Player processing
         console.log('[SAVE-GAME] [SQS-DEBUG] Starting player processing evaluation...');
-        const pdpDecision = shouldQueueForPDP(input, game);
+        // FIXED: Pass wasNewGame and existingGame to prevent re-queueing already-finished games
+        const pdpDecision = shouldQueueForPDP(input, game, wasNewGame, existingGame);
         let playerProcessingQueued = false;
         let playerProcessingReason = null;
 
@@ -968,7 +1012,13 @@ exports.handler = async (event) => {
                 confidence: game.recurringGameAssignmentConfidence
             },
             fieldsUpdated,
-            wasEdited: input.source.wasEdited || false
+            wasEdited: input.source.wasEdited || false,
+            // NEW: ActiveGame sync result
+            activeGameSync: activeGameSync ? {
+                action: activeGameSync.action,
+                success: activeGameSync.success,
+                activeGameId: activeGameSync.activeGameId
+            } : null
         };
 
     } catch (error) {

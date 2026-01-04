@@ -44,5 +44,11 @@
     "Resource": [
       "arn:aws:lambda:ap-southeast-2:*:function:*socialPostProcessor*"
     ]
+  },
+  {
+    "Action": ["appsync:GraphQL"],
+    "Resource": [
+      "arn:aws:appsync:ap-southeast-2:495599763953:apis/ht3nugt6lvddpeeuwj3x6mkite/*"
+    ]
   }
 ]

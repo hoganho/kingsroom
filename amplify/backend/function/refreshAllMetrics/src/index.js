@@ -30,9 +30,12 @@ Amplify Params - DO NOT EDIT */
   Lambda: refreshAllMetrics
   Region: ap-southeast-2
   
-  VERSION: 2.0.0 (Series/Regular/All partitioning) - touch
+  VERSION: 2.1.0 (Fixed DataStore sync fields) - touch
   
   CHANGELOG:
+  - v2.1.0: CRITICAL FIX - Added _version, _lastChangedAt, _deleted to all metrics
+            Without these fields, GraphQL queries that fetch nested metrics fail with:
+            "Cannot return null for non-nullable type: 'Int' within parent '*Metrics'"
   - v2.0.0: Added seriesType dimension (SERIES, REGULAR, ALL) for all metrics
             Added TournamentSeriesMetrics calculation
             Metrics now have IDs like: {entityId}_{timeRange}_{seriesType}
@@ -716,7 +719,14 @@ function calculateEntityMetrics(entity, venues, snapshots, recurringGames, timeR
     dateRangeEnd: latestGameDate,
     
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    
+    // CRITICAL: Required by Amplify DataStore/AppSync
+    // Without these, GraphQL queries that fetch nested metrics will fail with:
+    // "Cannot return null for non-nullable type: 'Int' within parent 'EntityMetrics'"
+    _version: 1,
+    _lastChangedAt: Date.now(),
+    _deleted: null
   };
 }
 
@@ -920,7 +930,12 @@ function calculateVenueMetrics(entity, venue, snapshots, recurringGames, timeRan
     dateRangeEnd: latestGameDate,
     
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    
+    // CRITICAL: Required by Amplify DataStore/AppSync
+    _version: 1,
+    _lastChangedAt: Date.now(),
+    _deleted: null
   };
 }
 
@@ -1083,7 +1098,12 @@ function calculateRecurringGameMetrics(entity, recurringGame, snapshots, timeRan
     dateRangeEnd: latestInstanceDate,
     
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    
+    // CRITICAL: Required by Amplify DataStore/AppSync
+    _version: 1,
+    _lastChangedAt: Date.now(),
+    _deleted: null
   };
 }
 
@@ -1237,7 +1257,12 @@ function calculateTournamentSeriesMetrics(entity, tournamentSeries, snapshots, t
     dateRangeEnd: latestEventDate,
     
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    
+    // CRITICAL: Required by Amplify DataStore/AppSync
+    _version: 1,
+    _lastChangedAt: Date.now(),
+    _deleted: null
   };
 }
 

@@ -1,6 +1,6 @@
 // src/pages/scraper-admin-tabs/OverviewTab.tsx
-// REFACTORED: Fixed field names to match Lambda response, added graceful error handling
-// FIXED: Uses minimal query to avoid deeply nested entity null errors
+// OPTIMIZED: Removed 30-second auto-polling to reduce Lambda costs
+// Now only refreshes on manual click or when component mounts
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -66,7 +66,7 @@ const CoverageInfo: React.FC = () => {
       try {
         await getScrapingStatus({ entityId: currentEntity.id });
       } catch (error) {
-        console.error('Error loading gap analysis:', error);
+        // Silently handle error - gap analysis is non-critical
       }
     }, [currentEntity?.id, getScrapingStatus]);
   
@@ -150,6 +150,7 @@ export const OverviewTab: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [metricsUnavailable, setMetricsUnavailable] = useState(false);
+    const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
     const loadMetrics = useCallback(async () => {
         try {
@@ -167,17 +168,13 @@ export const OverviewTab: React.FC = () => {
                     setMetrics(metricsResponse.data.getScraperMetrics);
                     setMetricsUnavailable(false);
                 } else if (metricsResponse.errors?.length) {
-                    console.warn('Metrics query returned errors:', metricsResponse.errors);
                     setMetricsUnavailable(true);
-                    // Don't fail completely - just mark metrics as unavailable
                 }
             } catch (metricsError: any) {
-                console.warn('Could not load metrics:', metricsError);
                 setMetricsUnavailable(true);
-                // Continue to load jobs even if metrics fail
             }
 
-            // Load recent jobs - FIXED: Use minimal query to avoid nested entity null errors
+            // Load recent jobs
             try {
                 const jobsResponse = await client.graphql({
                     query: scraperManagementQueries.getScraperJobsReportMinimal,
@@ -186,25 +183,25 @@ export const OverviewTab: React.FC = () => {
                 
                 if (jobsResponse.data?.getScraperJobsReport) {
                     setRecentJobs(jobsResponse.data.getScraperJobsReport.items || []);
-                } else if (jobsResponse.errors?.length) {
-                    console.warn('Jobs query returned errors:', jobsResponse.errors);
                 }
             } catch (jobsError) {
-                console.warn('Could not load jobs:', jobsError);
+                // Jobs query failed - non-critical
             }
             
+            setLastRefresh(new Date());
+            
         } catch (error: any) {
-            console.error('Error loading overview data:', error);
             setError(error.message || 'An unknown error occurred while loading data.');
         } finally {
             setLoading(false);
         }
     }, [client]);
 
+    // Load once on mount - NO AUTO-POLLING
     useEffect(() => {
         loadMetrics();
-        const interval = setInterval(loadMetrics, 30000); // Refresh every 30 seconds
-        return () => clearInterval(interval);
+        // REMOVED: 30-second polling interval
+        // Users can manually refresh with the refresh button
     }, [loadMetrics]);
 
     if (loading && !metrics && recentJobs.length === 0 && !error) {
@@ -286,13 +283,22 @@ export const OverviewTab: React.FC = () => {
             {/* --- 3. Recent Jobs Table --- */}
             <div className="bg-white rounded-lg shadow">
                 <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Recent Jobs</h3>
+                    <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold">Recent Jobs</h3>
+                        {lastRefresh && (
+                            <span className="text-xs text-gray-400">
+                                Updated {lastRefresh.toLocaleTimeString()}
+                            </span>
+                        )}
+                    </div>
                     <button
                         onClick={loadMetrics}
                         disabled={loading}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded disabled:opacity-50"
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded disabled:opacity-50 flex items-center gap-2"
+                        title="Refresh metrics"
                     >
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                        <span className="text-sm">Refresh</span>
                     </button>
                 </div>
                 <div className="overflow-x-auto">

@@ -150,6 +150,7 @@ type SocialScrapeAttempt @model(subscriptions: null) @auth(rules: [{ allow: priv
   errorCode: String
   triggerSource: ScraperJobTriggerSource
   triggeredBy: String
+  cancellationRequested: Boolean @default(value: "false")
   socialAccountId: ID! @index(name: "bySocialAccountAttempt", sortKeyFields: ["startedAt"])
   socialAccount: SocialAccount @belongsTo(fields: ["socialAccountId"])
   createdAt: AWSDateTime!
@@ -218,6 +219,7 @@ type SocialScrapeResult {
   rateLimited: Boolean
   timeout: Boolean
   oldestPostDate: String
+  attemptId: ID
 }
 
 # Result type for page info sync mutation
@@ -256,6 +258,7 @@ input AddSocialAccountInput {
 
 input UpdateSocialAccountInput {
   id: ID!
+  _version: Int
   accountName: String
   accountHandle: String
   isScrapingEnabled: Boolean
