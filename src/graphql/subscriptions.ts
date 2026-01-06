@@ -605,6 +605,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -657,6 +658,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -721,6 +723,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -813,6 +817,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -2730,6 +2736,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -2782,6 +2789,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -2846,6 +2854,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -2938,6 +2948,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -4359,6 +4371,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
       gameVariant
       gameStatus
       gameStartDateTime
+      gameActualStartDateTime
       gameEndDateTime
       registrationStatus
       totalDuration
@@ -4411,6 +4424,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         gameVariant
         gameStatus
         gameStartDateTime
+        gameActualStartDateTime
         gameEndDateTime
         registrationStatus
         totalDuration
@@ -4463,6 +4477,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -4515,6 +4530,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -4579,6 +4595,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -4671,6 +4689,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -5092,6 +5112,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -5156,6 +5177,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -5247,6 +5270,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         lastEditedAt
         lastEditedBy
         editHistory
+        contentHash
+        dataChangedAt
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
@@ -5515,6 +5540,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -5579,6 +5605,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -5727,6 +5755,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -5791,6 +5820,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -5913,6 +5944,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -5977,6 +6009,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -6283,6 +6317,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -6347,6 +6382,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -6818,6 +6855,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -6870,6 +6908,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -6934,6 +6973,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -7026,6 +7067,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -7462,6 +7505,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
       lastEditedAt
       lastEditedBy
       editHistory
+      contentHash
+      dataChangedAt
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
@@ -7592,6 +7637,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -7656,6 +7702,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -8407,6 +8455,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -8471,6 +8520,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -8637,6 +8688,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -8689,6 +8741,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -8753,6 +8806,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -8845,6 +8900,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -9311,6 +9368,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -9375,6 +9433,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -9501,6 +9561,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -9565,6 +9626,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -9664,6 +9727,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -9716,6 +9780,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -9780,6 +9845,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -9872,6 +9939,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -10364,6 +10433,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -10416,6 +10486,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -10480,6 +10551,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -10572,6 +10645,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -11110,6 +11185,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -11174,6 +11250,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -11490,6 +11568,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -11542,6 +11621,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -11606,6 +11686,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -11698,6 +11780,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -12420,6 +12504,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -12484,6 +12569,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -12761,6 +12848,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -12825,6 +12913,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -13598,6 +13688,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -13662,6 +13753,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -14200,6 +14293,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -14252,6 +14346,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -14316,6 +14411,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -14408,6 +14505,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -15945,6 +16044,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -15997,6 +16097,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -16061,6 +16162,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -16153,6 +16256,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -17596,6 +17701,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -17660,6 +17766,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -18612,6 +18720,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -18664,6 +18773,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -18728,6 +18838,8 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -18820,6 +18932,8 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -20214,6 +20328,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
       gameVariant
       gameStatus
       gameStartDateTime
+      gameActualStartDateTime
       gameEndDateTime
       registrationStatus
       totalDuration
@@ -20266,6 +20381,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         gameVariant
         gameStatus
         gameStartDateTime
+        gameActualStartDateTime
         gameEndDateTime
         registrationStatus
         totalDuration
@@ -20318,6 +20434,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -20370,6 +20487,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -20434,6 +20552,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -20526,6 +20646,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -20947,6 +21069,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -21011,6 +21134,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -21102,6 +21227,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         lastEditedAt
         lastEditedBy
         editHistory
+        contentHash
+        dataChangedAt
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
@@ -21370,6 +21497,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -21434,6 +21562,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -21582,6 +21712,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -21646,6 +21777,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -21768,6 +21901,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -21832,6 +21966,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -22138,6 +22274,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -22202,6 +22339,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -22673,6 +22812,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -22725,6 +22865,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -22789,6 +22930,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -22881,6 +23024,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -23317,6 +23462,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
       lastEditedAt
       lastEditedBy
       editHistory
+      contentHash
+      dataChangedAt
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
@@ -23447,6 +23594,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -23511,6 +23659,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -24262,6 +24412,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -24326,6 +24477,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -24492,6 +24645,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -24544,6 +24698,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -24608,6 +24763,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -24700,6 +24857,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -25166,6 +25325,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -25230,6 +25390,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -25356,6 +25518,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -25420,6 +25583,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -25519,6 +25684,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -25571,6 +25737,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -25635,6 +25802,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -25727,6 +25896,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -26219,6 +26390,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -26271,6 +26443,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -26335,6 +26508,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -26427,6 +26602,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -26965,6 +27142,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -27029,6 +27207,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -27345,6 +27525,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -27397,6 +27578,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -27461,6 +27643,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -27553,6 +27737,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -28275,6 +28461,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -28339,6 +28526,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -28616,6 +28805,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -28680,6 +28870,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -29453,6 +29645,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -29517,6 +29710,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -30055,6 +30250,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -30107,6 +30303,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -30171,6 +30368,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -30263,6 +30462,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -31800,6 +32001,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -31852,6 +32054,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -31916,6 +32119,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -32008,6 +32213,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -33451,6 +33658,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -33515,6 +33723,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -34114,6 +34324,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
       gameVariant
       gameStatus
       gameStartDateTime
+      gameActualStartDateTime
       gameEndDateTime
       registrationStatus
       totalDuration
@@ -34166,6 +34377,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         gameVariant
         gameStatus
         gameStartDateTime
+        gameActualStartDateTime
         gameEndDateTime
         registrationStatus
         totalDuration
@@ -34218,6 +34430,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -34270,6 +34483,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -34334,6 +34548,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -34426,6 +34642,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -34847,6 +35065,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -34911,6 +35130,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -35002,6 +35223,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         lastEditedAt
         lastEditedBy
         editHistory
+        contentHash
+        dataChangedAt
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
@@ -35270,6 +35493,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -35334,6 +35558,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -35482,6 +35708,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -35546,6 +35773,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -35668,6 +35897,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -35732,6 +35962,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -36038,6 +36270,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -36102,6 +36335,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -36573,6 +36808,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -36625,6 +36861,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -36689,6 +36926,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -36781,6 +37020,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -37217,6 +37458,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
       lastEditedAt
       lastEditedBy
       editHistory
+      contentHash
+      dataChangedAt
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
@@ -37347,6 +37590,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -37411,6 +37655,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -38162,6 +38408,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -38226,6 +38473,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -38392,6 +38641,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -38444,6 +38694,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -38508,6 +38759,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -38600,6 +38853,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -39066,6 +39321,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -39130,6 +39386,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -39256,6 +39514,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -39320,6 +39579,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -39419,6 +39680,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -39471,6 +39733,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -39535,6 +39798,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -39627,6 +39892,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -40119,6 +40386,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -40171,6 +40439,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -40235,6 +40504,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -40327,6 +40598,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -40865,6 +41138,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -40929,6 +41203,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -41245,6 +41521,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -41297,6 +41574,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -41361,6 +41639,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -41453,6 +41733,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -42175,6 +42457,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -42239,6 +42522,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -42516,6 +42801,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -42580,6 +42866,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -43353,6 +43641,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -43417,6 +43706,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -43955,6 +44246,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -44007,6 +44299,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -44071,6 +44364,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -44163,6 +44458,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -45700,6 +45997,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -45752,6 +46050,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -45816,6 +46115,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -45908,6 +46209,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -47351,6 +47654,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -47415,6 +47719,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -48014,6 +48320,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
       gameVariant
       gameStatus
       gameStartDateTime
+      gameActualStartDateTime
       gameEndDateTime
       registrationStatus
       totalDuration
@@ -48066,6 +48373,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         gameVariant
         gameStatus
         gameStartDateTime
+        gameActualStartDateTime
         gameEndDateTime
         registrationStatus
         totalDuration
@@ -48118,6 +48426,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -48170,6 +48479,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -48234,6 +48544,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -48326,6 +48638,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -48747,6 +49061,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -48811,6 +49126,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -48902,6 +49219,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         lastEditedAt
         lastEditedBy
         editHistory
+        contentHash
+        dataChangedAt
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
@@ -49170,6 +49489,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -49234,6 +49554,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -49382,6 +49704,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -49446,6 +49769,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -49568,6 +49893,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -49632,6 +49958,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -49938,6 +50266,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -50002,6 +50331,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -50473,6 +50804,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -50525,6 +50857,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -50589,6 +50922,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -50681,6 +51016,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -51117,6 +51454,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
       lastEditedAt
       lastEditedBy
       editHistory
+      contentHash
+      dataChangedAt
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
@@ -51247,6 +51586,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -51311,6 +51651,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -52062,6 +52404,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -52126,6 +52469,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -52292,6 +52637,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -52344,6 +52690,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -52408,6 +52755,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -52500,6 +52849,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -52966,6 +53317,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -53030,6 +53382,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -53156,6 +53510,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -53220,6 +53575,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -53319,6 +53676,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -53371,6 +53729,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -53435,6 +53794,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -53527,6 +53888,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -54019,6 +54382,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -54071,6 +54435,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -54135,6 +54500,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -54227,6 +54594,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -54765,6 +55134,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -54829,6 +55199,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -55145,6 +55517,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -55197,6 +55570,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -55261,6 +55635,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -55353,6 +55729,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -56075,6 +56453,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -56139,6 +56518,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -56416,6 +56797,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -56480,6 +56862,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -57253,6 +57637,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -57317,6 +57702,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -57855,6 +58242,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -57907,6 +58295,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -57971,6 +58360,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -58063,6 +58454,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -59600,6 +59993,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -59652,6 +60046,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -59716,6 +60111,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -59808,6 +60205,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -61251,6 +61650,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -61315,6 +61715,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -62269,6 +62671,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -62321,6 +62724,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -62385,6 +62789,8 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -62477,6 +62883,8 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -64194,6 +64602,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -64246,6 +64655,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -64310,6 +64720,8 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -64402,6 +64814,8 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -66119,6 +66533,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -66171,6 +66586,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -66235,6 +66651,8 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -66327,6 +66745,8 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -68275,6 +68695,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -68327,6 +68748,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -68391,6 +68813,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -68483,6 +68907,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -70411,6 +70837,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -70463,6 +70890,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -70527,6 +70955,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -70619,6 +71049,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -72547,6 +72979,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -72599,6 +73032,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -72663,6 +73097,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -72755,6 +73191,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -74672,6 +75110,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -74724,6 +75163,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -74788,6 +75228,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -74880,6 +75322,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -76810,6 +77254,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -76862,6 +77307,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -76926,6 +77372,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -77018,6 +77466,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
@@ -78948,6 +79398,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           gameVariant
           gameStatus
           gameStartDateTime
+          gameActualStartDateTime
           gameEndDateTime
           registrationStatus
           totalDuration
@@ -79000,6 +79451,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameVariant
             gameStatus
             gameStartDateTime
+            gameActualStartDateTime
             gameEndDateTime
             registrationStatus
             totalDuration
@@ -79064,6 +79516,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             lastEditedAt
             lastEditedBy
             editHistory
+            contentHash
+            dataChangedAt
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
@@ -79156,6 +79610,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           lastEditedAt
           lastEditedBy
           editHistory
+          contentHash
+          dataChangedAt
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName

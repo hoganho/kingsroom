@@ -111,7 +111,7 @@ type RecentlyFinishedGame
   gameStartDateTime: AWSDateTime!
   finishedAt: AWSDateTime!
   @index(name: "byFinishedAt", queryField: "recentlyFinishedGames")
-  totalDuration: String
+  totalDuration: Int
   totalEntries: Int
   totalUniquePlayers: Int
   prizepoolPaid: Float

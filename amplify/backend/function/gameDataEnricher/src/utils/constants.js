@@ -3,6 +3,7 @@
  * Shared constants, enums, and default values for the enricher
  * 
  * UPDATED: Synced with GraphQL schema + new classification taxonomy
+ * UPDATED: Enhanced HOLIDAY_PATTERNS with name-based detection keywords
  */
 
 // ===================================================================
@@ -280,7 +281,7 @@ const ClassificationSource = {
 };
 
 // ===================================================================
-// VARIANT MAPPING: Old GameVariant -> New (PokerVariant, BettingStructure)
+// VARIANT MAPPING (Old → New)
 // ===================================================================
 
 const VARIANT_MAPPING = {
@@ -483,16 +484,367 @@ const STRUCTURE_KEYWORDS = [
   'day 2', 'day 3', 'final day', 'main event', 'high roller'
 ];
 
+// ===================================================================
+// HOLIDAY PATTERNS (ENHANCED)
+// ===================================================================
+// 
+// Each holiday now includes:
+// - name: Display name for the holiday series
+// - month: Month index (0-11)
+// - day: Specific day (optional - for fixed-date holidays)
+// - window: Number of days around the holiday to consider (for date matching)
+// - namePatterns: Array of regex patterns to detect holiday in tournament names
+// - aliases: Alternative spellings/abbreviations
+//
+// Detection now works TWO ways:
+// 1. DATE-BASED: If game date is within `window` days of the holiday
+// 2. NAME-BASED: If game name matches any of the `namePatterns`
+//
+// Both methods contribute to the series detection score.
+// ===================================================================
+
 const HOLIDAY_PATTERNS = [
-  { name: 'New Years', month: 0, day: 1, window: 3 },
-  { name: 'Australia Day', month: 0, day: 26, window: 4 },
-  { name: 'Anzac Day', month: 3, day: 25, window: 5 },
-  { name: 'Kings Birthday', month: 5, window: 7 },
-  { name: 'Labour Day', month: 9, window: 7 },
-  { name: 'Christmas', month: 11, day: 25, window: 7 },
-  { name: 'Easter', month: 2, window: 14 },
-  { name: 'Easter', month: 3, window: 14 }
+  {
+    name: 'New Years',
+    month: 0,
+    day: 1,
+    window: 3,
+    namePatterns: [
+      /\bnew\s*years?\b/i,
+      /\bny[e]?\s*(day|eve|special|classic|series)?\b/i,
+      /\bnewyear/i
+    ],
+    aliases: ['new year', 'new years', 'nye', 'new years eve', 'new years day']
+  },
+  {
+    name: 'Australia Day',
+    month: 0,
+    day: 26,
+    window: 4,
+    namePatterns: [
+      /\baustralia\s*day\b/i,
+      /\baus\s*day\b/i,
+      /\baussie\s*day\b/i
+    ],
+    aliases: ['australia day', 'aussie day', 'aus day']
+  },
+  {
+    name: 'Valentines Day',
+    month: 1,
+    day: 14,
+    window: 3,
+    namePatterns: [
+      /\bvalentine'?s?\s*(day)?\b/i,
+      /\blove\s*(day|special)\b/i,
+      /\bsweetheart/i
+    ],
+    aliases: ['valentines', 'valentine', 'valentines day']
+  },
+  {
+    name: 'St Patricks Day',
+    month: 2,
+    day: 17,
+    window: 3,
+    namePatterns: [
+      /\bst\.?\s*pat(rick)?'?s?\b/i,
+      /\bpaddy'?s?\s*day\b/i,
+      /\bshamrock/i,
+      /\birish\s*(luck|special|classic)\b/i
+    ],
+    aliases: ['st patricks', 'st paddys', 'paddys day', 'shamrock']
+  },
+  {
+    name: 'Easter',
+    month: 2,  // March
+    window: 14,
+    namePatterns: [
+      /\beaster\b/i,
+      /\bgood\s*friday\b/i,
+      /\beastern?\s*(classic|special|series|championship)\b/i
+    ],
+    aliases: ['easter', 'good friday', 'easter weekend']
+  },
+  {
+    name: 'Easter',
+    month: 3,  // April (Easter can span March-April)
+    window: 14,
+    namePatterns: [
+      /\beaster\b/i,
+      /\bgood\s*friday\b/i,
+      /\beastern?\s*(classic|special|series|championship)\b/i
+    ],
+    aliases: ['easter', 'good friday', 'easter weekend']
+  },
+  {
+    name: 'Anzac Day',
+    month: 3,
+    day: 25,
+    window: 5,
+    namePatterns: [
+      /\banzac\b/i,
+      /\banzac\s*day\b/i,
+      /\blest\s*we\s*forget\b/i
+    ],
+    aliases: ['anzac', 'anzac day']
+  },
+  {
+    name: 'Mothers Day',
+    month: 4,  // May (second Sunday)
+    window: 7,
+    namePatterns: [
+      /\bmother'?s?\s*day\b/i,
+      /\bmum'?s?\s*day\b/i,
+      /\bmom'?s?\s*(day|special)\b/i
+    ],
+    aliases: ['mothers day', 'mums day']
+  },
+  {
+    name: 'Kings Birthday',
+    month: 5,  // June (varies by state)
+    window: 7,
+    namePatterns: [
+      /\bking'?s?\s*birthday\b/i,
+      /\bqueens?\s*birthday\b/i,  // Legacy name
+      /\broyal\s*(birthday|special|classic)\b/i
+    ],
+    aliases: ['kings birthday', 'queens birthday', 'royal birthday']
+  },
+  {
+    name: 'Fathers Day',
+    month: 8,  // September (first Sunday in AU)
+    window: 7,
+    namePatterns: [
+      /\bfather'?s?\s*day\b/i,
+      /\bdad'?s?\s*day\b/i,
+      /\bpapa'?s?\s*(day|special)\b/i
+    ],
+    aliases: ['fathers day', 'dads day']
+  },
+  {
+    name: 'Labour Day',
+    month: 9,  // October (varies by state)
+    window: 7,
+    namePatterns: [
+      /\blabou?r\s*day\b/i,
+      /\beight\s*hour\s*day\b/i,
+      /\bmay\s*day\b/i  // Some regions
+    ],
+    aliases: ['labour day', 'labor day', 'eight hour day']
+  },
+  {
+    name: 'Halloween',
+    month: 9,
+    day: 31,
+    window: 5,
+    namePatterns: [
+      /\bhallowe?'?e?n\b/i,
+      /\bspooky\s*(special|classic|series)\b/i,
+      /\bfright\s*night\b/i,
+      /\bmonster\s*(mash|special|classic)\b/i
+    ],
+    aliases: ['halloween', 'haloween', 'spooky']
+  },
+  {
+    name: 'Melbourne Cup',
+    month: 10,  // November (first Tuesday)
+    window: 5,
+    namePatterns: [
+      /\bmelbourne\s*cup\b/i,
+      /\bcup\s*day\b/i,
+      /\bthe\s*race\s*that\s*stops/i
+    ],
+    aliases: ['melbourne cup', 'cup day']
+  },
+  {
+    name: 'Christmas',
+    month: 11,
+    day: 25,
+    window: 7,
+    namePatterns: [
+      /\bchristmas\b/i,
+      /\bxmas\b/i,
+      /\bx-?mas\b/i,
+      /\bholiday\s*(special|classic|series)\b/i,
+      /\bfestive\s*(special|classic|series)\b/i,
+      /\bsanta\s*(special|classic)\b/i,
+      /\bboxing\s*day\b/i
+    ],
+    aliases: ['christmas', 'xmas', 'x-mas', 'boxing day', 'festive', 'holiday']
+  },
+  {
+    name: 'New Years Eve',
+    month: 11,
+    day: 31,
+    window: 2,
+    namePatterns: [
+      /\bnew\s*years?\s*eve\b/i,
+      /\bnye\b/i,
+      /\bend\s*of\s*year\b/i,
+      /\byear\s*end\s*(special|classic|bash)\b/i
+    ],
+    aliases: ['new years eve', 'nye', 'year end']
+  }
 ];
+
+// ===================================================================
+// HOLIDAY DETECTION HELPER FUNCTIONS
+// ===================================================================
+
+/**
+ * Check if a game name contains holiday-related keywords
+ * Returns the matched holiday or null
+ * 
+ * @param {string} gameName - Tournament name to check
+ * @returns {object|null} { name, confidence, matchType } or null
+ */
+const detectHolidayFromName = (gameName) => {
+  if (!gameName) return null;
+  
+  const lowerName = gameName.toLowerCase();
+  
+  for (const holiday of HOLIDAY_PATTERNS) {
+    // Check namePatterns (regex matching)
+    if (holiday.namePatterns) {
+      for (const pattern of holiday.namePatterns) {
+        if (pattern.test(gameName)) {
+          return {
+            name: holiday.name,
+            confidence: 0.95,
+            matchType: 'NAME_PATTERN',
+            matchedPattern: pattern.toString()
+          };
+        }
+      }
+    }
+    
+    // Check aliases (simple string matching)
+    if (holiday.aliases) {
+      for (const alias of holiday.aliases) {
+        if (lowerName.includes(alias.toLowerCase())) {
+          return {
+            name: holiday.name,
+            confidence: 0.90,
+            matchType: 'NAME_ALIAS',
+            matchedAlias: alias
+          };
+        }
+      }
+    }
+  }
+  
+  return null;
+};
+
+/**
+ * Check if a date falls within a holiday window
+ * Returns the matched holiday or null
+ * 
+ * @param {Date} dateObj - Date to check
+ * @returns {object|null} { name, confidence, matchType } or null
+ */
+const detectHolidayFromDate = (dateObj) => {
+  if (!dateObj || !(dateObj instanceof Date) || isNaN(dateObj.getTime())) return null;
+  
+  const month = dateObj.getMonth();
+  const day = dateObj.getDate();
+  
+  for (const holiday of HOLIDAY_PATTERNS) {
+    if (holiday.month === month) {
+      if (holiday.day) {
+        // Fixed-date holiday - check if within window
+        const diff = Math.abs(day - holiday.day);
+        if (diff <= holiday.window) {
+          // Confidence is higher the closer to the actual day
+          const confidence = Math.max(0.7, 1 - (diff / (holiday.window * 2)));
+          return {
+            name: holiday.name,
+            confidence,
+            matchType: 'DATE_PROXIMITY',
+            daysFromHoliday: diff
+          };
+        }
+      } else {
+        // Floating holiday (e.g., Easter, Queens Birthday) - match by month + window
+        return {
+          name: holiday.name,
+          confidence: 0.7,
+          matchType: 'DATE_MONTH',
+          monthMatch: month
+        };
+      }
+    }
+  }
+  
+  return null;
+};
+
+/**
+ * Combined holiday detection - checks both name AND date
+ * Returns the best match with combined confidence
+ * 
+ * @param {string} gameName - Tournament name
+ * @param {Date} dateObj - Game date
+ * @returns {object|null} { name, confidence, matchType, nameMatch, dateMatch }
+ */
+const detectHoliday = (gameName, dateObj) => {
+  const nameMatch = detectHolidayFromName(gameName);
+  const dateMatch = detectHolidayFromDate(dateObj);
+  
+  // If both match the SAME holiday, boost confidence
+  if (nameMatch && dateMatch && nameMatch.name === dateMatch.name) {
+    return {
+      name: nameMatch.name,
+      confidence: Math.min(1.0, nameMatch.confidence + 0.1), // Boost for dual match
+      matchType: 'NAME_AND_DATE',
+      nameMatch,
+      dateMatch
+    };
+  }
+  
+  // Name match takes priority (more explicit intent)
+  if (nameMatch) {
+    return {
+      ...nameMatch,
+      dateMatch: dateMatch || null
+    };
+  }
+  
+  // Fall back to date match
+  if (dateMatch) {
+    return {
+      ...dateMatch,
+      nameMatch: null
+    };
+  }
+  
+  return null;
+};
+
+/**
+ * Get all holiday name keywords for use in series detection heuristics
+ * @returns {string[]} Array of lowercase holiday-related keywords
+ */
+const getHolidayKeywords = () => {
+  const keywords = new Set();
+  
+  for (const holiday of HOLIDAY_PATTERNS) {
+    // Add the main holiday name (split into words)
+    holiday.name.toLowerCase().split(/\s+/).forEach(word => {
+      if (word.length > 2) keywords.add(word);
+    });
+    
+    // Add aliases
+    if (holiday.aliases) {
+      holiday.aliases.forEach(alias => {
+        alias.toLowerCase().split(/\s+/).forEach(word => {
+          if (word.length > 2) keywords.add(word);
+        });
+      });
+    }
+  }
+  
+  return Array.from(keywords);
+};
 
 // ===================================================================
 // VALIDATION THRESHOLDS (Existing - unchanged)
@@ -571,6 +923,12 @@ module.exports = {
   SERIES_KEYWORDS,
   STRUCTURE_KEYWORDS,
   HOLIDAY_PATTERNS,
+  
+  // Holiday Detection (NEW)
+  detectHolidayFromName,
+  detectHolidayFromDate,
+  detectHoliday,
+  getHolidayKeywords,
   
   // Validation
   VALIDATION_THRESHOLDS

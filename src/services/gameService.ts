@@ -528,7 +528,7 @@ export const saveGameDataToBackend = async (
             saveToDatabase: true,
             forceUpdate: !!existingGameId || options?.wasEdited,
             autoCreateSeries: options?.autoCreateSeries ?? true,
-            autoCreateRecurring: options?.autoCreateRecurring ?? false,
+            autoCreateRecurring: options?.autoCreateRecurring ?? true,
         };
         
         // Call enrichment pipeline

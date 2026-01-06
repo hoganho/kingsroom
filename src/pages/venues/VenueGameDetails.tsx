@@ -1,4 +1,8 @@
 // src/pages/venues/VenueGameDetails.tsx
+// VERSION: 1.1.0 - Added Tournament ID column
+//
+// CHANGELOG:
+// - v1.1.0: Added Tournament ID column to game history table (between Date and Game)
 
 import React, { useState, useEffect, useMemo, Fragment } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -106,6 +110,7 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
           buyIn
           gameType
           gameVariant
+          tournamentId
         }
       }
       nextToken
@@ -300,6 +305,7 @@ interface GameFinancialSnapshotWithGame {
     buyIn?: number | null;
     gameType?: string | null;
     gameVariant?: string | null;
+    tournamentId?: string | null;
   } | null;
 }
 
@@ -322,6 +328,7 @@ interface GameRowData {
   cost: number;
   profit: number;
   profitMargin: number | null;
+  tournamentId: string | null;
 }
 
 interface SummaryStats {
@@ -343,7 +350,7 @@ interface GameDetails {
   gameStartDateTime: string;
   gameEndDateTime?: string | null;
   registrationStatus?: string | null;
-  totalDuration?: string | null;
+  totalDuration?: number | null;
   gameFrequency?: string | null;
   buyIn?: number | null;
   rake?: number | null;
@@ -489,6 +496,7 @@ function buildGameRows(snapshots: GameFinancialSnapshotWithGame[]): GameRowData[
       cost: snap.totalCost ?? 0,
       profit: snap.netProfit ?? 0,
       profitMargin: snap.profitMargin ?? null,
+      tournamentId: snap.game?.tournamentId ?? null,
     }));
 }
 
@@ -1486,12 +1494,13 @@ export const VenueGameDetails: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">ID</th>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Game</th>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Buy-in</th>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Registrations</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Rego</th>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Entries</th>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Prizepool</th>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Revenue</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">PP</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Rev</th>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Cost</th>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Profit</th>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Margin</th>
@@ -1512,6 +1521,9 @@ export const VenueGameDetails: React.FC = () => {
                         return '-';
                       }
                     })()}
+                  </td>
+                  <td className="px-4 py-2 whitespace-nowrap text-gray-500 font-mono text-xs">
+                    {row.tournamentId || '-'}
                   </td>
                   <td className="px-4 py-2 whitespace-nowrap">
                     <button
@@ -1544,7 +1556,7 @@ export const VenueGameDetails: React.FC = () => {
               ))}
               {gameRows.length === 0 && (
                 <tr>
-                  <td className="px-4 py-6 text-center text-sm text-gray-500" colSpan={10}>
+                  <td className="px-4 py-6 text-center text-sm text-gray-500" colSpan={11}>
                     No data available.
                   </td>
                 </tr>

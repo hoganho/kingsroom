@@ -364,7 +364,7 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({
         saveToDatabase: true,
         forceUpdate: mode === 'edit' || !!existingGameId,
         autoCreateSeries: true,
-        autoCreateRecurring: false,
+        autoCreateRecurring: true,
       };
       
       // Call enrichment pipeline

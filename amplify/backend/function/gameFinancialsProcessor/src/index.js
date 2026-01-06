@@ -18,17 +18,20 @@
     API_KINGSROOM_VENUETABLE_NAME
     ENV
     REGION
-Amplify Params - DO NOT EDIT *//**
+Amplify Params - DO NOT EDIT */
+
+/**
  * ===================================================================
  * GAME FINANCIALS PROCESSOR LAMBDA
  * ===================================================================
  * 
- * VERSION: 1.4.0
+ * VERSION: 1.5.0
  * 
  * CHANGELOG:
+ * - v1.5.0: Added content hash check to skip non-meaningful Game table changes
+ *           Only processes records where dataChangedAt changed
  * - v1.4.0: Updates Game.gameCostId and Game.gameFinancialSnapshotId after saving
- *           (supports new @hasOne foreign key schema for efficient lookups)
- * - v1.3.0: Added tournamentSeriesId, seriesName, recurringGameId for metrics partitioning
+ * - v1.3.0: Added tournamentSeriesId, seriesName, recurringGameId for metrics
  * - v1.2.0: Added isSeries and isSeriesParent flags for filtering/aggregation
  * 
  * TRIGGERS:
@@ -36,52 +39,8 @@ Amplify Params - DO NOT EDIT *//**
  * - GraphQL mutation (preview or save mode)
  * - Direct Lambda invocation (preview or save mode)
  * 
- * MODES:
- * - Preview (saveToDatabase: false): Calculate and return financial data
- * - Save (saveToDatabase: true): Calculate and persist to DB
- * 
- * RESPONSIBILITIES:
- * - Calculates GameCost (operational costs)
- * - Calculates GameFinancialSnapshot (reporting metrics)
- * - Updates Game.gameCostId and Game.gameFinancialSnapshotId for @hasOne lookups
- * - Supports preview for FE confirmation workflows
- * 
- * SERIES HANDLING:
- * - isSeries: true if game is part of a tournament series
- * - isSeriesParent: true if series game AND no parentGameId (consolidated record)
- * - tournamentSeriesId: ID of the specific tournament series
- * - seriesName: Denormalized series name for display
- * - These fields enable proper filtering and grouping in aggregate queries
- * 
- * RECURRING GAME HANDLING:
- * - recurringGameId: Link to the recurring game template (for regular games)
- * - Enables RecurringGameMetrics calculation in refreshAllMetrics Lambda
- * 
- * GSI QUERY PATTERNS:
- * - byEntitySeriesKey: Query "{entityId}#SERIES" or "{entityId}#REGULAR"
- * - byVenueSeriesKey: Query "{venueId}#SERIES" or "{venueId}#REGULAR"
- * - byTournamentSeriesSnapshot: Query all snapshots for a specific series
- * - byRecurringGameSnapshot: Query all instances of a recurring game
- * 
- * ARCHITECTURE:
- * ┌─────────────────────────────────────────────────────────────────┐
- * │  Frontend / gameDataEnricher                                    │
- * │       │                                                          │
- * │       ▼ (GraphQL: calculateGameFinancials)                      │
- * │  gameFinancialsProcessor                                        │
- * │       │                                                          │
- * │       ├──▶ Preview Mode: Return calculated data                 │
- * │       │                                                          │
- * │       └──▶ Save Mode: Write to GameCost + GameFinancialSnapshot │
- * │                       + Update Game.gameCostId/snapshotId       │
- * └─────────────────────────────────────────────────────────────────┘
- * 
- * ┌─────────────────────────────────────────────────────────────────┐
- * │  Game Table (DynamoDB Stream)                                   │
- * │       │                                                          │
- * │       ▼ (INSERT/MODIFY event)                                   │
- * │  gameFinancialsProcessor → Always saves                         │
- * └─────────────────────────────────────────────────────────────────┘
+ * NO PLAYER DATA MODIFICATION - Only updates GameCost, GameFinancialSnapshot,
+ * and Game FK fields.
  * 
  * ===================================================================
  */
@@ -125,8 +84,6 @@ const shouldProcessGame = (game, eventName) => {
 
 /**
  * Determine if a game is part of a tournament series
- * @param {Object} game - Game data
- * @returns {boolean}
  */
 const determineIsSeries = (game) => {
     return !!(game.isSeries === true || game.tournamentSeriesId);
@@ -134,19 +91,67 @@ const determineIsSeries = (game) => {
 
 /**
  * Determine if a game is a series parent (consolidated record)
- * A series parent is a game that:
- * - IS part of a series
- * - Does NOT have a parentGameId (it's not a flight/child)
- * 
- * This identifies the "top-level" record for multi-day events
- * @param {Object} game - Game data
- * @returns {boolean}
  */
 const determineIsSeriesParent = (game) => {
     const isSeries = determineIsSeries(game);
-    // If it's a series game and has no parent, it's the parent/consolidated record
-    // Also check finalDay as an additional indicator
     return isSeries && !game.parentGameId;
+};
+
+// ===================================================================
+// CONTENT HASH CHECK - Skip non-meaningful changes
+// ===================================================================
+
+/**
+ * Check if this stream record represents a meaningful change
+ * that requires financial processing.
+ * 
+ * @param {Object} record - DynamoDB stream record
+ * @returns {Object} { shouldProcess: boolean, reason: string }
+ */
+const shouldProcessStreamRecord = (record) => {
+    const { eventName, dynamodb } = record;
+    
+    // Always process INSERT events (new games)
+    if (eventName === 'INSERT') {
+        return { shouldProcess: true, reason: 'New game inserted' };
+    }
+    
+    // Skip REMOVE events (no financials for deleted games)
+    if (eventName === 'REMOVE') {
+        return { shouldProcess: false, reason: 'Game removed' };
+    }
+    
+    // For MODIFY events, check if dataChangedAt changed
+    if (eventName === 'MODIFY') {
+        const oldImage = dynamodb.OldImage ? unmarshall(dynamodb.OldImage) : null;
+        const newImage = dynamodb.NewImage ? unmarshall(dynamodb.NewImage) : null;
+        
+        if (!oldImage || !newImage) {
+            return { shouldProcess: true, reason: 'Missing image data, processing to be safe' };
+        }
+        
+        // Check if dataChangedAt changed (meaningful change)
+        const oldDataChangedAt = oldImage.dataChangedAt;
+        const newDataChangedAt = newImage.dataChangedAt;
+        
+        if (oldDataChangedAt !== newDataChangedAt) {
+            return { shouldProcess: true, reason: 'dataChangedAt changed (meaningful update)' };
+        }
+        
+        // Also check contentHash as backup
+        const oldHash = oldImage.contentHash;
+        const newHash = newImage.contentHash;
+        
+        if (oldHash !== newHash) {
+            return { shouldProcess: true, reason: 'contentHash changed' };
+        }
+        
+        // No meaningful change
+        return { shouldProcess: false, reason: 'No meaningful change (dataChangedAt unchanged)' };
+    }
+    
+    // Unknown event type - process to be safe
+    return { shouldProcess: true, reason: 'Unknown event type' };
 };
 
 // ===================================================================
@@ -155,17 +160,13 @@ const determineIsSeriesParent = (game) => {
 
 /**
  * Calculate GameCost data
- * 
- * @param {Object} game - Game data
- * @param {Object} existingCost - Existing GameCost record (if any)
- * @returns {Object} Calculated cost data
  */
 const calculateGameCost = (game, existingCost = null) => {
     const totalEntries = game.totalEntries || 0;
-    const dealerRatePerEntry = 15; // $15 per entry
+    const dealerRatePerEntry = 15;
     const computedDealerCost = totalEntries * dealerRatePerEntry;
     
-    // Preserve existing manual cost entries, only update computed ones
+    // Preserve existing manual cost entries
     const totalTournamentDirectorCost = existingCost?.totalTournamentDirectorCost || 0;
     const totalFloorStaffCost = existingCost?.totalFloorStaffCost || 0;
     const totalSecurityCost = existingCost?.totalSecurityCost || 0;
@@ -188,7 +189,6 @@ const calculateGameCost = (game, existingCost = null) => {
         entityId: game.entityId,
         venueId: game.venueId,
         gameDate: game.gameStartDateTime,
-        // Cost breakdown
         totalDealerCost: computedDealerCost,
         totalTournamentDirectorCost,
         totalFloorStaffCost,
@@ -198,7 +198,6 @@ const calculateGameCost = (game, existingCost = null) => {
         totalPromotionCost,
         totalOtherCost,
         totalCost,
-        // Metadata
         dealerRatePerEntry,
         entriesUsedForCalculation: totalEntries
     };
@@ -210,10 +209,6 @@ const calculateGameCost = (game, existingCost = null) => {
 
 /**
  * Calculate GameFinancialSnapshot data
- * 
- * @param {Object} game - Game data
- * @param {Object} costData - Calculated cost data
- * @returns {Object} Calculated snapshot data
  */
 const calculateGameFinancialSnapshot = (game, costData) => {
     // Revenue metrics
@@ -281,26 +276,19 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         }
     }
     
-    // Dealer cost per hour (if we have duration)
     const dealerCostPerHour = gameDurationMinutes && gameDurationMinutes > 0 
         ? Math.round((totalDealerCost / (gameDurationMinutes / 60)) * 100) / 100 
         : null;
     
-    // ===================================================================
-    // PRIZEPOOL ADJUSTMENTS (NEW)
-    // ===================================================================
-    
-    // Prizepool delta (rounding adjustments)
+    // Prizepool adjustments
     const prizepoolCalculated = game.prizepoolCalculated || 0;
     const prizepoolPaidDelta = (game.prizepoolPaid || 0) - prizepoolCalculated;
     
-    // Jackpot contributions
     const hasJackpotContributions = game.hasJackpotContributions || false;
     const jackpotContributionAmount = game.jackpotContributionAmount || 0;
     const prizepoolJackpotContributions = game.prizepoolJackpotContributions || 
         (hasJackpotContributions ? jackpotContributionAmount * totalEntries : 0);
     
-    // Accumulator ticket payouts
     const hasAccumulatorTickets = game.hasAccumulatorTickets || false;
     const accumulatorTicketValue = game.accumulatorTicketValue || 100;
     const numberOfAccumulatorTicketsPaid = game.numberOfAccumulatorTicketsPaid || 
@@ -309,9 +297,7 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         ? numberOfAccumulatorTicketsPaid * accumulatorTicketValue 
         : 0;
     
-    // ===================================================================
-    // SERIES FLAGS - For filtering and aggregation
-    // ===================================================================
+    // Series flags
     const isSeries = determineIsSeries(game);
     const isSeriesParent = determineIsSeriesParent(game);
     
@@ -340,8 +326,6 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         prizepoolAddedValue,
         prizepoolTotal,
         prizepoolSurplus,
-        
-        // Prizepool Adjustments (NEW)
         prizepoolPaidDelta,
         prizepoolJackpotContributions,
         prizepoolAccumulatorTicketPayoutEstimate,
@@ -374,48 +358,20 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         staffCostPerPlayer,
         dealerCostPerHour,
         
-        // ===================================================================
-        // SERIES FLAGS - For filtering and aggregation
-        // ===================================================================
-        // isSeries: true if game is part of a tournament series
-        // Use to exclude series games from regular game aggregations
+        // Series flags
         isSeries,
-        
-        // isSeriesParent: true if this is the consolidated/parent record
-        // Use to include only parent records when aggregating series data
-        // (avoids double-counting flights/days)
         isSeriesParent,
-        
-        // Reference to parent game (for child/flight games)
         parentGameId: game.parentGameId || null,
         
-        // ===================================================================
-        // SERIES IDENTIFICATION - For grouping and reporting (NEW in v1.3.0)
-        // ===================================================================
-        // The specific tournament series this game belongs to
-        // Enables queries like "all snapshots for WSOP 2024"
+        // Series identification
         tournamentSeriesId: game.tournamentSeriesId || null,
-        
-        // Denormalized series name for display/reporting
-        // Avoids joins when displaying series info
         seriesName: game.seriesName || null,
         
-        // ===================================================================
-        // RECURRING GAME REFERENCE - For RecurringGameMetrics (NEW in v1.3.0)
-        // ===================================================================
-        // Link to the recurring game template (for regular/non-series games)
-        // Enables RecurringGameMetrics calculation in refreshAllMetrics Lambda
+        // Recurring game reference
         recurringGameId: game.recurringGameId || null,
         
-        // ===================================================================
-        // COMPOSITE QUERY KEYS - For efficient GSI queries
-        // ===================================================================
-        // Format: "{entityId}#REGULAR" or "{entityId}#SERIES"
-        // Use with byEntitySeriesKey GSI to efficiently query series vs regular games
+        // Composite query keys
         entitySeriesKey: game.entityId ? `${game.entityId}#${isSeries ? 'SERIES' : 'REGULAR'}` : null,
-        
-        // Format: "{venueId}#REGULAR" or "{venueId}#SERIES"
-        // Use with byVenueSeriesKey GSI to efficiently query series vs regular games per venue
         venueSeriesKey: game.venueId ? `${game.venueId}#${isSeries ? 'SERIES' : 'REGULAR'}` : null
     };
 };
@@ -451,7 +407,6 @@ const saveGameCost = async (costData, existingCost = null) => {
     
     try {
         if (existingCost) {
-            // Update existing
             await ddbDocClient.send(new UpdateCommand({
                 TableName: getTableName('GameCost'),
                 Key: { id: existingCost.id },
@@ -474,11 +429,10 @@ const saveGameCost = async (costData, existingCost = null) => {
                 }
             }));
             
-            console.log(`[FINANCIALS] ✅ Updated GameCost ${existingCost.id}`);
+            console.log(`[FINANCIALS] Updated GameCost ${existingCost.id}`);
             return { action: 'UPDATED', costId: existingCost.id };
         }
         
-        // Create new
         const costId = uuidv4();
         await ddbDocClient.send(new PutCommand({
             TableName: getTableName('GameCost'),
@@ -493,11 +447,11 @@ const saveGameCost = async (costData, existingCost = null) => {
             }
         }));
         
-        console.log(`[FINANCIALS] ✅ Created GameCost ${costId}`);
+        console.log(`[FINANCIALS] Created GameCost ${costId}`);
         return { action: 'CREATED', costId };
         
     } catch (error) {
-        console.error(`[FINANCIALS] ❌ Error saving GameCost:`, error);
+        console.error(`[FINANCIALS] Error saving GameCost:`, error);
         return { action: 'ERROR', error: error.message };
     }
 };
@@ -511,7 +465,6 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
     const snapshotTable = getTableName('GameFinancialSnapshot');
     
     try {
-        // Check for existing snapshot
         const existingResult = await ddbDocClient.send(new QueryCommand({
             TableName: snapshotTable,
             IndexName: 'byGameFinancialSnapshot',
@@ -528,17 +481,14 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
             _lastChangedAt: timestamp
         };
         
-        // Remove gameId from fields (it's stored separately)
         const gameId = snapshotFields.gameId;
         delete snapshotFields.gameId;
         
-        // Remove null GSI key fields - DynamoDB doesn't allow null values in GSI keys
-        // Items without these fields simply won't be indexed (which is correct behavior)
+        // Remove null GSI key fields
         if (!snapshotFields.tournamentSeriesId) delete snapshotFields.tournamentSeriesId;
         if (!snapshotFields.recurringGameId) delete snapshotFields.recurringGameId;
 
         if (existingResult.Items?.[0]) {
-            // Update existing
             const existing = existingResult.Items[0];
             
             const updateKeys = Object.keys(snapshotFields);
@@ -560,11 +510,10 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
                 ExpressionAttributeValues: expressionAttributeValues
             }));
             
-            console.log(`[FINANCIALS] ✅ Updated GameFinancialSnapshot ${existing.id} (isSeries: ${snapshotData.isSeries}, isSeriesParent: ${snapshotData.isSeriesParent}, seriesId: ${snapshotData.tournamentSeriesId}, recurringGameId: ${snapshotData.recurringGameId})`);
+            console.log(`[FINANCIALS] Updated GameFinancialSnapshot ${existing.id}`);
             return { action: 'UPDATED', snapshotId: existing.id };
         }
 
-        // Create new snapshot
         const snapshotId = uuidv4();
         await ddbDocClient.send(new PutCommand({
             TableName: snapshotTable,
@@ -578,31 +527,21 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
             }
         }));
         
-        console.log(`[FINANCIALS] ✅ Created GameFinancialSnapshot ${snapshotId} (isSeries: ${snapshotData.isSeries}, isSeriesParent: ${snapshotData.isSeriesParent}, seriesId: ${snapshotData.tournamentSeriesId}, recurringGameId: ${snapshotData.recurringGameId})`);
+        console.log(`[FINANCIALS] Created GameFinancialSnapshot ${snapshotId}`);
         return { action: 'CREATED', snapshotId };
         
     } catch (error) {
-        console.error(`[FINANCIALS] ❌ Error saving GameFinancialSnapshot:`, error);
+        console.error(`[FINANCIALS] Error saving GameFinancialSnapshot:`, error);
         return { action: 'ERROR', error: error.message };
     }
 };
 
-// ===================================================================
-// UPDATE GAME WITH FOREIGN KEYS (NEW in v1.4.0)
-// ===================================================================
-
 /**
  * Update Game record with gameCostId and gameFinancialSnapshotId
- * This enables efficient @hasOne lookups without GSI queries
- * 
- * @param {string} gameId - Game ID to update
- * @param {Object} costSaveResult - Result from saveGameCost
- * @param {Object} snapshotSaveResult - Result from saveGameFinancialSnapshot
  */
 const updateGameFinancialForeignKeys = async (gameId, costSaveResult, snapshotSaveResult) => {
     const updates = {};
     
-    // Only update if we have new IDs (CREATED action)
     if (costSaveResult?.action === 'CREATED' && costSaveResult?.costId) {
         updates.gameCostId = costSaveResult.costId;
     }
@@ -611,9 +550,7 @@ const updateGameFinancialForeignKeys = async (gameId, costSaveResult, snapshotSa
         updates.gameFinancialSnapshotId = snapshotSaveResult.snapshotId;
     }
     
-    // Skip if nothing to update
     if (Object.keys(updates).length === 0) {
-        console.log(`[FINANCIALS] No FK updates needed for game ${gameId}`);
         return { updated: false };
     }
     
@@ -645,12 +582,11 @@ const updateGameFinancialForeignKeys = async (gameId, costSaveResult, snapshotSa
             ConditionExpression: 'attribute_exists(id)'
         }));
         
-        console.log(`[FINANCIALS] ✅ Updated Game ${gameId} with FK:`, updates);
+        console.log(`[FINANCIALS] Updated Game ${gameId} with FK:`, updates);
         return { updated: true, fields: Object.keys(updates) };
         
     } catch (error) {
-        // Don't fail the whole operation if FK update fails
-        console.error(`[FINANCIALS] ⚠️ Failed to update Game FKs for ${gameId}:`, error.message);
+        console.error(`[FINANCIALS] Failed to update Game FKs for ${gameId}:`, error.message);
         return { updated: false, error: error.message };
     }
 };
@@ -661,96 +597,59 @@ const updateGameFinancialForeignKeys = async (gameId, costSaveResult, snapshotSa
 
 /**
  * Process game financials - calculate and optionally save
- * 
- * @param {Object} game - Game data
- * @param {Object} options - Processing options
- * @param {boolean} options.saveToDatabase - If true, persist to DB; if false, preview only
- * @returns {Object} Processing result with calculated data
  */
 const processGameFinancials = async (game, options = {}) => {
     const { saveToDatabase = false } = options;
     const startTime = Date.now();
     
-    // Log series status for debugging
     const isSeries = determineIsSeries(game);
     const isSeriesParent = determineIsSeriesParent(game);
-    console.log(`[FINANCIALS] Processing game ${game.id} (saveToDatabase: ${saveToDatabase}, isSeries: ${isSeries}, isSeriesParent: ${isSeriesParent}, seriesId: ${game.tournamentSeriesId || 'none'}, recurringGameId: ${game.recurringGameId || 'none'})`);
+    console.log(`[FINANCIALS] Processing game ${game.id} (save: ${saveToDatabase}, isSeries: ${isSeries})`);
     
-    // Get existing cost record (for preserving manual entries)
     const existingCost = saveToDatabase ? await getExistingGameCost(game.id) : null;
-    
-    // Calculate cost data
     const costData = calculateGameCost(game, existingCost);
-    
-    // Calculate snapshot data
     const snapshotData = calculateGameFinancialSnapshot(game, costData);
     
-    // Build result
     const result = {
         success: true,
         gameId: game.id,
         mode: saveToDatabase ? 'SAVE' : 'PREVIEW',
-        
-        // Calculated data (always returned for FE)
         calculatedCost: costData,
         calculatedSnapshot: snapshotData,
-        
-        // Summary metrics for FE display
         summary: {
-            // Revenue
             totalRevenue: snapshotData.totalRevenue,
             rakeRevenue: snapshotData.rakeRevenue,
             totalBuyInsCollected: snapshotData.totalBuyInsCollected,
-            
-            // Costs
             totalCost: snapshotData.totalCost,
             totalDealerCost: snapshotData.totalDealerCost,
-            
-            // Prizepool
             prizepoolTotal: snapshotData.prizepoolTotal,
             prizepoolPlayerContributions: snapshotData.prizepoolPlayerContributions,
             prizepoolAddedValue: snapshotData.prizepoolAddedValue,
-            
-            // Guarantee
             guaranteeMet: snapshotData.guaranteeMet,
             guaranteeOverlayCost: snapshotData.guaranteeOverlayCost,
             guaranteeCoverageRate: snapshotData.guaranteeCoverageRate,
-            
-            // Profit
             gameProfit: snapshotData.gameProfit,
             netProfit: snapshotData.netProfit,
             profitMargin: snapshotData.profitMargin,
-            
-            // Per-player
             revenuePerPlayer: snapshotData.revenuePerPlayer,
             costPerPlayer: snapshotData.costPerPlayer,
             profitPerPlayer: snapshotData.profitPerPlayer,
             rakePerEntry: snapshotData.rakePerEntry,
-            
-            // Series flags (for FE awareness)
             isSeries: snapshotData.isSeries,
             isSeriesParent: snapshotData.isSeriesParent,
-            
-            // Series/Recurring identification (NEW in v1.3.0)
             tournamentSeriesId: snapshotData.tournamentSeriesId,
             seriesName: snapshotData.seriesName,
             recurringGameId: snapshotData.recurringGameId
         },
-        
-        // Save results (only populated when saveToDatabase is true)
         costSaveResult: null,
         snapshotSaveResult: null,
-        gameFkUpdateResult: null, // NEW in v1.4.0
-        
+        gameFkUpdateResult: null,
         processingTimeMs: 0
     };
     
-    // Save to database if requested
     if (saveToDatabase) {
         result.costSaveResult = await saveGameCost(costData, existingCost);
         result.snapshotSaveResult = await saveGameFinancialSnapshot(snapshotData, result.costSaveResult);
-        
-        // NEW in v1.4.0: Update Game with foreign keys for efficient @hasOne lookups
         result.gameFkUpdateResult = await updateGameFinancialForeignKeys(
             game.id, 
             result.costSaveResult, 
@@ -759,24 +658,16 @@ const processGameFinancials = async (game, options = {}) => {
     }
     
     result.processingTimeMs = Date.now() - startTime;
-    
     return result;
 };
 
 // ===================================================================
-// MAIN HANDLER - GRAPHQL / DIRECT INVOCATION
+// MAIN HANDLER
 // ===================================================================
 
-/**
- * Main handler for GraphQL mutations and direct invocations
- * 
- * Input formats:
- * 1. GraphQL: { arguments: { input: { game: {...}, options: {...} } } }
- * 2. Direct with game object: { game: {...}, options: { saveToDatabase: true/false } }
- * 3. Direct with gameId: { gameId: "xxx", options: { saveToDatabase: true/false } }
- * 4. DynamoDB Stream: { Records: [...] }
- */
 exports.handler = async (event) => {
+    console.log('[FINANCIALS] v1.5.0 - With content hash check');
+    
     // Check if this is a DynamoDB Stream event
     if (event.Records && Array.isArray(event.Records)) {
         return await handleStreamEvent(event);
@@ -785,14 +676,11 @@ exports.handler = async (event) => {
     // GraphQL or direct invocation
     const input = event.arguments?.input || event.input || event;
     const options = input.options || {};
-    
-    // Default to preview mode for explicit calls (safety)
     const saveToDatabase = options.saveToDatabase === true;
     
     try {
         let game = input.game;
         
-        // If gameId provided instead of full game, fetch it
         if (!game && input.gameId) {
             const gameTable = getTableName('Game');
             const result = await ddbDocClient.send(new GetCommand({
@@ -801,41 +689,24 @@ exports.handler = async (event) => {
             }));
             
             if (!result.Item) {
-                return {
-                    success: false,
-                    error: `Game not found: ${input.gameId}`
-                };
+                return { success: false, error: `Game not found: ${input.gameId}` };
             }
-            
             game = result.Item;
         }
         
         if (!game || !game.id) {
-            return {
-                success: false,
-                error: 'Game data or gameId is required'
-            };
+            return { success: false, error: 'Game data or gameId is required' };
         }
         
-        // Skip NOT_PUBLISHED games
         if (game.gameStatus === 'NOT_PUBLISHED') {
-            console.log(`[FINANCIALS] Skipping NOT_PUBLISHED game: ${game.id}`);
-            return {
-                success: false,
-                skipped: true,
-                error: 'Game is NOT_PUBLISHED - financial processing skipped'
-            };
+            return { success: false, skipped: true, error: 'Game is NOT_PUBLISHED' };
         }
         
-        // Process financials
         return await processGameFinancials(game, { saveToDatabase });
         
     } catch (error) {
         console.error('[FINANCIALS] Handler error:', error);
-        return {
-            success: false,
-            error: error.message
-        };
+        return { success: false, error: error.message };
     }
 };
 
@@ -845,9 +716,11 @@ exports.handler = async (event) => {
 
 /**
  * Handle DynamoDB Stream events (always saves)
+ * NOW: Checks for meaningful changes before processing
  */
 const handleStreamEvent = async (event) => {
-    console.log(`[FINANCIALS] Processing ${event.Records?.length || 0} stream records`);
+    const totalRecords = event.Records?.length || 0;
+    console.log(`[FINANCIALS] Processing ${totalRecords} stream records`);
     
     const results = {
         processed: 0,
@@ -861,8 +734,13 @@ const handleStreamEvent = async (event) => {
     for (const record of event.Records || []) {
         const eventName = record.eventName;
         
-        // Skip REMOVE events
-        if (eventName === 'REMOVE') {
+        // ═══════════════════════════════════════════════════════════════
+        // CONTENT HASH CHECK: Skip non-meaningful changes
+        // ═══════════════════════════════════════════════════════════════
+        const processCheck = shouldProcessStreamRecord(record);
+        
+        if (!processCheck.shouldProcess) {
+            console.log(`[FINANCIALS] Skipping record: ${processCheck.reason}`);
             results.skipped++;
             continue;
         }
@@ -882,7 +760,6 @@ const handleStreamEvent = async (event) => {
                 continue;
             }
             
-            // Track series and recurring games for logging
             if (determineIsSeries(game)) {
                 results.seriesGames++;
             }
@@ -890,7 +767,6 @@ const handleStreamEvent = async (event) => {
                 results.recurringGames++;
             }
             
-            // Stream events always save to database
             const result = await processGameFinancials(game, { saveToDatabase: true });
             
             results.processed++;
@@ -899,37 +775,26 @@ const handleStreamEvent = async (event) => {
                 eventName,
                 isSeries: result.summary?.isSeries,
                 isSeriesParent: result.summary?.isSeriesParent,
-                tournamentSeriesId: result.summary?.tournamentSeriesId,
-                recurringGameId: result.summary?.recurringGameId,
                 cost: result.costSaveResult,
                 snapshot: result.snapshotSaveResult,
-                gameFkUpdate: result.gameFkUpdateResult // NEW in v1.4.0
+                gameFkUpdate: result.gameFkUpdateResult
             });
             
         } catch (error) {
             console.error('[FINANCIALS] Error processing record:', error);
             results.errors++;
-            results.details.push({
-                error: error.message,
-                record: record.eventID
-            });
+            results.details.push({ error: error.message, record: record.eventID });
         }
     }
     
-    console.log(`[FINANCIALS] Stream complete: ${results.processed} processed (${results.seriesGames} series, ${results.recurringGames} recurring), ${results.skipped} skipped, ${results.errors} errors`);
-    
+    console.log(`[FINANCIALS] Stream complete: ${results.processed} processed, ${results.skipped} skipped, ${results.errors} errors`);
     return results;
 };
 
 // ===================================================================
-// BATCH PROCESSING - REPROCESSING SUPPORT
+// BATCH PROCESSING
 // ===================================================================
 
-/**
- * Process multiple games by ID (for batch reprocessing)
- * 
- * Usage: { gameIds: ["xxx", "yyy"], options: { saveToDatabase: true } }
- */
 exports.batchProcess = async (event) => {
     const gameIds = event.gameIds || [];
     const options = event.options || { saveToDatabase: false };
@@ -953,22 +818,13 @@ exports.batchProcess = async (event) => {
                 continue;
             }
             
-            // Skip NOT_PUBLISHED games
             if (result.Item.gameStatus === 'NOT_PUBLISHED') {
                 results.push({ gameId, skipped: true, error: 'Game is NOT_PUBLISHED' });
                 continue;
             }
             
             const processResult = await processGameFinancials(result.Item, options);
-            results.push({
-                gameId,
-                isSeries: processResult.summary?.isSeries,
-                isSeriesParent: processResult.summary?.isSeriesParent,
-                tournamentSeriesId: processResult.summary?.tournamentSeriesId,
-                recurringGameId: processResult.summary?.recurringGameId,
-                gameFkUpdate: processResult.gameFkUpdateResult, // NEW in v1.4.0
-                ...processResult
-            });
+            results.push({ gameId, ...processResult });
             
         } catch (error) {
             results.push({ gameId, error: error.message });
@@ -978,8 +834,8 @@ exports.batchProcess = async (event) => {
     return {
         totalRequested: gameIds.length,
         processed: results.filter(r => r.success).length,
-        seriesGames: results.filter(r => r.isSeries).length,
-        recurringGames: results.filter(r => r.recurringGameId).length,
+        seriesGames: results.filter(r => r.summary?.isSeries).length,
+        recurringGames: results.filter(r => r.summary?.recurringGameId).length,
         failed: results.filter(r => !r.success).length,
         results
     };

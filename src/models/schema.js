@@ -1096,6 +1096,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "gameActualStartDateTime": {
+                    "name": "gameActualStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "gameEndDateTime": {
                     "name": "gameEndDateTime",
                     "isArray": false,
@@ -1115,7 +1122,7 @@ export const schema = {
                 "totalDuration": {
                     "name": "totalDuration",
                     "isArray": false,
-                    "type": "String",
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -1579,6 +1586,20 @@ export const schema = {
                     "name": "editHistory",
                     "isArray": false,
                     "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentHash": {
+                    "name": "contentHash",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dataChangedAt": {
+                    "name": "dataChangedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -12422,7 +12443,7 @@ export const schema = {
                 "totalDuration": {
                     "name": "totalDuration",
                     "isArray": false,
-                    "type": "String",
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -18060,7 +18081,7 @@ export const schema = {
                 "totalDuration": {
                     "name": "totalDuration",
                     "isArray": false,
-                    "type": "String",
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -19133,6 +19154,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "gameActualStartDateTime": {
+                    "name": "gameActualStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "gameEndDateTime": {
                     "name": "gameEndDateTime",
                     "isArray": false,
@@ -19348,7 +19376,7 @@ export const schema = {
                 "totalDuration": {
                     "name": "totalDuration",
                     "isArray": false,
-                    "type": "String",
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -22131,6 +22159,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "gameActualStartDateTime": {
+                    "name": "gameActualStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "gameEndDateTime": {
                     "name": "gameEndDateTime",
                     "isArray": false,
@@ -22268,7 +22303,7 @@ export const schema = {
                 "totalDuration": {
                     "name": "totalDuration",
                     "isArray": false,
-                    "type": "String",
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -26355,5 +26390,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "c7696d8ede358aa1b0327fc667850fbb"
+    "version": "ae00cee82d60093ca21426b16a4d79a6"
 };

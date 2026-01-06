@@ -101,7 +101,7 @@ export type GameData = {
     averagePlayerStack?: number | null;
     totalRebuys?: number | null;
     totalAddons?: number | null;
-    totalDuration?: string | null;
+    totalDuration?: number | null;
     gameTags?: (string | null)[] | null;
     seriesName?: string | null;
     gameDayOfWeek?: string | null;
@@ -230,7 +230,7 @@ export interface GameDataInput {
     totalEntries?: number;
     totalRebuys?: number;
     totalAddons?: number;
-    totalDuration?: string;
+    totalDuration?: number;
     gameTags?: string[];
     venueFee?: number;
     

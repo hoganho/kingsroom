@@ -1,6 +1,10 @@
 // src/pages/scraper-admin-tabs/OverviewTab.tsx
-// OPTIMIZED: Removed 30-second auto-polling to reduce Lambda costs
-// Now only refreshes on manual click or when component mounts
+// UPDATED v1.2.0:
+// - Fixed: Success rate now calculated from job data (newGamesScraped + gamesUpdated) / totalURLsProcessed
+// - Fixed: Recent jobs table shows calculated success rate
+// - Fixed: Coverage section has clearer explanations
+// - Fixed: Handles null/undefined metrics gracefully
+// - Removed auto-polling to reduce Lambda costs
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -12,14 +16,13 @@ import {
     Database,
     TrendingUp,
     AlertTriangle,
+    HelpCircle,
+    Info,
 } from 'lucide-react';
-// Import from auto-generated queries (except getScraperJobsReport which causes issues)
 import { 
     getScraperMetrics,
+    getScraperJobsReport,
 } from '../../graphql/queries';
-// Import minimal query from custom queries
-import { scraperManagementQueries } from '../../graphql/scraperManagement';
-// Import TimeRange enum from API types
 import { TimeRange, type ScraperJob } from '../../API';
 import { MetricCard, JobStatusBadge } from '../../components/scraper/shared/StatusBadges';
 import { useEntity } from '../../contexts/EntityContext';
@@ -31,10 +34,10 @@ interface ScraperMetrics {
     timeRange: string;
     entityId: string | null;
     totalJobs: number;
-    successfulJobs: number;     // GraphQL field name
+    successfulJobs: number;
     failedJobs: number;
     runningJobs: number;
-    totalURLsScraped: number;   // GraphQL field name
+    totalURLsScraped: number;
     totalNewGames: number;
     totalUpdatedGames: number;
     totalErrors: number;
@@ -44,8 +47,26 @@ interface ScraperMetrics {
     s3CacheRate: number;
 }
 
+// Extended job type with calculated fields
+interface JobWithStats extends ScraperJob {
+    calculatedSuccessRate?: number;
+}
+
 // ===================================================================
-// Coverage Info Component
+// Helper: Calculate Success Rate from Job Data
+// ===================================================================
+function calculateJobSuccessRate(job: ScraperJob): number {
+    const processed = job.totalURLsProcessed || 0;
+    if (processed === 0) return 0;
+    
+    const successful = (job.newGamesScraped || 0) + (job.gamesUpdated || 0);
+    return Math.round((successful / processed) * 100);
+}
+
+
+
+// ===================================================================
+// Coverage Info Component - IMPROVED
 // ===================================================================
 const CoverageInfo: React.FC = () => {
     const { currentEntity } = useEntity();
@@ -54,6 +75,7 @@ const CoverageInfo: React.FC = () => {
       scrapingStatus,
       getScrapingStatus,
     } = useGameIdTracking(currentEntity?.id);
+    const [showHelp, setShowHelp] = useState(false);
   
     useEffect(() => {
       if (currentEntity?.id) {
@@ -94,6 +116,17 @@ const CoverageInfo: React.FC = () => {
         </div>
       );
     }
+
+    // Calculate more intuitive metrics
+    const totalGames = scrapingStatus.totalGamesStored || 0;
+    const coveragePercent = scrapingStatus.gapSummary?.coveragePercentage || 0;
+    const missingIds = scrapingStatus.gapSummary?.totalMissingIds || 0;
+    const gapCount = scrapingStatus.gapSummary?.totalGaps || 0;
+    
+    // Calculate estimated total ID range
+    const estimatedTotalIds = coveragePercent > 0 
+        ? Math.round(totalGames / (coveragePercent / 100))
+        : totalGames;
   
     return (
       <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg shadow p-6 border border-purple-200">
@@ -102,38 +135,67 @@ const CoverageInfo: React.FC = () => {
             <TrendingUp className="h-5 w-5 mr-2 text-purple-600" />
             {currentEntity.entityName} Coverage
           </h3>
-          <button
-            onClick={loadGapAnalysis}
-            disabled={gapLoading}
-            className="text-sm text-purple-600 hover:text-purple-700 disabled:opacity-50"
-          >
-            {gapLoading ? 'Refreshing...' : 'Refresh'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowHelp(!showHelp)}
+              className="text-purple-400 hover:text-purple-600"
+              title="What do these numbers mean?"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
+            <button
+              onClick={loadGapAnalysis}
+              disabled={gapLoading}
+              className="text-sm text-purple-600 hover:text-purple-700 disabled:opacity-50"
+            >
+              {gapLoading ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
         </div>
+
+        {/* Help explanation */}
+        {showHelp && (
+          <div className="mb-4 p-3 bg-white bg-opacity-80 rounded-lg text-xs text-gray-600 space-y-1">
+            <p><strong>Games Saved:</strong> Tournaments successfully saved to your database</p>
+            <p><strong>ID Coverage:</strong> Percentage of the tournament ID range that has games saved</p>
+            <p><strong>Missing IDs:</strong> IDs in the range without a saved game (need scraping or are NOT_FOUND/NOT_PUBLISHED)</p>
+            <p><strong>Gap Ranges:</strong> Number of separate contiguous ID ranges that are missing</p>
+          </div>
+        )}
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-white bg-opacity-60 p-3 rounded">
-            <p className="text-xs text-gray-600">Total Games</p>
-            <p className="text-xl font-bold text-gray-900">{scrapingStatus.totalGamesStored}</p>
+            <p className="text-xs text-gray-600">Games Saved</p>
+            <p className="text-xl font-bold text-gray-900">{totalGames.toLocaleString()}</p>
           </div>
           <div className="bg-white bg-opacity-60 p-3 rounded">
-            <p className="text-xs text-gray-600">Coverage</p>
-            <p className="text-xl font-bold text-green-600">{scrapingStatus.gapSummary.coveragePercentage.toFixed(1)}%</p>
+            <p className="text-xs text-gray-600">ID Coverage</p>
+            <p className={`text-xl font-bold ${coveragePercent >= 90 ? 'text-green-600' : coveragePercent >= 70 ? 'text-yellow-600' : 'text-orange-600'}`}>
+              {coveragePercent.toFixed(1)}%
+            </p>
+            {estimatedTotalIds > totalGames && (
+              <p className="text-xs text-gray-500">of ~{estimatedTotalIds.toLocaleString()} IDs</p>
+            )}
           </div>
           <div className="bg-white bg-opacity-60 p-3 rounded">
-            <p className="text-xs text-gray-600">Missing</p>
-            <p className="text-xl font-bold text-orange-600">{scrapingStatus.gapSummary.totalMissingIds}</p>
+            <p className="text-xs text-gray-600">Missing IDs</p>
+            <p className="text-xl font-bold text-orange-600">{missingIds.toLocaleString()}</p>
+            <p className="text-xs text-gray-500">to scrape/verify</p>
           </div>
           <div className="bg-white bg-opacity-60 p-3 rounded">
-            <p className="text-xs text-gray-600">Gaps</p>
-            <p className="text-xl font-bold text-purple-600">{scrapingStatus.gapSummary.totalGaps}</p>
+            <p className="text-xs text-gray-600">Gap Ranges</p>
+            <p className="text-xl font-bold text-purple-600">{gapCount}</p>
+            <p className="text-xs text-gray-500">contiguous gaps</p>
           </div>
         </div>
         
-        {scrapingStatus.gaps && scrapingStatus.gaps.length > 0 && (
-          <p className="text-xs text-purple-700 mt-3">
-            💡 Go to the <strong>Scrape</strong> tab to fill {scrapingStatus.gapSummary.totalGaps} detected gap(s).
-          </p>
+        {gapCount > 0 && (
+          <div className="mt-3 flex items-center gap-2 text-xs text-purple-700 bg-white bg-opacity-50 p-2 rounded">
+            <Info className="h-4 w-4 flex-shrink-0" />
+            <span>
+              Go to the <strong>Scrape</strong> tab and use "Fill Gaps" mode to process {gapCount} gap range(s).
+            </span>
+          </div>
         )}
       </div>
     );
@@ -146,7 +208,7 @@ const CoverageInfo: React.FC = () => {
 export const OverviewTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
     const [metrics, setMetrics] = useState<ScraperMetrics | null>(null);
-    const [recentJobs, setRecentJobs] = useState<ScraperJob[]>([]);
+    const [recentJobs, setRecentJobs] = useState<JobWithStats[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [metricsUnavailable, setMetricsUnavailable] = useState(false);
@@ -168,23 +230,31 @@ export const OverviewTab: React.FC = () => {
                     setMetrics(metricsResponse.data.getScraperMetrics);
                     setMetricsUnavailable(false);
                 } else if (metricsResponse.errors?.length) {
+                    console.warn('Metrics errors:', metricsResponse.errors);
                     setMetricsUnavailable(true);
                 }
             } catch (metricsError: any) {
+                console.warn('Metrics unavailable:', metricsError.message);
                 setMetricsUnavailable(true);
             }
 
-            // Load recent jobs
+            // Load recent jobs with full query (includes all stats fields)
             try {
                 const jobsResponse = await client.graphql({
-                    query: scraperManagementQueries.getScraperJobsReportMinimal,
+                    query: getScraperJobsReport,
                     variables: { limit: 5 }
                 }) as any;
                 
-                if (jobsResponse.data?.getScraperJobsReport) {
-                    setRecentJobs(jobsResponse.data.getScraperJobsReport.items || []);
+                if (jobsResponse.data?.getScraperJobsReport?.items) {
+                    // Calculate success rate for each job
+                    const jobsWithStats = jobsResponse.data.getScraperJobsReport.items.map((job: ScraperJob) => ({
+                        ...job,
+                        calculatedSuccessRate: calculateJobSuccessRate(job)
+                    }));
+                    setRecentJobs(jobsWithStats);
                 }
-            } catch (jobsError) {
+            } catch (jobsError: any) {
+                console.warn('Jobs query failed:', jobsError?.message || jobsError);
                 // Jobs query failed - non-critical
             }
             
@@ -200,9 +270,14 @@ export const OverviewTab: React.FC = () => {
     // Load once on mount - NO AUTO-POLLING
     useEffect(() => {
         loadMetrics();
-        // REMOVED: 30-second polling interval
-        // Users can manually refresh with the refresh button
     }, [loadMetrics]);
+
+    // Helper to safely display metric values
+    const displayMetric = (value: number | null | undefined, suffix: string = ''): string => {
+        if (value === null || value === undefined) return '-';
+        if (typeof value !== 'number' || isNaN(value)) return '-';
+        return `${value}${suffix}`;
+    };
 
     if (loading && !metrics && recentJobs.length === 0 && !error) {
         return (
@@ -240,13 +315,13 @@ export const OverviewTab: React.FC = () => {
                 />
                 <MetricCard
                     title="Success Rate"
-                    value={metrics ? `${Math.round(metrics.successRate || 0)}%` : '-'}
+                    value={displayMetric(metrics?.successRate, '%')}
                     icon={<CheckCircle className="h-5 w-5" />}
                     color="green"
                 />
                 <MetricCard
                     title="URLs Processed"
-                    value={metrics?.totalURLsScraped ?? '-'}
+                    value={metrics?.totalURLsScraped?.toLocaleString() ?? '-'}
                     icon={<Database className="h-5 w-5" />}
                     color="purple"
                 />
@@ -259,26 +334,32 @@ export const OverviewTab: React.FC = () => {
             </div>
             
             {/* --- 2b. Additional Metrics Row --- */}
-            {metrics && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <p className="text-xs text-gray-500 uppercase">New Games</p>
-                        <p className="text-2xl font-bold text-green-600">{metrics.totalNewGames}</p>
-                    </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <p className="text-xs text-gray-500 uppercase">Updated Games</p>
-                        <p className="text-2xl font-bold text-blue-600">{metrics.totalUpdatedGames}</p>
-                    </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <p className="text-xs text-gray-500 uppercase">S3 Cache Rate</p>
-                        <p className="text-2xl font-bold text-purple-600">{metrics.s3CacheRate}%</p>
-                    </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <p className="text-xs text-gray-500 uppercase">Avg Duration</p>
-                        <p className="text-2xl font-bold text-gray-700">{metrics.averageJobDuration}s</p>
-                    </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white rounded-lg shadow p-4">
+                    <p className="text-xs text-gray-500 uppercase">New Games</p>
+                    <p className="text-2xl font-bold text-green-600">
+                        {displayMetric(metrics?.totalNewGames)}
+                    </p>
                 </div>
-            )}
+                <div className="bg-white rounded-lg shadow p-4">
+                    <p className="text-xs text-gray-500 uppercase">Updated Games</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                        {displayMetric(metrics?.totalUpdatedGames)}
+                    </p>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                    <p className="text-xs text-gray-500 uppercase">S3 Cache Rate</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                        {displayMetric(metrics?.s3CacheRate, '%')}
+                    </p>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                    <p className="text-xs text-gray-500 uppercase">Avg Duration</p>
+                    <p className="text-2xl font-bold text-gray-700">
+                        {displayMetric(metrics?.averageJobDuration, 's')}
+                    </p>
+                </div>
+            </div>
 
             {/* --- 3. Recent Jobs Table --- */}
             <div className="bg-white rounded-lg shadow">
@@ -318,6 +399,9 @@ export const OverviewTab: React.FC = () => {
                                     URLs
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    New / Updated
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Success Rate
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -338,10 +422,21 @@ export const OverviewTab: React.FC = () => {
                                         {job.triggerSource || 'MANUAL'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {job.totalURLsProcessed || 0}
+                                        {(job.totalURLsProcessed || 0).toLocaleString()}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {Math.round(job.successRate || 0)}%
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span className="text-green-600 font-medium">{job.newGamesScraped || 0}</span>
+                                        <span className="text-gray-400"> / </span>
+                                        <span className="text-blue-600 font-medium">{job.gamesUpdated || 0}</span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span className={`font-medium ${
+                                            (job.calculatedSuccessRate || 0) >= 80 ? 'text-green-600' :
+                                            (job.calculatedSuccessRate || 0) >= 50 ? 'text-yellow-600' :
+                                            'text-red-600'
+                                        }`}>
+                                            {job.calculatedSuccessRate || 0}%
+                                        </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {job.startTime ? new Date(job.startTime).toLocaleTimeString() : '-'}

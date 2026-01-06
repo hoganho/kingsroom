@@ -2,7 +2,11 @@
  * enricher.js
  * Main enrichment orchestration
  * 
- * UPDATED: v2.0.0
+ * UPDATED: v2.1.0
+ * - Added Step 2c: Duration Completion (gameEndDateTime calculation)
+ * - Added gameActualStartDateTime support for accurate duration calculations
+ * 
+ * v2.0.0:
  * - Added classification field derivation (variant, bettingStructure, buyInTier, sessionMode)
  * - Uses entryStructure (not tournamentStructure) to avoid @model conflict
  * - Uses cashRakeType (not rakeStructure) to avoid @model conflict
@@ -10,7 +14,8 @@
  * This is the core of the enricher - it coordinates:
  * 1. Validation
  * 2. Data completion
- * 2b. Classification derivation (NEW)
+ * 2b. Classification derivation
+ * 2c. Duration completion (NEW)
  * 3. Venue resolution
  * 4. Series resolution
  * 5. Recurring game resolution
@@ -22,6 +27,7 @@
 const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 const { validateGameData } = require('./validation');
 const { completeData, completeSeriesMetadata } = require('./completion/data-completion');
+const { completeDurationFields } = require('./completion/duration-completion');
 const { resolveVenue, getVenueFee } = require('./resolution/venue-resolver');
 const { resolveSeriesAssignment } = require('./resolution/series-resolver');
 const { resolveRecurringAssignment } = require('./resolution/recurring-resolver');
@@ -143,7 +149,9 @@ const enrichGameData = async (input) => {
       venueResolution: null,
       queryKeysGenerated: false,
       financialsCalculated: false,
-      guaranteeWasInferred: false,  // NEW: Track if guarantee was inferred
+      guaranteeWasInferred: false,
+      durationCompleted: false,      // NEW: Track duration completion
+      endTimeCalculated: false,       // NEW: Track if end time was calculated
       fieldsCompleted: [],
       processingTimeMs: 0
     },
@@ -203,6 +211,34 @@ const enrichGameData = async (input) => {
       result.enrichmentMetadata.fieldsCompleted.push(...Object.keys(classificationUpdates));
       console.log(`[ENRICHER] Derived ${Object.keys(classificationUpdates).length} classification fields:`, 
         Object.keys(classificationUpdates).join(', '));
+    }
+    
+    // =========================================================
+    // 2c. DURATION COMPLETION (NEW)
+    // =========================================================
+    // Normalize duration and calculate gameEndDateTime if missing
+    console.log('[ENRICHER] Step 2c: Duration completion');
+    
+    const durationResult = completeDurationFields(enrichedGame);
+    
+    if (durationResult.updates && Object.keys(durationResult.updates).length > 0) {
+      enrichedGame = { ...enrichedGame, ...durationResult.updates };
+      result.enrichmentMetadata.fieldsCompleted.push(...durationResult.fieldsCompleted);
+      
+      // Track what was done
+      if (durationResult.fieldsCompleted.includes('totalDuration')) {
+        result.enrichmentMetadata.durationCompleted = true;
+      }
+      if (durationResult.fieldsCompleted.includes('gameEndDateTime')) {
+        result.enrichmentMetadata.endTimeCalculated = true;
+      }
+      
+      console.log(`[ENRICHER] Duration completion: ${durationResult.fieldsCompleted.join(', ')}`);
+    }
+    
+    // Add any duration warnings to validation warnings
+    if (durationResult.warnings && durationResult.warnings.length > 0) {
+      result.validation.warnings.push(...durationResult.warnings);
     }
     
     // =========================================================

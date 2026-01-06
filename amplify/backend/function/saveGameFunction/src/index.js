@@ -1,82 +1,81 @@
 /* Amplify Params - DO NOT EDIT
-	API_KINGSROOM_ENTITYTABLE_ARN
-	API_KINGSROOM_ENTITYTABLE_NAME
-	API_KINGSROOM_GAMETABLE_ARN
-	API_KINGSROOM_GAMETABLE_NAME
-	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
-	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
-	API_KINGSROOM_PLAYERENTRYTABLE_ARN
-	API_KINGSROOM_PLAYERENTRYTABLE_NAME
-	API_KINGSROOM_SCRAPEATTEMPTTABLE_ARN
-	API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME
-	API_KINGSROOM_SCRAPEURLTABLE_ARN
-	API_KINGSROOM_SCRAPEURLTABLE_NAME
-	API_KINGSROOM_TOURNAMENTSERIESTABLE_ARN
-	API_KINGSROOM_TOURNAMENTSERIESTABLE_NAME
-	API_KINGSROOM_VENUETABLE_ARN
-	API_KINGSROOM_VENUETABLE_NAME
+    API_KINGSROOM_ENTITYTABLE_ARN
+    API_KINGSROOM_ENTITYTABLE_NAME
+    API_KINGSROOM_GAMETABLE_ARN
+    API_KINGSROOM_GAMETABLE_NAME
+    API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
+    API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+    API_KINGSROOM_PLAYERENTRYTABLE_ARN
+    API_KINGSROOM_PLAYERENTRYTABLE_NAME
+    API_KINGSROOM_SCRAPEATTEMPTTABLE_ARN
+    API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME
+    API_KINGSROOM_SCRAPEURLTABLE_ARN
+    API_KINGSROOM_SCRAPEURLTABLE_NAME
+    API_KINGSROOM_TOURNAMENTSERIESTABLE_ARN
+    API_KINGSROOM_TOURNAMENTSERIESTABLE_NAME
+    API_KINGSROOM_VENUETABLE_ARN
+    API_KINGSROOM_VENUETABLE_NAME
     API_KINGSROOM_RECURRINGGAMETABLE_NAME
     API_KINGSROOM_ACTIVEGAMETABLE_NAME
     API_KINGSROOM_RECENTLYFINISHEDGAMETABLE_NAME
-	ENV
-	REGION
+    ENV
+    REGION
 Amplify Params - DO NOT EDIT */
 
 /**
  * ===================================================================
- * SAVEGAME LAMBDA FUNCTION - PURE WRITER (v4.2.0)
+ * SAVEGAME LAMBDA FUNCTION - PURE WRITER (v4.4.0)
  * ===================================================================
  * 
- * VERSION: 4.2.0 (Added ActiveGame table synchronization)
+ * VERSION: 4.4.0
+ * - Added gameActualStartDateTime field support
+ * - Fixed gameEndDateTime not updating on existing games (was missing from fieldMappings)
+ * - Duration fields now properly sync to database
+ * 
+ * VERSION: 4.3.0
+ * - Added content hash for meaningful change detection
+ * - Downstream Lambdas can now skip non-meaningful updates
+ * - Removed lambda-monitoring (deprecated)
+ * 
+ * VERSION: 4.2.0
+ * - Added ActiveGame table synchronization for dashboard queries
+ * - Games in RUNNING/REGISTERING/CLOCK_STOPPED sync to ActiveGame
+ * - FINISHED games move to RecentlyFinishedGame (7-day TTL)
  * 
  * RESPONSIBILITIES:
- * This Lambda is now a "pure writer" that accepts pre-enriched data
- * from gameDataEnricher and writes it to the database. All enrichment
- * logic (series resolution, recurring resolution, query keys, financials)
- * has been moved to gameDataEnricher.
+ * This Lambda is a "pure writer" that accepts pre-enriched data
+ * from gameDataEnricher and writes it to the database.
  * 
  * WHAT THIS LAMBDA DOES:
  * - Validates input structure (not business rules)
  * - Creates or updates Game records in DynamoDB
+ * - Calculates content hash for meaningful change detection
  * - Updates ScrapeURL tracking
  * - Creates ScrapeAttempt records
  * - Queues player data for processing (SQS)
- * - NEW: Syncs ActiveGame/RecentlyFinishedGame tables for dashboard
+ * - Syncs ActiveGame/RecentlyFinishedGame tables for dashboard
  * 
- * NOTE: GameCost and GameFinancialSnapshot are now created by
- * gameFinancialsProcessor Lambda (triggered via DynamoDB Streams)
- * 
- * WHAT THIS LAMBDA DOES NOT DO:
- * - Series resolution (done by gameDataEnricher)
- * - Recurring game resolution (done by gameDataEnricher)
- * - Query key computation (done by gameDataEnricher)
- * - Financial calculations (done by gameDataEnricher)
- * - Venue resolution (done by gameDataEnricher)
- * 
- * ENTITY ID REQUIREMENT:
- * This Lambda REQUIRES source.entityId to be provided in the input.
- * 
- * CHANGELOG:
- * v4.2.0 - Added ActiveGame table synchronization for dashboard queries
- *        - Games in RUNNING/REGISTERING/CLOCK_STOPPED sync to ActiveGame
- *        - FINISHED games move to RecentlyFinishedGame (7-day TTL)
- * v4.1.0 - Added 29 classification fields to createGame() and updateGame()
- *        - Uses entryStructure (not tournamentStructure) to avoid @model conflict
- *        - Uses cashRakeType (not rakeStructure) to avoid @model conflict
+ * CONTENT HASH:
+ * - Only updates dataChangedAt when meaningful fields change
+ * - Downstream Lambdas can compare OldImage vs NewImage dataChangedAt
+ * - Skip processing if dataChangedAt unchanged
  * 
  * ===================================================================
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, QueryCommand, BatchWriteCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
 const { v4: uuidv4 } = require('uuid');
 
-// Lambda Monitoring
-const { LambdaMonitoring } = require('./lambda-monitoring');
-
 // ActiveGame Sync
 const { syncActiveGame } = require('./syncActiveGame');
+
+// Content Hash for meaningful change detection
+const { 
+    detectMeaningfulChanges, 
+    calculateGameContentHash 
+} = require('./gameContentHash');
 
 // ===================================================================
 // CONSTANTS
@@ -98,18 +97,8 @@ const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 const sqsClient = new SQSClient({});
 
-// Lambda Monitoring Initialization
-const monitoring = new LambdaMonitoring('saveGameFunction', 'pending-entity');
-const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
-
 // Environment variables
 const PLAYER_PROCESSOR_QUEUE_URL = process.env.PLAYER_PROCESSOR_QUEUE_URL;
-
-// DEBUG: Log SQS configuration at cold start
-console.log('[SAVE-GAME] [SQS-DEBUG] Lambda cold start - SQS Config:', {
-    PLAYER_PROCESSOR_QUEUE_URL_SET: !!PLAYER_PROCESSOR_QUEUE_URL,
-    PLAYER_PROCESSOR_QUEUE_URL_VALUE: PLAYER_PROCESSOR_QUEUE_URL ? `${PLAYER_PROCESSOR_QUEUE_URL.substring(0, 50)}...` : 'NOT SET'
-});
 
 // ===================================================================
 // HELPER FUNCTIONS
@@ -148,14 +137,12 @@ const ensureISODate = (dateValue, fallback = null) => {
 
 /**
  * Extract YYYY-MM from ISO date string for byGameMonth GSI
- * @param {string} isoDateString - ISO format date string
- * @returns {string|null} Format: "2025-08" or null
  */
 const getYearMonth = (isoDateString) => {
-  if (!isoDateString) return null;
-  const date = new Date(isoDateString);
-  if (isNaN(date.getTime())) return null;
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (!isoDateString) return null;
+    const date = new Date(isoDateString);
+    if (isNaN(date.getTime())) return null;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 };
 
 const parseAuditTrail = (auditTrailString) => {
@@ -239,7 +226,7 @@ const findExistingGame = async (input) => {
     // Method 1: By existing game ID
     if (input.game.existingGameId) {
         try {
-            const result = await monitoredDdbDocClient.send(new GetCommand({
+            const result = await ddbDocClient.send(new GetCommand({
                 TableName: getTableName('Game'),
                 Key: { id: input.game.existingGameId }
             }));
@@ -252,7 +239,7 @@ const findExistingGame = async (input) => {
     // Method 2: By sourceUrl (for scrapes)
     if (input.source.type === 'SCRAPE' && input.source.sourceId) {
         try {
-            const result = await monitoredDdbDocClient.send(new QueryCommand({
+            const result = await ddbDocClient.send(new QueryCommand({
                 TableName: getTableName('Game'),
                 IndexName: 'bySourceUrl',
                 KeyConditionExpression: 'sourceUrl = :url',
@@ -267,7 +254,7 @@ const findExistingGame = async (input) => {
     // Method 3: By entity + tournamentId
     if (input.game.tournamentId && entityId) {
         try {
-            const result = await monitoredDdbDocClient.send(new QueryCommand({
+            const result = await ddbDocClient.send(new QueryCommand({
                 TableName: getTableName('Game'),
                 IndexName: 'byEntityAndTournamentId',
                 KeyConditionExpression: 'entityId = :entityId AND tournamentId = :tid',
@@ -306,7 +293,7 @@ const updateScrapeURL = async (sourceUrl, gameId, gameStatus, doNotScrape = fals
     
     try {
         // Check if exists
-        const existingResult = await monitoredDdbDocClient.send(new QueryCommand({
+        const existingResult = await ddbDocClient.send(new QueryCommand({
             TableName: scrapeURLTable,
             IndexName: 'byURL',
             KeyConditionExpression: '#url = :url',
@@ -316,7 +303,7 @@ const updateScrapeURL = async (sourceUrl, gameId, gameStatus, doNotScrape = fals
         
         if (existingResult.Items?.[0]) {
             const existing = existingResult.Items[0];
-            await monitoredDdbDocClient.send(new UpdateCommand({
+            await ddbDocClient.send(new UpdateCommand({
                 TableName: scrapeURLTable,
                 Key: { id: existing.id },
                 UpdateExpression: 'SET #status = :status, gameId = :gameId, lastScrapedAt = :now, lastAttemptStatus = :attemptStatus, updatedAt = :now, #lastChanged = :ts',
@@ -324,7 +311,7 @@ const updateScrapeURL = async (sourceUrl, gameId, gameStatus, doNotScrape = fals
                 ExpressionAttributeValues: { ':status': status, ':gameId': gameId, ':now': now, ':attemptStatus': attemptStatus, ':ts': timestamp }
             }));
         } else {
-            await monitoredDdbDocClient.send(new PutCommand({
+            await ddbDocClient.send(new PutCommand({
                 TableName: scrapeURLTable,
                 Item: {
                     id: uuidv4(), url: sourceUrl, status, gameId, lastScrapedAt: now, lastAttemptStatus: attemptStatus,
@@ -351,7 +338,7 @@ const createScrapeAttempt = async (input, gameId, wasNewGame, fieldsUpdated) => 
     }
     
     try {
-        await monitoredDdbDocClient.send(new PutCommand({
+        await ddbDocClient.send(new PutCommand({
             TableName: getTableName('ScrapeAttempt'),
             Item: {
                 id: uuidv4(), url: input.source.sourceId, scrapedAt: now, status: attemptStatus,
@@ -369,66 +356,65 @@ const createScrapeAttempt = async (input, gameId, wasNewGame, fieldsUpdated) => 
 // PLAYER DATA PROCESSING (SQS)
 // ===================================================================
 
-const shouldQueueForPDP = (input, game, wasNewGame = true, existingGame = null) => {
+/**
+ * Determine if game should be queued for Player Data Processor (PDP)
+ * 
+ * REQUIREMENTS FOR QUEUING:
+ * 1. Must have player list
+ * 2. Must be in FINISHED status
+ * 3. Must be a NEW transition to FINISHED (not already finished before)
+ * 4. Must have meaningful changes (content hash changed) - for updates
+ * 
+ * @param {Object} input - Save input
+ * @param {Object} game - Game being saved
+ * @param {boolean} wasNewGame - Whether this is a new game
+ * @param {Object} existingGame - Previous game state (null for new games)
+ * @param {boolean} meaningfulChange - Whether content hash changed
+ */
+const shouldQueueForPDP = (input, game, wasNewGame = true, existingGame = null, meaningfulChange = true) => {
     const hasPlayerList = input.players?.allPlayers?.length > 0;
-    const playerCount = input.players?.allPlayers?.length || 0;
     const isFinished = FINISHED_STATUSES.includes(game.gameStatus);
     const isLive = LIVE_STATUSES.includes(game.gameStatus);
     const wasAlreadyFinished = existingGame && FINISHED_STATUSES.includes(existingGame.gameStatus);
     
-    // DEBUG: Log all decision factors
-    console.log('[SAVE-GAME] [SQS-DEBUG] shouldQueueForPDP evaluation:', {
-        gameId: game.id,
-        gameStatus: game.gameStatus,
-        hasPlayerList,
-        playerCount,
-        isFinished,
-        isLive,
-        wasNewGame,
-        wasAlreadyFinished,
-        FINISHED_STATUSES,
-        LIVE_STATUSES
-    });
-    
+    // Must have player list
     if (!hasPlayerList) {
-        console.log('[SAVE-GAME] [SQS-DEBUG] ❌ Decision: NO QUEUE - No player list provided');
-        return { shouldQueue: false, updateEntriesOnly: false };
+        console.log('[SAVE-GAME] PDP skip: No player list');
+        return { shouldQueue: false, updateEntriesOnly: false, reason: 'No player list' };
     }
     
-    // FIXED: Only queue if this is a NEW transition to FINISHED status
-    // This prevents re-queueing when an already-finished game is re-scraped
+    // For updates: must have meaningful change to re-process
+    if (!wasNewGame && !meaningfulChange) {
+        console.log('[SAVE-GAME] PDP skip: No meaningful change');
+        return { shouldQueue: false, updateEntriesOnly: false, reason: 'No meaningful change' };
+    }
+    
+    // Already processed this finished game (no status transition)
     if (isFinished && wasAlreadyFinished && !wasNewGame) {
-        console.log('[SAVE-GAME] [SQS-DEBUG] ⏭️ Decision: NO QUEUE - Game was already FINISHED (no status transition)');
-        return { shouldQueue: false, updateEntriesOnly: false };
+        console.log('[SAVE-GAME] PDP skip: Already processed as FINISHED');
+        return { shouldQueue: false, updateEntriesOnly: false, reason: 'Already processed as FINISHED' };
     }
     
+    // Queue for finished games with players
     if (isFinished) {
-        console.log('[SAVE-GAME] [SQS-DEBUG] ✅ Decision: QUEUE FOR PDP - Game is finished with players');
-        return { shouldQueue: true, updateEntriesOnly: false };
-    }
-    if (isLive) {
-        console.log('[SAVE-GAME] [SQS-DEBUG] ⏸️ Decision: UPDATE ENTRIES ONLY - Game is live');
-        return { shouldQueue: false, updateEntriesOnly: true };
+        console.log('[SAVE-GAME] PDP queue: FINISHED with players');
+        return { shouldQueue: true, updateEntriesOnly: false, reason: 'Game finished with players' };
     }
     
-    console.log('[SAVE-GAME] [SQS-DEBUG] ❌ Decision: NO QUEUE - Game status not finished or live');
-    return { shouldQueue: false, updateEntriesOnly: false };
+    // Live games just update entries inline
+    if (isLive) {
+        console.log('[SAVE-GAME] PDP: Live game - update entries only');
+        return { shouldQueue: false, updateEntriesOnly: true, reason: 'Live game' };
+    }
+    
+    return { shouldQueue: false, updateEntriesOnly: false, reason: 'Not finished or live' };
 };
 
 const queueForPDP = async (game, input) => {
-    console.log('[SAVE-GAME] [SQS-DEBUG] queueForPDP called:', {
-        gameId: game.id,
-        entityId: input.source.entityId,
-        playerCount: input.players?.allPlayers?.length || 0
-    });
-    
     if (!PLAYER_PROCESSOR_QUEUE_URL) {
-        console.error('[SAVE-GAME] [SQS-DEBUG] ❌ CRITICAL: PLAYER_PROCESSOR_QUEUE_URL not configured!');
-        console.error('[SAVE-GAME] [SQS-DEBUG] Available env vars:', Object.keys(process.env).filter(k => k.includes('QUEUE') || k.includes('SQS')));
+        console.error('[SAVE-GAME] PLAYER_PROCESSOR_QUEUE_URL not configured');
         return;
     }
-    
-    console.log('[SAVE-GAME] [SQS-DEBUG] ✅ Queue URL is set, preparing message...');
     
     const messageBody = {
         game: {
@@ -450,41 +436,18 @@ const queueForPDP = async (game, input) => {
         }
     };
     
-    // FIXED: Use deterministic deduplication ID based on game ID only
-    // This ensures that re-saves of the same finished game don't create duplicate SQS messages
-    // The 5-minute deduplication window will prevent duplicates from retries/re-scrapes
     const sqsParams = {
         QueueUrl: PLAYER_PROCESSOR_QUEUE_URL,
         MessageBody: JSON.stringify(messageBody),
         MessageGroupId: game.id,
-        MessageDeduplicationId: game.id  // Deterministic - same game = same dedup ID
+        MessageDeduplicationId: game.id
     };
-    
-    console.log('[SAVE-GAME] [SQS-DEBUG] SQS SendMessage params:', {
-        QueueUrl: sqsParams.QueueUrl,
-        MessageGroupId: sqsParams.MessageGroupId,
-        MessageDeduplicationId: sqsParams.MessageDeduplicationId,
-        MessageBodyLength: sqsParams.MessageBody.length,
-        playerCount: input.players.allPlayers.length
-    });
     
     try {
         const result = await sqsClient.send(new SendMessageCommand(sqsParams));
-        console.log('[SAVE-GAME] [SQS-DEBUG] ✅ SQS SendMessage SUCCESS:', {
-            MessageId: result.MessageId,
-            SequenceNumber: result.SequenceNumber,
-            gameId: game.id,
-            playerCount: input.players.allPlayers.length
-        });
+        console.log('[SAVE-GAME] Queued for PDP:', { gameId: game.id, messageId: result.MessageId });
     } catch (error) {
-        console.error('[SAVE-GAME] [SQS-DEBUG] ❌ SQS SendMessage FAILED:', {
-            errorName: error.name,
-            errorMessage: error.message,
-            errorCode: error.code,
-            gameId: game.id,
-            queueUrl: PLAYER_PROCESSOR_QUEUE_URL
-        });
-        // Re-throw to surface the error if needed
+        console.error('[SAVE-GAME] SQS send failed:', error.message);
         throw error;
     }
 };
@@ -492,10 +455,7 @@ const queueForPDP = async (game, input) => {
 const updatePlayerEntries = async (game, input) => {
     // Update existing player entries without full reprocessing (for live games)
     console.log(`[SAVE-GAME] Updating player entries for live game ${game.id}`);
-    // Implementation would update PlayerEntry records inline
 };
-
-
 
 // ===================================================================
 // CREATE GAME (Expects pre-enriched data)
@@ -508,13 +468,12 @@ const createGame = async (input) => {
     const gameData = input.game;
     const entityId = input.source.entityId;
 
-    monitoring.trackOperation('CREATE', 'Game', gameId, { entityId, tournamentId: gameData.tournamentId });
-
     const gameStartDateTime = ensureISODate(gameData.gameStartDateTime);
     const totalUniquePlayers = calculateUniquePlayersFromList(input);
 
     const game = {
         id: gameId,
+        
         // Core fields
         name: gameData.name,
         gameType: gameData.gameType,
@@ -522,6 +481,8 @@ const createGame = async (input) => {
         gameStatus: gameData.gameStatus,
         gameStartDateTime: gameStartDateTime,
         gameEndDateTime: gameData.gameEndDateTime ? ensureISODate(gameData.gameEndDateTime) : null,
+        // NEW: Actual start time (for duration calculations)
+        gameActualStartDateTime: gameData.gameActualStartDateTime ? ensureISODate(gameData.gameActualStartDateTime) : null,
         registrationStatus: gameData.registrationStatus || 'N_A',
         gameFrequency: gameData.gameFrequency || 'UNKNOWN',
         
@@ -540,11 +501,11 @@ const createGame = async (input) => {
         guaranteeOverlayCost: gameData.guaranteeOverlayCost || 0,
         gameProfit: gameData.gameProfit || 0,
         
-        // Jackpot contributions (inherited from RecurringGame)
+        // Jackpot contributions
         hasJackpotContributions: gameData.hasJackpotContributions || false,
         jackpotContributionAmount: gameData.jackpotContributionAmount || null,
         
-        // Accumulator tickets (inherited from RecurringGame)
+        // Accumulator tickets
         hasAccumulatorTickets: gameData.hasAccumulatorTickets || false,
         accumulatorTicketValue: gameData.accumulatorTicketValue || null,
         numberOfAccumulatorTicketsPaid: gameData.numberOfAccumulatorTicketsPaid || null,
@@ -613,11 +574,7 @@ const createGame = async (input) => {
         entityQueryKey: gameData.entityQueryKey,
         entityGameTypeKey: gameData.entityGameTypeKey,
         
-        // ===================================================================
-        // NEW: Classification fields (from gameDataEnricher)
-        // ===================================================================
-        
-        // Universal classification
+        // Classification fields
         sessionMode: gameData.sessionMode || null,
         variant: gameData.variant || null,
         bettingStructure: gameData.bettingStructure || null,
@@ -626,9 +583,6 @@ const createGame = async (input) => {
         maxPlayers: gameData.maxPlayers || null,
         dealType: gameData.dealType || null,
         buyInTier: gameData.buyInTier || null,
-        
-        // Tournament classification
-        // NOTE: entryStructure (not tournamentStructure) to avoid @model conflict
         entryStructure: gameData.entryStructure || null,
         bountyType: gameData.bountyType || null,
         bountyAmount: gameData.bountyAmount || null,
@@ -638,27 +592,18 @@ const createGame = async (input) => {
         lateRegistration: gameData.lateRegistration || null,
         payoutStructure: gameData.payoutStructure || null,
         scheduleType: gameData.scheduleType || null,
-        
-        // Tournament feature flags
         isShootout: gameData.isShootout || null,
         isSurvivor: gameData.isSurvivor || null,
         isFlipAndGo: gameData.isFlipAndGo || null,
         isWinTheButton: gameData.isWinTheButton || null,
         isAnteOnly: gameData.isAnteOnly || null,
         isBigBlindAnte: gameData.isBigBlindAnte || null,
-        
-        // Cash game classification
-        // NOTE: cashRakeType (not rakeStructure) to avoid @model conflict
         cashGameType: gameData.cashGameType || null,
         cashRakeType: gameData.cashRakeType || null,
         hasBombPots: gameData.hasBombPots || null,
         hasRunItTwice: gameData.hasRunItTwice || null,
         hasStraddle: gameData.hasStraddle || null,
-        
-        // Mixed game support
         mixedGameRotation: gameData.mixedGameRotation || null,
-        
-        // Classification metadata
         classificationSource: gameData.classificationSource || null,
         classificationConfidence: gameData.classificationConfidence || null,
         lastClassifiedAt: gameData.lastClassifiedAt || null,
@@ -682,10 +627,18 @@ const createGame = async (input) => {
         }
     }
 
-    await monitoredDdbDocClient.send(new PutCommand({ TableName: getTableName('Game'), Item: game }));
+    // ═══════════════════════════════════════════════════════════════════
+    // CONTENT HASH: Calculate initial hash for new game
+    // New games are always meaningful changes
+    // ═══════════════════════════════════════════════════════════════════
+    game.contentHash = calculateGameContentHash(game);
+    game.dataChangedAt = now;
+    console.log('[SAVE-GAME] New game content hash:', game.contentHash);
+
+    await ddbDocClient.send(new PutCommand({ TableName: getTableName('Game'), Item: game }));
     console.log(`[SAVE-GAME] ✅ Created game: ${gameId}`);
 
-    return { gameId, game, wasNewGame: true, fieldsUpdated: [] };
+    return { gameId, game, wasNewGame: true, fieldsUpdated: [], meaningfulChange: true };
 };
 
 // ===================================================================
@@ -697,8 +650,6 @@ const updateGame = async (existingGame, input) => {
     const timestamp = Date.now();
     const gameData = input.game;
     const entityId = input.source.entityId;
-
-    monitoring.trackOperation('UPDATE', 'Game', existingGame.id, { entityId, wasEdited: input.source.wasEdited });
 
     // Track which fields changed
     const fieldsUpdated = [];
@@ -735,11 +686,11 @@ const updateGame = async (existingGame, input) => {
         guaranteeOverlayCost: 'guaranteeOverlayCost',
         gameProfit: 'gameProfit',
         
-        // Jackpot contributions (inherited from RecurringGame)
+        // Jackpot contributions
         hasJackpotContributions: 'hasJackpotContributions',
         jackpotContributionAmount: 'jackpotContributionAmount',
         
-        // Accumulator tickets (inherited from RecurringGame)
+        // Accumulator tickets
         hasAccumulatorTickets: 'hasAccumulatorTickets',
         accumulatorTicketValue: 'accumulatorTicketValue',
         numberOfAccumulatorTicketsPaid: 'numberOfAccumulatorTicketsPaid',
@@ -768,12 +719,9 @@ const updateGame = async (existingGame, input) => {
         venueGameTypeKey: 'venueGameTypeKey',
         entityQueryKey: 'entityQueryKey',
         entityGameTypeKey: 'entityGameTypeKey',
+        gameYearMonth: 'gameYearMonth',
         
-        // ===================================================================
-        // NEW: Classification field
-        // ===================================================================
-        
-        // Universal classification
+        // Classification fields
         sessionMode: 'sessionMode',
         variant: 'variant',
         bettingStructure: 'bettingStructure',
@@ -782,8 +730,6 @@ const updateGame = async (existingGame, input) => {
         maxPlayers: 'maxPlayers',
         dealType: 'dealType',
         buyInTier: 'buyInTier',
-        
-        // Tournament classification
         entryStructure: 'entryStructure',
         bountyType: 'bountyType',
         bountyAmount: 'bountyAmount',
@@ -793,30 +739,21 @@ const updateGame = async (existingGame, input) => {
         lateRegistration: 'lateRegistration',
         payoutStructure: 'payoutStructure',
         scheduleType: 'scheduleType',
-        
-        // Tournament feature flags
         isShootout: 'isShootout',
         isSurvivor: 'isSurvivor',
         isFlipAndGo: 'isFlipAndGo',
         isWinTheButton: 'isWinTheButton',
         isAnteOnly: 'isAnteOnly',
         isBigBlindAnte: 'isBigBlindAnte',
-        
-        // Cash game classification
         cashGameType: 'cashGameType',
         cashRakeType: 'cashRakeType',
         hasBombPots: 'hasBombPots',
         hasRunItTwice: 'hasRunItTwice',
         hasStraddle: 'hasStraddle',
-        
-        // Mixed game support
         mixedGameRotation: 'mixedGameRotation',
-        
-        // Classification metadata
         classificationSource: 'classificationSource',
         classificationConfidence: 'classificationConfidence',
-        lastClassifiedAt: 'lastClassifiedAt',
-        gameYearMonth: 'gameYearMonth'
+        lastClassifiedAt: 'lastClassifiedAt'
     };
 
     for (const [inputField, dbField] of Object.entries(fieldMappings)) {
@@ -825,6 +762,24 @@ const updateGame = async (existingGame, input) => {
         if (newValue !== undefined && newValue !== oldValue) {
             updates[dbField] = newValue;
             fieldsUpdated.push(dbField);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // TIMING FIELDS: Special handling for date fields (need ensureISODate)
+    // FIXED in v4.4.0: gameEndDateTime was MISSING from updates!
+    // ═══════════════════════════════════════════════════════════════════
+    const dateFields = ['gameEndDateTime', 'gameActualStartDateTime'];
+    for (const field of dateFields) {
+        const newValue = gameData[field];
+        if (newValue !== undefined && newValue !== null) {
+            const normalizedNew = ensureISODate(newValue);
+            const existingValue = existingGame[field];
+            if (normalizedNew !== existingValue) {
+                updates[field] = normalizedNew;
+                fieldsUpdated.push(field);
+                console.log(`[SAVE-GAME] Timing field update: ${field} = ${normalizedNew}`);
+            }
         }
     }
 
@@ -839,17 +794,34 @@ const updateGame = async (existingGame, input) => {
         fieldsUpdated.push('wasEdited');
     }
 
-    // Build update expression
-    if (fieldsUpdated.length === 0) {
+    // ═══════════════════════════════════════════════════════════════════
+    // CONTENT HASH: Detect meaningful changes
+    // Only update dataChangedAt if hash changes
+    // ═══════════════════════════════════════════════════════════════════
+    const projectedGame = { ...existingGame, ...updates };
+    const changeDetection = detectMeaningfulChanges(existingGame, projectedGame);
+    let meaningfulChange = false;
+    
+    if (changeDetection.changed) {
+        updates.contentHash = changeDetection.newHash;
+        updates.dataChangedAt = now;
+        meaningfulChange = true;
+        console.log('[SAVE-GAME] Meaningful change:', changeDetection.changedFields.join(', '));
+    } else {
+        console.log('[SAVE-GAME] No meaningful change, dataChangedAt preserved');
+    }
+
+    // Check if any updates to make
+    if (fieldsUpdated.length === 0 && !meaningfulChange) {
         console.log(`[SAVE-GAME] No changes detected for game ${existingGame.id}`);
-        return { gameId: existingGame.id, game: existingGame, wasNewGame: false, fieldsUpdated: [] };
+        return { gameId: existingGame.id, game: existingGame, wasNewGame: false, fieldsUpdated: [], meaningfulChange: false };
     }
 
     const updateExpression = 'SET ' + Object.keys(updates).map(key => `#${key} = :${key}`).join(', ');
     const expressionAttributeNames = Object.fromEntries(Object.keys(updates).map(k => [`#${k}`, k]));
     const expressionAttributeValues = Object.fromEntries(Object.keys(updates).map(k => [`:${k}`, updates[k]]));
 
-    await monitoredDdbDocClient.send(new UpdateCommand({
+    await ddbDocClient.send(new UpdateCommand({
         TableName: getTableName('Game'),
         Key: { id: existingGame.id },
         UpdateExpression: updateExpression,
@@ -857,10 +829,10 @@ const updateGame = async (existingGame, input) => {
         ExpressionAttributeValues: expressionAttributeValues
     }));
 
-    console.log(`[SAVE-GAME] ✅ Updated game ${existingGame.id}: ${fieldsUpdated.join(', ')}`);
+    console.log(`[SAVE-GAME] ✅ Updated game ${existingGame.id}: ${fieldsUpdated.join(', ')} (meaningful: ${meaningfulChange})`);
 
     const updatedGame = { ...existingGame, ...updates };
-    return { gameId: existingGame.id, game: updatedGame, wasNewGame: false, fieldsUpdated };
+    return { gameId: existingGame.id, game: updatedGame, wasNewGame: false, fieldsUpdated, meaningfulChange };
 };
 
 // ===================================================================
@@ -868,20 +840,10 @@ const updateGame = async (existingGame, input) => {
 // ===================================================================
 
 exports.handler = async (event) => {
-    console.log('[SAVE-GAME] v4.2.0 - Pure Writer with ActiveGame sync');
+    console.log('[SAVE-GAME] v4.4.0 - Pure Writer with Content Hash + Timing Fields');
     
     // Handle both direct invocation and GraphQL resolver invocation
     const input = event.arguments?.input || event.input || event;
-
-    // DEBUG: Log input structure for SQS debugging
-    console.log('[SAVE-GAME] [SQS-DEBUG] Input structure check:', {
-        hasPlayers: !!input.players,
-        hasAllPlayers: !!input.players?.allPlayers,
-        playerCount: input.players?.allPlayers?.length || 0,
-        gameStatus: input.game?.gameStatus,
-        sourceType: input.source?.type,
-        entityId: input.source?.entityId
-    });
 
     try {
         // Validate input structure
@@ -912,11 +874,12 @@ exports.handler = async (event) => {
                 input.game.totalUniquePlayers !== existingGame.totalUniquePlayers ||
                 input.game.totalEntries !== existingGame.totalEntries ||
                 input.game.prizepoolPaid !== existingGame.prizepoolPaid ||
+                input.game.gameEndDateTime !== existingGame.gameEndDateTime ||  // Added timing check
                 input.source.wasEdited;
 
             if (!hasChanges) {
                 console.log(`[SAVE-GAME] Game exists with no changes, skipping`);
-                saveResult = { gameId: existingGame.id, game: existingGame, wasNewGame: false, fieldsUpdated: [] };
+                saveResult = { gameId: existingGame.id, game: existingGame, wasNewGame: false, fieldsUpdated: [], meaningfulChange: false };
             } else {
                 saveResult = await updateGame(existingGame, input);
             }
@@ -926,27 +889,25 @@ exports.handler = async (event) => {
             saveResult = await createGame(input);
         }
 
-        const { gameId, game, wasNewGame, fieldsUpdated } = saveResult;
+        const { gameId, game, wasNewGame, fieldsUpdated, meaningfulChange } = saveResult;
 
         // =====================================================
-        // NEW: Sync ActiveGame table for dashboard queries
+        // Sync ActiveGame table for dashboard queries
         // =====================================================
         let activeGameSync = null;
         try {
             activeGameSync = await syncActiveGame(
-                game,           // The saved/updated Game record
-                input,          // Original input (has venue/entity info)
-                wasNewGame,     // Whether this was a new game
-                existingGame,   // Previous game state (for transition detection)
-                monitoredDdbDocClient  // DynamoDB client
+                game,
+                input,
+                wasNewGame,
+                existingGame,
+                ddbDocClient
             );
             console.log('[SAVE-GAME] ActiveGame sync result:', activeGameSync);
         } catch (syncError) {
-            // Log but don't fail the main save operation
             console.error('[SAVE-GAME] ActiveGame sync error (non-fatal):', syncError.message);
             activeGameSync = { success: false, error: syncError.message };
         }
-        // =====================================================
 
         // Update scrape tracking
         if (input.source.type === 'SCRAPE') {
@@ -954,36 +915,20 @@ exports.handler = async (event) => {
             await createScrapeAttempt(input, gameId, wasNewGame, fieldsUpdated);
         }
 
-        // Player processing
-        console.log('[SAVE-GAME] [SQS-DEBUG] Starting player processing evaluation...');
-        // FIXED: Pass wasNewGame and existingGame to prevent re-queueing already-finished games
-        const pdpDecision = shouldQueueForPDP(input, game, wasNewGame, existingGame);
+        // Player processing - only queue if meaningful change
+        const pdpDecision = shouldQueueForPDP(input, game, wasNewGame, existingGame, meaningfulChange);
         let playerProcessingQueued = false;
-        let playerProcessingReason = null;
-
-        console.log('[SAVE-GAME] [SQS-DEBUG] PDP decision result:', pdpDecision);
+        let playerProcessingReason = pdpDecision.reason;
 
         if (pdpDecision.shouldQueue) {
-            console.log('[SAVE-GAME] [SQS-DEBUG] Calling queueForPDP...');
             await queueForPDP(game, input);
             playerProcessingQueued = true;
-            playerProcessingReason = 'Game finished with player list';
-            console.log('[SAVE-GAME] [SQS-DEBUG] queueForPDP completed');
         } else if (pdpDecision.updateEntriesOnly) {
             await updatePlayerEntries(game, input);
-            playerProcessingReason = 'Live game - entries updated inline';
-        } else {
-            console.log('[SAVE-GAME] [SQS-DEBUG] No player processing action taken');
-            playerProcessingReason = 'No queue action - check logs for reason';
         }
-
-        // NOTE: GameCost and GameFinancialSnapshot are now created by
-        // gameFinancialsProcessor Lambda (triggered via EventBridge/DynamoDB Streams)
 
         // Build response
         const action = wasNewGame ? 'CREATED' : fieldsUpdated.length > 0 ? 'UPDATED' : 'SKIPPED';
-
-        monitoring.trackOperation('HANDLER_COMPLETE', 'Handler', action, { gameId, entityId: input.source.entityId });
 
         return {
             success: true,
@@ -991,6 +936,7 @@ exports.handler = async (event) => {
             action: action,
             message: wasNewGame ? 'Game created' : `Game ${action.toLowerCase()}`,
             warnings: validation.warnings,
+            meaningfulChange,
             playerProcessingQueued,
             playerProcessingReason,
             venueAssignment: {
@@ -1013,7 +959,6 @@ exports.handler = async (event) => {
             },
             fieldsUpdated,
             wasEdited: input.source.wasEdited || false,
-            // NEW: ActiveGame sync result
             activeGameSync: activeGameSync ? {
                 action: activeGameSync.action,
                 success: activeGameSync.success,
@@ -1023,11 +968,6 @@ exports.handler = async (event) => {
 
     } catch (error) {
         console.error('[SAVE-GAME] Error:', error);
-        monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'error', { error: error.message });
         return { success: false, action: 'ERROR', message: error.message || 'Internal error' };
-    } finally {
-        if (monitoring) {
-            await monitoring.flush();
-        }
     }
 };

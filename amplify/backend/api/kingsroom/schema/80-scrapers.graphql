@@ -340,6 +340,7 @@ type ScrapedGameSummary {
 type ScrapedGameData @aws_iam @aws_cognito_user_pools {
   name: String!
   gameStartDateTime: String
+  gameActualStartDateTime: AWSDateTime
   gameEndDateTime: String
   gameStatus: GameStatus
   registrationStatus: String
@@ -358,7 +359,7 @@ type ScrapedGameData @aws_iam @aws_cognito_user_pools {
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
-  totalDuration: String
+  totalDuration: Int
   playersRemaining: Int
   totalChipsInPlay: Float
   averagePlayerStack: Float
@@ -569,6 +570,7 @@ input SaveTournamentInput {
 input ScrapedGameDataInput {
   name: String!
   gameStartDateTime: String
+  gameActualStartDateTime: AWSDateTime
   gameEndDateTime: String
   gameStatus: GameStatus
   registrationStatus: RegistrationStatus
@@ -581,7 +583,7 @@ input ScrapedGameDataInput {
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
-  totalDuration: String
+  totalDuration: Int
   gameTags: [String]
   tournamentType: TournamentType
   buyIn: Float

@@ -1,4 +1,26 @@
 // src/pages/venues/VenueDetails.tsx
+// VERSION: 2.3.0 - Added Tournament ID column to all game tables
+//
+// CHANGELOG:
+// - v2.3.0: Added Tournament ID column to game history table and ad-hoc games table
+//           Column appears between Date and Game (name)
+// - v2.2.0: Ad-hoc games now displayed in full table format (matching VenueGameDetails)
+//           Added clickable rows to navigate to GameDetails
+//           Added buyIn, revenue, cost, profitMargin columns
+//           Summary stats now include 5 metrics (Games, Entries, Prizepool, Profit, Avg Profit)
+// - v2.1.0: Added ad-hoc games support (isSeries=false AND isRegular=false)
+//           Game history table now shows both recurring and ad-hoc games
+//           Overview tab shows separate ad-hoc games section with stats
+//           Added game type filter toggle (All/Recurring/Ad-hoc)
+//           Added game classification badges in table
+// - v2.0.0: Now uses VenueMetrics for summary cards (matches VenuesDashboard)
+//           Added seriesType selector for SUPER_ADMIN users
+//           Game history table still shows detailed recurring game data
+// - v1.x.x: Used GameFinancialSnapshot with strict filtering (caused mismatch)
+//
+// FIX: Previously, VenueDetails showed different "Total Games" than VenuesDashboard
+// because it used stricter filtering (isRegular=true, gameStatus=FINISHED, etc.)
+// Now summary cards use VenueMetrics (same source as VenuesDashboard) for consistency.
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -11,6 +33,7 @@ import {
   UserGroupIcon,
   BanknotesIcon,
   ChartBarIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 import {
   BarChart,
@@ -30,92 +53,59 @@ import { format, parseISO, startOfMonth } from 'date-fns';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { MultiEntitySelector } from '../../components/entities/MultiEntitySelector';
 import { useEntity } from '../../contexts/EntityContext';
+import { useUserPermissions } from '../../hooks/useUserPermissions';
 import { getClient } from '../../utils/apiClient';
 import { MetricCard } from '../../components/ui/MetricCard';
 import { TimeRangeToggle } from '../../components/ui/TimeRangeToggle';
 import { DataTable } from '../../components/ui/DataTable';
 import type { ColumnDef } from '@tanstack/react-table';
 
-// ---- Time range utilities ----
+// ============================================
+// TYPES
+// ============================================
 
 export type TimeRangeKey = 'ALL' | '12M' | '6M' | '3M' | '1M';
+type SeriesTypeKey = 'ALL' | 'REGULAR' | 'SERIES';
 
-function getTimeRangeBounds(range: TimeRangeKey): { from: string | null; to: string | null } {
-  const to = new Date();
-  if (range === 'ALL') return { from: null, to: to.toISOString() };
+const SERIES_TYPE_OPTIONS: { key: SeriesTypeKey; label: string; icon: React.ReactNode; color: string }[] = [
+  { key: 'ALL', label: 'All Games', icon: <Squares2X2Icon className="w-4 h-4" />, color: 'indigo' },
+  { key: 'REGULAR', label: 'Regular', icon: <CalendarIcon className="w-4 h-4" />, color: 'blue' },
+  { key: 'SERIES', label: 'Series', icon: <TrophyIcon className="w-4 h-4" />, color: 'purple' }
+];
 
-  const months =
-    range === '12M' ? 12 :
-    range === '6M'  ? 6  :
-    range === '3M'  ? 3  : 1;
-
-  const from = new Date();
-  from.setMonth(from.getMonth() - months);
-  return { from: from.toISOString(), to: to.toISOString() };
+interface VenueMetrics {
+  id: string;
+  entityId: string;
+  venueId: string;
+  venueName: string;
+  timeRange: string;
+  seriesType: string;
+  
+  totalGames: number;
+  totalSeriesGames: number;
+  totalRegularGames: number;
+  totalRecurringGames: number;
+  totalOneOffGames: number;
+  totalActiveRecurringGameTypes: number;
+  totalActiveTournamentSeries: number;
+  
+  totalEntries: number;
+  totalUniquePlayers: number;
+  
+  totalPrizepool: number;
+  totalRevenue: number;
+  totalProfit: number;
+  
+  avgEntriesPerGame: number;
+  avgPrizepoolPerGame: number;
+  avgProfitPerGame: number;
+  
+  firstGameDate: string | null;
+  latestGameDate: string | null;
+  daysSinceLastGame: number | null;
+  
+  calculatedAt: string;
 }
-
-// ---- GraphQL Queries ----
-
-const getVenueQuery = /* GraphQL */ `
-  query GetVenue($id: ID!) {
-    getVenue(id: $id) {
-      id
-      name
-      address
-      city
-      country
-      venueNumber
-      aliases
-      entityId
-      logo
-    }
-  }
-`;
-
-const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
-  query ListGameFinancialSnapshotsWithGame(
-    $filter: ModelGameFinancialSnapshotFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listGameFinancialSnapshots(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        entityId
-        venueId
-        gameId
-        gameStartDateTime
-        totalEntries
-        totalUniquePlayers
-        prizepoolTotal
-        totalRevenue
-        totalCost
-        netProfit
-        profitMargin
-        gameType
-        # New prizepool adjustment fields
-        prizepoolPaidDelta
-        prizepoolJackpotContributions
-        prizepoolAccumulatorTicketPayoutEstimate
-        prizepoolAccumulatorTicketPayoutActual
-        game {
-          id
-          name
-          gameStatus
-          isRegular
-          venueScheduleKey
-          venueGameTypeKey
-          buyIn
-          gameType
-          gameVariant
-        }
-      }
-      nextToken
-    }
-  }
-`;
-
-// ---- Types ----
 
 interface GameFinancialSnapshotWithGame {
   id: string;
@@ -131,21 +121,19 @@ interface GameFinancialSnapshotWithGame {
   netProfit?: number | null;
   profitMargin?: number | null;
   gameType?: string | null;
-  // New prizepool adjustment fields
-  prizepoolPaidDelta?: number | null;
-  prizepoolJackpotContributions?: number | null;
-  prizepoolAccumulatorTicketPayoutEstimate?: number | null;
-  prizepoolAccumulatorTicketPayoutActual?: number | null;
+  isSeries?: boolean | null;
   game?: {
     id: string;
     name?: string | null;
     gameStatus?: string | null;
     isRegular?: boolean | null;
+    isSeries?: boolean | null;
     venueScheduleKey?: string | null;
     venueGameTypeKey?: string | null;
     buyIn?: number | null;
     gameType?: string | null;
     gameVariant?: string | null;
+    tournamentId?: string | null;
   } | null;
 }
 
@@ -183,42 +171,225 @@ interface GameRowData {
   registrations: number;
   prizepool: number;
   profit: number;
+  classification: GameClassification;
+  gameId: string;
+  // Additional fields for detailed display (matching VenueGameDetails)
+  buyIn: number;
+  revenue: number;
+  cost: number;
+  profitMargin: number | null;
+  tournamentId: string | null;
 }
 
-// ---- Helpers ----
+// ============================================
+// TIME RANGE UTILITIES
+// ============================================
 
-function isValidGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
+function getTimeRangeBounds(range: TimeRangeKey): { from: string | null; to: string | null } {
+  const to = new Date();
+  if (range === 'ALL') return { from: null, to: to.toISOString() };
+
+  const months =
+    range === '12M' ? 12 :
+    range === '6M'  ? 6  :
+    range === '3M'  ? 3  : 1;
+
+  const from = new Date();
+  from.setMonth(from.getMonth() - months);
+  return { from: from.toISOString(), to: to.toISOString() };
+}
+
+// ============================================
+// GRAPHQL QUERIES
+// ============================================
+
+const getVenueQuery = /* GraphQL */ `
+  query GetVenue($id: ID!) {
+    getVenue(id: $id) {
+      id
+      name
+      address
+      city
+      country
+      venueNumber
+      aliases
+      entityId
+      logo
+    }
+  }
+`;
+
+// NEW: Query VenueMetrics for summary cards (matches VenuesDashboard)
+const getVenueMetricsQuery = /* GraphQL */ `
+  query GetVenueMetrics($id: ID!) {
+    getVenueMetrics(id: $id) {
+      id
+      entityId
+      venueId
+      venueName
+      timeRange
+      seriesType
+      
+      totalGames
+      totalSeriesGames
+      totalRegularGames
+      totalRecurringGames
+      totalOneOffGames
+      totalActiveRecurringGameTypes
+      totalActiveTournamentSeries
+      
+      totalEntries
+      totalUniquePlayers
+      
+      totalPrizepool
+      totalRevenue
+      totalProfit
+      
+      avgEntriesPerGame
+      avgPrizepoolPerGame
+      avgProfitPerGame
+      
+      firstGameDate
+      latestGameDate
+      daysSinceLastGame
+      
+      calculatedAt
+    }
+  }
+`;
+
+// Existing query for game history table (with isSeries field added)
+const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
+  query ListGameFinancialSnapshotsWithGame(
+    $filter: ModelGameFinancialSnapshotFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listGameFinancialSnapshots(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        entityId
+        venueId
+        gameId
+        gameStartDateTime
+        totalEntries
+        totalUniquePlayers
+        prizepoolTotal
+        totalRevenue
+        totalCost
+        netProfit
+        profitMargin
+        gameType
+        isSeries
+        game {
+          id
+          name
+          gameStatus
+          isRegular
+          isSeries
+          venueScheduleKey
+          venueGameTypeKey
+          buyIn
+          gameType
+          gameVariant
+          tournamentId
+        }
+      }
+      nextToken
+    }
+  }
+`;
+
+// ============================================
+// HELPERS
+// ============================================
+
+/**
+ * Game classification types
+ */
+type GameClassification = 'RECURRING' | 'AD_HOC' | 'SERIES' | 'UNKNOWN';
+
+/**
+ * Classify a game based on isSeries and isRegular flags
+ */
+function classifyGame(snapshot: GameFinancialSnapshotWithGame): GameClassification {
+  const game = snapshot.game;
+  const isSeries = snapshot.isSeries === true || game?.isSeries === true;
+  const isRegular = game?.isRegular === true;
+  
+  if (isSeries) return 'SERIES';
+  if (isRegular) return 'RECURRING';
+  // Ad-hoc: isSeries=false AND isRegular=false (or null)
+  if (!isSeries && !isRegular) return 'AD_HOC';
+  return 'UNKNOWN';
+}
+
+/**
+ * Filter for recurring games - games with isRegular=true and proper metadata
+ */
+function isValidRecurringGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
   const game = snapshot.game;
   
-  // Debug logging to identify filtering issues
-  const checks = {
-    hasGame: !!game,
-    gameStatus: game?.gameStatus,
-    isFinished: game?.gameStatus === 'FINISHED',
-    isRegular: game?.isRegular,
-    venueScheduleKey: game?.venueScheduleKey,
-    venueGameTypeKey: game?.venueGameTypeKey,
-  };
-  
-  // Explicitly exclude NOT_PUBLISHED games
+  // Exclude NOT_PUBLISHED games
   if (game?.gameStatus === 'NOT_PUBLISHED') {
-    console.log(`[VenueDetails] Snapshot ${snapshot.id} excluded: NOT_PUBLISHED`);
     return false;
   }
   
-  const isValid = (
+  return (
     !!game &&
     game.gameStatus === 'FINISHED' &&
     game.isRegular === true &&
     !!game.venueScheduleKey &&
     !!game.venueGameTypeKey
   );
+}
+
+/**
+ * Filter for ad-hoc games - games where isSeries=false AND isRegular=false
+ */
+function isValidAdHocGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
+  const game = snapshot.game;
   
-  if (!isValid) {
-    console.log(`[VenueDetails] Snapshot ${snapshot.id} filtered out:`, checks);
+  // Exclude NOT_PUBLISHED games
+  if (game?.gameStatus === 'NOT_PUBLISHED') {
+    return false;
   }
   
-  return isValid;
+  const isSeries = snapshot.isSeries === true || game?.isSeries === true;
+  const isRegular = game?.isRegular === true;
+  
+  return (
+    !!game &&
+    game.gameStatus === 'FINISHED' &&
+    !isSeries &&
+    !isRegular
+  );
+}
+
+/**
+ * Filter for all valid games (recurring + ad-hoc, excluding series)
+ */
+function isValidRegularGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
+  return isValidRecurringGameSnapshot(snapshot) || isValidAdHocGameSnapshot(snapshot);
+}
+
+/**
+ * Filter snapshots by seriesType (matches refreshAllMetrics logic)
+ */
+function filterSnapshotsBySeriesType(
+  snapshots: GameFinancialSnapshotWithGame[], 
+  seriesType: SeriesTypeKey
+): GameFinancialSnapshotWithGame[] {
+  switch (seriesType) {
+    case 'ALL':
+      return snapshots;
+    case 'SERIES':
+      return snapshots.filter(s => s.isSeries === true || s.game?.isSeries === true);
+    case 'REGULAR':
+      return snapshots.filter(s => s.isSeries !== true && s.game?.isSeries !== true);
+    default:
+      return snapshots;
+  }
 }
 
 function formatCurrency(value: number): string {
@@ -251,11 +422,9 @@ function formatCompactCurrency(value: number): string {
 }
 
 function formatKeyToDisplayName(key: string): string {
-  // Convert keys like "wednesday-50-turbo" to "Wednesday $50 Turbo"
   return key
     .split('-')
     .map((word) => {
-      // Check if it's a number (likely a buy-in amount)
       if (/^\d+$/.test(word)) {
         return `$${word}`;
       }
@@ -306,7 +475,6 @@ function buildScheduleGroupStats(
 
     const s = statsByGameType.get(gameTypeKey)!;
     
-    // Track the most recent game name
     if (snap.gameStartDateTime && snap.gameStartDateTime > s.latestGameDate) {
       s.latestGameDate = snap.gameStartDateTime;
       s.gameName = snap.game?.name ?? s.gameName;
@@ -318,7 +486,6 @@ function buildScheduleGroupStats(
     s.totalPrizepool += snap.prizepoolTotal ?? 0;
     s.totalProfit += snap.netProfit ?? 0;
 
-    // Build trend data by month
     if (snap.gameStartDateTime) {
       const monthKey = getMonthKey(snap.gameStartDateTime);
       const monthData = s.snapshotsByMonth.get(monthKey) ?? { profit: 0, games: 0 };
@@ -330,7 +497,6 @@ function buildScheduleGroupStats(
 
   const scheduleStats: ScheduleGroupStats[] = Array.from(statsByGameType.entries())
     .map(([gameTypeKey, data]) => {
-      // Convert month map to sorted trend array
       const trendData = Array.from(data.snapshotsByMonth.entries())
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([date, values]) => ({
@@ -352,9 +518,8 @@ function buildScheduleGroupStats(
         trendData,
       };
     })
-    .sort((a, b) => b.totalProfit - a.totalProfit); // Sort by profit descending
+    .sort((a, b) => b.totalProfit - a.totalProfit);
 
-  // Calculate global stats
   const globalStats: ScheduleGroupStats = scheduleStats.reduce(
     (acc, s) => ({
       ...acc,
@@ -414,7 +579,7 @@ function buildGameRowData(snapshots: GameFinancialSnapshotWithGame[]): GameRowDa
     .sort((a, b) => {
       const dateA = a.gameStartDateTime ? new Date(a.gameStartDateTime).getTime() : 0;
       const dateB = b.gameStartDateTime ? new Date(b.gameStartDateTime).getTime() : 0;
-      return dateB - dateA; // Newest first
+      return dateB - dateA;
     })
     .map((snap) => ({
       id: snap.id,
@@ -425,11 +590,56 @@ function buildGameRowData(snapshots: GameFinancialSnapshotWithGame[]): GameRowDa
       registrations: snap.totalUniquePlayers ?? 0,
       prizepool: snap.prizepoolTotal ?? 0,
       profit: snap.netProfit ?? 0,
+      classification: classifyGame(snap),
+      gameId: snap.gameId ?? snap.game?.id ?? '',
+      // Additional fields for detailed display
+      buyIn: snap.game?.buyIn ?? 0,
+      revenue: snap.totalRevenue ?? 0,
+      cost: snap.totalCost ?? 0,
+      profitMargin: snap.profitMargin ?? null,
+      tournamentId: snap.game?.tournamentId ?? null,
     }));
 }
 
-// ---- Sparkline Component ----
+// ============================================
+// SUB-COMPONENTS
+// ============================================
 
+// Series Type Selector (matches VenuesDashboard)
+interface SeriesTypeSelectorProps {
+  value: SeriesTypeKey;
+  onChange: (value: SeriesTypeKey) => void;
+}
+
+const SeriesTypeSelector: React.FC<SeriesTypeSelectorProps> = ({ value, onChange }) => {
+  return (
+    <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5">
+      {SERIES_TYPE_OPTIONS.map((option) => {
+        const isActive = value === option.key;
+        const colorStyles = {
+          indigo: isActive ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-indigo-600',
+          blue: isActive ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:text-blue-600',
+          purple: isActive ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-600 hover:text-purple-600'
+        };
+        
+        return (
+          <button
+            key={option.key}
+            onClick={() => onChange(option.key)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+              colorStyles[option.color as keyof typeof colorStyles]
+            }`}
+          >
+            {option.icon}
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+// Sparkline Component
 interface SparklineProps {
   data: { date: string; profit: number }[];
   width?: number;
@@ -470,8 +680,7 @@ function Sparkline({ data, width = 100, height = 32 }: SparklineProps) {
   );
 }
 
-// ---- Game Schedule Card Component ----
-
+// Schedule Card Component
 interface ScheduleCardProps {
   schedule: ScheduleGroupStats;
   onClick: () => void;
@@ -500,43 +709,33 @@ function ScheduleCard({ schedule, onClick }: ScheduleCardProps) {
         </div>
       </div>
 
-      <div className="mt-2 grid grid-cols-2 gap-y-1.5 text-xs">
-        <span className="text-gray-500">Games</span>
-        <span className="text-right font-semibold">
-          {schedule.totalGames.toLocaleString()}
-        </span>
-
-        <span className="text-gray-500">Registrations</span>
-        <span className="text-right font-semibold">
-          {schedule.totalRegistrations.toLocaleString()}
-        </span>
-
-        <span className="text-gray-500">Entries</span>
-        <span className="text-right font-semibold">
-          {schedule.totalEntries.toLocaleString()}
-        </span>
-
-        <span className="text-gray-500">Prizepool</span>
-        <span className="text-right font-semibold">
-          {formatCurrency(schedule.totalPrizepool)}
-        </span>
-
-        <span className="text-gray-500">Total Profit</span>
-        <span className={`text-right font-semibold ${profitColor}`}>
-          {formatCurrency(schedule.totalProfit)}
-        </span>
-
-        <span className="text-gray-500">Avg Profit/Game</span>
-        <span className={`text-right font-semibold ${avgProfitColor}`}>
-          {formatCurrency(schedule.avgProfit)}
-        </span>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Text className="text-xs text-gray-500">Games</Text>
+          <Metric className="text-lg">{schedule.totalGames}</Metric>
+        </div>
+        <div>
+          <Text className="text-xs text-gray-500">Avg Profit</Text>
+          <Metric className={`text-lg ${avgProfitColor}`}>
+            {formatCompactCurrency(schedule.avgProfit)}
+          </Metric>
+        </div>
+        <div>
+          <Text className="text-xs text-gray-500">Entries</Text>
+          <Metric className="text-lg">{schedule.totalEntries.toLocaleString()}</Metric>
+        </div>
+        <div>
+          <Text className="text-xs text-gray-500">Total Profit</Text>
+          <Metric className={`text-lg ${profitColor}`}>
+            {formatCompactCurrency(schedule.totalProfit)}
+          </Metric>
+        </div>
       </div>
     </Card>
   );
 }
 
-// ---- Profit Trend Chart Component ----
-
+// Profit Trend Chart
 interface ProfitTrendChartProps {
   data: { date: string; profit: number; prizepool: number; entries: number; games: number }[];
 }
@@ -544,43 +743,35 @@ interface ProfitTrendChartProps {
 function ProfitTrendChart({ data }: ProfitTrendChartProps) {
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-400">
+      <div className="flex items-center justify-center h-48 text-gray-400">
         No trend data available
       </div>
     );
   }
 
-  const formatXAxis = (dateStr: string) => {
-    try {
-      return format(parseISO(dateStr + '-01'), 'MMM yy');
-    } catch {
-      return dateStr;
-    }
-  };
-
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={200}>
       <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
         <XAxis
           dataKey="date"
-          tickFormatter={formatXAxis}
+          tickFormatter={(d) => {
+            try {
+              return format(parseISO(d + '-01'), 'MMM yy');
+            } catch {
+              return d;
+            }
+          }}
           tick={{ fontSize: 12 }}
           stroke="#9ca3af"
         />
         <YAxis
-          tickFormatter={(value) => formatCompactCurrency(value)}
+          tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
           tick={{ fontSize: 12 }}
           stroke="#9ca3af"
         />
         <Tooltip
-          formatter={(value: number, name: string) => {
-            if (name === 'profit') return [formatCurrency(value), 'Net Profit'];
-            if (name === 'prizepool') return [formatCurrency(value), 'Prizepool'];
-            if (name === 'entries') return [value, 'Entries'];
-            if (name === 'games') return [value, 'Games'];
-            return [value, name];
-          }}
+          formatter={(value: number) => [formatCurrency(value), 'Profit']}
           labelFormatter={(label) => {
             try {
               return format(parseISO(label + '-01'), 'MMMM yyyy');
@@ -606,7 +797,9 @@ function ProfitTrendChart({ data }: ProfitTrendChartProps) {
   );
 }
 
-// ---- Main Component ----
+// ============================================
+// MAIN COMPONENT
+// ============================================
 
 const PAGE_LIMIT = 500;
 
@@ -614,23 +807,35 @@ export const VenueDetails: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { selectedEntities, entities, loading: entityLoading } = useEntity();
+  const { isSuperAdmin } = useUserPermissions();
 
-  // Get venueId from URL params (standardized parameter name)
+  // Get venueId from URL params
   const venueId = searchParams.get('venueId');
   const entityId: string | undefined = selectedEntities[0]?.id;
 
+  // State
   const [timeRange, setTimeRange] = useState<TimeRangeKey>('ALL');
+  const [seriesType, setSeriesType] = useState<SeriesTypeKey>('REGULAR'); // Default to REGULAR
   const [venue, setVenue] = useState<VenueInfo | null>(null);
-  const [snapshots, setSnapshots] = useState<GameFinancialSnapshotWithGame[]>([]);
+  const [venueMetrics, setVenueMetrics] = useState<VenueMetrics | null>(null);
+  const [allSnapshots, setAllSnapshots] = useState<GameFinancialSnapshotWithGame[]>([]);
+  const [recurringSnapshots, setRecurringSnapshots] = useState<GameFinancialSnapshotWithGame[]>([]);
+  const [adHocSnapshots, setAdHocSnapshots] = useState<GameFinancialSnapshotWithGame[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'games' | 'analytics'>('overview');
+  const [gameHistoryFilter, setGameHistoryFilter] = useState<'all' | 'recurring' | 'adhoc'>('all');
 
-  // Determine if we should show the entity selector (only if user has more than 1 entity)
-  // Note: entities is already filtered by user permissions in EntityContext
+  // Show entity selector only if user has more than 1 entity
   const showEntitySelector = entities && entities.length > 1;
 
-  // Fetch venue info and financial snapshots
+  // Build VenueMetrics ID: {venueId}_{timeRange}_{seriesType}
+  const venueMetricsId = useMemo(() => {
+    if (!venueId) return null;
+    return `${venueId}_${timeRange}_${seriesType}`;
+  }, [venueId, timeRange, seriesType]);
+
+  // Fetch venue info, metrics, and snapshots
   useEffect(() => {
     if (!venueId) {
       setError('No venue ID provided');
@@ -660,17 +865,40 @@ export const VenueDetails: React.FC = () => {
 
         setVenue(venueData);
 
-        // 2) Fetch GameFinancialSnapshots for this venue + time range
+        // 2) Fetch VenueMetrics for summary cards (NEW - matches VenuesDashboard)
+        if (venueMetricsId) {
+          try {
+            const metricsRes = await client.graphql({
+              query: getVenueMetricsQuery,
+              variables: { id: venueMetricsId },
+            }) as any;
+
+            const metricsData = metricsRes?.data?.getVenueMetrics;
+            if (metricsData) {
+              setVenueMetrics(metricsData);
+              console.log(`[VenueDetails] Loaded VenueMetrics: ${venueMetricsId}`, {
+                totalGames: metricsData.totalGames,
+                seriesType: metricsData.seriesType
+              });
+            } else {
+              console.warn(`[VenueDetails] No VenueMetrics found for ${venueMetricsId}`);
+              setVenueMetrics(null);
+            }
+          } catch (metricsErr) {
+            console.warn('[VenueDetails] Error loading VenueMetrics:', metricsErr);
+            setVenueMetrics(null);
+          }
+        }
+
+        // 3) Fetch GameFinancialSnapshots for game history table
         const { from, to } = getTimeRangeBounds(timeRange);
-        const allSnapshots: GameFinancialSnapshotWithGame[] = [];
+        const fetchedSnapshots: GameFinancialSnapshotWithGame[] = [];
         let nextToken: string | null | undefined = null;
 
-        // Build filter for venue + optional entity + date range
         const baseFilter: any = {
           venueId: { eq: venueId },
         };
 
-        // If entity context is active and matches venue's entity, add entity filter
         if (entityId && venueData.entityId === entityId) {
           baseFilter.entityId = { eq: entityId };
         }
@@ -698,18 +926,28 @@ export const VenueDetails: React.FC = () => {
           const pageItems =
             page?.items?.filter((s: GameFinancialSnapshotWithGame | null) => s != null) ?? [];
 
-          allSnapshots.push(...(pageItems as GameFinancialSnapshotWithGame[]));
+          fetchedSnapshots.push(...(pageItems as GameFinancialSnapshotWithGame[]));
           nextToken = page?.nextToken ?? null;
         } while (nextToken);
 
-        // Filter to only valid game snapshots (FINISHED, isRegular, has schedule keys)
-        const validSnapshots = allSnapshots.filter(isValidGameSnapshot);
+        // Filter snapshots by seriesType first
+        const seriesFilteredSnapshots = filterSnapshotsBySeriesType(fetchedSnapshots, seriesType);
+        
+        // Separate into recurring and ad-hoc games
+        const recurring = seriesFilteredSnapshots.filter(isValidRecurringGameSnapshot);
+        const adHoc = seriesFilteredSnapshots.filter(isValidAdHocGameSnapshot);
+        
+        // All valid regular games (both recurring and ad-hoc)
+        const allValid = seriesFilteredSnapshots.filter(isValidRegularGameSnapshot);
 
         console.log(
-          `[VenueDetails] Loaded ${allSnapshots.length} snapshots, ${validSnapshots.length} valid after filtering`
+          `[VenueDetails] Loaded ${fetchedSnapshots.length} snapshots, ${seriesFilteredSnapshots.length} after seriesType filter`,
+          `| ${recurring.length} recurring | ${adHoc.length} ad-hoc | ${allValid.length} total valid`
         );
 
-        setSnapshots(validSnapshots);
+        setAllSnapshots(allValid);
+        setRecurringSnapshots(recurring);
+        setAdHocSnapshots(adHoc);
       } catch (err: any) {
         console.error('Error loading venue details:', err);
         setError(err?.message ?? 'Failed to load venue details');
@@ -719,22 +957,64 @@ export const VenueDetails: React.FC = () => {
     };
 
     void load();
-  }, [venueId, entityId, timeRange]);
+  }, [venueId, entityId, timeRange, seriesType, venueMetricsId]);
 
-  // Compute aggregated stats
-  const { scheduleStats, globalStats } = useMemo(
-    () => buildScheduleGroupStats(snapshots),
-    [snapshots]
+  // Compute aggregated stats for recurring games (for overview)
+  const { scheduleStats, globalStats: tableGlobalStats } = useMemo(
+    () => buildScheduleGroupStats(recurringSnapshots),
+    [recurringSnapshots]
   );
 
-  const trendData = useMemo(() => buildOverallTrendData(snapshots), [snapshots]);
+  const trendData = useMemo(() => buildOverallTrendData(allSnapshots), [allSnapshots]);
 
-  const gameRows = useMemo(() => buildGameRowData(snapshots), [snapshots]);
+  // Game rows based on filter selection
+  const gameRows = useMemo(() => {
+    const snapshotsToShow = gameHistoryFilter === 'recurring' 
+      ? recurringSnapshots 
+      : gameHistoryFilter === 'adhoc' 
+        ? adHocSnapshots 
+        : allSnapshots;
+    return buildGameRowData(snapshotsToShow);
+  }, [allSnapshots, recurringSnapshots, adHocSnapshots, gameHistoryFilter]);
 
-  // Handle row click to navigate to game details (same as RecurringGame card)
+  // Ad-hoc game stats for the overview section
+  const adHocStats = useMemo(() => {
+    const adHocGames = buildGameRowData(adHocSnapshots);
+    const totalProfit = adHocGames.reduce((sum, g) => sum + g.profit, 0);
+    const totalPrizepool = adHocGames.reduce((sum, g) => sum + g.prizepool, 0);
+    const totalEntries = adHocGames.reduce((sum, g) => sum + g.entries, 0);
+    const totalRegistrations = adHocGames.reduce((sum, g) => sum + g.registrations, 0);
+    const totalRevenue = adHocGames.reduce((sum, g) => sum + g.revenue, 0);
+    const totalCost = adHocGames.reduce((sum, g) => sum + g.cost, 0);
+    return {
+      totalGames: adHocGames.length,
+      totalProfit,
+      totalPrizepool,
+      totalEntries,
+      totalRegistrations,
+      totalRevenue,
+      totalCost,
+      avgProfit: adHocGames.length > 0 ? totalProfit / adHocGames.length : 0,
+      avgEntries: adHocGames.length > 0 ? totalEntries / adHocGames.length : 0,
+      games: adHocGames, // All games for the table
+    };
+  }, [adHocSnapshots]);
+
+  // Handler for clicking on ad-hoc game name (navigates to GameDetails page)
+  const handleAdHocGameClick = (gameId: string) => {
+    navigate(`/games/details/${gameId}`);
+  };
+
+  // Handle row click to navigate to game details
   const handleGameRowClick = (row: GameRowData) => {
-    if (venue) {
+    if (!venue) return;
+    
+    // For recurring games with a schedule, navigate to the game type view
+    if (row.classification === 'RECURRING' && row.gameTypeKey && row.gameTypeKey !== '-') {
       navigate(`/venues/game?venueId=${venue.id}&gameTypeKey=${encodeURIComponent(row.gameTypeKey)}`);
+    } else if (row.gameId) {
+      // For ad-hoc games or games without a schedule, navigate to the specific game
+      navigate(`/games/${row.gameId}`);
     }
   };
 
@@ -753,6 +1033,39 @@ export const VenueDetails: React.FC = () => {
         },
       },
       {
+        header: 'Tournament ID',
+        accessorKey: 'tournamentId',
+        cell: ({ row }) => (
+          <span className="text-gray-500 font-mono text-xs">
+            {row.original.tournamentId || '-'}
+          </span>
+        ),
+      },
+      {
+        header: 'Type',
+        accessorKey: 'classification',
+        cell: ({ row }) => {
+          const classification = row.original.classification;
+          const styles = {
+            RECURRING: 'bg-blue-100 text-blue-700',
+            AD_HOC: 'bg-amber-100 text-amber-700',
+            SERIES: 'bg-purple-100 text-purple-700',
+            UNKNOWN: 'bg-gray-100 text-gray-600',
+          };
+          const labels = {
+            RECURRING: 'Recurring',
+            AD_HOC: 'Ad-hoc',
+            SERIES: 'Series',
+            UNKNOWN: 'Unknown',
+          };
+          return (
+            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${styles[classification]}`}>
+              {labels[classification]}
+            </span>
+          );
+        },
+      },
+      {
         header: 'Game',
         accessorKey: 'name',
         cell: ({ row }) => (
@@ -764,13 +1077,19 @@ export const VenueDetails: React.FC = () => {
         ),
       },
       {
-        header: 'Game Type',
+        header: 'Schedule',
         accessorKey: 'gameTypeKey',
-        cell: ({ row }) => (
-          <span className="text-gray-600 text-xs">
-            {formatKeyToDisplayName(row.original.gameTypeKey)}
-          </span>
-        ),
+        cell: ({ row }) => {
+          const key = row.original.gameTypeKey;
+          if (!key || key === '-') {
+            return <span className="text-gray-400 text-xs italic">None</span>;
+          }
+          return (
+            <span className="text-gray-600 text-xs">
+              {formatKeyToDisplayName(key)}
+            </span>
+          );
+        },
       },
       {
         header: 'Registrations',
@@ -829,7 +1148,25 @@ export const VenueDetails: React.FC = () => {
     );
   }
 
-  const profitColor = globalStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600';
+  // Use VenueMetrics for summary cards (consistent with VenuesDashboard)
+  // Fall back to table stats if metrics not available
+  const summaryStats = venueMetrics ? {
+    totalGames: venueMetrics.totalGames,
+    totalRegistrations: venueMetrics.totalUniquePlayers,
+    totalEntries: venueMetrics.totalEntries,
+    totalPrizepool: venueMetrics.totalPrizepool,
+    totalProfit: venueMetrics.totalProfit,
+    avgProfit: venueMetrics.avgProfitPerGame || 0,
+  } : {
+    totalGames: tableGlobalStats.totalGames,
+    totalRegistrations: tableGlobalStats.totalRegistrations,
+    totalEntries: tableGlobalStats.totalEntries,
+    totalPrizepool: tableGlobalStats.totalPrizepool,
+    totalProfit: tableGlobalStats.totalProfit,
+    avgProfit: tableGlobalStats.avgProfit,
+  };
+
+  const profitColor = summaryStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600';
 
   return (
     <PageWrapper title={venue.name}>
@@ -842,20 +1179,28 @@ export const VenueDetails: React.FC = () => {
         Back to Dashboard
       </button>
 
-      {/* ============ FILTERS - Same layout as VenuesDashboard ============ */}
+      {/* Filters - Time Range and Series Type */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {showEntitySelector && (
-          <div className="w-full sm:flex-1 sm:max-w-xs">
-            <MultiEntitySelector />
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          {showEntitySelector && (
+            <div className="w-full sm:flex-1 sm:max-w-xs">
+              <MultiEntitySelector />
+            </div>
+          )}
+          {/* Series Type Selector - ONLY show for SUPER_ADMIN */}
+          {isSuperAdmin && (
+            <SeriesTypeSelector 
+              value={seriesType} 
+              onChange={setSeriesType} 
+            />
+          )}
+        </div>
         <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
       </div>
 
-      {/* Venue Header - Updated with Logo Display (SocialAccountTable style) */}
+      {/* Venue Header */}
       <Card className="mb-6">
         <div className="flex items-center">
-          {/* Venue Logo / Avatar - SocialAccountTable pattern */}
           <div className="flex-shrink-0 h-14 w-14 relative">
             {venue.logo ? (
               <img
@@ -893,38 +1238,61 @@ export const VenueDetails: React.FC = () => {
               </p>
             )}
           </div>
+          {/* Data source indicator */}
+          <div className="text-right">
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+              seriesType === 'ALL' ? 'bg-indigo-100 text-indigo-700' :
+              seriesType === 'REGULAR' ? 'bg-blue-100 text-blue-700' :
+              'bg-purple-100 text-purple-700'
+            }`}>
+              {seriesType === 'ALL' ? 'All Games' : seriesType === 'REGULAR' ? 'Regular Games' : 'Series Games'}
+            </span>
+            {venueMetrics && (
+              <p className="mt-1 text-xs text-gray-400">
+                Updated {format(parseISO(venueMetrics.calculatedAt), 'MMM d, h:mm a')}
+              </p>
+            )}
+          </div>
         </div>
       </Card>
 
-      {/* Summary Metric Cards */}
+      {/* Summary Metric Cards - NOW USES VenueMetrics (matches VenuesDashboard) */}
       <Grid numItemsSm={2} numItemsLg={5} className="gap-4 mb-6">
         <MetricCard
           label="Total Games"
-          value={globalStats.totalGames.toLocaleString()}
+          value={summaryStats.totalGames.toLocaleString()}
           icon={<CalendarIcon className="h-6 w-6" />}
         />
         <MetricCard
           label="Total Registrations"
-          value={globalStats.totalRegistrations.toLocaleString()}
+          value={summaryStats.totalRegistrations.toLocaleString()}
           icon={<UserGroupIcon className="h-6 w-6" />}
         />
         <MetricCard
           label="Total Entries"
-          value={globalStats.totalEntries.toLocaleString()}
+          value={summaryStats.totalEntries.toLocaleString()}
           icon={<UserGroupIcon className="h-6 w-6" />}
         />
         <MetricCard
           label="Total Prizepool"
-          value={formatCurrency(globalStats.totalPrizepool)}
+          value={formatCurrency(summaryStats.totalPrizepool)}
           icon={<TrophyIcon className="h-6 w-6" />}
         />
         <MetricCard
           label="Total Profit"
-          value={formatCurrency(globalStats.totalProfit)}
+          value={formatCurrency(summaryStats.totalProfit)}
           icon={<BanknotesIcon className="h-6 w-6" />}
-          secondary={`Avg ${formatCurrency(globalStats.avgProfit)}/game`}
+          secondary={`Avg ${formatCurrency(summaryStats.avgProfit)}/game`}
         />
       </Grid>
+
+      {/* Info banner when VenueMetrics not available */}
+      {!venueMetrics && (
+        <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+          <strong>Note:</strong> Pre-calculated metrics not available for this filter combination. 
+          Showing computed values from game history. Run "Refresh Metrics" to update.
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="bg-white shadow rounded-lg">
@@ -932,7 +1300,7 @@ export const VenueDetails: React.FC = () => {
           <nav className="-mb-px flex space-x-8 px-6">
             {[
               { id: 'overview', label: 'Overview' },
-              { id: 'games', label: 'Game History' },
+              { id: 'games', label: `Game History (${gameRows.length})` },
               { id: 'analytics', label: 'Analytics' },
             ].map((tab) => (
               <button
@@ -958,18 +1326,23 @@ export const VenueDetails: React.FC = () => {
               <div>
                 <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
                   <ChartBarIcon className="h-5 w-5 mr-2 text-gray-400" />
-                  Profit Trend
+                  Profit Trend (All Games)
                 </h3>
                 <Card>
                   <ProfitTrendChart data={trendData} />
                 </Card>
               </div>
 
-              {/* Schedule/Game Type Cards */}
+              {/* Recurring Games Section */}
               <div>
-                <Text className="mb-3 text-xs font-semibold uppercase text-gray-500">
-                  Recurring Games ({scheduleStats.length})
-                </Text>
+                <div className="flex items-center justify-between mb-3">
+                  <Text className="text-xs font-semibold uppercase text-gray-500">
+                    Recurring Games ({scheduleStats.length} types, {recurringSnapshots.length} games)
+                  </Text>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                    {formatCurrency(tableGlobalStats.totalProfit)} profit
+                  </span>
+                </div>
 
                 <Grid numItemsSm={1} numItemsMd={2} numItemsLg={3} className="gap-4">
                   {scheduleStats.map((schedule) => (
@@ -984,19 +1357,207 @@ export const VenueDetails: React.FC = () => {
 
                   {scheduleStats.length === 0 && (
                     <Text className="col-span-full text-sm text-gray-400 text-center py-8">
-                      No recurring game data available for the selected time range.
+                      No recurring game data available for the selected filters.
+                      {seriesType === 'SERIES' && ' Try switching to "Regular" or "All Games".'}
                     </Text>
                   )}
                 </Grid>
+              </div>
+
+              {/* Ad-hoc Games Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <Text className="text-xs font-semibold uppercase text-gray-500">
+                    Ad-hoc Games ({adHocStats.totalGames} games)
+                  </Text>
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    adHocStats.totalProfit >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
+                    {formatCurrency(adHocStats.totalProfit)} profit
+                  </span>
+                </div>
+
+                {adHocStats.totalGames > 0 ? (
+                  <Card>
+                    {/* Summary Stats */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                      <div>
+                        <Text className="text-xs text-gray-500">Total Games</Text>
+                        <Metric className="text-lg">{adHocStats.totalGames}</Metric>
+                      </div>
+                      <div>
+                        <Text className="text-xs text-gray-500">Total Entries</Text>
+                        <Metric className="text-lg">{adHocStats.totalEntries.toLocaleString()}</Metric>
+                        <Text className="text-xs text-gray-400">Avg {adHocStats.avgEntries.toFixed(1)}/game</Text>
+                      </div>
+                      <div>
+                        <Text className="text-xs text-gray-500">Total Prizepool</Text>
+                        <Metric className="text-lg">{formatCompactCurrency(adHocStats.totalPrizepool)}</Metric>
+                      </div>
+                      <div>
+                        <Text className="text-xs text-gray-500">Total Profit</Text>
+                        <Metric className={`text-lg ${adHocStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                          {formatCompactCurrency(adHocStats.totalProfit)}
+                        </Metric>
+                      </div>
+                      <div>
+                        <Text className="text-xs text-gray-500">Avg Profit/Game</Text>
+                        <Metric className={`text-lg ${adHocStats.avgProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                          {formatCompactCurrency(adHocStats.avgProfit)}
+                        </Metric>
+                      </div>
+                    </div>
+
+                    {/* Ad-hoc Games Table (matching VenueGameDetails style) */}
+                    <div className="border-t border-gray-100 pt-4">
+                      <Text className="text-xs text-gray-500 mb-3">Game History (click to view details)</Text>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 text-sm">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">ID</th>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Game</th>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Buy-in</th>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Reg.</th>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Entries</th>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Prize</th>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Rev</th>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Cost</th>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Profit</th>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Margin</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100 bg-white">
+                            {adHocStats.games.map((game) => (
+                              <tr
+                                key={game.id}
+                                className="hover:bg-gray-50 cursor-pointer"
+                                onClick={() => handleAdHocGameClick(game.gameId)}
+                              >
+                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">
+                                  {(() => {
+                                    try {
+                                      return format(parseISO(game.date), 'dd MMM yyyy');
+                                    } catch {
+                                      return '-';
+                                    }
+                                  })()}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-gray-500 font-mono text-xs">
+                                  {game.tournamentId || '-'}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap">
+                                  <span
+                                    className="font-medium text-indigo-600 hover:text-indigo-900 hover:underline"
+                                    title={`View details for ${game.name}`}
+                                  >
+                                    {game.name.length > 35 ? game.name.substring(0, 35) + '...' : game.name}
+                                  </span>
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{formatCurrency(game.buyIn)}</td>
+                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{game.registrations.toLocaleString()}</td>
+                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{game.entries.toLocaleString()}</td>
+                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{formatCurrency(game.prizepool)}</td>
+                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{formatCurrency(game.revenue)}</td>
+                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{formatCurrency(game.cost)}</td>
+                                <td className="px-3 py-2 whitespace-nowrap">
+                                  <span className={`font-semibold ${game.profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                                    {formatCurrency(game.profit)}
+                                  </span>
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap">
+                                  {game.profitMargin !== null ? (
+                                    <span className={game.profitMargin >= 0 ? 'text-blue-600' : 'text-red-600'}>
+                                      {(game.profitMargin * 100).toFixed(1)}%
+                                    </span>
+                                  ) : '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      
+                      {adHocStats.totalGames > 10 && (
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <button 
+                            onClick={() => {
+                              setGameHistoryFilter('adhoc');
+                              setActiveTab('games');
+                            }}
+                            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                          >
+                            View all {adHocStats.totalGames} ad-hoc games in Game History tab →
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ) : (
+                  <Card>
+                    <Text className="text-sm text-gray-400 text-center py-8">
+                      No ad-hoc games recorded for the selected filters.
+                    </Text>
+                  </Card>
+                )}
               </div>
             </div>
           )}
 
           {activeTab === 'games' && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                Game History ({gameRows.length} games)
-              </h3>
+              {/* Header with filter toggle */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">
+                    Game History ({gameRows.length} games)
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {gameHistoryFilter === 'all' 
+                      ? `Showing all finished games (${recurringSnapshots.length} recurring, ${adHocSnapshots.length} ad-hoc)`
+                      : gameHistoryFilter === 'recurring'
+                        ? 'Showing recurring games only'
+                        : 'Showing ad-hoc games only'}
+                  </p>
+                </div>
+
+                {/* Game type filter toggle */}
+                <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5">
+                  <button
+                    onClick={() => setGameHistoryFilter('all')}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                      gameHistoryFilter === 'all' 
+                        ? 'bg-indigo-600 text-white shadow-sm' 
+                        : 'text-gray-600 hover:text-indigo-600'
+                    }`}
+                  >
+                    All ({allSnapshots.length})
+                  </button>
+                  <button
+                    onClick={() => setGameHistoryFilter('recurring')}
+                    className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                      gameHistoryFilter === 'recurring' 
+                        ? 'bg-blue-600 text-white shadow-sm' 
+                        : 'text-gray-600 hover:text-blue-600'
+                    }`}
+                  >
+                    <CalendarIcon className="w-3.5 h-3.5" />
+                    Recurring ({recurringSnapshots.length})
+                  </button>
+                  <button
+                    onClick={() => setGameHistoryFilter('adhoc')}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                      gameHistoryFilter === 'adhoc' 
+                        ? 'bg-amber-600 text-white shadow-sm' 
+                        : 'text-gray-600 hover:text-amber-600'
+                    }`}
+                  >
+                    Ad-hoc ({adHocSnapshots.length})
+                  </button>
+                </div>
+              </div>
+
               <DataTable<GameRowData> 
                 data={gameRows} 
                 columns={columns} 
@@ -1014,7 +1575,7 @@ export const VenueDetails: React.FC = () => {
                     Total Revenue Generated
                   </Text>
                   <Metric className="mt-1">
-                    {formatCurrency(globalStats.totalPrizepool + globalStats.totalProfit)}
+                    {formatCurrency(summaryStats.totalPrizepool + summaryStats.totalProfit)}
                   </Metric>
                   <Text className="mt-1 text-xs text-gray-400">
                     Prizepool + Profit
@@ -1026,8 +1587,8 @@ export const VenueDetails: React.FC = () => {
                     Average Entries per Game
                   </Text>
                   <Metric className="mt-1">
-                    {globalStats.totalGames > 0
-                      ? (globalStats.totalEntries / globalStats.totalGames).toFixed(1)
+                    {summaryStats.totalGames > 0
+                      ? (summaryStats.totalEntries / summaryStats.totalGames).toFixed(1)
                       : '0'}
                   </Metric>
                 </Card>
@@ -1037,8 +1598,8 @@ export const VenueDetails: React.FC = () => {
                     Profit Margin
                   </Text>
                   <Metric className={`mt-1 ${profitColor}`}>
-                    {globalStats.totalPrizepool > 0
-                      ? ((globalStats.totalProfit / (globalStats.totalPrizepool + globalStats.totalProfit)) * 100).toFixed(1)
+                    {summaryStats.totalPrizepool > 0
+                      ? ((summaryStats.totalProfit / (summaryStats.totalPrizepool + summaryStats.totalProfit)) * 100).toFixed(1)
                       : '0'}%
                   </Metric>
                 </Card>

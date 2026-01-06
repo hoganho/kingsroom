@@ -2,15 +2,19 @@
   Lambda: entityVenueDashMetricCounter
   Region: ap-southeast-2
   
-  VERSION: 1.2.0
+  VERSION: 1.3.0
   
   CHANGELOG:
+  - v1.3.0: Added content hash check to skip non-meaningful Game table changes
+            Only processes records where dataChangedAt changed
   - v1.2.0: Added robust table name resolution (same as refreshAllMetrics)
             Supports both STORAGE_* and API_KINGSROOM_* env var patterns
   - v1.1.0: Added series game exclusion logic
     - Games with isSeries=true are excluded from gameCount
     - Added separate seriesGameCount for tracking series games
     - MODIFY events now handle transitions (regular ↔ series)
+    
+  NO PLAYER DATA MODIFICATION - Only updates Entity/Venue count fields.
 */
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
@@ -53,31 +57,110 @@ const getTableName = (modelName) => {
 const ENTITY_TABLE = getTableName('Entity');
 const VENUE_TABLE = getTableName('Venue');
 
+// ===================================================================
+// CONTENT HASH CHECK - Skip non-meaningful Game table changes
+// ===================================================================
+
+/**
+ * Check if this Game table stream record represents a meaningful change.
+ * 
+ * @param {Object} record - DynamoDB stream record
+ * @returns {Object} { shouldProcess: boolean, reason: string }
+ */
+function shouldProcessGameRecord(record) {
+  const { eventName, dynamodb } = record;
+  
+  // Always process INSERT events (new games)
+  if (eventName === 'INSERT') {
+    return { shouldProcess: true, reason: 'New game inserted' };
+  }
+  
+  // Always process REMOVE events (game deleted)
+  if (eventName === 'REMOVE') {
+    return { shouldProcess: true, reason: 'Game removed' };
+  }
+  
+  // For MODIFY events, check if dataChangedAt changed
+  if (eventName === 'MODIFY') {
+    const oldImage = dynamodb.OldImage ? unmarshall(dynamodb.OldImage) : null;
+    const newImage = dynamodb.NewImage ? unmarshall(dynamodb.NewImage) : null;
+    
+    if (!oldImage || !newImage) {
+      return { shouldProcess: true, reason: 'Missing image data, processing to be safe' };
+    }
+    
+    // Check if dataChangedAt changed (meaningful change)
+    const oldDataChangedAt = oldImage.dataChangedAt;
+    const newDataChangedAt = newImage.dataChangedAt;
+    
+    if (oldDataChangedAt !== newDataChangedAt) {
+      return { shouldProcess: true, reason: 'dataChangedAt changed (meaningful update)' };
+    }
+    
+    // Also check contentHash as backup
+    const oldHash = oldImage.contentHash;
+    const newHash = newImage.contentHash;
+    
+    if (oldHash !== newHash) {
+      return { shouldProcess: true, reason: 'contentHash changed' };
+    }
+    
+    // No meaningful change
+    return { shouldProcess: false, reason: 'No meaningful change (dataChangedAt unchanged)' };
+  }
+  
+  // Unknown event type - process to be safe
+  return { shouldProcess: true, reason: 'Unknown event type' };
+}
+
+// ===================================================================
+// MAIN HANDLER
+// ===================================================================
+
 exports.handler = async (event) => {
-  // Log configuration on cold start
+  console.log('[METRICS] v1.3.0 - With content hash check');
   console.log('[METRICS] Table configuration:', { ENTITY_TABLE, VENUE_TABLE });
   
   // Validate tables are configured
   if (!ENTITY_TABLE || !VENUE_TABLE) {
     console.error('[METRICS] FATAL: Table names not configured. Check Lambda environment variables.');
-    console.error('[METRICS] Available env vars:', Object.keys(process.env).join(', '));
     return { error: 'Table configuration missing' };
   }
 
+  let processed = 0;
+  let skipped = 0;
+
   const promises = event.Records.map(async (record) => {
-    // Determine source table based on Event Source ARN (Game or Venue table triggered this?)
+    // Determine source table based on Event Source ARN
     const sourceArn = record.eventSourceARN || "";
     const isGameTable = sourceArn.includes("Game");
     const isVenueTable = sourceArn.includes("Venue");
 
     if (isGameTable) {
+      // ═══════════════════════════════════════════════════════════════
+      // CONTENT HASH CHECK: Skip non-meaningful Game table changes
+      // ═══════════════════════════════════════════════════════════════
+      const processCheck = shouldProcessGameRecord(record);
+      
+      if (!processCheck.shouldProcess) {
+        console.log(`[METRICS] Skipping Game record: ${processCheck.reason}`);
+        skipped++;
+        return;
+      }
+      
       await handleGameChange(record);
+      processed++;
     } else if (isVenueTable) {
+      // Venue changes don't need content hash check - they're always meaningful
       await handleVenueChange(record);
+      processed++;
     }
   });
 
   await Promise.all(promises);
+  
+  console.log(`[METRICS] Processing complete: ${processed} processed, ${skipped} skipped`);
+  return { processed, skipped };
 };
 
 // ===================================================================
@@ -99,7 +182,7 @@ function isSeriesGame(game) {
 // HANDLER: GAME CHANGES
 // ===================================================================
 // Triggers when a Game is ADDED, MODIFIED, or REMOVED
-// Now excludes series games from the main gameCount
+// Excludes series games from the main gameCount
 
 async function handleGameChange(record) {
   const { eventName, dynamodb } = record;
@@ -194,8 +277,9 @@ async function handleGameChange(record) {
           });
         }
       }
+    } else {
+      console.log(`[METRICS] MODIFY game ${newImage?.id} - series status unchanged, no count updates`);
     }
-    // If series status didn't change, no count updates needed
   }
 
   // 3. GAME REMOVED (REMOVE)
@@ -238,10 +322,12 @@ async function handleVenueChange(record) {
   const oldImage = dynamodb.OldImage ? unmarshall(dynamodb.OldImage) : null;
 
   if (eventName === 'INSERT' && newImage.entityId) {
+    console.log(`[METRICS] INSERT venue ${newImage.id} - incrementing venueCount for entity ${newImage.entityId}`);
     await updateStats(ENTITY_TABLE, newImage.entityId, { incFields: { venueCount: 1 } });
   }
 
   if (eventName === 'REMOVE' && oldImage.entityId) {
+    console.log(`[METRICS] REMOVE venue ${oldImage.id} - decrementing venueCount for entity ${oldImage.entityId}`);
     await updateStats(ENTITY_TABLE, oldImage.entityId, { incFields: { venueCount: -1 } });
   }
 }

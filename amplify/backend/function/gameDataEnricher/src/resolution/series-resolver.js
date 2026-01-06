@@ -16,18 +16,34 @@
  * resolveSeriesFromName -> createTournamentSeries. If entityId is not provided directly,
  * createTournamentSeries will look it up from the venue.
  * 
+ * ENHANCED (2026-01-06): Holiday detection now checks BOTH game name AND date.
+ * - detectSeriesSignal() now checks for holiday keywords in game names
+ * - New detectHolidayFromName() function for name-based holiday detection
+ * - Combined detection gives higher confidence when both name and date match
+ * 
  * DETECTION ORDER:
  * 1. Database matching against TournamentSeriesTitle (exact + fuzzy)
  * 2. Pattern-based detection (WSOP, WPT, etc.)
  * 3. Keyword heuristics (championship, series, festival, etc.)
- * 4. Temporal matching to find/create TournamentSeries instance
- * 5. Extract series details (dayNumber, flightLetter, eventNumber, etc.)
+ * 4. Holiday detection (name + date based) - ENHANCED
+ * 5. Temporal matching to find/create TournamentSeries instance
+ * 6. Extract series details (dayNumber, flightLetter, eventNumber, etc.)
  */
 
 const { v4: uuidv4 } = require('uuid');
 const stringSimilarity = require('string-similarity');
 const { getDocClient, getTableName, QueryCommand, GetCommand, PutCommand, UpdateCommand, ScanCommand } = require('../utils/db-client');
-const { SERIES_KEYWORDS, STRUCTURE_KEYWORDS, HOLIDAY_PATTERNS, VALIDATION_THRESHOLDS } = require('../utils/constants');
+const { 
+  SERIES_KEYWORDS, 
+  STRUCTURE_KEYWORDS, 
+  HOLIDAY_PATTERNS, 
+  VALIDATION_THRESHOLDS,
+  // NEW: Import enhanced holiday detection functions
+  detectHolidayFromName,
+  detectHolidayFromDate,
+  detectHoliday,
+  getHolidayKeywords
+} = require('../utils/constants');
 
 // Series match threshold for fuzzy matching
 const SERIES_MATCH_THRESHOLD = 0.7;
@@ -298,31 +314,74 @@ const matchAgainstPatterns = (gameName) => {
 };
 
 // ===================================================================
-// HEURISTIC DETECTION (original series-resolver.js)
+// HEURISTIC DETECTION (ENHANCED with holiday name detection)
 // ===================================================================
 
 /**
- * Detect series signal from keywords and structure
+ * Detect series signal from keywords, structure, and holidays
+ * 
+ * ENHANCED: Now also checks for holiday names in game title
  * 
  * @param {string} name - Tournament name
- * @returns {object} Detection result with isSeries and confidence
+ * @param {Date} dateObj - Optional game date for holiday context
+ * @returns {object} Detection result with isSeries, confidence, reason, and holidayMatch
  */
-const detectSeriesSignal = (name) => {
+const detectSeriesSignal = (name, dateObj = null) => {
   if (!name) return { isSeries: false, confidence: 0 };
   
   const lowerName = name.toLowerCase();
   
-  // Structural indicators (definitive)
+  // ===== 1. Structural indicators (definitive) =====
   if (STRUCTURE_KEYWORDS && STRUCTURE_KEYWORDS.some(k => lowerName.includes(k))) {
     return { isSeries: true, confidence: 1.0, reason: 'STRUCTURE_INDICATOR' };
   }
   
-  // Keyword match
+  // ===== 2. Series keyword match =====
   if (SERIES_KEYWORDS && SERIES_KEYWORDS.some(k => lowerName.includes(k))) {
     return { isSeries: true, confidence: 0.9, reason: 'KEYWORD_MATCH' };
   }
   
-  // High guarantee (>$30k, not weekly)
+  // ===== 3. ENHANCED: Holiday detection (name + date) =====
+  // Check if game name contains holiday keywords
+  const holidayNameMatch = detectHolidayFromName ? detectHolidayFromName(name) : null;
+  
+  if (holidayNameMatch) {
+    console.log(`[SERIES] Holiday detected in name: "${holidayNameMatch.name}" (confidence: ${holidayNameMatch.confidence.toFixed(2)}, type: ${holidayNameMatch.matchType})`);
+    
+    // If we also have a date, check for combined match
+    if (dateObj) {
+      const combinedMatch = detectHoliday ? detectHoliday(name, dateObj) : holidayNameMatch;
+      if (combinedMatch && combinedMatch.matchType === 'NAME_AND_DATE') {
+        console.log(`[SERIES] Holiday dual match (name + date): "${combinedMatch.name}" - boosted confidence`);
+        return {
+          isSeries: true,
+          confidence: combinedMatch.confidence,
+          reason: 'HOLIDAY_NAME_AND_DATE',
+          holidayMatch: combinedMatch
+        };
+      }
+    }
+    
+    return {
+      isSeries: true,
+      confidence: holidayNameMatch.confidence,
+      reason: 'HOLIDAY_NAME',
+      holidayMatch: holidayNameMatch
+    };
+  }
+  
+  // ===== 4. Date-only holiday detection (fallback) =====
+  if (dateObj) {
+    const holidayDateMatch = detectHolidayFromDate ? detectHolidayFromDate(dateObj) : null;
+    if (holidayDateMatch) {
+      console.log(`[SERIES] Holiday detected from date: "${holidayDateMatch.name}" (confidence: ${holidayDateMatch.confidence.toFixed(2)})`);
+      // Date-only match has lower priority - don't automatically mark as series
+      // but return the info for potential use downstream
+      // (This preserves original behavior - date alone doesn't trigger series)
+    }
+  }
+  
+  // ===== 5. High guarantee (>$30k, not weekly) =====
   const guaranteeMatch = lowerName.match(/\$([0-9]+)k/);
   if (guaranteeMatch) {
     const amount = parseInt(guaranteeMatch[1]);
@@ -335,8 +394,9 @@ const detectSeriesSignal = (name) => {
 };
 
 /**
- * Detect holiday context from date
+ * Detect holiday context from date (LEGACY - kept for backward compatibility)
  * 
+ * @deprecated Use detectHoliday() or detectHolidayFromDate() instead
  * @param {Date} dateObj - Date to check
  * @returns {string|null} Holiday name or null
  */
@@ -356,6 +416,33 @@ const detectHolidayContext = (dateObj) => {
       }
     }
   }
+  return null;
+};
+
+/**
+ * Enhanced holiday context detection
+ * Checks BOTH game name AND date for holiday indicators
+ * 
+ * @param {string} gameName - Tournament name
+ * @param {Date} dateObj - Game date
+ * @returns {object|null} { name, confidence, matchType, ... } or null
+ */
+const detectHolidayContextEnhanced = (gameName, dateObj) => {
+  // Use the new combined detection from constants
+  if (detectHoliday) {
+    return detectHoliday(gameName, dateObj);
+  }
+  
+  // Fallback to legacy detection
+  const legacyResult = detectHolidayContext(dateObj);
+  if (legacyResult) {
+    return {
+      name: legacyResult,
+      confidence: 0.7,
+      matchType: 'DATE_LEGACY'
+    };
+  }
+  
   return null;
 };
 
@@ -653,35 +740,28 @@ const findExistingSeriesTitle = async (titleName, seriesCategory = null) => {
 
 /**
  * Find or create a TournamentSeriesTitle
- * First checks if one exists, creates if not
  * 
  * @param {string} titleName - The title name
- * @param {string} seriesCategory - Category
- * @returns {Object} The found or created title
+ * @param {string} seriesCategory - Category (REGULAR, SEASONAL, CHAMPIONSHIP, SPECIAL)
+ * @returns {Object} { title: TournamentSeriesTitle, wasCreated: boolean }
  */
 const findOrCreateSeriesTitle = async (titleName, seriesCategory = 'SPECIAL') => {
   // First try to find existing
   const existing = await findExistingSeriesTitle(titleName, seriesCategory);
+  
   if (existing) {
     return { title: existing, wasCreated: false };
   }
   
-  // Create new
+  // Create new title
   const newTitle = await createTournamentSeriesTitle(titleName, seriesCategory);
   return { title: newTitle, wasCreated: true };
 };
 
 // ===================================================================
-// ENTITY ID LOOKUP HELPER (FIX for TournamentSeriesMetrics)
+// VENUE LOOKUP FOR ENTITY ID
 // ===================================================================
 
-/**
- * Helper to get entityId from venueId
- * Used when creating TournamentSeries to ensure entityId is always populated
- * 
- * @param {string} venueId - Venue ID to look up
- * @returns {string|null} Entity ID or null if not found
- */
 const getEntityIdFromVenue = async (venueId) => {
   if (!venueId) return null;
   
@@ -694,9 +774,10 @@ const getEntityIdFromVenue = async (venueId) => {
       Key: { id: venueId },
       ProjectionExpression: 'entityId'
     }));
+    
     return result.Item?.entityId || null;
   } catch (error) {
-    console.error(`[SERIES] Failed to get entityId from venue ${venueId}:`, error.message);
+    console.error('[SERIES] Error fetching entityId from venue:', error);
     return null;
   }
 };
@@ -805,17 +886,17 @@ const generateSeriesName = (titleName, year, month = null, quarter = null) => {
 };
 
 // ===================================================================
-// MAIN RESOLVER (MERGED)
+// MAIN RESOLVER (MERGED + ENHANCED)
 // ===================================================================
 
 /**
  * Resolve series assignment for a game
  * 
- * NEW DETECTION ORDER:
+ * ENHANCED DETECTION ORDER:
  * 1. If tournamentSeriesId provided → Use it
  * 2. Database matching against TournamentSeriesTitle
  * 3. Pattern-based detection (WSOP, WPT, etc.)
- * 4. Keyword heuristics
+ * 4. Keyword heuristics (now includes holiday name detection)
  * 5. Temporal matching to find/create instance
  * 6. Extract series details (dayNumber, flightLetter, etc.)
  * 
@@ -934,19 +1015,25 @@ const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoC
     return result;
   }
   
-  // ===== STEP 4: Keyword heuristics =====
-  console.log('[SERIES] Step 4: Trying keyword heuristics...');
-  const heuristicSignal = detectSeriesSignal(inputSeriesName || gameName);
+  // ===== STEP 4: Keyword heuristics (ENHANCED with holiday detection) =====
+  console.log('[SERIES] Step 4: Trying keyword heuristics (with holiday detection)...');
+  
+  // ENHANCED: Pass date to detectSeriesSignal for combined holiday detection
+  const heuristicSignal = detectSeriesSignal(inputSeriesName || gameName, temporal.date);
   
   if (heuristicSignal.isSeries) {
     console.log(`[SERIES] Heuristic signal detected: ${heuristicSignal.reason}`);
     
-    const holidayName = detectHolidayContext(new Date(gameStartDateTime));
+    // ENHANCED: Use the improved holiday detection
+    const holidayMatch = heuristicSignal.holidayMatch || detectHolidayContextEnhanced(gameName, temporal.date);
+    
     let generatedSeriesName = normalizeSeriesName(inputSeriesName || gameName);
     let category = 'SPECIAL';
     
-    if (holidayName) {
-      generatedSeriesName = `${holidayName} Series ${year}`;
+    // Holiday-based series naming
+    if (holidayMatch) {
+      console.log(`[SERIES] Holiday context: "${holidayMatch.name}" (type: ${holidayMatch.matchType}, confidence: ${holidayMatch.confidence?.toFixed(2) || 'N/A'})`);
+      generatedSeriesName = `${holidayMatch.name} Series ${year}`;
       category = 'SEASONAL';
     } else if (generatedSeriesName.includes('championship')) {
       generatedSeriesName = generatedSeriesName.replace(/\d{4}/, '').trim() + ` ${year}`;
@@ -968,7 +1055,7 @@ const resolveSeriesAssignment = async ({ game, entityId, seriesInput = {}, autoC
       quarter,
       autoCreate,
       matchConfidence: heuristicSignal.confidence,
-      matchType: 'HEURISTIC'
+      matchType: heuristicSignal.holidayMatch ? 'HOLIDAY' : 'HEURISTIC'
     });
     
     return result;
@@ -1262,6 +1349,10 @@ module.exports = {
   matchAgainstDatabase,
   matchAgainstPatterns,
   extractSeriesDetails,
+  
+  // Holiday detection (NEW + ENHANCED)
+  detectHolidayContext,           // Legacy - kept for backward compatibility
+  detectHolidayContextEnhanced,   // NEW - combined name + date detection
   
   // Utilities
   normalizeSeriesName,

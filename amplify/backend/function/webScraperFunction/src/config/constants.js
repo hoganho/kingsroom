@@ -95,7 +95,6 @@ const GAME_STATUSES = {
     RUNNING: 'RUNNING',
     CANCELLED: 'CANCELLED',
     FINISHED: 'FINISHED',
-    NOT_IN_USE: 'NOT_IN_USE',
     NOT_PUBLISHED: 'NOT_PUBLISHED',
     CLOCK_STOPPED: 'CLOCK_STOPPED',
     UNKNOWN: 'UNKNOWN'
@@ -103,7 +102,6 @@ const GAME_STATUSES = {
 
 /** Statuses that indicate tournament should not be scraped */
 const DO_NOT_SCRAPE_STATUSES = [
-    GAME_STATUSES.NOT_IN_USE,      // Includes "not found" tournaments
     GAME_STATUSES.NOT_PUBLISHED,
     GAME_STATUSES.UNKNOWN          // Error states
 ];

@@ -1,10 +1,15 @@
 /**
  * ===================================================================
- * Range Handler
+ * Range Handler (v1.1.0)
  * ===================================================================
  * 
  * Handles fetchTournamentDataRange operation.
  * Fetches multiple tournaments by ID range.
+ * 
+ * VERSION: 1.1.0
+ * 
+ * CHANGELOG:
+ * - v1.1.0: Removed lambda-monitoring dependency (no longer maintained)
  * 
  * NOTE: This is a convenience operation for batch fetching.
  * Each tournament is fetched individually (no Game saves).
@@ -41,11 +46,8 @@ const handleFetchRange = async (options, context) => {
         forceRefresh = false
     } = options;
     
-    const { monitoring } = context;
-    
-    monitoring.trackOperation('FETCH_RANGE_START', 'Range', `${startId}-${endId}`, { entityId });
-    
-    console.log(`[RangeHandler] Fetching tournaments ${startId} to ${endId} for entity ${entityId}`);
+    const totalRequested = endId - startId + 1;
+    console.log(`[RangeHandler] v1.1.0 Fetching tournaments ${startId} to ${endId} for entity ${entityId} (${totalRequested} total)`);
     
     const results = [];
     const errors = [];
@@ -83,22 +85,16 @@ const handleFetchRange = async (options, context) => {
         }
     }
     
-    monitoring.trackOperation('FETCH_RANGE_COMPLETE', 'Range', `${startId}-${endId}`, {
-        entityId,
-        totalRequested: endId - startId + 1,
-        successCount: results.filter(r => r.success).length,
-        errorCount: errors.length
-    });
-    
-    console.log(`[RangeHandler] Completed: ${results.filter(r => r.success).length} success, ${errors.length} errors`);
+    const successCount = results.filter(r => r.success).length;
+    console.log(`[RangeHandler] Completed: ${successCount}/${totalRequested} success, ${errors.length} errors`);
     
     return {
         results,
         summary: {
             startId,
             endId,
-            totalRequested: endId - startId + 1,
-            successCount: results.filter(r => r.success).length,
+            totalRequested,
+            successCount,
             errorCount: errors.length,
             errors
         }

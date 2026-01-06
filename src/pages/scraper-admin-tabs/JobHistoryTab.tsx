@@ -1,5 +1,8 @@
 // src/pages/scraper-admin-tabs/JobHistoryTab.tsx
-// UPDATED: Better error handling, correct status enum values
+// UPDATED v1.1.0:
+// - Fixed: Success rate now calculated from job data instead of non-existent field
+// - Added: New/Updated columns for clarity
+// - Better error handling and correct status enum values
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -14,6 +17,20 @@ import type { ScraperJob, ScraperJobStatus } from '../../API';
 import { JobStatusBadge } from '../../components/scraper/shared/StatusBadges';
 import { JobDetailsModal } from '../../components/scraper/admin/ScraperModals';
 
+// ===================================================================
+// Helper: Calculate Success Rate from Job Data
+// ===================================================================
+function calculateJobSuccessRate(job: ScraperJob): number {
+    const processed = job.totalURLsProcessed || 0;
+    if (processed === 0) return 0;
+    
+    const successful = (job.newGamesScraped || 0) + (job.gamesUpdated || 0);
+    return Math.round((successful / processed) * 100);
+}
+
+// ===================================================================
+// Main Component
+// ===================================================================
 export const JobHistoryTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
     const [jobs, setJobs] = useState<ScraperJob[]>([]);
@@ -159,7 +176,7 @@ export const JobHistoryTab: React.FC = () => {
                                     URLs
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    New/Updated
+                                    New / Updated
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                     Success
@@ -170,47 +187,57 @@ export const JobHistoryTab: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {jobs.map((job) => (
-                                <tr key={job.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <span title={job.jobId || job.id}>
-                                            {(job.jobId || job.id)?.slice(0, 8)}...
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <JobStatusBadge status={job.status} />
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        {job.triggerSource || 'MANUAL'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        {job.startTime ? new Date(job.startTime).toLocaleString() : '-'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        {formatDuration(job.durationSeconds)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        {job.totalURLsProcessed || 0}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span className="text-green-600">{job.newGamesScraped || 0}</span>
-                                        {' / '}
-                                        <span className="text-blue-600">{job.gamesUpdated || 0}</span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        {Math.round(job.successRate || 0)}%
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <button
-                                            onClick={() => setSelectedJob(job)}
-                                            className="text-blue-600 hover:text-blue-800 p-1"
-                                            title="View Details"
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                            {jobs.map((job) => {
+                                const successRate = calculateJobSuccessRate(job);
+                                return (
+                                    <tr key={job.id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <span title={job.jobId || job.id}>
+                                                {(job.jobId || job.id)?.slice(0, 8)}...
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <JobStatusBadge status={job.status} />
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {job.triggerSource || 'MANUAL'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {job.startTime ? new Date(job.startTime).toLocaleString() : '-'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {formatDuration(job.durationSeconds)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {(job.totalURLsProcessed || 0).toLocaleString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span className="text-green-600 font-medium">{job.newGamesScraped || 0}</span>
+                                            <span className="text-gray-400"> / </span>
+                                            <span className="text-blue-600 font-medium">{job.gamesUpdated || 0}</span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span className={`font-medium ${
+                                                successRate >= 80 ? 'text-green-600' :
+                                                successRate >= 50 ? 'text-yellow-600' :
+                                                successRate > 0 ? 'text-orange-600' :
+                                                'text-gray-400'
+                                            }`}>
+                                                {successRate}%
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <button
+                                                onClick={() => setSelectedJob(job)}
+                                                className="text-blue-600 hover:text-blue-800 p-1"
+                                                title="View Details"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                             {jobs.length === 0 && !loading && (
                                 <tr>
                                     <td colSpan={9} className="px-6 py-8 text-center text-gray-500">

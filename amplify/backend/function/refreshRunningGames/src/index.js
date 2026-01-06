@@ -182,23 +182,21 @@ async function triggerScraper(game) {
     }
     
     const scraperPayload = {
-        urls: [game.sourceUrl],
+        operation: 'fetchTournamentData',
+        url: game.sourceUrl,
         entityId: game.entityId,
-        options: {
-            isRefresh: true,
-            gameId: game.gameId,
-            priority: 'low'
-        }
+        forceRefresh: true,
+        scraperJobId: `REFRESH_${game.gameId}_${Date.now()}`
     };
     
     try {
         await lambdaClient.send(new InvokeCommand({
             FunctionName: getScraperFunctionName(),
-            InvocationType: 'Event', // Async - don't wait for response
+            InvocationType: 'Event',
             Payload: JSON.stringify(scraperPayload)
         }));
         
-        console.log(`[REFRESH] ✅ Triggered scraper for: ${game.name} (${game.sourceUrl.substring(0, 50)}...)`);
+        console.log(`[REFRESH] ✅ Triggered scraper for: ${game.name}`);
         return true;
         
     } catch (error) {

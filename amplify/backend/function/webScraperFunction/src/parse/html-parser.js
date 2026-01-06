@@ -66,6 +66,37 @@ const parseDurationToMilliseconds = (durationStr) => {
     return totalMilliseconds;
 };
 
+const cwTimestampToISO = (cwTimestamp) => {
+    if (!cwTimestamp) return null;
+    try {
+        const isoStr = cwTimestamp.trim().replace(' ', 'T') + '.000Z';
+        const date = new Date(isoStr);
+        if (isNaN(date.getTime())) return null;
+        return date.toISOString();
+    } catch (e) {
+        return null;
+    }
+};
+
+const formatSecondsToHHMMSS = (totalSeconds) => {
+    if (!totalSeconds || totalSeconds <= 0) return '00:00:00';
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+    return [
+        hours.toString().padStart(2, '0'),
+        minutes.toString().padStart(2, '0'),
+        seconds.toString().padStart(2, '0')
+    ].join(':');
+};
+
+const parseHHMMSSToSeconds = (hhmmss) => {
+    if (!hhmmss) return 0;
+    const match = hhmmss.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+    if (!match) return 0;
+    return parseInt(match[1], 10) * 3600 + parseInt(match[2], 10) * 60 + parseInt(match[3], 10);
+};
+
 /**
  * Extract tournament ID from URL
  */
@@ -287,6 +318,41 @@ const defaultStrategy = {
     },
     
     /**
+     * Detect game type (TOURNAMENT vs CASH_GAME)
+     * 
+     * Scans game name for "CASH GAME" indicator.
+     * Must be called AFTER getName() since we need the name.
+     * 
+     * This sets both:
+     * - gameType (legacy field): TOURNAMENT or CASH_GAME
+     * - sessionMode (new taxonomy): TOURNAMENT or CASH
+     */
+    detectGameType(ctx) {
+        const name = ctx.data.name || '';
+        const gameTags = ctx.data.gameTags || [];
+        const allText = [name, ...gameTags].join(' ');
+        
+        // Check for "CASH GAME" or "CASH-GAME" in the name/tags (case insensitive)
+        // Uses word boundary to avoid false positives like "CASHBACK"
+        const isCashGame = /\bCASH[\s-]*GAME\b/i.test(allText);
+        
+        if (isCashGame) {
+            ctx.add('gameType', 'CASH_GAME');
+            ctx.add('sessionMode', 'CASH');
+            console.log(`[HtmlParser] ✅ Detected CASH GAME from: "${name}"`);
+            
+            // Cash games don't have tournament-specific fields
+            ctx.add('isSeries', false);
+            ctx.add('isSatellite', false);
+            // Note: isRegular for cash games could be handled differently
+            // For now, leave it to the enricher to determine based on recurring match
+        } else {
+            ctx.add('gameType', 'TOURNAMENT');
+            ctx.add('sessionMode', 'TOURNAMENT');
+        }
+    },
+
+    /**
      * Get game tags (badges)
      */
     getGameTags(ctx) {
@@ -423,9 +489,12 @@ const defaultStrategy = {
     /**
      * NEW: Extract multi-dimensional classification fields
      * 
+     * UPDATED: Now checks for cash games first and skips tournament-specific
+     * classification fields for cash games.
+     * 
      * This extracts the new taxonomy fields from scraped data:
      * - variant + bettingStructure (from gameVariant)
-     * - sessionMode (from gameType)
+     * - sessionMode (from gameType) - NOW PROPERLY DETECTED
      * - bountyType (from name/tags)
      * - speedType (from name/tags)
      * - stackDepth (from name/tags)
@@ -433,23 +502,24 @@ const defaultStrategy = {
      * - tournamentPurpose (from name/tags + isSatellite)
      * - scheduleType (from isSeries/isRegular)
      * 
-     * Should be called AFTER getGameVariant(), getTournamentType(), getName()
-     * 
-     * NOTE: scheduleType now defaults to 'RECURRING' since isSeries detection
-     * has moved to gameDataEnricher. The enricher will update scheduleType
-     * to 'SERIES_EVENT' if series is detected.
+     * Should be called AFTER detectGameType(), getGameVariant(), getTournamentType(), getName()
      */
     getClassification(ctx) {
         const name = ctx.data.name || '';
         const tags = ctx.data.gameTags || [];
         const allText = [...tags, name].join(' ');
         const gameVariant = ctx.data.gameVariant;
-        const gameType = ctx.data.gameType || 'TOURNAMENT';
         
         // === SESSION MODE ===
-        ctx.add('sessionMode', gameType === 'CASH_GAME' ? 'CASH' : 'TOURNAMENT');
+        // Respect already-detected values from detectGameType()
+        // This should already be set, but fallback just in case
+        if (!ctx.data.sessionMode) {
+            const gameType = ctx.data.gameType || 'TOURNAMENT';
+            ctx.add('sessionMode', gameType === 'CASH_GAME' ? 'CASH' : 'TOURNAMENT');
+        }
         
         // === VARIANT + BETTING STRUCTURE (from gameVariant) ===
+        // This applies to both cash and tournament games
         if (gameVariant && VARIANT_MAPPING[gameVariant]) {
             const mapping = VARIANT_MAPPING[gameVariant];
             ctx.add('variant', mapping.variant);
@@ -461,6 +531,35 @@ const defaultStrategy = {
             console.log(`[HtmlParser] Unknown gameVariant: ${gameVariant}`);
             ctx.add('variant', 'OTHER');
         }
+        
+        // === CASH GAME: Skip tournament-specific classification ===
+        if (ctx.data.sessionMode === 'CASH') {
+            console.log(`[HtmlParser] Cash game detected - skipping tournament classification fields`);
+            
+            // Set cash-game appropriate nulls/defaults for tournament fields
+            ctx.add('bountyType', null);        // N/A for cash
+            ctx.add('speedType', null);         // N/A for cash
+            ctx.add('entryStructure', null);    // N/A for cash
+            ctx.add('tournamentPurpose', null); // N/A for cash
+            ctx.add('stackDepth', null);        // Could be relevant but typically N/A
+            ctx.add('scheduleType', null);      // Cash games use different scheduling model
+            
+            // Cash game specific fields (future expansion)
+            // Default to common values - enricher can refine based on RecurringGame template
+            if (!ctx.data.cashGameType) {
+                ctx.add('cashGameType', 'STANDARD');
+            }
+            if (!ctx.data.cashRakeType) {
+                ctx.add('cashRakeType', 'POT_PERCENTAGE_CAPPED');
+            }
+            
+            ctx.add('classificationSource', 'SCRAPED');
+            
+            console.log(`[HtmlParser] Cash game classification: variant=${ctx.data.variant}, betting=${ctx.data.bettingStructure}`);
+            return;
+        }
+        
+        // === TOURNAMENT: Continue with full classification ===
         
         // === BOUNTY TYPE ===
         if (/MYSTERY\s*BOUNTY/i.test(allText)) {
@@ -568,7 +667,7 @@ const defaultStrategy = {
         ctx.add('classificationSource', 'SCRAPED');
         
         // Log classification for debugging
-        console.log(`[HtmlParser] Classification: variant=${ctx.data.variant}, betting=${ctx.data.bettingStructure}, ` +
+        console.log(`[HtmlParser] Classification: sessionMode=${ctx.data.sessionMode}, variant=${ctx.data.variant}, betting=${ctx.data.bettingStructure}, ` +
             `bounty=${ctx.data.bountyType}, speed=${ctx.data.speedType}, stack=${ctx.data.stackDepth}, ` +
             `entry=${ctx.data.entryStructure}, purpose=${ctx.data.tournamentPurpose}`);
     },
@@ -1023,6 +1122,59 @@ const defaultStrategy = {
             ctx.add('gameFrequency', 'YEARLY');
         } else {
             ctx.add('gameFrequency', 'UNKNOWN');
+        }
+    },
+    
+    getTotalDuration(ctx) {
+        if (ctx.gameData) {
+            // Extract duration in seconds
+            if (ctx.gameData.ttime !== undefined && ctx.gameData.ttime > 0) {
+                ctx.add('totalDuration', ctx.gameData.ttime);
+                console.log(`[HtmlParser] Duration: ${ctx.gameData.ttime} seconds`);
+            }
+            
+            // Extract actual start time
+            if (ctx.gameData.started_utc) {
+                const actualStartIso = cwTimestampToISO(ctx.gameData.started_utc);
+                if (actualStartIso) {
+                    ctx.add('gameActualStartDateTime', actualStartIso);
+                    console.log(`[HtmlParser] Actual start: ${actualStartIso}`);
+                }
+            }
+            
+            // Extract end time (direct - preferred over calculation)
+            if (ctx.gameData.finished_utc) {
+                const finishedIso = cwTimestampToISO(ctx.gameData.finished_utc);
+                if (finishedIso) {
+                    ctx.add('gameEndDateTime', finishedIso);
+                    console.log(`[HtmlParser] End time: ${finishedIso}`);
+                }
+            }
+            
+            // Calculate duration if we have timestamps but no ttime
+            if (!ctx.data.totalDuration && ctx.data.gameActualStartDateTime && ctx.data.gameEndDateTime) {
+                const startMs = new Date(ctx.data.gameActualStartDateTime).getTime();
+                const endMs = new Date(ctx.data.gameEndDateTime).getTime();
+                if (!isNaN(startMs) && !isNaN(endMs) && endMs > startMs) {
+                    ctx.add('totalDuration', Math.floor((endMs - startMs) / 1000));
+                }
+            }
+            return;
+        }
+        
+        // Fallback: Parse from HTML
+        try {
+            const totalTimeLabel = ctx.$('.cw-clock-label').filter((i, el) => 
+                ctx.$(el).text().trim().toLowerCase() === 'total time'
+            );
+            if (totalTimeLabel.length > 0) {
+                const rawValue = totalTimeLabel.siblings('.cw-clock-value-side').text().trim();
+                if (/^\d{1,2}:\d{2}:\d{2}$/.test(rawValue)) {
+                    ctx.add('totalDuration', parseHHMMSSToSeconds(rawValue));
+                }
+            }
+        } catch (err) {
+            console.warn('[HtmlParser] Error parsing Total Time:', err.message);
         }
     },
 };

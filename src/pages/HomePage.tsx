@@ -297,7 +297,7 @@ interface FinishedGameData {
   gameStartDateTime: string;
   finishedAt?: string | null;
   gameEndDateTime?: string | null;
-  totalDuration?: string | null;
+  totalDuration?: number | null;
   totalEntries?: number | null;
   totalUniquePlayers?: number | null;
   prizepoolPaid?: number | null;

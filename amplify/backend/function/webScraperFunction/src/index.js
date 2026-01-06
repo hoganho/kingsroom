@@ -3,6 +3,12 @@
  * webScraperFunction - Entry Point
  * ===================================================================
  * 
+ * VERSION: 2.0.0
+ * 
+ * CHANGELOG:
+ * - v2.0.0: Removed lambda-monitoring dependency (no longer maintained)
+ *           Uses raw ddbDocClient instead of monitored wrapper
+ * 
  * RESPONSIBILITIES (Fetch + Parse ONLY):
  * - Fetch HTML from live site or S3 cache
  * - Parse HTML to extract tournament data
@@ -10,13 +16,19 @@
  * - Return parsed data to caller
  * 
  * DOES NOT:
- * - Write to Game table (delegated to saveGameFunction)
+ * - Write to Game table (delegated to gameDataEnricher -> saveGameFunction)
  * - Create/modify venues or series
  * - Process player data
  * 
+ * TABLES UPDATED:
+ * - ScrapeURL: Tracking scrape status and S3 cache links
+ * - S3Storage: Metadata about cached HTML files
+ * - ScrapeAttempt: Audit log of scrape attempts
+ * - ScrapeStructure: HTML structure fingerprinting
+ * 
  * OPERATIONS:
  * - fetchTournamentData: Fetch + parse a single tournament
- * - saveTournamentData: Passthrough to saveGameFunction Lambda
+ * - saveTournamentData: Passthrough to gameDataEnricher Lambda
  * - fetchTournamentDataRange: Batch fetch multiple tournaments
  * - reScrapeFromCache: Re-parse existing S3 HTML with new strategies
  * 
@@ -29,7 +41,6 @@ const { S3Client } = require('@aws-sdk/client-s3');
 const { LambdaClient } = require('@aws-sdk/client-lambda');
 
 // Core modules
-const { LambdaMonitoring } = require('./utils/monitoring');
 const { resolveEntityId, getEntityIdFromUrl } = require('./core/entity-resolver');
 const { getTableName } = require('./config/tables');
 
@@ -50,16 +61,11 @@ const lambdaClient = new LambdaClient({});
 exports.handler = async (event) => {
     const handlerStartTime = Date.now();
     
-    // Initialize monitoring for this request
-    const monitoring = new LambdaMonitoring('webScraperFunction', 'pending-entity');
-    const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
-    
-    // Build shared context object
+    // Build shared context object (no monitoring wrapper)
     const context = {
-        ddbDocClient: monitoredDdbDocClient,
+        ddbDocClient,
         s3Client,
         lambdaClient,
-        monitoring,
         getTableName
     };
     
@@ -78,9 +84,6 @@ exports.handler = async (event) => {
             `handler(${fieldName})`
         );
         
-        // Update monitoring with resolved entity
-        monitoring.setEntityId(entityId);
-        
         // Extract common options
         const options = {
             entityId,
@@ -90,7 +93,7 @@ exports.handler = async (event) => {
             scraperApiKey: args.scraperApiKey || process.env.SCRAPERAPI_KEY || null
         };
         
-        console.log(`[Handler] Operation: ${fieldName}, EntityId: ${entityId}`);
+        console.log(`[Handler] v2.0.0 Operation: ${fieldName}, EntityId: ${entityId}`);
         
         // Route to appropriate handler
         switch (fieldName) {
@@ -121,14 +124,13 @@ exports.handler = async (event) => {
             }
             
             // ───────────────────────────────────────────────────────────────
-            // SAVE: Passthrough to saveGameFunction Lambda
+            // SAVE: Passthrough to gameDataEnricher Lambda
             // ───────────────────────────────────────────────────────────────
             case 'saveTournamentData':
             case 'SAVE': {
                 const input = args.input || args;
                 
-                // FIXED: Handle both old format (sourceUrl, data) and new format (source, game, players)
-                // New format comes from scrapingEngine.buildSaveInput()
+                // Handle both old format (sourceUrl, data) and new format (source, game, players)
                 const isNewFormat = !!(input.source && input.game);
                 
                 if (isNewFormat) {
@@ -141,20 +143,12 @@ exports.handler = async (event) => {
                 }
                 
                 return await handleSave({
-                    // URL: new format uses source.sourceId, old format uses sourceUrl/url
                     sourceUrl: isNewFormat ? input.source.sourceId : (input.sourceUrl || input.url),
-                    
-                    // VenueId: new format uses venue.venueId, old format uses venueId directly
                     venueId: isNewFormat ? input.venue?.venueId : input.venueId,
-                    
-                    // Data: new format has structured data, old format has raw scraped data
-                    // For new format, reconstruct the data object that save-handler expects
                     data: isNewFormat ? {
                         ...input.game,
-                        // Include player arrays so extractPlayerDataForProcessing can find them
                         results: input.players?.allPlayers?.filter(p => p.rank !== undefined) || [],
                         entries: input.players?.allPlayers || [],
-                        // Pass through other fields
                         isSeries: !!input.series,
                         seriesName: input.series?.seriesName,
                         tournamentSeriesId: input.series?.seriesId,
@@ -162,7 +156,6 @@ exports.handler = async (event) => {
                             autoAssignedVenue: { id: input.venue.suggestedVenueId, score: input.venue.confidence }
                         } : undefined
                     } : (input.originalScrapedData || input.data),
-                    
                     existingGameId: isNewFormat ? input.game?.existingGameId : input.existingGameId,
                     doNotScrape: isNewFormat ? (input.options?.doNotScrape || false) : (input.doNotScrape || false),
                     entityId: input.entityId || input.source?.entityId || entityId,
@@ -195,7 +188,6 @@ exports.handler = async (event) => {
                     throw new Error('s3Key is required for reScrapeFromCache');
                 }
                 
-                // Delegate to fetchTournamentData with s3Key
                 return await handleFetch({
                     s3Key: input.s3Key,
                     url: input.url || null,
@@ -213,14 +205,8 @@ exports.handler = async (event) => {
         
     } catch (error) {
         console.error('[Handler] Error:', error);
-        monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'fatal', {
-            error: error.message,
-            stack: error.stack
-        });
         
         // Return structured error for fetch operations
-        // FIXED: Use gameStatus: 'UNKNOWN' (valid enum value) instead of 'ERROR' (not in enum)
-        // This ensures GraphQL serialization works while still indicating an error state
         if (event.fieldName === 'fetchTournamentData' || event.fieldName === 'FETCH') {
             const args = event.arguments || event.args || event;
             const tournamentId = args.url ? extractTournamentIdFromUrl(args.url) : 0;
@@ -228,26 +214,24 @@ exports.handler = async (event) => {
             return {
                 tournamentId,
                 name: 'Error processing tournament',
-                gameStatus: 'UNKNOWN',            // FIXED: Was 'ERROR' - not in GraphQL GameStatus enum
+                gameStatus: 'UNKNOWN',
                 hasGuarantee: false,
                 doNotScrape: true,
                 s3Key: '',
                 error: error.message,
-                errorMessage: error.message,      // Explicit error message field
-                status: 'ERROR',                  // Keep internal status for debugging (not gameStatus)
+                errorMessage: error.message,
+                status: 'ERROR',
                 registrationStatus: 'N_A',
                 entityId: args.entityId || null,
-                source: 'ERROR'                   // Indicate this came from error path
+                source: 'ERROR'
             };
         }
         
         throw error;
         
     } finally {
-        // Always flush monitoring metrics
         const duration = Date.now() - handlerStartTime;
         console.log(`[Handler] Completed in ${duration}ms`);
-        await monitoring.flush();
     }
 };
 

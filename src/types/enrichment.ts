@@ -121,7 +121,7 @@ export interface EnrichGameInput {
   playersRemaining?: number | null;
   totalChipsInPlay?: number | null;
   averagePlayerStack?: number | null;
-  totalDuration?: string | null;
+  totalDuration?: number | null;
   
   // Classification
   tournamentType?: TournamentType | null;
@@ -341,7 +341,7 @@ export interface EnrichedGameData {
   playersRemaining?: number | null;
   totalChipsInPlay?: number | null;
   averagePlayerStack?: number | null;
-  totalDuration?: string | null;
+  totalDuration?: number | null;
   
   // Classification
   tournamentType?: TournamentType | null;
@@ -782,7 +782,7 @@ export const createDefaultEnrichmentInput = (
   options: {
     saveToDatabase: false,
     autoCreateSeries: true,
-    autoCreateRecurring: false,
+    autoCreateRecurring: true,
   },
 });
 

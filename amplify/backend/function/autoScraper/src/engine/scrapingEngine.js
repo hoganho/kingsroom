@@ -4,13 +4,22 @@
  * Core scraping logic extracted from index.js for maintainability.
  * Handles bulk scraping, gap processing, and event streaming.
  * 
- * UPDATED v1.2.0:
+ * UPDATED v1.4.0:
+ * - FIXED: Added ctx.onProgress() calls for real-time job stats via subscription
+ * - Progress events now published alongside DynamoDB updates
+ * - Stats panel in frontend now receives live updates during processing
+ * 
+ * v1.3.0:
+ * - FIXED: NOT_PUBLISHED is now handled separately from NOT_FOUND
+ *   - NOT_FOUND: Empty slot - increments consecutive counters, can stop scraper
+ *   - NOT_PUBLISHED: Real tournament hidden - RESETS counters, does NOT stop scraper
+ * - NO Game table placeholder saving - ScrapeURL handles tracking
+ * - NEW: notPublishedCount metric for tracking
+ * 
+ * v1.2.0:
  * - FIXED: gapIds are now processed FIRST regardless of mode
- *   Previously, gapIds were only processed if mode was 'gaps' or 'multiId'
- *   Now: mode='auto' + gapIds will process gaps, then continue scanning new IDs
  * - FIXED: Auto mode now respects options.startId if provided
- * - IMPROVED: Error messages now capture actual error (e.g., "ScraperAPI key not configured")
- *   instead of generic "Consecutive scraper errors"
+ * - IMPROVED: Error messages now capture actual error
  * - FIXED: gameStatus uses 'UNKNOWN' instead of 'ERROR' (not in GraphQL enum)
  * 
  * v1.1.0:
@@ -37,12 +46,42 @@ function shouldSkipNotFoundGap(scrapeURLStatus, options) {
     return status === 'NOT_FOUND' || status === 'BLANK' || status === 'NOT_IN_USE';
 }
 
+/**
+ * Check if response indicates an EMPTY tournament slot (NOT_FOUND)
+ * These SHOULD increment consecutive counters and potentially stop scraper.
+ * These slots may have new tournaments created soon - treat as gaps.
+ * 
+ * UPDATED v1.3.0: Removed NOT_PUBLISHED from this check!
+ * NOT_PUBLISHED is a REAL tournament that's just hidden - not an empty slot.
+ */
 function isNotFoundResponse(parsedData) {
     if (!parsedData) return false;
     const status = parsedData.gameStatus;
-    // NOTE: 'NOT_FOUND' is legacy - now using 'NOT_IN_USE' 
-    // 'UNKNOWN' is used for error states (was 'ERROR' which isn't in enum)
-    return status === 'NOT_FOUND' || status === 'NOT_IN_USE' || status === 'NOT_PUBLISHED' || status === 'UNKNOWN';
+    // Only true "not found" statuses - NOT including NOT_PUBLISHED!
+    // NOT_FOUND is legacy, NOT_IN_USE is current
+    return status === 'NOT_FOUND' || status === 'NOT_IN_USE';
+}
+
+/**
+ * Check if response indicates a REAL but UNPUBLISHED tournament
+ * These should NOT increment consecutive counters (treat like a found game).
+ * These are real tournaments - just not visible yet.
+ * ScrapeURL will be marked doNotScrape=true, re-check monthly/ad-hoc.
+ * 
+ * NEW in v1.3.0
+ */
+function isNotPublishedResponse(parsedData) {
+    if (!parsedData) return false;
+    return parsedData.gameStatus === 'NOT_PUBLISHED';
+}
+
+/**
+ * Check if response indicates an error that should be retried
+ * UNKNOWN status means something went wrong during parsing
+ */
+function isUnknownErrorResponse(parsedData) {
+    if (!parsedData) return false;
+    return parsedData.gameStatus === 'UNKNOWN';
 }
 
 /**
@@ -227,7 +266,7 @@ function buildSaveInput(entityId, url, parsedData, venueId) {
         options: {
             saveToDatabase: true,
             autoCreateSeries: true,
-            autoCreateRecurring: false
+            autoCreateRecurring: true
         }
     };
 }
@@ -264,6 +303,37 @@ async function withRetry(fn, maxRetries = 3, baseDelayMs = 500) {
 }
 
 // ===================================================================
+// PROGRESS STATS BUILDER (NEW in v1.4.0)
+// ===================================================================
+
+/**
+ * Build stats object for onProgress callback
+ * Ensures consistent structure for real-time subscription updates
+ */
+function buildProgressStats(results, startTime) {
+    const totalSuccessful = results.newGamesScraped + results.gamesUpdated;
+    const successRate = results.totalProcessed > 0 
+        ? Math.round((totalSuccessful / results.totalProcessed) * 100 * 10) / 10
+        : null;
+    
+    return {
+        totalProcessed: results.totalProcessed,
+        newGamesScraped: results.newGamesScraped,
+        gamesUpdated: results.gamesUpdated,
+        gamesSkipped: results.gamesSkipped,
+        errors: results.errors,
+        blanks: results.blanks,
+        notFoundCount: results.notFoundCount,
+        s3CacheHits: results.s3CacheHits,
+        successRate: successRate,
+        consecutiveNotFound: results.consecutiveNotFound,
+        consecutiveErrors: results.consecutiveErrors,
+        consecutiveBlanks: results.consecutiveBlanks,
+        notPublishedCount: results.notPublishedCount,
+    };
+}
+
+// ===================================================================
 // MAIN SCRAPING ENGINE
 // ===================================================================
 
@@ -296,10 +366,13 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         DEFAULT_MAX_CONSECUTIVE_BLANKS,
         DEFAULT_MAX_TOTAL_ERRORS,
         // Self-continuation support (optional)
-        invokeContinuation
+        invokeContinuation,
+        // NEW v1.4.0: Real-time progress callback for subscription updates
+        onProgress,
+        invocationStartTime
     } = ctx;
     
-    const startTime = Date.now();
+    const startTime = invocationStartTime || Date.now();
     
     // Extract thresholds from options (passed from scraperManagement) with defaults
     const MAX_CONSECUTIVE_NOT_FOUND = options.maxConsecutiveNotFound || DEFAULT_MAX_CONSECUTIVE_NOT_FOUND;
@@ -327,6 +400,8 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         lastProcessedId: scraperState.lastScannedId,
         stopReason: STOP_REASON.COMPLETED,
         lastErrorMessage: null,
+        // NEW v1.3.0: NOT_PUBLISHED tracking (no Game save, just count)
+        notPublishedCount: accumulated.notPublishedCount || 0,
     };
     
     if (accumulated.totalProcessed) {
@@ -339,7 +414,6 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
     
     // ─────────────────────────────────────────────────────────────────
     // IMPROVED: Process gapIds FIRST if provided, regardless of mode
-    // This ensures gaps are filled before scanning new IDs
     // ─────────────────────────────────────────────────────────────────
     if (options.gapIds?.length > 0) {
         console.log(`[ScrapingEngine] Processing ${options.gapIds.length} gap IDs first (mode: ${mode})`);
@@ -355,11 +429,12 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         results.totalProcessed += gapResults.totalProcessed;
         results.newGamesScraped += gapResults.newGamesScraped;
         results.gamesUpdated += gapResults.gamesUpdated;
-        results.gamesSkipped += gapResults.gamesSkipped;
+        results.gamesSkipped += gapResults.gapsSkipped;
         results.errors += gapResults.errors;
         results.blanks += gapResults.blanks;
         results.notFoundCount += gapResults.notFoundCount;
         results.s3CacheHits += gapResults.s3CacheHits;
+        results.notPublishedCount += gapResults.notPublishedCount || 0;
         
         // If gaps processing hit error threshold, stop early
         if (gapResults.stopReason && gapResults.stopReason !== STOP_REASON.COMPLETED) {
@@ -468,7 +543,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     results.gamesSkipped++;
                     
                     publishGameProcessedEvent(jobId, entityId, currentId, url, {
-                        action: 'NOT_PUBLISHED',
+                        action: 'SKIPPED',
                         message: 'Skipped (prefetch: NOT_PUBLISHED)',
                         durationMs: Date.now() - gameStartTime,
                         dataSource: 'none',
@@ -483,7 +558,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     results.gamesSkipped++;
                     
                     publishGameProcessedEvent(jobId, entityId, currentId, url, {
-                        action: 'NOT_FOUND',
+                        action: 'SKIPPED',
                         message: 'Skipped (prefetch: NOT_FOUND gap)',
                         durationMs: Date.now() - gameStartTime,
                         dataSource: 'none',
@@ -528,21 +603,19 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                 results.consecutiveNotFound = 0;
                 results.consecutiveBlanks = 0;
                 
-                // IMPROVED: Capture the FIRST actual error message, not a generic one
-                // This ensures the UI shows what actually went wrong
                 if (!results.lastErrorMessage || results.lastErrorMessage === 'Consecutive scraper errors') {
                     results.lastErrorMessage = actualErrorMessage;
                 }
                 
                 publishGameProcessedEvent(jobId, entityId, currentId, url, {
                     action: 'ERROR',
-                    message: actualErrorMessage,  // Use actual error, not generic
+                    message: actualErrorMessage,
                     errorMessage: actualErrorMessage,
                     durationMs: Date.now() - gameStartTime,
                     dataSource: dataSource,
                     s3Key: parsedData.s3Key || null,
                     parsedData: {
-                        gameStatus: 'UNKNOWN',  // FIXED: 'ERROR' not in GraphQL enum
+                        gameStatus: 'UNKNOWN',
                         name: parsedData.name,
                         doNotScrape: parsedData.doNotScrape,
                     },
@@ -552,7 +625,6 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                 if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
                     console.log(`[ScrapingEngine] ERRORS threshold reached: ${results.consecutiveErrors}`);
                     results.stopReason = STOP_REASON.ERROR;
-                    // DON'T overwrite lastErrorMessage - keep the actual error
                     if (!results.lastErrorMessage) {
                         results.lastErrorMessage = `Consecutive errors (${results.consecutiveErrors})`;
                     }
@@ -572,10 +644,21 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                 continue;
             }
 
-            // Check response type
-            const isNotFound = isNotFoundResponse(parsedData);
+            // ═══════════════════════════════════════════════════════════════
+            // UPDATED v1.3.0: Separate handling for NOT_FOUND vs NOT_PUBLISHED
+            // ═══════════════════════════════════════════════════════════════
             
-            if (isNotFound) {
+            const isNotFound = isNotFoundResponse(parsedData);
+            const isNotPublished = isNotPublishedResponse(parsedData);
+            const isUnknownError = isUnknownErrorResponse(parsedData);
+            
+            if (isNotFound || isUnknownError) {
+                // ─────────────────────────────────────────────────────────────
+                // NOT_FOUND / NOT_IN_USE / UNKNOWN: Empty slot or error
+                // INCREMENT consecutive counters - can stop scraper
+                // These are gaps that need frequent re-checking
+                // ScrapeURL: doNotScrape = false (set by fetch-handler)
+                // ─────────────────────────────────────────────────────────────
                 results.consecutiveBlanks++;
                 results.consecutiveNotFound++;
                 results.blanks++;
@@ -585,7 +668,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                 console.log(`[ScrapingEngine] ID ${currentId}: ${parsedData.gameStatus} (consecutive: ${results.consecutiveNotFound}/${MAX_CONSECUTIVE_NOT_FOUND})`);
                 
                 publishGameProcessedEvent(jobId, entityId, currentId, url, {
-                    action: parsedData.gameStatus === 'NOT_PUBLISHED' ? 'NOT_PUBLISHED' : 'NOT_FOUND',
+                    action: 'NOT_FOUND',
                     message: parsedData.gameStatus || 'Not Found',
                     durationMs: Date.now() - gameStartTime,
                     dataSource: dataSource,
@@ -594,6 +677,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     saveResult: null,
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
+                // Check thresholds - these SHOULD stop for consecutive NOT_FOUNDs
                 if (results.consecutiveNotFound >= MAX_CONSECUTIVE_NOT_FOUND && mode !== 'gaps') {
                     console.log(`[ScrapingEngine] NOT_FOUND threshold reached: ${results.consecutiveNotFound}`);
                     results.stopReason = STOP_REASON.NOT_FOUND;
@@ -606,8 +690,37 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     break;
                 }
                 
+            } else if (isNotPublished) {
+                // ─────────────────────────────────────────────────────────────
+                // NOT_PUBLISHED: Real tournament, just hidden
+                // RESET consecutive counters - treat like a found game!
+                // Does NOT stop the scraper - continue to next ID
+                // NO Game table save - ScrapeURL tracks this
+                // ScrapeURL: doNotScrape = true (set by fetch-handler)
+                // ─────────────────────────────────────────────────────────────
+                results.consecutiveErrors = 0;
+                results.consecutiveBlanks = 0;      // RESET - this is a real tournament
+                results.consecutiveNotFound = 0;    // RESET - this is a real tournament
+                results.notPublishedCount++;
+                
+                console.log(`[ScrapingEngine] ID ${currentId}: NOT_PUBLISHED (counters reset, no Game save)`);
+                
+                publishGameProcessedEvent(jobId, entityId, currentId, url, {
+                    action: 'NOT_PUBLISHED',
+                    message: 'Tournament not published (tracked in ScrapeURL)',
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: dataSource,
+                    s3Key: parsedData.s3Key,
+                    parsedData: { gameStatus: 'NOT_PUBLISHED' },
+                    saveResult: null,  // No Game save for NOT_PUBLISHED
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
+                // Continue to next ID - do NOT save to Game table
+                
             } else {
-                // Valid game data
+                // ─────────────────────────────────────────────────────────────
+                // Valid published game data - existing handling
+                // ─────────────────────────────────────────────────────────────
                 results.consecutiveBlanks = 0;
                 results.consecutiveNotFound = 0;
                 results.consecutiveErrors = 0;
@@ -726,19 +839,6 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                             }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                         }
                     }
-                } else {
-                    // Scrape-only mode
-                    results.newGamesScraped++;
-                    
-                    publishGameProcessedEvent(jobId, entityId, currentId, url, {
-                        action: 'CREATED',
-                        message: 'Scraped (not saved)',
-                        durationMs: Date.now() - gameStartTime,
-                        dataSource: dataSource,
-                        s3Key: parsedData.s3Key,
-                        parsedData: parsedData,
-                        saveResult: null,
-                    }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 }
             }
             
@@ -747,81 +847,66 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
             console.error(`[ScrapingEngine] Error at ID ${currentId}:`, errorMessage);
             
             // SPECIAL HANDLING: GraphQL enum serialization errors for gameStatus
-            // This happens when the scraper returns a status like "NOT_PUBLISHED" that
-            // isn't in the GraphQL GameStatus enum. Treat this as NOT_PUBLISHED, not an error.
             const isEnumError = errorMessage.includes("Invalid input for Enum 'GameStatus'") ||
-                                errorMessage.includes("Can't serialize value") && errorMessage.includes("gameStatus");
+                                (errorMessage.includes("Can't serialize value") && errorMessage.includes("gameStatus"));
             
             if (isEnumError) {
+                // Treat enum errors as NOT_PUBLISHED - reset counters, no save
                 console.log(`[ScrapingEngine] ID ${currentId}: GameStatus enum error - treating as NOT_PUBLISHED`);
-                results.consecutiveBlanks++;
-                results.consecutiveNotFound++;
-                results.blanks++;
-                results.notFoundCount++;
-                results.consecutiveErrors = 0;  // Reset error counter - this isn't a real error
+                results.notPublishedCount++;
+                results.consecutiveBlanks = 0;
+                results.consecutiveNotFound = 0;
+                results.consecutiveErrors = 0;
                 
                 publishGameProcessedEvent(jobId, entityId, currentId, url, {
                     action: 'NOT_PUBLISHED',
                     message: 'NOT_PUBLISHED (enum serialization)',
                     durationMs: Date.now() - gameStartTime,
                     dataSource: 'web',
-                    s3Key: null,
                     parsedData: { gameStatus: 'NOT_PUBLISHED' },
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+            } else {
+                // Regular error handling
+                results.errors++;
+                results.consecutiveErrors++;
+                results.consecutiveBlanks = 0;
+                results.consecutiveNotFound = 0;
+                
+                if (!results.lastErrorMessage) {
+                    results.lastErrorMessage = errorMessage;
+                }
+                
+                publishGameProcessedEvent(jobId, entityId, currentId, url, {
+                    action: 'ERROR',
+                    message: 'Processing error',
+                    errorMessage: errorMessage,
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: 'none',
+                    s3Key: null,
+                    parsedData: null,
                     saveResult: null,
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
-                // Check thresholds (same as NOT_FOUND handling)
-                if (results.consecutiveNotFound >= MAX_CONSECUTIVE_NOT_FOUND && mode !== 'gaps') {
-                    console.log(`[ScrapingEngine] NOT_FOUND threshold reached: ${results.consecutiveNotFound}`);
-                    results.stopReason = STOP_REASON.NOT_FOUND;
+                if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                    console.log(`[ScrapingEngine] ERRORS threshold reached: ${results.consecutiveErrors}`);
+                    results.stopReason = STOP_REASON.ERROR;
                     break;
                 }
                 
-                if (results.consecutiveBlanks >= MAX_CONSECUTIVE_BLANKS && mode !== 'gaps') {
-                    console.log(`[ScrapingEngine] BLANKS threshold reached: ${results.consecutiveBlanks}`);
-                    results.stopReason = STOP_REASON.BLANKS;
+                if (results.errors >= MAX_TOTAL_ERRORS) {
+                    console.log(`[ScrapingEngine] TOTAL ERRORS threshold reached: ${results.errors}`);
+                    results.stopReason = STOP_REASON.ERROR;
+                    results.lastErrorMessage = `Total errors exceeded: ${results.errors}`;
                     break;
                 }
-                
-                currentId++;
-                continue;  // Skip to next ID
-            }
-            
-            // Regular error handling for non-enum errors
-            results.errors++;
-            results.consecutiveErrors++;
-            results.lastErrorMessage = errorMessage;
-            
-            results.consecutiveNotFound = 0;
-            results.consecutiveBlanks = 0;
-            
-            publishGameProcessedEvent(jobId, entityId, currentId, url, {
-                action: 'ERROR',
-                message: 'Processing error',
-                errorMessage: errorMessage,
-                durationMs: Date.now() - gameStartTime,
-                dataSource: 'none',
-                s3Key: null,
-                parsedData: null,
-                saveResult: null,
-            }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
-            
-            if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                console.log(`[ScrapingEngine] ERRORS threshold reached: ${results.consecutiveErrors}`);
-                results.stopReason = STOP_REASON.ERROR;
-                break;
-            }
-            
-            if (results.errors >= MAX_TOTAL_ERRORS) {
-                console.log(`[ScrapingEngine] TOTAL ERRORS threshold reached: ${results.errors}`);
-                results.stopReason = STOP_REASON.ERROR;
-                results.lastErrorMessage = `Total errors exceeded: ${results.errors}`;
-                break;
             }
         }
 
-        // Publish progress update to job record
+        // ═══════════════════════════════════════════════════════════════
+        // UPDATED v1.4.0: Publish progress to BOTH DynamoDB AND subscription
+        // ═══════════════════════════════════════════════════════════════
         if (results.totalProcessed % PROGRESS_UPDATE_FREQUENCY === 0) {
+            // Update DynamoDB (existing behavior)
             await updateScraperJob(jobId, {
                 totalURLsProcessed: results.totalProcessed,
                 currentId: currentId,
@@ -836,6 +921,18 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                 consecutiveErrors: results.consecutiveErrors,
                 consecutiveBlanks: results.consecutiveBlanks,
             });
+            
+            // NEW v1.4.0: Publish to real-time subscription for live UI updates
+            if (onProgress) {
+                try {
+                    const progressStats = buildProgressStats(results, startTime);
+                    await onProgress(progressStats, currentId);
+                    console.log(`[ScrapingEngine] Progress published: ${results.totalProcessed} processed, ID ${currentId}`);
+                } catch (progressError) {
+                    // Don't fail the job if progress publishing fails
+                    console.warn(`[ScrapingEngine] Progress publish failed:`, progressError.message);
+                }
+            }
         }
 
         currentId++;
@@ -864,6 +961,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         gamesSkipped: results.gamesSkipped,
         errors: results.errors,
         blanks: results.blanks,
+        notPublishedCount: results.notPublishedCount,
     });
     
     return results;
@@ -875,6 +973,9 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
 
 /**
  * Process specific gap IDs (with event streaming)
+ * 
+ * UPDATED v1.4.0: Added onProgress callback for real-time stats
+ * UPDATED v1.3.0: Separate NOT_FOUND vs NOT_PUBLISHED handling
  */
 async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
     const {
@@ -885,12 +986,12 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         publishGameProcessedEvent,
         STOP_REASON,
         PROGRESS_UPDATE_FREQUENCY,
-        // Error thresholds with defaults
         DEFAULT_MAX_CONSECUTIVE_ERRORS = 3,
-        DEFAULT_MAX_TOTAL_ERRORS = 15
+        DEFAULT_MAX_TOTAL_ERRORS = 15,
+        // NEW v1.4.0: Real-time progress callback
+        onProgress
     } = ctx;
     
-    // Use options thresholds if provided, otherwise defaults
     const MAX_CONSECUTIVE_ERRORS = options.maxConsecutiveErrors || DEFAULT_MAX_CONSECUTIVE_ERRORS;
     const MAX_TOTAL_ERRORS = options.maxTotalErrors || DEFAULT_MAX_TOTAL_ERRORS;
     
@@ -908,20 +1009,20 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         blanks: 0,
         notFoundCount: 0,
         s3CacheHits: 0,
-        consecutiveErrors: 0,
-        // FIXED: Added missing fields that executeJob expects
         consecutiveBlanks: 0,
         consecutiveNotFound: 0,
+        consecutiveErrors: 0,
         stopReason: STOP_REASON.COMPLETED,
         lastErrorMessage: null,
-        lastProcessedId: null
+        notPublishedCount: 0,
     };
     
     for (const tournamentId of gapIds) {
         const gameStartTime = Date.now();
         const url = await buildTournamentUrl(entityId, tournamentId);
+        
         results.totalProcessed++;
-        results.lastProcessedId = tournamentId;
+        results.currentId = tournamentId;
         
         try {
             const fetchData = await withRetry(async () => {
@@ -940,7 +1041,7 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                 results.s3CacheHits++;
             }
             
-            // Check for error responses first (e.g., "Error processing tournament")
+            // Check for error responses
             if (isErrorResponse(parsedData)) {
                 const actualErrorMessage = parsedData.errorMessage || parsedData.error || parsedData.name || 'Unknown error';
                 console.warn(`[ScrapingEngine] Gap error response for ID ${tournamentId}: ${actualErrorMessage}`);
@@ -949,7 +1050,6 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                 results.consecutiveBlanks = 0;
                 results.consecutiveNotFound = 0;
                 
-                // Capture first actual error message
                 if (!results.lastErrorMessage) {
                     results.lastErrorMessage = actualErrorMessage;
                 }
@@ -960,36 +1060,31 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                     errorMessage: actualErrorMessage,
                     durationMs: Date.now() - gameStartTime,
                     dataSource: dataSource,
-                    s3Key: parsedData.s3Key || null,
-                    parsedData: { gameStatus: 'UNKNOWN', name: parsedData.name },
+                    parsedData: { gameStatus: 'UNKNOWN' },
                     saveResult: null,
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
-                // Check error thresholds
                 if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                    console.log(`[ScrapingEngine] Gap processing: ERRORS threshold reached: ${results.consecutiveErrors}`);
                     results.stopReason = STOP_REASON.ERROR;
                     break;
                 }
-                
-                if (results.errors >= MAX_TOTAL_ERRORS) {
-                    console.log(`[ScrapingEngine] Gap processing: TOTAL ERRORS threshold reached: ${results.errors}`);
-                    results.stopReason = STOP_REASON.ERROR;
-                    break;
-                }
-                
-                continue;  // Skip to next gap ID
+                continue;
             }
             
-            if (isNotFoundResponse(parsedData)) {
-                results.notFoundCount++;
+            const isNotFound = isNotFoundResponse(parsedData);
+            const isNotPublished = isNotPublishedResponse(parsedData);
+            
+            if (isNotFound) {
                 results.blanks++;
+                results.notFoundCount++;
                 results.consecutiveBlanks++;
                 results.consecutiveNotFound++;
                 results.consecutiveErrors = 0;
                 
+                console.log(`[ScrapingEngine] Gap ID ${tournamentId}: ${parsedData.gameStatus}`);
+                
                 publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
-                    action: parsedData.gameStatus === 'NOT_PUBLISHED' ? 'NOT_PUBLISHED' : 'NOT_FOUND',
+                    action: 'NOT_FOUND',
                     message: parsedData.gameStatus || 'Not Found',
                     durationMs: Date.now() - gameStartTime,
                     dataSource: dataSource,
@@ -998,8 +1093,26 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                     saveResult: null,
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
+            } else if (isNotPublished) {
+                results.notPublishedCount++;
+                results.consecutiveBlanks = 0;
+                results.consecutiveNotFound = 0;
+                results.consecutiveErrors = 0;
+                
+                console.log(`[ScrapingEngine] Gap ID ${tournamentId}: NOT_PUBLISHED (counters reset)`);
+                
+                publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
+                    action: 'NOT_PUBLISHED',
+                    message: 'Tournament not published',
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: dataSource,
+                    s3Key: parsedData.s3Key,
+                    parsedData: { gameStatus: 'NOT_PUBLISHED' },
+                    saveResult: null,
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
             } else if (options.saveToDatabase !== false) {
-                // Valid game - reset all consecutive counters
+                // Valid game - reset counters and save
                 results.consecutiveErrors = 0;
                 results.consecutiveBlanks = 0;
                 results.consecutiveNotFound = 0;
@@ -1093,17 +1206,14 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
             const errorMessage = error.message || String(error);
             console.error(`[ScrapingEngine] Gap error at ID ${tournamentId}:`, errorMessage);
             
-            // SPECIAL HANDLING: GraphQL enum serialization errors for gameStatus
-            // Same handling as performScrapingEnhanced
             const isEnumError = errorMessage.includes("Invalid input for Enum 'GameStatus'") ||
-                                errorMessage.includes("Can't serialize value") && errorMessage.includes("gameStatus");
+                                (errorMessage.includes("Can't serialize value") && errorMessage.includes("gameStatus"));
             
             if (isEnumError) {
                 console.log(`[ScrapingEngine] Gap ID ${tournamentId}: GameStatus enum error - treating as NOT_PUBLISHED`);
-                results.notFoundCount++;
-                results.blanks++;
-                results.consecutiveBlanks++;
-                results.consecutiveNotFound++;
+                results.notPublishedCount++;
+                results.consecutiveBlanks = 0;
+                results.consecutiveNotFound = 0;
                 results.consecutiveErrors = 0;
                 
                 publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
@@ -1114,27 +1224,24 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                     parsedData: { gameStatus: 'NOT_PUBLISHED' },
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
             } else {
-                // Regular error handling
                 results.errors++;
                 results.consecutiveErrors++;
                 results.consecutiveBlanks = 0;
                 results.consecutiveNotFound = 0;
                 
-                // IMPROVED: Track actual error message
                 if (!results.lastErrorMessage) {
                     results.lastErrorMessage = errorMessage;
                 }
                 
                 publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
                     action: 'ERROR',
-                    message: errorMessage,  // Use actual error message
+                    message: errorMessage,
                     errorMessage: errorMessage,
                     durationMs: Date.now() - gameStartTime,
                     dataSource: 'none',
                     parsedData: null,
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
-                // Check error thresholds
                 if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
                     console.log(`[ScrapingEngine] Gap processing: ERRORS threshold reached: ${results.consecutiveErrors}`);
                     results.stopReason = STOP_REASON.ERROR;
@@ -1149,8 +1256,11 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
             }
         }
         
-        // Progress update
+        // ═══════════════════════════════════════════════════════════════
+        // UPDATED v1.4.0: Publish progress to BOTH DynamoDB AND subscription
+        // ═══════════════════════════════════════════════════════════════
         if (results.totalProcessed % PROGRESS_UPDATE_FREQUENCY === 0) {
+            // Update DynamoDB (existing behavior)
             await updateScraperJob(jobId, {
                 totalURLsProcessed: results.totalProcessed,
                 currentId: tournamentId,
@@ -1158,8 +1268,29 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                 errors: results.errors,
                 notFoundCount: results.notFoundCount,
             });
+            
+            // NEW v1.4.0: Publish to real-time subscription for live UI updates
+            if (onProgress) {
+                try {
+                    const progressStats = buildProgressStats(results, startTime);
+                    await onProgress(progressStats, tournamentId);
+                    console.log(`[ScrapingEngine] Gap progress published: ${results.totalProcessed} processed, ID ${tournamentId}`);
+                } catch (progressError) {
+                    console.warn(`[ScrapingEngine] Gap progress publish failed:`, progressError.message);
+                }
+            }
         }
     }
+    
+    console.log(`[ScrapingEngine] Gap processing finished:`, {
+        totalProcessed: results.totalProcessed,
+        newGamesScraped: results.newGamesScraped,
+        gamesUpdated: results.gamesUpdated,
+        notFoundCount: results.notFoundCount,
+        notPublishedCount: results.notPublishedCount,
+        errors: results.errors,
+        stopReason: results.stopReason,
+    });
     
     return results;
 }
@@ -1169,9 +1300,13 @@ module.exports = {
     processGapIds,
     // Export helpers for testing
     isNotFoundResponse,
+    isNotPublishedResponse,
+    isUnknownErrorResponse,
     isErrorResponse,
     shouldSkipNotPublished,
     shouldSkipNotFoundGap,
     extractPlayerData,
-    buildSaveInput
+    buildSaveInput,
+    // NEW v1.4.0: Export for testing
+    buildProgressStats
 };

@@ -32,9 +32,10 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
 
   # --- Scheduling & Timestamps ---
   gameStartDateTime: AWSDateTime!
+  gameActualStartDateTime: AWSDateTime
   gameEndDateTime: AWSDateTime
   registrationStatus: RegistrationStatus @index(name: "byRegistrationStatus", queryField: "gamesByRegistrationStatus", sortKeyFields: ["gameStartDateTime"])
-  totalDuration: String
+  totalDuration: Int
   gameFrequency: GameFrequency
 
   # --- Financials & Buy-in ---
@@ -125,6 +126,10 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   lastEditedAt: AWSDateTime
   lastEditedBy: String
   editHistory: AWSJSON
+
+  # Content change tracking
+  contentHash: String          # Hash of meaningful fields (16 chars)
+  dataChangedAt: AWSDateTime   # Only updates when contentHash changes
 
   # --- Venue & Series Tracking ---
   venueAssignmentStatus: VenueAssignmentStatus @default(value: "PENDING_ASSIGNMENT")
@@ -529,7 +534,7 @@ type ReScrapeResult {
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
-  totalDuration: String
+  totalDuration: Int
   playersRemaining: Int
   seriesName: String
   gameTags: [String]
@@ -721,6 +726,7 @@ input SaveGameDataInput {
   gameVariant: GameVariant
   gameStatus: GameStatus!
   gameStartDateTime: AWSDateTime!
+  gameActualStartDateTime: AWSDateTime
   gameEndDateTime: AWSDateTime
   registrationStatus: RegistrationStatus
   gameFrequency: GameFrequency
@@ -739,7 +745,7 @@ input SaveGameDataInput {
   playersRemaining: Int
   totalChipsInPlay: Float
   averagePlayerStack: Float
-  totalDuration: String
+  totalDuration: Int
   totalBuyInsCollected: Float
   rakeRevenue: Float
   prizepoolPlayerContributions: Float

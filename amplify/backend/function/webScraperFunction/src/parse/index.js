@@ -63,6 +63,7 @@ const parseHtml = (html, options = {}) => {
     
     // Step 3: Get name (series detection now handled by gameDataEnricher)
     defaultStrategy.getName(ctx);
+    defaultStrategy.detectGameType(ctx);
     
     // Step 4: Extract tournament details
     defaultStrategy.getGameTags(ctx);

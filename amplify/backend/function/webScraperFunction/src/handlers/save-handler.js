@@ -1,19 +1,19 @@
 /**
  * ===================================================================
- * Save Handler
+ * Save Handler (v2.1.0)
  * ===================================================================
  * 
  * PASSTHROUGH to gameDataEnricher Lambda (with saveToDatabase: true).
  * 
+ * VERSION: 2.1.0
+ * 
+ * CHANGELOG:
+ * - v2.1.0: Removed lambda-monitoring dependency (no longer maintained)
+ * - v2.0.0: Added new classification field passthrough
+ * 
  * This handler does NOT save directly to the Game table.
  * It builds an EnrichGameDataInput payload and invokes gameDataEnricher,
  * which enriches the data and then invokes saveGameFunction.
- * 
- * UPDATED: v2.0.0
- * - Added new classification field passthrough
- * - Uses entryStructure (not tournamentStructure) to avoid @model conflict
- * - Uses cashRakeType (not rakeStructure) to avoid @model conflict
- * - Fixed: Added prizepoolPaid and prizepoolCalculated fields
  * 
  * ===================================================================
  */
@@ -131,9 +131,9 @@ const handleSave = async (options, context) => {
         scraperJobId = null
     } = options;
     
-    const { lambdaClient, ddbDocClient, monitoring } = context;
+    const { lambdaClient, ddbDocClient } = context;
     
-    console.log(`[SaveHandler] Delegating to gameDataEnricher for ${sourceUrl}`);
+    console.log(`[SaveHandler] v2.1.0 Delegating to gameDataEnricher for ${sourceUrl}`);
     
     // Parse data if string
     let parsedData;
@@ -173,10 +173,7 @@ const handleSave = async (options, context) => {
     
     // Build EnrichGameDataInput for gameDataEnricher
     const enrichGameInput = {
-        // Required context
         entityId,
-        
-        // Source information
         source: {
             type: 'SCRAPE',
             sourceId: sourceUrl,
@@ -184,8 +181,6 @@ const handleSave = async (options, context) => {
             fetchedAt: new Date().toISOString(),
             contentHash: parsedData.contentHash || null
         },
-        
-        // Core game data (enricher will calculate financials, query keys, etc.)
         game: {
             tournamentId,
             existingGameId: existingGameId || null,
@@ -197,32 +192,22 @@ const handleSave = async (options, context) => {
             gameEndDateTime: parsedData.gameEndDateTime ? ensureISODate(parsedData.gameEndDateTime) : null,
             registrationStatus: parsedData.registrationStatus || null,
             gameFrequency: parsedData.gameFrequency || null,
-            
-            // Financials (raw inputs - enricher will calculate derived values)
             buyIn: parsedData.buyIn || 0,
             rake: parsedData.rake || 0,
             startingStack: parsedData.startingStack || 0,
             hasGuarantee: parsedData.hasGuarantee || false,
             guaranteeAmount: parsedData.guaranteeAmount || 0,
-            
-            // Results - IMPORTANT: include prizepool fields
             prizepoolPaid: parsedData.prizepoolPaid || 0,
             prizepoolCalculated: parsedData.prizepoolCalculated || 0,
-            
-            // Entry counts
             totalUniquePlayers: playerData.totalUniquePlayers || parsedData.totalUniquePlayers || 0,
             totalInitialEntries: parsedData.totalInitialEntries || 0,
             totalEntries: parsedData.totalEntries || 0,
             totalRebuys: parsedData.totalRebuys || 0,
             totalAddons: parsedData.totalAddons || 0,
-            
-            // Live game data
             playersRemaining: parsedData.playersRemaining || null,
             totalChipsInPlay: parsedData.totalChipsInPlay || null,
             averagePlayerStack: parsedData.averagePlayerStack || null,
             totalDuration: parsedData.totalDuration || null,
-            
-            // Pre-calculated financials (if already computed by parser)
             totalBuyInsCollected: parsedData.totalBuyInsCollected || null,
             rakeRevenue: parsedData.rakeRevenue || null,
             prizepoolPlayerContributions: parsedData.prizepoolPlayerContributions || null,
@@ -230,8 +215,6 @@ const handleSave = async (options, context) => {
             prizepoolSurplus: parsedData.prizepoolSurplus || null,
             guaranteeOverlayCost: parsedData.guaranteeOverlayCost || null,
             gameProfit: parsedData.gameProfit || null,
-            
-            // Legacy classification fields
             tournamentType: parsedData.tournamentType || null,
             isSatellite: parsedData.isSatellite || false,
             isSeries: parsedData.isSeries || false,
@@ -239,32 +222,21 @@ const handleSave = async (options, context) => {
             seriesName: parsedData.seriesName || null,
             gameTags: parsedData.gameTags || [],
             levels: parsedData.levels || [],
-            
-            // Series event metadata (from name parsing)
             isMainEvent: parsedData.isMainEvent || false,
             eventNumber: parsedData.eventNumber || null,
             dayNumber: parsedData.dayNumber || null,
             flightLetter: parsedData.flightLetter || null,
             finalDay: parsedData.finalDay || false,
-            
-            // Recurring game fields (if already known)
             recurringGameId: parsedData.recurringGameId || null,
             recurringGameAssignmentStatus: parsedData.recurringGameAssignmentStatus || 'PENDING_ASSIGNMENT',
             recurringGameAssignmentConfidence: parsedData.recurringGameAssignmentConfidence || 0,
             
-            // ===================================================================
-            // NEW: Classification fields (from html-parser getClassification)
-            // ===================================================================
-            
-            // Universal classification
+            // Classification fields
             sessionMode: parsedData.sessionMode || null,
             variant: parsedData.variant || null,
             bettingStructure: parsedData.bettingStructure || null,
             speedType: parsedData.speedType || null,
             stackDepth: parsedData.stackDepth || null,
-            
-            // Tournament classification
-            // NOTE: entryStructure (not tournamentStructure) to avoid @model conflict
             entryStructure: parsedData.entryStructure || null,
             bountyType: parsedData.bountyType || null,
             bountyAmount: parsedData.bountyAmount || null,
@@ -273,39 +245,26 @@ const handleSave = async (options, context) => {
             lateRegistration: parsedData.lateRegistration || null,
             payoutStructure: parsedData.payoutStructure || null,
             scheduleType: parsedData.scheduleType || null,
-            
-            // Tournament feature flags
             isShootout: parsedData.isShootout || null,
             isSurvivor: parsedData.isSurvivor || null,
             isFlipAndGo: parsedData.isFlipAndGo || null,
             isWinTheButton: parsedData.isWinTheButton || null,
             isAnteOnly: parsedData.isAnteOnly || null,
             isBigBlindAnte: parsedData.isBigBlindAnte || null,
-            
-            // Cash game classification
-            // NOTE: cashRakeType (not rakeStructure) to avoid @model conflict
             cashGameType: parsedData.cashGameType || null,
             cashRakeType: parsedData.cashRakeType || null,
             hasBombPots: parsedData.hasBombPots || null,
             hasRunItTwice: parsedData.hasRunItTwice || null,
             hasStraddle: parsedData.hasStraddle || null,
-            
-            // Table configuration
             tableSize: parsedData.tableSize || null,
             maxPlayers: parsedData.maxPlayers || null,
             dealType: parsedData.dealType || null,
             buyInTier: parsedData.buyInTier || null,
-            
-            // Mixed game support
             mixedGameRotation: parsedData.mixedGameRotation || null,
-            
-            // Classification metadata
             classificationSource: parsedData.classificationSource || 'SCRAPED',
             classificationConfidence: parsedData.classificationConfidence || null,
             lastClassifiedAt: parsedData.lastClassifiedAt || null
         },
-        
-        // Series information for resolution
         series: parsedData.isSeries ? {
             seriesId: parsedData.tournamentSeriesId || null,
             seriesTitleId: parsedData.seriesTitleId || null,
@@ -319,29 +278,23 @@ const handleSave = async (options, context) => {
             finalDay: parsedData.finalDay || false,
             year: parsedData.seriesYear || new Date(parsedData.gameStartDateTime || new Date()).getFullYear()
         } : null,
-        
-        // Player data
         players: playerData.totalUniquePlayers > 0 ? {
             allPlayers: playerData.allPlayers,
             totalUniquePlayers: playerData.totalUniquePlayers,
             hasCompleteResults: playerData.hasCompleteResults
         } : null,
-        
-        // Venue information for resolution
         venue: {
             venueId: venueId || null,
             venueName: parsedData.venueName || null,
             suggestedVenueId: parsedData.venueMatch?.autoAssignedVenue?.id || null,
             confidence: parsedData.venueMatch?.suggestions?.[0]?.score || 0
         },
-        
-        // Options - KEY: saveToDatabase: true triggers save via saveGameFunction
         options: {
             saveToDatabase: true,
             skipPlayerProcessing: false,
             forceUpdate: !!existingGameId,
             autoCreateSeries: true,
-            autoCreateRecurring: false,
+            autoCreateRecurring: true,
             doNotScrape,
             scraperJobId
         }
@@ -349,7 +302,7 @@ const handleSave = async (options, context) => {
     
     // Invoke gameDataEnricher Lambda
     try {
-        monitoring.trackOperation('INVOKE_ENRICHER', 'Game', tournamentId.toString(), { entityId });
+        console.log(`[SaveHandler] Invoking gameDataEnricher for tournament ${tournamentId}`);
         
         const invokeCommand = new InvokeCommand({
             FunctionName: GAME_DATA_ENRICHER_FUNCTION_NAME,
@@ -358,8 +311,6 @@ const handleSave = async (options, context) => {
         });
         
         const response = await lambdaClient.send(invokeCommand);
-        
-        // Parse response
         const responsePayload = JSON.parse(Buffer.from(response.Payload).toString());
         
         if (responsePayload.errorMessage) {
@@ -373,7 +324,6 @@ const handleSave = async (options, context) => {
             gameId: responsePayload.saveResult?.gameId,
             seriesStatus: responsePayload.enrichmentMetadata?.seriesResolution?.status,
             recurringStatus: responsePayload.enrichmentMetadata?.recurringResolution?.status,
-            // Log classification info
             variant: responsePayload.enrichedGame?.variant,
             bountyType: responsePayload.enrichedGame?.bountyType,
             speedType: responsePayload.enrichedGame?.speedType
@@ -386,7 +336,6 @@ const handleSave = async (options, context) => {
             throw new Error(`Enrichment failed: ${errors}`);
         }
         
-        // Extract save result (present when saveToDatabase: true)
         const saveResult = responsePayload.saveResult;
         if (!saveResult || !saveResult.success) {
             throw new Error(saveResult?.message || 'Save failed after enrichment');
@@ -415,12 +364,10 @@ const handleSave = async (options, context) => {
             playerProcessingQueued: saveResult.playerProcessingQueued,
             playerProcessingReason: saveResult.playerProcessingReason,
             fieldsUpdated: saveResult.fieldsUpdated || [],
-            // Additional enrichment info
             seriesAssigned: responsePayload.enrichmentMetadata?.seriesResolution?.status === 'MATCHED_EXISTING' ||
                            responsePayload.enrichmentMetadata?.seriesResolution?.status === 'CREATED_NEW',
             seriesName: responsePayload.enrichedGame?.seriesName,
             recurringGameAssigned: responsePayload.enrichmentMetadata?.recurringResolution?.status === 'MATCHED_EXISTING',
-            // Return classification info
             classification: {
                 variant: responsePayload.enrichedGame?.variant,
                 bettingStructure: responsePayload.enrichedGame?.bettingStructure,
@@ -434,10 +381,6 @@ const handleSave = async (options, context) => {
         
     } catch (error) {
         console.error(`[SaveHandler] Error invoking gameDataEnricher:`, error);
-        monitoring.trackOperation('ENRICHER_ERROR', 'Game', tournamentId.toString(), {
-            error: error.message,
-            entityId
-        });
         throw error;
     }
 };
@@ -449,7 +392,6 @@ const linkS3StorageToGame = async (tournamentId, entityId, gameId, action, ddbDo
     try {
         const s3StorageTable = getTableName('S3Storage');
         
-        // Find the S3Storage record
         const queryResult = await ddbDocClient.send(new QueryCommand({
             TableName: s3StorageTable,
             IndexName: 'byTournamentId',

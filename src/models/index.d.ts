@@ -1075,7 +1075,7 @@ type EagerReScrapeResult = {
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
-  readonly totalDuration?: string | null;
+  readonly totalDuration?: number | null;
   readonly playersRemaining?: number | null;
   readonly seriesName?: string | null;
   readonly gameTags?: (string | null)[] | null;
@@ -1110,7 +1110,7 @@ type LazyReScrapeResult = {
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
-  readonly totalDuration?: string | null;
+  readonly totalDuration?: number | null;
   readonly playersRemaining?: number | null;
   readonly seriesName?: string | null;
   readonly gameTags?: (string | null)[] | null;
@@ -1529,6 +1529,7 @@ type EagerEnrichedGameData = {
   readonly gameStatus: GameStatus | keyof typeof GameStatus;
   readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
   readonly gameStartDateTime: string;
+  readonly gameActualStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
   readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
   readonly buyIn?: number | null;
@@ -1559,7 +1560,7 @@ type EagerEnrichedGameData = {
   readonly playersRemaining?: number | null;
   readonly totalChipsInPlay?: number | null;
   readonly averagePlayerStack?: number | null;
-  readonly totalDuration?: string | null;
+  readonly totalDuration?: number | null;
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly isSeries?: boolean | null;
   readonly seriesName?: string | null;
@@ -1604,6 +1605,7 @@ type LazyEnrichedGameData = {
   readonly gameStatus: GameStatus | keyof typeof GameStatus;
   readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
   readonly gameStartDateTime: string;
+  readonly gameActualStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
   readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
   readonly buyIn?: number | null;
@@ -1634,7 +1636,7 @@ type LazyEnrichedGameData = {
   readonly playersRemaining?: number | null;
   readonly totalChipsInPlay?: number | null;
   readonly averagePlayerStack?: number | null;
-  readonly totalDuration?: string | null;
+  readonly totalDuration?: number | null;
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly isSeries?: boolean | null;
   readonly seriesName?: string | null;
@@ -2651,6 +2653,7 @@ export declare const ScrapedGameSummary: (new (init: ModelInit<ScrapedGameSummar
 type EagerScrapedGameData = {
   readonly name: string;
   readonly gameStartDateTime?: string | null;
+  readonly gameActualStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
   readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
   readonly registrationStatus?: string | null;
@@ -2669,7 +2672,7 @@ type EagerScrapedGameData = {
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
-  readonly totalDuration?: string | null;
+  readonly totalDuration?: number | null;
   readonly playersRemaining?: number | null;
   readonly totalChipsInPlay?: number | null;
   readonly averagePlayerStack?: number | null;
@@ -2728,6 +2731,7 @@ type EagerScrapedGameData = {
 type LazyScrapedGameData = {
   readonly name: string;
   readonly gameStartDateTime?: string | null;
+  readonly gameActualStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
   readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
   readonly registrationStatus?: string | null;
@@ -2746,7 +2750,7 @@ type LazyScrapedGameData = {
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
-  readonly totalDuration?: string | null;
+  readonly totalDuration?: number | null;
   readonly playersRemaining?: number | null;
   readonly totalChipsInPlay?: number | null;
   readonly averagePlayerStack?: number | null;
@@ -4688,9 +4692,10 @@ type EagerGame = {
   readonly gameVariant: GameVariant | keyof typeof GameVariant;
   readonly gameStatus: GameStatus | keyof typeof GameStatus;
   readonly gameStartDateTime: string;
+  readonly gameActualStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
   readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
-  readonly totalDuration?: string | null;
+  readonly totalDuration?: number | null;
   readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
@@ -4754,6 +4759,8 @@ type EagerGame = {
   readonly lastEditedAt?: string | null;
   readonly lastEditedBy?: string | null;
   readonly editHistory?: string | null;
+  readonly contentHash?: string | null;
+  readonly dataChangedAt?: string | null;
   readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
   readonly requiresVenueAssignment?: boolean | null;
   readonly suggestedVenueName?: string | null;
@@ -4842,9 +4849,10 @@ type LazyGame = {
   readonly gameVariant: GameVariant | keyof typeof GameVariant;
   readonly gameStatus: GameStatus | keyof typeof GameStatus;
   readonly gameStartDateTime: string;
+  readonly gameActualStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
   readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
-  readonly totalDuration?: string | null;
+  readonly totalDuration?: number | null;
   readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
@@ -4908,6 +4916,8 @@ type LazyGame = {
   readonly lastEditedAt?: string | null;
   readonly lastEditedBy?: string | null;
   readonly editHistory?: string | null;
+  readonly contentHash?: string | null;
+  readonly dataChangedAt?: string | null;
   readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
   readonly requiresVenueAssignment?: boolean | null;
   readonly suggestedVenueName?: string | null;
@@ -7648,7 +7658,7 @@ type EagerRecentlyFinishedGame = {
   readonly entityName?: string | null;
   readonly gameStartDateTime: string;
   readonly finishedAt: string;
-  readonly totalDuration?: string | null;
+  readonly totalDuration?: number | null;
   readonly totalEntries?: number | null;
   readonly totalUniquePlayers?: number | null;
   readonly prizepoolPaid?: number | null;
@@ -7682,7 +7692,7 @@ type LazyRecentlyFinishedGame = {
   readonly entityName?: string | null;
   readonly gameStartDateTime: string;
   readonly finishedAt: string;
-  readonly totalDuration?: string | null;
+  readonly totalDuration?: number | null;
   readonly totalEntries?: number | null;
   readonly totalUniquePlayers?: number | null;
   readonly prizepoolPaid?: number | null;

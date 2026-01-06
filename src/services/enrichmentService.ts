@@ -255,7 +255,7 @@ export const scrapedDataToEnrichInput = (
       playersRemaining: nullToUndefined(dataAsAny.playersRemaining as number | null),
       totalChipsInPlay: nullToUndefined(dataAsAny.totalChipsInPlay as number | null),
       averagePlayerStack: nullToUndefined(dataAsAny.averagePlayerStack as number | null),
-      totalDuration: nullToUndefined(dataAsAny.totalDuration as string | null),
+      totalDuration: nullToUndefined(dataAsAny.totalDuration as number | null),
       
       // Classification
       tournamentType: nullToUndefined(dataAsAny.tournamentType as TournamentType | null),
@@ -305,7 +305,7 @@ export const scrapedDataToEnrichInput = (
     options: {
       saveToDatabase: false,
       autoCreateSeries: true,
-      autoCreateRecurring: false,
+      autoCreateRecurring: true,
       forceUpdate: !!options?.existingGameId || options?.wasEdited,
     },
   };
@@ -707,7 +707,7 @@ export async function enrichAndSaveForPipeline(
     ...input.options,
     saveToDatabase: true,
     autoCreateSeries: true,
-    autoCreateRecurring: false,
+    autoCreateRecurring: true,
   };
   
   const result = await enrichGameData(input);
@@ -789,7 +789,7 @@ export const saveGameDataToBackend = async (
     ...input.options, 
     saveToDatabase: true,
     autoCreateSeries: options?.autoCreateSeries ?? true,
-    autoCreateRecurring: options?.autoCreateRecurring ?? false,
+    autoCreateRecurring: options?.autoCreateRecurring ?? true,
   };
   
   const result = await enrichGameData(input);

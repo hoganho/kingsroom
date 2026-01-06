@@ -58,6 +58,7 @@ input EnrichGameInput {
   
   # Schedule
   gameStartDateTime: AWSDateTime
+  gameActualStartDateTime: AWSDateTime
   gameEndDateTime: AWSDateTime
   gameFrequency: GameFrequency
   
@@ -91,7 +92,7 @@ input EnrichGameInput {
   playersRemaining: Int
   totalChipsInPlay: Float
   averagePlayerStack: Float
-  totalDuration: String
+  totalDuration: Int
   
   # Classification
   tournamentType: TournamentType
@@ -215,6 +216,7 @@ type EnrichedGameData @aws_iam @aws_cognito_user_pools {
   
   # === SCHEDULE ===
   gameStartDateTime: AWSDateTime!
+  gameActualStartDateTime: AWSDateTime
   gameEndDateTime: AWSDateTime
   gameFrequency: GameFrequency
   
@@ -257,7 +259,7 @@ type EnrichedGameData @aws_iam @aws_cognito_user_pools {
   playersRemaining: Int
   totalChipsInPlay: Float
   averagePlayerStack: Float
-  totalDuration: String
+  totalDuration: Int
   
   # === CLASSIFICATION ===
   tournamentType: TournamentType

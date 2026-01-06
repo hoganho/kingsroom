@@ -419,7 +419,7 @@ export function Sidebar() {
           <div className="border-t border-gray-200 p-4 dark:border-gray-800">
             <UserProfile />
             <div className="mt-3 text-xs text-gray-500">
-              <div>Version: {buildVersion}</div>
+              <div>Version: {buildVersion}-{process.env.NODE_ENV}</div>
               <div>© 2025 Top Set Ventures</div>
             </div>
           </div>

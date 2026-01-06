@@ -40,6 +40,7 @@ SCRIPT_CLEAR_CORE="clearDevData.js"
 SCRIPT_CLEAR_SOCIAL="clearDevData-social-enhanced.js"
 SCRIPT_CLEAR_SCRAPER="clearScraperMetadata.js"
 SCRIPT_CLEAR_LOGS="backupThenClearCloudwatchLogs_perStream.js"
+SCRIPT_DELETE_LOGS_ONLY="listAndDeleteCloudwatchLogs.js"
 
 # Confirmation Keywords expected by the Node scripts
 KEYWORD_BACKUP="backup"     # for backupDevData
@@ -306,18 +307,28 @@ fi
 
 if [ "$SKIP_LOGS" = false ]; then
     CURRENT_STEP=$((CURRENT_STEP + 1))
-    print_header "STEP ${CURRENT_STEP}/${TOTAL_STEPS}: Backup & Clear CloudWatch Logs"
     
-    if check_file "$SCRIPT_CLEAR_LOGS"; then
+    # Choose script based on whether we're skipping backups
+    if [ "$SKIP_BACKUP" = true ]; then
+        LOGS_SCRIPT="$SCRIPT_DELETE_LOGS_ONLY"
+        LOGS_KEYWORD="yes"
+        print_header "STEP ${CURRENT_STEP}/${TOTAL_STEPS}: Delete CloudWatch Logs (No Backup)"
+    else
+        LOGS_SCRIPT="$SCRIPT_CLEAR_LOGS"
+        LOGS_KEYWORD="$KEYWORD_PROCEED"
+        print_header "STEP ${CURRENT_STEP}/${TOTAL_STEPS}: Backup & Clear CloudWatch Logs"
+    fi
+    
+    if check_file "$LOGS_SCRIPT"; then
         if [ "$DRY_RUN_MODE" = true ]; then
-            echo "[DRY RUN] Would run: node $SCRIPT_CLEAR_LOGS"
+            echo "[DRY RUN] Would run: node $LOGS_SCRIPT"
         elif [ "$AUTO_MODE" = true ]; then
-            echo "$KEYWORD_PROCEED" | node "$SCRIPT_CLEAR_LOGS"
+            echo "$LOGS_KEYWORD" | node "$LOGS_SCRIPT"
         else
-            node "$SCRIPT_CLEAR_LOGS"
+            node "$LOGS_SCRIPT"
         fi
     else
-        echo "⚠️  Warning: $SCRIPT_CLEAR_LOGS not found - skipping log cleanup"
+        echo "⚠️  Warning: $LOGS_SCRIPT not found - skipping log cleanup"
     fi
 else
     echo "⏭️  Skipping Step: Backup & Clear CloudWatch Logs (--skip-logs)"

@@ -1,5 +1,6 @@
 // src/pages/ScraperAdminPage.tsx
 // REFACTORED: Consolidated Auto, Manual, and Bulk tabs into a single "Scrape" tab.
+// UPDATED v1.1.0: Added Analytics tab integration with scraperAnalytics utilities
 
 import React, { useState } from 'react';
 import {
@@ -8,7 +9,8 @@ import {
     Clock, 
     Settings,
     HardDrive,
-    Zap, // New Icon for the unified Scrape tab
+    Zap,
+    BarChart2, // Analytics icon
 } from 'lucide-react';
 
 // Import the tab components
@@ -18,9 +20,10 @@ import { JobHistoryTab } from './scraper-admin-tabs/JobHistoryTab';
 import { URLManagementTab } from './scraper-admin-tabs/URLManagementTab';
 import { SettingsTab } from './scraper-admin-tabs/SettingsTab';
 import { S3ManagementTab } from './scraper-admin-tabs/S3ManagementTab';
+import { AnalyticsTab } from './scraper-admin-tabs/AnalyticsTab'; // NEW
 
-// Tab definitions
-type TabKey = 'overview' | 'scrape' | 'jobs' | 'urls' | 's3' | 'settings';
+// Tab definitions - UPDATED to include Analytics
+type TabKey = 'overview' | 'scrape' | 'jobs' | 'urls' | 's3' | 'analytics' | 'settings';
 
 interface Tab {
     key: TabKey;
@@ -29,16 +32,16 @@ interface Tab {
     description: string;
 }
 
-// --- REFACTORED: tabs array ---
+// --- UPDATED: tabs array with Analytics ---
 const tabs: Tab[] = [
     { key: 'overview', label: 'Overview', icon: <Activity className="h-4 w-4" />, description: 'System metrics and health' },
     { key: 'scrape', label: 'Scrape', icon: <Zap className="h-4 w-4" />, description: 'Run scraper jobs' },
     { key: 'jobs', label: 'Job History', icon: <Clock className="h-4 w-4" />, description: 'View all scraping jobs' },
     { key: 'urls', label: 'URL Management', icon: <List className="h-4 w-4" />, description: 'Manage scraped URLs' },
-    { key: 's3', label: 'S3 Storage', icon: <HardDrive className="h-4 w-4" />, description: 'Manage HTML storage' },    
+    { key: 's3', label: 'S3 Storage', icon: <HardDrive className="h-4 w-4" />, description: 'Manage HTML storage' },
+    { key: 'analytics', label: 'Analytics', icon: <BarChart2 className="h-4 w-4" />, description: 'Performance analytics & insights' }, // NEW
     { key: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" />, description: 'Configuration and preferences' }
 ];
-// --- REMOVED: 'auto', 'manual', 'bulk' keys ---
 
 // ===================================================================
 // MAIN COMPONENT
@@ -56,16 +59,16 @@ export const ScraperAdminPage: React.FC = () => {
     const handleReparse = (url: string) => {
         console.log(`[AdminPage] Setting URL to re-parse: ${url}`);
         setUrlToReparse(url);
-        setActiveTab('scrape'); // Switch to the NEW unified scraper tab
+        setActiveTab('scrape'); // Switch to the unified scraper tab
     };
 
-    // --- REFACTORED: renderTabContent ---
+    // --- UPDATED: renderTabContent with Analytics ---
     const renderTabContent = () => {
         switch (activeTab) {
             case 'overview':
                 return <OverviewTab />;
             case 'scrape':
-                // Pass re-parse URL and clear function to the new consolidated tab
+                // Pass re-parse URL and clear function to the consolidated tab
                 return (
                     <ScrapeTab 
                         urlToReparse={urlToReparse}
@@ -79,6 +82,8 @@ export const ScraperAdminPage: React.FC = () => {
             case 's3':
                 // Pass the re-parse handler to the S3 tab
                 return <S3ManagementTab onReparse={handleReparse} />;
+            case 'analytics':
+                return <AnalyticsTab />; // NEW
             case 'settings':
                 return <SettingsTab />;
             default:
