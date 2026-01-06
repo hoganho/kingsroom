@@ -742,6 +742,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -836,6 +838,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -2895,6 +2899,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -2989,6 +2995,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -4668,6 +4676,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -4762,6 +4772,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -5250,6 +5262,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -5343,6 +5357,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         isPartialData
         missingFlightCount
         expectedTotalEntries
+        needsReview
+        notes
         gameDayOfWeek
         gameYearMonth
         buyInBucket
@@ -5678,6 +5694,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -5893,6 +5911,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -6082,6 +6102,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -6455,6 +6477,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -7046,6 +7070,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -7140,6 +7166,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -7578,6 +7606,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
       isPartialData
       missingFlightCount
       expectedTotalEntries
+      needsReview
+      notes
       gameDayOfWeek
       gameYearMonth
       buyInBucket
@@ -7775,6 +7805,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -8593,6 +8625,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -8879,6 +8913,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -8973,6 +9009,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -9506,6 +9544,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -9699,6 +9739,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -9918,6 +9960,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -10012,6 +10056,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -10624,6 +10670,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -10718,6 +10766,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -11323,6 +11373,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -11759,6 +11811,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -11853,6 +11907,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -12642,6 +12698,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -12997,6 +13055,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -13837,6 +13897,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -14506,6 +14568,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -14600,6 +14664,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -16257,6 +16323,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -16351,6 +16419,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -17872,6 +17942,8 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -18955,6 +19027,8 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -19049,6 +19123,8 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -20637,6 +20713,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -20731,6 +20809,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -21219,6 +21299,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -21312,6 +21394,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         isPartialData
         missingFlightCount
         expectedTotalEntries
+        needsReview
+        notes
         gameDayOfWeek
         gameYearMonth
         buyInBucket
@@ -21647,6 +21731,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -21862,6 +21948,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -22051,6 +22139,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -22424,6 +22514,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -23015,6 +23107,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -23109,6 +23203,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -23547,6 +23643,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
       isPartialData
       missingFlightCount
       expectedTotalEntries
+      needsReview
+      notes
       gameDayOfWeek
       gameYearMonth
       buyInBucket
@@ -23744,6 +23842,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -24562,6 +24662,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -24848,6 +24950,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -24942,6 +25046,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -25475,6 +25581,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -25668,6 +25776,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -25887,6 +25997,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -25981,6 +26093,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -26593,6 +26707,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -26687,6 +26803,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -27292,6 +27410,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -27728,6 +27848,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -27822,6 +27944,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -28611,6 +28735,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -28966,6 +29092,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -29806,6 +29934,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -30475,6 +30605,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -30569,6 +30701,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -32226,6 +32360,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -32320,6 +32456,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -33841,6 +33979,8 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -34666,6 +34806,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -34760,6 +34902,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -35248,6 +35392,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -35341,6 +35487,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         isPartialData
         missingFlightCount
         expectedTotalEntries
+        needsReview
+        notes
         gameDayOfWeek
         gameYearMonth
         buyInBucket
@@ -35676,6 +35824,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -35891,6 +36041,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -36080,6 +36232,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -36453,6 +36607,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -37044,6 +37200,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -37138,6 +37296,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -37576,6 +37736,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
       isPartialData
       missingFlightCount
       expectedTotalEntries
+      needsReview
+      notes
       gameDayOfWeek
       gameYearMonth
       buyInBucket
@@ -37773,6 +37935,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -38591,6 +38755,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -38877,6 +39043,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -38971,6 +39139,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -39504,6 +39674,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -39697,6 +39869,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -39916,6 +40090,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -40010,6 +40186,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -40622,6 +40800,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -40716,6 +40896,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -41321,6 +41503,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -41757,6 +41941,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -41851,6 +42037,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -42640,6 +42828,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -42995,6 +43185,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -43835,6 +44027,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -44504,6 +44698,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -44598,6 +44794,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -46255,6 +46453,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -46349,6 +46549,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -47870,6 +48072,8 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -48695,6 +48899,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -48789,6 +48995,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -49277,6 +49485,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -49370,6 +49580,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         isPartialData
         missingFlightCount
         expectedTotalEntries
+        needsReview
+        notes
         gameDayOfWeek
         gameYearMonth
         buyInBucket
@@ -49705,6 +49917,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -49920,6 +50134,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -50109,6 +50325,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -50482,6 +50700,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -51073,6 +51293,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -51167,6 +51389,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -51605,6 +51829,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
       isPartialData
       missingFlightCount
       expectedTotalEntries
+      needsReview
+      notes
       gameDayOfWeek
       gameYearMonth
       buyInBucket
@@ -51802,6 +52028,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -52620,6 +52848,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -52906,6 +53136,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -53000,6 +53232,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -53533,6 +53767,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -53726,6 +53962,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -53945,6 +54183,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -54039,6 +54279,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -54651,6 +54893,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -54745,6 +54989,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -55350,6 +55596,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -55786,6 +56034,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -55880,6 +56130,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -56669,6 +56921,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -57024,6 +57278,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -57864,6 +58120,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -58533,6 +58791,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -58627,6 +58887,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -60284,6 +60546,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -60378,6 +60642,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -61899,6 +62165,8 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -62984,6 +63252,8 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -63078,6 +63348,8 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -64926,6 +65198,8 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -65020,6 +65294,8 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -66868,6 +67144,8 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -66962,6 +67240,8 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -69063,6 +69343,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -69157,6 +69439,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -71238,6 +71522,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -71332,6 +71618,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -73413,6 +73701,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -73507,6 +73797,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -75566,6 +75858,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -75660,6 +75954,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -77732,6 +78028,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -77826,6 +78124,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket
@@ -79898,6 +80198,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             isPartialData
             missingFlightCount
             expectedTotalEntries
+            needsReview
+            notes
             gameDayOfWeek
             gameYearMonth
             buyInBucket
@@ -79992,6 +80294,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           isPartialData
           missingFlightCount
           expectedTotalEntries
+          needsReview
+          notes
           gameDayOfWeek
           gameYearMonth
           buyInBucket

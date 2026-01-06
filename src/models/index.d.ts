@@ -4745,6 +4745,8 @@ type EagerGame = {
   readonly isPartialData?: boolean | null;
   readonly missingFlightCount?: number | null;
   readonly expectedTotalEntries?: number | null;
+  readonly needsReview?: boolean | null;
+  readonly notes?: string | null;
   readonly gameDayOfWeek?: string | null;
   readonly gameYearMonth?: string | null;
   readonly buyInBucket?: string | null;
@@ -4902,6 +4904,8 @@ type LazyGame = {
   readonly isPartialData?: boolean | null;
   readonly missingFlightCount?: number | null;
   readonly expectedTotalEntries?: number | null;
+  readonly needsReview?: boolean | null;
+  readonly notes?: string | null;
   readonly gameDayOfWeek?: string | null;
   readonly gameYearMonth?: string | null;
   readonly buyInBucket?: string | null;

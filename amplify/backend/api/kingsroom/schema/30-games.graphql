@@ -106,6 +106,8 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   isPartialData: Boolean @default(value: "false")
   missingFlightCount: Int
   expectedTotalEntries: Int
+  needsReview: Boolean
+  notes: String
 
   # --- Query Optimisation Keys ---
   gameDayOfWeek: String @index(name: "byDayOfWeek", sortKeyFields: ["gameStartDateTime"])

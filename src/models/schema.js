@@ -1491,6 +1491,20 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "needsReview": {
+                    "name": "needsReview",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "notes": {
+                    "name": "notes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "gameDayOfWeek": {
                     "name": "gameDayOfWeek",
                     "isArray": false,
@@ -26468,5 +26482,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "9e90642f90b24f929dd02f2ab97b1ba0"
+    "version": "48ae36ed6e9f6aee3265c71e04548cb8"
 };
