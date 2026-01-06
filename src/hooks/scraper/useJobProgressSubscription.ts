@@ -1,6 +1,6 @@
 // src/hooks/scraper/useJobProgressSubscription.ts
 // Real-time job progress monitoring via GraphQL subscription
-// UPDATED v1.1: Fixed TypeScript errors - removed unused imports, fixed module path
+// UPDATED v1.2: Fixed subscription churning - callbacks now use refs to prevent reconnection loops
 //
 // This hook subscribes to the onJobProgress subscription to receive real-time
 // updates about job progress without polling. Events are published by the
@@ -13,7 +13,7 @@
 //     onJobComplete: (event) => console.log('Job completed:', event),
 //   });
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { 
   onJobProgress, 
@@ -129,7 +129,23 @@ export const useJobProgressSubscription = (
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Refs for callbacks and tracking
+  // === CRITICAL FIX: Use refs for callbacks to prevent subscription churning ===
+  // These refs allow us to call the latest callback without including them
+  // in the useEffect dependency array, which would cause constant reconnections.
+  const onStatusChangeRef = useRef(onStatusChange);
+  const onJobCompleteRef = useRef(onJobComplete);
+  const onErrorRef = useRef(onError);
+  const onSubscribedRef = useRef(onSubscribed);
+
+  // Keep refs updated with latest callbacks
+  useEffect(() => {
+    onStatusChangeRef.current = onStatusChange;
+    onJobCompleteRef.current = onJobComplete;
+    onErrorRef.current = onError;
+    onSubscribedRef.current = onSubscribed;
+  }, [onStatusChange, onJobComplete, onError, onSubscribed]);
+
+  // Refs for tracking state across renders
   const previousStatusRef = useRef<string | null>(null);
   const completionNotifiedRef = useRef<boolean>(false);
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
@@ -138,9 +154,11 @@ export const useJobProgressSubscription = (
   useEffect(() => {
     completionNotifiedRef.current = false;
     previousStatusRef.current = null;
+    setEvent(null); // Clear previous job's event
   }, [jobId]);
 
   // Main subscription effect
+  // NOTE: Only jobId and enabled are dependencies - callbacks use refs
   useEffect(() => {
     if (!jobId || !enabled) {
       setIsSubscribed(false);
@@ -171,32 +189,38 @@ export const useJobProgressSubscription = (
             if (!isActive) return;
 
             const progressEvent = data?.onJobProgress;
-            if (!progressEvent) return;
+            if (!progressEvent) {
+              console.log('[useJobProgressSubscription] Received empty event');
+              return;
+            }
 
             console.log(`[useJobProgressSubscription] Event received:`, {
               status: progressEvent.status,
               processed: progressEvent.totalURLsProcessed,
+              newGames: progressEvent.newGamesScraped,
+              updated: progressEvent.gamesUpdated,
+              errors: progressEvent.errors,
               duration: progressEvent.durationSeconds,
             });
 
             setEvent(progressEvent);
             setError(null);
 
-            // Handle status changes
+            // Handle status changes - use ref to get latest callback
             const currentStatus = progressEvent.status;
             const prevStatus = previousStatusRef.current;
 
             if (currentStatus && currentStatus !== prevStatus) {
               console.log(`[useJobProgressSubscription] Status changed: ${prevStatus} -> ${currentStatus}`);
-              onStatusChange?.(currentStatus, prevStatus);
+              onStatusChangeRef.current?.(currentStatus, prevStatus);
               previousStatusRef.current = currentStatus;
             }
 
-            // Handle completion
+            // Handle completion - use ref to get latest callback
             if (isCompleteStatus(currentStatus) && !completionNotifiedRef.current) {
               console.log(`[useJobProgressSubscription] Job completed with status: ${currentStatus}`);
               completionNotifiedRef.current = true;
-              onJobComplete?.(progressEvent);
+              onJobCompleteRef.current?.(progressEvent);
             }
           },
           error: (err: Error) => {
@@ -204,14 +228,14 @@ export const useJobProgressSubscription = (
             console.error('[useJobProgressSubscription] Subscription error:', err);
             setError(err);
             setIsSubscribed(false);
-            onError?.(err);
+            onErrorRef.current?.(err);
           },
         });
 
         if (isActive) {
           setIsSubscribed(true);
           setError(null);
-          onSubscribed?.();
+          onSubscribedRef.current?.();
           console.log(`[useJobProgressSubscription] Subscription established for job: ${jobId}`);
         }
       } catch (err) {
@@ -220,7 +244,7 @@ export const useJobProgressSubscription = (
         console.error('[useJobProgressSubscription] Failed to setup subscription:', error);
         setError(error);
         setIsSubscribed(false);
-        onError?.(error);
+        onErrorRef.current?.(error);
       }
     };
 
@@ -235,7 +259,7 @@ export const useJobProgressSubscription = (
       }
       setIsSubscribed(false);
     };
-  }, [jobId, enabled, onStatusChange, onJobComplete, onError, onSubscribed]);
+  }, [jobId, enabled]); // <-- FIXED: Only jobId and enabled, callbacks use refs
 
   // Computed values
   const stats = extractStats(event);

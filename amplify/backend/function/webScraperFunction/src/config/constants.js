@@ -36,7 +36,7 @@ const SCRAPERAPI_URL = 'http://api.scraperapi.com';
 // ─────────────────────────────────────────────────────────────────────
 
 /** S3 bucket for HTML storage */
-const S3_BUCKET = process.env.S3_BUCKET || process.env.SCRAPER_S3_BUCKET || 'pokerpro-scraper-storage';
+const S3_BUCKET = process.env.S3_BUCKET || process.env.SCRAPER_S3_BUCKET;
 
 /** AWS region */
 const AWS_REGION = process.env.REGION || 'ap-southeast-2';
@@ -47,10 +47,10 @@ const AWS_REGION = process.env.REGION || 'ap-southeast-2';
 
 /** Save game function name */
 const SAVE_GAME_FUNCTION_NAME = process.env.SAVE_GAME_FUNCTION_NAME || 
-    `saveGameFunction-${process.env.ENV || 'dev'}`;
+    `saveGameFunction-${process.env.ENV}`;
 
 const GAME_DATA_ENRICHER_FUNCTION_NAME = process.env.FUNCTION_GAMEDATAENRICHER_NAME || 
-    `gameDataEnricher-${process.env.ENV || 'dev'}`;
+    `gameDataEnricher-${process.env.ENV}`;
 
 // ─────────────────────────────────────────────────────────────────────
 // VENUE & SERIES MATCHING

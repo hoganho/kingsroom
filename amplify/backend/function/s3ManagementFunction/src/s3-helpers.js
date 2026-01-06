@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const s3Client = new S3Client({});
 
 // Configuration
-const S3_BUCKET = process.env.SCRAPER_S3_BUCKET || 'pokerpro-scraper-storage';
+const S3_BUCKET = process.env.SCRAPER_S3_BUCKET || '';
 const S3_REGION = process.env.REGION || 'ap-southeast-2';
 
 /**

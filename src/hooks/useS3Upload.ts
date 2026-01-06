@@ -3,19 +3,12 @@
 import { useState, useCallback } from 'react';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { getS3UploadConfig, getS3PublicUrl } from '../config/s3Config';
 
-// S3 Configuration
-const S3_CONFIG = {
-  bucket: 'pokerpro-scraper-storage',
-  region: 'ap-southeast-2',  // Adjust if different
-  paths: {
-    venueLogo: 'logos/venue',
-    entityLogo: 'logos/entity',
-    // Add more paths as needed
-  },
-} as const;
+// Get the upload paths from config
+const getUploadPaths = () => getS3UploadConfig().paths;
 
-type UploadPath = keyof typeof S3_CONFIG.paths;
+type UploadPath = keyof ReturnType<typeof getUploadPaths>;
 
 interface UploadOptions {
   /** The path category for the upload */
@@ -59,6 +52,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 /**
  * Hook for uploading files to S3 using Cognito credentials
+ * Uses S3 bucket from VITE_S3_BUCKET environment variable
  * 
  * @example
  * ```tsx
@@ -112,9 +106,13 @@ export function useS3Upload(): UseS3UploadReturn {
         throw new Error('Unable to get AWS credentials. Please sign in again.');
       }
 
+      // Get S3 config from environment
+      const s3Config = getS3UploadConfig();
+      console.log(`[useS3Upload] Using bucket: ${s3Config.bucket}`);
+
       // Create S3 client
       const s3Client = new S3Client({
-        region: S3_CONFIG.region,
+        region: s3Config.region,
         credentials: {
           accessKeyId: credentials.accessKeyId,
           secretAccessKey: credentials.secretAccessKey,
@@ -130,14 +128,14 @@ export function useS3Upload(): UseS3UploadReturn {
         ? `${fileName}.${fileExtension}`
         : `${timestamp}-${randomString}.${fileExtension}`;
       
-      const s3Key = `${S3_CONFIG.paths[path]}/${finalFileName}`;
+      const s3Key = `${s3Config.paths[path]}/${finalFileName}`;
 
       // Convert file to ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
 
       // Upload to S3
       const command = new PutObjectCommand({
-        Bucket: S3_CONFIG.bucket,
+        Bucket: s3Config.bucket,
         Key: s3Key,
         Body: new Uint8Array(arrayBuffer),
         ContentType: file.type,
@@ -147,8 +145,8 @@ export function useS3Upload(): UseS3UploadReturn {
 
       await s3Client.send(command);
 
-      // Construct the public URL
-      const url = `https://${S3_CONFIG.bucket}.s3.${S3_CONFIG.region}.amazonaws.com/${s3Key}`;
+      // Construct the public URL using shared utility
+      const url = getS3PublicUrl(s3Key);
 
       console.log('[useS3Upload] Successfully uploaded:', { key: s3Key, url });
 
@@ -202,5 +200,5 @@ export function validateImageFile(file: File): string | null {
  * Get the S3 config (useful for displaying bucket info, etc.)
  */
 export function getS3Config() {
-  return S3_CONFIG;
+  return getS3UploadConfig();
 }

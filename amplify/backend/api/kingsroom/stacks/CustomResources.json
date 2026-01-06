@@ -54,6 +54,24 @@
           "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.publishGameProcessed.res.vtl"
         }
       }
+    },
+    "PublishJobProgressResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "DependsOn": "NoneDataSource",
+      "Properties": {
+        "ApiId": {
+          "Ref": "AppSyncApiId"
+        },
+        "TypeName": "Mutation",
+        "FieldName": "publishJobProgress",
+        "DataSourceName": "NoneDataSource",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.publishJobProgress.req.vtl"
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.publishJobProgress.res.vtl"
+        }
+      }
     }
   },
   "Conditions": {

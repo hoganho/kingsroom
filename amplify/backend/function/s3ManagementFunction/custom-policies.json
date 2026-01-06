@@ -5,7 +5,8 @@
       "s3:GetObject"
     ],
     "Resource": [
-      "arn:aws:s3:::pokerpro-scraper-storage/*"
+      "arn:aws:s3:::pokerpro-scraper-storage/*",
+      "arn:aws:s3:::kingsroom-storage-prod/*"
     ]
   },
   {

@@ -1,10 +1,10 @@
 # 82-job-progress-streaming.graphql
 # ==========================================
-# Job Progress Streaming - Real-time batch job status updates
+# Job Progress Streaming - Type Definitions
 # 
-# This replaces polling-based job monitoring with a subscription-based approach.
-# The Lambda publishes progress updates via publishJobProgress mutation,
-# and clients subscribe via onJobProgress subscription.
+# NOTE: The mutation (publishJobProgress) and subscription (onJobProgress)
+# have been moved to 99-mutations.graphql to ensure proper resolver creation.
+# This file now only contains the type definitions.
 #
 # USAGE (Lambda side):
 #   await client.graphql({
@@ -70,8 +70,8 @@ type JobProgressEvent @aws_iam @aws_cognito_user_pools {
   consecutiveBlanks: Int
   lastErrorMessage: String
   
-  # Timestamp of this event
-  publishedAt: AWSDateTime!
+  # Timestamp of this event (auto-populated by resolver)
+  publishedAt: AWSDateTime
 }
 
 # =============================================================================
@@ -116,29 +116,4 @@ input JobProgressEventInput {
   consecutiveErrors: Int
   consecutiveBlanks: Int
   lastErrorMessage: String
-}
-
-# =============================================================================
-# EXTEND MUTATION - Add publishJobProgress
-# =============================================================================
-
-extend type Mutation {
-  # Publish job progress event (called by autoScraper/bulkGamesScraper Lambda)
-  # This triggers the onJobProgress subscription for all listeners
-  publishJobProgress(jobId: ID!, event: JobProgressEventInput!): JobProgressEvent
-    @aws_iam
-    @aws_cognito_user_pools
-}
-
-# =============================================================================
-# EXTEND SUBSCRIPTION - Add onJobProgress
-# =============================================================================
-
-extend type Subscription {
-  # Subscribe to job progress events for a specific job
-  # Clients receive real-time updates as the job processes
-  onJobProgress(jobId: ID!): JobProgressEvent
-    @aws_subscribe(mutations: ["publishJobProgress"])
-    @aws_iam
-    @aws_cognito_user_pools
 }

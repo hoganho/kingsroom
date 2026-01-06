@@ -4,7 +4,14 @@
  * Core scraping logic extracted from index.js for maintainability.
  * Handles bulk scraping, gap processing, and event streaming.
  * 
- * UPDATED v1.4.0:
+ * UPDATED v1.5.0:
+ * - NEW: Implemented 'refresh' mode for re-fetching unfinished games
+ * - NEW: queryUnfinishedGames() helper for refresh mode
+ * - NEW: Auto mode per-game forceRefresh for in-progress games
+ * - In-progress games (RUNNING, REGISTERING, SCHEDULED, LATE_REGISTRATION) 
+ *   now get fresh data even when S3 cache is enabled
+ * 
+ * v1.4.0:
  * - FIXED: Added ctx.onProgress() calls for real-time job stats via subscription
  * - Progress events now published alongside DynamoDB updates
  * - Stats panel in frontend now receives live updates during processing
@@ -28,6 +35,29 @@
 
 const { FETCH_TOURNAMENT_DATA, SAVE_TOURNAMENT_DATA } = require('../graphql/queries');
 const { ScrapeURLPrefetchCache } = require('../lib/prefetchCache');
+
+// ===================================================================
+// IN-PROGRESS GAME STATUS CONSTANTS (NEW v1.5.0)
+// ===================================================================
+
+/**
+ * Game statuses that indicate a game is still in progress.
+ * These games benefit from fresh data fetches (not S3 cache).
+ */
+const IN_PROGRESS_GAME_STATUSES = [
+    'RUNNING',
+    'REGISTERING', 
+    'SCHEDULED',
+    'LATE_REGISTRATION',
+];
+
+/**
+ * Check if a game status indicates the game is still in progress
+ */
+function isInProgressGameStatus(status) {
+    if (!status) return false;
+    return IN_PROGRESS_GAME_STATUSES.includes(status.toUpperCase());
+}
 
 // ===================================================================
 // RESPONSE VALIDATORS
@@ -334,11 +364,157 @@ function buildProgressStats(results, startTime) {
 }
 
 // ===================================================================
+// QUERY UNFINISHED GAMES (NEW v1.5.0)
+// ===================================================================
+
+/**
+ * Query for unfinished games (RUNNING, REGISTERING, SCHEDULED, LATE_REGISTRATION)
+ * Used by refresh mode to find games that need fresh data.
+ * Returns array of tournament IDs.
+ * 
+ * NEW in v1.5.0
+ * 
+ * @param {string} entityId - Entity to query for
+ * @param {object} ctx - Context with ddbDocClient and table names
+ * @returns {Promise<number[]>} Array of tournament IDs for unfinished games
+ */
+async function queryUnfinishedGames(entityId, ctx) {
+    const { ddbDocClient, getTableName, scrapeURLTable } = ctx;
+    
+    // Try using ScrapeURL table first (it has gameStatus from last scrape)
+    // This is more reliable since Game table might not have the right GSI
+    if (scrapeURLTable && ddbDocClient) {
+        try {
+            const { ScanCommand } = require('@aws-sdk/lib-dynamodb');
+            
+            const tournamentIds = [];
+            
+            // ScrapeURL stores gameStatus from last scrape
+            const result = await ddbDocClient.send(new ScanCommand({
+                TableName: scrapeURLTable,
+                FilterExpression: 'entityId = :entityId AND gameStatus IN (:s1, :s2, :s3, :s4) AND (doNotScrape = :false OR attribute_not_exists(doNotScrape))',
+                ExpressionAttributeValues: {
+                    ':entityId': entityId,
+                    ':s1': 'RUNNING',
+                    ':s2': 'REGISTERING',
+                    ':s3': 'SCHEDULED',
+                    ':s4': 'LATE_REGISTRATION',
+                    ':false': false
+                },
+                ProjectionExpression: 'tournamentId',
+                Limit: 1000
+            }));
+            
+            if (result.Items) {
+                result.Items.forEach(item => {
+                    if (item.tournamentId && typeof item.tournamentId === 'number') {
+                        tournamentIds.push(item.tournamentId);
+                    }
+                });
+            }
+            
+            // Remove duplicates and sort
+            const uniqueIds = [...new Set(tournamentIds)].sort((a, b) => a - b);
+            console.log(`[ScrapingEngine] Refresh mode: Found ${uniqueIds.length} unfinished games from ScrapeURL table`);
+            
+            return uniqueIds;
+            
+        } catch (error) {
+            console.warn('[ScrapingEngine] ScrapeURL query failed, trying Game table:', error.message);
+        }
+    }
+    
+    // Fallback: Try Game table with GSI (if available)
+    if (ddbDocClient && getTableName) {
+        try {
+            const { QueryCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
+            const gameTable = getTableName('Game');
+            
+            const tournamentIds = [];
+            
+            // Try GSI first for each status
+            for (const status of IN_PROGRESS_GAME_STATUSES) {
+                try {
+                    const result = await ddbDocClient.send(new QueryCommand({
+                        TableName: gameTable,
+                        IndexName: 'byEntityAndStatus',
+                        KeyConditionExpression: 'entityId = :entityId AND gameStatus = :status',
+                        ExpressionAttributeValues: {
+                            ':entityId': entityId,
+                            ':status': status
+                        },
+                        ProjectionExpression: 'tournamentId',
+                        Limit: 250
+                    }));
+                    
+                    if (result.Items) {
+                        result.Items.forEach(item => {
+                            if (item.tournamentId) {
+                                tournamentIds.push(item.tournamentId);
+                            }
+                        });
+                    }
+                } catch (queryError) {
+                    // GSI might not exist, try scan as last resort
+                    if (queryError.name === 'ValidationException' || queryError.message?.includes('GSI')) {
+                        console.log(`[ScrapingEngine] GSI not available, will use scan for status ${status}`);
+                    } else {
+                        console.warn(`[ScrapingEngine] Query for ${status} games failed:`, queryError.message);
+                    }
+                }
+            }
+            
+            if (tournamentIds.length > 0) {
+                const uniqueIds = [...new Set(tournamentIds)].sort((a, b) => a - b);
+                console.log(`[ScrapingEngine] Refresh mode: Found ${uniqueIds.length} unfinished games from Game table GSI`);
+                return uniqueIds;
+            }
+            
+            // Last resort: Scan with filter (expensive but works without GSI)
+            console.log('[ScrapingEngine] Falling back to scan for unfinished games');
+            const scanResult = await ddbDocClient.send(new ScanCommand({
+                TableName: gameTable,
+                FilterExpression: 'entityId = :entityId AND gameStatus IN (:s1, :s2, :s3, :s4)',
+                ExpressionAttributeValues: {
+                    ':entityId': entityId,
+                    ':s1': 'RUNNING',
+                    ':s2': 'REGISTERING',
+                    ':s3': 'SCHEDULED',
+                    ':s4': 'LATE_REGISTRATION'
+                },
+                ProjectionExpression: 'tournamentId',
+                Limit: 500
+            }));
+            
+            if (scanResult.Items) {
+                scanResult.Items.forEach(item => {
+                    if (item.tournamentId) {
+                        tournamentIds.push(item.tournamentId);
+                    }
+                });
+            }
+            
+            const uniqueIds = [...new Set(tournamentIds)].sort((a, b) => a - b);
+            console.log(`[ScrapingEngine] Refresh mode: Found ${uniqueIds.length} unfinished games via scan`);
+            return uniqueIds;
+            
+        } catch (error) {
+            console.error('[ScrapingEngine] Failed to query unfinished games from Game table:', error.message);
+        }
+    }
+    
+    console.warn('[ScrapingEngine] No database client available for unfinished games query');
+    return [];
+}
+
+// ===================================================================
 // MAIN SCRAPING ENGINE
 // ===================================================================
 
 /**
  * Main scraping engine with configurable thresholds and event streaming
+ * 
+ * UPDATED v1.5.0: Added refresh mode and auto mode per-game forceRefresh
  * 
  * @param {string} entityId - Entity to scrape for
  * @param {object} scraperState - Current scraper state from DynamoDB
@@ -357,6 +533,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         publishGameProcessedEvent,
         ddbDocClient,
         scrapeURLTable,
+        getTableName,
         STOP_REASON,
         LAMBDA_TIMEOUT,
         LAMBDA_TIMEOUT_BUFFER,
@@ -420,8 +597,8 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         
         const gapResults = await processGapIds(entityId, jobId, options.gapIds, options, startTime, ctx);
         
-        // If mode is 'gaps' or 'multiId', return after processing gaps only
-        if (mode === 'gaps' || mode === 'multiId') {
+        // If mode is 'gaps', 'multiId', or 'refresh', return after processing gaps only
+        if (mode === 'gaps' || mode === 'multiId' || mode === 'refresh') {
             return gapResults;
         }
         
@@ -466,8 +643,60 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
             // Already handled above - should not reach here
             return results;
         case 'refresh':
-            // TODO: Implement refresh mode
-            break;
+            // ═══════════════════════════════════════════════════════════════
+            // NEW v1.5.0: Refresh mode implementation
+            // Re-fetch and update unfinished games (RUNNING, REGISTERING, SCHEDULED)
+            // These games need fresh data to update standings, player counts, etc.
+            // ═══════════════════════════════════════════════════════════════
+            
+            // If gapIds already provided (from frontend or scraperManagement), they were processed above
+            if (options.gapIds?.length > 0) {
+                console.log(`[ScrapingEngine] Refresh mode: Already processed ${options.gapIds.length} pre-provided game IDs`);
+                return results;
+            }
+            
+            // Otherwise, query for unfinished games
+            console.log(`[ScrapingEngine] Refresh mode: Querying for unfinished games...`);
+            const unfinishedGameIds = await queryUnfinishedGames(entityId, {
+                ddbDocClient: ctx.ddbDocClient,
+                getTableName: ctx.getTableName,
+                scrapeURLTable: ctx.scrapeURLTable
+            });
+            
+            if (!unfinishedGameIds || unfinishedGameIds.length === 0) {
+                console.log(`[ScrapingEngine] Refresh mode: No unfinished games found to refresh`);
+                results.stopReason = STOP_REASON.COMPLETED;
+                return results;
+            }
+            
+            console.log(`[ScrapingEngine] Refresh mode: Processing ${unfinishedGameIds.length} unfinished games`);
+            console.log(`[ScrapingEngine] Refresh forceRefresh=${options.forceRefresh}, will ${options.forceRefresh ? 'bypass S3 cache' : 'use S3 cache if available'}`);
+            
+            // Process these IDs through the gap processor
+            // Note: forceRefresh in options will be respected by processGapIds -> callGraphQL
+            const refreshResults = await processGapIds(
+                entityId, 
+                jobId, 
+                unfinishedGameIds, 
+                {
+                    ...options,
+                    // Ensure we're updating, not skipping
+                    skipNotPublished: false,
+                    skipNotFoundGaps: false,
+                }, 
+                startTime, 
+                ctx
+            );
+            
+            console.log(`[ScrapingEngine] Refresh mode complete:`, {
+                totalProcessed: refreshResults.totalProcessed,
+                gamesUpdated: refreshResults.gamesUpdated,
+                newGamesScraped: refreshResults.newGamesScraped,
+                errors: refreshResults.errors
+            });
+            
+            return refreshResults;
+            
         default:
             currentId = scraperState.lastScannedId + 1;
             endId = currentId + (options.maxGames || 100);
@@ -481,7 +710,8 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
     
     // Initialize prefetch cache
     let prefetchCache = null;
-    if (options.skipNotPublished || options.skipNotFoundGaps) {
+    if (options.skipNotPublished || options.skipNotFoundGaps || mode === 'auto') {
+        // v1.5.0: Also init prefetch for auto mode to check game status for per-game forceRefresh
         prefetchCache = new ScrapeURLPrefetchCache(entityId, ddbDocClient, scrapeURLTable);
     }
     
@@ -534,11 +764,19 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         const url = await buildTournamentUrl(entityId, currentId);
         results.lastProcessedId = currentId;
 
-        // Skip checks using prefetch cache
+        // ═══════════════════════════════════════════════════════════════
+        // v1.5.0: Determine per-game forceRefresh for auto mode
+        // In-progress games should always get fresh data
+        // ═══════════════════════════════════════════════════════════════
+        let gameForceRefresh = options.forceRefresh || false;
+        let scrapeURLStatus = null;
+        
+        // Skip checks and per-game forceRefresh using prefetch cache
         if (prefetchCache) {
             try {
-                const scrapeURLStatus = await prefetchCache.getStatus(currentId);
+                scrapeURLStatus = await prefetchCache.getStatus(currentId);
                 
+                // Check skip conditions first
                 if (shouldSkipNotPublished(scrapeURLStatus, options)) {
                     results.gamesSkipped++;
                     
@@ -568,6 +806,17 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     currentId++;
                     continue;
                 }
+                
+                // v1.5.0: Auto mode per-game forceRefresh for in-progress games
+                // If game exists with an in-progress status, force refresh to get latest data
+                if (mode === 'auto' && scrapeURLStatus.found && !gameForceRefresh) {
+                    const existingStatus = scrapeURLStatus.gameStatus;
+                    if (isInProgressGameStatus(existingStatus)) {
+                        gameForceRefresh = true;
+                        console.log(`[ScrapingEngine] Auto mode: ID ${currentId} has in-progress status "${existingStatus}", forcing refresh`);
+                    }
+                }
+                
             } catch (error) {
                 console.warn(`[ScrapingEngine] Prefetch error, continuing: ${error.message}`);
             }
@@ -577,10 +826,11 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
 
         try {
             // Fetch via AppSync with retry for rate limiting
+            // v1.5.0: Use per-game forceRefresh for auto mode
             const fetchData = await withRetry(async () => {
                 return await callGraphQL(FETCH_TOURNAMENT_DATA, {
                     url: url,
-                    forceRefresh: options.forceRefresh || false,
+                    forceRefresh: gameForceRefresh,
                     entityId: entityId,
                     scraperApiKey: options.scraperApiKey || null
                 });
@@ -1298,6 +1548,10 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
 module.exports = {
     performScrapingEnhanced,
     processGapIds,
+    // NEW v1.5.0: Export for refresh mode
+    queryUnfinishedGames,
+    isInProgressGameStatus,
+    IN_PROGRESS_GAME_STATUSES,
     // Export helpers for testing
     isNotFoundResponse,
     isNotPublishedResponse,

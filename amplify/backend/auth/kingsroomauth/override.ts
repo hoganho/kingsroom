@@ -20,7 +20,8 @@ export function override(resources: AmplifyAuthCognitoStackTemplate) {
               's3:DeleteObject'
             ],
             Resource: [
-              'arn:aws:s3:::pokerpro-scraper-storage/social-media/post-attachments/*'
+              'arn:aws:s3:::pokerpro-scraper-storage/social-media/post-attachments/*',
+              'arn:aws:s3:::kingsroom-storage-prod/social-media/post-attachments/*'
             ]
           },
           {
@@ -29,7 +30,8 @@ export function override(resources: AmplifyAuthCognitoStackTemplate) {
               's3:GetObject'
             ],
             Resource: [
-              'arn:aws:s3:::pokerpro-scraper-storage/entities/*/html/*'
+              'arn:aws:s3:::pokerpro-scraper-storage/entities/*/html/*',
+              'arn:aws:s3:::kingsroom-storage-prod/social-media/post-attachments/*'
             ]
           }
         ]

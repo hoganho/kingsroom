@@ -10,6 +10,7 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 import { createSocialPost } from '../graphql/mutations';
 import { getSocialAccount } from '../graphql/queries';
 import { getYearMonthAEST } from '../utils/dateUtils';
+import { getSocialPostS3Config, getS3PublicUrl } from '../config/s3Config';
 
 import type {
   RawFacebookPost,
@@ -35,13 +36,6 @@ import {
   SocialPostProcessingStatus,
   CreateSocialPostInput,
 } from '../API';
-
-// S3 Configuration for post attachments
-const S3_CONFIG = {
-  bucket: 'pokerpro-scraper-storage',
-  region: 'ap-southeast-2',
-  prefix: 'social-media/post-attachments',
-} as const;
 
 // Helper to check GraphQL response
 function hasGraphQLData<T>(response: unknown): response is { data: T } {
@@ -181,9 +175,12 @@ async function uploadFileToS3(
     throw new Error('Unable to get AWS credentials. Please sign in again.');
   }
 
+  // Get S3 config from environment
+  const s3Config = getSocialPostS3Config();
+
   // Create S3 client
   const s3Client = new S3Client({
-    region: S3_CONFIG.region,
+    region: s3Config.region,
     credentials: {
       accessKeyId: credentials.accessKeyId,
       secretAccessKey: credentials.secretAccessKey,
@@ -197,7 +194,7 @@ async function uploadFileToS3(
   const randomString = Math.random().toString(36).substring(2, 8);
   const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   
-  const s3Key = `${S3_CONFIG.prefix}/${accountId}/${postId}/${timestamp}-${randomString}-${sanitizedFilename}`;
+  const s3Key = `${s3Config.prefix}/${accountId}/${postId}/${timestamp}-${randomString}-${sanitizedFilename}`;
 
   // Convert file to ArrayBuffer
   const arrayBuffer = await file.arrayBuffer();
@@ -215,7 +212,7 @@ async function uploadFileToS3(
 
   // Upload to S3
   const command = new PutObjectCommand({
-    Bucket: S3_CONFIG.bucket,
+    Bucket: s3Config.bucket,
     Key: s3Key,
     Body: new Uint8Array(arrayBuffer),
     ContentType: contentType,
@@ -231,7 +228,7 @@ async function uploadFileToS3(
   await s3Client.send(command);
 
   // Return the public URL
-  const url = `https://${S3_CONFIG.bucket}.s3.${S3_CONFIG.region}.amazonaws.com/${s3Key}`;
+  const url = getS3PublicUrl(s3Key);
   console.log('[useSocialPostUpload] Uploaded attachment to S3:', { filename: file.name, url });
 
   return url;

@@ -1,0 +1,28 @@
+{
+  "version": "2018-05-29",
+  "payload": {
+    "jobId": $util.toJson($context.arguments.event.jobId),
+    "entityId": $util.toJson($context.arguments.event.entityId),
+    "status": $util.toJson($context.arguments.event.status),
+    "stopReason": $util.toJson($context.arguments.event.stopReason),
+    "totalURLsProcessed": $util.toJson($context.arguments.event.totalURLsProcessed),
+    "newGamesScraped": $util.toJson($context.arguments.event.newGamesScraped),
+    "gamesUpdated": $util.toJson($context.arguments.event.gamesUpdated),
+    "gamesSkipped": $util.toJson($context.arguments.event.gamesSkipped),
+    "errors": $util.toJson($context.arguments.event.errors),
+    "blanks": $util.toJson($context.arguments.event.blanks),
+    "currentId": $util.toJson($context.arguments.event.currentId),
+    "startId": $util.toJson($context.arguments.event.startId),
+    "endId": $util.toJson($context.arguments.event.endId),
+    "startTime": $util.toJson($context.arguments.event.startTime),
+    "durationSeconds": $util.toJson($context.arguments.event.durationSeconds),
+    "successRate": $util.toJson($context.arguments.event.successRate),
+    "averageScrapingTime": $util.toJson($context.arguments.event.averageScrapingTime),
+    "s3CacheHits": $util.toJson($context.arguments.event.s3CacheHits),
+    "consecutiveNotFound": $util.toJson($context.arguments.event.consecutiveNotFound),
+    "consecutiveErrors": $util.toJson($context.arguments.event.consecutiveErrors),
+    "consecutiveBlanks": $util.toJson($context.arguments.event.consecutiveBlanks),
+    "lastErrorMessage": $util.toJson($context.arguments.event.lastErrorMessage),
+    "publishedAt": "$util.time.nowISO8601()"
+  }
+}

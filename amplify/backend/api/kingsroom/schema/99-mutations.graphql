@@ -450,6 +450,12 @@ type Mutation {
     @aws_iam
     @aws_cognito_user_pools
 
+  # Publish job progress event (called by autoScraper Lambda)
+  # This triggers the onJobProgress subscription for real-time stats updates
+  publishJobProgress(jobId: ID!, event: JobProgressEventInput!): JobProgressEvent
+    @aws_iam
+    @aws_cognito_user_pools
+
   # --- Venue Assignment ---
   assignVenueToGame(gameId: ID!, venueId: ID!): VenueAssignmentResult
     @function(name: "venueAssignmentService-${env}")
@@ -504,6 +510,13 @@ type Subscription {
   # Subscribe to game processing events for a specific job
   onGameProcessed(jobId: ID!): GameProcessedEvent
     @aws_subscribe(mutations: ["publishGameProcessed"])
+    @aws_iam
+    @aws_cognito_user_pools
+
+  # Subscribe to job progress events for a specific job
+  # Provides real-time stats updates (processed, created, updated, errors, duration)
+  onJobProgress(jobId: ID!): JobProgressEvent
+    @aws_subscribe(mutations: ["publishJobProgress"])
     @aws_iam
     @aws_cognito_user_pools
 

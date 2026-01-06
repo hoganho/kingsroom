@@ -67,6 +67,10 @@ const resolveEntityId = (providedEntityId, urlEntityId = null, existingEntityId 
 
 /**
  * Get entityId by matching URL domain against Entity table
+ * Matches gameUrlDomain stored as either:
+ *   - Just domain: "kingsroom.com.au"
+ *   - With https: "https://kingsroom.com.au"
+ *   - With http: "http://kingsroom.com.au"
  * 
  * @param {string} url - URL to extract domain from
  * @param {object} context - Context object containing ddbDocClient
@@ -86,14 +90,18 @@ const getEntityIdFromUrl = async (url, context) => {
             return cachedEntityId;
         }
         
-        // Query Entity table
+        // Query Entity table - match domain with or without protocol
         const entityTable = getTableName('Entity');
         const { ddbDocClient } = context;
         
         const scanResult = await ddbDocClient.send(new ScanCommand({
             TableName: entityTable,
-            FilterExpression: 'gameUrlDomain = :domain',
-            ExpressionAttributeValues: { ':domain': domain },
+            FilterExpression: 'gameUrlDomain = :domain OR gameUrlDomain = :domainHttps OR gameUrlDomain = :domainHttp',
+            ExpressionAttributeValues: { 
+                ':domain': domain,
+                ':domainHttps': `https://${domain}`,
+                ':domainHttp': `http://${domain}`
+            },
             ProjectionExpression: 'id, #name, gameUrlDomain',
             ExpressionAttributeNames: { '#name': 'name' }
         }));

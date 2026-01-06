@@ -61,6 +61,19 @@ type ScraperJob @model(queries: { list: null }) @auth(rules: [{ allow: private }
   consecutiveErrors: Int
   consecutiveBlanks: Int
 
+  # Job configuration (for continuation support)
+  mode: String
+  forceRefresh: Boolean
+  skipNotPublished: Boolean
+  skipNotFoundGaps: Boolean
+  skipInProgress: Boolean
+  ignoreDoNotScrape: Boolean
+  saveToDatabase: Boolean
+  defaultVenueId: ID
+  bulkCount: Int
+  gapIds: [Int]
+  scraperApiKey: String
+
   scrapeAttempts: [ScrapeAttempt] @hasMany(indexName: "byScraperJob", fields: ["id"])
   entityId: ID @index(name: "byEntityScraperJob", sortKeyFields: ["startTime"])
   entity: Entity @belongsTo(fields: ["entityId"])

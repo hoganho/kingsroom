@@ -34,7 +34,8 @@
       "s3:DeleteObject"
     ],
     "Resource": [
-      "arn:aws:s3:::pokerpro-scraper-storage/social-media/*"
+      "arn:aws:s3:::pokerpro-scraper-storage/social-media/*",
+      "arn:aws:s3:::kingsroom-storage-prod/social-media/*"
     ]
   },
   {

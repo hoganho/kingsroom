@@ -5,12 +5,7 @@ import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { getClient } from '../utils/apiClient';
-
-// S3 Configuration - shared with useS3Upload
-const S3_CONFIG = {
-  bucket: 'pokerpro-scraper-storage',
-  region: 'ap-southeast-2',
-} as const;
+import { getS3Config } from '../config/s3Config';
 
 // Source system for ScrapeURL lookups
 const SOURCE_SYSTEM = 'KINGSROOM_WEB';
@@ -58,8 +53,11 @@ export async function getPresignedS3Url(s3Key: string, expiresIn: number = 3600)
     throw new Error('Unable to get AWS credentials. Please sign in again.');
   }
 
+  // Get S3 config from environment
+  const s3Config = getS3Config();
+
   const s3Client = new S3Client({
-    region: S3_CONFIG.region,
+    region: s3Config.region,
     credentials: {
       accessKeyId: credentials.accessKeyId,
       secretAccessKey: credentials.secretAccessKey,
@@ -68,7 +66,7 @@ export async function getPresignedS3Url(s3Key: string, expiresIn: number = 3600)
   });
 
   const command = new GetObjectCommand({
-    Bucket: S3_CONFIG.bucket,
+    Bucket: s3Config.bucket,
     Key: s3Key,
   });
 
@@ -107,6 +105,7 @@ export async function lookupS3KeyForGame(entityId: string, tournamentId: number)
 
 /**
  * Hook for fetching files from S3 using Cognito credentials
+ * Uses S3 bucket from VITE_S3_BUCKET environment variable
  * 
  * @example
  * ```tsx
@@ -182,7 +181,8 @@ export function useS3Fetch(): UseS3FetchReturn {
       }
 
       // Generate pre-signed URL and open
-      console.log(`[useS3Fetch] Generating pre-signed URL for: ${s3Key}`);
+      const s3Config = getS3Config();
+      console.log(`[useS3Fetch] Generating pre-signed URL for: ${s3Key} (bucket: ${s3Config.bucket})`);
       const signedUrl = await getPresignedS3Url(s3Key);
       
       console.log('[useS3Fetch] Opening S3 file in new window');
@@ -225,5 +225,5 @@ export function useS3Fetch(): UseS3FetchReturn {
  * Get the S3 config (useful for displaying bucket info, etc.)
  */
 export function getS3FetchConfig() {
-  return S3_CONFIG;
+  return getS3Config();
 }

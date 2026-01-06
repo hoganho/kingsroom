@@ -308,6 +308,20 @@ export function Sidebar() {
   const { canAccess } = useUserPermissions()
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const buildVersion = import.meta.env.VITE_BUILD_VERSION || "dev"
+  
+  // Environment detection: local-dev, local-prod, deployed-dev, deployed-prod
+  const getAppEnv = () => {
+    // If explicitly set in Amplify, use that (deployed-dev, deployed-prod)
+    if (import.meta.env.VITE_APP_ENV) {
+      return import.meta.env.VITE_APP_ENV
+    }
+    // Otherwise, detect local environment based on hostname + build mode
+    const isLocal = typeof window !== 'undefined' && 
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    const mode = import.meta.env.MODE || 'development'
+    return isLocal ? `local-${mode === 'production' ? 'prod' : 'dev'}` : mode
+  }
+  const appEnv = getAppEnv()
 
   const isActive = (href: string) => {
     return location.pathname === href || location.pathname.startsWith(href + "/")
@@ -419,7 +433,7 @@ export function Sidebar() {
           <div className="border-t border-gray-200 p-4 dark:border-gray-800">
             <UserProfile />
             <div className="mt-3 text-xs text-gray-500">
-              <div>Version: {buildVersion}-{process.env.NODE_ENV}</div>
+              <div>Version: {buildVersion}-{appEnv}</div>
               <div>© 2025 Top Set Ventures</div>
             </div>
           </div>

@@ -984,7 +984,20 @@ exports.handler = async (event) => {
                 maxId: args.maxId,
                 isFullScan: args.isFullScan,
                 startId: args.startId,
-                endId: args.endId
+                endId: args.endId,
+                // ADD these for continuation support:
+                mode: args.mode,
+                forceRefresh: args.forceRefresh,
+                skipNotPublished: args.skipNotPublished,
+                skipNotFoundGaps: args.skipNotFoundGaps,
+                gapIds: args.gapIds,
+                saveToDatabase: args.saveToDatabase,
+                defaultVenueId: args.defaultVenueId,
+                scraperApiKey: args.scraperApiKey,
+                maxConsecutiveNotFound: args.maxConsecutiveNotFound,
+                maxConsecutiveErrors: args.maxConsecutiveErrors,
+                maxConsecutiveBlanks: args.maxConsecutiveBlanks,
+                maxTotalErrors: args.maxTotalErrors,
             });
 
             // Create progress publisher for this job

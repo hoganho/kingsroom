@@ -10210,6 +10210,84 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "mode": {
+                    "name": "mode",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "forceRefresh": {
+                    "name": "forceRefresh",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "skipNotPublished": {
+                    "name": "skipNotPublished",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "skipNotFoundGaps": {
+                    "name": "skipNotFoundGaps",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "skipInProgress": {
+                    "name": "skipInProgress",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ignoreDoNotScrape": {
+                    "name": "ignoreDoNotScrape",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "saveToDatabase": {
+                    "name": "saveToDatabase",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "defaultVenueId": {
+                    "name": "defaultVenueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "bulkCount": {
+                    "name": "bulkCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gapIds": {
+                    "name": "gapIds",
+                    "isArray": true,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "scraperApiKey": {
+                    "name": "scraperApiKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "scrapeAttempts": {
                     "name": "scrapeAttempts",
                     "isArray": true,
@@ -23978,7 +24056,7 @@ export const schema = {
                     "name": "publishedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 }
             }
@@ -26390,5 +26468,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "ae00cee82d60093ca21426b16a4d79a6"
+    "version": "9e90642f90b24f929dd02f2ab97b1ba0"
 };

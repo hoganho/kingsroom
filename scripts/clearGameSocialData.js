@@ -38,7 +38,7 @@ const ENV = process.env.ENV_SUFFIX || 'dev';
 
 // S3 Configuration
 const S3_CONFIG = {
-  bucket: process.env.S3_BUCKET || 'pokerpro-scraper-storage',
+  bucket: process.env.S3_BUCKET || '',
   region: REGION,
 };
 
@@ -585,7 +585,7 @@ Environment variables:
   AWS_REGION        AWS region (default: ap-southeast-2)
   API_ID            AppSync API ID (default: ht3nugt6lvddpeeuwj3x6mkite)
   ENV_SUFFIX        Environment suffix (default: dev)
-  S3_BUCKET         S3 bucket for media (default: pokerpro-scraper-storage)
+  S3_BUCKET         S3 bucket for media ()
 `);
     return;
   }

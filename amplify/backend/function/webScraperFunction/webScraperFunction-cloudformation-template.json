@@ -1421,7 +1421,9 @@
               ],
               "Resource": [
                 "arn:aws:s3:::pokerpro-scraper-storage",
-                "arn:aws:s3:::pokerpro-scraper-storage/*"
+                "arn:aws:s3:::pokerpro-scraper-storage/*",
+                "arn:aws:s3:::kingsroom-storage-prod",
+                "arn:aws:s3:::kingsroom-storage-prod/*"
               ],
               "Effect": "Allow"
             },

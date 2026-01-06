@@ -49,7 +49,7 @@ const DELETE_S3_MEDIA = process.env.DELETE_S3_MEDIA || '1';
 
 // S3 Configuration for social media attachments
 const S3_CONFIG = {
-  bucket: process.env.S3_BUCKET || 'pokerpro-scraper-storage',
+  bucket: process.env.S3_BUCKET || '',
   region: REGION,
   // Common prefixes where social media might be stored
   prefixes: [

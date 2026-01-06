@@ -50,6 +50,17 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
     consecutiveNotFound
     consecutiveErrors
     consecutiveBlanks
+    mode
+    forceRefresh
+    skipNotPublished
+    skipNotFoundGaps
+    skipInProgress
+    ignoreDoNotScrape
+    saveToDatabase
+    defaultVenueId
+    bulkCount
+    gapIds
+    scraperApiKey
     scrapeAttempts {
       items {
         id
@@ -98,6 +109,17 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -363,6 +385,17 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -2229,6 +2262,17 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -2494,6 +2538,17 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -4342,6 +4397,38 @@ export const onGameProcessed = /* GraphQL */ `subscription OnGameProcessed($jobI
 ` as GeneratedSubscription<
   APITypes.OnGameProcessedSubscriptionVariables,
   APITypes.OnGameProcessedSubscription
+>;
+export const onJobProgress = /* GraphQL */ `subscription OnJobProgress($jobId: ID!) {
+  onJobProgress(jobId: $jobId) {
+    jobId
+    entityId
+    status
+    stopReason
+    totalURLsProcessed
+    newGamesScraped
+    gamesUpdated
+    gamesSkipped
+    errors
+    blanks
+    currentId
+    startId
+    endId
+    startTime
+    durationSeconds
+    successRate
+    averageScrapingTime
+    s3CacheHits
+    consecutiveNotFound
+    consecutiveErrors
+    consecutiveBlanks
+    lastErrorMessage
+    publishedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnJobProgressSubscriptionVariables,
+  APITypes.OnJobProgressSubscription
 >;
 export const onSyncProgress = /* GraphQL */ `subscription OnSyncProgress($socialAccountId: ID!) {
   onSyncProgress(socialAccountId: $socialAccountId) {
@@ -12741,6 +12828,17 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             consecutiveNotFound
             consecutiveErrors
             consecutiveBlanks
+            mode
+            forceRefresh
+            skipNotPublished
+            skipNotFoundGaps
+            skipInProgress
+            ignoreDoNotScrape
+            saveToDatabase
+            defaultVenueId
+            bulkCount
+            gapIds
+            scraperApiKey
             entityId
             createdAt
             updatedAt
@@ -14051,6 +14149,17 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -17594,6 +17703,17 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             consecutiveNotFound
             consecutiveErrors
             consecutiveBlanks
+            mode
+            forceRefresh
+            skipNotPublished
+            skipNotFoundGaps
+            skipInProgress
+            ignoreDoNotScrape
+            saveToDatabase
+            defaultVenueId
+            bulkCount
+            gapIds
+            scraperApiKey
             entityId
             createdAt
             updatedAt
@@ -18478,6 +18598,17 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -20282,38 +20413,6 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
 ` as GeneratedSubscription<
   APITypes.OnDashboardCacheUpdateSubscriptionVariables,
   APITypes.OnDashboardCacheUpdateSubscription
->;
-export const onJobProgress = /* GraphQL */ `subscription OnJobProgress($jobId: ID!) {
-  onJobProgress(jobId: $jobId) {
-    jobId
-    entityId
-    status
-    stopReason
-    totalURLsProcessed
-    newGamesScraped
-    gamesUpdated
-    gamesSkipped
-    errors
-    blanks
-    currentId
-    startId
-    endId
-    startTime
-    durationSeconds
-    successRate
-    averageScrapingTime
-    s3CacheHits
-    consecutiveNotFound
-    consecutiveErrors
-    consecutiveBlanks
-    lastErrorMessage
-    publishedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnJobProgressSubscriptionVariables,
-  APITypes.OnJobProgressSubscription
 >;
 export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame(
   $filter: ModelSubscriptionActiveGameFilterInput
@@ -28698,6 +28797,17 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             consecutiveNotFound
             consecutiveErrors
             consecutiveBlanks
+            mode
+            forceRefresh
+            skipNotPublished
+            skipNotFoundGaps
+            skipInProgress
+            ignoreDoNotScrape
+            saveToDatabase
+            defaultVenueId
+            bulkCount
+            gapIds
+            scraperApiKey
             entityId
             createdAt
             updatedAt
@@ -30008,6 +30118,17 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -33551,6 +33672,17 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             consecutiveNotFound
             consecutiveErrors
             consecutiveBlanks
+            mode
+            forceRefresh
+            skipNotPublished
+            skipNotFoundGaps
+            skipInProgress
+            ignoreDoNotScrape
+            saveToDatabase
+            defaultVenueId
+            bulkCount
+            gapIds
+            scraperApiKey
             entityId
             createdAt
             updatedAt
@@ -42694,6 +42826,17 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             consecutiveNotFound
             consecutiveErrors
             consecutiveBlanks
+            mode
+            forceRefresh
+            skipNotPublished
+            skipNotFoundGaps
+            skipInProgress
+            ignoreDoNotScrape
+            saveToDatabase
+            defaultVenueId
+            bulkCount
+            gapIds
+            scraperApiKey
             entityId
             createdAt
             updatedAt
@@ -44004,6 +44147,17 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -47547,6 +47701,17 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             consecutiveNotFound
             consecutiveErrors
             consecutiveBlanks
+            mode
+            forceRefresh
+            skipNotPublished
+            skipNotFoundGaps
+            skipInProgress
+            ignoreDoNotScrape
+            saveToDatabase
+            defaultVenueId
+            bulkCount
+            gapIds
+            scraperApiKey
             entityId
             createdAt
             updatedAt
@@ -56690,6 +56855,17 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             consecutiveNotFound
             consecutiveErrors
             consecutiveBlanks
+            mode
+            forceRefresh
+            skipNotPublished
+            skipNotFoundGaps
+            skipInProgress
+            ignoreDoNotScrape
+            saveToDatabase
+            defaultVenueId
+            bulkCount
+            gapIds
+            scraperApiKey
             entityId
             createdAt
             updatedAt
@@ -58000,6 +58176,17 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -61543,6 +61730,17 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             consecutiveNotFound
             consecutiveErrors
             consecutiveBlanks
+            mode
+            forceRefresh
+            skipNotPublished
+            skipNotFoundGaps
+            skipInProgress
+            ignoreDoNotScrape
+            saveToDatabase
+            defaultVenueId
+            bulkCount
+            gapIds
+            scraperApiKey
             entityId
             createdAt
             updatedAt
@@ -62429,6 +62627,17 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -64360,6 +64569,17 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -66291,6 +66511,17 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -68140,6 +68371,17 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
     consecutiveNotFound
     consecutiveErrors
     consecutiveBlanks
+    mode
+    forceRefresh
+    skipNotPublished
+    skipNotFoundGaps
+    skipInProgress
+    ignoreDoNotScrape
+    saveToDatabase
+    defaultVenueId
+    bulkCount
+    gapIds
+    scraperApiKey
     scrapeAttempts {
       items {
         id
@@ -68188,6 +68430,17 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -68453,6 +68706,17 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -70282,6 +70546,17 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
     consecutiveNotFound
     consecutiveErrors
     consecutiveBlanks
+    mode
+    forceRefresh
+    skipNotPublished
+    skipNotFoundGaps
+    skipInProgress
+    ignoreDoNotScrape
+    saveToDatabase
+    defaultVenueId
+    bulkCount
+    gapIds
+    scraperApiKey
     scrapeAttempts {
       items {
         id
@@ -70330,6 +70605,17 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -70595,6 +70881,17 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -72424,6 +72721,17 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
     consecutiveNotFound
     consecutiveErrors
     consecutiveBlanks
+    mode
+    forceRefresh
+    skipNotPublished
+    skipNotFoundGaps
+    skipInProgress
+    ignoreDoNotScrape
+    saveToDatabase
+    defaultVenueId
+    bulkCount
+    gapIds
+    scraperApiKey
     scrapeAttempts {
       items {
         id
@@ -72472,6 +72780,17 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -72737,6 +73056,17 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -74603,6 +74933,17 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -74868,6 +75209,17 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -76747,6 +77099,17 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -77012,6 +77375,17 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -78891,6 +79265,17 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt
@@ -79156,6 +79541,17 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           consecutiveNotFound
           consecutiveErrors
           consecutiveBlanks
+          mode
+          forceRefresh
+          skipNotPublished
+          skipNotFoundGaps
+          skipInProgress
+          ignoreDoNotScrape
+          saveToDatabase
+          defaultVenueId
+          bulkCount
+          gapIds
+          scraperApiKey
           scrapeAttempts {
             nextToken
             startedAt

@@ -1,9 +1,11 @@
 // src/pages/scraper-admin-tabs/ScraperTab.tsx
 // REFACTORED: Single-ID on frontend (useSingleScrape), batch on backend (useScraperJobs)
 // UPDATED: Integrated BatchJobProgress for real-time batch job monitoring with polling
+// UPDATED v3.1: Added refresh mode support with forceRefreshFromWeb option
 //
 // Architecture:
 // - 'single' mode: Frontend handles with full interactive control (modals, venue selection)
+// - 'refresh' mode: Re-fetch unfinished games (RUNNING, REGISTERING, SCHEDULED)
 // - All other modes: Backend Lambda handles via useScraperJobs.startJob()
 //
 // This integrates with existing hooks:
@@ -96,7 +98,8 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
   const modals = useScraperModals();
 
   // --- Gap Tracker ---
-  const { scrapingStatus, loading: gapLoading, getScrapingStatus, getBounds, bounds } = useGameIdTracking(currentEntity?.id);
+  // v3.1: Added getUnfinishedGames for refresh mode
+  const { scrapingStatus, loading: gapLoading, getScrapingStatus, getBounds, bounds, getUnfinishedGames } = useGameIdTracking(currentEntity?.id);
   const highestTournamentId = scrapingStatus?.highestTournamentId ?? bounds?.highestId;
 
   // --- Single Scrape Hook (frontend processing) ---
@@ -534,6 +537,24 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         console.log(`[ScraperTab] Multi-ID mode: parsed ${multiIds.length} IDs from "${idSelectionParams.multiIdString}"`);
       }
 
+      // v3.1: For refresh mode, get unfinished game IDs
+      let refreshGameIds: number[] | undefined;
+      if (idSelectionMode === 'refresh') {
+        try {
+          const unfinishedResult = await getUnfinishedGames({ limit: 500 });
+          if (unfinishedResult?.items?.length > 0) {
+            refreshGameIds = unfinishedResult.items
+              .map((g: any) => g.tournamentId)
+              .filter((id: number | undefined): id is number => typeof id === 'number' && id > 0);
+            console.log(`[ScraperTab] Refresh mode: ${refreshGameIds.length} unfinished games to process`);
+          } else {
+            console.log('[ScraperTab] Refresh mode: No unfinished games found');
+          }
+        } catch (err) {
+          console.warn('[ScraperTab] Failed to fetch unfinished games:', err);
+        }
+      }
+
       console.log('[ScraperTab DEBUG] Raw params:', {
         idSelectionMode,
         'bulkCount raw': idSelectionParams.bulkCount,
@@ -571,7 +592,10 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         
         // Scrape options
         useS3: options.useS3,
-        forceRefresh: !options.useS3,
+        // v3.1: forceRefresh is true if:
+        // 1. useS3 is disabled globally, OR
+        // 2. Refresh mode with forceRefreshFromWeb enabled
+        forceRefresh: !options.useS3 || (idSelectionMode === 'refresh' && options.forceRefreshFromWeb),
         skipNotPublished: options.skipNotPublished,
         skipNotFoundGaps: options.skipNotFoundGaps,
         skipInProgress: options.skipInProgress,
@@ -602,13 +626,15 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         maxId: idSelectionMode === 'auto' 
             ? (parseInt(idSelectionParams.maxId) || undefined) 
             : undefined,
-        // Use gapIds for 'gaps', 'multiId', OR 'auto' mode (auto includes detected gaps)
+        // v3.1: Use gapIds for 'gaps', 'multiId', 'auto', OR 'refresh' mode
         gapIds: idSelectionMode === 'gaps' && gapIds 
               ? gapIds 
               : idSelectionMode === 'multiId' && multiIds 
               ? multiIds 
               : idSelectionMode === 'auto' && autoGapIds?.length 
               ? autoGapIds
+              : idSelectionMode === 'refresh' && refreshGameIds?.length
+              ? refreshGameIds
               : undefined,
         
         // Stopping thresholds
@@ -625,6 +651,15 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
           maxId: parseInt(idSelectionParams.maxId) || 'unlimited',
           gapsToProcess: autoGapIds?.length || 0,
           highestKnownId: highestTournamentId,
+        });
+      }
+
+      // v3.1: Log helpful info about refresh mode
+      if (idSelectionMode === 'refresh') {
+        console.log('[ScraperTab] Refresh mode configuration:', {
+          unfinishedGames: refreshGameIds?.length || 0,
+          forceRefreshFromWeb: options.forceRefreshFromWeb,
+          forceRefresh: jobInput.forceRefresh,
         });
       }
 
@@ -646,7 +681,8 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
     }
   }, [
     currentEntity, idSelectionMode, idSelectionParams, options, scrapeFlow, batchThresholds,
-    singleScrape, modals.saveConfirmation, defaultVenueId, scrapingStatus, startJob, urlToReparse, onReparseComplete, suggestedNextId, getScrapingStatus
+    singleScrape, modals.saveConfirmation, defaultVenueId, scrapingStatus, startJob, urlToReparse, 
+    onReparseComplete, suggestedNextId, getScrapingStatus, getUnfinishedGames, scraperApiKey
   ]);
 
   const handleStopProcessing = useCallback(async () => {
@@ -926,6 +962,44 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
                 </div>
               </div>
             )}
+
+            {/* v3.1: Refresh mode info panel */}
+            {idSelectionMode === 'refresh' && (
+              <div className="col-span-full">
+                <div className="text-sm text-gray-600 bg-amber-50 border border-amber-200 p-3 rounded">
+                  {gapLoading ? (
+                    <span className="flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      Loading unfinished games...
+                    </span>
+                  ) : scrapingStatus?.unfinishedGameCount ? (
+                    <>
+                      <div className="font-medium text-amber-800 mb-2">
+                        <RefreshCw className="h-4 w-4 inline mr-1" />
+                        {scrapingStatus.unfinishedGameCount} non-finished game(s) to refresh
+                      </div>
+                      <ul className="list-disc list-inside text-xs text-amber-700 space-y-1">
+                        <li>Games with status: RUNNING, REGISTERING, SCHEDULED</li>
+                        <li>Will re-fetch tournament data to update standings</li>
+                        {options.forceRefreshFromWeb && (
+                          <li className="font-medium text-amber-900">
+                            ⚡ Will fetch from LIVE web (ignoring S3 cache)
+                          </li>
+                        )}
+                        {!options.forceRefreshFromWeb && options.useS3 && (
+                          <li>Will use S3 cache if available (check "Force Refresh from Web" for live data)</li>
+                        )}
+                      </ul>
+                    </>
+                  ) : (
+                    <span className="text-green-600">
+                      <CheckCircle className="h-4 w-4 inline mr-1" />
+                      No unfinished games to refresh
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Batch Thresholds (only for batch modes) */}
@@ -1089,6 +1163,21 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
               />
               <span>Skip In-Progress</span>
             </label>
+
+            {/* v3.1: Force Refresh option - only shown for refresh mode */}
+            {idSelectionMode === 'refresh' && (
+              <label className="flex items-center gap-2 text-sm cursor-pointer bg-amber-50 px-3 py-1.5 rounded border border-amber-200">
+                <input 
+                  type="checkbox" 
+                  checked={options.forceRefreshFromWeb} 
+                  onChange={(e) => setOptions(o => ({ ...o, forceRefreshFromWeb: e.target.checked }))} 
+                  disabled={isProcessing} 
+                  className="rounded border-amber-300 text-amber-600 focus:ring-amber-500" 
+                />
+                <span className="font-medium text-amber-800">Force Refresh from Web</span>
+                <span className="text-xs text-amber-600">(bypass S3 cache)</span>
+              </label>
+            )}
           </div>
 
           {/* Venue Selection */}

@@ -1,6 +1,8 @@
 // src/types/scraper.ts
 // Centralized types for the scraper system
-// UPDATED v3.0: Added job progress subscription types for real-time batch job monitoring
+// UPDATED v3.1: Added forceRefreshFromWeb option for refresh mode
+//               - Refresh mode: Re-fetch unfinished games (RUNNING, REGISTERING, SCHEDULED)
+//               - Auto mode: Backend handles per-game forceRefresh based on game status
 //
 // Architecture:
 // - 'single': Frontend handles (interactive with modals) using useSingleScrape
@@ -20,6 +22,7 @@ import { ScrapedGameData } from '../API';
  * Processing modes
  * - 'single': Frontend handles with interactive control (modals, venue selection)
  * - 'multiId': Backend processes a custom list of IDs (comma-separated ranges/IDs)
+ * - 'refresh': Re-fetch unfinished games (RUNNING, REGISTERING, SCHEDULED) - NEW in v3.1
  * - Others: Backend Lambda handles (batch processing)
  * 
  * MIGRATION: 'next' is deprecated, use 'single' instead
@@ -48,6 +51,12 @@ export interface ScrapeOptions {
   overrideExisting: boolean;
   skipNotPublished: boolean;
   skipNotFoundGaps: boolean;
+  /** 
+   * NEW v3.1: Force live web fetch for refresh mode (bypass S3 cache)
+   * When enabled with refresh mode, all unfinished games will be re-fetched from live web
+   * instead of using S3 cache, ensuring the most up-to-date standings and player counts.
+   */
+  forceRefreshFromWeb: boolean;
 }
 
 export interface IdSelectionParams {
@@ -70,6 +79,7 @@ export const DEFAULT_SCRAPE_OPTIONS: ScrapeOptions = {
   overrideExisting: false,
   skipNotPublished: true,
   skipNotFoundGaps: true,
+  forceRefreshFromWeb: false,  // NEW v3.1: Default to using S3 cache
 };
 
 export const DEFAULT_ID_SELECTION_PARAMS: IdSelectionParams = {
@@ -678,6 +688,11 @@ export const validateMultiIdString = (multiIdString: string): string | null => {
 
 /**
  * Convert frontend options to batch job input for startScraperJob mutation
+ * 
+ * v3.1 UPDATE: forceRefresh logic
+ * - If useS3 is disabled globally → forceRefresh = true (all games fetched live)
+ * - If refresh mode with forceRefreshFromWeb → forceRefresh = true (refresh games fetched live)
+ * - For auto mode, backend handles per-game forceRefresh based on game status
  */
 export const buildBatchJobInput = (
   entityId: string,
@@ -694,7 +709,11 @@ export const buildBatchJobInput = (
     mode,
     triggerSource: 'MANUAL',
     useS3: options.useS3,
-    forceRefresh: !options.useS3,
+    // v3.1: forceRefresh is true if:
+    // 1. useS3 is disabled globally, OR
+    // 2. Refresh mode with forceRefreshFromWeb enabled
+    // Note: For auto mode, backend handles per-game forceRefresh based on game status
+    forceRefresh: !options.useS3 || (mode === 'refresh' && options.forceRefreshFromWeb),
     skipNotPublished: options.skipNotPublished,
     skipNotFoundGaps: options.skipNotFoundGaps,
     skipInProgress: options.skipInProgress,
@@ -715,6 +734,8 @@ export const buildBatchJobInput = (
       break;
     case 'auto':
       input.maxId = parseInt(params.maxId) || undefined;
+      // Note: Auto mode handles per-game forceRefresh in backend based on game status
+      // (in-progress games get forceRefresh=true, finished games use S3 cache)
       break;
     case 'gaps':
       input.gapIds = gapIds;
@@ -725,7 +746,12 @@ export const buildBatchJobInput = (
       input.gapIds = parseMultiIdString(params.multiIdString);
       break;
     case 'refresh':
-      // No additional params needed
+      // Refresh mode: Re-fetch unfinished games
+      // gapIds will be populated by frontend (from getUnfinishedGames) or backend query
+      // forceRefresh already set above based on forceRefreshFromWeb option
+      if (gapIds?.length) {
+        input.gapIds = gapIds;
+      }
       break;
   }
 
@@ -883,4 +909,50 @@ export const getJobStatusColor = (status: string | null | undefined): string => 
   }
   
   return 'bg-gray-100 text-gray-700';
+};
+
+// ===================================================================
+// IN-PROGRESS GAME STATUS HELPERS (NEW v3.1)
+// ===================================================================
+
+/**
+ * Game statuses that indicate a game is still in progress
+ * These games benefit from fresh data fetches (not S3 cache)
+ */
+export const IN_PROGRESS_GAME_STATUSES = [
+  'RUNNING',
+  'REGISTERING',
+  'SCHEDULED',
+  'LATE_REGISTRATION',
+] as const;
+
+export type InProgressGameStatus = typeof IN_PROGRESS_GAME_STATUSES[number];
+
+/**
+ * Check if a game status indicates the game is still in progress
+ * Used by auto mode to determine per-game forceRefresh
+ */
+export const isInProgressGameStatus = (status: string | null | undefined): boolean => {
+  if (!status) return false;
+  return IN_PROGRESS_GAME_STATUSES.includes(status.toUpperCase() as InProgressGameStatus);
+};
+
+/**
+ * Game statuses that indicate a game is finished
+ * These games can safely use S3 cache since data won't change
+ */
+export const FINISHED_GAME_STATUSES = [
+  'COMPLETED',
+  'CANCELLED',
+  'SUSPENDED',
+] as const;
+
+export type FinishedGameStatus = typeof FINISHED_GAME_STATUSES[number];
+
+/**
+ * Check if a game status indicates the game is finished
+ */
+export const isFinishedGameStatus = (status: string | null | undefined): boolean => {
+  if (!status) return false;
+  return FINISHED_GAME_STATUSES.includes(status.toUpperCase() as FinishedGameStatus);
 };

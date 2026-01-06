@@ -28,11 +28,11 @@ const monitoring = new LambdaMonitoring('s3ManagementFunction', null);
 const dynamodb = monitoring.wrapDynamoDBClient(originalDdbDocClient);
 
 // --- DynamoDB Table Constants ---
-const SCRAPE_URL_TABLE = process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME || process.env.SCRAPE_URL_TABLE || 'ScrapeURL-prod';
-const S3_STORAGE_TABLE = process.env.API_KINGSROOM_S3STORAGETABLE_NAME || process.env.S3_STORAGE_TABLE || 'S3Storage-prod';
+const SCRAPE_URL_TABLE = process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME || process.env.SCRAPE_URL_TABLE;
+const S3_STORAGE_TABLE = process.env.API_KINGSROOM_S3STORAGETABLE_NAME || process.env.S3_STORAGE_TABLE;
 
 // --- S3 Bucket Constant ---
-const S3_BUCKET = process.env.S3_BUCKET || 'pokerpro-scraper-storage';
+const S3_BUCKET = process.env.S3_BUCKET;
 
 /**
  * Helper to convert S3 GetObject stream to string

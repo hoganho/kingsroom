@@ -3357,7 +3357,7 @@ type EagerJobProgressEvent = {
   readonly consecutiveErrors?: number | null;
   readonly consecutiveBlanks?: number | null;
   readonly lastErrorMessage?: string | null;
-  readonly publishedAt: string;
+  readonly publishedAt?: string | null;
 }
 
 type LazyJobProgressEvent = {
@@ -3383,7 +3383,7 @@ type LazyJobProgressEvent = {
   readonly consecutiveErrors?: number | null;
   readonly consecutiveBlanks?: number | null;
   readonly lastErrorMessage?: string | null;
-  readonly publishedAt: string;
+  readonly publishedAt?: string | null;
 }
 
 export declare type JobProgressEvent = LazyLoading extends LazyLoadingDisabled ? EagerJobProgressEvent : LazyJobProgressEvent
@@ -7054,6 +7054,17 @@ type EagerScraperJob = {
   readonly consecutiveNotFound?: number | null;
   readonly consecutiveErrors?: number | null;
   readonly consecutiveBlanks?: number | null;
+  readonly mode?: string | null;
+  readonly forceRefresh?: boolean | null;
+  readonly skipNotPublished?: boolean | null;
+  readonly skipNotFoundGaps?: boolean | null;
+  readonly skipInProgress?: boolean | null;
+  readonly ignoreDoNotScrape?: boolean | null;
+  readonly saveToDatabase?: boolean | null;
+  readonly defaultVenueId?: string | null;
+  readonly bulkCount?: number | null;
+  readonly gapIds?: (number | null)[] | null;
+  readonly scraperApiKey?: string | null;
   readonly scrapeAttempts?: (ScrapeAttempt | null)[] | null;
   readonly entityId?: string | null;
   readonly entity?: Entity | null;
@@ -7097,6 +7108,17 @@ type LazyScraperJob = {
   readonly consecutiveNotFound?: number | null;
   readonly consecutiveErrors?: number | null;
   readonly consecutiveBlanks?: number | null;
+  readonly mode?: string | null;
+  readonly forceRefresh?: boolean | null;
+  readonly skipNotPublished?: boolean | null;
+  readonly skipNotFoundGaps?: boolean | null;
+  readonly skipInProgress?: boolean | null;
+  readonly ignoreDoNotScrape?: boolean | null;
+  readonly saveToDatabase?: boolean | null;
+  readonly defaultVenueId?: string | null;
+  readonly bulkCount?: number | null;
+  readonly gapIds?: (number | null)[] | null;
+  readonly scraperApiKey?: string | null;
   readonly scrapeAttempts: AsyncCollection<ScrapeAttempt>;
   readonly entityId?: string | null;
   readonly entity: AsyncItem<Entity | undefined>;

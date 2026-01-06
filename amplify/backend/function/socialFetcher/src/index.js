@@ -64,7 +64,7 @@ const APPSYNC_ENDPOINT = process.env.API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT || p
 const APPSYNC_REGION = process.env.REGION || 'ap-southeast-2';
 
 // S3 bucket for storing page logos/profile images
-const S3_BUCKET = process.env.SOCIAL_MEDIA_BUCKET || 'pokerpro-scraper-storage';
+const S3_BUCKET = process.env.SOCIAL_MEDIA_BUCKET || '';
 const S3_PREFIX = 'social-media/page-logos/';
 const S3_POST_ATTACHMENTS_PREFIX = 'social-media/post-attachments/';
 
