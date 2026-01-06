@@ -13,7 +13,7 @@
 //     onJobComplete: (event) => console.log('Job completed:', event),
 //   });
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { 
   onJobProgress, 
