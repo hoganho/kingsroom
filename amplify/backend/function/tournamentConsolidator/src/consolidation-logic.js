@@ -638,9 +638,7 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     let totalDuration = null;
     if (earliestStart < Number.MAX_SAFE_INTEGER && latestEnd > 0) {
         const durationMs = latestEnd - earliestStart;
-        const hours = Math.floor(durationMs / (1000 * 60 * 60));
-        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-        totalDuration = `${hours}h ${minutes}m`;
+        totalDuration = Math.floor(durationMs / 1000);
     }
 
     return {

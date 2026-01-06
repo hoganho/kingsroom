@@ -327,11 +327,7 @@ async function createRecentlyFinishedGame(game, input, ddbDocClient) {
         const start = new Date(game.gameStartDateTime).getTime();
         const end = new Date(game.gameEndDateTime).getTime();
         const durationMs = end - start;
-        if (durationMs > 0) {
-            const hours = Math.floor(durationMs / (1000 * 60 * 60));
-            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-            totalDuration = `${hours}h ${minutes}m`;
-        }
+        totalDuration = Math.floor(durationMs / 1000);
     }
     
     const recentlyFinishedRecord = {
