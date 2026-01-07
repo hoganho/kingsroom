@@ -711,7 +711,10 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         consolidationType: 'PARENT',
         // *** FIX: Pass childGame to use structured fields for parent name ***
         name: deriveParentName(childGame.name, childGame),
-        parentGameId: null, // Parents don't have parents
+        // NOTE: parentGameId is intentionally OMITTED (not set to null)
+        // Setting it to null causes DynamoDB GSI validation errors
+        // ("Type mismatch for Index Key parentGameId Expected: S Actual: NULL")
+        // DynamoDB GSIs are sparse - items without the key are simply not indexed
         
         // Copy immutable traits from child
         gameType: childGame.gameType || 'TOURNAMENT',

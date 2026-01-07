@@ -105,9 +105,9 @@ const settingsNavigation: NavItem[] = [
   { name: "Venue Management", href: "/settings/venue-management", icon: BuildingOffice2Icon, requiredPaths: ["/settings/venue-management"] },
   { name: "Game Management", href: "/settings/game-management", icon: BeakerIcon, requiredPaths: ["/settings/game-management"] },
   { name: "Series Management", href: "/settings/series-management", icon: TrophyIcon, requiredPaths: ["/settings/series-management"] },
-  { name: 'Metrics Management', href: '/settings/metrics-management', icon: ChartBarIcon, requiredPaths: ["/settings/metrics-management"] },
   { name: "Social Accounts", href: "/settings/social-accounts", icon: HashtagIcon, requiredPaths: ["/settings/social-accounts"] },
   { name: "User Management", href: "/settings/user-management", icon: UsersIcon, requiredPaths: ["/settings/user-management"] },
+  { name: 'Metrics Management', href: '/settings/metrics-management', icon: ChartBarIcon, requiredPaths: ["/settings/metrics-management"] },
 ]
 
 const scraperNavigation: NavItem[] = [

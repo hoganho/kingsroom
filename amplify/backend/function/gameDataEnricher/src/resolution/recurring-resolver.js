@@ -439,6 +439,7 @@ const findExistingDuplicate = async (venueId, displayName, gameVariant) => {
 
 /**
  * Create a new recurring game with conditional write
+ * Defaults frequency to 'WEEKLY' if not provided (required by GraphQL schema)
  */
 const createRecurringGame = async (gameData) => {
     const client = getDocClient();
@@ -452,6 +453,7 @@ const createRecurringGame = async (gameData) => {
         id,
         ...gameData,
         'dayOfWeek#name': dayOfWeekNameKey,
+        frequency: gameData.frequency || 'WEEKLY',  // Default to WEEKLY - required field in GraphQL schema
         isActive: true,
         isPaused: false,
         totalInstancesRun: 0,

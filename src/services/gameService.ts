@@ -6,7 +6,8 @@
 import { generateClient } from 'aws-amplify/api';
 import type { GraphQLResult } from '@aws-amplify/api';
 import { fetchTournamentData } from '../graphql/mutations';
-import { listEntities } from '../graphql/queries';
+// FIXED: Use optimized query to avoid nested relationship errors (RecurringGame.frequency null issue)
+import { listEntitiesSimple } from '../graphql/customQueries';
 import type { GameData } from '../types/game';
 import type { Entity } from '../API';
 import { 
@@ -254,12 +255,14 @@ export const getUnassignedVenueId = (): string => {
 
 /**
  * Fetch all entities from the backend
+ * FIXED: Uses listEntitiesSimple to avoid nested relationship errors
+ * (e.g., RecurringGame.frequency null causing GraphQL failures)
  */
 export const fetchEntities = async (): Promise<Entity[]> => {
     const client = generateClient();
     try {
         const response = await client.graphql({
-            query: listEntities,
+            query: listEntitiesSimple,
             variables: { limit: 100 }
         }) as any;
         
