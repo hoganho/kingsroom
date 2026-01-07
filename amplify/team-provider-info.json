@@ -175,7 +175,7 @@
         },
         "gameDataEnricher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/gameDataEnricher-554c4b5a49326a454a5a-build.zip"
+          "s3Key": "amplify-builds/gameDataEnricher-6f705375753241486b63-build.zip"
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -253,7 +253,7 @@
         },
         "tournamentConsolidator": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/tournamentConsolidator-3578497644766d5a4e50-build.zip"
+          "s3Key": "amplify-builds/tournamentConsolidator-774a784333493239302b-build.zip"
         },
         "userLastActiveUpdater": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
