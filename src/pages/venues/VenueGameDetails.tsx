@@ -1,7 +1,9 @@
 // src/pages/venues/VenueGameDetails.tsx
-// VERSION: 1.1.0 - Added Tournament ID column
+// VERSION: 1.2.0 - Explicitly filters out series games for all users
 //
 // CHANGELOG:
+// - v1.2.0: Added explicit filter to exclude series games (isSeries=true)
+//           All users now only see regular games
 // - v1.1.0: Added Tournament ID column to game history table (between Date and Game)
 
 import React, { useState, useEffect, useMemo, Fragment } from 'react';
@@ -95,6 +97,7 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
         netProfit
         profitMargin
         gameType
+        isSeries
         # New prizepool adjustment fields
         prizepoolPaidDelta
         prizepoolJackpotContributions
@@ -105,6 +108,7 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
           name
           gameStatus
           isRegular
+          isSeries
           venueScheduleKey
           venueGameTypeKey
           buyIn
@@ -290,6 +294,7 @@ interface GameFinancialSnapshotWithGame {
   netProfit?: number | null;
   profitMargin?: number | null;
   gameType?: string | null;
+  isSeries?: boolean | null;
   // New prizepool adjustment fields
   prizepoolPaidDelta?: number | null;
   prizepoolJackpotContributions?: number | null;
@@ -300,6 +305,7 @@ interface GameFinancialSnapshotWithGame {
     name?: string | null;
     gameStatus?: string | null;
     isRegular?: boolean | null;
+    isSeries?: boolean | null;
     venueScheduleKey?: string | null;
     venueGameTypeKey?: string | null;
     buyIn?: number | null;
@@ -430,12 +436,16 @@ interface GameDetails {
 function isValidGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
   const game = snapshot.game;
   
+  // v1.2.0: Check for series games at both snapshot and game level
+  const isSeries = snapshot.isSeries === true || game?.isSeries === true;
+  
   // Debug logging to identify filtering issues
   const checks = {
     hasGame: !!game,
     gameStatus: game?.gameStatus,
     isFinished: game?.gameStatus === 'FINISHED',
     isRegular: game?.isRegular,
+    isSeries: isSeries,
     venueScheduleKey: game?.venueScheduleKey,
     venueGameTypeKey: game?.venueGameTypeKey,
   };
@@ -443,6 +453,12 @@ function isValidGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
   // Explicitly exclude NOT_PUBLISHED games
   if (game?.gameStatus === 'NOT_PUBLISHED') {
     console.log(`[VenueGameDetails] Snapshot ${snapshot.id} excluded: NOT_PUBLISHED`);
+    return false;
+  }
+  
+  // v1.2.0: Explicitly exclude series games for all users
+  if (isSeries) {
+    console.log(`[VenueGameDetails] Snapshot ${snapshot.id} excluded: isSeries=true`);
     return false;
   }
   

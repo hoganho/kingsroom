@@ -1,12 +1,21 @@
 // src/pages/venues/VenuesDashboard.tsx
-// VERSION: 2.3.0 - Fixed seriesType filtering to use separate VenueMetrics records per seriesType
+// VERSION: 2.5.0 - Added global series type toggle for SUPER_ADMIN KPI stats
 //
 // REQUIRES: Metrics calculated with refreshAllMetrics v2.0.0+
 // Data format: VenueMetrics with seriesType: REGULAR | SERIES | ALL
 //
-// FIX: Previously always queried seriesType='ALL' and only filtered game count.
-//      Now fetches metrics for all three seriesTypes and uses the correct record
-//      for each metric (prizepool, profit, entries, etc.)
+// FIX v2.5.0: Added global SeriesTypeSelector for SUPER_ADMIN to control KPI card stats
+//             - SUPER_ADMIN can toggle between ALL/REGULAR/SERIES for summary stats
+//             - Per-entity toggles remain for individual entity venue sections
+//
+// FIX v2.4.0: Non-SUPER_ADMIN users now properly see REGULAR game stats only
+//             - Global stats use REGULAR metrics (not ALL)
+//             - Series type filter hidden for non-SUPER_ADMIN
+//             - All data views locked to REGULAR for non-SUPER_ADMIN
+//
+// FIX v2.3.0: Previously always queried seriesType='ALL' and only filtered game count.
+//             Now fetches metrics for all three seriesTypes and uses the correct record
+//             for each metric (prizepool, profit, entries, etc.)
 
 import { useCallback, useEffect, useMemo, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
@@ -451,82 +460,71 @@ const VenueCard: React.FC<VenueCardProps> = ({ data, seriesType, onNavigate }) =
             <img 
               src={data.venueLogo} 
               alt={data.venueName} 
-              className="w-12 h-12 rounded-full object-cover border-2 border-slate-100"
+              className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" 
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 border-2 border-slate-100">
-              <BuildingOffice2Icon className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white font-semibold text-lg border-2 border-white shadow-sm">
+              {data.venueName?.charAt(0) || '?'}
             </div>
           )}
+          {/* Health indicator dot */}
+          <div className={cx(
+            "absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white",
+            data.overallHealth === 'excellent' && 'bg-green-500',
+            data.overallHealth === 'good' && 'bg-blue-500',
+            data.overallHealth === 'needs-attention' && 'bg-yellow-500',
+            data.overallHealth === 'critical' && 'bg-red-500',
+            !['excellent', 'good', 'needs-attention', 'critical'].includes(data.overallHealth) && 'bg-gray-400'
+          )} />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold text-gray-900 truncate">{data.venueName}</h3>
-          <p className="text-xs text-gray-500">
-            Latest: {data.latestGameDate 
-              ? formatDateWithDaysAgo(data.latestGameDate, data.latestGameDaysAgo) 
-              : 'No games'}
-          </p>
+          <h3 className="font-semibold text-gray-900 truncate" title={data.venueName}>
+            {data.venueName}
+          </h3>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-xs text-gray-500">
+              {data.totalGames} games
+            </span>
+            <TrendIndicator trend={data.attendanceTrend} percent={data.attendanceTrendPercent} />
+          </div>
         </div>
-        <HealthBadge health={data.overallHealth} />
       </div>
 
       {/* Card Body */}
       {isEmpty ? (
-        <div className="p-6 text-center text-sm text-gray-400">
-          No {seriesType === 'ALL' ? '' : seriesType.toLowerCase()} games recorded
+        <div className="p-6 text-center text-gray-400">
+          <CalendarIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No games in this period</p>
         </div>
       ) : (
-        <>
-          {/* Stats Grid */}
-          <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-3">
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Games</p>
-              <p className="text-lg font-semibold text-gray-900">{data.totalGames.toLocaleString()}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Prizepool</p>
-              <p className="text-lg font-semibold text-gray-900">{formatCurrency(data.totalPrizepool)}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Entries</p>
-              <p className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                {data.totalEntries.toLocaleString()}
-                <TrendIndicator trend={data.attendanceTrend} percent={data.attendanceTrendPercent} />
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Profit</p>
-              <p className={cx(
-                "text-lg font-semibold",
-                data.totalProfit >= 0 ? "text-green-600" : "text-red-600"
-              )}>
-                {formatCurrency(data.totalProfit)}
-              </p>
-            </div>
+        <div className="p-4 grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-xs text-gray-500">Entries</p>
+            <p className="text-lg font-semibold text-gray-900">{data.totalEntries.toLocaleString()}</p>
+            <p className="text-xs text-gray-400">avg {data.avgEntriesPerGame?.toFixed(1) || '-'}/game</p>
           </div>
-
-          {/* Top Games */}
-          <div className="px-4 pb-4 border-t border-slate-100 pt-3">
-            <p className="text-xs text-gray-500 font-medium mb-2">
-              Top {seriesType === 'SERIES' ? 'Tournament Series' : 'Regular Games'}
+          <div>
+            <p className="text-xs text-gray-500">Prizepool</p>
+            <p className="text-lg font-semibold text-gray-900">{formatCompactCurrency(data.totalPrizepool)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Profit</p>
+            <p className={cx("text-lg font-semibold", data.totalProfit >= 0 ? 'text-green-600' : 'text-red-600')}>
+              {formatCompactCurrency(data.totalProfit)}
             </p>
-            <div className="flex flex-wrap gap-1.5">
-              {(seriesType === 'SERIES' ? data.topTournamentSeries : data.topRecurringGames).slice(0, 3).map((game, i) => (
-                <span key={i} className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-md truncate max-w-[120px]">
-                  {game.name || game.seriesName || 'Unknown'}
-                </span>
-              ))}
-              {(seriesType === 'SERIES' ? data.topTournamentSeries : data.topRecurringGames).length > 3 && (
-                <span className="px-2 py-1 text-slate-500 text-xs">
-                  +{(seriesType === 'SERIES' ? data.topTournamentSeries : data.topRecurringGames).length - 3} more
-                </span>
-              )}
-              {(seriesType === 'SERIES' ? data.topTournamentSeries : data.topRecurringGames).length === 0 && (
-                <span className="text-xs text-gray-400 italic">None recorded</span>
-              )}
-            </div>
+            <TrendIndicator trend={data.profitTrend} percent={data.profitTrendPercent} />
           </div>
-        </>
+          <div>
+            <p className="text-xs text-gray-500">Last Game</p>
+            <p className="text-sm font-medium text-gray-700">
+              {data.latestGameDaysAgo !== null 
+                ? data.latestGameDaysAgo === 0 
+                  ? 'Today' 
+                  : `${data.latestGameDaysAgo}d ago`
+                : '-'}
+            </p>
+          </div>
+        </div>
       )}
     </div>
   )
@@ -536,15 +534,17 @@ const VenueCard: React.FC<VenueCardProps> = ({ data, seriesType, onNavigate }) =
 // MAIN COMPONENT
 // ============================================
 
-export default function VenuesDashboard() {
+export const VenuesDashboard = () => {
   const navigate = useNavigate()
   const client = getClient()
   const { selectedEntities, entities, loading: entityLoading } = useEntity()
-  
-  // Get user permissions - isSuperAdmin check for showing series type filter
   const { isSuperAdmin } = useUserPermissions()
 
-  const [timeRange, setTimeRange] = useState<TimeRangeKey>("ALL")
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [timeRange, setTimeRange] = useState<TimeRangeKey>('ALL')
   const [venues, setVenues] = useState<Venue[]>([])
   
   // CHANGED: Store metrics keyed by entityId AND seriesType
@@ -559,6 +559,9 @@ export default function VenuesDashboard() {
   // Per-entity state
   const [hideEmptyVenuesMap, setHideEmptyVenuesMap] = useState<Record<string, boolean>>({})
   const [seriesTypeMap, setSeriesTypeMap] = useState<Record<string, SeriesTypeKey>>({})
+  
+  // Global series type for KPI cards (SUPER_ADMIN only) - defaults to ALL for admins
+  const [globalSeriesType, setGlobalSeriesType] = useState<SeriesTypeKey>('ALL')
   
   // Table filter state
   const [hideEmptyInTable, setHideEmptyInTable] = useState<boolean>(true)
@@ -710,14 +713,14 @@ export default function VenuesDashboard() {
     return transformMetrics(metrics, displaySeriesType)
   }, [venueMetricsMap, transformMetrics])
 
-  // Combined stats for table - use REGULAR for non-SUPER_ADMIN
+  // Combined stats for table - ALWAYS use REGULAR for non-SUPER_ADMIN
   const allVenueStats = useMemo(() => {
-    const displayType = isSuperAdmin ? 'REGULAR' : 'REGULAR'
+    const displayType: SeriesTypeKey = 'REGULAR' // Always REGULAR for table view
     const allMetrics = Object.values(venueMetricsMap).flatMap(entityMetrics => 
       entityMetrics[displayType] || []
     )
     return transformMetrics(allMetrics, displayType)
-  }, [venueMetricsMap, transformMetrics, isSuperAdmin])
+  }, [venueMetricsMap, transformMetrics])
 
   // Filtered stats for table display
   const filteredTableStats = useMemo(() => {
@@ -732,9 +735,12 @@ export default function VenuesDashboard() {
   // ============================================
 
   const globalStats = useMemo<GlobalStats>(() => {
-    // Use 'ALL' metrics for global stats to get combined totals
+    // FIX v2.4.0: Non-SUPER_ADMIN users should use REGULAR metrics for global stats
+    // SUPER_ADMIN users can toggle between ALL/REGULAR/SERIES using globalSeriesType
+    const metricsSeriesType: SeriesTypeKey = isSuperAdmin ? globalSeriesType : 'REGULAR'
+    
     const allMetrics = Object.values(venueMetricsMap).flatMap(entityMetrics => 
-      entityMetrics['ALL'] || []
+      entityMetrics[metricsSeriesType] || []
     )
     
     if (allMetrics.length === 0) {
@@ -754,8 +760,13 @@ export default function VenuesDashboard() {
 
     const activeVenues = allMetrics.filter(m => m.totalGames > 0).length
     const totalGames = allMetrics.reduce((sum, m) => sum + (m.totalGames || 0), 0)
-    const totalSeriesGames = allMetrics.reduce((sum, m) => sum + (m.totalSeriesGames || 0), 0)
-    const totalRegularGames = allMetrics.reduce((sum, m) => sum + (m.totalRegularGames || 0), 0)
+    // Only show breakdown when viewing ALL metrics
+    const totalSeriesGames = (isSuperAdmin && globalSeriesType === 'ALL')
+      ? allMetrics.reduce((sum, m) => sum + (m.totalSeriesGames || 0), 0)
+      : 0
+    const totalRegularGames = (isSuperAdmin && globalSeriesType === 'ALL')
+      ? allMetrics.reduce((sum, m) => sum + (m.totalRegularGames || 0), 0)
+      : totalGames // When filtering by type, all displayed games are that type
     const totalEntries = allMetrics.reduce((sum, m) => sum + (m.totalEntries || 0), 0)
     const totalPrizepool = allMetrics.reduce((sum, m) => sum + (m.totalPrizepool || 0), 0)
     const totalProfit = allMetrics.reduce((sum, m) => sum + (m.totalProfit || 0), 0)
@@ -774,7 +785,7 @@ export default function VenuesDashboard() {
       avgEntriesPerGame: totalGames > 0 ? totalEntries / totalGames : 0,
       calculatedAt: latestCalc ? new Date(latestCalc) : null
     }
-  }, [venueMetricsMap, venues])
+  }, [venueMetricsMap, venues, isSuperAdmin, globalSeriesType])
 
   // ============================================
   // TABLE COLUMNS
@@ -843,16 +854,30 @@ export default function VenuesDashboard() {
         </div>
       ) : (
         <>
+          {/* Global Series Type Selector for KPI Stats - SUPER_ADMIN only */}
+          {isSuperAdmin && (
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-600">Summary Stats Filter:</span>
+              <SeriesTypeSelector 
+                value={globalSeriesType} 
+                onChange={setGlobalSeriesType} 
+              />
+            </div>
+          )}
+
           {/* Global KPI Cards - Responsive grid with gradual column increase */}
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             <KpiCard title="Total Venues" value={globalStats.totalVenues} subtitle={`${globalStats.activeVenues} active`} icon={<BuildingOffice2Icon className="h-5 w-5" />} />
             <KpiCard 
-              title={isSuperAdmin ? "Total Games" : "Regular Games"} 
+              title={isSuperAdmin 
+                ? (globalSeriesType === 'ALL' ? "Total Games" : globalSeriesType === 'REGULAR' ? "Regular Games" : "Series Games")
+                : "Regular Games"
+              } 
               value={globalStats.totalGames.toLocaleString()} 
               icon={<CalendarIcon className="h-5 w-5" />} 
             />
-            {/* Only show breakdown KPIs for SUPER_ADMIN */}
-            {isSuperAdmin && (
+            {/* Only show breakdown KPIs for SUPER_ADMIN when viewing ALL */}
+            {isSuperAdmin && globalSeriesType === 'ALL' && (
               <>
                 <KpiCard title="Regular Games" value={globalStats.totalRegularGames.toLocaleString()} icon={<CalendarIcon className="h-5 w-5 text-blue-500" />} />
                 <KpiCard title="Series Games" value={globalStats.totalSeriesGames.toLocaleString()} icon={<TrophyIcon className="h-5 w-5 text-purple-500" />} />
@@ -1006,3 +1031,5 @@ export default function VenuesDashboard() {
     </>
   )
 }
+
+export default VenuesDashboard

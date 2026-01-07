@@ -1,7 +1,10 @@
 // src/pages/venues/VenueDetails.tsx
-// VERSION: 2.3.0 - Added Tournament ID column to all game tables
+// VERSION: 2.4.0 - Fixed non-SUPER_ADMIN users to only see REGULAR game stats
 //
 // CHANGELOG:
+// - v2.4.0: Non-SUPER_ADMIN users now properly locked to REGULAR game stats only
+//           - seriesType state is forced to 'REGULAR' for non-SUPER_ADMIN
+//           - Series type filter hidden for non-SUPER_ADMIN
 // - v2.3.0: Added Tournament ID column to game history table and ad-hoc games table
 //           Column appears between Date and Game (name)
 // - v2.2.0: Ad-hoc games now displayed in full table format (matching VenueGameDetails)
@@ -826,6 +829,20 @@ export const VenueDetails: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'games' | 'analytics'>('overview');
   const [gameHistoryFilter, setGameHistoryFilter] = useState<'all' | 'recurring' | 'adhoc'>('all');
 
+  // FIX v2.4.0: Ensure seriesType is always REGULAR for non-SUPER_ADMIN users
+  // This effect runs when isSuperAdmin changes or when seriesType is set incorrectly
+  useEffect(() => {
+    if (!isSuperAdmin && seriesType !== 'REGULAR') {
+      setSeriesType('REGULAR');
+    }
+  }, [isSuperAdmin, seriesType]);
+
+  // Wrapper function to ensure non-SUPER_ADMIN users can't change seriesType
+  const handleSeriesTypeChange = (newSeriesType: SeriesTypeKey) => {
+    if (!isSuperAdmin) return; // Safety check
+    setSeriesType(newSeriesType);
+  };
+
   // Show entity selector only if user has more than 1 entity
   const showEntitySelector = entities && entities.length > 1;
 
@@ -1191,7 +1208,7 @@ export const VenueDetails: React.FC = () => {
           {isSuperAdmin && (
             <SeriesTypeSelector 
               value={seriesType} 
-              onChange={setSeriesType} 
+              onChange={handleSeriesTypeChange} 
             />
           )}
         </div>
