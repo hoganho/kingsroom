@@ -376,6 +376,8 @@ export interface JobProgressEvent {
   lastErrorMessage?: string | null;
   /** Timestamp when this event was published */
   publishedAt: string;
+  notFoundCount?: number;
+  notPublishedCount?: number;
 }
 
 /**

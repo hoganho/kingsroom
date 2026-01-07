@@ -33,7 +33,9 @@ export interface JobProgressStats {
   updated: number;
   errors: number;
   skipped: number;
-  blanks: number;
+  blanks: number;           // Kept for backwards compat - same as notFound
+  notFound: number;         // Clearer name: empty tournament slots
+  notPublished: number;     // Real tournaments that are hidden
   successRate: number | null;
   s3CacheHits: number;
 }
@@ -104,6 +106,8 @@ const extractStats = (event: JobProgressEvent | null): JobProgressStats => ({
   errors: event?.errors ?? 0,
   skipped: event?.gamesSkipped ?? 0,
   blanks: event?.blanks ?? 0,
+  notFound: (event as any)?.notFoundCount ?? event?.blanks ?? 0,  // Prefer notFoundCount, fallback to blanks
+  notPublished: (event as any)?.notPublishedCount ?? 0,
   successRate: event?.successRate ?? null,
   s3CacheHits: event?.s3CacheHits ?? 0,
 });

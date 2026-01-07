@@ -285,6 +285,8 @@ class JobProgressPublisher {
             gamesSkipped: stats.gamesSkipped || 0,
             errors: stats.errors || 0,
             blanks: stats.blanks || 0,
+            notFoundCount: stats.notFoundCount || 0,
+            notPublishedCount: stats.notPublishedCount || 0,
             currentId: currentId,
             startId: this.startId,
             endId: this.endId,
@@ -606,14 +608,27 @@ function buildScrapingContext(jobId = null, entityId = null, options = {}) {
         
         // ===== Continuation support =====
         invokeContinuation: jobId ? async (currentId, endId, accumulatedResults) => {
-            console.log(`[AutoScraper] Self-continuing from ID ${currentId}`);
+            // Calculate duration so far for accumulation
+            const currentDuration = Math.floor((Date.now() - invocationStartTime) / 1000);
+            const previousDuration = options.accumulatedResults?.previousDuration || 0;
+            const totalDuration = currentDuration + previousDuration;
             
-            // Publish continuation status
+            console.log(`[AutoScraper] Self-continuing from ID ${currentId}, processed so far: ${accumulatedResults.totalProcessed || 0}, duration: ${totalDuration}s`);
+            
+            // Publish continuation status with current totals
             if (progressPublisher) {
-                await progressPublisher.publishProgress(accumulatedResults, 'RUNNING', { 
-                    currentId,
-                    stopReason: STOP_REASON.CONTINUING 
-                });
+                try {
+                    await progressPublisher.publishProgress({
+                        ...accumulatedResults,
+                        durationSeconds: totalDuration,
+                    }, 'RUNNING', { 
+                        currentId,
+                        stopReason: STOP_REASON.CONTINUING,
+                        message: `Continuing from ID ${currentId}`
+                    });
+                } catch (pubErr) {
+                    console.warn(`[AutoScraper] Continuation progress publish failed:`, pubErr.message);
+                }
             }
             
             const continuationPayload = {
@@ -631,10 +646,29 @@ function buildScrapingContext(jobId = null, entityId = null, options = {}) {
                     errors: accumulatedResults.errors || 0,
                     blanks: accumulatedResults.blanks || 0,
                     notFoundCount: accumulatedResults.notFoundCount || 0,
+                    notPublishedCount: accumulatedResults.notPublishedCount || 0,
                     s3CacheHits: accumulatedResults.s3CacheHits || 0,
+                    // Track accumulated duration across invocations
+                    previousDuration: totalDuration,
                 },
-                // Pass through original options
-                ...options,
+                // Pass through original options (excluding accumulatedResults to avoid nesting)
+                mode: options.mode,
+                useS3: options.useS3,
+                forceRefresh: options.forceRefresh,
+                skipNotPublished: options.skipNotPublished,
+                skipNotFoundGaps: options.skipNotFoundGaps,
+                skipInProgress: options.skipInProgress,
+                ignoreDoNotScrape: options.ignoreDoNotScrape,
+                saveToDatabase: options.saveToDatabase,
+                defaultVenueId: options.defaultVenueId,
+                scraperApiKey: options.scraperApiKey,
+                maxConsecutiveNotFound: options.maxConsecutiveNotFound,
+                maxConsecutiveErrors: options.maxConsecutiveErrors,
+                maxConsecutiveBlanks: options.maxConsecutiveBlanks,
+                maxTotalErrors: options.maxTotalErrors,
+                startId: options.startId,
+                endId: options.endId || endId,
+                bulkCount: options.bulkCount,
             };
             
             await lambdaClient.send(new InvokeCommand({
@@ -643,7 +677,7 @@ function buildScrapingContext(jobId = null, entityId = null, options = {}) {
                 Payload: JSON.stringify(continuationPayload),
             }));
             
-            console.log(`[AutoScraper] Continuation invoked successfully for job ${jobId}`);
+            console.log(`[AutoScraper] Continuation invoked successfully for job ${jobId} from ID ${currentId}`);
         } : null  // No continuation if no jobId
     };
 }
@@ -692,81 +726,30 @@ async function controlScraperOperation(operation, entityId) {
 // ===================================================================
 
 async function executeJob(event) {
-    const {
-        jobId,
-        entityId,
-        mode,
-        useS3,
-        forceRefresh,
-        skipNotPublished,
-        skipNotFoundGaps,
-        skipInProgress,
-        ignoreDoNotScrape,
-        saveToDatabase,
-        defaultVenueId,
-        scraperApiKey,
-        bulkCount,
-        startId,
-        endId,
-        maxId,
-        gapIds,
-        maxConsecutiveNotFound,
-        maxConsecutiveErrors,
-        maxConsecutiveBlanks,
-        maxTotalErrors,
-    } = event;
+    const { jobId, entityId } = event;
+    
+    if (!jobId || !entityId) {
+        return { success: false, error: 'jobId and entityId required' };
+    }
 
-    // Handle explicit continuation from self-invocation
+    // Handle continuation - check if this is a continuation invocation
     const isContinuation = event.isContinuation || false;
-    let accumulatedResults = event.accumulatedResults || null;
-    let continueFromId = event.continueFromId || null;
+    const accumulatedResults = event.accumulatedResults || null;
+    const continueFromId = event.continueFromId || null;
     const originalEndId = event.originalEndId || null;
 
-    console.log(`[executeJob] Starting job ${jobId} for entity ${entityId}`);
+    if (isContinuation) {
+        console.log(`[executeJob] CONTINUATION for job ${jobId} from ID ${continueFromId}`);
+        console.log(`[executeJob] Accumulated results:`, JSON.stringify(accumulatedResults));
+    } else {
+        console.log(`[executeJob] Starting job ${jobId} for entity ${entityId}`);
+    }
     
     const jobStartTime = Date.now();
     
     const job = await getScraperJob(jobId);
     if (!job) {
         return { success: false, error: `Job ${jobId} not found` };
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // CHECKPOINT RESUME LOGIC (NEW)
-    // Detects if this is an AWS retry of a timed-out invocation
-    // and resumes from the last checkpoint instead of starting over
-    // ═══════════════════════════════════════════════════════════════
-    let resumeFromCheckpoint = false;
-    
-    if (!isContinuation && job.currentId && job.totalURLsProcessed > 0 && job.status === 'RUNNING') {
-        // Job was already running and has progress - this is likely an AWS retry
-        console.log(`[executeJob] CHECKPOINT DETECTED: Job was interrupted at ID ${job.currentId}`);
-        console.log(`[executeJob] Previous progress: ${job.totalURLsProcessed} processed, ` +
-                    `${job.newGamesScraped} new, ${job.gamesUpdated} updated`);
-        
-        // Resume from checkpoint
-        continueFromId = job.currentId;
-        resumeFromCheckpoint = true;
-        
-        // Restore accumulated results from the interrupted run
-        accumulatedResults = {
-            totalProcessed: job.totalURLsProcessed || 0,
-            newGamesScraped: job.newGamesScraped || 0,
-            gamesUpdated: job.gamesUpdated || 0,
-            gamesSkipped: job.gamesSkipped || 0,
-            errors: job.errors || 0,
-            blanks: job.blanks || 0,
-            notFoundCount: job.notFoundCount || 0,
-            s3CacheHits: job.s3CacheHits || 0,
-            notPublishedCount: job.notPublishedCount || 0,
-        };
-        
-        console.log(`[executeJob] Resuming from checkpoint ID ${continueFromId} with accumulated results`);
-    }
-
-    if (isContinuation) {
-        console.log(`[executeJob] CONTINUATION for job ${jobId} from ID ${continueFromId}`);
-        console.log(`[executeJob] Accumulated results:`, JSON.stringify(accumulatedResults));
     }
     
     const scraperState = await getOrCreateScraperState(entityId);
@@ -780,8 +763,8 @@ async function executeJob(event) {
         job.endId
     );
     
-    // Only update state if this is a fresh start (not continuation or checkpoint resume)
-    if (!isContinuation && !resumeFromCheckpoint) {
+    // Only update state if not a continuation (continuation keeps isRunning true)
+    if (!isContinuation) {
         await updateScraperState(scraperState.id, {
             isRunning: true,
             lastRunStartTime: new Date(jobStartTime).toISOString(),
@@ -799,13 +782,6 @@ async function executeJob(event) {
             errors: 0,
             blanks: 0,
         }, 'RUNNING', { force: true });
-    } else if (resumeFromCheckpoint) {
-        // For checkpoint resume, publish current progress
-        await progressPublisher.publishProgress(accumulatedResults, 'RUNNING', { 
-            force: true,
-            currentId: continueFromId,
-            message: `Resuming from checkpoint at ID ${continueFromId}`
-        });
     }
     
     try {
@@ -813,8 +789,7 @@ async function executeJob(event) {
         const scrapingOptions = {
             mode: job.mode || 'bulk',
             bulkCount: job.bulkCount,
-            // Use checkpoint/continuation ID if available, otherwise use job's startId
-            startId: continueFromId || job.startId,
+            startId: isContinuation ? continueFromId : job.startId,
             endId: isContinuation ? originalEndId : job.endId,
             maxId: job.maxId,
             gapIds: job.gapIds,
@@ -828,7 +803,7 @@ async function executeJob(event) {
             maxConsecutiveErrors: job.maxConsecutiveErrors,
             maxConsecutiveBlanks: job.maxConsecutiveBlanks,
             maxTotalErrors: job.maxTotalErrors,
-            // Pass accumulated results for continuation OR checkpoint resume
+            // Pass accumulated results for continuation
             accumulatedResults: accumulatedResults,
         };
 
@@ -838,7 +813,10 @@ async function executeJob(event) {
         const results = await performScrapingEnhanced(entityId, scraperState, jobId, scrapingOptions, ctx);
         
         const jobEndTime = Date.now();
-        const durationSeconds = Math.floor((jobEndTime - jobStartTime) / 1000);
+        const currentDuration = Math.floor((jobEndTime - jobStartTime) / 1000);
+        // Account for accumulated duration from previous invocations
+        const previousDuration = event.accumulatedResults?.previousDuration || 0;
+        const durationSeconds = currentDuration + previousDuration;
         
         // Handle CONTINUING status - don't finalize the job
         if (results.stopReason === STOP_REASON.CONTINUING || results.stopReason === 'CONTINUING') {
@@ -854,7 +832,9 @@ async function executeJob(event) {
                 notFoundCount: results.notFoundCount,
                 blanks: results.blanks,
                 s3CacheHits: results.s3CacheHits,
+                notPublishedCount: results.notPublishedCount,
                 currentId: results.currentId,
+                durationSeconds: durationSeconds,  // Update accumulated duration
                 // Don't set endTime or final status - job is still running
             });
             
@@ -864,6 +844,7 @@ async function executeJob(event) {
                 stopReason: STOP_REASON.CONTINUING,
             });
             
+            // Don't reset scraper state - let continuation handle it
             return {
                 success: true,
                 jobId,
@@ -887,17 +868,17 @@ async function executeJob(event) {
             notFoundCount: results.notFoundCount,
             blanks: results.blanks,
             s3CacheHits: results.s3CacheHits,
+            notPublishedCount: results.notPublishedCount,
             consecutiveNotFound: results.consecutiveNotFound,
             consecutiveErrors: results.consecutiveErrors,
             consecutiveBlanks: results.consecutiveBlanks,
             stopReason: results.stopReason !== STOP_REASON.COMPLETED ? results.stopReason : null,
             lastErrorMessage: results.lastErrorMessage,
             endTime: new Date(jobEndTime).toISOString(),
-            durationSeconds: durationSeconds,
-            currentId: results.currentId,  // Record final position
+            durationSeconds: durationSeconds
         });
 
-        // Publish completion event
+        // Publish completion event (always publishes immediately)
         await progressPublisher.publishCompletion(results, finalStatus, {
             stopReason: results.stopReason !== STOP_REASON.COMPLETED ? results.stopReason : null,
             lastErrorMessage: results.lastErrorMessage,
@@ -919,29 +900,78 @@ async function executeJob(event) {
         console.error(`[executeJob] Job ${jobId} failed:`, error);
         
         const jobEndTime = Date.now();
-        const durationSeconds = Math.floor((jobEndTime - jobStartTime) / 1000);
+        const currentDuration = Math.floor((jobEndTime - jobStartTime) / 1000);
         
-        // Update DynamoDB with failure
+        // Get accumulated stats from the event (from previous invocations)
+        const accumulated = event.accumulatedResults || {};
+        const previousDuration = accumulated.previousDuration || 0;
+        const totalDuration = currentDuration + previousDuration;
+        
+        // Preserve accumulated stats on failure - don't lose work already done
+        let lastKnownStats = {
+            totalProcessed: accumulated.totalProcessed || 0,
+            newGamesScraped: accumulated.newGamesScraped || 0,
+            gamesUpdated: accumulated.gamesUpdated || 0,
+            gamesSkipped: accumulated.gamesSkipped || 0,
+            errors: (accumulated.errors || 0) + 1,  // Add 1 for this failure
+            blanks: accumulated.blanks || 0,
+            notFoundCount: accumulated.notFoundCount || 0,
+            notPublishedCount: accumulated.notPublishedCount || 0,
+            s3CacheHits: accumulated.s3CacheHits || 0,
+        };
+        
+        // Try to fetch current job stats from DynamoDB (may have more up-to-date info)
+        try {
+            const currentJob = await getScraperJob(jobId);
+            if (currentJob && (currentJob.totalURLsProcessed || 0) > lastKnownStats.totalProcessed) {
+                lastKnownStats = {
+                    totalProcessed: currentJob.totalURLsProcessed || 0,
+                    newGamesScraped: currentJob.newGamesScraped || 0,
+                    gamesUpdated: currentJob.gamesUpdated || 0,
+                    gamesSkipped: currentJob.gamesSkipped || 0,
+                    errors: (currentJob.errors || 0) + 1,
+                    blanks: currentJob.blanks || 0,
+                    notFoundCount: currentJob.notFoundCount || 0,
+                    notPublishedCount: currentJob.notPublishedCount || 0,
+                    s3CacheHits: currentJob.s3CacheHits || 0,
+                };
+            }
+        } catch (fetchErr) {
+            console.warn(`[executeJob] Could not fetch current job stats:`, fetchErr.message);
+        }
+        
+        console.log(`[executeJob] Preserving stats on failure:`, lastKnownStats);
+        
+        // Update DynamoDB with failure but preserve accumulated stats
         await updateScraperJob(jobId, {
             status: 'FAILED',
             stopReason: 'FAILED',
             lastErrorMessage: error.message,
             endTime: new Date(jobEndTime).toISOString(),
-            durationSeconds: durationSeconds
+            durationSeconds: totalDuration,
+            // Preserve accumulated stats
+            totalURLsProcessed: lastKnownStats.totalProcessed,
+            newGamesScraped: lastKnownStats.newGamesScraped,
+            gamesUpdated: lastKnownStats.gamesUpdated,
+            gamesSkipped: lastKnownStats.gamesSkipped,
+            errors: lastKnownStats.errors,
+            blanks: lastKnownStats.blanks,
+            notFoundCount: lastKnownStats.notFoundCount,
+            notPublishedCount: lastKnownStats.notPublishedCount,
+            s3CacheHits: lastKnownStats.s3CacheHits,
         });
 
-        // Publish failure event
-        await progressPublisher.publishCompletion({
-            totalProcessed: accumulatedResults?.totalProcessed || 0,
-            newGamesScraped: accumulatedResults?.newGamesScraped || 0,
-            gamesUpdated: accumulatedResults?.gamesUpdated || 0,
-            gamesSkipped: accumulatedResults?.gamesSkipped || 0,
-            errors: (accumulatedResults?.errors || 0) + 1,
-            blanks: accumulatedResults?.blanks || 0,
-        }, 'FAILED', {
-            stopReason: 'FAILED',
-            lastErrorMessage: error.message,
-        });
+        // Publish failure event with preserved stats
+        if (progressPublisher) {
+            try {
+                await progressPublisher.publishCompletion(lastKnownStats, 'FAILED', {
+                    stopReason: 'FAILED',
+                    lastErrorMessage: error.message,
+                });
+            } catch (pubErr) {
+                console.warn(`[executeJob] Failed to publish completion:`, pubErr.message);
+            }
+        }
 
         throw error;
 
@@ -959,7 +989,6 @@ async function executeJob(event) {
         }
     }
 }
-
 
 // ===================================================================
 // CANCEL JOB

@@ -47,6 +47,8 @@ export enum GameVariant {
   PLOM = "PLOM",
   PL04 = "PL04",
   PLOM4 = "PLOM4",
+  PLOM45 = "PLOM45",
+  PLOM456 = "PLOM456",
   PLOM5 = "PLOM5",
   PLO5 = "PLO5",
   PLO6 = "PLO6",
@@ -3345,6 +3347,8 @@ type EagerJobProgressEvent = {
   readonly gamesSkipped: number;
   readonly errors: number;
   readonly blanks: number;
+  readonly notFoundCount?: number | null;
+  readonly notPublishedCount?: number | null;
   readonly currentId?: number | null;
   readonly startId?: number | null;
   readonly endId?: number | null;
@@ -3371,6 +3375,8 @@ type LazyJobProgressEvent = {
   readonly gamesSkipped: number;
   readonly errors: number;
   readonly blanks: number;
+  readonly notFoundCount?: number | null;
+  readonly notPublishedCount?: number | null;
   readonly currentId?: number | null;
   readonly startId?: number | null;
   readonly endId?: number | null;
@@ -7054,6 +7060,7 @@ type EagerScraperJob = {
   readonly stopReason?: string | null;
   readonly lastErrorMessage?: string | null;
   readonly notFoundCount?: number | null;
+  readonly notPublishedCount?: number | null;
   readonly s3CacheHits?: number | null;
   readonly consecutiveNotFound?: number | null;
   readonly consecutiveErrors?: number | null;
@@ -7108,6 +7115,7 @@ type LazyScraperJob = {
   readonly stopReason?: string | null;
   readonly lastErrorMessage?: string | null;
   readonly notFoundCount?: number | null;
+  readonly notPublishedCount?: number | null;
   readonly s3CacheHits?: number | null;
   readonly consecutiveNotFound?: number | null;
   readonly consecutiveErrors?: number | null;

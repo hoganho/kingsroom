@@ -2,6 +2,11 @@
 // ==========================================
 // Enhanced batch job progress display with real-time streaming
 //
+// UPDATED v2.2: Updated stat cards for clarity
+// - Renamed "Blanks" → "Not Found" (empty tournament slots)
+// - Added "Not Published" stat (hidden real tournaments)
+// - Added tooltips to stat cards explaining each metric
+//
 // REFACTORED v2.1: Added stale job detection and Lambda restart warnings
 // - Shows warning banner when no updates received for 60+ seconds
 // - Shows warning when stats regression detected (Lambda restart)
@@ -774,12 +779,23 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
                 label="Skipped"
                 value={stats.skipped}
                 colorClass="bg-yellow-50"
+                title="Skipped due to missing venue, date, or validation failure"
               />
               
+              {/* RENAMED: Blanks → Not Found */}
               <StatCard
-                label="Blanks"
-                value={stats.blanks}
-                colorClass="bg-gray-50"
+                label="Not Found"
+                value={stats.notFound}
+                colorClass="bg-orange-50"
+                title="Empty tournament slots (no data at this ID)"
+              />
+              
+              {/* NEW: Not Published */}
+              <StatCard
+                label="Not Published"
+                value={stats.notPublished}
+                colorClass="bg-purple-50"
+                title="Real tournaments that are hidden/unpublished"
               />
               
               <StatCard

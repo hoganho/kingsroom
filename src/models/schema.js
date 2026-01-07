@@ -10196,6 +10196,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "notPublishedCount": {
+                    "name": "notPublishedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "s3CacheHits": {
                     "name": "s3CacheHits",
                     "isArray": false,
@@ -16456,6 +16463,8 @@ export const schema = {
                 "PLOM",
                 "PL04",
                 "PLOM4",
+                "PLOM45",
+                "PLOM456",
                 "PLOM5",
                 "PLO5",
                 "PLO6",
@@ -23982,6 +23991,20 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "notFoundCount": {
+                    "name": "notFoundCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "notPublishedCount": {
+                    "name": "notPublishedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "currentId": {
                     "name": "currentId",
                     "isArray": false,
@@ -26482,5 +26505,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "48ae36ed6e9f6aee3265c71e04548cb8"
+    "version": "ff3907ebe1e3aeed6bd63a69fc603b0a"
 };

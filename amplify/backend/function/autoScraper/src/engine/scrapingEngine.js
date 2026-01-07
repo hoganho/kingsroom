@@ -4,6 +4,18 @@
  * Core scraping logic extracted from index.js for maintainability.
  * Handles bulk scraping, gap processing, and event streaming.
  * 
+ * UPDATED v1.5.1:
+ * - FIXED: Added progressPublisher to ctx destructuring (was causing "progressPublisher is not defined" crash)
+ * - FIXED: Typo in gap results merge: gapsSkipped -> gamesSkipped (was causing Skipped=0)
+ * - FIXED: Added || 0 safety to all numeric merges to prevent NaN in DynamoDB
+ * - FIXED: buildProgressStats now returns 0 instead of null for successRate
+ * - FIXED: Gap processing DynamoDB update now includes all stats (blanks, skipped, etc.)
+ * - IMPROVED: Timeout handler includes better error messages and safe progressPublisher call
+ * - NEW: isUnparseableResponse() - separates "Error processing tournament" from real errors
+ *   - "Error processing tournament" now treated as NOT_FOUND (not an error)
+ *   - These pages exist but don't have tournament data - that's normal, not an error
+ *   - Increments notFoundCount/blanks instead of errors counter
+ * 
  * UPDATED v1.5.0:
  * - NEW: Implemented 'refresh' mode for re-fetching unfinished games
  * - NEW: queryUnfinishedGames() helper for refresh mode
@@ -115,20 +127,58 @@ function isUnknownErrorResponse(parsedData) {
 }
 
 /**
- * Check if the parsed data represents an error response from the scraper
- * This catches cases where the scraper returns structured "valid-looking" data
- * that actually represents a failure (e.g., "Error processing tournament")
+ * Check if the page exists but couldn't be parsed into tournament data.
+ * This is NOT an error - it's just an empty/unparseable slot.
+ * Treat these like NOT_FOUND (don't increment error counters).
+ * 
+ * Examples:
+ * - "Error processing tournament" - page exists but no valid tournament structure
+ * - Page with error-like name but valid HTTP response
+ * 
+ * UPDATED v1.5.1: Separated from isErrorResponse to avoid counting these as errors
+ */
+function isUnparseableResponse(parsedData) {
+    if (!parsedData) return false;
+    
+    // "Error processing tournament" means the scraper found the page but couldn't extract data
+    // This is normal for empty tournament slots - NOT an error
+    if (parsedData.name === 'Error processing tournament') return true;
+    
+    // Generic "error" in name without explicit error fields = unparseable, not error
+    if (parsedData.name && 
+        parsedData.name.toLowerCase().includes('error') && 
+        !parsedData.errorMessage && 
+        !parsedData.error) {
+        return true;
+    }
+    
+    return false;
+}
+
+/**
+ * Check if the parsed data represents an ACTUAL error response from the scraper.
+ * These are real failures that should increment error counters.
+ * 
+ * UPDATED v1.5.1: Only true errors - unparseable pages moved to isUnparseableResponse
+ * 
+ * Examples of REAL errors:
+ * - Network/HTTP failures
+ * - Scraper API errors
+ * - Explicit error messages from backend
  */
 function isErrorResponse(parsedData) {
+    // No data at all = something went wrong
     if (!parsedData) return true;
     
-    // Check for known error name patterns
-    if (parsedData.name === 'Error processing tournament') return true;
-    if (parsedData.name && parsedData.name.toLowerCase().includes('error')) return true;
-    
-    // Check for explicit error message
+    // Explicit error message from scraper/backend = real error
     if (parsedData.errorMessage) return true;
     if (parsedData.error) return true;
+    
+    // HTTP error status codes
+    if (parsedData.httpStatus && parsedData.httpStatus >= 400) return true;
+    
+    // Note: "Error processing tournament" is handled by isUnparseableResponse
+    // and should NOT be treated as an error
     
     return false;
 }
@@ -341,25 +391,28 @@ async function withRetry(fn, maxRetries = 3, baseDelayMs = 500) {
  * Ensures consistent structure for real-time subscription updates
  */
 function buildProgressStats(results, startTime) {
-    const totalSuccessful = results.newGamesScraped + results.gamesUpdated;
-    const successRate = results.totalProcessed > 0 
-        ? Math.round((totalSuccessful / results.totalProcessed) * 100 * 10) / 10
-        : null;
+    const totalProcessed = results.totalProcessed || 0;
+    const newGames = results.newGamesScraped || 0;
+    const updated = results.gamesUpdated || 0;
+    const totalSuccessful = newGames + updated;
+    const successRate = totalProcessed > 0 
+        ? Math.round((totalSuccessful / totalProcessed) * 100 * 10) / 10
+        : 0;  // Changed from null to 0 to prevent DynamoDB NaN issues
     
     return {
-        totalProcessed: results.totalProcessed,
-        newGamesScraped: results.newGamesScraped,
-        gamesUpdated: results.gamesUpdated,
-        gamesSkipped: results.gamesSkipped,
-        errors: results.errors,
-        blanks: results.blanks,
-        notFoundCount: results.notFoundCount,
-        s3CacheHits: results.s3CacheHits,
+        totalProcessed: totalProcessed,
+        newGamesScraped: newGames,
+        gamesUpdated: updated,
+        gamesSkipped: results.gamesSkipped || 0,
+        errors: results.errors || 0,
+        blanks: results.blanks || 0,
+        notFoundCount: results.notFoundCount || 0,
+        s3CacheHits: results.s3CacheHits || 0,
         successRate: successRate,
-        consecutiveNotFound: results.consecutiveNotFound,
-        consecutiveErrors: results.consecutiveErrors,
-        consecutiveBlanks: results.consecutiveBlanks,
-        notPublishedCount: results.notPublishedCount,
+        consecutiveNotFound: results.consecutiveNotFound || 0,
+        consecutiveErrors: results.consecutiveErrors || 0,
+        consecutiveBlanks: results.consecutiveBlanks || 0,
+        notPublishedCount: results.notPublishedCount || 0,
     };
 }
 
@@ -546,7 +599,9 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         invokeContinuation,
         // NEW v1.4.0: Real-time progress callback for subscription updates
         onProgress,
-        invocationStartTime
+        invocationStartTime,
+        // v1.5.1: Progress publisher for timeout/continuation status
+        progressPublisher,
     } = ctx;
     
     const startTime = invocationStartTime || Date.now();
@@ -603,14 +658,14 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         }
         
         // Otherwise, merge gap results and continue with normal scanning
-        results.totalProcessed += gapResults.totalProcessed;
-        results.newGamesScraped += gapResults.newGamesScraped;
-        results.gamesUpdated += gapResults.gamesUpdated;
-        results.gamesSkipped += gapResults.gapsSkipped;
-        results.errors += gapResults.errors;
-        results.blanks += gapResults.blanks;
-        results.notFoundCount += gapResults.notFoundCount;
-        results.s3CacheHits += gapResults.s3CacheHits;
+        results.totalProcessed += gapResults.totalProcessed || 0;
+        results.newGamesScraped += gapResults.newGamesScraped || 0;
+        results.gamesUpdated += gapResults.gamesUpdated || 0;
+        results.gamesSkipped += gapResults.gamesSkipped || 0;  // FIXED: was gapsSkipped (typo)
+        results.errors += gapResults.errors || 0;
+        results.blanks += gapResults.blanks || 0;
+        results.notFoundCount += gapResults.notFoundCount || 0;
+        results.s3CacheHits += gapResults.s3CacheHits || 0;
         results.notPublishedCount += gapResults.notPublishedCount || 0;
         
         // If gaps processing hit error threshold, stop early
@@ -743,14 +798,20 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         
         // Check timeout - trigger self-continuation if available
         if (Date.now() - startTime > (LAMBDA_TIMEOUT - LAMBDA_TIMEOUT_BUFFER)) {
-            console.log(`[ScrapingEngine] Approaching timeout at ID ${currentId}`);
+            console.log(`[ScrapingEngine] Approaching timeout at ID ${currentId}, processed so far: ${results.totalProcessed}`);
             
-            // ALWAYS publish timeout status, even if continuation fails
-            await progressPublisher.publishProgress(results, 'TIMEOUT', {
-                currentId,
-                stopReason: 'TIMEOUT',
-                message: `Timeout at ID ${currentId}, will retry`
-            });
+            // Publish timeout status if publisher available
+            if (progressPublisher) {
+                try {
+                    await progressPublisher.publishProgress(results, 'RUNNING', {
+                        currentId,
+                        stopReason: 'TIMEOUT',
+                        message: `Timeout at ID ${currentId}, attempting continuation`
+                    });
+                } catch (pubErr) {
+                    console.warn(`[ScrapingEngine] Timeout progress publish failed:`, pubErr.message);
+                }
+            }
             
             // Try to continue in new invocation
             if (invokeContinuation && currentId < endId) {
@@ -761,9 +822,13 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                 } catch (contErr) {
                     console.error(`[ScrapingEngine] Failed to invoke continuation:`, contErr.message);
                     results.stopReason = STOP_REASON.TIMEOUT;
+                    results.lastErrorMessage = `Continuation failed: ${contErr.message}`;
                 }
             } else {
                 results.stopReason = STOP_REASON.TIMEOUT;
+                results.lastErrorMessage = invokeContinuation 
+                    ? 'Timeout: Already at end of range' 
+                    : 'Timeout: No continuation handler available';
             }
             break;
         }
@@ -851,7 +916,44 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                 results.s3CacheHits++;
             }
 
-            // Check for error responses that look like valid data
+            // ═══════════════════════════════════════════════════════════════
+            // v1.5.1: Check for unparseable pages FIRST (not errors!)
+            // These are pages that exist but don't have tournament data
+            // Treat like NOT_FOUND - don't increment error counters
+            // ═══════════════════════════════════════════════════════════════
+            if (isUnparseableResponse(parsedData)) {
+                console.log(`[ScrapingEngine] ID ${currentId}: Unparseable page (${parsedData.name || 'no name'}) - treating as NOT_FOUND`);
+                results.consecutiveBlanks++;
+                results.consecutiveNotFound++;
+                results.blanks++;
+                results.notFoundCount++;
+                results.consecutiveErrors = 0;  // Reset - this is NOT an error
+                
+                publishGameProcessedEvent(jobId, entityId, currentId, url, {
+                    action: 'NOT_FOUND',
+                    message: `Unparseable: ${parsedData.name || 'No tournament data'}`,
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: dataSource,
+                    s3Key: parsedData.s3Key || null,
+                    parsedData: { 
+                        gameStatus: 'NOT_FOUND',
+                        name: parsedData.name,
+                    },
+                    saveResult: null,
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
+                // Check NOT_FOUND thresholds (NOT error thresholds)
+                if (results.consecutiveNotFound >= MAX_CONSECUTIVE_NOT_FOUND && mode !== 'gaps') {
+                    console.log(`[ScrapingEngine] NOT_FOUND threshold reached: ${results.consecutiveNotFound}`);
+                    results.stopReason = STOP_REASON.NOT_FOUND;
+                    break;
+                }
+                
+                currentId++;
+                continue;
+            }
+
+            // Check for REAL error responses (network failures, API errors, etc.)
             if (isErrorResponse(parsedData)) {
                 const actualErrorMessage = parsedData.errorMessage || parsedData.error || parsedData.name || 'Unknown error';
                 console.warn(`[ScrapingEngine] Error response for ID ${currentId}: ${actualErrorMessage}`);
@@ -1298,9 +1400,38 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                 results.s3CacheHits++;
             }
             
-            // Check for error responses
+            // ═══════════════════════════════════════════════════════════════
+            // v1.5.1: Check for unparseable pages FIRST (not errors!)
+            // These are pages that exist but don't have tournament data
+            // Treat like NOT_FOUND - don't increment error counters
+            // ═══════════════════════════════════════════════════════════════
+            if (isUnparseableResponse(parsedData)) {
+                console.log(`[ScrapingEngine] Gap ID ${tournamentId}: Unparseable page (${parsedData.name || 'no name'}) - treating as NOT_FOUND`);
+                results.blanks++;
+                results.notFoundCount++;
+                results.consecutiveBlanks++;
+                results.consecutiveNotFound++;
+                results.consecutiveErrors = 0;  // Reset - this is NOT an error
+                
+                publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
+                    action: 'NOT_FOUND',
+                    message: `Unparseable: ${parsedData.name || 'No tournament data'}`,
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: dataSource,
+                    s3Key: parsedData.s3Key || null,
+                    parsedData: { 
+                        gameStatus: 'NOT_FOUND',
+                        name: parsedData.name,
+                    },
+                    saveResult: null,
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
+                continue;  // Don't count as error, continue to next ID
+            }
+            
+            // Check for REAL error responses (network failures, API errors, etc.)
             if (isErrorResponse(parsedData)) {
-                const actualErrorMessage = parsedData.errorMessage || parsedData.error || parsedData.name || 'Unknown error';
+                const actualErrorMessage = parsedData.errorMessage || parsedData.error || 'Unknown error';
                 console.warn(`[ScrapingEngine] Gap error response for ID ${tournamentId}: ${actualErrorMessage}`);
                 results.errors++;
                 results.consecutiveErrors++;
@@ -1517,16 +1648,20 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         // UPDATED v1.4.0: Publish progress to BOTH DynamoDB AND subscription
         // ═══════════════════════════════════════════════════════════════
         if (results.totalProcessed % PROGRESS_UPDATE_FREQUENCY === 0) {
-            // Update DynamoDB (existing behavior)
+            // Update DynamoDB with ALL stats
             await updateScraperJob(jobId, {
                 totalURLsProcessed: results.totalProcessed,
                 currentId: tournamentId,
                 newGamesScraped: results.newGamesScraped,
+                gamesUpdated: results.gamesUpdated,
+                gamesSkipped: results.gamesSkipped,
                 errors: results.errors,
+                blanks: results.blanks,
                 notFoundCount: results.notFoundCount,
+                s3CacheHits: results.s3CacheHits,
+                notPublishedCount: results.notPublishedCount,
             });
             
-            // NEW v1.4.0: Publish to real-time subscription for live UI updates
             if (onProgress) {
                 try {
                     const progressStats = buildProgressStats(results, startTime);
@@ -1563,6 +1698,7 @@ module.exports = {
     isNotFoundResponse,
     isNotPublishedResponse,
     isUnknownErrorResponse,
+    isUnparseableResponse,  // NEW v1.5.1
     isErrorResponse,
     shouldSkipNotPublished,
     shouldSkipNotFoundGap,

@@ -42,7 +42,9 @@ export interface BatchJobStats {
   updated: number;
   errors: number;
   skipped: number;
-  blanks: number;
+  blanks: number;           // Kept for backwards compat
+  notFound: number;         // Empty tournament slots (NOT_FOUND status)
+  notPublished: number;     // Real tournaments that are hidden
   successRate: number | null;
 }
 
@@ -72,6 +74,8 @@ const extractStats = (job: ScraperJob | null): BatchJobStats => ({
   errors: job?.errors ?? 0,
   skipped: job?.gamesSkipped ?? 0,
   blanks: job?.blanks ?? 0,
+  notFound: (job as any)?.notFoundCount ?? job?.blanks ?? 0,
+  notPublished: (job as any)?.notPublishedCount ?? 0,
   successRate: job?.successRate ?? null,
 });
 
@@ -82,7 +86,8 @@ const statsEqual = (a: BatchJobStats, b: BatchJobStats): boolean => {
     a.updated === b.updated &&
     a.errors === b.errors &&
     a.skipped === b.skipped &&
-    a.blanks === b.blanks
+    a.notFound === b.notFound &&
+    a.notPublished === b.notPublished
   );
 };
 

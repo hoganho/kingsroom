@@ -47,6 +47,8 @@ type JobProgressEvent @aws_iam @aws_cognito_user_pools {
   gamesSkipped: Int!
   errors: Int!
   blanks: Int!
+  notFoundCount: Int                # Empty tournament slots (clearer name for blanks)
+  notPublishedCount: Int            # Real tournaments that are hidden/unpublished
   
   # Current position (for range scans)
   currentId: Int
@@ -94,6 +96,8 @@ input JobProgressEventInput {
   gamesSkipped: Int!
   errors: Int!
   blanks: Int!
+  notFoundCount: Int                # Empty tournament slots (clearer name for blanks)
+  notPublishedCount: Int            # Real tournaments that are hidden/unpublished
   
   # Current position
   currentId: Int

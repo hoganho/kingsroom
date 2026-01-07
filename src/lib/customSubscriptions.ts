@@ -135,6 +135,8 @@ export const onJobProgress = /* GraphQL */ `
       gamesSkipped
       errors
       blanks
+      notFoundCount
+      notPublishedCount
       currentId
       startId
       endId

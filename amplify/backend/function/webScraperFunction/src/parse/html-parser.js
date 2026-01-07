@@ -482,7 +482,7 @@ const defaultStrategy = {
         let variant = ctx.gameData?.shortlimitgame || 
             ctx.$('#cw_clock_shortlimitgame').first().text().trim();
         if (variant) {
-            ctx.add('gameVariant', variant.replace(/\s/g, ''));
+            ctx.add('gameVariant', variant.replace(/[\s\/]/g, ''));
         }
     },
 

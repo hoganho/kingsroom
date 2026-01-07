@@ -56,6 +56,7 @@ type ScraperJob @model(queries: { list: null }) @auth(rules: [{ allow: private }
   stopReason: String
   lastErrorMessage: String
   notFoundCount: Int
+  notPublishedCount: Int            # Real tournaments that are hidden/unpublished
   s3CacheHits: Int
   consecutiveNotFound: Int
   consecutiveErrors: Int

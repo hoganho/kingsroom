@@ -50,6 +50,8 @@ enum GameVariant {
   PLOM
   PL04
   PLOM4
+  PLOM45
+  PLOM456
   PLOM5
   PLO5
   PLO6

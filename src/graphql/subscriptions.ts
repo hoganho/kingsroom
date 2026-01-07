@@ -46,6 +46,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
     stopReason
     lastErrorMessage
     notFoundCount
+    notPublishedCount
     s3CacheHits
     consecutiveNotFound
     consecutiveErrors
@@ -105,6 +106,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -381,6 +383,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -2262,6 +2265,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -2538,6 +2542,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -4418,6 +4423,8 @@ export const onJobProgress = /* GraphQL */ `subscription OnJobProgress($jobId: I
     gamesSkipped
     errors
     blanks
+    notFoundCount
+    notPublishedCount
     currentId
     startId
     endId
@@ -12882,6 +12889,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             stopReason
             lastErrorMessage
             notFoundCount
+            notPublishedCount
             s3CacheHits
             consecutiveNotFound
             consecutiveErrors
@@ -14207,6 +14215,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -17769,6 +17778,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             stopReason
             lastErrorMessage
             notFoundCount
+            notPublishedCount
             s3CacheHits
             consecutiveNotFound
             consecutiveErrors
@@ -18666,6 +18676,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -28919,6 +28930,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             stopReason
             lastErrorMessage
             notFoundCount
+            notPublishedCount
             s3CacheHits
             consecutiveNotFound
             consecutiveErrors
@@ -30244,6 +30256,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -33806,6 +33819,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             stopReason
             lastErrorMessage
             notFoundCount
+            notPublishedCount
             s3CacheHits
             consecutiveNotFound
             consecutiveErrors
@@ -43012,6 +43026,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             stopReason
             lastErrorMessage
             notFoundCount
+            notPublishedCount
             s3CacheHits
             consecutiveNotFound
             consecutiveErrors
@@ -44337,6 +44352,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -47899,6 +47915,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             stopReason
             lastErrorMessage
             notFoundCount
+            notPublishedCount
             s3CacheHits
             consecutiveNotFound
             consecutiveErrors
@@ -57105,6 +57122,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             stopReason
             lastErrorMessage
             notFoundCount
+            notPublishedCount
             s3CacheHits
             consecutiveNotFound
             consecutiveErrors
@@ -58430,6 +58448,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -61992,6 +62011,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             stopReason
             lastErrorMessage
             notFoundCount
+            notPublishedCount
             s3CacheHits
             consecutiveNotFound
             consecutiveErrors
@@ -62891,6 +62911,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -64837,6 +64858,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -66783,6 +66805,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -68647,6 +68670,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
     stopReason
     lastErrorMessage
     notFoundCount
+    notPublishedCount
     s3CacheHits
     consecutiveNotFound
     consecutiveErrors
@@ -68706,6 +68730,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -68982,6 +69007,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -70826,6 +70852,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
     stopReason
     lastErrorMessage
     notFoundCount
+    notPublishedCount
     s3CacheHits
     consecutiveNotFound
     consecutiveErrors
@@ -70885,6 +70912,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -71161,6 +71189,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -73005,6 +73034,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
     stopReason
     lastErrorMessage
     notFoundCount
+    notPublishedCount
     s3CacheHits
     consecutiveNotFound
     consecutiveErrors
@@ -73064,6 +73094,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -73340,6 +73371,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -75221,6 +75253,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -75497,6 +75530,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -77391,6 +77425,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -77667,6 +77702,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -79561,6 +79597,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors
@@ -79837,6 +79874,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           stopReason
           lastErrorMessage
           notFoundCount
+          notPublishedCount
           s3CacheHits
           consecutiveNotFound
           consecutiveErrors

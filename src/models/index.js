@@ -47,6 +47,8 @@ const GameVariant = {
   "PLOM": "PLOM",
   "PL04": "PL04",
   "PLOM4": "PLOM4",
+  "PLOM45": "PLOM45",
+  "PLOM456": "PLOM456",
   "PLOM5": "PLOM5",
   "PLO5": "PLO5",
   "PLO6": "PLO6",
