@@ -98,6 +98,7 @@
             "REGION": {
               "Ref": "AWS::Region"
             },
+            "AWS_LAMBDA_TIMEOUT": "300",
             "API_KINGSROOM_GRAPHQLAPIIDOUTPUT": {
               "Ref": "apikingsroomGraphQLAPIIdOutput"
             },
@@ -285,7 +286,8 @@
         },
         "Runtime": "nodejs22.x",
         "Layers": [],
-        "Timeout": 25
+        "Timeout": 300,
+        "MemorySize": 512
       }
     },
     "LambdaExecutionRole": {

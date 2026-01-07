@@ -2,7 +2,12 @@
 // ==========================================
 // Enhanced batch job progress display with real-time streaming
 //
-// REFACTORED v2.0: Subscription-based updates
+// REFACTORED v2.1: Added stale job detection and Lambda restart warnings
+// - Shows warning banner when no updates received for 60+ seconds
+// - Shows warning when stats regression detected (Lambda restart)
+// - Auto-refreshes job status when stale detected
+//
+// v2.0: Subscription-based updates
 // - Removed rate limit indicators (no longer relevant)
 // - Added subscription status indicator
 // - Simplified polling indicator to show subscription state
@@ -28,12 +33,15 @@ import {
   Square,
   Wifi,
   WifiOff,
+  AlertOctagon,
+  RotateCcw,
 } from 'lucide-react';
 import { ScraperJob } from '../../../API';
 import { 
   useBatchJobMonitor, 
   getJobStatusLabel, 
-  getJobStatusColor
+  getJobStatusColor,
+  BatchJobStats,
 } from '../../../hooks/scraper/useBatchJobMonitor';
 import { useBatchGameStream } from '../../../hooks/scraper/useBatchGameStream';
 import GameListItem from '../GameListItem';
@@ -233,15 +241,30 @@ interface SubscriptionIndicatorProps {
   isJobSubscribed: boolean;
   isGameStreamSubscribed: boolean;
   showGameStream: boolean;
+  isStale?: boolean;
 }
 
 const SubscriptionIndicator: React.FC<SubscriptionIndicatorProps> = ({
   isJobSubscribed,
   isGameStreamSubscribed,
   showGameStream,
+  isStale = false,
 }) => {
   const bothConnected = isJobSubscribed && (!showGameStream || isGameStreamSubscribed);
   const anyConnected = isJobSubscribed || isGameStreamSubscribed;
+  
+  // Show stale warning if connected but not receiving updates
+  if (isStale && anyConnected) {
+    return (
+      <span 
+        className="flex items-center gap-1 text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full"
+        title="Connected but no updates received recently"
+      >
+        <AlertTriangle className="h-3 w-3" />
+        Stale
+      </span>
+    );
+  }
   
   if (bothConnected) {
     return (
@@ -275,6 +298,95 @@ const SubscriptionIndicator: React.FC<SubscriptionIndicatorProps> = ({
       <WifiOff className="h-3 w-3" />
       Connecting
     </span>
+  );
+};
+
+// ===================================================================
+// STALE JOB WARNING BANNER
+// ===================================================================
+
+interface StaleWarningBannerProps {
+  isStale: boolean;
+  lastEventTime: number;
+  onRefresh: () => void;
+  isRefreshing: boolean;
+}
+
+const StaleWarningBanner: React.FC<StaleWarningBannerProps> = ({
+  isStale,
+  lastEventTime,
+  onRefresh,
+  isRefreshing,
+}) => {
+  if (!isStale) return null;
+
+  const secondsSinceUpdate = Math.round((Date.now() - lastEventTime) / 1000);
+  const formattedTime = secondsSinceUpdate >= 60 
+    ? `${Math.floor(secondsSinceUpdate / 60)}m ${secondsSinceUpdate % 60}s`
+    : `${secondsSinceUpdate}s`;
+
+  return (
+    <div className="px-4 py-3 bg-orange-50 border-b border-orange-200 flex items-center justify-between">
+      <div className="flex items-center gap-2 text-orange-800">
+        <AlertOctagon className="h-5 w-5 flex-shrink-0 text-orange-600" />
+        <div>
+          <span className="font-medium">Job may be stuck</span>
+          <span className="text-orange-600 text-sm ml-2">
+            No updates for {formattedTime}
+          </span>
+        </div>
+      </div>
+      <button
+        onClick={onRefresh}
+        disabled={isRefreshing}
+        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-orange-700 bg-orange-100 hover:bg-orange-200 rounded-md transition-colors disabled:opacity-50"
+      >
+        <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+        Check Status
+      </button>
+    </div>
+  );
+};
+
+// ===================================================================
+// STATS REGRESSION WARNING BANNER
+// ===================================================================
+
+interface StatsRegressionBannerProps {
+  statsRegressed: boolean;
+  onDismiss?: () => void;
+}
+
+const StatsRegressionBanner: React.FC<StatsRegressionBannerProps> = ({
+  statsRegressed,
+  onDismiss,
+}) => {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (!statsRegressed || dismissed) return null;
+
+  return (
+    <div className="px-4 py-3 bg-amber-50 border-b border-amber-200 flex items-center justify-between">
+      <div className="flex items-center gap-2 text-amber-800">
+        <RotateCcw className="h-5 w-5 flex-shrink-0 text-amber-600" />
+        <div>
+          <span className="font-medium">Lambda restart detected</span>
+          <span className="text-amber-600 text-sm ml-2">
+            Stats reset - job is continuing from a new Lambda instance
+          </span>
+        </div>
+      </div>
+      <button
+        onClick={() => {
+          setDismissed(true);
+          onDismiss?.();
+        }}
+        className="p-1 text-amber-600 hover:text-amber-800 hover:bg-amber-100 rounded transition-colors"
+        title="Dismiss"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
   );
 };
 
@@ -425,8 +537,21 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
     refresh,
     formatDuration,
     error,
+    // New stale detection values
+    isStale,
+    statsRegressed,
+    lastEventTime,
   } = useBatchJobMonitor(jobId, {
     onJobComplete: onComplete,
+    onJobStale: () => {
+      console.warn('[BatchJobProgress] Job appears stale - no updates for 60s');
+    },
+    onStatsRegression: (current: BatchJobStats, previous: BatchJobStats) => {
+      console.warn('[BatchJobProgress] Stats regressed - possible Lambda restart', {
+        previousProcessed: previous.processed,
+        currentProcessed: current.processed,
+      });
+    },
   });
 
   // Use the streaming hook for real-time game events
@@ -491,15 +616,19 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
       <div className={`
         bg-white border rounded-lg shadow-sm overflow-hidden
         ${isActive ? 'border-blue-200' : 'border-gray-200'}
+        ${isStale && isActive ? 'border-orange-300' : ''}
         transition-colors duration-300
       `}>
         {/* Header */}
         <div className={`
           px-4 py-3 border-b flex items-center justify-between
           ${isActive ? 'bg-blue-50/50 border-blue-100' : 'bg-gray-50 border-gray-100'}
+          ${isStale && isActive ? 'bg-orange-50/50 border-orange-100' : ''}
         `}>
           <div className="flex items-center gap-3">
-            {isActive ? (
+            {isStale && isActive ? (
+              <AlertOctagon className="h-5 w-5 text-orange-600" />
+            ) : isActive ? (
               <Activity className="h-5 w-5 text-blue-600 animate-pulse" />
             ) : isComplete && stats.errors === 0 ? (
               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -527,16 +656,17 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
               isJobSubscribed={isJobSubscribed}
               isGameStreamSubscribed={isGameStreamSubscribed}
               showGameStream={showStreamingGames}
+              isStale={isStale && isActive}
             />
             
             {/* Activity indicator */}
-            <ActivityIndicator isActive={isActive} />
+            {!isStale && <ActivityIndicator isActive={isActive} />}
             
             {/* Status badge */}
             <span className={`
               px-3 py-1 text-xs font-medium rounded-full
               ${statusColor}
-              ${isActive ? 'animate-pulse' : ''}
+              ${isActive && !isStale ? 'animate-pulse' : ''}
             `}>
               {statusLabel}
             </span>
@@ -564,6 +694,19 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Stale job warning banner */}
+        {isActive && (
+          <StaleWarningBanner
+            isStale={isStale}
+            lastEventTime={lastEventTime}
+            onRefresh={refresh}
+            isRefreshing={isPolling}
+          />
+        )}
+
+        {/* Stats regression warning banner */}
+        <StatsRegressionBanner statsRegressed={statsRegressed} />
 
         {/* Connection error banner */}
         {error && !isJobSubscribed && (
@@ -643,9 +786,9 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
                 label="Duration"
                 value={formatDuration(liveDuration)}
                 colorClass="bg-gray-50"
-                pulse={isActive}
+                pulse={isActive && !isStale}
                 icon={isActive ? (
-                  <Clock className="h-3 w-3 text-blue-500 animate-pulse" />
+                  <Clock className={`h-3 w-3 ${isStale ? 'text-orange-500' : 'text-blue-500 animate-pulse'}`} />
                 ) : undefined}
               />
               

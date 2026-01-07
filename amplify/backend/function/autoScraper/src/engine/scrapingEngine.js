@@ -745,6 +745,13 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         if (Date.now() - startTime > (LAMBDA_TIMEOUT - LAMBDA_TIMEOUT_BUFFER)) {
             console.log(`[ScrapingEngine] Approaching timeout at ID ${currentId}`);
             
+            // ALWAYS publish timeout status, even if continuation fails
+            await progressPublisher.publishProgress(results, 'TIMEOUT', {
+                currentId,
+                stopReason: 'TIMEOUT',
+                message: `Timeout at ID ${currentId}, will retry`
+            });
+            
             // Try to continue in new invocation
             if (invokeContinuation && currentId < endId) {
                 try {

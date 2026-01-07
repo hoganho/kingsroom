@@ -1,6 +1,10 @@
 // src/hooks/scraper/useBatchJobMonitor.ts
 // Real-time batch job monitoring with subscription-first approach and polling fallback
-// UPDATED v2.3: CRITICAL FIX - onJobComplete now called when job is already complete on
+// UPDATED v2.4: Added stale job detection and Lambda restart detection.
+//               - Detects when no subscription updates received for 60+ seconds
+//               - Detects stats regression (sign of Lambda restart)
+//               - Auto-refetches job status when stale
+// v2.3: CRITICAL FIX - onJobComplete now called when job is already complete on
 //               initial fetch. This fixes the UI getting stuck when Lambda crashes 
 //               immediately before the subscription is established.
 // v2.2: Fixed null _version/_lastChangedAt errors by using minimal query
@@ -17,6 +21,16 @@ import { getScraperJobsReportMinimal } from '../../graphql/scraperManagement';
 import { useJobProgressSubscription } from './useJobProgressSubscription';
 
 const getClient = () => generateClient();
+
+// ===================================================================
+// CONSTANTS
+// ===================================================================
+
+/** Time without subscription updates before considering job stale (ms) */
+const STALE_THRESHOLD_MS = 60000; // 1 minute
+
+/** Interval for checking if job is stale (ms) */
+const STALE_CHECK_INTERVAL_MS = 10000; // 10 seconds
 
 // ===================================================================
 // TYPES
@@ -39,6 +53,10 @@ export interface UseBatchJobMonitorConfig {
   enablePolling?: boolean;
   onJobComplete?: (job: ScraperJob) => void;
   onStatsChange?: (stats: BatchJobStats, prevStats: BatchJobStats) => void;
+  /** Called when job becomes stale (no updates for STALE_THRESHOLD_MS) */
+  onJobStale?: () => void;
+  /** Called when stats regression is detected (possible Lambda restart) */
+  onStatsRegression?: (current: BatchJobStats, previous: BatchJobStats) => void;
   /** @deprecated Polling is no longer used */
   maxBackoffInterval?: number;
 }
@@ -126,6 +144,8 @@ export const useBatchJobMonitor = (
   const {
     onJobComplete,
     onStatsChange,
+    onJobStale,
+    onStatsRegression,
   } = config;
 
   // State
@@ -136,12 +156,18 @@ export const useBatchJobMonitor = (
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Stale detection state
+  const [lastEventTime, setLastEventTime] = useState<number>(Date.now());
+  const [isStale, setIsStale] = useState(false);
+  const [statsRegressed, setStatsRegressed] = useState(false);
+
   // Refs
   const prevStatsRef = useRef<BatchJobStats>(extractStats(null));
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const jobStartTimeRef = useRef<number | null>(null);
   const completionNotifiedRef = useRef<boolean>(false);
   const currentJobIdRef = useRef<string | null>(null);
+  const prevSubscriptionEventRef = useRef<typeof subscriptionEvent>(null);
 
   // ===================================================================
   // SUBSCRIPTION FOR REAL-TIME UPDATES
@@ -203,6 +229,165 @@ export const useBatchJobMonitor = (
     },
   });
 
+  // ===================================================================
+  // STALE DETECTION - Track when we last received an event
+  // ===================================================================
+
+  useEffect(() => {
+    if (subscriptionEvent) {
+      setLastEventTime(Date.now());
+      setIsStale(false);
+    }
+  }, [subscriptionEvent]);
+
+  // ===================================================================
+  // STALE DETECTION - Check for stale job (no updates for too long)
+  // ===================================================================
+
+  // Computed values (defined early for use in stale detection)
+  const isActive = useMemo(() => {
+    if (subscriptionStatus) {
+      return isJobRunning(subscriptionStatus);
+    }
+    return isJobRunning(job?.status);
+  }, [subscriptionStatus, job?.status]);
+
+  // fetchJob defined early for stale detection
+  const fetchJob = useCallback(async (): Promise<ScraperJob | null> => {
+    if (!jobId) return null;
+    
+    setIsPolling(true);
+
+    try {
+      const client = getClient();
+      
+      const response = await client.graphql({
+        query: getScraperJobsReportMinimal,
+        variables: { limit: 50 }
+      }) as { data?: { getScraperJobsReport?: { items?: ScraperJob[] } }; errors?: unknown[] };
+
+      if (response?.errors && response.errors.length > 0) {
+        console.error('[useBatchJobMonitor] GraphQL errors:', response.errors);
+        setError('Failed to fetch job data');
+        return null;
+      }
+
+      const jobs = response?.data?.getScraperJobsReport?.items || [];
+      const foundJob = jobs.find(j => j.id === jobId || j.jobId === jobId) || null;
+
+      if (foundJob) {
+        // Only update if we don't have subscription data yet
+        if (!subscriptionEvent) {
+          setJob(foundJob);
+          setLastUpdated(new Date());
+          
+          if (foundJob.durationSeconds != null) {
+            setLiveDuration(foundJob.durationSeconds);
+          }
+          
+          // CRITICAL FIX: If job is already complete when we first fetch it,
+          // trigger onJobComplete callback. This handles the case where the Lambda
+          // crashes immediately before our subscription is established.
+          if (isJobComplete(foundJob.status) && !completionNotifiedRef.current) {
+            console.log('[useBatchJobMonitor] Job already complete on initial fetch:', foundJob.status);
+            completionNotifiedRef.current = true;
+            onJobComplete?.(foundJob);
+          }
+        }
+        
+        // If we were stale and job is now complete, clear stale flag
+        if (isJobComplete(foundJob.status)) {
+          setIsStale(false);
+        }
+        
+        setError(null);
+      }
+
+      return foundJob;
+
+    } catch (err) {
+      console.error('[useBatchJobMonitor] Error fetching job:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsPolling(false);
+    }
+  }, [jobId, subscriptionEvent, onJobComplete]);
+
+  // Stale check interval
+  useEffect(() => {
+    if (!isActive) return;
+
+    const interval = setInterval(() => {
+      const timeSinceLastEvent = Date.now() - lastEventTime;
+      
+      if (timeSinceLastEvent > STALE_THRESHOLD_MS && !isStale) {
+        console.warn(`[useBatchJobMonitor] Job appears stale - no updates for ${Math.round(timeSinceLastEvent / 1000)}s`);
+        setIsStale(true);
+        onJobStale?.();
+        
+        // Auto-refetch job status to see if it's actually still running or failed
+        console.log('[useBatchJobMonitor] Auto-refetching job status due to stale detection');
+        fetchJob();
+      }
+    }, STALE_CHECK_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [isActive, lastEventTime, isStale, fetchJob, onJobStale]);
+
+  // ===================================================================
+  // STATS REGRESSION DETECTION (sign of Lambda restart)
+  // ===================================================================
+
+  useEffect(() => {
+    if (!subscriptionEvent || !prevSubscriptionEventRef.current) {
+      prevSubscriptionEventRef.current = subscriptionEvent;
+      return;
+    }
+
+    const prevEvent = prevSubscriptionEventRef.current;
+    
+    // Check if totalURLsProcessed went backwards
+    if (subscriptionEvent.totalURLsProcessed < prevEvent.totalURLsProcessed) {
+      console.warn('[useBatchJobMonitor] Stats regressed - possible Lambda restart detected', {
+        previous: prevEvent.totalURLsProcessed,
+        current: subscriptionEvent.totalURLsProcessed,
+      });
+      
+      setStatsRegressed(true);
+      
+      const currentStats = extractStats({
+        totalURLsProcessed: subscriptionEvent.totalURLsProcessed,
+        newGamesScraped: subscriptionEvent.newGamesScraped,
+        gamesUpdated: subscriptionEvent.gamesUpdated,
+        gamesSkipped: subscriptionEvent.gamesSkipped,
+        errors: subscriptionEvent.errors,
+        blanks: subscriptionEvent.blanks,
+        successRate: subscriptionEvent.successRate,
+      } as ScraperJob);
+      
+      const prevStats = extractStats({
+        totalURLsProcessed: prevEvent.totalURLsProcessed,
+        newGamesScraped: prevEvent.newGamesScraped,
+        gamesUpdated: prevEvent.gamesUpdated,
+        gamesSkipped: prevEvent.gamesSkipped,
+        errors: prevEvent.errors,
+        blanks: prevEvent.blanks,
+        successRate: prevEvent.successRate,
+      } as ScraperJob);
+      
+      onStatsRegression?.(currentStats, prevStats);
+    } else {
+      // Clear regression flag if stats are progressing normally
+      if (statsRegressed && subscriptionEvent.totalURLsProcessed > prevEvent.totalURLsProcessed) {
+        setStatsRegressed(false);
+      }
+    }
+
+    prevSubscriptionEventRef.current = subscriptionEvent;
+  }, [subscriptionEvent, onStatsRegression, statsRegressed]);
+
   // Update job state from subscription events
   useEffect(() => {
     if (!subscriptionEvent) return;
@@ -262,13 +447,6 @@ export const useBatchJobMonitor = (
 
   // Computed values from subscription
   const stats = useMemo(() => extractStats(job), [job]);
-  const isActive = useMemo(() => {
-    // Prefer subscription status if available
-    if (subscriptionStatus) {
-      return isJobRunning(subscriptionStatus);
-    }
-    return isJobRunning(job?.status);
-  }, [subscriptionStatus, job?.status]);
   
   const isCompleteStatus = useMemo(() => {
     if (subscriptionStatus) {
@@ -276,66 +454,6 @@ export const useBatchJobMonitor = (
     }
     return isJobComplete(job?.status);
   }, [subscriptionStatus, job?.status]);
-
-  // ===================================================================
-  // INITIAL FETCH (single fetch on mount, no polling)
-  // ===================================================================
-
-  const fetchJob = useCallback(async (): Promise<ScraperJob | null> => {
-    if (!jobId) return null;
-    
-    setIsPolling(true);
-
-    try {
-      const client = getClient();
-      
-      const response = await client.graphql({
-        query: getScraperJobsReportMinimal,
-        variables: { limit: 50 }
-      }) as { data?: { getScraperJobsReport?: { items?: ScraperJob[] } }; errors?: unknown[] };
-
-      if (response?.errors && response.errors.length > 0) {
-        console.error('[useBatchJobMonitor] GraphQL errors:', response.errors);
-        setError('Failed to fetch job data');
-        return null;
-      }
-
-      const jobs = response?.data?.getScraperJobsReport?.items || [];
-      const foundJob = jobs.find(j => j.id === jobId || j.jobId === jobId) || null;
-
-      if (foundJob) {
-        // Only update if we don't have subscription data yet
-        if (!subscriptionEvent) {
-          setJob(foundJob);
-          setLastUpdated(new Date());
-          
-          if (foundJob.durationSeconds != null) {
-            setLiveDuration(foundJob.durationSeconds);
-          }
-          
-          // CRITICAL FIX: If job is already complete when we first fetch it,
-          // trigger onJobComplete callback. This handles the case where the Lambda
-          // crashes immediately before our subscription is established.
-          if (isJobComplete(foundJob.status) && !completionNotifiedRef.current) {
-            console.log('[useBatchJobMonitor] Job already complete on initial fetch:', foundJob.status);
-            completionNotifiedRef.current = true;
-            onJobComplete?.(foundJob);
-          }
-        }
-        setError(null);
-      }
-
-      return foundJob;
-
-    } catch (err) {
-      console.error('[useBatchJobMonitor] Error fetching job:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(errorMessage);
-      return null;
-    } finally {
-      setIsPolling(false);
-    }
-  }, [jobId, subscriptionEvent, onJobComplete]);
 
   const refresh = useCallback(() => {
     fetchJob();
@@ -352,12 +470,18 @@ export const useBatchJobMonitor = (
       currentJobIdRef.current = jobId;
       completionNotifiedRef.current = false;
       prevStatsRef.current = extractStats(null);
+      prevSubscriptionEventRef.current = null;
       jobStartTimeRef.current = null;
       
       setJob(null);
       setLiveDuration(0);
       setHasChanges(false);
       setError(null);
+      
+      // Reset stale detection state
+      setLastEventTime(Date.now());
+      setIsStale(false);
+      setStatsRegressed(false);
     }
   }, [jobId]);
 
@@ -462,6 +586,11 @@ export const useBatchJobMonitor = (
 
     // Subscription state
     isSubscribed,
+    
+    // Stale/health detection state
+    isStale,
+    statsRegressed,
+    lastEventTime,
     
     // Subscription-provided values (use these for display)
     currentId: subscriptionCurrentId ?? job?.currentId ?? null,

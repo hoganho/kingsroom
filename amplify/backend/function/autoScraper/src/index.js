@@ -692,30 +692,81 @@ async function controlScraperOperation(operation, entityId) {
 // ===================================================================
 
 async function executeJob(event) {
-    const { jobId, entityId } = event;
-    
-    if (!jobId || !entityId) {
-        return { success: false, error: 'jobId and entityId required' };
-    }
+    const {
+        jobId,
+        entityId,
+        mode,
+        useS3,
+        forceRefresh,
+        skipNotPublished,
+        skipNotFoundGaps,
+        skipInProgress,
+        ignoreDoNotScrape,
+        saveToDatabase,
+        defaultVenueId,
+        scraperApiKey,
+        bulkCount,
+        startId,
+        endId,
+        maxId,
+        gapIds,
+        maxConsecutiveNotFound,
+        maxConsecutiveErrors,
+        maxConsecutiveBlanks,
+        maxTotalErrors,
+    } = event;
 
-    // Handle continuation - check if this is a continuation invocation
+    // Handle explicit continuation from self-invocation
     const isContinuation = event.isContinuation || false;
-    const accumulatedResults = event.accumulatedResults || null;
-    const continueFromId = event.continueFromId || null;
+    let accumulatedResults = event.accumulatedResults || null;
+    let continueFromId = event.continueFromId || null;
     const originalEndId = event.originalEndId || null;
 
-    if (isContinuation) {
-        console.log(`[executeJob] CONTINUATION for job ${jobId} from ID ${continueFromId}`);
-        console.log(`[executeJob] Accumulated results:`, JSON.stringify(accumulatedResults));
-    } else {
-        console.log(`[executeJob] Starting job ${jobId} for entity ${entityId}`);
-    }
+    console.log(`[executeJob] Starting job ${jobId} for entity ${entityId}`);
     
     const jobStartTime = Date.now();
     
     const job = await getScraperJob(jobId);
     if (!job) {
         return { success: false, error: `Job ${jobId} not found` };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // CHECKPOINT RESUME LOGIC (NEW)
+    // Detects if this is an AWS retry of a timed-out invocation
+    // and resumes from the last checkpoint instead of starting over
+    // ═══════════════════════════════════════════════════════════════
+    let resumeFromCheckpoint = false;
+    
+    if (!isContinuation && job.currentId && job.totalURLsProcessed > 0 && job.status === 'RUNNING') {
+        // Job was already running and has progress - this is likely an AWS retry
+        console.log(`[executeJob] CHECKPOINT DETECTED: Job was interrupted at ID ${job.currentId}`);
+        console.log(`[executeJob] Previous progress: ${job.totalURLsProcessed} processed, ` +
+                    `${job.newGamesScraped} new, ${job.gamesUpdated} updated`);
+        
+        // Resume from checkpoint
+        continueFromId = job.currentId;
+        resumeFromCheckpoint = true;
+        
+        // Restore accumulated results from the interrupted run
+        accumulatedResults = {
+            totalProcessed: job.totalURLsProcessed || 0,
+            newGamesScraped: job.newGamesScraped || 0,
+            gamesUpdated: job.gamesUpdated || 0,
+            gamesSkipped: job.gamesSkipped || 0,
+            errors: job.errors || 0,
+            blanks: job.blanks || 0,
+            notFoundCount: job.notFoundCount || 0,
+            s3CacheHits: job.s3CacheHits || 0,
+            notPublishedCount: job.notPublishedCount || 0,
+        };
+        
+        console.log(`[executeJob] Resuming from checkpoint ID ${continueFromId} with accumulated results`);
+    }
+
+    if (isContinuation) {
+        console.log(`[executeJob] CONTINUATION for job ${jobId} from ID ${continueFromId}`);
+        console.log(`[executeJob] Accumulated results:`, JSON.stringify(accumulatedResults));
     }
     
     const scraperState = await getOrCreateScraperState(entityId);
@@ -729,8 +780,8 @@ async function executeJob(event) {
         job.endId
     );
     
-    // Only update state if not a continuation (continuation keeps isRunning true)
-    if (!isContinuation) {
+    // Only update state if this is a fresh start (not continuation or checkpoint resume)
+    if (!isContinuation && !resumeFromCheckpoint) {
         await updateScraperState(scraperState.id, {
             isRunning: true,
             lastRunStartTime: new Date(jobStartTime).toISOString(),
@@ -748,6 +799,13 @@ async function executeJob(event) {
             errors: 0,
             blanks: 0,
         }, 'RUNNING', { force: true });
+    } else if (resumeFromCheckpoint) {
+        // For checkpoint resume, publish current progress
+        await progressPublisher.publishProgress(accumulatedResults, 'RUNNING', { 
+            force: true,
+            currentId: continueFromId,
+            message: `Resuming from checkpoint at ID ${continueFromId}`
+        });
     }
     
     try {
@@ -755,7 +813,8 @@ async function executeJob(event) {
         const scrapingOptions = {
             mode: job.mode || 'bulk',
             bulkCount: job.bulkCount,
-            startId: isContinuation ? continueFromId : job.startId,
+            // Use checkpoint/continuation ID if available, otherwise use job's startId
+            startId: continueFromId || job.startId,
             endId: isContinuation ? originalEndId : job.endId,
             maxId: job.maxId,
             gapIds: job.gapIds,
@@ -769,7 +828,7 @@ async function executeJob(event) {
             maxConsecutiveErrors: job.maxConsecutiveErrors,
             maxConsecutiveBlanks: job.maxConsecutiveBlanks,
             maxTotalErrors: job.maxTotalErrors,
-            // Pass accumulated results for continuation
+            // Pass accumulated results for continuation OR checkpoint resume
             accumulatedResults: accumulatedResults,
         };
 
@@ -805,7 +864,6 @@ async function executeJob(event) {
                 stopReason: STOP_REASON.CONTINUING,
             });
             
-            // Don't reset scraper state - let continuation handle it
             return {
                 success: true,
                 jobId,
@@ -835,10 +893,11 @@ async function executeJob(event) {
             stopReason: results.stopReason !== STOP_REASON.COMPLETED ? results.stopReason : null,
             lastErrorMessage: results.lastErrorMessage,
             endTime: new Date(jobEndTime).toISOString(),
-            durationSeconds: durationSeconds
+            durationSeconds: durationSeconds,
+            currentId: results.currentId,  // Record final position
         });
 
-        // Publish completion event (always publishes immediately)
+        // Publish completion event
         await progressPublisher.publishCompletion(results, finalStatus, {
             stopReason: results.stopReason !== STOP_REASON.COMPLETED ? results.stopReason : null,
             lastErrorMessage: results.lastErrorMessage,
@@ -873,12 +932,12 @@ async function executeJob(event) {
 
         // Publish failure event
         await progressPublisher.publishCompletion({
-            totalProcessed: 0,
-            newGamesScraped: 0,
-            gamesUpdated: 0,
-            gamesSkipped: 0,
-            errors: 1,
-            blanks: 0,
+            totalProcessed: accumulatedResults?.totalProcessed || 0,
+            newGamesScraped: accumulatedResults?.newGamesScraped || 0,
+            gamesUpdated: accumulatedResults?.gamesUpdated || 0,
+            gamesSkipped: accumulatedResults?.gamesSkipped || 0,
+            errors: (accumulatedResults?.errors || 0) + 1,
+            blanks: accumulatedResults?.blanks || 0,
         }, 'FAILED', {
             stopReason: 'FAILED',
             lastErrorMessage: error.message,
@@ -900,6 +959,7 @@ async function executeJob(event) {
         }
     }
 }
+
 
 // ===================================================================
 // CANCEL JOB

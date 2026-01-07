@@ -163,7 +163,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/autoScraper-4d2f64756c4b71685873-build.zip"
+          "s3Key": "amplify-builds/autoScraper-4a336447665079424f4f-build.zip"
         },
         "deleteGameFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
