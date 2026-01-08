@@ -104,49 +104,181 @@ function parseCSVLine(line) {
     return values;
 }
 
+// Fields that should always be treated as numbers (Int/Float in GraphQL)
+const NUMERIC_FIELDS = new Set([
+    // SocialPost Int fields
+    'videoWidth', 'videoHeight', 'likeCount', 'commentCount', 'shareCount',
+    'reactionCount', 'viewCount', 'linkedGameCount',
+    // SocialPost Float fields
+    'contentTypeConfidence',
+    // SocialAccount Int fields
+    'followerCount', 'followingCount', 'postCount', 'scrapeFrequencyMinutes',
+    'consecutiveFailures',
+    // SocialScrapeAttempt Int fields
+    'durationMs', 'postsFound', 'newPostsAdded', 'postsUpdated',
+    // Common Int fields across tables
+    'buyIn', 'guarantee', 'entrants', 'prizePool', 'rake', 'fee',
+    'order', 'position', 'amount', 'count', 'total', 'duration',
+    'latitude', 'longitude', 'rating', 'score',
+    // Amplify version field
+    '_version', '__version'
+]);
+
+// Fields that should always be treated as strings (ID/String/AWSURL/AWSDateTime in GraphQL)
+// Note: We also have a catch-all for fields ending in 'Id' below
+const STRING_FIELDS = new Set([
+    // All ID fields
+    'id', 'entityId', 'venueId', 'seriesId', 'accountId', 'postId',
+    'socialAccountId', 'linkedGameId', 'extractedGameDataId', 'primaryLinkedGameId',
+    'targetAccountIds',
+    // Platform-specific IDs (these are String! not ID! in schema)
+    'platformPostId', 'platformAccountId', 'platformUserId',
+    // Other String fields that might look like numbers
+    'phone', 'postcode', 'zipCode', 'abn', 'acn',
+    'postYearMonth', 'processingVersion',
+    // DynamoDB/Amplify metadata
+    '__typename'
+]);
+
+// Maximum safe integer in JavaScript
+const MAX_SAFE_INTEGER = 9007199254740991;
+
 function parseValue(value, header) {
     if (value === '' || value === null || value === undefined) {
         return null;
     }
     
+    const trimmedValue = value.trim();
+    
     // Handle JSON arrays and objects
-    if ((value.startsWith('[') && value.endsWith(']')) || 
-        (value.startsWith('{') && value.endsWith('}'))) {
+    if ((trimmedValue.startsWith('[') && trimmedValue.endsWith(']')) || 
+        (trimmedValue.startsWith('{') && trimmedValue.endsWith('}'))) {
         try {
-            return JSON.parse(value);
+            return JSON.parse(trimmedValue);
         } catch {
-            return value;
+            return trimmedValue;
         }
     }
     
     // Handle booleans
-    if (value.toLowerCase() === 'true') return true;
-    if (value.toLowerCase() === 'false') return false;
+    if (trimmedValue.toLowerCase() === 'true') return true;
+    if (trimmedValue.toLowerCase() === 'false') return false;
     
-    // Handle numbers (but not strings that look like numbers with leading zeros)
-    if (/^-?\d+\.?\d*$/.test(value) && !value.startsWith('0') || value === '0') {
-        const num = Number(value);
+    // Force string for known string fields
+    if (STRING_FIELDS.has(header)) {
+        return trimmedValue;
+    }
+    
+    // Any field ending in 'Id' should be a string
+    if (header.endsWith('Id')) {
+        return trimmedValue;
+    }
+    
+    // Force number for known numeric fields
+    if (NUMERIC_FIELDS.has(header)) {
+        // Check string length first for integers (MAX_SAFE_INTEGER has 16 digits)
+        if (/^-?\d+$/.test(trimmedValue)) {
+            const digits = trimmedValue.replace('-', '');
+            if (digits.length > 15) {
+                return trimmedValue;
+            }
+        }
+        const num = Number(trimmedValue);
+        if (!isNaN(num) && isFinite(num)) {
+            // Keep as string if too large for safe integer
+            if (Math.abs(num) > MAX_SAFE_INTEGER) {
+                return trimmedValue;
+            }
+            return num;
+        }
+        // If it can't be parsed as number, return 0 for numeric fields
+        return 0;
+    }
+    
+    // For other fields, try to detect numbers
+    // Match integers and decimals, including negative numbers
+    if (/^-?\d+$/.test(trimmedValue)) {
+        // Integer - check string length first (MAX_SAFE_INTEGER has 16 digits)
+        // If more than 15 digits, keep as string to avoid precision loss
+        const digits = trimmedValue.replace('-', '');
+        if (digits.length > 15) {
+            return trimmedValue;
+        }
+        const num = parseInt(trimmedValue, 10);
+        if (!isNaN(num) && isFinite(num)) {
+            // Double-check it's within safe range
+            if (Math.abs(num) > MAX_SAFE_INTEGER) {
+                return trimmedValue;
+            }
+            return num;
+        }
+    } else if (/^-?\d+\.\d+$/.test(trimmedValue)) {
+        // Decimal
+        const num = parseFloat(trimmedValue);
         if (!isNaN(num) && isFinite(num)) {
             return num;
         }
     }
     
-    return value;
+    return trimmedValue;
 }
 
 async function readCSV(filePath) {
     const content = fs.readFileSync(filePath, 'utf-8');
-    const lines = content.split('\n').filter(line => line.trim());
     
-    if (lines.length < 2) {
-        return [];
+    // Parse CSV properly handling multi-line quoted fields
+    const records = [];
+    let currentLine = '';
+    let inQuotes = false;
+    let headers = null;
+    
+    for (let i = 0; i < content.length; i++) {
+        const char = content[i];
+        
+        if (char === '"') {
+            // Check for escaped quote
+            if (inQuotes && content[i + 1] === '"') {
+                currentLine += '""';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+                currentLine += char;
+            }
+        } else if (char === '\n' && !inQuotes) {
+            // End of record
+            if (currentLine.trim()) {
+                if (!headers) {
+                    headers = parseCSVLine(currentLine);
+                } else {
+                    const values = parseCSVLine(currentLine);
+                    const record = {};
+                    
+                    for (let j = 0; j < headers.length; j++) {
+                        const header = headers[j].trim();
+                        const value = parseValue(values[j], header);
+                        
+                        if (value !== null && value !== '') {
+                            record[header] = value;
+                        }
+                    }
+                    
+                    if (record.id) {
+                        records.push(record);
+                    }
+                }
+            }
+            currentLine = '';
+        } else if (char === '\r') {
+            // Skip carriage returns
+            continue;
+        } else {
+            currentLine += char;
+        }
     }
     
-    const headers = parseCSVLine(lines[0]);
-    const records = [];
-    
-    for (let i = 1; i < lines.length; i++) {
-        const values = parseCSVLine(lines[i]);
+    // Handle last line if no trailing newline
+    if (currentLine.trim() && headers) {
+        const values = parseCSVLine(currentLine);
         const record = {};
         
         for (let j = 0; j < headers.length; j++) {
@@ -158,13 +290,24 @@ async function readCSV(filePath) {
             }
         }
         
-        // Only add records that have at least an id
         if (record.id) {
             records.push(record);
         }
     }
     
-    return records;
+    // Deduplicate by ID (keep last occurrence)
+    const seen = new Map();
+    for (const record of records) {
+        seen.set(record.id, record);
+    }
+    
+    const dedupedRecords = Array.from(seen.values());
+    
+    if (dedupedRecords.length < records.length) {
+        log(`   ⚠️  Removed ${records.length - dedupedRecords.length} duplicate records`);
+    }
+    
+    return dedupedRecords;
 }
 
 async function prompt(question) {
@@ -225,10 +368,24 @@ async function clearTable(tableName, keySchema) {
 }
 
 async function batchWriteItems(tableName, items) {
+    // Ensure no duplicates in the entire set (defensive)
+    const uniqueItems = [];
+    const seenIds = new Set();
+    for (const item of items) {
+        if (!seenIds.has(item.id)) {
+            seenIds.add(item.id);
+            uniqueItems.push(item);
+        }
+    }
+    
+    if (uniqueItems.length < items.length) {
+        log(`   ⚠️  Removed ${items.length - uniqueItems.length} duplicates before writing`, 0);
+    }
+    
     const batches = [];
     
-    for (let i = 0; i < items.length; i += CONFIG.batchSize) {
-        batches.push(items.slice(i, i + CONFIG.batchSize));
+    for (let i = 0; i < uniqueItems.length; i += CONFIG.batchSize) {
+        batches.push(uniqueItems.slice(i, i + CONFIG.batchSize));
     }
     
     let totalWritten = 0;
@@ -254,7 +411,7 @@ async function batchWriteItems(tableName, items) {
             }
             
             totalWritten += batch.length;
-            process.stdout.write(`\r    Progress: ${totalWritten}/${items.length} items written...`);
+            process.stdout.write(`\r    Progress: ${totalWritten}/${uniqueItems.length} items written...`);
             
             // Small delay to avoid throttling
             if (i < batches.length - 1) {

@@ -170,7 +170,7 @@ export const DatabaseMonitorPage: React.FC = () => {
 
     const client = useMemo(() => generateClient(), []);
 
-    // Scan a single table
+    // Scan a single table with full pagination
     const scanTable = useCallback(async (tableName: string, pluralName: string) => {
         setTableStats(prev => ({
             ...prev,
@@ -178,23 +178,57 @@ export const DatabaseMonitorPage: React.FC = () => {
         }));
 
         try {
-            const query = `query List${pluralName} { list${pluralName}(limit: 10000) { items { id } } }`;
-            const response = await client.graphql({ query });
+            let totalCount = 0;
+            let nextToken: string | null = null;
             
-            if ('data' in response && response.data) {
-                const items = (response.data as any)[`list${pluralName}`]?.items || [];
-                const count = items.length;
+            // Paginate through ALL records
+            do {
+                const query = `query List${pluralName}($limit: Int, $nextToken: String) { 
+                    list${pluralName}(limit: $limit, nextToken: $nextToken) { 
+                        items { id } 
+                        nextToken 
+                    } 
+                }`;
                 
-                setTableStats(prev => ({
-                    ...prev,
-                    [tableName]: {
-                        count,
-                        scannedCount: count,
-                        status: 'COMPLETE',
-                        lastScan: new Date()
+                const response: any = await client.graphql({ 
+                    query,
+                    variables: { 
+                        limit: 10000,
+                        nextToken 
                     }
-                }));
-            }
+                });
+                
+                if ('data' in response && response.data) {
+                    const result: any = (response.data as any)[`list${pluralName}`];
+                    const items = result?.items || [];
+                    totalCount += items.length;
+                    nextToken = result?.nextToken || null;
+                    
+                    // Update count as we scan (shows progress)
+                    setTableStats(prev => ({
+                        ...prev,
+                        [tableName]: {
+                            ...prev[tableName],
+                            count: totalCount,
+                            scannedCount: totalCount,
+                            status: 'SCANNING'
+                        }
+                    }));
+                } else {
+                    break;
+                }
+            } while (nextToken);
+            
+            // Final update with COMPLETE status
+            setTableStats(prev => ({
+                ...prev,
+                [tableName]: {
+                    count: totalCount,
+                    scannedCount: totalCount,
+                    status: 'COMPLETE',
+                    lastScan: new Date()
+                }
+            }));
         } catch (error: any) {
             console.error(`Error scanning ${tableName}:`, error);
             setTableStats(prev => ({
