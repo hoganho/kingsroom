@@ -350,7 +350,12 @@ export const fetchGameDataFromBackend = async (
         }
         
         // ADDITIONAL CHECK: Detect when gameVariant is null (may indicate invalid enum)
-        if (result.gameVariant === null) {
+        // v1.1.0: Only warn if this is NOT a NOT_FOUND/NOT_IN_USE response
+        // For empty tournament slots, null gameVariant is expected and not a warning
+        const isNotFoundResponse = result.gameStatus === 'NOT_FOUND' || 
+                                   result.gameStatus === 'NOT_IN_USE' ||
+                                   result.gameStatus === 'NOT_PUBLISHED';
+        if (result.gameVariant === null && !isNotFoundResponse) {
             console.warn('[GameService] gameVariant is null - may indicate invalid enum value');
         }
         

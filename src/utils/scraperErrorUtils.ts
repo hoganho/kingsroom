@@ -1,6 +1,13 @@
 // src/utils/scraperErrorUtils.ts
 // Error classification and handling utilities for the scraper
 // ENHANCED: Added shouldPauseForDecision and enum error detection
+//
+// v1.1.0:
+// - FIXED: hasEnumErrors() no longer flags NOT_FOUND responses as having enum errors
+//   - null gameVariant is expected for NOT_FOUND/NOT_IN_USE/NOT_PUBLISHED responses
+// - NEW: isNotPublishedResponse() - separate helper for hidden tournaments
+// - NEW: isInactiveResponse() - combined check for NOT_FOUND or NOT_PUBLISHED
+// - CHANGED: isNotFoundResponse() no longer includes NOT_PUBLISHED (different status)
 
 import { ErrorType, ErrorCounters, AutoProcessingConfig } from '../types/scraper';
 
@@ -133,14 +140,17 @@ export const shouldPauseForDecision = (
 };
 
 /**
- * Determine if an error response is a NOT_FOUND type
+ * Determine if a response indicates an empty tournament slot (NOT_FOUND)
  * Used for consecutive NOT_FOUND tracking
+ * 
+ * v1.1.0: Separated from NOT_PUBLISHED handling
+ * - NOT_FOUND/NOT_IN_USE = empty slot, no tournament exists
+ * - NOT_PUBLISHED = tournament exists but is hidden (different handling)
  */
 export const isNotFoundResponse = (parsedData: any, errorMsg?: string): boolean => {
-  // Check parsedData gameStatus
+  // Check parsedData gameStatus - only true "not found" statuses
   if (parsedData?.gameStatus === 'NOT_FOUND' || 
-      parsedData?.gameStatus === 'NOT_IN_USE' ||
-      parsedData?.gameStatus === 'NOT_PUBLISHED') {
+      parsedData?.gameStatus === 'NOT_IN_USE') {
     return true;
   }
   
@@ -158,14 +168,44 @@ export const isNotFoundResponse = (parsedData: any, errorMsg?: string): boolean 
 };
 
 /**
+ * Determine if a response indicates a hidden tournament (NOT_PUBLISHED)
+ * These are real tournaments that exist but aren't publicly visible
+ * 
+ * v1.1.0: Separated from NOT_FOUND handling
+ */
+export const isNotPublishedResponse = (parsedData: any): boolean => {
+  return parsedData?.gameStatus === 'NOT_PUBLISHED';
+};
+
+/**
+ * Determine if a response indicates any non-active tournament status
+ * Includes both empty slots (NOT_FOUND) and hidden tournaments (NOT_PUBLISHED)
+ */
+export const isInactiveResponse = (parsedData: any): boolean => {
+  return isNotFoundResponse(parsedData) || isNotPublishedResponse(parsedData);
+};
+
+/**
  * Check if parsed data has enum validation errors
+ * v1.1.0: Only considers null gameVariant an error for REAL tournament responses
+ * NOT_FOUND/NOT_IN_USE/NOT_PUBLISHED responses are expected to have null gameVariant
  */
 export const hasEnumErrors = (parsedData: any): boolean => {
-  return (
-    parsedData?._enumErrors?.length > 0 ||
-    !!parsedData?._enumErrorMessage ||
-    parsedData?.gameVariant === null // null gameVariant often indicates enum issue
-  );
+  // Check for explicit enum errors first
+  if (parsedData?._enumErrors?.length > 0 || parsedData?._enumErrorMessage) {
+    return true;
+  }
+  
+  // null gameVariant often indicates enum issue, BUT only for real tournament responses
+  // For NOT_FOUND/NOT_IN_USE/NOT_PUBLISHED, null gameVariant is expected
+  if (parsedData?.gameVariant === null) {
+    const isEmptySlot = parsedData?.gameStatus === 'NOT_FOUND' ||
+                        parsedData?.gameStatus === 'NOT_IN_USE' ||
+                        parsedData?.gameStatus === 'NOT_PUBLISHED';
+    return !isEmptySlot;  // Only flag as enum error if NOT an empty slot
+  }
+  
+  return false;
 };
 
 /**

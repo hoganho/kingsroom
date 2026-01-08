@@ -376,7 +376,7 @@ type Query {
   getTournamentIdBounds(entityId: ID!): TournamentIdBounds
     @function(name: "gameIdTracker-${env}")
 
-  getEntityScrapingStatus(entityId: ID!, forceRefresh: Boolean, startId: Int, endId: Int): EntityScrapingStatus
+  getEntityScrapingStatus(entityId: ID!, forceRefresh: Boolean, startId: Int, endId: Int, skipNotPublished: Boolean): EntityScrapingStatus
     @function(name: "gameIdTracker-${env}")
 
   findTournamentIdGaps(entityId: ID!, startId: Int, endId: Int, maxGapsToReturn: Int): [GapRange!]

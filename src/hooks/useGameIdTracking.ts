@@ -2,6 +2,8 @@
 /**
  * React hook for efficient game ID tracking and gap detection
  * Replaces the old findSkippedTournamentIds utility with server-side processing
+ * 
+ * UPDATED: Added skipNotPublished parameter to exclude NOT_PUBLISHED IDs from gaps
  */
 
 import { useState, useCallback, useEffect } from 'react';
@@ -78,12 +80,14 @@ const GET_ENTITY_SCRAPING_STATUS = /* GraphQL */ `
     $forceRefresh: Boolean
     $startId: Int
     $endId: Int
+    $skipNotPublished: Boolean
   ) {
     getEntityScrapingStatus(
       entityId: $entityId
       forceRefresh: $forceRefresh
       startId: $startId
       endId: $endId
+      skipNotPublished: $skipNotPublished
     ) {
       entityId
       entityName
@@ -226,6 +230,7 @@ export const useGameIdTracking = (entityId?: string) => {
     forceRefresh?: boolean;
     startId?: number;
     endId?: number;
+    skipNotPublished?: boolean;
   }) => {
     const id = options?.entityId || entityId;
     if (!id) {
@@ -240,7 +245,8 @@ export const useGameIdTracking = (entityId?: string) => {
         entityId: id,
         forceRefresh: options?.forceRefresh,
         startId: options?.startId,
-        endId: options?.endId
+        endId: options?.endId,
+        skipNotPublished: options?.skipNotPublished
       });
 
       const response = await getClient().graphql({
@@ -249,7 +255,8 @@ export const useGameIdTracking = (entityId?: string) => {
           entityId: id,
           forceRefresh: options?.forceRefresh || false,
           startId: options?.startId,
-          endId: options?.endId
+          endId: options?.endId,
+          skipNotPublished: options?.skipNotPublished || false
         }
       }) as { data: { getEntityScrapingStatus: EntityScrapingStatus } };
 
@@ -504,6 +511,7 @@ export const getEntityScrapingStatusDirect = async (
     forceRefresh?: boolean;
     startId?: number;
     endId?: number;
+    skipNotPublished?: boolean;
   }
 ): Promise<EntityScrapingStatus> => {
   try {
@@ -513,7 +521,8 @@ export const getEntityScrapingStatusDirect = async (
         entityId,
         forceRefresh: options?.forceRefresh || false,
         startId: options?.startId,
-        endId: options?.endId
+        endId: options?.endId,
+        skipNotPublished: options?.skipNotPublished || false
       }
     }) as { data: { getEntityScrapingStatus: EntityScrapingStatus } };
 

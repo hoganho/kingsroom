@@ -1,13 +1,16 @@
 /**
  * ===================================================================
- * Fetch Handler (v2.4.0)
+ * Fetch Handler (v2.5.0)
  * ===================================================================
  * 
  * Handles the fetchTournamentData operation.
  * 
- * VERSION: 2.4.0
+ * VERSION: 2.5.0
  * 
  * CHANGELOG:
+ * - v2.5.0: NOT_FOUND/NOT_IN_USE no longer set doNotScrape=true
+ *           These are empty tournament slots that need to keep being checked
+ *           Only NOT_PUBLISHED (hidden tournament) sets doNotScrape=true
  * - v2.4.0: Removed lambda-monitoring dependency (no longer maintained)
  * - v2.3.0: Added entityId filtering to byTournamentId GSI queries
  * - v2.2.0: Robust ScrapeURL record creation, S3 cache link restoration
@@ -511,13 +514,27 @@ const handleFetch = async (options, context) => {
     scrapedData.isNewStructure = isNewStructure;
     
     // Update doNotScrape if needed
-    const shouldMarkDoNotScrape = DO_NOT_SCRAPE_STATUSES.includes(scrapedData.gameStatus) ||
-                                   scrapedData.doNotScrape === true;
+    // v2.5.0 FIX: NOT_FOUND/NOT_IN_USE should NOT set doNotScrape=true
+    // These are empty slots that we need to keep checking for new tournaments
+    // Only NOT_PUBLISHED (real tournament that's hidden) should be marked doNotScrape
+    const isNotFoundStatus = scrapedData.gameStatus === 'NOT_FOUND' || 
+                             scrapedData.gameStatus === 'NOT_IN_USE';
+    
+    // Use the configured DO_NOT_SCRAPE_STATUSES, but explicitly exclude NOT_FOUND/NOT_IN_USE
+    const shouldMarkDoNotScrape = !isNotFoundStatus && (
+        DO_NOT_SCRAPE_STATUSES.includes(scrapedData.gameStatus) ||
+        scrapedData.doNotScrape === true
+    );
     
     if (shouldMarkDoNotScrape && !scrapeURLRecord.doNotScrape) {
         console.log(`[FetchHandler] Marking as doNotScrape: ${scrapedData.gameStatus}`);
         updateScrapeURLDoNotScrape(url, true, scrapedData.gameStatus, context)
             .catch(err => console.warn(`[FetchHandler] doNotScrape update failed: ${err.message}`));
+    }
+    
+    // v2.5.0: Ensure NOT_FOUND/NOT_IN_USE have doNotScrape=false in the result
+    if (isNotFoundStatus) {
+        scrapedData.doNotScrape = false;
     }
     
     // Build result

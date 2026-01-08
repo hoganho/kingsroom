@@ -1,5 +1,6 @@
 // src/components/scraper/admin/SkippedIDsAnalyzer.tsx
 // Modernized version using useGameIdTracking hook with server-side gap detection
+// UPDATED: Added skipNotPublished checkbox to exclude NOT_PUBLISHED IDs from gaps
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { 
@@ -27,6 +28,7 @@ export const SkippedIDsAnalyzer: React.FC = () => {
     const [selectedRanges, setSelectedRanges] = useState<Set<string>>(new Set());
     const [customRange, setCustomRange] = useState({ start: '', end: '' });
     const [forceRefresh, setForceRefresh] = useState(false);
+    const [skipNotPublished, setSkipNotPublished] = useState(true); // Default to skip NOT_PUBLISHED
     
     // Use the new hook
     const {
@@ -51,7 +53,8 @@ export const SkippedIDsAnalyzer: React.FC = () => {
                 entityId: currentEntity.id,
                 forceRefresh,
                 startId,
-                endId
+                endId,
+                skipNotPublished
             });
             
             // Reset force refresh after use
@@ -60,7 +63,7 @@ export const SkippedIDsAnalyzer: React.FC = () => {
             console.error('Error analyzing gaps:', err);
             alert('Error analyzing gaps. Check console for details.');
         }
-    }, [currentEntity, customRange, forceRefresh, getScrapingStatus]);
+    }, [currentEntity, customRange, forceRefresh, skipNotPublished, getScrapingStatus]);
     
     // Auto-load on mount if entity is selected
     useEffect(() => {
@@ -189,21 +192,33 @@ export const SkippedIDsAnalyzer: React.FC = () => {
                             </p>
                         </div>
                         
-                        <div className="flex space-x-2">
-                            <label className="flex items-center text-sm text-gray-600">
-                                <input
-                                    type="checkbox"
-                                    checked={forceRefresh}
-                                    onChange={(e) => setForceRefresh(e.target.checked)}
-                                    className="mr-2"
-                                    disabled={loading}
-                                />
-                                Force Refresh
-                            </label>
+                        <div className="flex flex-col space-y-2">
+                            <div className="flex space-x-4">
+                                <label className="flex items-center text-sm text-gray-600">
+                                    <input
+                                        type="checkbox"
+                                        checked={forceRefresh}
+                                        onChange={(e) => setForceRefresh(e.target.checked)}
+                                        className="mr-2"
+                                        disabled={loading}
+                                    />
+                                    Force Refresh
+                                </label>
+                                <label className="flex items-center text-sm text-gray-600">
+                                    <input
+                                        type="checkbox"
+                                        checked={skipNotPublished}
+                                        onChange={(e) => setSkipNotPublished(e.target.checked)}
+                                        className="mr-2"
+                                        disabled={loading}
+                                    />
+                                    Skip NOT_PUBLISHED
+                                </label>
+                            </div>
                             <button
                                 onClick={handleAnalyze}
                                 disabled={loading || !currentEntity}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                             >
                                 {loading ? (
                                     <>
@@ -222,6 +237,14 @@ export const SkippedIDsAnalyzer: React.FC = () => {
                             </button>
                         </div>
                     </div>
+                    
+                    {/* Skip NOT_PUBLISHED explanation */}
+                    {skipNotPublished && (
+                        <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                            <strong>Skip NOT_PUBLISHED:</strong> Tournament IDs that were previously scraped but found to be 
+                            NOT_PUBLISHED will not appear as gaps. Uncheck to see all missing IDs regardless of previous scrape results.
+                        </div>
+                    )}
                     
                     {!currentEntity && (
                         <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">

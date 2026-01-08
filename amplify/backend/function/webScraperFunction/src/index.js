@@ -3,9 +3,13 @@
  * webScraperFunction - Entry Point
  * ===================================================================
  * 
- * VERSION: 2.0.0
+ * VERSION: 2.1.0
  * 
  * CHANGELOG:
+ * - v2.1.0: Error message now encoded in 'name' field for GraphQL passthrough
+ *           Format: "FETCH_ERROR: <actual error message>"
+ *           This ensures scrapingEngine can detect and display real errors.
+ *           Also: doNotScrape=false for transient errors (API key missing, etc.)
  * - v2.0.0: Removed lambda-monitoring dependency (no longer maintained)
  *           Uses raw ddbDocClient instead of monitored wrapper
  * 
@@ -207,19 +211,27 @@ exports.handler = async (event) => {
         console.error('[Handler] Error:', error);
         
         // Return structured error for fetch operations
+        // v2.1.0: Encode error message in 'name' field so it passes through GraphQL
+        // The error/errorMessage fields may be stripped by GraphQL schema validation,
+        // but 'name' always passes through. scrapingEngine checks for "FETCH_ERROR:" prefix.
         if (event.fieldName === 'fetchTournamentData' || event.fieldName === 'FETCH') {
             const args = event.arguments || event.args || event;
             const tournamentId = args.url ? extractTournamentIdFromUrl(args.url) : 0;
             
+            const errorMsg = error.message || 'Unknown fetch error';
+            
             return {
                 tournamentId,
-                name: 'Error processing tournament',
+                // v2.1.0: Encode error in name field with prefix for detection
+                name: `FETCH_ERROR: ${errorMsg}`,
                 gameStatus: 'UNKNOWN',
                 hasGuarantee: false,
-                doNotScrape: true,
+                // v2.1.0: Don't set doNotScrape for transient errors like missing API key
+                doNotScrape: false,
                 s3Key: '',
-                error: error.message,
-                errorMessage: error.message,
+                // These fields may be stripped by GraphQL, but we include them anyway
+                error: errorMsg,
+                errorMessage: errorMsg,
                 status: 'ERROR',
                 registrationStatus: 'N_A',
                 entityId: args.entityId || null,

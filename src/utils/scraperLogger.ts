@@ -1,6 +1,12 @@
 // src/utils/scraperLogger.ts
 // Phase 5: Structured logging for scraper operations
 // Provides consistent, filterable log output for debugging
+//
+// v1.1.0:
+// - NEW: ITEM_NOT_FOUND event type for empty tournament slots (distinct from errors)
+// - NEW: ITEM_NOT_PUBLISHED event type for hidden tournaments
+// - NEW: logNotFound() and logNotPublished() helper methods
+// - NOT_FOUND is no longer logged as ITEM_FETCH_ERROR (was confusing)
 
 // ===================================================================
 // TYPES
@@ -29,6 +35,8 @@ export type ScraperEventType =
   | 'ITEM_SCRAPING'
   | 'ITEM_FETCH_SUCCESS'
   | 'ITEM_FETCH_ERROR'
+  | 'ITEM_NOT_FOUND'      // NEW: Distinct from ITEM_FETCH_ERROR - tournament slot doesn't exist
+  | 'ITEM_NOT_PUBLISHED'  // NEW: Tournament exists but is hidden
   | 'ITEM_SAVING'
   | 'ITEM_SAVE_SUCCESS'
   | 'ITEM_SAVE_ERROR'
@@ -343,6 +351,32 @@ class ScraperLogger {
       tournamentId,
       duration,
       payload: { errorType }
+    });
+  }
+
+  /**
+   * Log NOT_FOUND response (distinct from actual errors)
+   * This is a successful retrieval of an empty tournament slot - NOT an error
+   */
+  logNotFound(tournamentId: number, gameStatus?: string): void {
+    const duration = this.endTimer(`item_${tournamentId}`);
+    this.info('ITEM_NOT_FOUND', `Tournament slot empty (${gameStatus || 'NOT_FOUND'})`, {
+      tournamentId,
+      duration,
+      payload: { gameStatus: gameStatus || 'NOT_FOUND' }
+    });
+  }
+
+  /**
+   * Log NOT_PUBLISHED response (tournament exists but is hidden)
+   * This is a successful retrieval - NOT an error
+   */
+  logNotPublished(tournamentId: number): void {
+    const duration = this.endTimer(`item_${tournamentId}`);
+    this.info('ITEM_NOT_PUBLISHED', `Tournament not published (hidden)`, {
+      tournamentId,
+      duration,
+      payload: { gameStatus: 'NOT_PUBLISHED' }
     });
   }
 

@@ -7,20 +7,25 @@
     API_KINGSROOM_GRAPHQLAPIIDOUTPUT
     API_KINGSROOM_SCRAPERSTATETABLE_ARN
     API_KINGSROOM_SCRAPERSTATETABLE_NAME
+    API_KINGSROOM_SCRAPEURLTABLE_ARN
+    API_KINGSROOM_SCRAPEURLTABLE_NAME
     ENV
     REGION
 Amplify Params - DO NOT EDIT */
 
 /**
  * gameIdTracker Lambda Function
- * * Efficiently tracks tournament IDs, detects gaps, and manages scraping status
+ * Efficiently tracks tournament IDs, detects gaps, and manages scraping status
  * Uses composite index for optimal DynamoDB queries
- * * FIX: Added filtering to exclude 'PARENT' records from consolidation
+ * 
+ * FIX: Added filtering to exclude 'PARENT' records from consolidation
  * to prevent them from breaking statistics.
+ * 
+ * UPDATED: Added skipNotPublished parameter to exclude NOT_PUBLISHED IDs from gaps
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, QueryCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, QueryCommand, GetCommand, UpdateCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 
 // --- Lambda Monitoring ---
 const { LambdaMonitoring } = require('./lambda-monitoring');
@@ -37,6 +42,7 @@ const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(originalDdbDocClient
 const GAME_TABLE = process.env.API_KINGSROOM_GAMETABLE_NAME;
 const SCRAPER_STATE_TABLE = process.env.API_KINGSROOM_SCRAPERSTATETABLE_NAME;
 const ENTITY_TABLE = process.env.API_KINGSROOM_ENTITYTABLE_NAME;
+const SCRAPE_URL_TABLE = process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME;
 
 // Cache TTL in seconds (5 minutes)
 const CACHE_TTL = 300;
@@ -70,13 +76,15 @@ exports.handler = async (event) => {
       case 'getEntityScrapingStatus':
         monitoring.trackOperation('GET_STATUS_START', 'Game', args.entityId, { 
           entityId: args.entityId, 
-          forceRefresh: args.forceRefresh 
+          forceRefresh: args.forceRefresh,
+          skipNotPublished: args.skipNotPublished
         });
         return await getEntityScrapingStatus(
           args.entityId,
           args.forceRefresh,
           args.startId,
-          args.endId
+          args.endId,
+          args.skipNotPublished
         );
       
       case 'findTournamentIdGaps':
@@ -277,6 +285,74 @@ async function getAllTournamentIds(entityId) {
 }
 
 /**
+ * Get tournament IDs that have NOT_PUBLISHED status in ScrapeURL table
+ * These are IDs we've checked but the tournament wasn't published
+ * 
+ * Uses byEntityScrapeURL index with filter (no dedicated GSI for gameStatus)
+ */
+async function getNotPublishedTournamentIds(entityId) {
+  console.log(`[getNotPublishedTournamentIds] Fetching NOT_PUBLISHED IDs for entity: ${entityId}`);
+  
+  if (!SCRAPE_URL_TABLE) {
+    console.warn('[getNotPublishedTournamentIds] SCRAPE_URL_TABLE not configured');
+    return [];
+  }
+  
+  monitoring.trackOperation('GET_NOT_PUBLISHED_START', 'ScrapeURL', entityId, { entityId });
+  
+  const ids = [];
+  let lastEvaluatedKey = undefined;
+  let iterations = 0;
+  
+  try {
+    do {
+      const result = await monitoredDdbDocClient.send(new QueryCommand({
+        TableName: SCRAPE_URL_TABLE,
+        IndexName: 'byEntityScrapeURL',
+        KeyConditionExpression: 'entityId = :entityId',
+        FilterExpression: 'gameStatus = :status',
+        ExpressionAttributeValues: {
+          ':entityId': entityId,
+          ':status': 'NOT_PUBLISHED'
+        },
+        ProjectionExpression: 'tournamentId',
+        Limit: 1000,
+        ExclusiveStartKey: lastEvaluatedKey
+      }));
+      
+      if (result.Items) {
+        result.Items.forEach(item => {
+          if (item.tournamentId) {
+            ids.push(item.tournamentId);
+          }
+        });
+      }
+      
+      lastEvaluatedKey = result.LastEvaluatedKey;
+      iterations++;
+      
+      console.log(`[getNotPublishedTournamentIds] Iteration ${iterations}: Scanned ${result.ScannedCount || 0}, Found ${result.Items?.length || 0} NOT_PUBLISHED`);
+      
+    } while (lastEvaluatedKey);
+    
+  } catch (error) {
+    console.error('[getNotPublishedTournamentIds] Query failed:', error.message);
+    monitoring.trackOperation('GET_NOT_PUBLISHED_ERROR', 'ScrapeURL', entityId, { error: error.message });
+    // Return empty array - NOT_PUBLISHED IDs won't be excluded from gaps
+    return [];
+  }
+  
+  console.log(`[getNotPublishedTournamentIds] Found ${ids.length} NOT_PUBLISHED tournament IDs in ${iterations} iterations`);
+  
+  monitoring.trackOperation('GET_NOT_PUBLISHED_COMPLETE', 'ScrapeURL', entityId, { 
+    count: ids.length,
+    iterations 
+  });
+  
+  return ids;
+}
+
+/**
  * Calculate gaps in tournament ID sequence
  */
 function calculateGaps(foundIds, startId, endId, maxGapsToReturn = 1000) {
@@ -460,13 +536,20 @@ async function getEntityName(entityId) {
 
 /**
  * Get comprehensive entity scraping status
+ * 
+ * @param {string} entityId - The entity ID to get status for
+ * @param {boolean} forceRefresh - Whether to bypass cache
+ * @param {number} startId - Optional start ID for range
+ * @param {number} endId - Optional end ID for range
+ * @param {boolean} skipNotPublished - If true, exclude NOT_PUBLISHED IDs from gaps
  */
-async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, endId) {
-  console.log(`[getEntityScrapingStatus] Entity: ${entityId}, Force: ${forceRefresh}`);
+async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, endId, skipNotPublished = false) {
+  console.log(`[getEntityScrapingStatus] Entity: ${entityId}, Force: ${forceRefresh}, SkipNotPublished: ${skipNotPublished}`);
   const entityName = await getEntityName(entityId);
 
   // Try to use cache unless forced refresh
-  if (!forceRefresh) {
+  // NOTE: Cache doesn't account for skipNotPublished, so we skip cache if skipNotPublished is true
+  if (!forceRefresh && !skipNotPublished) {
     const cached = await getCachedStatus(entityId);
     if (cached) {
       const unfinishedCount = await getUnfinishedGamesCount(entityId);
@@ -495,7 +578,7 @@ async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, 
   }
   
   console.log('[getEntityScrapingStatus] Performing fresh calculation...');
-  monitoring.trackOperation('STATUS_FRESH_CALC_START', 'Game', entityId, { forceRefresh });
+  monitoring.trackOperation('STATUS_FRESH_CALC_START', 'Game', entityId, { forceRefresh, skipNotPublished });
   
   // Get bounds
   const bounds = await getTournamentIdBounds(entityId);
@@ -504,6 +587,7 @@ async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, 
     monitoring.trackOperation('STATUS_NO_GAMES', 'Game', entityId);
     return {
       entityId,
+      entityName,
       totalGamesStored: 0,
       unfinishedGameCount: 0,
       gaps: [],
@@ -517,8 +601,16 @@ async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, 
     };
   }
   
-  // Get all IDs
+  // Get all IDs from Game table
   const foundIds = await getAllTournamentIds(entityId);
+  
+  // NEW: If skipNotPublished, also get NOT_PUBLISHED IDs and add them to foundIds
+  // This makes NOT_PUBLISHED IDs appear as "found" so they won't show as gaps
+  if (skipNotPublished) {
+    const notPublishedIds = await getNotPublishedTournamentIds(entityId);
+    console.log(`[getEntityScrapingStatus] Adding ${notPublishedIds.length} NOT_PUBLISHED IDs to exclude from gaps`);
+    notPublishedIds.forEach(id => foundIds.add(id));
+  }
   
   // Calculate gaps
   const rangeStart = startId || bounds.lowestId;
@@ -535,22 +627,26 @@ async function getEntityScrapingStatus(entityId, forceRefresh = false, startId, 
   monitoring.trackOperation('STATUS_FRESH_CALC_COMPLETE', 'Game', entityId, { 
     totalGames: bounds.totalCount,
     gapCount: gaps.length,
-    coverage: gapSummary.coveragePercentage
+    coverage: gapSummary.coveragePercentage,
+    skipNotPublished
   });
   
-  // Update cache
-  const cached = await getCachedStatus(entityId);
-  if (cached?.scraperStateId) {
-    await updateScraperStateCache(cached.scraperStateId, {
-      highestStoredId: bounds.highestId,
-      lowestStoredId: bounds.lowestId,
-      knownGapRanges: gaps,
-      totalGamesInDatabase: bounds.totalCount
-    });
+  // Update cache (only if not using skipNotPublished, to avoid caching filtered results)
+  if (!skipNotPublished) {
+    const cached = await getCachedStatus(entityId);
+    if (cached?.scraperStateId) {
+      await updateScraperStateCache(cached.scraperStateId, {
+        highestStoredId: bounds.highestId,
+        lowestStoredId: bounds.lowestId,
+        knownGapRanges: gaps,
+        totalGamesInDatabase: bounds.totalCount
+      });
+    }
   }
   
   return {
     entityId,
+    entityName,
     lowestTournamentId: bounds.lowestId,
     highestTournamentId: bounds.highestId,
     totalGamesStored: bounds.totalCount,

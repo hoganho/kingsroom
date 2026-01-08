@@ -1,5 +1,12 @@
 // src/types/scraper.ts
 // Centralized types for the scraper system
+//
+// UPDATED v4.0: Error threshold changes
+// - DEFAULT_BATCH_THRESHOLDS.maxTotalErrors now defaults to 1 (was 15)
+// - DEFAULT_AUTO_CONFIG.maxTotalErrors now defaults to 1 (was 15)
+// - Jobs will stop on first REAL error (not parse failures)
+// - Note: blanks counter is deprecated, use notFoundCount instead
+//
 // UPDATED v3.1: Added forceRefreshFromWeb option for refresh mode
 //               - Refresh mode: Re-fetch unfinished games (RUNNING, REGISTERING, SCHEDULED)
 //               - Auto mode: Backend handles per-game forceRefresh based on game status
@@ -137,7 +144,7 @@ export const DEFAULT_BATCH_THRESHOLDS: BatchThresholds = {
   maxConsecutiveNotFound: 10,
   maxConsecutiveErrors: 3,
   maxConsecutiveBlanks: 5,
-  maxTotalErrors: 15,
+  maxTotalErrors: 1,  // v4.0: Stop on first real error (was 15)
 };
 
 // ===================================================================
@@ -217,7 +224,7 @@ export interface AutoProcessingConfig {
 
 export const DEFAULT_AUTO_CONFIG: AutoProcessingConfig = {
   maxConsecutiveErrors: 3,
-  maxTotalErrors: 15,
+  maxTotalErrors: 1,  // v4.0: Stop on first real error (was 15)
   pauseOnUnknownError: true,
   autoRetryTransientErrors: true,
   retryDelayMs: 2000,

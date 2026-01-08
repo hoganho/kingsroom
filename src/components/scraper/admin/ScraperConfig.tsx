@@ -1,5 +1,10 @@
 // src/components/scraper/admin/ScraperConfig.tsx
 // Configuration panel for the scraper including ID selection, options, venue, and API key
+//
+// v2.0.0: Removed error threshold configuration
+// - Error thresholds are now hardcoded in the backend (maxTotalErrors=1)
+// - Simplifies UI and prevents configuration mistakes
+// - Removed: maxConsecutiveNotFound, maxConsecutiveErrors, maxConsecutiveBlanks, maxTotalErrors
 
 import React from 'react';
 import { Play, Key, AlertTriangle } from 'lucide-react';
@@ -8,7 +13,6 @@ import {
   IdSelectionParams, 
   ScrapeFlow, 
   ScrapeOptions,
-  AutoProcessingConfig 
 } from '../../../types/scraper';
 import { Venue } from '../../../API';
 import { EntityScrapingStatus, TournamentIdBounds } from '../../../hooks/useGameIdTracking';
@@ -52,7 +56,6 @@ interface ScraperConfigProps {
   // Scraping Status
   scrapingStatus: EntityScrapingStatus | null;
   bounds: TournamentIdBounds | null;
-  autoConfig: AutoProcessingConfig;
 }
 
 export const ScraperConfig: React.FC<ScraperConfigProps> = ({
@@ -81,7 +84,6 @@ export const ScraperConfig: React.FC<ScraperConfigProps> = ({
   onStartProcessing,
   scrapingStatus,
   bounds,
-  autoConfig
 }) => {
   const highestTournamentId = scrapingStatus?.highestTournamentId ?? bounds?.highestId;
 
@@ -124,13 +126,12 @@ export const ScraperConfig: React.FC<ScraperConfigProps> = ({
           </div>
         );
       case 'auto':
-        // NEW: Show Start ID and Max ID inputs for auto mode
         return (
           <div className="space-y-3 mt-1">
             <div className="p-2 bg-amber-50 border border-amber-200 rounded">
               <p className="font-medium text-amber-800 text-sm">Auto Mode</p>
               <p className="text-xs text-amber-700">
-                Will fill gaps first, then scan new IDs. Pauses on any error or after {autoConfig.maxConsecutiveNotFound} consecutive NOT_FOUND.
+                Fills gaps first, then scans new IDs. Stops on any real error or after 10 consecutive NOT_FOUND.
               </p>
             </div>
             

@@ -2,6 +2,9 @@
 // REFACTORED: Single-ID on frontend (useSingleScrape), batch on backend (useScraperJobs)
 // UPDATED: Integrated BatchJobProgress for real-time batch job monitoring with polling
 // UPDATED v3.1: Added refresh mode support with forceRefreshFromWeb option
+// UPDATED v3.2: Removed error threshold configuration - now managed by backend defaults
+//               Backend defaults: maxTotalErrors=1, maxConsecutiveNotFound=10
+// UPDATED v3.3: Pass skipNotPublished to getScrapingStatus for gap analysis
 //
 // Architecture:
 // - 'single' mode: Frontend handles with full interactive control (modals, venue selection)
@@ -26,11 +29,8 @@ import {
   IdSelectionParams,
   ScrapeFlow,
   ScrapeOptions,
-  BatchThresholds,
   DEFAULT_SCRAPE_OPTIONS,
   DEFAULT_ID_SELECTION_PARAMS,
-  DEFAULT_BATCH_THRESHOLDS,
-  isBatchMode,
   isSingleMode,
   parseMultiIdString,
   getMultiIdCount,
@@ -88,7 +88,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
   const [options, setOptions] = useState<ScrapeOptions>(DEFAULT_SCRAPE_OPTIONS);
   const [scraperApiKey, setScraperApiKey] = useState<string>('');
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
-  const [batchThresholds, setBatchThresholds] = useState<BatchThresholds>(DEFAULT_BATCH_THRESHOLDS);
+  // v3.2: Removed batchThresholds state - now managed by backend defaults
 
   // --- View State ---
   const [selectedGameDetails, setSelectedGameDetails] = useState<ScrapedGameData | null>(null);
@@ -135,8 +135,8 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
   useEffect(() => {
     if (currentEntity?.id) {
       fetchVenues();
-      // Try to get scraping status first, fall back to bounds
-      getScrapingStatus({ forceRefresh: false })
+      // v3.3: Pass skipNotPublished to initial load
+      getScrapingStatus({ forceRefresh: false, skipNotPublished: options.skipNotPublished })
         .catch(() => {
           console.log('[ScraperTab] Scraping status failed, trying bounds...');
           return getBounds();
@@ -293,14 +293,14 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
       errors: job.errors,
     });
     
-    // Refresh scraping status to update gaps and highest ID
-    getScrapingStatus({ forceRefresh: true }).catch(() => {
+    // v3.3: Refresh scraping status with skipNotPublished option
+    getScrapingStatus({ forceRefresh: true, skipNotPublished: options.skipNotPublished }).catch(() => {
       getBounds().catch(() => {});
     });
     
     // Refresh jobs list
     fetchJobs(true);
-  }, [getScrapingStatus, getBounds, fetchJobs]);
+  }, [getScrapingStatus, getBounds, fetchJobs, options.skipNotPublished]);
 
   /**
    * Clear the active job from display
@@ -415,7 +415,8 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
             } else {
               const sourceUrl = `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${tournamentId}`;
               await singleScrape.save(venueToUse, parsedData, sourceUrl, tournamentId);
-              getScrapingStatus({ forceRefresh: true }).catch(() => {});
+              // v3.3: Pass skipNotPublished when refreshing
+              getScrapingStatus({ forceRefresh: true, skipNotPublished: options.skipNotPublished }).catch(() => {});
               
               // Update next ID (increment from current)
               setIdSelectionParams(p => ({ ...p, singleId: String(tournamentId + 1) }));
@@ -465,8 +466,8 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
               tournamentId
             );
             
-            // Refresh scraping status to update suggestedNextId
-            getScrapingStatus({ forceRefresh: true }).catch(() => {});
+            // v3.3: Refresh scraping status with skipNotPublished option
+            getScrapingStatus({ forceRefresh: true, skipNotPublished: options.skipNotPublished }).catch(() => {});
           }
         }
         // If scrapeFlow === 'scrape', just display the result (no auto-modal, no save)
@@ -581,6 +582,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
 
       // Build the input for startScraperJob - must match Lambda expectations
       // See sm-index.js startScraperJob() for expected fields
+      // v3.2: Removed threshold fields - backend uses sensible defaults
       const jobInput = {
         // Required
         entityId: currentEntity.id,
@@ -637,11 +639,8 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
               ? refreshGameIds
               : undefined,
         
-        // Stopping thresholds
-        maxConsecutiveNotFound: batchThresholds.maxConsecutiveNotFound,
-        maxConsecutiveErrors: batchThresholds.maxConsecutiveErrors,
-        maxConsecutiveBlanks: batchThresholds.maxConsecutiveBlanks,
-        maxTotalErrors: batchThresholds.maxTotalErrors,
+        // v3.2: Removed stopping threshold fields
+        // Backend now uses defaults: maxTotalErrors=1, maxConsecutiveNotFound=10
       };
 
       // Log helpful info about auto mode
@@ -680,7 +679,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
       }
     }
   }, [
-    currentEntity, idSelectionMode, idSelectionParams, options, scrapeFlow, batchThresholds,
+    currentEntity, idSelectionMode, idSelectionParams, options, scrapeFlow,
     singleScrape, modals.saveConfirmation, defaultVenueId, scrapingStatus, startJob, urlToReparse, 
     onReparseComplete, suggestedNextId, getScrapingStatus, getUnfinishedGames, scraperApiKey
   ]);
@@ -691,8 +690,9 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
     }
     singleScrape.reset();
     scraperLogger.info('PROCESSING_STOP', 'Processing stopped by user');
-    getScrapingStatus({ forceRefresh: true }).catch(() => {});
-  }, [isBatchRunning, activeJobId, cancelJob, singleScrape, getScrapingStatus]);
+    // v3.3: Pass skipNotPublished when refreshing
+    getScrapingStatus({ forceRefresh: true, skipNotPublished: options.skipNotPublished }).catch(() => {});
+  }, [isBatchRunning, activeJobId, cancelJob, singleScrape, getScrapingStatus, options.skipNotPublished]);
 
   // --- Render ---
   if (!currentEntity) {
@@ -923,7 +923,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
                       ) : (
                         <li className="text-green-600">✓ No gaps detected</li>
                       )}
-                      <li>Continue until threshold{idSelectionParams.maxId ? ` or ID ${idSelectionParams.maxId}` : ''}</li>
+                      <li>Stop on error or after 10 consecutive NOT_FOUND{idSelectionParams.maxId ? ` or ID ${idSelectionParams.maxId}` : ''}</li>
                     </ul>
                   </div>
                 )}
@@ -1002,62 +1002,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
             )}
           </div>
 
-          {/* Batch Thresholds (only for batch modes) */}
-          {isBatchMode(idSelectionMode) && (
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="text-sm font-medium text-blue-800 mb-3">Stopping Thresholds</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Max NOT_FOUND</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={batchThresholds.maxConsecutiveNotFound}
-                    onChange={(e) => setBatchThresholds(t => ({ ...t, maxConsecutiveNotFound: Math.max(1, parseInt(e.target.value) || 10) }))}
-                    disabled={isProcessing}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Max Errors</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="50"
-                    value={batchThresholds.maxConsecutiveErrors}
-                    onChange={(e) => setBatchThresholds(t => ({ ...t, maxConsecutiveErrors: Math.max(1, parseInt(e.target.value) || 3) }))}
-                    disabled={isProcessing}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Max Blanks</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="50"
-                    value={batchThresholds.maxConsecutiveBlanks}
-                    onChange={(e) => setBatchThresholds(t => ({ ...t, maxConsecutiveBlanks: Math.max(1, parseInt(e.target.value) || 5) }))}
-                    disabled={isProcessing}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Max Total Errors</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={batchThresholds.maxTotalErrors}
-                    onChange={(e) => setBatchThresholds(t => ({ ...t, maxTotalErrors: Math.max(1, parseInt(e.target.value) || 15) }))}
-                    disabled={isProcessing}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
+          {/* v3.2: Removed Batch Thresholds section - now managed by backend defaults */}
 
           {/* Scrape Flow Toggle - Restored from pre-refactor */}
           <div>
@@ -1334,7 +1279,8 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
                         capturedUrl,
                         capturedId
                       );
-                      getScrapingStatus({ forceRefresh: true }).catch(() => {});
+                      // v3.3: Pass skipNotPublished when refreshing
+                      getScrapingStatus({ forceRefresh: true, skipNotPublished: options.skipNotPublished }).catch(() => {});
                     }
                   }
                 : undefined

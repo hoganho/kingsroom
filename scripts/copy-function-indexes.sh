@@ -2,6 +2,7 @@
 
 # Script to copy index.js files from Amplify function folders
 # and consolidate them into a timestamped folder in the Data directory
+# Also creates symlinks to the original function folders for easy navigation
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -48,6 +49,14 @@ for func_folder in "$FUNCTION_DIR"/*/; do
         dest_file="${OUTPUT_DIR}/${func_name}-index.js"
         cp "$index_file" "$dest_file"
         echo "Copied: $func_name/src/index.js -> ${func_name}-index.js"
+        
+        # Create a symlink to the original function's src folder
+        # Get the absolute path to the src folder
+        src_folder="$(cd "${func_folder}src" && pwd)"
+        link_name="${OUTPUT_DIR}/${func_name}-folder"
+        ln -s "$src_folder" "$link_name"
+        echo "  Created shortcut: ${func_name}-folder -> $src_folder"
+        
         ((copied++))
     else
         echo "Skipped: $func_name (no src/index.js found)"

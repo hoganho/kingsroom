@@ -18,7 +18,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/autoScraper-6e4b4e61384979794b78-build.zip"
+          "s3Key": "amplify-builds/autoScraper-62374b38476c4c494f2f-build.zip"
         },
         "entityVenueDashMetricCounter": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
@@ -34,7 +34,7 @@
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/gameIdTracker-6a6853317a59746a7839-build.zip"
+          "s3Key": "amplify-builds/gameIdTracker-64554e74784144757763-build.zip"
         },
         "getModelCount": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
@@ -114,7 +114,7 @@
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-7541474b705a77306e56-build.zip",
+          "s3Key": "amplify-builds/webScraperFunction-46356a4b394a31507379-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "scraperS3Bucket": "pokerpro-scraper-storage",
           "saveGameFunctionName": "saveGameFunction-dev",
