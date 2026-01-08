@@ -138,6 +138,9 @@ function tableMatchesFilters(tableName) {
   // Must contain the API ID
   if (!tableName.includes(config.API_ID)) return false;
 
+  // Comment out to search all tables
+  if (!tableName.includes("ScrapeURL-")) return false;
+
   return true;
 }
 

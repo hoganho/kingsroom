@@ -4,6 +4,14 @@
  * Core scraping logic extracted from index.js for maintainability.
  * Handles bulk scraping, gap processing, and event streaming.
  * 
+ * UPDATED v1.5.2:
+ * - FIXED: isUnparseableResponse() now checks for explicit errors FIRST
+ *   - If parsedData.error/errorMessage/status='ERROR'/source='ERROR' exists, it's a REAL error
+ *   - "ScraperAPI key is not configured" now properly counted as ERROR, not NOT_FOUND
+ *   - This fixes the bug where configuration/network errors were masked as NOT_FOUND
+ * - FIXED: isErrorResponse() now also checks status and source fields for 'ERROR'
+ * - FIXED: Main loop now checks isErrorResponse() BEFORE isUnparseableResponse()
+ * 
  * UPDATED v1.5.1:
  * - FIXED: Added progressPublisher to ctx destructuring (was causing "progressPublisher is not defined" crash)
  * - FIXED: Typo in gap results merge: gapsSkipped -> gamesSkipped (was causing Skipped=0)
@@ -135,20 +143,31 @@ function isUnknownErrorResponse(parsedData) {
  * - "Error processing tournament" - page exists but no valid tournament structure
  * - Page with error-like name but valid HTTP response
  * 
+ * UPDATED v1.5.2: MUST check for explicit errors FIRST!
+ * If there's an error/errorMessage/status='ERROR'/source='ERROR', this is a REAL error.
+ * This fixes the bug where "ScraperAPI key is not configured" was counted as NOT_FOUND.
+ * 
  * UPDATED v1.5.1: Separated from isErrorResponse to avoid counting these as errors
  */
 function isUnparseableResponse(parsedData) {
     if (!parsedData) return false;
     
-    // "Error processing tournament" means the scraper found the page but couldn't extract data
-    // This is normal for empty tournament slots - NOT an error
+    // ═══════════════════════════════════════════════════════════════════════
+    // v1.5.2 FIX: Check for REAL errors FIRST
+    // If there's an explicit error, this is NOT unparseable - let isErrorResponse handle it
+    // ═══════════════════════════════════════════════════════════════════════
+    if (parsedData.error) return false;
+    if (parsedData.errorMessage) return false;
+    if (parsedData.status === 'ERROR') return false;
+    if (parsedData.source === 'ERROR') return false;
+    
+    // "Error processing tournament" WITH NO explicit error means the scraper found the page 
+    // but couldn't extract data. This is normal for empty tournament slots - NOT an error.
     if (parsedData.name === 'Error processing tournament') return true;
     
     // Generic "error" in name without explicit error fields = unparseable, not error
     if (parsedData.name && 
-        parsedData.name.toLowerCase().includes('error') && 
-        !parsedData.errorMessage && 
-        !parsedData.error) {
+        parsedData.name.toLowerCase().includes('error')) {
         return true;
     }
     
@@ -159,11 +178,13 @@ function isUnparseableResponse(parsedData) {
  * Check if the parsed data represents an ACTUAL error response from the scraper.
  * These are real failures that should increment error counters.
  * 
+ * UPDATED v1.5.2: Also checks status and source fields for 'ERROR' value
+ * 
  * UPDATED v1.5.1: Only true errors - unparseable pages moved to isUnparseableResponse
  * 
  * Examples of REAL errors:
  * - Network/HTTP failures
- * - Scraper API errors
+ * - Scraper API configuration errors (e.g., "ScraperAPI key is not configured")
  * - Explicit error messages from backend
  */
 function isErrorResponse(parsedData) {
@@ -174,11 +195,15 @@ function isErrorResponse(parsedData) {
     if (parsedData.errorMessage) return true;
     if (parsedData.error) return true;
     
+    // v1.5.2: Check status and source fields for ERROR
+    if (parsedData.status === 'ERROR') return true;
+    if (parsedData.source === 'ERROR') return true;
+    
     // HTTP error status codes
     if (parsedData.httpStatus && parsedData.httpStatus >= 400) return true;
     
     // Note: "Error processing tournament" is handled by isUnparseableResponse
-    // and should NOT be treated as an error
+    // and should NOT be treated as an error (when no explicit error fields exist)
     
     return false;
 }
@@ -917,46 +942,12 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
             }
 
             // ═══════════════════════════════════════════════════════════════
-            // v1.5.1: Check for unparseable pages FIRST (not errors!)
-            // These are pages that exist but don't have tournament data
-            // Treat like NOT_FOUND - don't increment error counters
+            // v1.5.2 FIX: Check for REAL errors FIRST (before unparseable)
+            // This ensures configuration/network errors are properly counted
             // ═══════════════════════════════════════════════════════════════
-            if (isUnparseableResponse(parsedData)) {
-                console.log(`[ScrapingEngine] ID ${currentId}: Unparseable page (${parsedData.name || 'no name'}) - treating as NOT_FOUND`);
-                results.consecutiveBlanks++;
-                results.consecutiveNotFound++;
-                results.blanks++;
-                results.notFoundCount++;
-                results.consecutiveErrors = 0;  // Reset - this is NOT an error
-                
-                publishGameProcessedEvent(jobId, entityId, currentId, url, {
-                    action: 'NOT_FOUND',
-                    message: `Unparseable: ${parsedData.name || 'No tournament data'}`,
-                    durationMs: Date.now() - gameStartTime,
-                    dataSource: dataSource,
-                    s3Key: parsedData.s3Key || null,
-                    parsedData: { 
-                        gameStatus: 'NOT_FOUND',
-                        name: parsedData.name,
-                    },
-                    saveResult: null,
-                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
-                
-                // Check NOT_FOUND thresholds (NOT error thresholds)
-                if (results.consecutiveNotFound >= MAX_CONSECUTIVE_NOT_FOUND && mode !== 'gaps') {
-                    console.log(`[ScrapingEngine] NOT_FOUND threshold reached: ${results.consecutiveNotFound}`);
-                    results.stopReason = STOP_REASON.NOT_FOUND;
-                    break;
-                }
-                
-                currentId++;
-                continue;
-            }
-
-            // Check for REAL error responses (network failures, API errors, etc.)
             if (isErrorResponse(parsedData)) {
                 const actualErrorMessage = parsedData.errorMessage || parsedData.error || parsedData.name || 'Unknown error';
-                console.warn(`[ScrapingEngine] Error response for ID ${currentId}: ${actualErrorMessage}`);
+                console.warn(`[ScrapingEngine] ID ${currentId}: ERROR response: ${actualErrorMessage}`);
                 results.errors++;
                 results.consecutiveErrors++;
                 results.consecutiveNotFound = 0;
@@ -996,6 +987,44 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     if (!results.lastErrorMessage) {
                         results.lastErrorMessage = `Total errors exceeded: ${results.errors}`;
                     }
+                    break;
+                }
+                
+                currentId++;
+                continue;
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // v1.5.1: Check for unparseable pages (not errors!)
+            // v1.5.2: This now only triggers if isErrorResponse is false
+            // These are pages that exist but don't have tournament data
+            // Treat like NOT_FOUND - don't increment error counters
+            // ═══════════════════════════════════════════════════════════════
+            if (isUnparseableResponse(parsedData)) {
+                console.log(`[ScrapingEngine] ID ${currentId}: Unparseable page (${parsedData.name || 'no name'}) - treating as NOT_FOUND`);
+                results.consecutiveBlanks++;
+                results.consecutiveNotFound++;
+                results.blanks++;
+                results.notFoundCount++;
+                results.consecutiveErrors = 0;  // Reset - this is NOT an error
+                
+                publishGameProcessedEvent(jobId, entityId, currentId, url, {
+                    action: 'NOT_FOUND',
+                    message: `Unparseable: ${parsedData.name || 'No tournament data'}`,
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: dataSource,
+                    s3Key: parsedData.s3Key || null,
+                    parsedData: { 
+                        gameStatus: 'NOT_FOUND',
+                        name: parsedData.name,
+                    },
+                    saveResult: null,
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
+                // Check NOT_FOUND thresholds (NOT error thresholds)
+                if (results.consecutiveNotFound >= MAX_CONSECUTIVE_NOT_FOUND && mode !== 'gaps') {
+                    console.log(`[ScrapingEngine] NOT_FOUND threshold reached: ${results.consecutiveNotFound}`);
+                    results.stopReason = STOP_REASON.NOT_FOUND;
                     break;
                 }
                 
@@ -1401,7 +1430,41 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
             }
             
             // ═══════════════════════════════════════════════════════════════
-            // v1.5.1: Check for unparseable pages FIRST (not errors!)
+            // v1.5.2 FIX: Check for REAL errors FIRST (before unparseable)
+            // This ensures configuration/network errors are properly counted
+            // ═══════════════════════════════════════════════════════════════
+            if (isErrorResponse(parsedData)) {
+                const actualErrorMessage = parsedData.errorMessage || parsedData.error || 'Unknown error';
+                console.warn(`[ScrapingEngine] Gap ID ${tournamentId}: ERROR response: ${actualErrorMessage}`);
+                results.errors++;
+                results.consecutiveErrors++;
+                results.consecutiveBlanks = 0;
+                results.consecutiveNotFound = 0;
+                
+                if (!results.lastErrorMessage) {
+                    results.lastErrorMessage = actualErrorMessage;
+                }
+                
+                publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
+                    action: 'ERROR',
+                    message: actualErrorMessage,
+                    errorMessage: actualErrorMessage,
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: dataSource,
+                    parsedData: { gameStatus: 'UNKNOWN' },
+                    saveResult: null,
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
+                if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                    results.stopReason = STOP_REASON.ERROR;
+                    break;
+                }
+                continue;
+            }
+            
+            // ═══════════════════════════════════════════════════════════════
+            // v1.5.1: Check for unparseable pages (not errors!)
+            // v1.5.2: This now only triggers if isErrorResponse is false
             // These are pages that exist but don't have tournament data
             // Treat like NOT_FOUND - don't increment error counters
             // ═══════════════════════════════════════════════════════════════
@@ -1427,36 +1490,6 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
                 continue;  // Don't count as error, continue to next ID
-            }
-            
-            // Check for REAL error responses (network failures, API errors, etc.)
-            if (isErrorResponse(parsedData)) {
-                const actualErrorMessage = parsedData.errorMessage || parsedData.error || 'Unknown error';
-                console.warn(`[ScrapingEngine] Gap error response for ID ${tournamentId}: ${actualErrorMessage}`);
-                results.errors++;
-                results.consecutiveErrors++;
-                results.consecutiveBlanks = 0;
-                results.consecutiveNotFound = 0;
-                
-                if (!results.lastErrorMessage) {
-                    results.lastErrorMessage = actualErrorMessage;
-                }
-                
-                publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
-                    action: 'ERROR',
-                    message: actualErrorMessage,
-                    errorMessage: actualErrorMessage,
-                    durationMs: Date.now() - gameStartTime,
-                    dataSource: dataSource,
-                    parsedData: { gameStatus: 'UNKNOWN' },
-                    saveResult: null,
-                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
-                
-                if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                    results.stopReason = STOP_REASON.ERROR;
-                    break;
-                }
-                continue;
             }
             
             const isNotFound = isNotFoundResponse(parsedData);

@@ -31,8 +31,6 @@ import {
 import {
   CloudWatchLogsClient,
   DeleteLogGroupCommand,
-  DescribeLogStreamsCommand,
-  GetLogEventsCommand,
   DescribeLogGroupsCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
 import { S3Client, DeleteObjectsCommand } from '@aws-sdk/client-s3';
@@ -216,24 +214,6 @@ function makeTimestampedDirName(prefix) {
     now.getHours()
   )}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
   return `${prefix}_${timestamp}`;
-}
-
-function sanitizeFilename(name) {
-  return name.replace(/[\/:\$\[\]]/g, '_');
-}
-
-function formatTimestamp(timestamp) {
-  if (!timestamp) return 'NO_TIMESTAMP';
-  const d = new Date(timestamp);
-  const pad = (num) => num.toString().padStart(2, '0');
-  return (
-    `${pad(d.getUTCFullYear() % 100)}` +
-    `${pad(d.getUTCMonth() + 1)}` +
-    `${pad(d.getUTCDate())}-` +
-    `${pad(d.getUTCHours())}` +
-    `${pad(d.getUTCMinutes())}` +
-    `${pad(d.getUTCSeconds())}`
-  );
 }
 
 function extractS3KeyFromUrl(url) {
@@ -895,94 +875,19 @@ async function getLogGroupsFromAWS() {
   return matchingGroups;
 }
 
-async function countStreamsInGroup(logGroupName) {
-  let count = 0;
-  let nextToken;
-  
-  try {
-    do {
-      await sleep(CONFIG.RATE_LIMIT_DELAY);
-      const response = await cwClient.send(new DescribeLogStreamsCommand({
-        logGroupName,
-        nextToken,
-        limit: 50,
-      }));
-      if (response.logStreams) count += response.logStreams.length;
-      nextToken = response.nextToken;
-    } while (nextToken);
-    return count;
-  } catch (err) {
-    if (err.name === 'ResourceNotFoundException') return -1;
-    throw err;
-  }
-}
-
-async function backupLogGroup(logGroupName, groupBackupDir) {
-  logger.info(`Backing up: ${logGroupName}`);
-  
-  let streamNextToken;
-  let streamsSaved = 0;
-  let totalEventsSaved = 0;
-  
-  do {
-    const streamResponse = await cwClient.send(
-      new DescribeLogStreamsCommand({ logGroupName, nextToken: streamNextToken })
-    );
-    
-    for (const stream of streamResponse.logStreams || []) {
-      const streamEvents = [];
-      let eventNextToken;
-      
-      do {
-        await sleep(CONFIG.RATE_LIMIT_DELAY);
-        const eventResponse = await cwClient.send(new GetLogEventsCommand({
-          logGroupName,
-          logStreamName: stream.logStreamName,
-          nextToken: eventNextToken,
-          startFromHead: true,
-        }));
-        
-        if (eventResponse.events?.length) {
-          streamEvents.push(...eventResponse.events);
-        }
-        
-        if (eventResponse.nextForwardToken === eventNextToken) break;
-        eventNextToken = eventResponse.nextForwardToken;
-      } while (eventNextToken);
-      
-      if (streamEvents.length > 0) {
-        const firstTime = formatTimestamp(stream.firstEventTimestamp);
-        const lastTime = formatTimestamp(stream.lastEventTimestamp);
-        const saneStreamName = sanitizeFilename(stream.logStreamName);
-        
-        const fileName = `${firstTime}_${lastTime}__${saneStreamName}.json`;
-        const filePath = path.join(groupBackupDir, fileName);
-        
-        await fs.writeFile(filePath, JSON.stringify(streamEvents, null, 2));
-        streamsSaved++;
-        totalEventsSaved += streamEvents.length;
-      }
-    }
-    streamNextToken = streamResponse.nextToken;
-  } while (streamNextToken);
-  
-  if (streamsSaved > 0) {
-    logger.success(`Saved ${totalEventsSaved} events from ${streamsSaved} streams`);
-  }
-  return totalEventsSaved;
-}
-
 async function deleteLogGroup(logGroupName, dryRun) {
   if (dryRun) {
     logger.info(`[DRY RUN] Would delete log group: ${logGroupName}`);
-    return;
+    return true;
   }
   
   try {
     await cwClient.send(new DeleteLogGroupCommand({ logGroupName }));
-    logger.success(`Deleted log group: ${logGroupName}`);
+    logger.success(`Deleted: ${logGroupName}`);
+    return true;
   } catch (err) {
     logger.error(`Delete failed for ${logGroupName}: ${err.message}`);
+    return false;
   }
 }
 
@@ -1149,7 +1054,7 @@ async function main() {
       s3ObjectsDeleted: 0,
     },
     scraper: { tables: {}, total: 0 },
-    logs: { groups: 0, events: 0 },
+    logs: { groups: 0 },
   };
   
   let currentStep = 0;
@@ -1274,10 +1179,10 @@ async function main() {
     }
   }
   
-  // STEP: CLOUDWATCH LOGS
+  // STEP: DELETE CLOUDWATCH LOGS
   if (!options.skipLogs) {
     currentStep++;
-    logger.step(currentStep, totalSteps, '📋 BACKUP & CLEAR CLOUDWATCH LOGS');
+    logger.step(currentStep, totalSteps, '📋 DELETE CLOUDWATCH LOG GROUPS');
     console.log('─'.repeat(70));
     
     const logGroups = await getLogGroupsFromAWS();
@@ -1285,42 +1190,12 @@ async function main() {
     if (logGroups.length === 0) {
       logger.info('No matching log groups found');
     } else {
-      logger.info(`Found ${logGroups.length} log groups`);
+      logger.info(`Found ${logGroups.length} log groups to delete`);
       
-      // Count streams
-      const groupsWithStreams = [];
       for (const groupName of logGroups) {
-        const count = await countStreamsInGroup(groupName);
-        if (count > 0) {
-          groupsWithStreams.push({ name: groupName, streamCount: count });
-        }
-      }
-      
-      if (groupsWithStreams.length > 0) {
-        // Create backup directory
-        const logBackupDir = path.join(
-          CONFIG.DATA_OUTPUT_DIR,
-          makeTimestampedDirName(`${ENV_CONFIG.BACKUP_PREFIX}_logs`)
-        );
-        
-        if (!options.dryRun) {
-          await fs.mkdir(logBackupDir, { recursive: true });
-        }
-        
-        // Process each group
-        for (const group of groupsWithStreams) {
-          try {
-            if (!options.dryRun) {
-              const groupBackupDir = path.join(logBackupDir, sanitizeFilename(group.name));
-              await fs.mkdir(groupBackupDir, { recursive: true });
-              const events = await backupLogGroup(group.name, groupBackupDir);
-              stats.logs.events += events;
-            }
-            await deleteLogGroup(group.name, options.dryRun);
-            stats.logs.groups++;
-          } catch (err) {
-            logger.error(`Error processing ${group.name}: ${err.message}`);
-          }
+        const deleted = await deleteLogGroup(groupName, options.dryRun);
+        if (deleted) {
+          stats.logs.groups++;
         }
       }
     }
@@ -1370,7 +1245,6 @@ async function main() {
   if (!options.skipLogs && shouldDelete) {
     console.log(`\n  📋 CloudWatch Logs:`);
     console.log(`     Groups deleted: ${stats.logs.groups}`);
-    console.log(`     Events backed up: ${stats.logs.events}`);
   }
   
   console.log('\n' + '═'.repeat(70) + '\n');

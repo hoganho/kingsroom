@@ -3,7 +3,7 @@
  * 
  * Extracted from index.js for maintainability
  * 
- * UPDATED: v1.2.0
+ * UPDATED: v1.2.1 bump
  * - Added PUBLISH_JOB_PROGRESS mutation for real-time job monitoring
  *   This triggers the onJobProgress subscription for live UI updates
  * 
@@ -166,6 +166,8 @@ const PUBLISH_JOB_PROGRESS = /* GraphQL */ `
             gamesSkipped
             errors
             blanks
+            notFoundCount
+            notPublishedCount
             currentId
             startId
             endId

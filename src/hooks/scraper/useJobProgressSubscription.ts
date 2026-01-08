@@ -1,6 +1,10 @@
 // src/hooks/scraper/useJobProgressSubscription.ts
 // Real-time job progress monitoring via GraphQL subscription
-// UPDATED v1.2: Fixed subscription churning - callbacks now use refs to prevent reconnection loops
+//
+// UPDATED v1.3: FIXED - Removed 'as any' casts for notFoundCount/notPublishedCount
+//               since these fields are now properly typed in customSubscriptions.ts
+//
+// v1.2: Fixed subscription churning - callbacks now use refs to prevent reconnection loops
 //
 // This hook subscribes to the onJobProgress subscription to receive real-time
 // updates about job progress without polling. Events are published by the
@@ -99,6 +103,10 @@ const isCompleteStatus = (status: string | null | undefined): boolean => {
   return COMPLETE_STATUSES.includes(status.toUpperCase());
 };
 
+/**
+ * Extract stats from a job progress event
+ * FIXED v1.3: Now uses properly typed notFoundCount and notPublishedCount fields
+ */
 const extractStats = (event: JobProgressEvent | null): JobProgressStats => ({
   processed: event?.totalURLsProcessed ?? 0,
   newGames: event?.newGamesScraped ?? 0,
@@ -106,8 +114,9 @@ const extractStats = (event: JobProgressEvent | null): JobProgressStats => ({
   errors: event?.errors ?? 0,
   skipped: event?.gamesSkipped ?? 0,
   blanks: event?.blanks ?? 0,
-  notFound: (event as any)?.notFoundCount ?? event?.blanks ?? 0,  // Prefer notFoundCount, fallback to blanks
-  notPublished: (event as any)?.notPublishedCount ?? 0,
+  // FIXED v1.3: No more 'as any' cast - fields are now properly typed
+  notFound: event?.notFoundCount ?? event?.blanks ?? 0,
+  notPublished: event?.notPublishedCount ?? 0,
   successRate: event?.successRate ?? null,
   s3CacheHits: event?.s3CacheHits ?? 0,
 });
@@ -207,7 +216,7 @@ export const useJobProgressSubscription = (
               duration: progressEvent.durationSeconds,
             });
 
-            setEvent(progressEvent);
+            setEvent(progressEvent as JobProgressEvent);
             setError(null);
 
             // Handle status changes - use ref to get latest callback
@@ -224,7 +233,7 @@ export const useJobProgressSubscription = (
             if (isCompleteStatus(currentStatus) && !completionNotifiedRef.current) {
               console.log(`[useJobProgressSubscription] Job completed with status: ${currentStatus}`);
               completionNotifiedRef.current = true;
-              onJobCompleteRef.current?.(progressEvent);
+              onJobCompleteRef.current?.(progressEvent as JobProgressEvent);
             }
           },
           error: (err: Error) => {

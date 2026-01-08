@@ -1,6 +1,12 @@
 // src/hooks/scraper/useBatchJobMonitor.ts
 // Real-time batch job monitoring with subscription-first approach and polling fallback
-// UPDATED v2.4: Added stale job detection and Lambda restart detection.
+//
+// UPDATED v2.5: FIXED - notFoundCount and notPublishedCount now properly passed from
+//               subscription events to job state. Previously these fields were being
+//               dropped when converting subscription events to ScraperJob objects,
+//               causing Skipped and Not Published stats to always show 0.
+//
+// v2.4: Added stale job detection and Lambda restart detection.
 //               - Detects when no subscription updates received for 60+ seconds
 //               - Detects stats regression (sign of Lambda restart)
 //               - Auto-refetches job status when stale
@@ -74,6 +80,7 @@ const extractStats = (job: ScraperJob | null): BatchJobStats => ({
   errors: job?.errors ?? 0,
   skipped: job?.gamesSkipped ?? 0,
   blanks: job?.blanks ?? 0,
+  // FIXED v2.5: Use notFoundCount directly, fallback to blanks for backwards compat
   notFound: (job as any)?.notFoundCount ?? job?.blanks ?? 0,
   notPublished: (job as any)?.notPublishedCount ?? 0,
   successRate: job?.successRate ?? null,
@@ -194,6 +201,7 @@ export const useBatchJobMonitor = (
     onJobComplete: (event) => {
       console.log('[useBatchJobMonitor] Job completed via subscription:', event.status);
       // Create a ScraperJob-like object from the subscription event
+      // FIXED v2.5: Include notFoundCount and notPublishedCount
       const jobFromEvent: ScraperJob = {
         __typename: 'ScraperJob',
         id: event.jobId,
@@ -208,6 +216,9 @@ export const useBatchJobMonitor = (
         gamesSkipped: event.gamesSkipped,
         errors: event.errors,
         blanks: event.blanks,
+        // FIXED v2.5: Add notFoundCount and notPublishedCount
+        notFoundCount: event.notFoundCount ?? event.blanks ?? 0,
+        notPublishedCount: event.notPublishedCount ?? 0,
         entityId: event.entityId,
         durationSeconds: event.durationSeconds,
         s3CacheHits: event.s3CacheHits,
@@ -362,6 +373,7 @@ export const useBatchJobMonitor = (
       
       setStatsRegressed(true);
       
+      // FIXED v2.5: Include notFoundCount and notPublishedCount in regression stats
       const currentStats = extractStats({
         totalURLsProcessed: subscriptionEvent.totalURLsProcessed,
         newGamesScraped: subscriptionEvent.newGamesScraped,
@@ -369,6 +381,8 @@ export const useBatchJobMonitor = (
         gamesSkipped: subscriptionEvent.gamesSkipped,
         errors: subscriptionEvent.errors,
         blanks: subscriptionEvent.blanks,
+        notFoundCount: subscriptionEvent.notFoundCount,
+        notPublishedCount: subscriptionEvent.notPublishedCount,
         successRate: subscriptionEvent.successRate,
       } as ScraperJob);
       
@@ -379,6 +393,8 @@ export const useBatchJobMonitor = (
         gamesSkipped: prevEvent.gamesSkipped,
         errors: prevEvent.errors,
         blanks: prevEvent.blanks,
+        notFoundCount: prevEvent.notFoundCount,
+        notPublishedCount: prevEvent.notPublishedCount,
         successRate: prevEvent.successRate,
       } as ScraperJob);
       
@@ -398,6 +414,7 @@ export const useBatchJobMonitor = (
     if (!subscriptionEvent) return;
 
     // Build a ScraperJob from the subscription event
+    // FIXED v2.5: Include notFoundCount and notPublishedCount
     const jobFromEvent: ScraperJob = {
       __typename: 'ScraperJob',
       id: subscriptionEvent.jobId,
@@ -412,6 +429,9 @@ export const useBatchJobMonitor = (
       gamesSkipped: subscriptionEvent.gamesSkipped,
       errors: subscriptionEvent.errors,
       blanks: subscriptionEvent.blanks,
+      // FIXED v2.5: Add notFoundCount and notPublishedCount
+      notFoundCount: subscriptionEvent.notFoundCount ?? subscriptionEvent.blanks ?? 0,
+      notPublishedCount: subscriptionEvent.notPublishedCount ?? 0,
       entityId: subscriptionEvent.entityId,
       durationSeconds: subscriptionEvent.durationSeconds,
       s3CacheHits: subscriptionEvent.s3CacheHits,
@@ -438,6 +458,13 @@ export const useBatchJobMonitor = (
       });
       onStatsChange?.(newStats, prevStatsRef.current);
     }
+
+    console.log('[useBatchJobMonitor] DEBUG subscription event raw:', {
+        notFoundCount: subscriptionEvent.notFoundCount,
+        notPublishedCount: subscriptionEvent.notPublishedCount,
+        blanks: subscriptionEvent.blanks,
+        gamesSkipped: subscriptionEvent.gamesSkipped,
+    });
 
     setHasChanges(changed);
     prevStatsRef.current = newStats;

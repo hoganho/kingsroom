@@ -1,17 +1,23 @@
 /**
  * recurring-resolver.js
- * UPDATED: Added AEST timezone support for start time extraction and comparison
+ * UPDATED: Added session mode (CASH vs TOURNAMENT) validation
  * 
- * Changes from original:
- * 1. Added AEST/AEDT timezone conversion functions
- * 2. formatTimeFromISO() now converts UTC to AEST before extracting time
- * 3. getTimeAsMinutes() now converts UTC to AEST for comparison
- * 4. getDayOfWeek() now uses AEST to determine correct day
- * 5. getRecurringGamesByVenue() - queries ALL days, not just current day
- * 6. findExistingDuplicate() - checks for similar games before creating
- * 7. createRecurringGame() - uses conditional write to prevent race conditions
- * 8. extractDayFromName() - detects day hints in game names
- * 9. resolveRecurringAssignment() - validates day/name consistency
+ * Changes from previous version:
+ * 1. Added detectSessionModeFromName() - detects if game is CASH or TOURNAMENT from name
+ * 2. Added CASH_GAME_PATTERNS constant for name matching
+ * 3. Added SESSION_MODE_MISMATCH to SCORING_WEIGHTS (-100 penalty - effectively a hard filter)
+ * 4. filterCandidatesBySessionMode() - filters out incompatible recurring games
+ * 5. calculateMatchScore() - now includes session mode scoring
+ * 6. createRecurringGame() - now sets gameType based on detected session mode
+ * 7. resolveRecurringAssignment() - now filters candidates by session mode
+ * 
+ * Previous changes:
+ * - AEST timezone support for start time extraction and comparison
+ * - getRecurringGamesByVenue() - queries ALL days, not just current day
+ * - findExistingDuplicate() - checks for similar games before creating
+ * - createRecurringGame() - uses conditional write to prevent race conditions
+ * - extractDayFromName() - detects day hints in game names
+ * - validateDayConsistency() - validates day/name consistency
  */
 
 const { v4: uuidv4 } = require('uuid');
@@ -113,6 +119,9 @@ const SCORING_WEIGHTS = {
     TOURNAMENT_TYPE_MATCH: 10,
     TOURNAMENT_TYPE_MISMATCH: -15,
     GUARANTEE_MISMATCH: -5,
+    // NEW: Session mode mismatch is a HARD penalty
+    // This effectively makes it impossible to match a cash game to a tournament template
+    SESSION_MODE_MISMATCH: -100,
 };
 
 const MATCH_THRESHOLDS = {
@@ -132,6 +141,199 @@ const DAY_KEYWORDS = {
     'friday': 'FRIDAY', 'fri': 'FRIDAY',
     'saturday': 'SATURDAY', 'sat': 'SATURDAY',
     'sunday': 'SUNDAY', 'sun': 'SUNDAY',
+};
+
+// ===================================================================
+// CASH GAME DETECTION PATTERNS (NEW)
+// ===================================================================
+
+/**
+ * Patterns that indicate a game is a CASH game (not a tournament)
+ * These are checked against lowercased game names
+ */
+const CASH_GAME_PATTERNS = [
+    // Explicit cash game indicators
+    /\bcash\s*game\b/i,           // "cash game", "cashgame"
+    /\bcash\s*session\b/i,        // "cash session"
+    /\bring\s*game\b/i,           // "ring game"
+    /\bcash\s*table\b/i,          // "cash table"
+    /\blive\s*cash\b/i,           // "live cash"
+    
+    // Stake patterns (e.g., "$1/$2", "1/2", "2/5 NL", "$5/$10 PLO")
+    /\$?\d+\s*\/\s*\$?\d+/,       // "$1/$2", "1/2", "$5/$10"
+    /\b\d+\/\d+\s*(nl|plo?|limit|fl|nlhe|pl|plhe)\b/i,  // "1/2 NL", "2/5 PLO"
+    /\b(nl|plo?|limit|fl|nlhe|pl|plhe)\s*\d+\/\d+\b/i,  // "NL 1/2", "PLO 2/5"
+    
+    // Common cash game naming conventions
+    /\bstakes?\s*[:=]?\s*\$?\d+/i, // "Stakes: $5"
+    /\bmin\s*buy\s*in/i,          // "Min buy in"
+    /\bmax\s*buy\s*in/i,          // "Max buy in"
+    /\bbig\s*game\b/i,            // "Big game" (often refers to high-stakes cash)
+    /\bmixed\s*game\s*cash\b/i,   // "Mixed game cash"
+];
+
+/**
+ * Patterns that STRONGLY indicate a tournament (not a cash game)
+ * Used to override false positives from stake patterns in tournament names
+ */
+const TOURNAMENT_INDICATOR_PATTERNS = [
+    /\btournament\b/i,
+    /\btourney\b/i,
+    /\bfreeroll\b/i,
+    /\bsatellite\b/i,
+    /\bfreeze\s*out\b/i,
+    /\bfreezeout\b/i,
+    /\bre-?entry\b/i,
+    /\brebuy\b/i,
+    /\bbounty\b/i,
+    /\bknockout\b/i,
+    /\bguarantee[d]?\b/i,
+    /\bgtd\b/i,
+    /\bdeepstack\b/i,
+    /\bturbo\b/i,
+    /\bhyper\b/i,
+    /\bshootout\b/i,
+    /\bmain\s*event\b/i,
+    /\bday\s*\d+\b/i,             // "Day 1", "Day 2"
+    /\bflight\s*[a-z]\b/i,        // "Flight A", "Flight B"
+    /\bevent\s*#?\s*\d+\b/i,      // "Event #1", "Event 5"
+];
+
+// ===================================================================
+// SESSION MODE DETECTION (NEW)
+// ===================================================================
+
+/**
+ * Detect session mode (CASH or TOURNAMENT) from game name
+ * 
+ * Rules:
+ * 1. If name contains strong tournament indicators → TOURNAMENT
+ * 2. If name contains cash game patterns → CASH
+ * 3. Default → TOURNAMENT (most games in poker rooms are tournaments)
+ * 
+ * @param {string} name - Game name to analyze
+ * @returns {{ mode: 'CASH'|'TOURNAMENT', confidence: number, matchedPattern: string|null }}
+ */
+const detectSessionModeFromName = (name) => {
+    if (!name) {
+        return { mode: 'TOURNAMENT', confidence: 0.5, matchedPattern: null };
+    }
+    
+    const lowerName = name.toLowerCase();
+    
+    // First, check for strong tournament indicators
+    // These override any cash game patterns that might be in the name
+    // (e.g., "$100 NL Freezeout" has a stake pattern but is clearly a tournament)
+    for (const pattern of TOURNAMENT_INDICATOR_PATTERNS) {
+        if (pattern.test(name)) {
+            return { 
+                mode: 'TOURNAMENT', 
+                confidence: 0.95, 
+                matchedPattern: pattern.toString(),
+                reason: 'tournament_indicator'
+            };
+        }
+    }
+    
+    // Then check for cash game patterns
+    for (const pattern of CASH_GAME_PATTERNS) {
+        if (pattern.test(name)) {
+            return { 
+                mode: 'CASH', 
+                confidence: 0.9, 
+                matchedPattern: pattern.toString(),
+                reason: 'cash_game_pattern'
+            };
+        }
+    }
+    
+    // Default to tournament (most common in poker room systems)
+    return { 
+        mode: 'TOURNAMENT', 
+        confidence: 0.6, 
+        matchedPattern: null,
+        reason: 'default'
+    };
+};
+
+/**
+ * Check if a game's session mode is compatible with a recurring game template
+ * 
+ * @param {Object} game - Game data with name and optionally gameType
+ * @param {Object} recurringGame - RecurringGame template with gameType
+ * @returns {{ isCompatible: boolean, gameMode: string, templateMode: string, reason: string }}
+ */
+const checkSessionModeCompatibility = (game, recurringGame) => {
+    // Detect session mode from game name
+    const gameSessionInfo = detectSessionModeFromName(game.name);
+    const gameMode = game.gameType || gameSessionInfo.mode;
+    
+    // Get template session mode
+    const templateMode = recurringGame.gameType || 'TOURNAMENT';
+    
+    // Normalize for comparison
+    const normalizedGameMode = gameMode === 'CASH_GAME' ? 'CASH' : 
+                                gameMode === 'CASH' ? 'CASH' : 'TOURNAMENT';
+    const normalizedTemplateMode = templateMode === 'CASH_GAME' ? 'CASH' : 
+                                    templateMode === 'CASH' ? 'CASH' : 'TOURNAMENT';
+    
+    const isCompatible = normalizedGameMode === normalizedTemplateMode;
+    
+    return {
+        isCompatible,
+        gameMode: normalizedGameMode,
+        templateMode: normalizedTemplateMode,
+        gameDetection: gameSessionInfo,
+        reason: isCompatible ? 'modes_match' : 
+                `game_is_${normalizedGameMode}_but_template_is_${normalizedTemplateMode}`
+    };
+};
+
+/**
+ * Filter recurring game candidates by session mode compatibility
+ * 
+ * @param {Object} game - Game data
+ * @param {Array} candidates - Array of RecurringGame templates
+ * @returns {{ compatible: Array, filtered: Array, gameMode: string }}
+ */
+const filterCandidatesBySessionMode = (game, candidates) => {
+    if (!candidates || candidates.length === 0) {
+        return { compatible: [], filtered: [], gameMode: 'TOURNAMENT' };
+    }
+    
+    const gameSessionInfo = detectSessionModeFromName(game.name);
+    const gameMode = game.gameType || gameSessionInfo.mode;
+    const normalizedGameMode = gameMode === 'CASH_GAME' ? 'CASH' : 
+                                gameMode === 'CASH' ? 'CASH' : 'TOURNAMENT';
+    
+    const compatible = [];
+    const filtered = [];
+    
+    for (const candidate of candidates) {
+        const compatibility = checkSessionModeCompatibility(game, candidate);
+        
+        if (compatibility.isCompatible) {
+            compatible.push(candidate);
+        } else {
+            filtered.push({
+                candidate,
+                reason: compatibility.reason
+            });
+        }
+    }
+    
+    if (filtered.length > 0) {
+        console.log(`[RECURRING] Filtered ${filtered.length} candidates due to session mode mismatch (game is ${normalizedGameMode}):`,
+            filtered.map(f => `"${f.candidate.name}" (${f.candidate.gameType || 'TOURNAMENT'})`).join(', '));
+    }
+    
+    return { 
+        compatible, 
+        filtered, 
+        gameMode: normalizedGameMode,
+        detectionConfidence: gameSessionInfo.confidence,
+        detectionReason: gameSessionInfo.reason
+    };
 };
 
 // ===================================================================
@@ -413,15 +615,26 @@ const getRecurringGamesByVenueAndDay = async (venueId, dayOfWeek) => {
 
 /**
  * Find existing duplicate by name similarity (across all days)
+ * UPDATED: Now also filters by session mode
  */
-const findExistingDuplicate = async (venueId, displayName, gameVariant) => {
+const findExistingDuplicate = async (venueId, displayName, gameVariant, gameType) => {
     const allGames = await getRecurringGamesByVenue(venueId);
     
     if (allGames.length === 0) return null;
     
     const normalizedInput = normalizeGameName(displayName);
     
+    // Normalize the gameType we're looking for
+    const normalizedGameType = gameType === 'CASH_GAME' ? 'CASH_GAME' : 
+                               gameType === 'CASH' ? 'CASH_GAME' : 'TOURNAMENT';
+    
     for (const existing of allGames) {
+        // Check session mode compatibility first
+        const existingGameType = existing.gameType || 'TOURNAMENT';
+        if (existingGameType !== normalizedGameType) {
+            continue; // Skip incompatible session modes
+        }
+        
         const normalizedExisting = normalizeGameName(existing.name);
         const similarity = stringSimilarity.compareTwoStrings(normalizedInput, normalizedExisting);
         
@@ -440,6 +653,7 @@ const findExistingDuplicate = async (venueId, displayName, gameVariant) => {
 /**
  * Create a new recurring game with conditional write
  * Defaults frequency to 'WEEKLY' if not provided (required by GraphQL schema)
+ * UPDATED: Now sets gameType based on detected session mode
  */
 const createRecurringGame = async (gameData) => {
     const client = getDocClient();
@@ -449,9 +663,18 @@ const createRecurringGame = async (gameData) => {
     const now = new Date().toISOString();
     const dayOfWeekNameKey = buildDayOfWeekNameKey(gameData.dayOfWeek, gameData.name);
     
+    // Detect session mode from name if gameType not provided
+    let gameType = gameData.gameType;
+    if (!gameType) {
+        const sessionInfo = detectSessionModeFromName(gameData.name);
+        gameType = sessionInfo.mode === 'CASH' ? 'CASH_GAME' : 'TOURNAMENT';
+        console.log(`[RECURRING] Detected gameType="${gameType}" from name "${gameData.name}" (confidence: ${sessionInfo.confidence})`);
+    }
+    
     const item = {
         id,
         ...gameData,
+        gameType,  // Ensure gameType is always set
         'dayOfWeek#name': dayOfWeekNameKey,
         frequency: gameData.frequency || 'WEEKLY',  // Default to WEEKLY - required field in GraphQL schema
         isActive: true,
@@ -471,7 +694,7 @@ const createRecurringGame = async (gameData) => {
             ConditionExpression: 'attribute_not_exists(id)'
         }));
         
-        console.log(`[RECURRING] Created new recurring game: ${item.name} (${id})`);
+        console.log(`[RECURRING] Created new recurring game: ${item.name} (${id}) [gameType: ${gameType}]`);
         return item;
     } catch (error) {
         if (error.name === 'ConditionalCheckFailedException') {
@@ -489,6 +712,8 @@ const createRecurringGame = async (gameData) => {
 /**
  * Calculate match score between a game and a recurring game template
  * 
+ * UPDATED: Now includes session mode scoring
+ * 
  * NOTE: Time comparison now works correctly because:
  * - Game time is converted from UTC to AEST via getTimeAsMinutes()
  * - Template time is stored in AEST
@@ -496,6 +721,28 @@ const createRecurringGame = async (gameData) => {
 const calculateMatchScore = (game, recurringGame) => {
     let score = 0;
     const scoringDetails = {};
+    
+    // === SESSION MODE SCORING (NEW - checked first as it's most critical) ===
+    const modeCompatibility = checkSessionModeCompatibility(game, recurringGame);
+    if (!modeCompatibility.isCompatible) {
+        // Hard penalty - effectively filters out this candidate
+        score += SCORING_WEIGHTS.SESSION_MODE_MISMATCH;
+        scoringDetails.sessionMode = { 
+            compatible: false, 
+            gameMode: modeCompatibility.gameMode,
+            templateMode: modeCompatibility.templateMode,
+            score: SCORING_WEIGHTS.SESSION_MODE_MISMATCH,
+            reason: modeCompatibility.reason
+        };
+        // Early return - no point scoring other fields if session mode doesn't match
+        return { score, scoringDetails };
+    }
+    scoringDetails.sessionMode = { 
+        compatible: true, 
+        gameMode: modeCompatibility.gameMode,
+        templateMode: modeCompatibility.templateMode,
+        score: 0 
+    };
     
     // === NAME SCORING ===
     const gameName = normalizeGameName(game.name);
@@ -629,6 +876,7 @@ const findBestMatch = (game, candidates) => {
 /**
  * Resolve recurring game assignment for a game
  * 
+ * UPDATED: Now filters candidates by session mode before matching
  * UPDATED: Now uses AEST for day-of-week determination and time comparison
  */
 const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }) => {
@@ -652,6 +900,11 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
             };
         }
         
+        // Detect session mode from game name
+        const gameSessionInfo = detectSessionModeFromName(name);
+        const detectedGameType = game.gameType || (gameSessionInfo.mode === 'CASH' ? 'CASH_GAME' : 'TOURNAMENT');
+        console.log(`[RECURRING] Detected session mode: ${detectedGameType} (confidence: ${gameSessionInfo.confidence}, reason: ${gameSessionInfo.reason})`);
+        
         // Get day of week IN AEST
         const dayOfWeek = getDayOfWeek(gameStartDateTime);
         if (!dayOfWeek) {
@@ -671,7 +924,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
             };
         }
         
-        console.log(`[RECURRING] Resolving for venue ${venueId}, day ${dayOfWeek} (AEST)`);
+        console.log(`[RECURRING] Resolving for venue ${venueId}, day ${dayOfWeek} (AEST), gameType ${detectedGameType}`);
         
         // Check for day/name consistency
         const dayHint = extractDayFromName(name);
@@ -682,9 +935,15 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
         }
         
         // STEP 1: Get candidates for this venue and day
-        const candidates = await getRecurringGamesByVenueAndDay(venueId, dayOfWeek);
+        const allCandidates = await getRecurringGamesByVenueAndDay(venueId, dayOfWeek);
         
-        // STEP 2: Find best match
+        // STEP 1b: Filter candidates by session mode
+        const { compatible: candidates, filtered: filteredCandidates, gameMode } = 
+            filterCandidatesBySessionMode(game, allCandidates);
+        
+        console.log(`[RECURRING] After session mode filtering: ${candidates.length} compatible candidates (${filteredCandidates.length} filtered out)`);
+        
+        // STEP 2: Find best match from compatible candidates
         if (candidates.length > 0) {
             const matchResult = findBestMatch(game, candidates);
             
@@ -721,7 +980,12 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
                         isAmbiguous: matchResult.isAmbiguous,
                         templateGuarantee: matchResult.match.typicalGuarantee || null,
                         scoringDetails: matchResult.scoringDetails,
-                        topCandidates: matchResult.metadata.topScores
+                        topCandidates: matchResult.metadata.topScores,
+                        sessionMode: {
+                            detected: gameMode,
+                            confidence: gameSessionInfo.confidence,
+                            candidatesFiltered: filteredCandidates.length
+                        }
                     }
                 };
             }
@@ -754,7 +1018,12 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
                         isAmbiguous: matchResult.isAmbiguous,
                         templateGuarantee: matchResult.match.typicalGuarantee || null,
                         scoringDetails: matchResult.scoringDetails,
-                        topCandidates: matchResult.metadata.topScores
+                        topCandidates: matchResult.metadata.topScores,
+                        sessionMode: {
+                            detected: gameMode,
+                            confidence: gameSessionInfo.confidence,
+                            candidatesFiltered: filteredCandidates.length
+                        }
                     }
                 };
             }
@@ -767,8 +1036,13 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
             const displayName = generateRecurringDisplayName(game.name);
             
             if (displayName.length > 3) {
-                // Check for existing duplicate first
-                const existingDuplicate = await findExistingDuplicate(venueId, displayName, game.gameVariant);
+                // Check for existing duplicate first (now with session mode filter)
+                const existingDuplicate = await findExistingDuplicate(
+                    venueId, 
+                    displayName, 
+                    game.gameVariant,
+                    detectedGameType  // Pass the detected game type for filtering
+                );
                 
                 if (existingDuplicate) {
                     console.log(`[RECURRING] 🔗 Found existing game on different day: "${existingDuplicate.name}" (${existingDuplicate.dayOfWeek})`);
@@ -797,12 +1071,17 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
                             matchReason: 'cross_day_match',
                             dayMismatch: true,
                             processingDay: dayOfWeek,
-                            templateDay: existingDuplicate.dayOfWeek
+                            templateDay: existingDuplicate.dayOfWeek,
+                            sessionMode: {
+                                detected: gameMode,
+                                confidence: gameSessionInfo.confidence,
+                                candidatesFiltered: filteredCandidates.length
+                            }
                         }
                     };
                 }
                 
-                // No existing duplicate - create new
+                // No existing duplicate - create new with correct gameType
                 try {
                     // Use the day from the game's actual date (or from name hint if present)
                     const targetDay = dayHint || dayOfWeek;
@@ -812,7 +1091,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
                         venueId: venueId,
                         entityId: entityId,
                         dayOfWeek: targetDay,
-                        gameType: game.gameType,
+                        gameType: detectedGameType,  // Set gameType based on detection
                         gameVariant: game.gameVariant,
                         tournamentType: game.tournamentType,
                         typicalBuyIn: game.buyIn,
@@ -820,7 +1099,7 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
                         startTime: formatTimeFromISO(game.gameStartDateTime)  // NOW SAVES AEST TIME
                     });
                     
-                    console.log(`[RECURRING] ✅ Auto-created new recurring game: "${newGame.name}" on ${newGame.dayOfWeek} at ${newGame.startTime} AEST`);
+                    console.log(`[RECURRING] ✅ Auto-created new recurring game: "${newGame.name}" on ${newGame.dayOfWeek} at ${newGame.startTime} AEST [gameType: ${newGame.gameType}]`);
                     
                     return {
                         gameUpdates: {
@@ -839,7 +1118,12 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
                             createdRecurringGameId: newGame.id,
                             inheritedFields: [],
                             matchReason: 'auto_created',
-                            templateGuarantee: newGame.typicalGuarantee || null
+                            templateGuarantee: newGame.typicalGuarantee || null,
+                            sessionMode: {
+                                detected: gameMode,
+                                confidence: gameSessionInfo.confidence,
+                                createdWithGameType: newGame.gameType
+                            }
                         }
                     };
                 } catch (err) {
@@ -861,7 +1145,14 @@ const resolveRecurringAssignment = async ({ game, entityId, autoCreate = false }
                 confidence: 0,
                 wasCreated: false,
                 inheritedFields: [],
-                matchReason: candidates.length > 0 ? 'no_match_above_threshold' : 'no_candidates'
+                matchReason: candidates.length > 0 ? 'no_match_above_threshold' : 
+                             allCandidates.length > 0 ? 'all_filtered_by_session_mode' : 'no_candidates',
+                sessionMode: {
+                    detected: gameMode,
+                    confidence: gameSessionInfo.confidence,
+                    candidatesFiltered: filteredCandidates.length,
+                    totalCandidates: allCandidates.length
+                }
             }
         };
         
@@ -904,6 +1195,12 @@ module.exports = {
     findExistingDuplicate,
     extractDayFromName,
     validateDayConsistency,
+    // Session mode detection (NEW)
+    detectSessionModeFromName,
+    checkSessionModeCompatibility,
+    filterCandidatesBySessionMode,
+    CASH_GAME_PATTERNS,
+    TOURNAMENT_INDICATOR_PATTERNS,
     // AEST utilities (exported for testing)
     toAEST,
     isAEDT,
