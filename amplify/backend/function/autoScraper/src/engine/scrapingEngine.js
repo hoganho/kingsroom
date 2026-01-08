@@ -11,6 +11,12 @@
  *   - This fixes the bug where configuration/network errors were masked as NOT_FOUND
  * - FIXED: isErrorResponse() now also checks status and source fields for 'ERROR'
  * - FIXED: Main loop now checks isErrorResponse() BEFORE isUnparseableResponse()
+ * - CHANGED: DEFAULT_MAX_TOTAL_ERRORS now defaults to 1 (was 15)
+ *   - Multi-game jobs will stop on first genuine error by default
+ *   - This prevents wasted processing when there's a configuration issue
+ * - CHANGED: Total errors check now runs BEFORE consecutive errors check
+ *   - Total (cumulative) errors is the primary stop condition
+ *   - Consecutive errors is secondary
  * 
  * UPDATED v1.5.1:
  * - FIXED: Added progressPublisher to ctx destructuring (was causing "progressPublisher is not defined" crash)
@@ -632,12 +638,13 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
     const startTime = invocationStartTime || Date.now();
     
     // Extract thresholds from options (passed from scraperManagement) with defaults
-    const MAX_CONSECUTIVE_NOT_FOUND = options.maxConsecutiveNotFound || DEFAULT_MAX_CONSECUTIVE_NOT_FOUND;
-    const MAX_CONSECUTIVE_ERRORS = options.maxConsecutiveErrors || DEFAULT_MAX_CONSECUTIVE_ERRORS;
-    const MAX_CONSECUTIVE_BLANKS = options.maxConsecutiveBlanks || DEFAULT_MAX_CONSECUTIVE_BLANKS;
-    const MAX_TOTAL_ERRORS = options.maxTotalErrors || DEFAULT_MAX_TOTAL_ERRORS;
+    // v1.5.2: Changed DEFAULT_MAX_TOTAL_ERRORS fallback from 15 to 1 - stop on first real error
+    const MAX_CONSECUTIVE_NOT_FOUND = options.maxConsecutiveNotFound || DEFAULT_MAX_CONSECUTIVE_NOT_FOUND || 10;
+    const MAX_CONSECUTIVE_ERRORS = options.maxConsecutiveErrors || DEFAULT_MAX_CONSECUTIVE_ERRORS || 3;
+    const MAX_CONSECUTIVE_BLANKS = options.maxConsecutiveBlanks || DEFAULT_MAX_CONSECUTIVE_BLANKS || 5;
+    const MAX_TOTAL_ERRORS = options.maxTotalErrors || DEFAULT_MAX_TOTAL_ERRORS || 1;
     
-    console.log(`[ScrapingEngine] Using thresholds: NOT_FOUND=${MAX_CONSECUTIVE_NOT_FOUND}, ERRORS=${MAX_CONSECUTIVE_ERRORS}, BLANKS=${MAX_CONSECUTIVE_BLANKS}, TOTAL_ERRORS=${MAX_TOTAL_ERRORS}`);
+    console.log(`[ScrapingEngine] Using thresholds: NOT_FOUND=${MAX_CONSECUTIVE_NOT_FOUND}, CONSECUTIVE_ERRORS=${MAX_CONSECUTIVE_ERRORS}, BLANKS=${MAX_CONSECUTIVE_BLANKS}, TOTAL_ERRORS=${MAX_TOTAL_ERRORS}`);
     
     // Initialize results - merge with accumulated results from previous invocation if continuing
     const accumulated = options.accumulatedResults || {};
@@ -972,20 +979,21 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     saveResult: null,
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
-                if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                    console.log(`[ScrapingEngine] ERRORS threshold reached: ${results.consecutiveErrors}`);
+                // v1.5.2: Check TOTAL errors FIRST (primary stop condition, default=1)
+                if (results.errors >= MAX_TOTAL_ERRORS) {
+                    console.log(`[ScrapingEngine] TOTAL ERRORS threshold reached: ${results.errors}/${MAX_TOTAL_ERRORS}`);
                     results.stopReason = STOP_REASON.ERROR;
                     if (!results.lastErrorMessage) {
-                        results.lastErrorMessage = `Consecutive errors (${results.consecutiveErrors})`;
+                        results.lastErrorMessage = `Total errors threshold: ${results.errors}`;
                     }
                     break;
                 }
                 
-                if (results.errors >= MAX_TOTAL_ERRORS) {
-                    console.log(`[ScrapingEngine] TOTAL ERRORS threshold reached: ${results.errors}`);
+                if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                    console.log(`[ScrapingEngine] CONSECUTIVE ERRORS threshold reached: ${results.consecutiveErrors}`);
                     results.stopReason = STOP_REASON.ERROR;
                     if (!results.lastErrorMessage) {
-                        results.lastErrorMessage = `Total errors exceeded: ${results.errors}`;
+                        results.lastErrorMessage = `Consecutive errors: ${results.consecutiveErrors}`;
                     }
                     break;
                 }
@@ -1275,16 +1283,17 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     saveResult: null,
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
-                if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                    console.log(`[ScrapingEngine] ERRORS threshold reached: ${results.consecutiveErrors}`);
+                // v1.5.2: Check TOTAL errors FIRST (primary stop condition, default=1)
+                if (results.errors >= MAX_TOTAL_ERRORS) {
+                    console.log(`[ScrapingEngine] TOTAL ERRORS threshold reached: ${results.errors}/${MAX_TOTAL_ERRORS}`);
                     results.stopReason = STOP_REASON.ERROR;
+                    results.lastErrorMessage = results.lastErrorMessage || `Total errors threshold: ${results.errors}`;
                     break;
                 }
                 
-                if (results.errors >= MAX_TOTAL_ERRORS) {
-                    console.log(`[ScrapingEngine] TOTAL ERRORS threshold reached: ${results.errors}`);
+                if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                    console.log(`[ScrapingEngine] CONSECUTIVE ERRORS threshold reached: ${results.consecutiveErrors}`);
                     results.stopReason = STOP_REASON.ERROR;
-                    results.lastErrorMessage = `Total errors exceeded: ${results.errors}`;
                     break;
                 }
             }
@@ -1375,7 +1384,7 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         STOP_REASON,
         PROGRESS_UPDATE_FREQUENCY,
         DEFAULT_MAX_CONSECUTIVE_ERRORS = 3,
-        DEFAULT_MAX_TOTAL_ERRORS = 15,
+        DEFAULT_MAX_TOTAL_ERRORS = 1,
         // NEW v1.4.0: Real-time progress callback
         onProgress
     } = ctx;
@@ -1455,7 +1464,15 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                     saveResult: null,
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
+                // v1.5.2: Check TOTAL errors FIRST (primary stop condition, default=1)
+                if (results.errors >= MAX_TOTAL_ERRORS) {
+                    console.log(`[ScrapingEngine] Gap: TOTAL ERRORS threshold reached: ${results.errors}/${MAX_TOTAL_ERRORS}`);
+                    results.stopReason = STOP_REASON.ERROR;
+                    break;
+                }
+                
                 if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                    console.log(`[ScrapingEngine] Gap: CONSECUTIVE ERRORS threshold reached: ${results.consecutiveErrors}`);
                     results.stopReason = STOP_REASON.ERROR;
                     break;
                 }
@@ -1663,14 +1680,15 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                     parsedData: null,
                 }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
                 
-                if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                    console.log(`[ScrapingEngine] Gap processing: ERRORS threshold reached: ${results.consecutiveErrors}`);
+                // v1.5.2: Check TOTAL errors FIRST (primary stop condition, default=1)
+                if (results.errors >= MAX_TOTAL_ERRORS) {
+                    console.log(`[ScrapingEngine] Gap processing: TOTAL ERRORS threshold reached: ${results.errors}/${MAX_TOTAL_ERRORS}`);
                     results.stopReason = STOP_REASON.ERROR;
                     break;
                 }
                 
-                if (results.errors >= MAX_TOTAL_ERRORS) {
-                    console.log(`[ScrapingEngine] Gap processing: TOTAL ERRORS threshold reached: ${results.errors}`);
+                if (results.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                    console.log(`[ScrapingEngine] Gap processing: CONSECUTIVE ERRORS threshold reached: ${results.consecutiveErrors}`);
                     results.stopReason = STOP_REASON.ERROR;
                     break;
                 }
