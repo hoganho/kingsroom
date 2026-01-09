@@ -18,19 +18,19 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/autoScraper-62374b38476c4c494f2f-build.zip"
+          "s3Key": "amplify-builds/autoScraper-2f69346442653547585a-build.zip"
         },
         "entityVenueDashMetricCounter": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/entityVenueDashMetricCounter-413345586142616f436b-build.zip"
+          "s3Key": "amplify-builds/entityVenueDashMetricCounter-354f556163656e464b38-build.zip"
         },
         "gameDataEnricher": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/gameDataEnricher-437972386a592b753439-build.zip"
+          "s3Key": "amplify-builds/gameDataEnricher-78555548693735507732-build.zip"
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/gameFinancialsProcessor-473866476e72364d572f-build.zip"
+          "s3Key": "amplify-builds/gameFinancialsProcessor-684b466377686a456552-build.zip"
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
@@ -42,7 +42,7 @@
         },
         "playerDataProcessor": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/playerDataProcessor-6b5941425157654d7748-build.zip",
+          "s3Key": "amplify-builds/playerDataProcessor-4434376a4f674974506c-build.zip",
           "gameProcessingQueueArn": "arn:aws:sqs:ap-southeast-2:495599763953:GameProcessingQueue.fifo"
         },
         "recurringGameStreamTrigger": {
@@ -55,12 +55,12 @@
         },
         "s3ManagementFunction": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/s3ManagementFunction-6a2f6659575a2f66564d-build.zip"
+          "s3Key": "amplify-builds/s3ManagementFunction-6e4f4c544e7a4854716e-build.zip"
         },
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-48357747654b36664837-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-4d4931776f6e326e6352-build.zip"
         },
         "scrapeURLQuery": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
@@ -72,7 +72,7 @@
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/scraperManagement-79643842533776373074-build.zip"
+          "s3Key": "amplify-builds/scraperManagement-79465a6c41516674594c-build.zip"
         },
         "socialDataAggregator": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
@@ -92,11 +92,11 @@
         },
         "tournamentConsolidator": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/tournamentConsolidator-774a784333493239302b-build.zip"
+          "s3Key": "amplify-builds/tournamentConsolidator-4e326f6e2b675455612f-build.zip"
         },
         "userLastActiveUpdater": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/userLastActiveUpdater-6445765462594959365a-build.zip"
+          "s3Key": "amplify-builds/userLastActiveUpdater-6a3657452b2b73467867-build.zip"
         },
         "userManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
@@ -105,16 +105,16 @@
         },
         "venueAssignmentService": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/venueAssignmentService-4d755638714e31764f43-build.zip",
+          "s3Key": "amplify-builds/venueAssignmentService-4a377861587662634769-build.zip",
           "venueReassignmentQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/VenueReassignmentQueue.fifo"
         },
         "venueDetailsUpdater": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/venueDetailsUpdater-6e4e7830504d416d7864-build.zip"
+          "s3Key": "amplify-builds/venueDetailsUpdater-586364505668646d424f-build.zip"
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-46356a4b394a31507379-build.zip",
+          "s3Key": "amplify-builds/webScraperFunction-38417a4345754f4d6747-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "scraperS3Bucket": "pokerpro-scraper-storage",
           "saveGameFunctionName": "saveGameFunction-dev",
@@ -124,11 +124,11 @@
         "kingsroomauth": {},
         "gameToSocialMatcher": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/gameToSocialMatcher-46444c396b3376457932-build.zip"
+          "s3Key": "amplify-builds/gameToSocialMatcher-484c6d565448526c3673-build.zip"
         },
         "deleteGameFunction": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
-          "s3Key": "amplify-builds/deleteGameFunction-4f6776756a5642704e65-build.zip"
+          "s3Key": "amplify-builds/deleteGameFunction-6e627065426432667846-build.zip"
         },
         "socialPostStreamHandler": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
@@ -137,6 +137,10 @@
         "refreshRunningGames": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
           "s3Key": "amplify-builds/refreshRunningGames-44346248756a766c794a-build.zip"
+        },
+        "recurringGameAdmin": {
+          "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
+          "s3Key": "amplify-builds/recurringGameAdmin-5253767647342f4f514a-build.zip"
         }
       },
       "api": {
@@ -163,7 +167,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/autoScraper-2b34307a6a493667685a-build.zip"
+          "s3Key": "amplify-builds/autoScraper-62374b38476c4c494f2f-build.zip"
         },
         "deleteGameFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -175,7 +179,7 @@
         },
         "gameDataEnricher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/gameDataEnricher-6f705375753241486b63-build.zip"
+          "s3Key": "amplify-builds/gameDataEnricher-437972386a592b753439-build.zip"
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -183,7 +187,7 @@
         },
         "gameIdTracker": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/gameIdTracker-6a6853317a59746a7839-build.zip"
+          "s3Key": "amplify-builds/gameIdTracker-64554e74784144757763-build.zip"
         },
         "gameToSocialMatcher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -275,7 +279,7 @@
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-314358416b39694f5063-build.zip",
+          "s3Key": "amplify-builds/webScraperFunction-46356a4b394a31507379-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue-prod.fifo",
           "scraperS3Bucket": "kingsroom-storage-prod",
           "saveGameFunctionName": "saveGameFunction-prod",

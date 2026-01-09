@@ -224,6 +224,22 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "recurringGameAdmin": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "recurringGameStreamTrigger": {
       "build": true,
       "dependsOn": [
@@ -671,6 +687,22 @@
         {
           "category": "function",
           "resourceName": "playerDataProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_recurringGameAdmin_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "recurringGameAdmin"
+        }
+      ]
+    },
+    "AMPLIFY_function_recurringGameAdmin_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "recurringGameAdmin"
         }
       ]
     },

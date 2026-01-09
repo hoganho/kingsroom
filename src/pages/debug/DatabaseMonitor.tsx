@@ -133,12 +133,16 @@ const SCHEMA_GROUPS = [
 // Flatten for easy lookup
 const ALL_TABLES = SCHEMA_GROUPS.flatMap(g => g.tables);
 
+// Safe limit for AppSync/DynamoDB - 1000 is well within limits
+const SCAN_PAGE_LIMIT = 1000;
+
 interface TableScanStats {
     count: number;
     scannedCount: number;
     status: 'IDLE' | 'SCANNING' | 'COMPLETE' | 'ERROR';
     lastScan?: Date;
     error?: string;
+    pages?: number; // Track pagination pages for debugging
 }
 
 export const DatabaseMonitorPage: React.FC = () => {
@@ -174,15 +178,19 @@ export const DatabaseMonitorPage: React.FC = () => {
     const scanTable = useCallback(async (tableName: string, pluralName: string) => {
         setTableStats(prev => ({
             ...prev,
-            [tableName]: { ...prev[tableName], status: 'SCANNING', count: 0, scannedCount: 0 }
+            [tableName]: { ...prev[tableName], status: 'SCANNING', count: 0, scannedCount: 0, pages: 0 }
         }));
 
         try {
             let totalCount = 0;
-            let nextToken: string | null = null;
+            let nextToken: string | null | undefined = undefined;
+            let pageCount = 0;
+            const MAX_PAGES = 1000; // Safety limit to prevent infinite loops
             
             // Paginate through ALL records
             do {
+                pageCount++;
+                
                 const query = `query List${pluralName}($limit: Int, $nextToken: String) { 
                     list${pluralName}(limit: $limit, nextToken: $nextToken) { 
                         items { id } 
@@ -190,19 +198,35 @@ export const DatabaseMonitorPage: React.FC = () => {
                     } 
                 }`;
                 
+                const variables: { limit: number; nextToken?: string } = { 
+                    limit: SCAN_PAGE_LIMIT
+                };
+                
+                // Only include nextToken if we have one (not on first request)
+                if (nextToken) {
+                    variables.nextToken = nextToken;
+                }
+                
                 const response: any = await client.graphql({ 
                     query,
-                    variables: { 
-                        limit: 10000,
-                        nextToken 
-                    }
+                    variables
                 });
                 
                 if ('data' in response && response.data) {
                     const result: any = (response.data as any)[`list${pluralName}`];
                     const items = result?.items || [];
                     totalCount += items.length;
-                    nextToken = result?.nextToken || null;
+                    
+                    // Robust nextToken handling - check for null, undefined, and empty string
+                    const newNextToken = result?.nextToken;
+                    nextToken = (newNextToken && typeof newNextToken === 'string' && newNextToken.trim() !== '') 
+                        ? newNextToken 
+                        : null;
+                    
+                    // Debug logging for large tables
+                    if (pageCount === 1 || pageCount % 10 === 0 || !nextToken) {
+                        console.log(`[${tableName}] Page ${pageCount}: +${items.length} items (total: ${totalCount}), hasMore: ${!!nextToken}`);
+                    }
                     
                     // Update count as we scan (shows progress)
                     setTableStats(prev => ({
@@ -211,13 +235,24 @@ export const DatabaseMonitorPage: React.FC = () => {
                             ...prev[tableName],
                             count: totalCount,
                             scannedCount: totalCount,
-                            status: 'SCANNING'
+                            status: 'SCANNING',
+                            pages: pageCount
                         }
                     }));
                 } else {
+                    console.warn(`[${tableName}] No data in response on page ${pageCount}`, response);
                     break;
                 }
+                
+                // Safety check to prevent infinite loops
+                if (pageCount >= MAX_PAGES) {
+                    console.warn(`[${tableName}] Hit max page limit (${MAX_PAGES}), stopping scan`);
+                    break;
+                }
+                
             } while (nextToken);
+            
+            console.log(`[${tableName}] Scan complete: ${totalCount} records across ${pageCount} pages`);
             
             // Final update with COMPLETE status
             setTableStats(prev => ({
@@ -226,7 +261,8 @@ export const DatabaseMonitorPage: React.FC = () => {
                     count: totalCount,
                     scannedCount: totalCount,
                     status: 'COMPLETE',
-                    lastScan: new Date()
+                    lastScan: new Date(),
+                    pages: pageCount
                 }
             }));
         } catch (error: any) {
@@ -364,13 +400,18 @@ export const DatabaseMonitorPage: React.FC = () => {
                                                 </td>
                                                 <td className="py-2 px-2 text-right w-24">
                                                     {stat.status === 'SCANNING' ? (
-                                                        <span className="text-indigo-600 animate-pulse text-xs">Scanning...</span>
+                                                        <span className="text-indigo-600 animate-pulse text-xs">
+                                                            {stat.count?.toLocaleString() || '...'} 
+                                                            {stat.pages && <span className="text-gray-400 ml-1">(p{stat.pages})</span>}
+                                                        </span>
                                                     ) : stat.status === 'ERROR' ? (
                                                         <span className="text-red-500 text-xs" title={stat.error}>Error</span>
                                                     ) : stat.status === 'IDLE' ? (
                                                         <span className="text-gray-300 text-xs">-</span>
                                                     ) : (
-                                                        <span className="font-bold text-gray-900">{stat.count.toLocaleString()}</span>
+                                                        <span className="font-bold text-gray-900" title={stat.pages ? `${stat.pages} pages` : undefined}>
+                                                            {stat.count.toLocaleString()}
+                                                        </span>
                                                     )}
                                                 </td>
                                                 <td className="py-2 px-2 w-8 text-center">

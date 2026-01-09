@@ -1,29 +1,18 @@
 // src/pages/venues/VenueDetails.tsx
-// VERSION: 2.4.0 - Fixed non-SUPER_ADMIN users to only see REGULAR game stats
+// VERSION: 3.0.0 - BREAKING CHANGE: Now groups recurring games by recurringGameId
 //
 // CHANGELOG:
+// - v3.0.0: BREAKING - Groups by recurringGameId instead of venueGameTypeKey
+//           - GraphQL now fetches recurringGameId and recurringGame { id, name }
+//           - buildScheduleGroupStats groups by recurringGameId
+//           - Navigation to VenueGameDetails uses recurringGameId param
+//           - ScheduleGroupStats interface updated to use recurringGameId
+//           - Games without recurringGameId remain in ad-hoc section
 // - v2.4.0: Non-SUPER_ADMIN users now properly locked to REGULAR game stats only
-//           - seriesType state is forced to 'REGULAR' for non-SUPER_ADMIN
-//           - Series type filter hidden for non-SUPER_ADMIN
 // - v2.3.0: Added Tournament ID column to game history table and ad-hoc games table
-//           Column appears between Date and Game (name)
-// - v2.2.0: Ad-hoc games now displayed in full table format (matching VenueGameDetails)
-//           Added clickable rows to navigate to GameDetails
-//           Added buyIn, revenue, cost, profitMargin columns
-//           Summary stats now include 5 metrics (Games, Entries, Prizepool, Profit, Avg Profit)
+// - v2.2.0: Ad-hoc games now displayed in full table format
 // - v2.1.0: Added ad-hoc games support (isSeries=false AND isRegular=false)
-//           Game history table now shows both recurring and ad-hoc games
-//           Overview tab shows separate ad-hoc games section with stats
-//           Added game type filter toggle (All/Recurring/Ad-hoc)
-//           Added game classification badges in table
 // - v2.0.0: Now uses VenueMetrics for summary cards (matches VenuesDashboard)
-//           Added seriesType selector for SUPER_ADMIN users
-//           Game history table still shows detailed recurring game data
-// - v1.x.x: Used GameFinancialSnapshot with strict filtering (caused mismatch)
-//
-// FIX: Previously, VenueDetails showed different "Total Games" than VenuesDashboard
-// because it used stricter filtering (isRegular=true, gameStatus=FINISHED, etc.)
-// Now summary cards use VenueMetrics (same source as VenuesDashboard) for consistency.
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -39,8 +28,6 @@ import {
   Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -110,6 +97,7 @@ interface VenueMetrics {
   calculatedAt: string;
 }
 
+// UPDATED: Added recurringGameId and recurringGame to the game object
 interface GameFinancialSnapshotWithGame {
   id: string;
   entityId?: string | null;
@@ -137,6 +125,13 @@ interface GameFinancialSnapshotWithGame {
     gameType?: string | null;
     gameVariant?: string | null;
     tournamentId?: string | null;
+    // NEW: recurringGameId for proper grouping
+    recurringGameId?: string | null;
+    recurringGame?: {
+      id: string;
+      name?: string | null;
+      dayOfWeek?: string | null;
+    } | null;
   } | null;
 }
 
@@ -152,10 +147,12 @@ interface VenueInfo {
   logo?: string | null;
 }
 
+// UPDATED: Changed from gameTypeKey to recurringGameId
 interface ScheduleGroupStats {
-  gameTypeKey: string;
-  gameName: string;
+  recurringGameId: string;
+  recurringGameName: string;
   displayName: string;
+  dayOfWeek: string | null;
   totalGames: number;
   totalEntries: number;
   totalRegistrations: number;
@@ -165,18 +162,20 @@ interface ScheduleGroupStats {
   trendData: { date: string; profit: number; games: number }[];
 }
 
+// UPDATED: Added recurringGameId
 interface GameRowData {
   id: string;
   date: string;
   name: string;
-  gameTypeKey: string;
+  gameTypeKey: string; // Keep for display purposes
+  recurringGameId: string | null; // NEW: for navigation
+  recurringGameName: string | null; // NEW: for display
   entries: number;
   registrations: number;
   prizepool: number;
   profit: number;
   classification: GameClassification;
   gameId: string;
-  // Additional fields for detailed display (matching VenueGameDetails)
   buyIn: number;
   revenue: number;
   cost: number;
@@ -222,7 +221,6 @@ const getVenueQuery = /* GraphQL */ `
   }
 `;
 
-// NEW: Query VenueMetrics for summary cards (matches VenuesDashboard)
 const getVenueMetricsQuery = /* GraphQL */ `
   query GetVenueMetrics($id: ID!) {
     getVenueMetrics(id: $id) {
@@ -261,7 +259,7 @@ const getVenueMetricsQuery = /* GraphQL */ `
   }
 `;
 
-// Existing query for game history table (with isSeries field added)
+// UPDATED: Added recurringGameId and recurringGame to the query
 const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
   query ListGameFinancialSnapshotsWithGame(
     $filter: ModelGameFinancialSnapshotFilterInput
@@ -296,6 +294,12 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
           gameType
           gameVariant
           tournamentId
+          recurringGameId
+          recurringGame {
+            id
+            name
+            dayOfWeek
+          }
         }
       }
       nextToken
@@ -307,37 +311,42 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
 // HELPERS
 // ============================================
 
-/**
- * Game classification types
- */
 type GameClassification = 'RECURRING' | 'AD_HOC' | 'SERIES' | 'UNKNOWN';
 
 /**
  * Classify a game based on isSeries and isRegular flags
+ * UPDATED: Also considers recurringGameId presence
  */
 function classifyGame(snapshot: GameFinancialSnapshotWithGame): GameClassification {
   const game = snapshot.game;
   const isSeries = snapshot.isSeries === true || game?.isSeries === true;
   const isRegular = game?.isRegular === true;
+  const hasRecurringGame = !!game?.recurringGameId;
   
   if (isSeries) return 'SERIES';
-  if (isRegular) return 'RECURRING';
-  // Ad-hoc: isSeries=false AND isRegular=false (or null)
+  // A game is RECURRING if it has a recurringGameId OR isRegular=true with proper keys
+  if (hasRecurringGame || (isRegular && game?.venueScheduleKey && game?.venueGameTypeKey)) return 'RECURRING';
   if (!isSeries && !isRegular) return 'AD_HOC';
   return 'UNKNOWN';
 }
 
 /**
- * Filter for recurring games - games with isRegular=true and proper metadata
+ * Filter for recurring games - games with recurringGameId OR (isRegular=true and proper metadata)
+ * UPDATED: Primary check is now recurringGameId
  */
 function isValidRecurringGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
   const game = snapshot.game;
   
-  // Exclude NOT_PUBLISHED games
   if (game?.gameStatus === 'NOT_PUBLISHED') {
     return false;
   }
   
+  // Primary: Has a recurringGameId
+  if (game?.recurringGameId) {
+    return !!game && game.gameStatus === 'FINISHED';
+  }
+  
+  // Fallback: Legacy check for isRegular with keys (for games not yet re-enriched)
   return (
     !!game &&
     game.gameStatus === 'FINISHED' &&
@@ -348,24 +357,25 @@ function isValidRecurringGameSnapshot(snapshot: GameFinancialSnapshotWithGame): 
 }
 
 /**
- * Filter for ad-hoc games - games where isSeries=false AND isRegular=false
+ * Filter for ad-hoc games - games where isSeries=false AND isRegular=false AND no recurringGameId
  */
 function isValidAdHocGameSnapshot(snapshot: GameFinancialSnapshotWithGame): boolean {
   const game = snapshot.game;
   
-  // Exclude NOT_PUBLISHED games
   if (game?.gameStatus === 'NOT_PUBLISHED') {
     return false;
   }
   
   const isSeries = snapshot.isSeries === true || game?.isSeries === true;
   const isRegular = game?.isRegular === true;
+  const hasRecurringGame = !!game?.recurringGameId;
   
   return (
     !!game &&
     game.gameStatus === 'FINISHED' &&
     !isSeries &&
-    !isRegular
+    !isRegular &&
+    !hasRecurringGame
   );
 }
 
@@ -377,7 +387,7 @@ function isValidRegularGameSnapshot(snapshot: GameFinancialSnapshotWithGame): bo
 }
 
 /**
- * Filter snapshots by seriesType (matches refreshAllMetrics logic)
+ * Filter snapshots by seriesType
  */
 function filterSnapshotsBySeriesType(
   snapshots: GameFinancialSnapshotWithGame[], 
@@ -424,18 +434,6 @@ function formatCompactCurrency(value: number): string {
   return isNegative ? `(-${formatted})` : formatted;
 }
 
-function formatKeyToDisplayName(key: string): string {
-  return key
-    .split('-')
-    .map((word) => {
-      if (/^\d+$/.test(word)) {
-        return `$${word}`;
-      }
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(' ');
-}
-
 function getMonthKey(dateStr: string): string {
   try {
     const date = parseISO(dateStr);
@@ -445,11 +443,19 @@ function getMonthKey(dateStr: string): string {
   }
 }
 
+/**
+ * UPDATED: Build schedule group stats - NOW GROUPS BY recurringGameId
+ * 
+ * This is the key change from v2.x - instead of grouping by the computed
+ * venueGameTypeKey, we now group by the actual recurringGameId which
+ * represents the true identity of the recurring game template.
+ */
 function buildScheduleGroupStats(
   snapshots: GameFinancialSnapshotWithGame[]
 ): { scheduleStats: ScheduleGroupStats[]; globalStats: ScheduleGroupStats } {
-  const statsByGameType = new Map<string, {
-    gameName: string;
+  const statsByRecurringGame = new Map<string, {
+    recurringGameName: string;
+    dayOfWeek: string | null;
     latestGameDate: string;
     totalGames: number;
     totalEntries: number;
@@ -460,12 +466,15 @@ function buildScheduleGroupStats(
   }>();
 
   for (const snap of snapshots) {
-    const gameTypeKey = snap.game?.venueGameTypeKey;
-    if (!gameTypeKey) continue;
+    // CHANGED: Use recurringGameId as the grouping key
+    const recurringGameId = snap.game?.recurringGameId;
+    if (!recurringGameId) continue; // Skip games without a recurring game assignment
 
-    if (!statsByGameType.has(gameTypeKey)) {
-      statsByGameType.set(gameTypeKey, {
-        gameName: snap.game?.name ?? gameTypeKey,
+    if (!statsByRecurringGame.has(recurringGameId)) {
+      statsByRecurringGame.set(recurringGameId, {
+        // Use the recurringGame.name if available, otherwise fall back to game name
+        recurringGameName: snap.game?.recurringGame?.name ?? snap.game?.name ?? recurringGameId,
+        dayOfWeek: snap.game?.recurringGame?.dayOfWeek ?? null,
         latestGameDate: snap.gameStartDateTime ?? '',
         totalGames: 0,
         totalEntries: 0,
@@ -476,11 +485,15 @@ function buildScheduleGroupStats(
       });
     }
 
-    const s = statsByGameType.get(gameTypeKey)!;
+    const s = statsByRecurringGame.get(recurringGameId)!;
     
+    // Update latest game info
     if (snap.gameStartDateTime && snap.gameStartDateTime > s.latestGameDate) {
       s.latestGameDate = snap.gameStartDateTime;
-      s.gameName = snap.game?.name ?? s.gameName;
+      // Update name from the most recent game's recurring game template
+      if (snap.game?.recurringGame?.name) {
+        s.recurringGameName = snap.game.recurringGame.name;
+      }
     }
     
     s.totalGames += 1;
@@ -498,8 +511,8 @@ function buildScheduleGroupStats(
     }
   }
 
-  const scheduleStats: ScheduleGroupStats[] = Array.from(statsByGameType.entries())
-    .map(([gameTypeKey, data]) => {
+  const scheduleStats: ScheduleGroupStats[] = Array.from(statsByRecurringGame.entries())
+    .map(([recurringGameId, data]) => {
       const trendData = Array.from(data.snapshotsByMonth.entries())
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([date, values]) => ({
@@ -509,9 +522,10 @@ function buildScheduleGroupStats(
         }));
 
       return {
-        gameTypeKey,
-        gameName: data.gameName,
-        displayName: data.gameName,
+        recurringGameId,
+        recurringGameName: data.recurringGameName,
+        displayName: data.recurringGameName,
+        dayOfWeek: data.dayOfWeek,
         totalGames: data.totalGames,
         totalEntries: data.totalEntries,
         totalRegistrations: data.totalRegistrations,
@@ -533,9 +547,10 @@ function buildScheduleGroupStats(
       totalProfit: acc.totalProfit + s.totalProfit,
     }),
     {
-      gameTypeKey: 'GLOBAL',
-      gameName: 'All Games',
+      recurringGameId: 'GLOBAL',
+      recurringGameName: 'All Games',
       displayName: 'All Games',
+      dayOfWeek: null,
       totalGames: 0,
       totalEntries: 0,
       totalRegistrations: 0,
@@ -576,6 +591,7 @@ function buildOverallTrendData(
     }));
 }
 
+// UPDATED: Added recurringGameId and recurringGameName to row data
 function buildGameRowData(snapshots: GameFinancialSnapshotWithGame[]): GameRowData[] {
   return snapshots
     .filter((s) => s.gameStartDateTime && s.game)
@@ -589,13 +605,14 @@ function buildGameRowData(snapshots: GameFinancialSnapshotWithGame[]): GameRowDa
       date: snap.gameStartDateTime!,
       name: snap.game?.name ?? 'Unknown Game',
       gameTypeKey: snap.game?.venueGameTypeKey ?? '-',
+      recurringGameId: snap.game?.recurringGameId ?? null,
+      recurringGameName: snap.game?.recurringGame?.name ?? null,
       entries: snap.totalEntries ?? 0,
       registrations: snap.totalUniquePlayers ?? 0,
       prizepool: snap.prizepoolTotal ?? 0,
       profit: snap.netProfit ?? 0,
       classification: classifyGame(snap),
       gameId: snap.gameId ?? snap.game?.id ?? '',
-      // Additional fields for detailed display
       buyIn: snap.game?.buyIn ?? 0,
       revenue: snap.totalRevenue ?? 0,
       cost: snap.totalCost ?? 0,
@@ -608,7 +625,6 @@ function buildGameRowData(snapshots: GameFinancialSnapshotWithGame[]): GameRowDa
 // SUB-COMPONENTS
 // ============================================
 
-// Series Type Selector (matches VenuesDashboard)
 interface SeriesTypeSelectorProps {
   value: SeriesTypeKey;
   onChange: (value: SeriesTypeKey) => void;
@@ -629,9 +645,7 @@ const SeriesTypeSelector: React.FC<SeriesTypeSelectorProps> = ({ value, onChange
           <button
             key={option.key}
             onClick={() => onChange(option.key)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-              colorStyles[option.color as keyof typeof colorStyles]
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${colorStyles[option.color as keyof typeof colorStyles]}`}
           >
             {option.icon}
             {option.label}
@@ -642,108 +656,64 @@ const SeriesTypeSelector: React.FC<SeriesTypeSelectorProps> = ({ value, onChange
   );
 };
 
-// Sparkline Component
-interface SparklineProps {
-  data: { date: string; profit: number }[];
-  width?: number;
-  height?: number;
-}
-
-function Sparkline({ data, width = 100, height = 32 }: SparklineProps) {
-  if (data.length < 2) {
-    return <div className="text-xs text-gray-400 italic">Not enough data</div>;
-  }
-
-  const lastValue = data[data.length - 1]?.profit ?? 0;
-  const prevValue = data[data.length - 2]?.profit ?? 0;
-  const isPositiveTrend = lastValue >= prevValue;
-
-  return (
-    <ResponsiveContainer width={width} height={height}>
-      <AreaChart data={data} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
-        <defs>
-          <linearGradient id="sparklineGradientPositive" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-          </linearGradient>
-          <linearGradient id="sparklineGradientNegative" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <Area
-          type="monotone"
-          dataKey="profit"
-          stroke={isPositiveTrend ? '#3b82f6' : '#ef4444'}
-          strokeWidth={1.5}
-          fill={isPositiveTrend ? 'url(#sparklineGradientPositive)' : 'url(#sparklineGradientNegative)'}
-        />
-      </AreaChart>
-    </ResponsiveContainer>
-  );
-}
-
-// Schedule Card Component
+// UPDATED: ScheduleCard now uses recurringGameId
 interface ScheduleCardProps {
   schedule: ScheduleGroupStats;
   onClick: () => void;
 }
 
-function ScheduleCard({ schedule, onClick }: ScheduleCardProps) {
+const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onClick }) => {
   const profitColor = schedule.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600';
-  const avgProfitColor = schedule.avgProfit >= 0 ? 'text-blue-600' : 'text-red-600';
+  const avgEntries = schedule.totalGames > 0 ? schedule.totalEntries / schedule.totalGames : 0;
 
   return (
     <Card 
-      className="hover:shadow-md transition cursor-pointer"
+      className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-blue-500"
       onClick={onClick}
     >
-      <div className="flex justify-between items-start mb-3">
+      <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <Text className="text-xs uppercase tracking-wide text-gray-400">
-            Recurring Game
+          <Text className="font-semibold text-gray-900 truncate" title={schedule.displayName}>
+            {schedule.displayName}
           </Text>
-          <Text className="text-sm font-semibold text-gray-900 truncate" title={schedule.gameName}>
-            {schedule.gameName}
-          </Text>
+          {schedule.dayOfWeek && (
+            <Text className="text-xs text-gray-500 mt-0.5">
+              {schedule.dayOfWeek}
+            </Text>
+          )}
         </div>
-        <div className="ml-2 flex-shrink-0">
-          <Sparkline data={schedule.trendData} width={80} height={28} />
-        </div>
+        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+          {schedule.totalGames} games
+        </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="mt-3 grid grid-cols-2 gap-3">
         <div>
-          <Text className="text-xs text-gray-500">Games</Text>
-          <Metric className="text-lg">{schedule.totalGames}</Metric>
+          <Text className="text-xs text-gray-500">Avg Entries</Text>
+          <Text className="font-semibold">{avgEntries.toFixed(1)}</Text>
         </div>
         <div>
-          <Text className="text-xs text-gray-500">Avg Profit</Text>
-          <Metric className={`text-lg ${avgProfitColor}`}>
-            {formatCompactCurrency(schedule.avgProfit)}
-          </Metric>
-        </div>
-        <div>
-          <Text className="text-xs text-gray-500">Entries</Text>
-          <Metric className="text-lg">{schedule.totalEntries.toLocaleString()}</Metric>
+          <Text className="text-xs text-gray-500">Total Prizepool</Text>
+          <Text className="font-semibold">{formatCompactCurrency(schedule.totalPrizepool)}</Text>
         </div>
         <div>
           <Text className="text-xs text-gray-500">Total Profit</Text>
-          <Metric className={`text-lg ${profitColor}`}>
+          <Text className={`font-semibold ${profitColor}`}>
             {formatCompactCurrency(schedule.totalProfit)}
-          </Metric>
+          </Text>
+        </div>
+        <div>
+          <Text className="text-xs text-gray-500">Avg Profit</Text>
+          <Text className={`font-semibold ${schedule.avgProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+            {formatCompactCurrency(schedule.avgProfit)}
+          </Text>
         </div>
       </div>
     </Card>
   );
-}
+};
 
-// Profit Trend Chart
-interface ProfitTrendChartProps {
-  data: { date: string; profit: number; prizepool: number; entries: number; games: number }[];
-}
-
-function ProfitTrendChart({ data }: ProfitTrendChartProps) {
+const ProfitTrendChart: React.FC<{ data: { date: string; profit: number }[] }> = ({ data }) => {
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-48 text-gray-400">
@@ -754,7 +724,13 @@ function ProfitTrendChart({ data }: ProfitTrendChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={200}>
-      <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+          </linearGradient>
+        </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
         <XAxis
           dataKey="date"
@@ -789,16 +765,17 @@ function ProfitTrendChart({ data }: ProfitTrendChartProps) {
             fontSize: '12px',
           }}
         />
-        <Bar
+        <Area
+          type="monotone"
           dataKey="profit"
-          fill="#6366f1"
-          radius={[4, 4, 0, 0]}
-          name="profit"
+          stroke="#6366f1"
+          strokeWidth={2}
+          fill="url(#profitGradient)"
         />
-      </BarChart>
+      </AreaChart>
     </ResponsiveContainer>
   );
-}
+};
 
 // ============================================
 // MAIN COMPONENT
@@ -812,13 +789,12 @@ export const VenueDetails: React.FC = () => {
   const { selectedEntities, entities, loading: entityLoading } = useEntity();
   const { isSuperAdmin } = useUserPermissions();
 
-  // Get venueId from URL params
   const venueId = searchParams.get('venueId');
   const entityId: string | undefined = selectedEntities[0]?.id;
 
   // State
   const [timeRange, setTimeRange] = useState<TimeRangeKey>('ALL');
-  const [seriesType, setSeriesType] = useState<SeriesTypeKey>('REGULAR'); // Default to REGULAR
+  const [seriesType, setSeriesType] = useState<SeriesTypeKey>('REGULAR');
   const [venue, setVenue] = useState<VenueInfo | null>(null);
   const [venueMetrics, setVenueMetrics] = useState<VenueMetrics | null>(null);
   const [allSnapshots, setAllSnapshots] = useState<GameFinancialSnapshotWithGame[]>([]);
@@ -829,30 +805,26 @@ export const VenueDetails: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'games' | 'analytics'>('overview');
   const [gameHistoryFilter, setGameHistoryFilter] = useState<'all' | 'recurring' | 'adhoc'>('all');
 
-  // FIX v2.4.0: Ensure seriesType is always REGULAR for non-SUPER_ADMIN users
-  // This effect runs when isSuperAdmin changes or when seriesType is set incorrectly
+  // Ensure seriesType is always REGULAR for non-SUPER_ADMIN users
   useEffect(() => {
     if (!isSuperAdmin && seriesType !== 'REGULAR') {
       setSeriesType('REGULAR');
     }
   }, [isSuperAdmin, seriesType]);
 
-  // Wrapper function to ensure non-SUPER_ADMIN users can't change seriesType
   const handleSeriesTypeChange = (newSeriesType: SeriesTypeKey) => {
-    if (!isSuperAdmin) return; // Safety check
+    if (!isSuperAdmin) return;
     setSeriesType(newSeriesType);
   };
 
-  // Show entity selector only if user has more than 1 entity
   const showEntitySelector = entities && entities.length > 1;
 
-  // Build VenueMetrics ID: {venueId}_{timeRange}_{seriesType}
   const venueMetricsId = useMemo(() => {
     if (!venueId) return null;
     return `${venueId}_${timeRange}_${seriesType}`;
   }, [venueId, timeRange, seriesType]);
 
-  // Fetch venue info, metrics, and snapshots
+  // Fetch data
   useEffect(() => {
     if (!venueId) {
       setError('No venue ID provided');
@@ -882,7 +854,7 @@ export const VenueDetails: React.FC = () => {
 
         setVenue(venueData);
 
-        // 2) Fetch VenueMetrics for summary cards (NEW - matches VenuesDashboard)
+        // 2) Fetch VenueMetrics
         if (venueMetricsId) {
           try {
             const metricsRes = await client.graphql({
@@ -893,10 +865,7 @@ export const VenueDetails: React.FC = () => {
             const metricsData = metricsRes?.data?.getVenueMetrics;
             if (metricsData) {
               setVenueMetrics(metricsData);
-              console.log(`[VenueDetails] Loaded VenueMetrics: ${venueMetricsId}`, {
-                totalGames: metricsData.totalGames,
-                seriesType: metricsData.seriesType
-              });
+              console.log(`[VenueDetails] Loaded VenueMetrics: ${venueMetricsId}`);
             } else {
               console.warn(`[VenueDetails] No VenueMetrics found for ${venueMetricsId}`);
               setVenueMetrics(null);
@@ -907,7 +876,7 @@ export const VenueDetails: React.FC = () => {
           }
         }
 
-        // 3) Fetch GameFinancialSnapshots for game history table
+        // 3) Fetch GameFinancialSnapshots
         const { from, to } = getTimeRangeBounds(timeRange);
         const fetchedSnapshots: GameFinancialSnapshotWithGame[] = [];
         let nextToken: string | null | undefined = null;
@@ -935,11 +904,6 @@ export const VenueDetails: React.FC = () => {
           }) as any;
 
           const page = snapRes?.data?.listGameFinancialSnapshots;
-
-          if (snapRes?.errors?.length) {
-            console.warn('GraphQL returned partial data with errors:', snapRes.errors.length, 'errors');
-          }
-
           const pageItems =
             page?.items?.filter((s: GameFinancialSnapshotWithGame | null) => s != null) ?? [];
 
@@ -947,19 +911,19 @@ export const VenueDetails: React.FC = () => {
           nextToken = page?.nextToken ?? null;
         } while (nextToken);
 
-        // Filter snapshots by seriesType first
+        // Filter by seriesType
         const seriesFilteredSnapshots = filterSnapshotsBySeriesType(fetchedSnapshots, seriesType);
         
-        // Separate into recurring and ad-hoc games
+        // Separate into recurring and ad-hoc
         const recurring = seriesFilteredSnapshots.filter(isValidRecurringGameSnapshot);
         const adHoc = seriesFilteredSnapshots.filter(isValidAdHocGameSnapshot);
-        
-        // All valid regular games (both recurring and ad-hoc)
         const allValid = seriesFilteredSnapshots.filter(isValidRegularGameSnapshot);
 
         console.log(
-          `[VenueDetails] Loaded ${fetchedSnapshots.length} snapshots, ${seriesFilteredSnapshots.length} after seriesType filter`,
-          `| ${recurring.length} recurring | ${adHoc.length} ad-hoc | ${allValid.length} total valid`
+          `[VenueDetails] Loaded ${fetchedSnapshots.length} snapshots`,
+          `| ${recurring.length} recurring (with recurringGameId)`,
+          `| ${adHoc.length} ad-hoc`,
+          `| ${allValid.length} total valid`
         );
 
         setAllSnapshots(allValid);
@@ -976,7 +940,7 @@ export const VenueDetails: React.FC = () => {
     void load();
   }, [venueId, entityId, timeRange, seriesType, venueMetricsId]);
 
-  // Compute aggregated stats for recurring games (for overview)
+  // Compute stats - NOW GROUPED BY recurringGameId
   const { scheduleStats, globalStats: tableGlobalStats } = useMemo(
     () => buildScheduleGroupStats(recurringSnapshots),
     [recurringSnapshots]
@@ -984,7 +948,6 @@ export const VenueDetails: React.FC = () => {
 
   const trendData = useMemo(() => buildOverallTrendData(allSnapshots), [allSnapshots]);
 
-  // Game rows based on filter selection
   const gameRows = useMemo(() => {
     const snapshotsToShow = gameHistoryFilter === 'recurring' 
       ? recurringSnapshots 
@@ -994,43 +957,62 @@ export const VenueDetails: React.FC = () => {
     return buildGameRowData(snapshotsToShow);
   }, [allSnapshots, recurringSnapshots, adHocSnapshots, gameHistoryFilter]);
 
-  // Ad-hoc game stats for the overview section
+  // Ad-hoc stats
   const adHocStats = useMemo(() => {
     const adHocGames = buildGameRowData(adHocSnapshots);
     const totalProfit = adHocGames.reduce((sum, g) => sum + g.profit, 0);
     const totalPrizepool = adHocGames.reduce((sum, g) => sum + g.prizepool, 0);
     const totalEntries = adHocGames.reduce((sum, g) => sum + g.entries, 0);
-    const totalRegistrations = adHocGames.reduce((sum, g) => sum + g.registrations, 0);
-    const totalRevenue = adHocGames.reduce((sum, g) => sum + g.revenue, 0);
-    const totalCost = adHocGames.reduce((sum, g) => sum + g.cost, 0);
     return {
       totalGames: adHocGames.length,
       totalProfit,
       totalPrizepool,
       totalEntries,
-      totalRegistrations,
-      totalRevenue,
-      totalCost,
       avgProfit: adHocGames.length > 0 ? totalProfit / adHocGames.length : 0,
       avgEntries: adHocGames.length > 0 ? totalEntries / adHocGames.length : 0,
-      games: adHocGames, // All games for the table
+      games: adHocGames,
     };
   }, [adHocSnapshots]);
 
-  // Handler for clicking on ad-hoc game name (navigates to GameDetails page)
-  const handleAdHocGameClick = (gameId: string) => {
-    navigate(`/games/details/${gameId}`);
-  };
+  // Summary stats from VenueMetrics or computed
+  const summaryStats = useMemo(() => {
+    if (venueMetrics) {
+      return {
+        totalGames: venueMetrics.totalGames || 0,
+        totalEntries: venueMetrics.totalEntries || 0,
+        totalPrizepool: venueMetrics.totalPrizepool || 0,
+        totalProfit: venueMetrics.totalProfit || 0,
+        avgEntriesPerGame: venueMetrics.avgEntriesPerGame || 0,
+        avgProfitPerGame: venueMetrics.avgProfitPerGame || 0,
+      };
+    }
+    
+    const totalEntries = tableGlobalStats.totalEntries + adHocStats.totalEntries;
+    const totalGames = tableGlobalStats.totalGames + adHocStats.totalGames;
+    const totalProfit = tableGlobalStats.totalProfit + adHocStats.totalProfit;
+    const totalPrizepool = tableGlobalStats.totalPrizepool + adHocStats.totalPrizepool;
+    
+    return {
+      totalGames,
+      totalEntries,
+      totalPrizepool,
+      totalProfit,
+      avgEntriesPerGame: totalGames > 0 ? totalEntries / totalGames : 0,
+      avgProfitPerGame: totalGames > 0 ? totalProfit / totalGames : 0,
+    };
+  }, [venueMetrics, tableGlobalStats, adHocStats]);
 
-  // Handle row click to navigate to game details
+  const profitColor = summaryStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600';
+
+  // UPDATED: Handle row click - now uses recurringGameId
   const handleGameRowClick = (row: GameRowData) => {
     if (!venue) return;
     
-    // For recurring games with a schedule, navigate to the game type view
-    if (row.classification === 'RECURRING' && row.gameTypeKey && row.gameTypeKey !== '-') {
-      navigate(`/venues/game?venueId=${venue.id}&gameTypeKey=${encodeURIComponent(row.gameTypeKey)}`);
+    // For recurring games with a recurringGameId, navigate to the recurring game view
+    if (row.classification === 'RECURRING' && row.recurringGameId) {
+      navigate(`/venues/game?venueId=${venue.id}&recurringGameId=${encodeURIComponent(row.recurringGameId)}`);
     } else if (row.gameId) {
-      // For ad-hoc games or games without a schedule, navigate to the specific game
+      // For ad-hoc games or games without a recurring assignment, navigate to the specific game
       navigate(`/games/${row.gameId}`);
     }
   };
@@ -1094,16 +1076,17 @@ export const VenueDetails: React.FC = () => {
         ),
       },
       {
-        header: 'Schedule',
-        accessorKey: 'gameTypeKey',
+        // UPDATED: Show recurring game name instead of schedule key
+        header: 'Recurring Game',
+        accessorKey: 'recurringGameName',
         cell: ({ row }) => {
-          const key = row.original.gameTypeKey;
-          if (!key || key === '-') {
+          const name = row.original.recurringGameName;
+          if (!name) {
             return <span className="text-gray-400 text-xs italic">None</span>;
           }
           return (
             <span className="text-gray-600 text-xs">
-              {formatKeyToDisplayName(key)}
+              {name.length > 25 ? name.substring(0, 25) + '...' : name}
             </span>
           );
         },
@@ -1127,9 +1110,12 @@ export const VenueDetails: React.FC = () => {
         header: 'Profit',
         accessorKey: 'profit',
         cell: ({ row }) => {
-          const profit = row.original.profit;
-          const color = profit >= 0 ? 'text-blue-600' : 'text-red-600';
-          return <span className={`font-semibold ${color}`}>{formatCurrency(profit)}</span>;
+          const val = row.original.profit;
+          return (
+            <span className={`font-semibold ${val >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+              {formatCurrency(val)}
+            </span>
+          );
         },
       },
     ],
@@ -1140,9 +1126,7 @@ export const VenueDetails: React.FC = () => {
   if (entityLoading || loading) {
     return (
       <PageWrapper title="Venue Details">
-        <div className="py-20 text-center text-gray-400">
-          Loading venue details…
-        </div>
+        <div className="py-20 text-center text-gray-400">Loading venue details…</div>
       </PageWrapper>
     );
   }
@@ -1154,126 +1138,55 @@ export const VenueDetails: React.FC = () => {
         <Card className="border-red-200 bg-red-50">
           <Text className="text-sm text-red-700">{error || 'Venue not found'}</Text>
           <button
-            onClick={() => navigate('/venues')}
+            onClick={() => navigate(-1)}
             className="mt-4 inline-flex items-center text-sm text-indigo-600 hover:text-indigo-900"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-1" />
-            Back to Venues Dashboard
+            Go Back
           </button>
         </Card>
       </PageWrapper>
     );
   }
 
-  // Use VenueMetrics for summary cards (consistent with VenuesDashboard)
-  // Fall back to table stats if metrics not available
-  const summaryStats = venueMetrics ? {
-    totalGames: venueMetrics.totalGames,
-    totalRegistrations: venueMetrics.totalUniquePlayers,
-    totalEntries: venueMetrics.totalEntries,
-    totalPrizepool: venueMetrics.totalPrizepool,
-    totalProfit: venueMetrics.totalProfit,
-    avgProfit: venueMetrics.avgProfitPerGame || 0,
-  } : {
-    totalGames: tableGlobalStats.totalGames,
-    totalRegistrations: tableGlobalStats.totalRegistrations,
-    totalEntries: tableGlobalStats.totalEntries,
-    totalPrizepool: tableGlobalStats.totalPrizepool,
-    totalProfit: tableGlobalStats.totalProfit,
-    avgProfit: tableGlobalStats.avgProfit,
-  };
-
-  const profitColor = summaryStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600';
-
   return (
     <PageWrapper title={venue.name}>
-      {/* Back Navigation */}
+      {/* Back Button */}
       <button
         onClick={() => navigate('/venues')}
         className="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
       >
         <ArrowLeftIcon className="h-4 w-4 mr-1" />
-        Back to Dashboard
+        Back to Venues
       </button>
 
-      {/* Filters - Time Range and Series Type */}
+      {/* Header & Filters */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          {showEntitySelector && (
-            <div className="w-full sm:flex-1 sm:max-w-xs">
-              <MultiEntitySelector />
-            </div>
+        <div className="flex items-center gap-3">
+          {venue.logo && (
+            <img src={venue.logo} alt={venue.name} className="w-12 h-12 rounded-full object-cover border border-gray-200" />
           )}
-          {/* Series Type Selector - ONLY show for SUPER_ADMIN */}
-          {isSuperAdmin && (
-            <SeriesTypeSelector 
-              value={seriesType} 
-              onChange={handleSeriesTypeChange} 
-            />
-          )}
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{venue.name}</h1>
+            {venue.address && (
+              <Text className="flex items-center gap-1 text-sm text-gray-500">
+                <MapPinIcon className="h-4 w-4" />
+                {venue.address}, {venue.city}
+              </Text>
+            )}
+          </div>
         </div>
-        <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
+        
+        <div className="flex flex-wrap items-center gap-3">
+          {showEntitySelector && <MultiEntitySelector />}
+          {isSuperAdmin && (
+            <SeriesTypeSelector value={seriesType} onChange={handleSeriesTypeChange} />
+          )}
+          <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
+        </div>
       </div>
 
-      {/* Venue Header */}
-      <Card className="mb-6">
-        <div className="flex items-center">
-          <div className="flex-shrink-0 h-14 w-14 relative">
-            {venue.logo ? (
-              <img
-                src={venue.logo}
-                alt={venue.name}
-                className="h-14 w-14 rounded-full object-cover"
-              />
-            ) : (
-              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white text-xl font-medium">
-                {venue.name.charAt(0)}
-              </div>
-            )}
-          </div>
-          <div className="ml-5 flex-1">
-            <h2 className="text-xl font-bold text-gray-900">
-              {venue.name}
-              {venue.venueNumber && (
-                <span className="ml-2 text-base text-gray-500">
-                  (#{venue.venueNumber})
-                </span>
-              )}
-            </h2>
-            <div className="mt-1 flex items-center text-sm text-gray-600">
-              <MapPinIcon className="h-4 w-4 mr-1" />
-              {venue.address && <span>{venue.address}, </span>}
-              {venue.city && <span>{venue.city}, </span>}
-              {venue.country && <span>{venue.country}</span>}
-              {!venue.address && !venue.city && !venue.country && (
-                <span className="text-gray-400">No address information</span>
-              )}
-            </div>
-            {venue.aliases && venue.aliases.length > 0 && (
-              <p className="mt-1 text-xs text-gray-500">
-                Also known as: {venue.aliases.join(', ')}
-              </p>
-            )}
-          </div>
-          {/* Data source indicator */}
-          <div className="text-right">
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-              seriesType === 'ALL' ? 'bg-indigo-100 text-indigo-700' :
-              seriesType === 'REGULAR' ? 'bg-blue-100 text-blue-700' :
-              'bg-purple-100 text-purple-700'
-            }`}>
-              {seriesType === 'ALL' ? 'All Games' : seriesType === 'REGULAR' ? 'Regular Games' : 'Series Games'}
-            </span>
-            {venueMetrics && (
-              <p className="mt-1 text-xs text-gray-400">
-                Updated {format(parseISO(venueMetrics.calculatedAt), 'MMM d, h:mm a')}
-              </p>
-            )}
-          </div>
-        </div>
-      </Card>
-
-      {/* Summary Metric Cards - NOW USES VenueMetrics (matches VenuesDashboard) */}
+      {/* Summary KPIs */}
       <Grid numItemsSm={2} numItemsLg={5} className="gap-4 mb-6">
         <MetricCard
           label="Total Games"
@@ -1281,14 +1194,10 @@ export const VenueDetails: React.FC = () => {
           icon={<CalendarIcon className="h-6 w-6" />}
         />
         <MetricCard
-          label="Total Registrations"
-          value={summaryStats.totalRegistrations.toLocaleString()}
-          icon={<UserGroupIcon className="h-6 w-6" />}
-        />
-        <MetricCard
           label="Total Entries"
           value={summaryStats.totalEntries.toLocaleString()}
           icon={<UserGroupIcon className="h-6 w-6" />}
+          secondary={`Avg ${summaryStats.avgEntriesPerGame.toFixed(1)}/game`}
         />
         <MetricCard
           label="Total Prizepool"
@@ -1299,455 +1208,359 @@ export const VenueDetails: React.FC = () => {
           label="Total Profit"
           value={formatCurrency(summaryStats.totalProfit)}
           icon={<BanknotesIcon className="h-6 w-6" />}
-          secondary={`Avg ${formatCurrency(summaryStats.avgProfit)}/game`}
+        />
+        <MetricCard
+          label="Avg Profit/Game"
+          value={formatCurrency(summaryStats.avgProfitPerGame)}
+          icon={<ChartBarIcon className="h-6 w-6" />}
         />
       </Grid>
 
-      {/* Info banner when VenueMetrics not available */}
-      {!venueMetrics && (
-        <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
-          <strong>Note:</strong> Pre-calculated metrics not available for this filter combination. 
-          Showing computed values from game history. Run "Refresh Metrics" to update.
-        </div>
-      )}
-
       {/* Tabs */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8 px-6">
-            {[
-              { id: 'overview', label: 'Overview' },
-              { id: 'games', label: `Game History (${gameRows.length})` },
-              { id: 'analytics', label: 'Analytics' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="-mb-px flex space-x-8">
+          {(['overview', 'games', 'analytics'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-        {/* Tab Content */}
-        <div className="p-6">
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              {/* Profit Trend Chart */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                  <ChartBarIcon className="h-5 w-5 mr-2 text-gray-400" />
-                  Profit Trend (All Games)
-                </h3>
-                <Card>
-                  <ProfitTrendChart data={trendData} />
-                </Card>
-              </div>
-
-              {/* Recurring Games Section */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <Text className="text-xs font-semibold uppercase text-gray-500">
-                    Recurring Games ({scheduleStats.length} types, {recurringSnapshots.length} games)
-                  </Text>
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-                    {formatCurrency(tableGlobalStats.totalProfit)} profit
-                  </span>
-                </div>
-
-                <Grid numItemsSm={1} numItemsMd={2} numItemsLg={3} className="gap-4">
-                  {scheduleStats.map((schedule) => (
-                    <ScheduleCard 
-                      key={schedule.gameTypeKey} 
-                      schedule={schedule}
-                      onClick={() => navigate(
-                        `/venues/game?venueId=${venue.id}&gameTypeKey=${encodeURIComponent(schedule.gameTypeKey)}`
-                      )}
-                    />
-                  ))}
-
-                  {scheduleStats.length === 0 && (
-                    <Text className="col-span-full text-sm text-gray-400 text-center py-8">
-                      No recurring game data available for the selected filters.
-                      {seriesType === 'SERIES' && ' Try switching to "Regular" or "All Games".'}
-                    </Text>
-                  )}
-                </Grid>
-              </div>
-
-              {/* Ad-hoc Games Section */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <Text className="text-xs font-semibold uppercase text-gray-500">
-                    Ad-hoc Games ({adHocStats.totalGames} games)
-                  </Text>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    adHocStats.totalProfit >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {formatCurrency(adHocStats.totalProfit)} profit
-                  </span>
-                </div>
-
-                {adHocStats.totalGames > 0 ? (
-                  <Card>
-                    {/* Summary Stats */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                      <div>
-                        <Text className="text-xs text-gray-500">Total Games</Text>
-                        <Metric className="text-lg">{adHocStats.totalGames}</Metric>
-                      </div>
-                      <div>
-                        <Text className="text-xs text-gray-500">Total Entries</Text>
-                        <Metric className="text-lg">{adHocStats.totalEntries.toLocaleString()}</Metric>
-                        <Text className="text-xs text-gray-400">Avg {adHocStats.avgEntries.toFixed(1)}/game</Text>
-                      </div>
-                      <div>
-                        <Text className="text-xs text-gray-500">Total Prizepool</Text>
-                        <Metric className="text-lg">{formatCompactCurrency(adHocStats.totalPrizepool)}</Metric>
-                      </div>
-                      <div>
-                        <Text className="text-xs text-gray-500">Total Profit</Text>
-                        <Metric className={`text-lg ${adHocStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                          {formatCompactCurrency(adHocStats.totalProfit)}
-                        </Metric>
-                      </div>
-                      <div>
-                        <Text className="text-xs text-gray-500">Avg Profit/Game</Text>
-                        <Metric className={`text-lg ${adHocStats.avgProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                          {formatCompactCurrency(adHocStats.avgProfit)}
-                        </Metric>
-                      </div>
-                    </div>
-
-                    {/* Ad-hoc Games Table (matching VenueGameDetails style) */}
-                    <div className="border-t border-gray-100 pt-4">
-                      <Text className="text-xs text-gray-500 mb-3">Game History (click to view details)</Text>
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 text-sm">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">ID</th>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Game</th>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Buy-in</th>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Reg.</th>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Entries</th>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Prize</th>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Rev</th>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Cost</th>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Profit</th>
-                              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Margin</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-100 bg-white">
-                            {adHocStats.games.map((game) => (
-                              <tr
-                                key={game.id}
-                                className="hover:bg-gray-50 cursor-pointer"
-                                onClick={() => handleAdHocGameClick(game.gameId)}
-                              >
-                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">
-                                  {(() => {
-                                    try {
-                                      return format(parseISO(game.date), 'dd MMM yyyy');
-                                    } catch {
-                                      return '-';
-                                    }
-                                  })()}
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap text-gray-500 font-mono text-xs">
-                                  {game.tournamentId || '-'}
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap">
-                                  <span
-                                    className="font-medium text-indigo-600 hover:text-indigo-900 hover:underline"
-                                    title={`View details for ${game.name}`}
-                                  >
-                                    {game.name.length > 35 ? game.name.substring(0, 35) + '...' : game.name}
-                                  </span>
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{formatCurrency(game.buyIn)}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{game.registrations.toLocaleString()}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{game.entries.toLocaleString()}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{formatCurrency(game.prizepool)}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{formatCurrency(game.revenue)}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{formatCurrency(game.cost)}</td>
-                                <td className="px-3 py-2 whitespace-nowrap">
-                                  <span className={`font-semibold ${game.profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                                    {formatCurrency(game.profit)}
-                                  </span>
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap">
-                                  {game.profitMargin !== null ? (
-                                    <span className={game.profitMargin >= 0 ? 'text-blue-600' : 'text-red-600'}>
-                                      {(game.profitMargin * 100).toFixed(1)}%
-                                    </span>
-                                  ) : '-'}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      
-                      {adHocStats.totalGames > 10 && (
-                        <div className="mt-3 pt-3 border-t border-gray-100">
-                          <button 
-                            onClick={() => {
-                              setGameHistoryFilter('adhoc');
-                              setActiveTab('games');
-                            }}
-                            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
-                          >
-                            View all {adHocStats.totalGames} ad-hoc games in Game History tab →
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                ) : (
-                  <Card>
-                    <Text className="text-sm text-gray-400 text-center py-8">
-                      No ad-hoc games recorded for the selected filters.
-                    </Text>
-                  </Card>
-                )}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'games' && (
+      {/* Tab Content */}
+      <div>
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {/* Profit Trend Chart */}
             <div>
-              {/* Header with filter toggle */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700">
-                    Game History ({gameRows.length} games)
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {gameHistoryFilter === 'all' 
-                      ? `Showing all finished games (${recurringSnapshots.length} recurring, ${adHocSnapshots.length} ad-hoc)`
-                      : gameHistoryFilter === 'recurring'
-                        ? 'Showing recurring games only'
-                        : 'Showing ad-hoc games only'}
-                  </p>
-                </div>
-
-                {/* Game type filter toggle */}
-                <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5">
-                  <button
-                    onClick={() => setGameHistoryFilter('all')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                      gameHistoryFilter === 'all' 
-                        ? 'bg-indigo-600 text-white shadow-sm' 
-                        : 'text-gray-600 hover:text-indigo-600'
-                    }`}
-                  >
-                    All ({allSnapshots.length})
-                  </button>
-                  <button
-                    onClick={() => setGameHistoryFilter('recurring')}
-                    className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                      gameHistoryFilter === 'recurring' 
-                        ? 'bg-blue-600 text-white shadow-sm' 
-                        : 'text-gray-600 hover:text-blue-600'
-                    }`}
-                  >
-                    <CalendarIcon className="w-3.5 h-3.5" />
-                    Recurring ({recurringSnapshots.length})
-                  </button>
-                  <button
-                    onClick={() => setGameHistoryFilter('adhoc')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                      gameHistoryFilter === 'adhoc' 
-                        ? 'bg-amber-600 text-white shadow-sm' 
-                        : 'text-gray-600 hover:text-amber-600'
-                    }`}
-                  >
-                    Ad-hoc ({adHocSnapshots.length})
-                  </button>
-                </div>
-              </div>
-
-              <DataTable<GameRowData> 
-                data={gameRows} 
-                columns={columns} 
-                onRowClick={handleGameRowClick}
-              />
+              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                <ChartBarIcon className="h-5 w-5 mr-2 text-gray-400" />
+                Profit Trend (All Games)
+              </h3>
+              <Card>
+                <ProfitTrendChart data={trendData} />
+              </Card>
             </div>
-          )}
 
-          {activeTab === 'analytics' && (
-            <div className="space-y-6">
-              {/* Summary Statistics */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                  <Text className="text-xs uppercase tracking-wide text-gray-500">
-                    Total Revenue Generated
-                  </Text>
-                  <Metric className="mt-1">
-                    {formatCurrency(summaryStats.totalPrizepool + summaryStats.totalProfit)}
-                  </Metric>
-                  <Text className="mt-1 text-xs text-gray-400">
-                    Prizepool + Profit
-                  </Text>
-                </Card>
-
-                <Card>
-                  <Text className="text-xs uppercase tracking-wide text-gray-500">
-                    Average Entries per Game
-                  </Text>
-                  <Metric className="mt-1">
-                    {summaryStats.totalGames > 0
-                      ? (summaryStats.totalEntries / summaryStats.totalGames).toFixed(1)
-                      : '0'}
-                  </Metric>
-                </Card>
-
-                <Card>
-                  <Text className="text-xs uppercase tracking-wide text-gray-500">
-                    Profit Margin
-                  </Text>
-                  <Metric className={`mt-1 ${profitColor}`}>
-                    {summaryStats.totalPrizepool > 0
-                      ? ((summaryStats.totalProfit / (summaryStats.totalPrizepool + summaryStats.totalProfit)) * 100).toFixed(1)
-                      : '0'}%
-                  </Metric>
-                </Card>
+            {/* Recurring Games Section - NOW GROUPED BY recurringGameId */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <Text className="text-xs font-semibold uppercase text-gray-500">
+                  Recurring Games ({scheduleStats.length} templates, {recurringSnapshots.length} games)
+                </Text>
+                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                  {formatCurrency(tableGlobalStats.totalProfit)} profit
+                </span>
               </div>
 
-              {/* Game Type Performance Breakdown */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Performance by Recurring Game
-                </h3>
+              <Grid numItemsSm={1} numItemsMd={2} numItemsLg={3} className="gap-4">
+                {scheduleStats.map((schedule) => (
+                  <ScheduleCard 
+                    key={schedule.recurringGameId} 
+                    schedule={schedule}
+                    // UPDATED: Navigate using recurringGameId
+                    onClick={() => navigate(
+                      `/venues/game?venueId=${venue.id}&recurringGameId=${encodeURIComponent(schedule.recurringGameId)}`
+                    )}
+                  />
+                ))}
+
+                {scheduleStats.length === 0 && (
+                  <Text className="col-span-full text-sm text-gray-400 text-center py-8">
+                    No recurring game data available for the selected filters.
+                    {seriesType === 'SERIES' && ' Try switching to "Regular" or "All Games".'}
+                  </Text>
+                )}
+              </Grid>
+            </div>
+
+            {/* Ad-hoc Games Section */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <Text className="text-xs font-semibold uppercase text-gray-500">
+                  Ad-hoc Games ({adHocStats.totalGames} games)
+                </Text>
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  adHocStats.totalProfit >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {formatCurrency(adHocStats.totalProfit)} profit
+                </span>
+              </div>
+
+              {adHocStats.totalGames > 0 ? (
                 <Card>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 text-sm">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">
-                            Game Schedule
-                          </th>
-                          <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">
-                            Games
-                          </th>
-                          <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">
-                            Avg Entries
-                          </th>
-                          <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">
-                            Total Prizepool
-                          </th>
-                          <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">
-                            Total Profit
-                          </th>
-                          <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">
-                            Avg Profit/Game
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100 bg-white">
-                        {scheduleStats.map((s) => {
-                          const avgEntries = s.totalGames > 0 ? s.totalEntries / s.totalGames : 0;
-                          const profitTextColor = s.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600';
-                          const avgProfitColor = s.avgProfit >= 0 ? 'text-blue-600' : 'text-red-600';
-
-                          return (
-                            <tr key={s.gameTypeKey} className="hover:bg-gray-50">
-                              <td className="px-4 py-2 font-medium">{s.displayName}</td>
-                              <td className="px-4 py-2 text-right">{s.totalGames}</td>
-                              <td className="px-4 py-2 text-right">{avgEntries.toFixed(1)}</td>
-                              <td className="px-4 py-2 text-right">{formatCurrency(s.totalPrizepool)}</td>
-                              <td className={`px-4 py-2 text-right font-semibold ${profitTextColor}`}>
-                                {formatCurrency(s.totalProfit)}
-                              </td>
-                              <td className={`px-4 py-2 text-right font-semibold ${avgProfitColor}`}>
-                                {formatCurrency(s.avgProfit)}
-                              </td>
-                            </tr>
-                          );
-                        })}
-
-                        {scheduleStats.length === 0 && (
-                          <tr>
-                            <td
-                              className="px-4 py-6 text-center text-sm text-gray-500"
-                              colSpan={6}
-                            >
-                              No data available.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                    <div>
+                      <Text className="text-xs text-gray-500">Total Games</Text>
+                      <Metric className="text-lg">{adHocStats.totalGames}</Metric>
+                    </div>
+                    <div>
+                      <Text className="text-xs text-gray-500">Total Entries</Text>
+                      <Metric className="text-lg">{adHocStats.totalEntries.toLocaleString()}</Metric>
+                      <Text className="text-xs text-gray-400">Avg {adHocStats.avgEntries.toFixed(1)}/game</Text>
+                    </div>
+                    <div>
+                      <Text className="text-xs text-gray-500">Total Prizepool</Text>
+                      <Metric className="text-lg">{formatCompactCurrency(adHocStats.totalPrizepool)}</Metric>
+                    </div>
+                    <div>
+                      <Text className="text-xs text-gray-500">Total Profit</Text>
+                      <Metric className={`text-lg ${adHocStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                        {formatCompactCurrency(adHocStats.totalProfit)}
+                      </Metric>
+                    </div>
+                    <div>
+                      <Text className="text-xs text-gray-500">Avg Profit/Game</Text>
+                      <Metric className={`text-lg ${adHocStats.avgProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                        {formatCompactCurrency(adHocStats.avgProfit)}
+                      </Metric>
+                    </div>
                   </div>
                 </Card>
-              </div>
-
-              {/* Entries Trend */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Entries Trend Over Time
-                </h3>
+              ) : (
                 <Card>
-                  {trendData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={200}>
-                      <LineChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis
-                          dataKey="date"
-                          tickFormatter={(d) => {
-                            try {
-                              return format(parseISO(d + '-01'), 'MMM yy');
-                            } catch {
-                              return d;
-                            }
-                          }}
-                          tick={{ fontSize: 12 }}
-                          stroke="#9ca3af"
-                        />
-                        <YAxis tick={{ fontSize: 12 }} stroke="#9ca3af" />
-                        <Tooltip
-                          formatter={(value: number) => [value, 'Total Entries']}
-                          labelFormatter={(label) => {
-                            try {
-                              return format(parseISO(label + '-01'), 'MMMM yyyy');
-                            } catch {
-                              return label;
-                            }
-                          }}
-                          contentStyle={{
-                            backgroundColor: 'white',
-                            border: '1px solid #e5e7eb',
-                            borderRadius: '8px',
-                            fontSize: '12px',
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="entries"
-                          stroke="#6366f1"
-                          strokeWidth={2}
-                          dot={{ r: 3 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="flex items-center justify-center h-48 text-gray-400">
-                      No trend data available
-                    </div>
-                  )}
+                  <Text className="text-sm text-gray-400 text-center py-4">
+                    No ad-hoc games in selected time range
+                  </Text>
                 </Card>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'games' && (
+          <div>
+            {/* Filter Buttons */}
+            <div className="flex items-center justify-between mb-4">
+              <Text className="text-sm text-gray-600">
+                {gameHistoryFilter === 'all'
+                  ? `Showing all finished games (${recurringSnapshots.length} recurring, ${adHocSnapshots.length} ad-hoc)`
+                  : gameHistoryFilter === 'recurring'
+                    ? 'Showing recurring games only'
+                    : 'Showing ad-hoc games only'}
+              </Text>
+              <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5">
+                <button
+                  onClick={() => setGameHistoryFilter('all')}
+                  className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    gameHistoryFilter === 'all' 
+                      ? 'bg-indigo-600 text-white shadow-sm' 
+                      : 'text-gray-600 hover:text-indigo-600'
+                  }`}
+                >
+                  All ({allSnapshots.length})
+                </button>
+                <button
+                  onClick={() => setGameHistoryFilter('recurring')}
+                  className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    gameHistoryFilter === 'recurring' 
+                      ? 'bg-blue-600 text-white shadow-sm' 
+                      : 'text-gray-600 hover:text-blue-600'
+                  }`}
+                >
+                  <CalendarIcon className="w-3.5 h-3.5" />
+                  Recurring ({recurringSnapshots.length})
+                </button>
+                <button
+                  onClick={() => setGameHistoryFilter('adhoc')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    gameHistoryFilter === 'adhoc' 
+                      ? 'bg-amber-600 text-white shadow-sm' 
+                      : 'text-gray-600 hover:text-amber-600'
+                  }`}
+                >
+                  Ad-hoc ({adHocSnapshots.length})
+                </button>
               </div>
             </div>
-          )}
-        </div>
+
+            <DataTable<GameRowData> 
+              data={gameRows} 
+              columns={columns} 
+              onRowClick={handleGameRowClick}
+            />
+          </div>
+        )}
+
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
+            {/* Summary Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <Text className="text-xs uppercase tracking-wide text-gray-500">
+                  Total Revenue Generated
+                </Text>
+                <Metric className="mt-1">
+                  {formatCurrency(summaryStats.totalPrizepool + summaryStats.totalProfit)}
+                </Metric>
+                <Text className="mt-1 text-xs text-gray-400">
+                  Prizepool + Profit
+                </Text>
+              </Card>
+
+              <Card>
+                <Text className="text-xs uppercase tracking-wide text-gray-500">
+                  Average Entries per Game
+                </Text>
+                <Metric className="mt-1">
+                  {summaryStats.totalGames > 0
+                    ? (summaryStats.totalEntries / summaryStats.totalGames).toFixed(1)
+                    : '0'}
+                </Metric>
+              </Card>
+
+              <Card>
+                <Text className="text-xs uppercase tracking-wide text-gray-500">
+                  Profit Margin
+                </Text>
+                <Metric className={`mt-1 ${profitColor}`}>
+                  {summaryStats.totalPrizepool > 0
+                    ? ((summaryStats.totalProfit / (summaryStats.totalPrizepool + summaryStats.totalProfit)) * 100).toFixed(1)
+                    : '0'}%
+                </Metric>
+              </Card>
+            </div>
+
+            {/* Performance by Recurring Game - NOW USES recurringGameId */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                Performance by Recurring Game
+              </h3>
+              <Card>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">
+                          Recurring Game
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">
+                          Day
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">
+                          Games
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">
+                          Avg Entries
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">
+                          Total Prizepool
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">
+                          Total Profit
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">
+                          Avg Profit/Game
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 bg-white">
+                      {scheduleStats.map((s) => {
+                        const avgEntries = s.totalGames > 0 ? s.totalEntries / s.totalGames : 0;
+                        const profitTextColor = s.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600';
+                        const avgProfitColor = s.avgProfit >= 0 ? 'text-blue-600' : 'text-red-600';
+
+                        return (
+                          <tr 
+                            key={s.recurringGameId} 
+                            className="hover:bg-gray-50 cursor-pointer"
+                            onClick={() => navigate(
+                              `/venues/game?venueId=${venue.id}&recurringGameId=${encodeURIComponent(s.recurringGameId)}`
+                            )}
+                          >
+                            <td className="px-4 py-2 font-medium">{s.displayName}</td>
+                            <td className="px-4 py-2 text-gray-500">{s.dayOfWeek || '-'}</td>
+                            <td className="px-4 py-2 text-right">{s.totalGames}</td>
+                            <td className="px-4 py-2 text-right">{avgEntries.toFixed(1)}</td>
+                            <td className="px-4 py-2 text-right">{formatCurrency(s.totalPrizepool)}</td>
+                            <td className={`px-4 py-2 text-right font-semibold ${profitTextColor}`}>
+                              {formatCurrency(s.totalProfit)}
+                            </td>
+                            <td className={`px-4 py-2 text-right font-semibold ${avgProfitColor}`}>
+                              {formatCurrency(s.avgProfit)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+
+                      {scheduleStats.length === 0 && (
+                        <tr>
+                          <td className="px-4 py-6 text-center text-sm text-gray-500" colSpan={7}>
+                            No data available.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </div>
+
+            {/* Entries Trend */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                Entries Trend Over Time
+              </h3>
+              <Card>
+                {trendData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis
+                        dataKey="date"
+                        tickFormatter={(d) => {
+                          try {
+                            return format(parseISO(d + '-01'), 'MMM yy');
+                          } catch {
+                            return d;
+                          }
+                        }}
+                        tick={{ fontSize: 12 }}
+                        stroke="#9ca3af"
+                      />
+                      <YAxis tick={{ fontSize: 12 }} stroke="#9ca3af" />
+                      <Tooltip
+                        formatter={(value: number) => [value, 'Total Entries']}
+                        labelFormatter={(label) => {
+                          try {
+                            return format(parseISO(label + '-01'), 'MMMM yyyy');
+                          } catch {
+                            return label;
+                          }
+                        }}
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="entries"
+                        stroke="#6366f1"
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-48 text-gray-400">
+                    No trend data available
+                  </div>
+                )}
+              </Card>
+            </div>
+          </div>
+        )}
       </div>
     </PageWrapper>
   );

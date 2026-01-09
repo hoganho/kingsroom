@@ -1,0 +1,371 @@
+# 31b-recurring-game-instances.graphql
+# ===================================================================
+# RECURRING GAME INSTANCE TRACKING (HYBRID APPROACH)
+# Version: 1.1.0
+# 
+# HYBRID APPROACH:
+# - Instances are NOT pre-generated
+# - Created lazily when:
+#   a) A game is matched to a RecurringGame (CONFIRMED)
+#   b) Admin marks a date as CANCELLED/SKIPPED
+#   c) Gap detection finds missing dates (UNKNOWN)
+# 
+# DEPENDENCIES:
+# - 31-recurring-games.graphql: RecurringGame
+# - 30-games.graphql: Game
+# ===================================================================
+
+# ===================================================================
+# RELATIONSHIP FIX: Add @hasMany to RecurringGame
+# ===================================================================
+# 
+# ADD THIS to RecurringGame type in 31-recurring-games.graphql
+# (after the existing "metrics" relationship around line 97):
+#
+#   # === INSTANCE TRACKING ===
+#   instances: [RecurringGameInstance] @hasMany(indexName: "byRecurringGameInstance", fields: ["id"])
+#
+# ===================================================================
+
+# ===================================================================
+# ENUM ADDITIONS - Add to 00-enums.graphql
+# ===================================================================
+
+enum RecurringGameInstanceStatus {
+  CONFIRMED           # Matched to actual Game record
+  CANCELLED           # Did not occur - explicitly cancelled
+  SKIPPED             # Did not occur - venue closed/holiday
+  REPLACED            # Different game ran in its slot
+  UNKNOWN             # No data - needs investigation (created by gap detection)
+  NO_SHOW             # Expected but never appeared (confirmed missing after review)
+}
+
+enum InstanceDeviationType {
+  NONE                # No deviation from expected
+  TIME_CHANGE         # Different start time
+  BUYIN_CHANGE        # Different buy-in
+  GUARANTEE_CHANGE    # Different guarantee
+  FORMAT_CHANGE       # Different structure (e.g., freezeout vs rebuy)
+  SPECIAL_EDITION     # Same game but special version
+  MULTIPLE            # Multiple deviations
+}
+
+# ===================================================================
+# RECURRING GAME INSTANCE
+# Created lazily - only when we have something to record
+# ===================================================================
+
+type RecurringGameInstance
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  # === PRIMARY KEY ===
+  id: ID!
+  
+  # === RELATIONSHIPS ===
+  recurringGameId: ID!
+    @index(name: "byRecurringGameInstance", sortKeyFields: ["expectedDate"])
+  recurringGame: RecurringGame @belongsTo(fields: ["recurringGameId"])
+  
+  # The actual game that ran (null if cancelled/skipped/unknown)
+  # Note: No @belongsTo to avoid requiring Game schema changes
+  # Use byGameInstance index to query instances by gameId
+  gameId: ID
+    @index(name: "byGameInstance")
+  
+  # === DATE INFO ===
+  # Expected date for this instance (YYYY-MM-DD in AEST)
+  expectedDate: AWSDate!
+    @index(name: "byExpectedDate", sortKeyFields: ["recurringGameId"])
+  
+  # Day of week (denormalized for queries)
+  dayOfWeek: String!
+  
+  # Week identifier for grouping (e.g., "2026-W02")
+  weekKey: String!
+    @index(name: "byWeekKey", sortKeyFields: ["venueId"])
+  
+  # === DENORMALIZED FOR QUERIES ===
+  venueId: ID!
+    @index(name: "byVenueInstance", sortKeyFields: ["expectedDate"])
+  
+  entityId: ID!
+    @index(name: "byEntityInstance", sortKeyFields: ["expectedDate"])
+  
+  recurringGameName: String  # Denormalized for display
+  
+  # === STATUS ===
+  status: RecurringGameInstanceStatus! @default(value: "CONFIRMED")
+  
+  # === DEVIATION TRACKING ===
+  hasDeviation: Boolean @default(value: "false")
+  deviationType: InstanceDeviationType
+  deviationDetails: AWSJSON
+  # Example:
+  # {
+  #   "expectedBuyIn": 100,
+  #   "actualBuyIn": 150,
+  #   "expectedGuarantee": 5000,
+  #   "actualGuarantee": 7500,
+  #   "expectedStartTime": "19:00",
+  #   "actualStartTime": "18:00"
+  # }
+  
+  # === NOTES ===
+  notes: String                    # General notes
+  adminNotes: String               # Internal admin notes
+  cancellationReason: String       # Why it was cancelled/skipped
+  
+  # === REVIEW FLAGS ===
+  needsReview: Boolean @default(value: "false")
+  reviewReason: String
+  reviewedAt: AWSDateTime
+  reviewedBy: String
+  
+  # === REPLACEMENT INFO ===
+  replacementGameId: ID            # If a different game ran instead
+  replacementGameName: String
+  replacementReason: String
+  
+  # === METADATA ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  
+  # How was this instance created?
+  # "GAME_MATCH" - Created when game matched to recurring
+  # "GAP_DETECTION" - Created when gap was detected
+  # "MANUAL" - Admin created manually
+  source: String!
+}
+
+# ===================================================================
+# MUTATION INPUTS
+# ===================================================================
+
+input RecordMissedInstanceInput {
+  recurringGameId: ID!
+  expectedDate: AWSDate!
+  status: RecurringGameInstanceStatus!  # CANCELLED, SKIPPED, NO_SHOW
+  cancellationReason: String
+  notes: String
+}
+
+input UpdateInstanceStatusInput {
+  instanceId: ID!
+  status: RecurringGameInstanceStatus!
+  cancellationReason: String
+  notes: String
+  adminNotes: String
+}
+
+input DetectInstanceGapsInput {
+  venueId: ID!
+  startDate: AWSDate!
+  endDate: AWSDate!
+  createInstances: Boolean  # If true, create UNKNOWN instances for gaps
+}
+
+input ReconcileInstancesInput {
+  venueId: ID!
+  startDate: AWSDate!
+  endDate: AWSDate!
+  preview: Boolean  # If true, just show what would happen
+}
+
+# ===================================================================
+# RESULT TYPES
+# ===================================================================
+
+type GapInfo @aws_iam @aws_cognito_user_pools {
+  recurringGameId: ID!
+  recurringGameName: String!
+  expectedDate: AWSDate!
+  dayOfWeek: String!
+  weekKey: String!
+  
+  # Did we find a possible match that wasn't linked?
+  possibleMatchGameId: ID
+  possibleMatchGameName: String
+  matchConfidence: Float
+}
+
+type DetectGapsResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  venueId: ID!
+  venueName: String
+  
+  # Date range analyzed
+  startDate: AWSDate!
+  endDate: AWSDate!
+  weeksAnalyzed: Int!
+  
+  # Counts
+  recurringGamesChecked: Int!
+  expectedOccurrences: Int!
+  confirmedOccurrences: Int!
+  gapsFound: Int!
+  
+  # Details of gaps
+  gaps: [GapInfo!]!
+  
+  # If createInstances was true
+  instancesCreated: Int
+}
+
+type ReconcileInstancesResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  venueId: ID!
+  
+  # What was processed
+  gamesAnalyzed: Int!
+  instancesCreated: Int!
+  instancesUpdated: Int!
+  
+  # Orphan games (games without recurring assignment in date range)
+  orphanGames: Int!
+  
+  preview: Boolean!
+  
+  details: [ReconcileInstanceDetail!]!
+}
+
+type ReconcileInstanceDetail @aws_iam @aws_cognito_user_pools {
+  gameId: ID!
+  gameName: String!
+  gameDate: AWSDate!
+  action: String!  # "INSTANCE_CREATED", "INSTANCE_EXISTS", "NO_RECURRING", "ORPHAN"
+  instanceId: ID
+  recurringGameId: ID
+  recurringGameName: String
+}
+
+type InstanceSummary @aws_iam @aws_cognito_user_pools {
+  weekKey: String!
+  weekStartDate: AWSDate!
+  
+  confirmedCount: Int!
+  cancelledCount: Int!
+  skippedCount: Int!
+  unknownCount: Int!
+  noShowCount: Int!
+  
+  totalExpected: Int!  # Based on active recurring games
+  complianceRate: Float!  # confirmed / totalExpected
+  
+  instances: [RecurringGameInstance!]!
+}
+
+type VenueComplianceReport @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  venueId: ID!
+  venueName: String
+  
+  startDate: AWSDate!
+  endDate: AWSDate!
+  
+  # Overall stats
+  totalExpected: Int!
+  totalConfirmed: Int!
+  totalCancelled: Int!
+  totalSkipped: Int!
+  totalUnknown: Int!
+  totalNoShow: Int!
+  
+  overallComplianceRate: Float!
+  
+  # Week by week
+  weekSummaries: [InstanceSummary!]!
+  
+  # Items needing attention
+  needsReviewCount: Int!
+  unknownCount: Int!
+}
+
+type RecordMissedInstanceResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  message: String
+  instance: RecurringGameInstance
+  wasCreated: Boolean!
+}
+
+type UpdateInstanceResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  message: String
+  instance: RecurringGameInstance
+}
+
+# ===================================================================
+# MUTATIONS - Add to recurringGameAdmin Lambda
+# ===================================================================
+
+extend type Mutation {
+  # Record a missed/cancelled/skipped instance
+  # Creates a new instance record with the specified status
+  recordMissedInstance(
+    input: RecordMissedInstanceInput!
+  ): RecordMissedInstanceResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # Update an existing instance's status
+  updateInstanceStatus(
+    input: UpdateInstanceStatusInput!
+  ): UpdateInstanceResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # Detect gaps in recurring game occurrences
+  # Compares expected schedule vs actual games
+  detectRecurringGameGaps(
+    input: DetectInstanceGapsInput!
+  ): DetectGapsResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # Reconcile games with instances
+  # Creates CONFIRMED instances for games that have recurringGameId but no instance
+  reconcileRecurringInstances(
+    input: ReconcileInstancesInput!
+  ): ReconcileInstancesResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+}
+
+# ===================================================================
+# QUERIES - Add to recurringGameAdmin Lambda
+# ===================================================================
+
+extend type Query {
+  # Get compliance report for a venue
+  getVenueComplianceReport(
+    venueId: ID!
+    startDate: AWSDate!
+    endDate: AWSDate!
+  ): VenueComplianceReport
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # Get instances for a specific week
+  getWeekInstances(
+    venueId: ID!
+    weekKey: String!  # "2026-W02"
+  ): InstanceSummary
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # List instances needing review
+  listInstancesNeedingReview(
+    venueId: ID
+    entityId: ID
+    limit: Int
+    nextToken: String
+  ): InstancesNeedingReviewResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+}
+
+type InstancesNeedingReviewResult @aws_iam @aws_cognito_user_pools {
+  items: [RecurringGameInstance!]!
+  nextToken: String
+  totalCount: Int
+}

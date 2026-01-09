@@ -4624,6 +4624,22 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "instances": {
+                    "name": "instances",
+                    "isArray": true,
+                    "type": {
+                        "model": "RecurringGameInstance"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "recurringGame"
+                        ]
+                    }
+                },
                 "gameInstances": {
                     "name": "gameInstances",
                     "isArray": true,
@@ -4655,6 +4671,13 @@ export const schema = {
                             "recurringGame"
                         ]
                     }
+                },
+                "mergedInto": {
+                    "name": "mergedInto",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
                 },
                 "notes": {
                     "name": "notes",
@@ -4754,6 +4777,297 @@ export const schema = {
                         "fields": [
                             "dayOfWeek",
                             "venueId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "RecurringGameInstance": {
+            "name": "RecurringGameInstance",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recurringGameId": {
+                    "name": "recurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recurringGame": {
+                    "name": "recurringGame",
+                    "isArray": false,
+                    "type": {
+                        "model": "RecurringGame"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "recurringGameId"
+                        ]
+                    }
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "expectedDate": {
+                    "name": "expectedDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "weekKey": {
+                    "name": "weekKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recurringGameName": {
+                    "name": "recurringGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "RecurringGameInstanceStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "hasDeviation": {
+                    "name": "hasDeviation",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "deviationType": {
+                    "name": "deviationType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "InstanceDeviationType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "deviationDetails": {
+                    "name": "deviationDetails",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "notes": {
+                    "name": "notes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "adminNotes": {
+                    "name": "adminNotes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "cancellationReason": {
+                    "name": "cancellationReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "needsReview": {
+                    "name": "needsReview",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reviewReason": {
+                    "name": "reviewReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reviewedAt": {
+                    "name": "reviewedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reviewedBy": {
+                    "name": "reviewedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "replacementGameId": {
+                    "name": "replacementGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "replacementGameName": {
+                    "name": "replacementGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "replacementReason": {
+                    "name": "replacementReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "source": {
+                    "name": "source",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "RecurringGameInstances",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byRecurringGameInstance",
+                        "fields": [
+                            "recurringGameId",
+                            "expectedDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameInstance",
+                        "fields": [
+                            "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byExpectedDate",
+                        "fields": [
+                            "expectedDate",
+                            "recurringGameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byWeekKey",
+                        "fields": [
+                            "weekKey",
+                            "venueId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueInstance",
+                        "fields": [
+                            "venueId",
+                            "expectedDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityInstance",
+                        "fields": [
+                            "entityId",
+                            "expectedDate"
                         ]
                     }
                 },
@@ -16705,7 +17019,8 @@ export const schema = {
                 "MANUALLY_ASSIGNED",
                 "PENDING_ASSIGNMENT",
                 "NOT_RECURRING",
-                "DEVIATION_FLAGGED"
+                "DEVIATION_FLAGGED",
+                "CANDIDATE_RECURRING"
             ]
         },
         "CostItemType": {
@@ -17279,6 +17594,29 @@ export const schema = {
                 "INHERITED",
                 "MANUAL",
                 "MIGRATED"
+            ]
+        },
+        "RecurringGameInstanceStatus": {
+            "name": "RecurringGameInstanceStatus",
+            "values": [
+                "CONFIRMED",
+                "CANCELLED",
+                "SKIPPED",
+                "REPLACED",
+                "UNKNOWN",
+                "NO_SHOW"
+            ]
+        },
+        "InstanceDeviationType": {
+            "name": "InstanceDeviationType",
+            "values": [
+                "NONE",
+                "TIME_CHANGE",
+                "BUYIN_CHANGE",
+                "GUARANTEE_CHANGE",
+                "FORMAT_CHANGE",
+                "SPECIAL_EDITION",
+                "MULTIPLE"
             ]
         },
         "GameProcessedAction": {
@@ -18904,6 +19242,1072 @@ export const schema = {
                 }
             }
         },
+        "RecurringGameAdminThresholds": {
+            "name": "RecurringGameAdminThresholds",
+            "fields": {
+                "highConfidence": {
+                    "name": "highConfidence",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "mediumConfidence": {
+                    "name": "mediumConfidence",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "crossDaySuggestion": {
+                    "name": "crossDaySuggestion",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "duplicateSimilarity": {
+                    "name": "duplicateSimilarity",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGameMatchDetails": {
+            "name": "RecurringGameMatchDetails",
+            "fields": {
+                "matchType": {
+                    "name": "matchType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchedTo": {
+                    "name": "matchedTo",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchedToId": {
+                    "name": "matchedToId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchedToDay": {
+                    "name": "matchedToDay",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameDay": {
+                    "name": "gameDay",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "score": {
+                    "name": "score",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "previousId": {
+                    "name": "previousId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "needsReview": {
+                    "name": "needsReview",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scoringDetails": {
+                    "name": "scoringDetails",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGameTopCandidate": {
+            "name": "RecurringGameTopCandidate",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "score": {
+                    "name": "score",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGameSummary": {
+            "name": "RecurringGameSummary",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "currentRecurringGameId": {
+                    "name": "currentRecurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ReResolveRecurringGameResult": {
+            "name": "ReResolveRecurringGameResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "game": {
+                    "name": "game",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "RecurringGameSummary"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "action": {
+                    "name": "action",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "newRecurringGameId": {
+                    "name": "newRecurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchDetails": {
+                    "name": "matchDetails",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "RecurringGameMatchDetails"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topCandidates": {
+                    "name": "topCandidates",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "RecurringGameTopCandidate"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "thresholdsUsed": {
+                    "name": "thresholdsUsed",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "RecurringGameAdminThresholds"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "applied": {
+                    "name": "applied",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGameActionSummary": {
+            "name": "RecurringGameActionSummary",
+            "fields": {
+                "REASSIGN": {
+                    "name": "REASSIGN",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "CONFIRM": {
+                    "name": "CONFIRM",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "SUGGEST_REASSIGN": {
+                    "name": "SUGGEST_REASSIGN",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "SUGGEST_CROSS_DAY": {
+                    "name": "SUGGEST_CROSS_DAY",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "SUGGEST_UNASSIGN": {
+                    "name": "SUGGEST_UNASSIGN",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "NO_CHANGE": {
+                    "name": "NO_CHANGE",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "SKIPPED": {
+                    "name": "SKIPPED",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ERROR": {
+                    "name": "ERROR",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGameActionDetail": {
+            "name": "RecurringGameActionDetail",
+            "fields": {
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameName": {
+                    "name": "gameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "action": {
+                    "name": "action",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "matchDetails": {
+                    "name": "matchDetails",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "RecurringGameMatchDetails"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ReResolveVenueRecurringGamesResult": {
+            "name": "ReResolveVenueRecurringGamesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalGames": {
+                    "name": "totalGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "eligibleGames": {
+                    "name": "eligibleGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "processed": {
+                    "name": "processed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "actions": {
+                    "name": "actions",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "RecurringGameActionSummary"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "details": {
+                    "name": "details",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "RecurringGameActionDetail"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "preview": {
+                    "name": "preview",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGameDuplicateEntry": {
+            "name": "RecurringGameDuplicateEntry",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "similarity": {
+                    "name": "similarity",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameCount": {
+                    "name": "gameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGameDuplicateGroup": {
+            "name": "RecurringGameDuplicateGroup",
+            "fields": {
+                "canonicalId": {
+                    "name": "canonicalId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "canonicalName": {
+                    "name": "canonicalName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "canonicalDayOfWeek": {
+                    "name": "canonicalDayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "canonicalGameCount": {
+                    "name": "canonicalGameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "duplicates": {
+                    "name": "duplicates",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "RecurringGameDuplicateEntry"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "totalGamesToReassign": {
+                    "name": "totalGamesToReassign",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "FindRecurringGameDuplicatesResult": {
+            "name": "FindRecurringGameDuplicatesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalRecurringGames": {
+                    "name": "totalRecurringGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "duplicateGroups": {
+                    "name": "duplicateGroups",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "duplicateEntries": {
+                    "name": "duplicateEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "groups": {
+                    "name": "groups",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "RecurringGameDuplicateGroup"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                }
+            }
+        },
+        "MergeRecurringGameDuplicatesDetail": {
+            "name": "MergeRecurringGameDuplicatesDetail",
+            "fields": {
+                "duplicateId": {
+                    "name": "duplicateId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesCount": {
+                    "name": "gamesCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "MergeRecurringGameDuplicatesResult": {
+            "name": "MergeRecurringGameDuplicatesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "canonicalId": {
+                    "name": "canonicalId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "canonicalName": {
+                    "name": "canonicalName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "duplicatesMerged": {
+                    "name": "duplicatesMerged",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesReassigned": {
+                    "name": "gamesReassigned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "preview": {
+                    "name": "preview",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "details": {
+                    "name": "details",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "MergeRecurringGameDuplicatesDetail"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "OrphanedRecurringGame": {
+            "name": "OrphanedRecurringGame",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "UnassignedGameSample": {
+            "name": "UnassignedGameSample",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGameDistributionItem": {
+            "name": "RecurringGameDistributionItem",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameCount": {
+                    "name": "gameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGamesByDayCount": {
+            "name": "RecurringGamesByDayCount",
+            "fields": {
+                "SUNDAY": {
+                    "name": "SUNDAY",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "MONDAY": {
+                    "name": "MONDAY",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "TUESDAY": {
+                    "name": "TUESDAY",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "WEDNESDAY": {
+                    "name": "WEDNESDAY",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "THURSDAY": {
+                    "name": "THURSDAY",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "FRIDAY": {
+                    "name": "FRIDAY",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "SATURDAY": {
+                    "name": "SATURDAY",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGameVenueStats": {
+            "name": "RecurringGameVenueStats",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalRecurringGames": {
+                    "name": "totalRecurringGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalGames": {
+                    "name": "totalGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "orphanedRecurringGames": {
+                    "name": "orphanedRecurringGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "orphans": {
+                    "name": "orphans",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "OrphanedRecurringGame"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "unassignedGames": {
+                    "name": "unassignedGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "unassignedSample": {
+                    "name": "unassignedSample",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "UnassignedGameSample"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "recurringGamesByDay": {
+                    "name": "recurringGamesByDay",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "RecurringGamesByDayCount"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameDistribution": {
+                    "name": "gameDistribution",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "RecurringGameDistributionItem"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                }
+            }
+        },
+        "CleanupOrphanedRecurringGamesResult": {
+            "name": "CleanupOrphanedRecurringGamesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "orphansFound": {
+                    "name": "orphansFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "orphansRemoved": {
+                    "name": "orphansRemoved",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "preview": {
+                    "name": "preview",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "orphans": {
+                    "name": "orphans",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "OrphanedRecurringGame"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                }
+            }
+        },
+        "BootstrapTemplateDetail": {
+            "name": "BootstrapTemplateDetail",
+            "fields": {
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameCount": {
+                    "name": "gameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "avgBuyIn": {
+                    "name": "avgBuyIn",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sampleGames": {
+                    "name": "sampleGames",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "templateId": {
+                    "name": "templateId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gamesAssigned": {
+                    "name": "gamesAssigned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "BootstrapRecurringGamesResult": {
+            "name": "BootstrapRecurringGamesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueName": {
+                    "name": "venueName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "preview": {
+                    "name": "preview",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalGamesAnalyzed": {
+                    "name": "totalGamesAnalyzed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "eligibleGames": {
+                    "name": "eligibleGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "templatesCreated": {
+                    "name": "templatesCreated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesAssigned": {
+                    "name": "gamesAssigned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "templateDetails": {
+                    "name": "templateDetails",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "BootstrapTemplateDetail"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "errors": {
+                    "name": "errors",
+                    "isArray": true,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
         "RecurringGameWithStats": {
             "name": "RecurringGameWithStats",
             "fields": {
@@ -19051,6 +20455,560 @@ export const schema = {
                     "name": "nextToken",
                     "isArray": false,
                     "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GapInfo": {
+            "name": "GapInfo",
+            "fields": {
+                "recurringGameId": {
+                    "name": "recurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recurringGameName": {
+                    "name": "recurringGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "expectedDate": {
+                    "name": "expectedDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "weekKey": {
+                    "name": "weekKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "possibleMatchGameId": {
+                    "name": "possibleMatchGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "possibleMatchGameName": {
+                    "name": "possibleMatchGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchConfidence": {
+                    "name": "matchConfidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "DetectGapsResult": {
+            "name": "DetectGapsResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueName": {
+                    "name": "venueName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startDate": {
+                    "name": "startDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "endDate": {
+                    "name": "endDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "weeksAnalyzed": {
+                    "name": "weeksAnalyzed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recurringGamesChecked": {
+                    "name": "recurringGamesChecked",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "expectedOccurrences": {
+                    "name": "expectedOccurrences",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "confirmedOccurrences": {
+                    "name": "confirmedOccurrences",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gapsFound": {
+                    "name": "gapsFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gaps": {
+                    "name": "gaps",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "GapInfo"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "instancesCreated": {
+                    "name": "instancesCreated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ReconcileInstancesResult": {
+            "name": "ReconcileInstancesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesAnalyzed": {
+                    "name": "gamesAnalyzed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "instancesCreated": {
+                    "name": "instancesCreated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "instancesUpdated": {
+                    "name": "instancesUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "orphanGames": {
+                    "name": "orphanGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "preview": {
+                    "name": "preview",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "details": {
+                    "name": "details",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ReconcileInstanceDetail"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                }
+            }
+        },
+        "ReconcileInstanceDetail": {
+            "name": "ReconcileInstanceDetail",
+            "fields": {
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameName": {
+                    "name": "gameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameDate": {
+                    "name": "gameDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "action": {
+                    "name": "action",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "instanceId": {
+                    "name": "instanceId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameId": {
+                    "name": "recurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameName": {
+                    "name": "recurringGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "InstanceSummary": {
+            "name": "InstanceSummary",
+            "fields": {
+                "weekKey": {
+                    "name": "weekKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "weekStartDate": {
+                    "name": "weekStartDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "confirmedCount": {
+                    "name": "confirmedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "cancelledCount": {
+                    "name": "cancelledCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "skippedCount": {
+                    "name": "skippedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "unknownCount": {
+                    "name": "unknownCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "noShowCount": {
+                    "name": "noShowCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalExpected": {
+                    "name": "totalExpected",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "complianceRate": {
+                    "name": "complianceRate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "instances": {
+                    "name": "instances",
+                    "isArray": true,
+                    "type": {
+                        "model": "RecurringGameInstance"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                }
+            }
+        },
+        "VenueComplianceReport": {
+            "name": "VenueComplianceReport",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueName": {
+                    "name": "venueName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startDate": {
+                    "name": "startDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "endDate": {
+                    "name": "endDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalExpected": {
+                    "name": "totalExpected",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalConfirmed": {
+                    "name": "totalConfirmed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalCancelled": {
+                    "name": "totalCancelled",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalSkipped": {
+                    "name": "totalSkipped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalUnknown": {
+                    "name": "totalUnknown",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalNoShow": {
+                    "name": "totalNoShow",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "overallComplianceRate": {
+                    "name": "overallComplianceRate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "weekSummaries": {
+                    "name": "weekSummaries",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "InstanceSummary"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "needsReviewCount": {
+                    "name": "needsReviewCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "unknownCount": {
+                    "name": "unknownCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "RecordMissedInstanceResult": {
+            "name": "RecordMissedInstanceResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "instance": {
+                    "name": "instance",
+                    "isArray": false,
+                    "type": {
+                        "model": "RecurringGameInstance"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "wasCreated": {
+                    "name": "wasCreated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "UpdateInstanceResult": {
+            "name": "UpdateInstanceResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "instance": {
+                    "name": "instance",
+                    "isArray": false,
+                    "type": {
+                        "model": "RecurringGameInstance"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "InstancesNeedingReviewResult": {
+            "name": "InstancesNeedingReviewResult",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "RecurringGameInstance"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -26505,5 +28463,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "ff3907ebe1e3aeed6bd63a69fc603b0a"
+    "version": "696917219393f224d9273daa966ed665"
 };

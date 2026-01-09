@@ -1,0 +1,16 @@
+[
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query",
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/Game-*",
+      "arn:aws:dynamodb:*:*:table/Game-*/index/*",
+      "arn:aws:dynamodb:*:*:table/RecurringGame-*",
+      "arn:aws:dynamodb:*:*:table/RecurringGame-*/index/*"
+    ]
+  }
+]

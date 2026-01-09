@@ -1247,6 +1247,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -1533,6 +1534,11 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -1543,6 +1549,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -1827,6 +1834,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -3406,6 +3414,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -3692,6 +3701,11 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -3702,6 +3716,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -3986,6 +4001,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -5185,6 +5201,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -6930,6 +6947,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -6940,6 +6962,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -7579,6 +7602,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -8031,6 +8055,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -9422,6 +9447,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -10469,6 +10495,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -11179,6 +11206,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -12320,6 +12348,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -13247,6 +13276,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -13846,6 +13876,43 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         totalInstancesRun
         avgAttendance
         lastMonthAttendance
+        instances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            reviewedAt
+            reviewedBy
+            replacementGameId
+            replacementGameName
+            replacementReason
+            createdAt
+            updatedAt
+            source
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         gameInstances {
           items {
             id
@@ -14073,6 +14140,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           startedAt
           __typename
         }
+        mergedInto
         notes
         adminNotes
         createdAt
@@ -15079,6 +15147,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -15365,6 +15434,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -15375,6 +15449,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -15659,6 +15734,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -16834,6 +16910,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -17269,6 +17346,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -17279,6 +17361,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -17470,6 +17553,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -18136,6 +18220,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -19540,6 +19625,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -19826,6 +19912,11 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -19836,6 +19927,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -20120,6 +20212,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -21226,6 +21319,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -22971,6 +23065,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -22981,6 +23080,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -23620,6 +23720,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -24072,6 +24173,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -25463,6 +25565,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -26510,6 +26613,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -27220,6 +27324,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -28361,6 +28466,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -29288,6 +29394,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -29887,6 +29994,43 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         totalInstancesRun
         avgAttendance
         lastMonthAttendance
+        instances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            reviewedAt
+            reviewedBy
+            replacementGameId
+            replacementGameName
+            replacementReason
+            createdAt
+            updatedAt
+            source
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         gameInstances {
           items {
             id
@@ -30114,6 +30258,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           startedAt
           __typename
         }
+        mergedInto
         notes
         adminNotes
         createdAt
@@ -31120,6 +31265,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -31406,6 +31552,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -31416,6 +31567,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -31700,6 +31852,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -32875,6 +33028,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -33310,6 +33464,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -33320,6 +33479,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -33511,6 +33671,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -34177,6 +34338,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -35322,6 +35484,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -37067,6 +37230,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -37077,6 +37245,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -37716,6 +37885,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -38168,6 +38338,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -39559,6 +39730,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -40606,6 +40778,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -41316,6 +41489,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -42457,6 +42631,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -43384,6 +43559,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -43983,6 +44159,43 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         totalInstancesRun
         avgAttendance
         lastMonthAttendance
+        instances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            reviewedAt
+            reviewedBy
+            replacementGameId
+            replacementGameName
+            replacementReason
+            createdAt
+            updatedAt
+            source
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         gameInstances {
           items {
             id
@@ -44210,6 +44423,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           startedAt
           __typename
         }
+        mergedInto
         notes
         adminNotes
         createdAt
@@ -45216,6 +45430,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -45502,6 +45717,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -45512,6 +45732,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -45796,6 +46017,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -46971,6 +47193,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -47406,6 +47629,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -47416,6 +47644,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -47607,6 +47836,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -48273,6 +48503,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -49418,6 +49649,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -51163,6 +51395,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -51173,6 +51410,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -51812,6 +52050,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -52264,6 +52503,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -53655,6 +53895,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -54702,6 +54943,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -55412,6 +55654,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -56553,6 +56796,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -57480,6 +57724,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -58079,6 +58324,43 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         totalInstancesRun
         avgAttendance
         lastMonthAttendance
+        instances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            reviewedAt
+            reviewedBy
+            replacementGameId
+            replacementGameName
+            replacementReason
+            createdAt
+            updatedAt
+            source
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         gameInstances {
           items {
             id
@@ -58306,6 +58588,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           startedAt
           __typename
         }
+        mergedInto
         notes
         adminNotes
         createdAt
@@ -59312,6 +59595,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -59598,6 +59882,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -59608,6 +59897,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -59892,6 +60182,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -61067,6 +61358,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -61502,6 +61794,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -61512,6 +61809,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -61703,6 +62001,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -62369,6 +62668,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -63775,6 +64075,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -64061,6 +64362,11 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -64071,6 +64377,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -64355,6 +64662,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -65722,6 +66030,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -66008,6 +66317,11 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -66018,6 +66332,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -66302,6 +66617,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -67669,6 +67985,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -67955,6 +68272,11 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -67965,6 +68287,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -68249,6 +68572,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -69871,6 +70195,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -70157,6 +70482,11 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -70167,6 +70497,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -70451,6 +70782,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -72053,6 +72385,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -72339,6 +72672,11 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -72349,6 +72687,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -72633,6 +72972,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -74235,6 +74575,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -74521,6 +74862,11 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -74531,6 +74877,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -74815,6 +75162,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -76394,6 +76742,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -76680,6 +77029,11 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -76690,6 +77044,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -76974,6 +77329,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -78566,6 +78922,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -78852,6 +79209,11 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -78862,6 +79224,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -79146,6 +79509,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -80738,6 +81102,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt
@@ -81024,6 +81389,11 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           totalInstancesRun
           avgAttendance
           lastMonthAttendance
+          instances {
+            nextToken
+            startedAt
+            __typename
+          }
           gameInstances {
             nextToken
             startedAt
@@ -81034,6 +81404,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             startedAt
             __typename
           }
+          mergedInto
           notes
           adminNotes
           createdAt
@@ -81318,6 +81689,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             totalInstancesRun
             avgAttendance
             lastMonthAttendance
+            mergedInto
             notes
             adminNotes
             createdAt

@@ -1,6 +1,14 @@
 # 31-recurring-games.graphql
 # ===================================================================
 # RECURRING GAMES
+# Version: 2.0.0 - Added Admin functionality for re-resolution,
+#                  duplicate detection, and orphan cleanup
+# 
+# DEPENDENCIES:
+# - 00-enums.graphql: RecurringGameAssignmentStatus, RecurringResolutionStatus,
+#                     GameFrequency, GameType, GameVariant, TournamentType
+# - 10-entities.graphql: Entity
+# - 20-venues.graphql: Venue
 # ===================================================================
 
 type RecurringGame
@@ -85,8 +93,12 @@ type RecurringGame
   lastMonthAttendance: Float 
   
   # === RELATIONSHIPS ===
+  instances: [RecurringGameInstance] @hasMany(indexName: "byRecurringGameInstance", fields: ["id"])
   gameInstances: [Game] @hasMany(indexName: "byRecurringGame", fields: ["id"])
   metrics: [RecurringGameMetrics] @hasMany(indexName: "byRecurringGameMetrics", fields: ["id"])
+  
+  # === ADMIN/MERGE TRACKING ===
+  mergedInto: ID  # If this was a duplicate, points to the canonical entry
   
   # === METADATA ===
   notes: String 
@@ -100,7 +112,7 @@ type RecurringGame
 }
 
 # ===================================================================
-# QUERY TYPES
+# QUERY TYPES (Existing)
 # ===================================================================
 
 input ListRecurringGamesInput {
@@ -113,7 +125,7 @@ input ListRecurringGamesInput {
 }
 
 # ===================================================================
-# MUTATION INPUTS
+# MUTATION INPUTS (Existing)
 # ===================================================================
 
 input AssignGameToRecurringGameInput {
@@ -132,7 +144,7 @@ input DetectRecurringGamesInput {
 }
 
 # ===================================================================
-# MUTATION RESULTS
+# MUTATION RESULTS (Existing)
 # ===================================================================
 
 type AssignGameResult {
@@ -173,7 +185,231 @@ type BulkAssignResult {
 }
 
 # ===================================================================
-# CUSTOM MUTATIONS
+# RECURRING GAME ADMIN TYPES (NEW)
+# ===================================================================
+
+# Thresholds for controlling matching sensitivity
+input RecurringGameAdminThresholdsInput {
+  highConfidence: Int         # Default 75 - auto-assign threshold
+  mediumConfidence: Int       # Default 50 - pending review threshold  
+  crossDaySuggestion: Int     # Default 60 - cross-day match suggestion
+  duplicateSimilarity: Float  # Default 0.85 - name similarity for duplicates
+}
+
+type RecurringGameAdminThresholds @aws_iam @aws_cognito_user_pools {
+  highConfidence: Int!
+  mediumConfidence: Int!
+  crossDaySuggestion: Int!
+  duplicateSimilarity: Float!
+}
+
+# --- Re-Resolution Types ---
+
+type RecurringGameMatchDetails @aws_iam @aws_cognito_user_pools {
+  matchType: String           # SAME_DAY_HIGH, SAME_DAY_MEDIUM, CROSS_DAY, NO_MATCH
+  matchedTo: String           # Name of matched RecurringGame
+  matchedToId: ID             # ID of matched RecurringGame
+  matchedToDay: String        # Day of week of match (for cross-day)
+  gameDay: String             # Day of week of the game
+  score: Int                  # Match score
+  previousId: ID              # Previous recurringGameId (if reassigning)
+  needsReview: Boolean        # Whether manual review is recommended
+  scoringDetails: AWSJSON     # Detailed breakdown of scoring
+}
+
+type RecurringGameTopCandidate @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  score: Int!
+  dayOfWeek: String
+}
+
+type RecurringGameSummary @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  dayOfWeek: String
+  venueId: ID
+  currentRecurringGameId: ID
+}
+
+type ReResolveRecurringGameResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  error: String
+  game: RecurringGameSummary
+  action: String!             # REASSIGN, CONFIRM, SUGGEST_REASSIGN, SUGGEST_CROSS_DAY, SUGGEST_UNASSIGN, NO_CHANGE, SKIPPED
+  newRecurringGameId: ID
+  matchDetails: RecurringGameMatchDetails
+  topCandidates: [RecurringGameTopCandidate!]
+  thresholdsUsed: RecurringGameAdminThresholds
+  applied: Boolean            # True if changes were applied (preview=false)
+}
+
+type RecurringGameActionSummary @aws_iam @aws_cognito_user_pools {
+  REASSIGN: Int!
+  CONFIRM: Int!
+  SUGGEST_REASSIGN: Int!
+  SUGGEST_CROSS_DAY: Int!
+  SUGGEST_UNASSIGN: Int!
+  NO_CHANGE: Int!
+  SKIPPED: Int!
+  ERROR: Int!
+}
+
+type RecurringGameActionDetail @aws_iam @aws_cognito_user_pools {
+  gameId: ID!
+  gameName: String!
+  action: String!
+  matchDetails: RecurringGameMatchDetails
+  error: String
+}
+
+type ReResolveVenueRecurringGamesResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean
+  venueId: ID!
+  totalGames: Int!
+  eligibleGames: Int!
+  processed: Int!
+  actions: RecurringGameActionSummary!
+  details: [RecurringGameActionDetail!]!
+  preview: Boolean!
+}
+
+# --- Duplicate Detection Types ---
+
+type RecurringGameDuplicateEntry @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  similarity: Float!
+  gameCount: Int!
+}
+
+type RecurringGameDuplicateGroup @aws_iam @aws_cognito_user_pools {
+  canonicalId: ID!
+  canonicalName: String!
+  canonicalDayOfWeek: String!
+  canonicalGameCount: Int!
+  duplicates: [RecurringGameDuplicateEntry!]!
+  totalGamesToReassign: Int!
+}
+
+type FindRecurringGameDuplicatesResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean
+  venueId: ID!
+  totalRecurringGames: Int!
+  duplicateGroups: Int!
+  duplicateEntries: Int!
+  groups: [RecurringGameDuplicateGroup!]!
+}
+
+type MergeRecurringGameDuplicatesDetail @aws_iam @aws_cognito_user_pools {
+  duplicateId: ID!
+  gamesCount: Int!
+}
+
+type MergeRecurringGameDuplicatesResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  error: String
+  canonicalId: ID
+  canonicalName: String
+  duplicatesMerged: Int!
+  gamesReassigned: Int!
+  preview: Boolean!
+  details: [MergeRecurringGameDuplicatesDetail!]
+}
+
+# --- Statistics Types ---
+
+type OrphanedRecurringGame @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  dayOfWeek: String!
+  createdAt: AWSDateTime
+}
+
+type UnassignedGameSample @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  dayOfWeek: String
+}
+
+type RecurringGameDistributionItem @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  dayOfWeek: String!
+  gameCount: Int!
+}
+
+type RecurringGamesByDayCount @aws_iam @aws_cognito_user_pools {
+  SUNDAY: Int
+  MONDAY: Int
+  TUESDAY: Int
+  WEDNESDAY: Int
+  THURSDAY: Int
+  FRIDAY: Int
+  SATURDAY: Int
+}
+
+type RecurringGameVenueStats @aws_iam @aws_cognito_user_pools {
+  success: Boolean
+  venueId: ID!
+  totalRecurringGames: Int!
+  totalGames: Int!
+  orphanedRecurringGames: Int!
+  orphans: [OrphanedRecurringGame!]!
+  unassignedGames: Int!
+  unassignedSample: [UnassignedGameSample!]!
+  recurringGamesByDay: RecurringGamesByDayCount!
+  gameDistribution: [RecurringGameDistributionItem!]!
+}
+
+# --- Orphan Cleanup Types ---
+
+type CleanupOrphanedRecurringGamesResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean
+  venueId: ID!
+  orphansFound: Int!
+  orphansRemoved: Int!
+  preview: Boolean!
+  orphans: [OrphanedRecurringGame!]!
+}
+
+# --- Bootstrap recurring game types ---
+
+input BootstrapRecurringGamesInput {
+  venueId: ID!
+  minGamesForTemplate: Int      # Default: 2
+  similarityThreshold: Float    # Default: 0.7
+  preview: Boolean              # Default: true
+  includeAssigned: Boolean      # Default: false (skip games already assigned)
+}
+
+type BootstrapTemplateDetail {
+  name: String!
+  dayOfWeek: String!
+  gameCount: Int!
+  avgBuyIn: Int
+  sampleGames: [String!]
+  status: String!
+  templateId: ID
+  gamesAssigned: Int
+  error: String
+}
+
+type BootstrapRecurringGamesResult {
+  success: Boolean!
+  venueId: ID!
+  venueName: String
+  preview: Boolean!
+  totalGamesAnalyzed: Int!
+  eligibleGames: Int!
+  templatesCreated: Int!
+  gamesAssigned: Int!
+  templateDetails: [BootstrapTemplateDetail!]!
+  errors: [AWSJSON]
+}
+
+# ===================================================================
+# CUSTOM MUTATIONS (Existing)
 # ===================================================================
 
 extend type Mutation {
@@ -194,10 +430,61 @@ extend type Mutation {
     autoAssign: Boolean
   ): BulkAssignResult
     @function(name: "recurringGameManagement-${env}")
+  
+  # ===================================================================
+  # RECURRING GAME ADMIN MUTATIONS (NEW)
+  # ===================================================================
+  
+  # Re-resolve recurring assignment for a single game
+  # - preview: true (default) = returns what would change, no modifications
+  # - preview: false = applies changes
+  reResolveRecurringAssignment(
+    gameId: ID!
+    thresholds: RecurringGameAdminThresholdsInput
+    preview: Boolean
+  ): ReResolveRecurringGameResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # Re-resolve all games at a venue
+  # - preview: true (default) = returns what would change, no modifications
+  # - preview: false = applies changes
+  reResolveRecurringAssignmentsForVenue(
+    venueId: ID!
+    thresholds: RecurringGameAdminThresholdsInput
+    preview: Boolean
+  ): ReResolveVenueRecurringGamesResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # Merge duplicate recurring game entries into a canonical entry
+  # - preview: true (default) = returns what would change
+  # - preview: false = reassigns games and deactivates duplicates
+  mergeRecurringGameDuplicates(
+    canonicalId: ID!
+    duplicateIds: [ID!]!
+    preview: Boolean
+  ): MergeRecurringGameDuplicatesResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # Cleanup orphaned recurring games (templates with no assigned games)
+  # - preview: true (default) = lists orphans without removing
+  # - preview: false = deactivates orphans
+  cleanupOrphanedRecurringGames(
+    venueId: ID!
+    preview: Boolean
+  ): CleanupOrphanedRecurringGamesResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+
+  bootstrapRecurringGames(input: BootstrapRecurringGamesInput!): BootstrapRecurringGamesResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: groups, groups: ["SUPER_ADMIN", "ADMIN"] }])    
 }
 
 # ===================================================================
-# QUERY HELPERS
+# QUERY HELPERS (Existing + New)
 # ===================================================================
 
 extend type Query {
@@ -215,10 +502,29 @@ extend type Query {
     limit: Int
   ): SearchRecurringGamesResult
     @function(name: "recurringGameSearch-${env}")
+  
+  # ===================================================================
+  # RECURRING GAME ADMIN QUERIES (NEW)
+  # ===================================================================
+  
+  # Get statistics about recurring games for a venue
+  # Includes orphan count, unassigned games, distribution by day
+  getRecurringGameVenueStats(venueId: ID!): RecurringGameVenueStats
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # Find duplicate recurring game entries at a venue
+  # Duplicates are identified by same venue + day + high name similarity
+  findRecurringGameDuplicates(
+    venueId: ID!
+    similarityThreshold: Float
+  ): FindRecurringGameDuplicatesResult
+    @function(name: "recurringGameAdmin-${env}")
+    @auth(rules: [{ allow: private }])
 }
 
 # ===================================================================
-# QUERY RESULT TYPES
+# QUERY RESULT TYPES (Existing)
 # ===================================================================
 
 type RecurringGameWithStats {

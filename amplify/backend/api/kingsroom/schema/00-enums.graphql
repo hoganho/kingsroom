@@ -253,6 +253,7 @@ enum RecurringGameAssignmentStatus {
   PENDING_ASSIGNMENT   # Needs review
   NOT_RECURRING        # One-off game
   DEVIATION_FLAGGED    # Matched but significantly different from typical
+  CANDIDATE_RECURRING  # NEW: Pattern detected but awaiting confirmation (2nd occurrence)
 }
 
 # ===================================================================
