@@ -1,14 +1,7 @@
 # 31-recurring-games.graphql
 # ===================================================================
 # RECURRING GAMES
-# Version: 2.0.0 - Added Admin functionality for re-resolution,
-#                  duplicate detection, and orphan cleanup
-# 
-# DEPENDENCIES:
-# - 00-enums.graphql: RecurringGameAssignmentStatus, RecurringResolutionStatus,
-#                     GameFrequency, GameType, GameVariant, TournamentType
-# - 10-entities.graphql: Entity
-# - 20-venues.graphql: Venue
+# VERSION 3.2.0 - Based on working schema + bulk processing operations
 # ===================================================================
 
 type RecurringGame
@@ -47,20 +40,22 @@ type RecurringGame
   gameType: GameType! @default(value: "TOURNAMENT")
   gameVariant: GameVariant!
   tournamentType: TournamentType
+  sessionMode: String
   
   # Typical values
   typicalBuyIn: Float
   typicalRake: Float
   typicalStartingStack: Int
   typicalGuarantee: Float
+  typicalDuration: Int
   
   # === JACKPOT CONTRIBUTION CONFIG ===
   hasJackpotContributions: Boolean @default(value: "false")
-  jackpotContributionAmount: Float @default(value: "2")  # $2 per entry when enabled
+  jackpotContributionAmount: Float @default(value: "2")
   
   # === ACCUMULATOR TICKET CONFIG ===
   hasAccumulatorTickets: Boolean @default(value: "false")
-  accumulatorTicketValue: Float @default(value: "100")  # $100 per ticket when enabled
+  accumulatorTicketValue: Float @default(value: "100")
   
   # === STATUS & TRACKING ===
   isActive: Boolean! @default(value: "true")
@@ -86,19 +81,20 @@ type RecurringGame
   autoDetectionConfidence: Float 
   wasManuallyCreated: Boolean @default(value: "false")
   requiresReview: Boolean @default(value: "false")
+  reviewReason: String
   
   # === STATISTICS ===
   totalInstancesRun: Int @default(value: "0")
+  totalInstancesCancelled: Int @default(value: "0")
   avgAttendance: Float
-  lastMonthAttendance: Float 
+  lastMonthAttendance: Float
+  lastConfirmedDate: String
+  lastCancelledDate: String
   
-  # === RELATIONSHIPS ===
-  instances: [RecurringGameInstance] @hasMany(indexName: "byRecurringGameInstance", fields: ["id"])
+  # === RELATIONSHIPS (hasMany) ===
   gameInstances: [Game] @hasMany(indexName: "byRecurringGame", fields: ["id"])
+  instances: [RecurringGameInstance] @hasMany(indexName: "byRecurringGameInstance", fields: ["id"])
   metrics: [RecurringGameMetrics] @hasMany(indexName: "byRecurringGameMetrics", fields: ["id"])
-  
-  # === ADMIN/MERGE TRACKING ===
-  mergedInto: ID  # If this was a duplicate, points to the canonical entry
   
   # === METADATA ===
   notes: String 
@@ -112,242 +108,254 @@ type RecurringGame
 }
 
 # ===================================================================
-# QUERY TYPES (Existing)
+# RECURRING GAME INSTANCE ENUMS
 # ===================================================================
 
-input ListRecurringGamesInput {
-  entityId: ID
-  venueId: ID
-  dayOfWeek: String
-  isActive: Boolean
-  gameVariant: GameVariant
-  isSignature: Boolean
+enum RecurringGameInstanceStatus {
+  CONFIRMED           # Matched to actual Game record
+  CANCELLED           # Did not occur - explicitly cancelled
+  SKIPPED             # Did not occur - venue closed/holiday
+  REPLACED            # Different game ran in its slot
+  UNKNOWN             # No data - needs investigation
+  NO_SHOW             # Expected but never appeared
+}
+
+enum InstanceDeviationType {
+  NONE                # No deviation from expected
+  TIME_CHANGE         # Different start time
+  BUYIN_CHANGE        # Different buy-in
+  GUARANTEE_CHANGE    # Different guarantee
+  FORMAT_CHANGE       # Different structure
+  SPECIAL_EDITION     # Same game but special version
+  MULTIPLE            # Multiple deviations
 }
 
 # ===================================================================
-# MUTATION INPUTS (Existing)
+# RECURRING GAME INSTANCE MODEL
+# Created lazily when games are matched or gaps detected
 # ===================================================================
 
-input AssignGameToRecurringGameInput {
-  gameId: ID!
+type RecurringGameInstance
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  # === PRIMARY KEY ===
+  id: ID!
+  
+  # === RELATIONSHIPS ===
   recurringGameId: ID!
-  confidence: Float
+    @index(name: "byRecurringGameInstance", sortKeyFields: ["expectedDate"])
+  recurringGame: RecurringGame @belongsTo(fields: ["recurringGameId"])
+  
+  # The actual game that ran (null if cancelled/skipped/unknown)
+  gameId: ID
+    @index(name: "byGameInstance")
+  
+  # === DATE INFO ===
+  expectedDate: AWSDate!
+    @index(name: "byExpectedDate", sortKeyFields: ["recurringGameId"])
+  
+  dayOfWeek: String!
+  
+  weekKey: String!
+    @index(name: "byWeekKey", sortKeyFields: ["venueId"])
+  
+  # === DENORMALIZED FOR QUERIES ===
+  venueId: ID!
+    @index(name: "byVenueInstance", sortKeyFields: ["expectedDate"])
+  
+  entityId: ID!
+    @index(name: "byEntityInstance", sortKeyFields: ["expectedDate"])
+  
+  recurringGameName: String
+  
+  # === STATUS ===
+  status: RecurringGameInstanceStatus! @default(value: "CONFIRMED")
+  
+  # === DEVIATION TRACKING ===
+  hasDeviation: Boolean @default(value: "false")
+  deviationType: InstanceDeviationType
+  deviationDetails: AWSJSON
+  
+  # === NOTES ===
   notes: String
-}
-
-input DetectRecurringGamesInput {
-  entityId: ID 
-  venueId: ID 
-  minInstanceCount: Int 
-  confidenceThreshold: Float 
-  dryRun: Boolean 
-}
-
-# ===================================================================
-# MUTATION RESULTS (Existing)
-# ===================================================================
-
-type AssignGameResult {
-  success: Boolean!
-  game: Game
-  recurringGame: RecurringGame
-  message: String
-  confidence: Float
-}
-
-type DetectRecurringGamesResult {
-  success: Boolean!
-  message: String
+  adminNotes: String
+  cancellationReason: String
   
-  # Summary stats
-  gamesAnalyzed: Int
-  recurringGamesCreated: Int
-  recurringGamesUpdated: Int
-  gamesAssigned: Int
-  gamesPendingReview: Int
+  # === REVIEW FLAGS ===
+  needsReview: Boolean @default(value: "false")
+  reviewReason: String
   
-  # Detailed results
-  newRecurringGames: [RecurringGame]
-  assignmentResults: [AssignGameResult]
-  
-  # For dry run
-  preview: AWSJSON
-  errors: [String]
-}
-
-type BulkAssignResult {
-  success: Boolean!
-  totalGames: Int
-  successfulAssignments: Int
-  failedAssignments: Int
-  results: [AssignGameResult]
-  errors: [String]
+  # === TIMESTAMPS ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }
 
 # ===================================================================
-# RECURRING GAME ADMIN TYPES (NEW)
+# INPUT TYPES - BULK PROCESSING
 # ===================================================================
 
-# Thresholds for controlling matching sensitivity
-input RecurringGameAdminThresholdsInput {
-  highConfidence: Int         # Default 75 - auto-assign threshold
-  mediumConfidence: Int       # Default 50 - pending review threshold  
-  crossDaySuggestion: Int     # Default 60 - cross-day match suggestion
-  duplicateSimilarity: Float  # Default 0.85 - name similarity for duplicates
-}
-
-type RecurringGameAdminThresholds @aws_iam @aws_cognito_user_pools {
-  highConfidence: Int!
-  mediumConfidence: Int!
-  crossDaySuggestion: Int!
-  duplicateSimilarity: Float!
-}
-
-# --- Re-Resolution Types ---
-
-type RecurringGameMatchDetails @aws_iam @aws_cognito_user_pools {
-  matchType: String           # SAME_DAY_HIGH, SAME_DAY_MEDIUM, CROSS_DAY, NO_MATCH
-  matchedTo: String           # Name of matched RecurringGame
-  matchedToId: ID             # ID of matched RecurringGame
-  matchedToDay: String        # Day of week of match (for cross-day)
-  gameDay: String             # Day of week of the game
-  score: Int                  # Match score
-  previousId: ID              # Previous recurringGameId (if reassigning)
-  needsReview: Boolean        # Whether manual review is recommended
-  scoringDetails: AWSJSON     # Detailed breakdown of scoring
-}
-
-type RecurringGameTopCandidate @aws_iam @aws_cognito_user_pools {
-  id: ID!
-  name: String!
-  score: Int!
-  dayOfWeek: String
-}
-
-type RecurringGameSummary @aws_iam @aws_cognito_user_pools {
-  id: ID!
-  name: String!
-  dayOfWeek: String
+input ProcessUnassignedGamesInput {
   venueId: ID
-  currentRecurringGameId: ID
-}
-
-type ReResolveRecurringGameResult @aws_iam @aws_cognito_user_pools {
-  success: Boolean!
-  error: String
-  game: RecurringGameSummary
-  action: String!             # REASSIGN, CONFIRM, SUGGEST_REASSIGN, SUGGEST_CROSS_DAY, SUGGEST_UNASSIGN, NO_CHANGE, SKIPPED
-  newRecurringGameId: ID
-  matchDetails: RecurringGameMatchDetails
-  topCandidates: [RecurringGameTopCandidate!]
-  thresholdsUsed: RecurringGameAdminThresholds
-  applied: Boolean            # True if changes were applied (preview=false)
-}
-
-type RecurringGameActionSummary @aws_iam @aws_cognito_user_pools {
-  REASSIGN: Int!
-  CONFIRM: Int!
-  SUGGEST_REASSIGN: Int!
-  SUGGEST_CROSS_DAY: Int!
-  SUGGEST_UNASSIGN: Int!
-  NO_CHANGE: Int!
-  SKIPPED: Int!
-  ERROR: Int!
-}
-
-type RecurringGameActionDetail @aws_iam @aws_cognito_user_pools {
-  gameId: ID!
-  gameName: String!
-  action: String!
-  matchDetails: RecurringGameMatchDetails
-  error: String
-}
-
-type ReResolveVenueRecurringGamesResult @aws_iam @aws_cognito_user_pools {
-  success: Boolean
-  venueId: ID!
-  totalGames: Int!
-  eligibleGames: Int!
-  processed: Int!
-  actions: RecurringGameActionSummary!
-  details: [RecurringGameActionDetail!]!
-  preview: Boolean!
-}
-
-# --- Duplicate Detection Types ---
-
-type RecurringGameDuplicateEntry @aws_iam @aws_cognito_user_pools {
-  id: ID!
-  name: String!
-  similarity: Float!
-  gameCount: Int!
-}
-
-type RecurringGameDuplicateGroup @aws_iam @aws_cognito_user_pools {
-  canonicalId: ID!
-  canonicalName: String!
-  canonicalDayOfWeek: String!
-  canonicalGameCount: Int!
-  duplicates: [RecurringGameDuplicateEntry!]!
-  totalGamesToReassign: Int!
-}
-
-type FindRecurringGameDuplicatesResult @aws_iam @aws_cognito_user_pools {
-  success: Boolean
-  venueId: ID!
-  totalRecurringGames: Int!
-  duplicateGroups: Int!
-  duplicateEntries: Int!
-  groups: [RecurringGameDuplicateGroup!]!
-}
-
-type MergeRecurringGameDuplicatesDetail @aws_iam @aws_cognito_user_pools {
-  duplicateId: ID!
-  gamesCount: Int!
-}
-
-type MergeRecurringGameDuplicatesResult @aws_iam @aws_cognito_user_pools {
-  success: Boolean!
-  error: String
-  canonicalId: ID
-  canonicalName: String
-  duplicatesMerged: Int!
-  gamesReassigned: Int!
-  preview: Boolean!
-  details: [MergeRecurringGameDuplicatesDetail!]
-}
-
-# --- Statistics Types ---
-
-type OrphanedRecurringGame @aws_iam @aws_cognito_user_pools {
-  id: ID!
-  name: String!
-  dayOfWeek: String!
-  createdAt: AWSDateTime
-}
-
-type UnassignedGameSample @aws_iam @aws_cognito_user_pools {
-  id: ID!
-  name: String!
+  entityId: ID
   dayOfWeek: String
+  limit: Int
+  autoCreate: Boolean
+  requirePatternConfirmation: Boolean
+  dryRun: Boolean
+  batchSize: Int
+  delayMs: Int
 }
 
-type RecurringGameDistributionItem @aws_iam @aws_cognito_user_pools {
-  id: ID!
-  name: String!
+input ReprocessDeferredInput {
+  venueId: ID
+  entityId: ID
+  dayOfWeek: String
+  limit: Int
+}
+
+input UnassignedGamesStatsInput {
+  venueId: ID
+  entityId: ID
+}
+
+input PreviewPatternsInput {
+  venueId: ID!
+  minOccurrences: Int
+}
+
+# ===================================================================
+# INPUT TYPES - ADMIN OPERATIONS
+# ===================================================================
+
+input AdminThresholdsInput {
+  highConfidence: Int
+  mediumConfidence: Int
+  crossDaySuggestion: Int
+  duplicateSimilarity: Float
+}
+
+input ReResolveInput {
+  gameId: ID!
+  thresholds: AdminThresholdsInput
+  preview: Boolean
+}
+
+input ReResolveVenueInput {
+  venueId: ID!
+  thresholds: AdminThresholdsInput
+  preview: Boolean
+}
+
+input MergeDuplicatesInput {
+  canonicalId: ID!
+  duplicateIds: [ID!]!
+  preview: Boolean
+}
+
+input CleanupOrphansInput {
+  venueId: ID!
+  preview: Boolean
+}
+
+# ===================================================================
+# RESULT TYPES - BULK PROCESSING
+# ===================================================================
+
+type ProcessedGameDetail @aws_iam @aws_cognito_user_pools {
+  gameId: ID!
+  gameName: String
+  status: String!
+  recurringGameId: ID
+  recurringGameName: String
+  confidence: Float
+  wasCreated: Boolean
+  error: String
+  # For dry run preview - shows what template the game would be assigned to
+  suggestedTemplateName: String
+  clusterSize: Int
+}
+
+# Template that would be created during bulk processing (dry run preview)
+type PotentialTemplate @aws_iam @aws_cognito_user_pools {
+  suggestedName: String!
   dayOfWeek: String!
+  gameType: String!
+  sessionMode: String!
+  variant: String
   gameCount: Int!
+  avgBuyIn: Float
+  buyInRange: String
+  timeSlot: String
+  confidence: String
+  sampleGames: [PatternSampleGame!]
+  status: String
 }
 
-type RecurringGamesByDayCount @aws_iam @aws_cognito_user_pools {
-  SUNDAY: Int
-  MONDAY: Int
-  TUESDAY: Int
-  WEDNESDAY: Int
-  THURSDAY: Int
-  FRIDAY: Int
-  SATURDAY: Int
+type ProcessUnassignedGamesResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  processed: Int!
+  assigned: Int!
+  created: Int!
+  deferred: Int!
+  noMatch: Int!
+  errors: Int!
+  dryRun: Boolean!
+  message: String
+  error: String
+  details: [ProcessedGameDetail!]!
+  # Potential templates that would be created (dry run only)
+  potentialTemplates: [PotentialTemplate!]
 }
+
+type UnassignedGamesStats @aws_iam @aws_cognito_user_pools {
+  # Venue-specific stats (for selected venue)
+  total: Int!
+  unprocessed: Int!
+  candidateRecurring: Int!
+  notRecurring: Int!
+  assigned: Int!
+  other: Int
+  
+  # Overall stats (all venues)
+  overallTotal: Int!
+  overallUnprocessed: Int!
+  overallCandidateRecurring: Int!
+  overallNotRecurring: Int!
+  overallAssigned: Int!
+  overallOther: Int
+  
+  # Breakdowns (AWSJSON - parsed on frontend)
+  byVenue: AWSJSON
+  byDay: AWSJSON
+  byStatus: AWSJSON
+}
+
+type PatternSampleGame @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String
+  date: String
+}
+
+type CandidatePattern @aws_iam @aws_cognito_user_pools {
+  dayOfWeek: String!
+  sessionMode: String!
+  variant: String
+  gameCount: Int!
+  suggestedName: String!
+  sampleGames: [PatternSampleGame!]!
+}
+
+type PreviewPatternsResult @aws_iam @aws_cognito_user_pools {
+  venueId: ID!
+  minOccurrences: Int!
+  patternCount: Int!
+  patterns: [CandidatePattern!]!
+}
+
+# ===================================================================
+# RESULT TYPES - ADMIN OPERATIONS
+# ===================================================================
 
 type RecurringGameVenueStats @aws_iam @aws_cognito_user_pools {
   success: Boolean
@@ -358,13 +366,72 @@ type RecurringGameVenueStats @aws_iam @aws_cognito_user_pools {
   orphans: [OrphanedRecurringGame!]!
   unassignedGames: Int!
   unassignedSample: [UnassignedGameSample!]!
-  recurringGamesByDay: RecurringGamesByDayCount!
-  gameDistribution: [RecurringGameDistributionItem!]!
+  recurringGamesByDay: AWSJSON!
+  gameDistribution: [RecurringGameDistribution!]!
 }
 
-# --- Orphan Cleanup Types ---
+type OrphanedRecurringGame @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  dayOfWeek: String!
+  createdAt: String
+}
 
-type CleanupOrphanedRecurringGamesResult @aws_iam @aws_cognito_user_pools {
+type UnassignedGameSample @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  dayOfWeek: String
+}
+
+type RecurringGameDistribution @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  dayOfWeek: String!
+  gameCount: Int!
+}
+
+type DuplicateEntry @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  name: String!
+  similarity: Float!
+  gameCount: Int!
+}
+
+type DuplicateGroup @aws_iam @aws_cognito_user_pools {
+  canonicalId: ID!
+  canonicalName: String!
+  canonicalDayOfWeek: String!
+  canonicalGameCount: Int!
+  duplicates: [DuplicateEntry!]!
+  totalGamesToReassign: Int!
+}
+
+type FindDuplicatesResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean
+  venueId: ID!
+  totalRecurringGames: Int!
+  duplicateGroups: Int!
+  duplicateEntries: Int!
+  groups: [DuplicateGroup!]!
+}
+
+type MergeDetail @aws_iam @aws_cognito_user_pools {
+  duplicateId: ID!
+  gamesCount: Int!
+}
+
+type MergeDuplicatesResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  error: String
+  canonicalId: ID
+  canonicalName: String
+  duplicatesMerged: Int!
+  gamesReassigned: Int!
+  preview: Boolean!
+  details: [MergeDetail!]
+}
+
+type CleanupOrphansResult @aws_iam @aws_cognito_user_pools {
   success: Boolean
   venueId: ID!
   orphansFound: Int!
@@ -373,182 +440,75 @@ type CleanupOrphanedRecurringGamesResult @aws_iam @aws_cognito_user_pools {
   orphans: [OrphanedRecurringGame!]!
 }
 
-# --- Bootstrap recurring game types ---
-
-input BootstrapRecurringGamesInput {
-  venueId: ID!
-  minGamesForTemplate: Int      # Default: 2
-  similarityThreshold: Float    # Default: 0.7
-  preview: Boolean              # Default: true
-  includeAssigned: Boolean      # Default: false (skip games already assigned)
+type MatchDetails @aws_iam @aws_cognito_user_pools {
+  matchedTo: String
+  score: Int
+  previousId: ID
+  newId: ID
+  dayOfWeek: String
 }
 
-type BootstrapTemplateDetail {
-  name: String!
-  dayOfWeek: String!
-  gameCount: Int!
-  avgBuyIn: Int
-  sampleGames: [String!]
-  status: String!
-  templateId: ID
-  gamesAssigned: Int
+type GameActionDetail @aws_iam @aws_cognito_user_pools {
+  gameId: ID!
+  gameName: String!
+  action: String!
+  matchDetails: MatchDetails
   error: String
 }
 
-type BootstrapRecurringGamesResult {
+type ActionSummary @aws_iam @aws_cognito_user_pools {
+  REASSIGN: Int!
+  CONFIRM: Int!
+  SUGGEST_REASSIGN: Int!
+  SUGGEST_CROSS_DAY: Int!
+  SUGGEST_UNASSIGN: Int!
+  NO_CHANGE: Int!
+  SKIPPED: Int!
+  ERROR: Int!
+}
+
+type ReResolveGameResult @aws_iam @aws_cognito_user_pools {
   success: Boolean!
-  venueId: ID!
-  venueName: String
+  gameId: ID!
+  gameName: String
+  previousRecurringGameId: ID
+  recurringGameId: ID
+  recurringGameName: String
+  matched: Boolean
+  matchScore: Int
   preview: Boolean!
-  totalGamesAnalyzed: Int!
+  error: String
+}
+
+type ReResolveVenueResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean
+  venueId: ID!
+  totalGames: Int!
   eligibleGames: Int!
-  templatesCreated: Int!
-  gamesAssigned: Int!
-  templateDetails: [BootstrapTemplateDetail!]!
-  errors: [AWSJSON]
+  processed: Int!
+  actions: ActionSummary!
+  details: [GameActionDetail!]!
+  preview: Boolean!
 }
 
 # ===================================================================
-# CUSTOM MUTATIONS (Existing)
+# QUERY RESULT TYPES (from original)
 # ===================================================================
 
-extend type Mutation {
-  # Manually assign a game to a recurring game
-  assignGameToRecurringGame(input: AssignGameToRecurringGameInput!): AssignGameResult
-    @function(name: "recurringGameManagement-${env}")
-  
-  # Auto-detect and create recurring games from existing data
-  detectRecurringGames(input: DetectRecurringGamesInput): DetectRecurringGamesResult
-    @function(name: "recurringGameDetection-${env}")
-  
-  # Bulk assign games to recurring games
-  bulkAssignGamesToRecurringGame(
-    recurringGameId: ID!
-    venueId: ID!
-    startDate: AWSDateTime
-    endDate: AWSDateTime
-    autoAssign: Boolean
-  ): BulkAssignResult
-    @function(name: "recurringGameManagement-${env}")
-  
-  # ===================================================================
-  # RECURRING GAME ADMIN MUTATIONS (NEW)
-  # ===================================================================
-  
-  # Re-resolve recurring assignment for a single game
-  # - preview: true (default) = returns what would change, no modifications
-  # - preview: false = applies changes
-  reResolveRecurringAssignment(
-    gameId: ID!
-    thresholds: RecurringGameAdminThresholdsInput
-    preview: Boolean
-  ): ReResolveRecurringGameResult
-    @function(name: "recurringGameAdmin-${env}")
-    @auth(rules: [{ allow: private }])
-  
-  # Re-resolve all games at a venue
-  # - preview: true (default) = returns what would change, no modifications
-  # - preview: false = applies changes
-  reResolveRecurringAssignmentsForVenue(
-    venueId: ID!
-    thresholds: RecurringGameAdminThresholdsInput
-    preview: Boolean
-  ): ReResolveVenueRecurringGamesResult
-    @function(name: "recurringGameAdmin-${env}")
-    @auth(rules: [{ allow: private }])
-  
-  # Merge duplicate recurring game entries into a canonical entry
-  # - preview: true (default) = returns what would change
-  # - preview: false = reassigns games and deactivates duplicates
-  mergeRecurringGameDuplicates(
-    canonicalId: ID!
-    duplicateIds: [ID!]!
-    preview: Boolean
-  ): MergeRecurringGameDuplicatesResult
-    @function(name: "recurringGameAdmin-${env}")
-    @auth(rules: [{ allow: private }])
-  
-  # Cleanup orphaned recurring games (templates with no assigned games)
-  # - preview: true (default) = lists orphans without removing
-  # - preview: false = deactivates orphans
-  cleanupOrphanedRecurringGames(
-    venueId: ID!
-    preview: Boolean
-  ): CleanupOrphanedRecurringGamesResult
-    @function(name: "recurringGameAdmin-${env}")
-    @auth(rules: [{ allow: private }])
-
-  bootstrapRecurringGames(input: BootstrapRecurringGamesInput!): BootstrapRecurringGamesResult
-    @function(name: "recurringGameAdmin-${env}")
-    @auth(rules: [{ allow: groups, groups: ["SUPER_ADMIN", "ADMIN"] }])    
-}
-
-# ===================================================================
-# QUERY HELPERS (Existing + New)
-# ===================================================================
-
-extend type Query {
-  # Get recurring games with detailed stats
-  getRecurringGameWithStats(id: ID!): RecurringGameWithStats
-    @function(name: "recurringGameStats-${env}")
-  
-  # Search recurring games by criteria
-  searchRecurringGames(
-    entityId: ID
-    venueId: ID
-    dayOfWeek: String
-    gameVariant: GameVariant
-    isActive: Boolean
-    limit: Int
-  ): SearchRecurringGamesResult
-    @function(name: "recurringGameSearch-${env}")
-  
-  # ===================================================================
-  # RECURRING GAME ADMIN QUERIES (NEW)
-  # ===================================================================
-  
-  # Get statistics about recurring games for a venue
-  # Includes orphan count, unassigned games, distribution by day
-  getRecurringGameVenueStats(venueId: ID!): RecurringGameVenueStats
-    @function(name: "recurringGameAdmin-${env}")
-    @auth(rules: [{ allow: private }])
-  
-  # Find duplicate recurring game entries at a venue
-  # Duplicates are identified by same venue + day + high name similarity
-  findRecurringGameDuplicates(
-    venueId: ID!
-    similarityThreshold: Float
-  ): FindRecurringGameDuplicatesResult
-    @function(name: "recurringGameAdmin-${env}")
-    @auth(rules: [{ allow: private }])
-}
-
-# ===================================================================
-# QUERY RESULT TYPES (Existing)
-# ===================================================================
-
-type RecurringGameWithStats {
+type RecurringGameWithStats @aws_iam @aws_cognito_user_pools {
   recurringGame: RecurringGame
-  
-  # Quick stats
   totalInstances: Int
   avgEntries: Float
   avgProfit: Float
   recentTrend: String 
-  
-  # Recent instances
   recentGames: [Game]
-  
-  # Health indicators
   consistency: String 
   profitability: String 
   attendanceHealth: String 
-  
-  # Regular players
   topPlayers: [RecurringGamePlayerSummary]
 }
 
-type RecurringGamePlayerSummary {
+type RecurringGamePlayerSummary @aws_iam @aws_cognito_user_pools {
   playerId: ID
   playerName: String
   appearances: Int
@@ -556,8 +516,64 @@ type RecurringGamePlayerSummary {
   totalWinnings: Float
 }
 
-type SearchRecurringGamesResult {
+type SearchRecurringGamesResult @aws_iam @aws_cognito_user_pools {
   items: [RecurringGame]
   total: Int
   nextToken: String
+}
+
+# ===================================================================
+# MUTATIONS - gameDataEnricher
+# ===================================================================
+
+extend type Mutation {
+  # Bulk Processing
+  processUnassignedGames(input: ProcessUnassignedGamesInput!): ProcessUnassignedGamesResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  reprocessDeferredGames(input: ReprocessDeferredInput!): ProcessUnassignedGamesResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # Admin Operations
+  reResolveRecurringAssignment(input: ReResolveInput!): ReResolveGameResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  reResolveRecurringAssignmentsForVenue(input: ReResolveVenueInput!): ReResolveVenueResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  mergeRecurringGameDuplicates(input: MergeDuplicatesInput!): MergeDuplicatesResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  cleanupOrphanedRecurringGames(input: CleanupOrphansInput!): CleanupOrphansResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+}
+
+# ===================================================================
+# QUERIES - gameDataEnricher
+# ===================================================================
+
+extend type Query {
+  # Bulk Processing Stats
+  getUnassignedGamesStats(input: UnassignedGamesStatsInput): UnassignedGamesStats!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  previewCandidatePatterns(input: PreviewPatternsInput!): PreviewPatternsResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  # Admin Operations
+  getRecurringGameVenueStats(venueId: ID!): RecurringGameVenueStats!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+  
+  findRecurringGameDuplicates(venueId: ID!, similarityThreshold: Float): FindDuplicatesResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
 }

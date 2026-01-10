@@ -4433,6 +4433,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "sessionMode": {
+                    "name": "sessionMode",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "typicalBuyIn": {
                     "name": "typicalBuyIn",
                     "isArray": false,
@@ -4458,6 +4465,13 @@ export const schema = {
                     "name": "typicalGuarantee",
                     "isArray": false,
                     "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "typicalDuration": {
+                    "name": "typicalDuration",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -4603,8 +4617,22 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "reviewReason": {
+                    "name": "reviewReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "totalInstancesRun": {
                     "name": "totalInstancesRun",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalInstancesCancelled": {
+                    "name": "totalInstancesCancelled",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": false,
@@ -4624,11 +4652,25 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "instances": {
-                    "name": "instances",
+                "lastConfirmedDate": {
+                    "name": "lastConfirmedDate",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastCancelledDate": {
+                    "name": "lastCancelledDate",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameInstances": {
+                    "name": "gameInstances",
                     "isArray": true,
                     "type": {
-                        "model": "RecurringGameInstance"
+                        "model": "Game"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -4640,11 +4682,11 @@ export const schema = {
                         ]
                     }
                 },
-                "gameInstances": {
-                    "name": "gameInstances",
+                "instances": {
+                    "name": "instances",
                     "isArray": true,
                     "type": {
-                        "model": "Game"
+                        "model": "RecurringGameInstance"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -4671,13 +4713,6 @@ export const schema = {
                             "recurringGame"
                         ]
                     }
-                },
-                "mergedInto": {
-                    "name": "mergedInto",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
                 },
                 "notes": {
                     "name": "notes",
@@ -4946,41 +4981,6 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "reviewedAt": {
-                    "name": "reviewedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "reviewedBy": {
-                    "name": "reviewedBy",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "replacementGameId": {
-                    "name": "replacementGameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "replacementGameName": {
-                    "name": "replacementGameName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "replacementReason": {
-                    "name": "replacementReason",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -4992,13 +4992,6 @@ export const schema = {
                     "name": "updatedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "source": {
-                    "name": "source",
-                    "isArray": false,
-                    "type": "String",
                     "isRequired": true,
                     "attributes": []
                 }
@@ -19058,504 +19051,8 @@ export const schema = {
                 }
             }
         },
-        "AssignGameResult": {
-            "name": "AssignGameResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "game": {
-                    "name": "game",
-                    "isArray": false,
-                    "type": {
-                        "model": "Game"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "recurringGame": {
-                    "name": "recurringGame",
-                    "isArray": false,
-                    "type": {
-                        "model": "RecurringGame"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "message": {
-                    "name": "message",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "confidence": {
-                    "name": "confidence",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "DetectRecurringGamesResult": {
-            "name": "DetectRecurringGamesResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "message": {
-                    "name": "message",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gamesAnalyzed": {
-                    "name": "gamesAnalyzed",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "recurringGamesCreated": {
-                    "name": "recurringGamesCreated",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "recurringGamesUpdated": {
-                    "name": "recurringGamesUpdated",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gamesAssigned": {
-                    "name": "gamesAssigned",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gamesPendingReview": {
-                    "name": "gamesPendingReview",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "newRecurringGames": {
-                    "name": "newRecurringGames",
-                    "isArray": true,
-                    "type": {
-                        "model": "RecurringGame"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "assignmentResults": {
-                    "name": "assignmentResults",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "AssignGameResult"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "preview": {
-                    "name": "preview",
-                    "isArray": false,
-                    "type": "AWSJSON",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "errors": {
-                    "name": "errors",
-                    "isArray": true,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                }
-            }
-        },
-        "BulkAssignResult": {
-            "name": "BulkAssignResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalGames": {
-                    "name": "totalGames",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "successfulAssignments": {
-                    "name": "successfulAssignments",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "failedAssignments": {
-                    "name": "failedAssignments",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "results": {
-                    "name": "results",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "AssignGameResult"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "errors": {
-                    "name": "errors",
-                    "isArray": true,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                }
-            }
-        },
-        "RecurringGameAdminThresholds": {
-            "name": "RecurringGameAdminThresholds",
-            "fields": {
-                "highConfidence": {
-                    "name": "highConfidence",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "mediumConfidence": {
-                    "name": "mediumConfidence",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "crossDaySuggestion": {
-                    "name": "crossDaySuggestion",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "duplicateSimilarity": {
-                    "name": "duplicateSimilarity",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "RecurringGameMatchDetails": {
-            "name": "RecurringGameMatchDetails",
-            "fields": {
-                "matchType": {
-                    "name": "matchType",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "matchedTo": {
-                    "name": "matchedTo",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "matchedToId": {
-                    "name": "matchedToId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "matchedToDay": {
-                    "name": "matchedToDay",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameDay": {
-                    "name": "gameDay",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "score": {
-                    "name": "score",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "previousId": {
-                    "name": "previousId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "needsReview": {
-                    "name": "needsReview",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "scoringDetails": {
-                    "name": "scoringDetails",
-                    "isArray": false,
-                    "type": "AWSJSON",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "RecurringGameTopCandidate": {
-            "name": "RecurringGameTopCandidate",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "name": {
-                    "name": "name",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "score": {
-                    "name": "score",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "dayOfWeek": {
-                    "name": "dayOfWeek",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "RecurringGameSummary": {
-            "name": "RecurringGameSummary",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "name": {
-                    "name": "name",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "dayOfWeek": {
-                    "name": "dayOfWeek",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "currentRecurringGameId": {
-                    "name": "currentRecurringGameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "ReResolveRecurringGameResult": {
-            "name": "ReResolveRecurringGameResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "error": {
-                    "name": "error",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "game": {
-                    "name": "game",
-                    "isArray": false,
-                    "type": {
-                        "nonModel": "RecurringGameSummary"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "action": {
-                    "name": "action",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "newRecurringGameId": {
-                    "name": "newRecurringGameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "matchDetails": {
-                    "name": "matchDetails",
-                    "isArray": false,
-                    "type": {
-                        "nonModel": "RecurringGameMatchDetails"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "topCandidates": {
-                    "name": "topCandidates",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "RecurringGameTopCandidate"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "thresholdsUsed": {
-                    "name": "thresholdsUsed",
-                    "isArray": false,
-                    "type": {
-                        "nonModel": "RecurringGameAdminThresholds"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "applied": {
-                    "name": "applied",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "RecurringGameActionSummary": {
-            "name": "RecurringGameActionSummary",
-            "fields": {
-                "REASSIGN": {
-                    "name": "REASSIGN",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "CONFIRM": {
-                    "name": "CONFIRM",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "SUGGEST_REASSIGN": {
-                    "name": "SUGGEST_REASSIGN",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "SUGGEST_CROSS_DAY": {
-                    "name": "SUGGEST_CROSS_DAY",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "SUGGEST_UNASSIGN": {
-                    "name": "SUGGEST_UNASSIGN",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "NO_CHANGE": {
-                    "name": "NO_CHANGE",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "SKIPPED": {
-                    "name": "SKIPPED",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "ERROR": {
-                    "name": "ERROR",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "RecurringGameActionDetail": {
-            "name": "RecurringGameActionDetail",
+        "ProcessedGameDetail": {
+            "name": "ProcessedGameDetail",
             "fields": {
                 "gameId": {
                     "name": "gameId",
@@ -19568,22 +19065,41 @@ export const schema = {
                     "name": "gameName",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
-                "action": {
-                    "name": "action",
+                "status": {
+                    "name": "status",
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
                     "attributes": []
                 },
-                "matchDetails": {
-                    "name": "matchDetails",
+                "recurringGameId": {
+                    "name": "recurringGameId",
                     "isArray": false,
-                    "type": {
-                        "nonModel": "RecurringGameMatchDetails"
-                    },
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameName": {
+                    "name": "recurringGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "confidence": {
+                    "name": "confidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "wasCreated": {
+                    "name": "wasCreated",
+                    "isArray": false,
+                    "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -19593,37 +19109,122 @@ export const schema = {
                     "type": "String",
                     "isRequired": false,
                     "attributes": []
+                },
+                "suggestedTemplateName": {
+                    "name": "suggestedTemplateName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "clusterSize": {
+                    "name": "clusterSize",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
-        "ReResolveVenueRecurringGamesResult": {
-            "name": "ReResolveVenueRecurringGamesResult",
+        "PotentialTemplate": {
+            "name": "PotentialTemplate",
+            "fields": {
+                "suggestedName": {
+                    "name": "suggestedName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameType": {
+                    "name": "gameType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "sessionMode": {
+                    "name": "sessionMode",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "variant": {
+                    "name": "variant",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameCount": {
+                    "name": "gameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "avgBuyIn": {
+                    "name": "avgBuyIn",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "buyInRange": {
+                    "name": "buyInRange",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "timeSlot": {
+                    "name": "timeSlot",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "confidence": {
+                    "name": "confidence",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sampleGames": {
+                    "name": "sampleGames",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "PatternSampleGame"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ProcessUnassignedGamesResult": {
+            "name": "ProcessUnassignedGamesResult",
             "fields": {
                 "success": {
                     "name": "success",
                     "isArray": false,
                     "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalGames": {
-                    "name": "totalGames",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "eligibleGames": {
-                    "name": "eligibleGames",
-                    "isArray": false,
-                    "type": "Int",
                     "isRequired": true,
                     "attributes": []
                 },
@@ -19634,194 +19235,53 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "actions": {
-                    "name": "actions",
+                "assigned": {
+                    "name": "assigned",
                     "isArray": false,
-                    "type": {
-                        "nonModel": "RecurringGameActionSummary"
-                    },
+                    "type": "Int",
                     "isRequired": true,
                     "attributes": []
                 },
-                "details": {
-                    "name": "details",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "RecurringGameActionDetail"
-                    },
+                "created": {
+                    "name": "created",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": false
+                    "attributes": []
                 },
-                "preview": {
-                    "name": "preview",
+                "deferred": {
+                    "name": "deferred",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "noMatch": {
+                    "name": "noMatch",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "errors": {
+                    "name": "errors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dryRun": {
+                    "name": "dryRun",
                     "isArray": false,
                     "type": "Boolean",
                     "isRequired": true,
                     "attributes": []
-                }
-            }
-        },
-        "RecurringGameDuplicateEntry": {
-            "name": "RecurringGameDuplicateEntry",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
                 },
-                "name": {
-                    "name": "name",
+                "message": {
+                    "name": "message",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "similarity": {
-                    "name": "similarity",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gameCount": {
-                    "name": "gameCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "RecurringGameDuplicateGroup": {
-            "name": "RecurringGameDuplicateGroup",
-            "fields": {
-                "canonicalId": {
-                    "name": "canonicalId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "canonicalName": {
-                    "name": "canonicalName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "canonicalDayOfWeek": {
-                    "name": "canonicalDayOfWeek",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "canonicalGameCount": {
-                    "name": "canonicalGameCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "duplicates": {
-                    "name": "duplicates",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "RecurringGameDuplicateEntry"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": false
-                },
-                "totalGamesToReassign": {
-                    "name": "totalGamesToReassign",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "FindRecurringGameDuplicatesResult": {
-            "name": "FindRecurringGameDuplicatesResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
                     "isRequired": false,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalRecurringGames": {
-                    "name": "totalRecurringGames",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "duplicateGroups": {
-                    "name": "duplicateGroups",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "duplicateEntries": {
-                    "name": "duplicateEntries",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "groups": {
-                    "name": "groups",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "RecurringGameDuplicateGroup"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": false
-                }
-            }
-        },
-        "MergeRecurringGameDuplicatesDetail": {
-            "name": "MergeRecurringGameDuplicatesDetail",
-            "fields": {
-                "duplicateId": {
-                    "name": "duplicateId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gamesCount": {
-                    "name": "gamesCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "MergeRecurringGameDuplicatesResult": {
-            "name": "MergeRecurringGameDuplicatesResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
                     "attributes": []
                 },
                 "error": {
@@ -19831,46 +19291,21 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "canonicalId": {
-                    "name": "canonicalId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "canonicalName": {
-                    "name": "canonicalName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "duplicatesMerged": {
-                    "name": "duplicatesMerged",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gamesReassigned": {
-                    "name": "gamesReassigned",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "preview": {
-                    "name": "preview",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
                 "details": {
                     "name": "details",
                     "isArray": true,
                     "type": {
-                        "nonModel": "MergeRecurringGameDuplicatesDetail"
+                        "nonModel": "ProcessedGameDetail"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "potentialTemplates": {
+                    "name": "potentialTemplates",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "PotentialTemplate"
                     },
                     "isRequired": true,
                     "attributes": [],
@@ -19878,41 +19313,118 @@ export const schema = {
                 }
             }
         },
-        "OrphanedRecurringGame": {
-            "name": "OrphanedRecurringGame",
+        "UnassignedGamesStats": {
+            "name": "UnassignedGamesStats",
             "fields": {
-                "id": {
-                    "name": "id",
+                "total": {
+                    "name": "total",
                     "isArray": false,
-                    "type": "ID",
+                    "type": "Int",
                     "isRequired": true,
                     "attributes": []
                 },
-                "name": {
-                    "name": "name",
+                "unprocessed": {
+                    "name": "unprocessed",
                     "isArray": false,
-                    "type": "String",
+                    "type": "Int",
                     "isRequired": true,
                     "attributes": []
                 },
-                "dayOfWeek": {
-                    "name": "dayOfWeek",
+                "candidateRecurring": {
+                    "name": "candidateRecurring",
                     "isArray": false,
-                    "type": "String",
+                    "type": "Int",
                     "isRequired": true,
                     "attributes": []
                 },
-                "createdAt": {
-                    "name": "createdAt",
+                "notRecurring": {
+                    "name": "notRecurring",
                     "isArray": false,
-                    "type": "AWSDateTime",
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "assigned": {
+                    "name": "assigned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "other": {
+                    "name": "other",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "overallTotal": {
+                    "name": "overallTotal",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "overallUnprocessed": {
+                    "name": "overallUnprocessed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "overallCandidateRecurring": {
+                    "name": "overallCandidateRecurring",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "overallNotRecurring": {
+                    "name": "overallNotRecurring",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "overallAssigned": {
+                    "name": "overallAssigned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "overallOther": {
+                    "name": "overallOther",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "byVenue": {
+                    "name": "byVenue",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "byDay": {
+                    "name": "byDay",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "byStatus": {
+                    "name": "byStatus",
+                    "isArray": false,
+                    "type": "AWSJSON",
                     "isRequired": false,
                     "attributes": []
                 }
             }
         },
-        "UnassignedGameSample": {
-            "name": "UnassignedGameSample",
+        "PatternSampleGame": {
+            "name": "PatternSampleGame",
             "fields": {
                 "id": {
                     "name": "id",
@@ -19925,11 +19437,11 @@ export const schema = {
                     "name": "name",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
-                "dayOfWeek": {
-                    "name": "dayOfWeek",
+                "date": {
+                    "name": "date",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -19937,28 +19449,28 @@ export const schema = {
                 }
             }
         },
-        "RecurringGameDistributionItem": {
-            "name": "RecurringGameDistributionItem",
+        "CandidatePattern": {
+            "name": "CandidatePattern",
             "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "name": {
-                    "name": "name",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
                 "dayOfWeek": {
                     "name": "dayOfWeek",
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
+                    "attributes": []
+                },
+                "sessionMode": {
+                    "name": "sessionMode",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "variant": {
+                    "name": "variant",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "gameCount": {
@@ -19967,60 +19479,59 @@ export const schema = {
                     "type": "Int",
                     "isRequired": true,
                     "attributes": []
+                },
+                "suggestedName": {
+                    "name": "suggestedName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "sampleGames": {
+                    "name": "sampleGames",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "PatternSampleGame"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
                 }
             }
         },
-        "RecurringGamesByDayCount": {
-            "name": "RecurringGamesByDayCount",
+        "PreviewPatternsResult": {
+            "name": "PreviewPatternsResult",
             "fields": {
-                "SUNDAY": {
-                    "name": "SUNDAY",
+                "venueId": {
+                    "name": "venueId",
                     "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
+                    "type": "ID",
+                    "isRequired": true,
                     "attributes": []
                 },
-                "MONDAY": {
-                    "name": "MONDAY",
+                "minOccurrences": {
+                    "name": "minOccurrences",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": false,
+                    "isRequired": true,
                     "attributes": []
                 },
-                "TUESDAY": {
-                    "name": "TUESDAY",
+                "patternCount": {
+                    "name": "patternCount",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": false,
+                    "isRequired": true,
                     "attributes": []
                 },
-                "WEDNESDAY": {
-                    "name": "WEDNESDAY",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "THURSDAY": {
-                    "name": "THURSDAY",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "FRIDAY": {
-                    "name": "FRIDAY",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "SATURDAY": {
-                    "name": "SATURDAY",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
+                "patterns": {
+                    "name": "patterns",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "CandidatePattern"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
                 }
             }
         },
@@ -20092,9 +19603,7 @@ export const schema = {
                 "recurringGamesByDay": {
                     "name": "recurringGamesByDay",
                     "isArray": false,
-                    "type": {
-                        "nonModel": "RecurringGamesByDayCount"
-                    },
+                    "type": "AWSJSON",
                     "isRequired": true,
                     "attributes": []
                 },
@@ -20102,7 +19611,7 @@ export const schema = {
                     "name": "gameDistribution",
                     "isArray": true,
                     "type": {
-                        "nonModel": "RecurringGameDistributionItem"
+                        "nonModel": "RecurringGameDistribution"
                     },
                     "isRequired": true,
                     "attributes": [],
@@ -20110,8 +19619,316 @@ export const schema = {
                 }
             }
         },
-        "CleanupOrphanedRecurringGamesResult": {
-            "name": "CleanupOrphanedRecurringGamesResult",
+        "OrphanedRecurringGame": {
+            "name": "OrphanedRecurringGame",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "UnassignedGameSample": {
+            "name": "UnassignedGameSample",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "RecurringGameDistribution": {
+            "name": "RecurringGameDistribution",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameCount": {
+                    "name": "gameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "DuplicateEntry": {
+            "name": "DuplicateEntry",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "similarity": {
+                    "name": "similarity",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameCount": {
+                    "name": "gameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "DuplicateGroup": {
+            "name": "DuplicateGroup",
+            "fields": {
+                "canonicalId": {
+                    "name": "canonicalId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "canonicalName": {
+                    "name": "canonicalName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "canonicalDayOfWeek": {
+                    "name": "canonicalDayOfWeek",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "canonicalGameCount": {
+                    "name": "canonicalGameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "duplicates": {
+                    "name": "duplicates",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "DuplicateEntry"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "totalGamesToReassign": {
+                    "name": "totalGamesToReassign",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "FindDuplicatesResult": {
+            "name": "FindDuplicatesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalRecurringGames": {
+                    "name": "totalRecurringGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "duplicateGroups": {
+                    "name": "duplicateGroups",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "duplicateEntries": {
+                    "name": "duplicateEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "groups": {
+                    "name": "groups",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "DuplicateGroup"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                }
+            }
+        },
+        "MergeDetail": {
+            "name": "MergeDetail",
+            "fields": {
+                "duplicateId": {
+                    "name": "duplicateId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesCount": {
+                    "name": "gamesCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "MergeDuplicatesResult": {
+            "name": "MergeDuplicatesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "canonicalId": {
+                    "name": "canonicalId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "canonicalName": {
+                    "name": "canonicalName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "duplicatesMerged": {
+                    "name": "duplicatesMerged",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesReassigned": {
+                    "name": "gamesReassigned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "preview": {
+                    "name": "preview",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "details": {
+                    "name": "details",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "MergeDetail"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "CleanupOrphansResult": {
+            "name": "CleanupOrphansResult",
             "fields": {
                 "success": {
                     "name": "success",
@@ -20160,63 +19977,76 @@ export const schema = {
                 }
             }
         },
-        "BootstrapTemplateDetail": {
-            "name": "BootstrapTemplateDetail",
+        "MatchDetails": {
+            "name": "MatchDetails",
             "fields": {
-                "name": {
-                    "name": "name",
+                "matchedTo": {
+                    "name": "matchedTo",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "score": {
+                    "name": "score",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "previousId": {
+                    "name": "previousId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newId": {
+                    "name": "newId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "dayOfWeek": {
                     "name": "dayOfWeek",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gameCount": {
-                    "name": "gameCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "avgBuyIn": {
-                    "name": "avgBuyIn",
-                    "isArray": false,
-                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
-                },
-                "sampleGames": {
-                    "name": "sampleGames",
-                    "isArray": true,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "status": {
-                    "name": "status",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "templateId": {
-                    "name": "templateId",
+                }
+            }
+        },
+        "GameActionDetail": {
+            "name": "GameActionDetail",
+            "fields": {
+                "gameId": {
+                    "name": "gameId",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": false,
+                    "isRequired": true,
                     "attributes": []
                 },
-                "gamesAssigned": {
-                    "name": "gamesAssigned",
+                "gameName": {
+                    "name": "gameName",
                     "isArray": false,
-                    "type": "Int",
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "action": {
+                    "name": "action",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "matchDetails": {
+                    "name": "matchDetails",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "MatchDetails"
+                    },
                     "isRequired": false,
                     "attributes": []
                 },
@@ -20229,8 +20059,69 @@ export const schema = {
                 }
             }
         },
-        "BootstrapRecurringGamesResult": {
-            "name": "BootstrapRecurringGamesResult",
+        "ActionSummary": {
+            "name": "ActionSummary",
+            "fields": {
+                "REASSIGN": {
+                    "name": "REASSIGN",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "CONFIRM": {
+                    "name": "CONFIRM",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "SUGGEST_REASSIGN": {
+                    "name": "SUGGEST_REASSIGN",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "SUGGEST_CROSS_DAY": {
+                    "name": "SUGGEST_CROSS_DAY",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "SUGGEST_UNASSIGN": {
+                    "name": "SUGGEST_UNASSIGN",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "NO_CHANGE": {
+                    "name": "NO_CHANGE",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "SKIPPED": {
+                    "name": "SKIPPED",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ERROR": {
+                    "name": "ERROR",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "ReResolveGameResult": {
+            "name": "ReResolveGameResult",
             "fields": {
                 "success": {
                     "name": "success",
@@ -20239,17 +20130,52 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "venueId": {
-                    "name": "venueId",
+                "gameId": {
+                    "name": "gameId",
                     "isArray": false,
                     "type": "ID",
                     "isRequired": true,
                     "attributes": []
                 },
-                "venueName": {
-                    "name": "venueName",
+                "gameName": {
+                    "name": "gameName",
                     "isArray": false,
                     "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "previousRecurringGameId": {
+                    "name": "previousRecurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameId": {
+                    "name": "recurringGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameName": {
+                    "name": "recurringGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matched": {
+                    "name": "matched",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "matchScore": {
+                    "name": "matchScore",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -20260,8 +20186,34 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "totalGamesAnalyzed": {
-                    "name": "totalGamesAnalyzed",
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ReResolveVenueResult": {
+            "name": "ReResolveVenueResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalGames": {
+                    "name": "totalGames",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": true,
@@ -20274,37 +20226,38 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "templatesCreated": {
-                    "name": "templatesCreated",
+                "processed": {
+                    "name": "processed",
                     "isArray": false,
                     "type": "Int",
                     "isRequired": true,
                     "attributes": []
                 },
-                "gamesAssigned": {
-                    "name": "gamesAssigned",
+                "actions": {
+                    "name": "actions",
                     "isArray": false,
-                    "type": "Int",
+                    "type": {
+                        "nonModel": "ActionSummary"
+                    },
                     "isRequired": true,
                     "attributes": []
                 },
-                "templateDetails": {
-                    "name": "templateDetails",
+                "details": {
+                    "name": "details",
                     "isArray": true,
                     "type": {
-                        "nonModel": "BootstrapTemplateDetail"
+                        "nonModel": "GameActionDetail"
                     },
                     "isRequired": true,
                     "attributes": [],
                     "isArrayNullable": false
                 },
-                "errors": {
-                    "name": "errors",
-                    "isArray": true,
-                    "type": "AWSJSON",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
+                "preview": {
+                    "name": "preview",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
                 }
             }
         },
@@ -20455,560 +20408,6 @@ export const schema = {
                     "name": "nextToken",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "GapInfo": {
-            "name": "GapInfo",
-            "fields": {
-                "recurringGameId": {
-                    "name": "recurringGameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "recurringGameName": {
-                    "name": "recurringGameName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "expectedDate": {
-                    "name": "expectedDate",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "dayOfWeek": {
-                    "name": "dayOfWeek",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "weekKey": {
-                    "name": "weekKey",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "possibleMatchGameId": {
-                    "name": "possibleMatchGameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "possibleMatchGameName": {
-                    "name": "possibleMatchGameName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "matchConfidence": {
-                    "name": "matchConfidence",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "DetectGapsResult": {
-            "name": "DetectGapsResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "venueName": {
-                    "name": "venueName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "startDate": {
-                    "name": "startDate",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "endDate": {
-                    "name": "endDate",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "weeksAnalyzed": {
-                    "name": "weeksAnalyzed",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "recurringGamesChecked": {
-                    "name": "recurringGamesChecked",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "expectedOccurrences": {
-                    "name": "expectedOccurrences",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "confirmedOccurrences": {
-                    "name": "confirmedOccurrences",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gapsFound": {
-                    "name": "gapsFound",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gaps": {
-                    "name": "gaps",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "GapInfo"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": false
-                },
-                "instancesCreated": {
-                    "name": "instancesCreated",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "ReconcileInstancesResult": {
-            "name": "ReconcileInstancesResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gamesAnalyzed": {
-                    "name": "gamesAnalyzed",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "instancesCreated": {
-                    "name": "instancesCreated",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "instancesUpdated": {
-                    "name": "instancesUpdated",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "orphanGames": {
-                    "name": "orphanGames",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "preview": {
-                    "name": "preview",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "details": {
-                    "name": "details",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "ReconcileInstanceDetail"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": false
-                }
-            }
-        },
-        "ReconcileInstanceDetail": {
-            "name": "ReconcileInstanceDetail",
-            "fields": {
-                "gameId": {
-                    "name": "gameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gameName": {
-                    "name": "gameName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gameDate": {
-                    "name": "gameDate",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "action": {
-                    "name": "action",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "instanceId": {
-                    "name": "instanceId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "recurringGameId": {
-                    "name": "recurringGameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "recurringGameName": {
-                    "name": "recurringGameName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "InstanceSummary": {
-            "name": "InstanceSummary",
-            "fields": {
-                "weekKey": {
-                    "name": "weekKey",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "weekStartDate": {
-                    "name": "weekStartDate",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "confirmedCount": {
-                    "name": "confirmedCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "cancelledCount": {
-                    "name": "cancelledCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "skippedCount": {
-                    "name": "skippedCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "unknownCount": {
-                    "name": "unknownCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "noShowCount": {
-                    "name": "noShowCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalExpected": {
-                    "name": "totalExpected",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "complianceRate": {
-                    "name": "complianceRate",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "instances": {
-                    "name": "instances",
-                    "isArray": true,
-                    "type": {
-                        "model": "RecurringGameInstance"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": false
-                }
-            }
-        },
-        "VenueComplianceReport": {
-            "name": "VenueComplianceReport",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "venueName": {
-                    "name": "venueName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "startDate": {
-                    "name": "startDate",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "endDate": {
-                    "name": "endDate",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalExpected": {
-                    "name": "totalExpected",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalConfirmed": {
-                    "name": "totalConfirmed",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalCancelled": {
-                    "name": "totalCancelled",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalSkipped": {
-                    "name": "totalSkipped",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalUnknown": {
-                    "name": "totalUnknown",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalNoShow": {
-                    "name": "totalNoShow",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "overallComplianceRate": {
-                    "name": "overallComplianceRate",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "weekSummaries": {
-                    "name": "weekSummaries",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "InstanceSummary"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": false
-                },
-                "needsReviewCount": {
-                    "name": "needsReviewCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "unknownCount": {
-                    "name": "unknownCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "RecordMissedInstanceResult": {
-            "name": "RecordMissedInstanceResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "message": {
-                    "name": "message",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "instance": {
-                    "name": "instance",
-                    "isArray": false,
-                    "type": {
-                        "model": "RecurringGameInstance"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "wasCreated": {
-                    "name": "wasCreated",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "UpdateInstanceResult": {
-            "name": "UpdateInstanceResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "message": {
-                    "name": "message",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "instance": {
-                    "name": "instance",
-                    "isArray": false,
-                    "type": {
-                        "model": "RecurringGameInstance"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "InstancesNeedingReviewResult": {
-            "name": "InstancesNeedingReviewResult",
-            "fields": {
-                "items": {
-                    "name": "items",
-                    "isArray": true,
-                    "type": {
-                        "model": "RecurringGameInstance"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": false
-                },
-                "nextToken": {
-                    "name": "nextToken",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalCount": {
-                    "name": "totalCount",
-                    "isArray": false,
-                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -28463,5 +27862,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "696917219393f224d9273daa966ed665"
+    "version": "64dc4b6186fdc7a791b9be4663a6ed8f"
 };

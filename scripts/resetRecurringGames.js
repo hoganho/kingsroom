@@ -238,21 +238,24 @@ async function scanTable(tableName, venueId = null) {
 }
 
 /**
- * Scan games with recurringGameId set
+ * Scan ALL games (optionally filtered by venue)
+ * We reset ALL games to PENDING_ASSIGNMENT so they can be reprocessed
  */
-async function scanGamesWithRecurringId(venueId = null) {
+async function scanGamesForRecurringReset(venueId = null) {
   const items = [];
   let lastKey = null;
   const tableName = getTableName('Game');
 
+  logger.info('Scanning ALL games for recurring status reset...');
+
   do {
     const params = {
       TableName: tableName,
-      FilterExpression: 'attribute_exists(recurringGameId)',
     };
 
+    // If venue specified, filter by venue
     if (venueId) {
-      params.FilterExpression += ' AND venueId = :vid';
+      params.FilterExpression = 'venueId = :vid';
       params.ExpressionAttributeValues = { ':vid': venueId };
     }
 
@@ -264,9 +267,23 @@ async function scanGamesWithRecurringId(venueId = null) {
     items.push(...(result.Items || []));
     lastKey = result.LastEvaluatedKey;
 
+    process.stdout.write(`\r  Found ${items.length} games so far...`);
     await sleep(CONFIG.RATE_LIMIT_DELAY);
   } while (lastKey);
 
+  console.log(''); // New line
+  
+  // Show current status breakdown
+  const statusCounts = {};
+  items.forEach(g => {
+    const status = g.recurringGameAssignmentStatus || '(empty)';
+    statusCounts[status] = (statusCounts[status] || 0) + 1;
+  });
+  logger.info('Current status breakdown:');
+  Object.entries(statusCounts).sort((a, b) => b[1] - a[1]).forEach(([status, count]) => {
+    console.log(`    ${status}: ${count}`);
+  });
+  
   return items;
 }
 
@@ -341,13 +358,11 @@ async function clearGameRecurringFields(games, dryRun = false) {
             TableName: tableName,
             Key: { id: game.id },
             UpdateExpression:
-              'REMOVE recurringGameId, recurringGameInstanceId ' +
+              'REMOVE recurringGameId, recurringGameInstanceId, recurringGameAssignmentConfidence ' +
               'SET recurringGameAssignmentStatus = :status, ' +
-              'recurringGameAssignmentConfidence = :conf, ' +
               'updatedAt = :now',
             ExpressionAttributeValues: {
-              ':status': 'NOT_RECURRING',
-              ':conf': 0,
+              ':status': 'PENDING_ASSIGNMENT',  // Changed from NOT_RECURRING so games can be reprocessed
               ':now': new Date().toISOString(),
             },
           })
@@ -409,7 +424,7 @@ async function performBackup(venueId, backupDir) {
 
   // Also backup games with recurring assignments
   const gameTableName = getTableName('Game');
-  const games = await scanGamesWithRecurringId(venueId);
+  const games = await scanGamesForRecurringReset(venueId);
   await backupTable(gameTableName + '_recurring', games, backupDir);
   stats['Game (with recurringGameId)'] = games.length;
 
@@ -469,7 +484,7 @@ async function performReset(venueId, options) {
 
   // Step 4: Clear recurringGameId from Game records
   logger.info('Scanning Game records with recurring assignments...');
-  const games = await scanGamesWithRecurringId(venueId);
+  const games = await scanGamesForRecurringReset(venueId);
   logger.info(`Found ${games.length} Game records to clear`);
 
   if (games.length > 0) {
@@ -545,7 +560,7 @@ WHAT THIS SCRIPT DOES:
   3. Deletes all RecurringGameInstance records (optional)
   4. Deletes all RecurringGameMetrics records
   5. Clears recurringGameId from all Game records
-  6. Resets recurringGameAssignmentStatus to 'NOT_RECURRING'
+  6. Sets recurringGameAssignmentStatus to 'PENDING_ASSIGNMENT' for reprocessing
 
 AFTER RUNNING:
   Re-run your scraper to re-process games. The improved matching logic

@@ -38,6 +38,161 @@ const {
 // Import evolving statistics utilities
 const { initializeStats } = require('./recurring-game-stats');
 
+// ===================================================================
+// DETECTION UTILITIES (inline - no external dependencies)
+// These are duplicated from recurring-resolver.js to avoid path issues
+// between lambdas. Keep in sync if logic changes.
+// ===================================================================
+
+/**
+ * Cash game indicators - if ANY of these match, it's a cash game
+ */
+const CASH_GAME_PATTERNS = [
+    /\bcash\s*game/i,
+    /\bcash\s*session/i,
+    /\bring\s*game/i,
+    /\bcash\s*table/i,
+    /\blive\s*cash/i,
+    /\$?\d+\s*\/\s*\$?\d+/,  // Stake notation: "$1/$2", "1/2"
+];
+
+/**
+ * Detect if a game is CASH or TOURNAMENT
+ */
+const detectSessionMode = (game) => {
+    if (game.gameType === 'CASH_GAME' || game.gameType === 'CASH') {
+        return { mode: 'CASH', confidence: 1.0, reason: 'explicit_gameType' };
+    }
+    if (game.sessionMode === 'CASH') {
+        return { mode: 'CASH', confidence: 1.0, reason: 'explicit_sessionMode' };
+    }
+    
+    const name = game.name || '';
+    for (const pattern of CASH_GAME_PATTERNS) {
+        if (pattern.test(name)) {
+            return { mode: 'CASH', confidence: 0.95, reason: 'name_pattern' };
+        }
+    }
+    
+    return { mode: 'TOURNAMENT', confidence: 0.8, reason: 'default' };
+};
+
+/**
+ * Detect game type category for clustering separation
+ * Returns: 'CASH' | 'TOURNAMENT'
+ */
+const detectGameCategory = (game) => {
+    const sessionInfo = detectSessionMode(game);
+    return sessionInfo.mode === 'CASH' ? 'CASH' : 'TOURNAMENT';
+};
+
+/**
+ * Normalize session mode to consistent values
+ */
+const normalizeSessionMode = (mode) => {
+    if (!mode) return 'TOURNAMENT';
+    const upper = mode.toUpperCase();
+    if (upper === 'CASH' || upper === 'CASH_GAME') return 'CASH';
+    return 'TOURNAMENT';
+};
+
+/**
+ * Detect game variant from name string
+ * @param {string} name - Game name
+ * @returns {string} - Game variant enum value (default: NLHE)
+ */
+const detectGameVariantFromName = (name) => {
+    if (!name) return 'NLHE';
+    
+    const nameLower = name.toLowerCase();
+    
+    if (/\bplo5\b|pot.?limit.?omaha.?5|5.?card.?plo|plo.?5/i.test(nameLower)) return 'PLO5';
+    if (/\bplo4?\b|pot.?limit.?omaha|omaha/i.test(nameLower)) return 'PLO';
+    if (/\bmixed\b|horse|h\.?o\.?r\.?s\.?e|8.?game/i.test(nameLower)) return 'MIXED';
+    if (/\bstud\b|7.?card/i.test(nameLower)) return 'STUD';
+    if (/\brazz\b/i.test(nameLower)) return 'RAZZ';
+    if (/\bdraw\b|2-7|27|badugi/i.test(nameLower)) return 'DRAW';
+    if (/\blimit\b(?!.*(no|pot))/i.test(nameLower)) return 'LHE';
+    
+    return 'NLHE';
+};
+
+/**
+ * Detect game variant from a cluster of games
+ * Priority: 1. Most common explicit gameVariant, 2. Infer from names
+ * @param {Object[]} games - Array of game objects
+ * @returns {string} - Game variant enum value
+ */
+const detectGameVariantFromCluster = (games) => {
+    if (!games || games.length === 0) return 'NLHE';
+    
+    const explicitVariants = games
+        .map(g => g.gameVariant)
+        .filter(v => v && typeof v === 'string');
+    
+    if (explicitVariants.length > 0) {
+        const counts = {};
+        explicitVariants.forEach(v => { counts[v] = (counts[v] || 0) + 1; });
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        return sorted[0][0];
+    }
+    
+    const allNames = games.map(g => (g.name || '').toLowerCase()).join(' ');
+    return detectGameVariantFromName(allNames);
+};
+
+/**
+ * Detect frequency from name string
+ * Priority: 1. Explicit keywords, 2. Day patterns → WEEKLY, 3. Month patterns → MONTHLY
+ * @param {string} name - Game name
+ * @returns {string} - Frequency enum value (default: WEEKLY)
+ */
+const detectFrequencyFromName = (name) => {
+    if (!name) return 'WEEKLY';
+    
+    const nameLower = name.toLowerCase();
+    
+    // Explicit keywords
+    if (/\bweekly\b/i.test(nameLower)) return 'WEEKLY';
+    if (/\bmonthly\b/i.test(nameLower)) return 'MONTHLY';
+    if (/\bdaily\b/i.test(nameLower)) return 'DAILY';
+    if (/\bfortnightly\b|\bbi-?weekly\b/i.test(nameLower)) return 'BIWEEKLY';
+    
+    // Day patterns → WEEKLY
+    const dayPatterns = [
+        /\bmon(?:day)?\b/i, /\btue(?:s(?:day)?)?\b/i, /\bwed(?:nesday)?\b/i,
+        /\bthu(?:rs(?:day)?)?\b/i, /\bfri(?:day)?\b/i, /\bsat(?:urday)?\b/i, /\bsun(?:day)?\b/i,
+    ];
+    for (const pattern of dayPatterns) {
+        if (pattern.test(nameLower)) return 'WEEKLY';
+    }
+    
+    // Month patterns → MONTHLY
+    const monthPatterns = [
+        /\bjan(?:uary)?\b/i, /\bfeb(?:ruary)?\b/i, /\bmar(?:ch)?\b/i, /\bapr(?:il)?\b/i,
+        /\bmay\b/i, /\bjun(?:e)?\b/i, /\bjul(?:y)?\b/i, /\baug(?:ust)?\b/i,
+        /\bsep(?:t(?:ember)?)?\b/i, /\boct(?:ober)?\b/i, /\bnov(?:ember)?\b/i, /\bdec(?:ember)?\b/i,
+        /\b1st\s+(of\s+)?(the\s+)?month\b/i, /\bfirst\s+(of\s+)?(the\s+)?month\b/i,
+        /\blast\s+(of\s+)?(the\s+)?month\b/i, /\bend\s+of\s+month\b/i,
+    ];
+    for (const pattern of monthPatterns) {
+        if (pattern.test(nameLower)) return 'MONTHLY';
+    }
+    
+    return 'WEEKLY';
+};
+
+/**
+ * Detect frequency from a cluster of games
+ * @param {Object[]} games - Array of game objects
+ * @returns {string} - Frequency enum value
+ */
+const detectFrequencyFromCluster = (games) => {
+    if (!games || games.length === 0) return 'WEEKLY';
+    const allNames = games.map(g => (g.name || '').toLowerCase()).join(' ');
+    return detectFrequencyFromName(allNames);
+};
+
 // Initialize DynamoDB
 const client = new DynamoDBClient({ region: process.env.AWS_REGION || 'ap-southeast-2' });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -270,43 +425,6 @@ const formatMinutes = (minutes) => {
     const period = h >= 12 ? 'pm' : 'am';
     const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
     return `${h12}:${String(m).padStart(2, '0')}${period}`;
-};
-
-/**
- * Detect if a game is a cash game based on name or gameType field
- * Cash games must NEVER be clustered with tournaments
- */
-const isCashGame = (game) => {
-    // Check explicit gameType field first
-    if (game.gameType === 'CASH_GAME') return true;
-    if (game.gameType === 'TOURNAMENT') return false;
-    
-    // Check name for cash game indicators
-    if (game.name) {
-        const nameLower = game.name.toLowerCase();
-        
-        // Strong cash game indicators
-        if (/\bcash\s*game\b/i.test(nameLower)) return true;
-        if (/\bcash\s*session\b/i.test(nameLower)) return true;
-        if (/\bring\s*game\b/i.test(nameLower)) return true;
-        if (/\bcash\s*table\b/i.test(nameLower)) return true;
-        
-        // Stakes patterns typical of cash games (e.g., "1/2", "2/5", "$1/$2")
-        if (/\$?\d+\s*\/\s*\$?\d+/.test(nameLower) && !/\d+\s*\/\s*\d+\s*nl/i.test(nameLower)) {
-            // Has stake format but NOT "X/Y NL" tournament format
-            return true;
-        }
-    }
-    
-    return false;
-};
-
-/**
- * Detect game type category for clustering separation
- * Returns: 'CASH' | 'TOURNAMENT'
- */
-const detectGameCategory = (game) => {
-    return isCashGame(game) ? 'CASH' : 'TOURNAMENT';
 };
 
 // ===================================================================
@@ -819,12 +937,18 @@ const bootstrapRecurringGames = async (input) => {
                     ? guarantees.reduce((sum, g) => sum + g, 0) / guarantees.length 
                     : 0;
                 
+                // Use shared detection utilities
+                const detectedVariant = detectGameVariantFromCluster(cluster);
+                const detectedFrequency = detectFrequencyFromCluster(cluster);
+                
                 const templateData = {
                     name: templateName,
                     dayOfWeek: day,
                     venueId,
                     entityId: venue.entityId,
                     gameType: category === 'CASH' ? 'CASH_GAME' : 'TOURNAMENT',
+                    gameVariant: detectedVariant,
+                    frequency: detectedFrequency,
                     typicalBuyIn: Math.round(avgBuyIn),
                     typicalGuarantee: avgGuarantee > 0 ? Math.round(avgGuarantee) : null,
                     typicalStartTime: `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`,

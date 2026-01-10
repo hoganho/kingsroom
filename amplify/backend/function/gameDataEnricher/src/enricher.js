@@ -2,7 +2,10 @@
  * enricher.js
  * Main enrichment orchestration
  * 
- * UPDATED: v2.1.0
+ * UPDATED: v2.2.0
+ * - Added Step 4b: Satellite Resolution (isSatellite detection and target linking)
+ * 
+ * v2.1.0:
  * - Added Step 2c: Duration Completion (gameEndDateTime calculation)
  * - Added gameActualStartDateTime support for accurate duration calculations
  * 
@@ -15,9 +18,10 @@
  * 1. Validation
  * 2. Data completion
  * 2b. Classification derivation
- * 2c. Duration completion (NEW)
+ * 2c. Duration completion
  * 3. Venue resolution
  * 4. Series resolution
+ * 4b. Satellite resolution (NEW)
  * 5. Recurring game resolution
  * 6. Query key computation
  * 7. Financial calculations (with guarantee inference from prizepoolPaid)
@@ -30,6 +34,7 @@ const { completeData, completeSeriesMetadata } = require('./completion/data-comp
 const { completeDurationFields } = require('./completion/duration-completion');
 const { resolveVenue, getVenueFee } = require('./resolution/venue-resolver');
 const { resolveSeriesAssignment } = require('./resolution/series-resolver');
+const { resolveSatellite } = require('./resolution/satellite-resolver');
 const { resolveRecurringAssignment } = require('./resolution/recurring-resolver');
 const { computeQueryKeys } = require('./computation/query-keys');
 const { calculateFinancials } = require('./computation/financials');
@@ -132,6 +137,7 @@ const deriveClassificationFields = (game) => {
  * @param {Object} input.players - Player data to pass to saveGameFunction
  * @param {Object} input.options - Enrichment options
  * @param {boolean} input.options.saveToDatabase - If true, invoke saveGameFunction after enrichment
+ * @param {boolean} input.options.skipSatelliteResolution - If true, skip satellite detection
  * @returns {Object} EnrichGameDataOutput
  */
 const enrichGameData = async (input) => {
@@ -145,13 +151,14 @@ const enrichGameData = async (input) => {
     enrichedGame: null,
     enrichmentMetadata: {
       seriesResolution: null,
+      satelliteResolution: null,
       recurringResolution: null,
       venueResolution: null,
       queryKeysGenerated: false,
       financialsCalculated: false,
       guaranteeWasInferred: false,
-      durationCompleted: false,      // NEW: Track duration completion
-      endTimeCalculated: false,       // NEW: Track if end time was calculated
+      durationCompleted: false,
+      endTimeCalculated: false,
       fieldsCompleted: [],
       processingTimeMs: 0
     },
@@ -214,7 +221,7 @@ const enrichGameData = async (input) => {
     }
     
     // =========================================================
-    // 2c. DURATION COMPLETION (NEW)
+    // 2c. DURATION COMPLETION
     // =========================================================
     // Normalize duration and calculate gameEndDateTime if missing
     console.log('[ENRICHER] Step 2c: Duration completion');
@@ -338,8 +345,73 @@ const enrichGameData = async (input) => {
     }
     
     // =========================================================
+    // 4b. SATELLITE RESOLUTION
+    // =========================================================
+    // Detect if game is a satellite and link to target series
+    // Note: isSatellite is orthogonal to isSeries - a game can be both
+    // (part of a series AND a satellite feeding into an event)
+    if (enrichedGame.gameType === 'TOURNAMENT' && !options.skipSatelliteResolution) {
+      console.log('[ENRICHER] Step 4b: Satellite resolution');
+      
+      try {
+        const satelliteResult = await resolveSatellite({
+          game: enrichedGame,
+          venueId: enrichedGame.venueId,
+          autoLink: true
+        });
+        
+        // Apply satellite updates
+        if (satelliteResult.gameUpdates) {
+          enrichedGame = { ...enrichedGame, ...satelliteResult.gameUpdates };
+        }
+        
+        // Store satellite metadata
+        result.enrichmentMetadata.satelliteResolution = satelliteResult.metadata;
+        
+        // Log satellite detection
+        if (enrichedGame.isSatellite) {
+          console.log('[ENRICHER] ✅ Satellite detected:', {
+            isSatellite: true,
+            tournamentPurpose: enrichedGame.tournamentPurpose,
+            targetSeries: satelliteResult.metadata?.linkedSeries?.seriesName || 'none',
+            seatsAwarded: enrichedGame.satelliteSeatsAwarded || 'unknown',
+            seatRatio: enrichedGame.satelliteSeatRatio || null
+          });
+        } else {
+          console.log('[ENRICHER] Not a satellite tournament');
+        }
+        
+      } catch (satError) {
+        console.error('[ENRICHER] Satellite resolution error:', satError);
+        result.validation.warnings.push({
+          field: 'isSatellite',
+          message: `Satellite resolution failed: ${satError.message}`,
+          code: 'SATELLITE_RESOLUTION_ERROR'
+        });
+        result.enrichmentMetadata.satelliteResolution = {
+          status: 'ERROR',
+          error: satError.message
+        };
+      }
+    } else if (options.skipSatelliteResolution) {
+      console.log('[ENRICHER] Step 4b: Satellite resolution SKIPPED (disabled by option)');
+      result.enrichmentMetadata.satelliteResolution = {
+        status: 'SKIPPED',
+        matchReason: 'option_disabled'
+      };
+    } else {
+      console.log('[ENRICHER] Step 4b: Satellite resolution SKIPPED (not a tournament)');
+      result.enrichmentMetadata.satelliteResolution = {
+        status: 'SKIPPED',
+        matchReason: 'not_tournament'
+      };
+    }
+    
+    // =========================================================
     // 5. RECURRING GAME RESOLUTION
     // =========================================================
+    // Note: Satellites CAN be recurring (e.g., "Thursday Colossus Satty")
+    // so we don't skip recurring resolution for satellites
     if (!options.skipRecurringResolution && enrichedGame.venueId && !enrichedGame.isSeries) {
       console.log('[ENRICHER] Step 5: Recurring game resolution');
       
@@ -395,6 +467,7 @@ const enrichGameData = async (input) => {
     // - isSeries=true + isRegular=false → Series game (part of tournament series)
     // - isSeries=false + isRegular=true → Regular game (recurring weekly/daily game)
     // - isSeries=false + isRegular=false → One-off game (neither series nor recurring)
+    // Note: isSatellite is orthogonal - a satellite can be series, regular, or one-off
     
     console.log('[ENRICHER] Step 5c: isRegular finalization');
     
@@ -420,7 +493,7 @@ const enrichGameData = async (input) => {
     }
     
     // Log final classification
-    console.log(`[ENRICHER] Game classification: isSeries=${enrichedGame.isSeries}, isRegular=${enrichedGame.isRegular}, recurringGameId=${enrichedGame.recurringGameId || 'none'}, tournamentSeriesId=${enrichedGame.tournamentSeriesId || 'none'}`);
+    console.log(`[ENRICHER] Game classification: isSeries=${enrichedGame.isSeries}, isSatellite=${enrichedGame.isSatellite || false}, isRegular=${enrichedGame.isRegular}, recurringGameId=${enrichedGame.recurringGameId || 'none'}, tournamentSeriesId=${enrichedGame.tournamentSeriesId || 'none'}`);
     
     // =========================================================
     // 6. QUERY KEY COMPUTATION

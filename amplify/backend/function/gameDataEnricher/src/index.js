@@ -1,152 +1,205 @@
-/* Amplify Params - DO NOT EDIT
-	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
-	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
-	API_KINGSROOM_GRAPHQLAPIKEYOUTPUT
-	API_KINGSROOM_RECURRINGGAMETABLE_ARN
-	API_KINGSROOM_RECURRINGGAMETABLE_NAME
-	API_KINGSROOM_TOURNAMENTSERIESTABLE_ARN
-	API_KINGSROOM_TOURNAMENTSERIESTABLE_NAME
-	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_ARN
-	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_NAME
-	API_KINGSROOM_VENUETABLE_ARN
-	API_KINGSROOM_VENUETABLE_NAME
-	ENV
-	REGION
-Amplify Params - DO NOT EDIT */
-
 /**
- * index.js
- * Lambda handler for gameDataEnricher
+ * gameDataEnricher Lambda - index.js
  * 
- * This Lambda enriches game data before it's persisted to the database.
- * It handles:
- * - Validation
- * - Series resolution
- * - Recurring game resolution
- * - Query key computation
- * - Financial calculations
+ * VERSION 3.0.0 - Consolidated all recurring game operations
+ * REPLACES: recurringGameAdmin Lambda entirely
  * 
- * Can be invoked via:
- * 1. GraphQL mutation (enrichGameData)
- * 2. Direct Lambda invocation (from webScraperFunction)
+ * Operations:
+ * - enrichGameData (original)
+ * - Bulk processing (processUnassignedGames, reprocessDeferredGames, getUnassignedGamesStats, previewCandidatePatterns)
+ * - Admin operations (getRecurringGameVenueStats, findRecurringGameDuplicates, mergeRecurringGameDuplicates, 
+ *                     cleanupOrphanedRecurringGames, reResolveRecurringAssignment, reResolveRecurringAssignmentsForVenue)
+ * - Instance tracking (detectRecurringGameGaps, reconcileRecurringInstances, recordMissedInstance, 
+ *                      updateInstanceStatus, getVenueComplianceReport, getWeekInstances, listInstancesNeedingReview)
+ * 
+ * Location: amplify/backend/function/gameDataEnricher/src/index.js
  */
 
+'use strict';
+
 const { enrichGameData } = require('./enricher');
-const { LambdaMonitoring, trackEnrichmentComplete } = require('./utils/monitoring');
 
-// ===================================================================
-// LAMBDA HANDLER
-// ===================================================================
+// Bulk processing operations
+const {
+    processUnassignedGames,
+    reprocessDeferredGames,
+    getUnassignedGamesStats,
+    previewCandidatePatterns,
+} = require('./resolution/bulk-recurring-processor');
 
+// Admin operations
+const {
+    getRecurringGameVenueStats,
+    findRecurringGameDuplicates,
+    mergeRecurringGameDuplicates,
+    cleanupOrphanedRecurringGames,
+    reResolveRecurringAssignment,
+    reResolveRecurringAssignmentsForVenue,
+} = require('./resolution/admin-resolver');
+
+// Instance tracking operations
+const {
+    detectRecurringGameGaps,
+    reconcileRecurringInstances,
+    recordMissedInstance,
+    updateInstanceStatus,
+    getVenueComplianceReport,
+    getWeekInstances,
+    listInstancesNeedingReview,
+} = require('./resolution/instance-manager');
+
+/**
+ * Main Lambda handler
+ */
 exports.handler = async (event, context) => {
-  console.log('[ENRICHER] Handler invoked');
-  console.log('[ENRICHER] Event:', JSON.stringify(event, null, 2));
-  
-  // Extract operation info
-  const { typeName, fieldName, arguments: args } = event;
-  const operation = typeName && fieldName ? `${typeName}.${fieldName}` : 'DirectInvoke';
-  
-  // Initialize monitoring
-  const entityId = args?.input?.entityId || event?.input?.entityId || null;
-  const monitoring = new LambdaMonitoring('gameDataEnricher', entityId);
-  monitoring.trackOperation('HANDLER_START', 'Handler', operation);
-  
-  try {
-    // Determine input source (GraphQL vs direct invoke)
-    let input;
+    console.log('[GameDataEnricher] Event:', JSON.stringify(event, null, 2));
     
-    if (args?.input) {
-      // GraphQL invocation
-      input = args.input;
-    } else if (event.input) {
-      // Direct Lambda invocation
-      input = event.input;
-    } else if (event.game && event.entityId) {
-      // Legacy/simplified invocation format
-      input = {
-        game: event.game,
-        entityId: event.entityId,
-        venue: event.venue,
-        series: event.series,
-        options: event.options
-      };
-    } else {
-      throw new Error('Invalid input format. Expected input.game and input.entityId');
-    }
+    // Determine operation from GraphQL field name
+    const fieldName = event.fieldName || event.info?.fieldName;
+    const args = event.arguments || {};
     
-    // Validate required fields
-    if (!input.game) {
-      throw new Error('game is required');
-    }
-    if (!input.entityId) {
-      throw new Error('entityId is required');
-    }
-    
-    // Handle different operations
-    let result;
-    
-    switch (operation) {
-      case 'Mutation.enrichGameData':
-      case 'Query.previewEnrichment':
-      case 'DirectInvoke':
-        result = await enrichGameData(input);
-        break;
+    try {
+        switch (fieldName) {
+            // ================================================================
+            // ORIGINAL ENRICHMENT
+            // ================================================================
+            case 'enrichGameData':
+                return await enrichGameData(args.input || args);
+            
+            // ================================================================
+            // BULK PROCESSING OPERATIONS
+            // ================================================================
+            case 'processUnassignedGames':
+                return await processUnassignedGames(args.input || args);
+            
+            case 'reprocessDeferredGames':
+                return await reprocessDeferredGames(args.input || args);
+            
+            case 'getUnassignedGamesStats':
+                return await getUnassignedGamesStats(args.input || args);
+            
+            case 'previewCandidatePatterns':
+                return await previewCandidatePatterns(args.input || args);
+            
+            // ================================================================
+            // ADMIN OPERATIONS
+            // ================================================================
+            case 'getRecurringGameVenueStats':
+                return await getRecurringGameVenueStats(args.venueId);
+            
+            case 'findRecurringGameDuplicates':
+                return await findRecurringGameDuplicates(args.venueId, args.similarityThreshold);
+            
+            case 'mergeRecurringGameDuplicates':
+                const mergeInput = args.input || args;
+                return await mergeRecurringGameDuplicates(
+                    mergeInput.canonicalId,
+                    mergeInput.duplicateIds,
+                    mergeInput.preview !== false
+                );
+            
+            case 'cleanupOrphanedRecurringGames':
+                const cleanupInput = args.input || args;
+                return await cleanupOrphanedRecurringGames(
+                    cleanupInput.venueId,
+                    cleanupInput.preview !== false
+                );
+            
+            case 'reResolveRecurringAssignment':
+                const reResolveInput = args.input || args;
+                return await reResolveRecurringAssignment(
+                    reResolveInput.gameId,
+                    reResolveInput.thresholds || {},
+                    reResolveInput.preview !== false
+                );
+            
+            case 'reResolveRecurringAssignmentsForVenue':
+                const venueResolveInput = args.input || args;
+                return await reResolveRecurringAssignmentsForVenue(
+                    venueResolveInput.venueId,
+                    venueResolveInput.thresholds || {},
+                    venueResolveInput.preview !== false
+                );
+            
+            // ================================================================
+            // INSTANCE TRACKING OPERATIONS
+            // ================================================================
+            case 'detectRecurringGameGaps':
+                const gapsInput = args.input || args;
+                return await detectRecurringGameGaps(
+                    gapsInput.venueId,
+                    gapsInput.startDate,
+                    gapsInput.endDate,
+                    gapsInput.createInstances || false
+                );
+            
+            case 'reconcileRecurringInstances':
+                const reconcileInput = args.input || args;
+                return await reconcileRecurringInstances(
+                    reconcileInput.venueId,
+                    reconcileInput.startDate,
+                    reconcileInput.endDate,
+                    reconcileInput.preview !== false
+                );
+            
+            case 'recordMissedInstance':
+                const missedInput = args.input || args;
+                return await recordMissedInstance(
+                    missedInput.recurringGameId,
+                    missedInput.expectedDate,
+                    missedInput.status,
+                    missedInput.reason,
+                    missedInput.notes
+                );
+            
+            case 'updateInstanceStatus':
+                const updateInput = args.input || args;
+                return await updateInstanceStatus(
+                    updateInput.instanceId,
+                    updateInput.status,
+                    updateInput.reason,
+                    updateInput.notes
+                );
+            
+            case 'getVenueComplianceReport':
+                const complianceInput = args.input || args;
+                return await getVenueComplianceReport(
+                    complianceInput.venueId,
+                    complianceInput.startDate,
+                    complianceInput.endDate
+                );
+            
+            case 'getWeekInstances':
+                const weekInput = args.input || args;
+                return await getWeekInstances(
+                    weekInput.venueId || weekInput.entityId,
+                    weekInput.weekKey
+                );
+            
+            case 'listInstancesNeedingReview':
+                const reviewInput = args.input || args;
+                return await listInstancesNeedingReview(
+                    reviewInput.venueId || reviewInput.entityId,
+                    reviewInput.limit,
+                    reviewInput.nextToken
+                );
+            
+            // ================================================================
+            // UNKNOWN OPERATION
+            // ================================================================
+            default:
+                console.error(`[GameDataEnricher] Unknown operation: ${fieldName}`);
+                throw new Error(`Unknown operation: ${fieldName}`);
+        }
+    } catch (error) {
+        console.error(`[GameDataEnricher] Error in ${fieldName}:`, error);
         
-      default:
-        // Default to enrichment
-        console.log(`[ENRICHER] Unknown operation "${operation}", treating as enrichment`);
-        result = await enrichGameData(input);
+        // Return error in appropriate format
+        return {
+            success: false,
+            error: error.message,
+            ...(fieldName?.includes('Stats') ? { total: 0, unprocessed: 0, candidateRecurring: 0, notRecurring: 0, assigned: 0 } : {}),
+            ...(fieldName?.includes('process') ? { processed: 0, assigned: 0, created: 0, deferred: 0, noMatch: 0, errors: 1, dryRun: true, details: [] } : {}),
+        };
     }
-    
-    // Track completion
-    trackEnrichmentComplete(monitoring, result);
-    monitoring.trackOperation('HANDLER_SUCCESS', 'Handler', operation, {
-      success: result.success,
-      isValid: result.validation?.isValid,
-      seriesResolved: !!result.enrichedGame?.tournamentSeriesId,
-      recurringResolved: !!result.enrichedGame?.recurringGameId,
-      processingTimeMs: result.enrichmentMetadata?.processingTimeMs
-    });
-    
-    return result;
-    
-  } catch (error) {
-    console.error('[ENRICHER] Handler error:', error);
-    monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'fatal', {
-      error: error.message
-    });
-    
-    // Return error in consistent format
-    return {
-      success: false,
-      validation: {
-        isValid: false,
-        errors: [{
-          field: '_system',
-          message: error.message,
-          code: 'HANDLER_ERROR'
-        }],
-        warnings: []
-      },
-      enrichedGame: null,
-      enrichmentMetadata: {
-        seriesResolution: null,
-        recurringResolution: null,
-        venueResolution: null,
-        queryKeysGenerated: false,
-        financialsCalculated: false,
-        fieldsCompleted: [],
-        processingTimeMs: 0
-      }
-    };
-    
-  } finally {
-    await monitoring.flush();
-  }
 };
-
-// ===================================================================
-// UTILITY EXPORTS (for testing)
-// ===================================================================
-
-module.exports.enrichGameData = enrichGameData;

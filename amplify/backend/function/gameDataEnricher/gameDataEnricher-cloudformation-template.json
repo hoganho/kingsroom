@@ -205,7 +205,8 @@
         },
         "Runtime": "nodejs22.x",
         "Layers": [],
-        "Timeout": 25
+        "MemorySize": 256,
+        "Timeout": 300
       }
     },
     "LambdaExecutionRole": {
@@ -601,6 +602,8 @@
                 "dynamodb:Scan"
               ],
               "Resource": [
+                "arn:aws:dynamodb:*:*:table/Game-*",
+                "arn:aws:dynamodb:*:*:table/Game-*/index/*",
                 "arn:aws:dynamodb:*:*:table/TournamentSeries-*",
                 "arn:aws:dynamodb:*:*:table/TournamentSeries-*/index/*",
                 "arn:aws:dynamodb:*:*:table/TournamentSeriesTitle-*",

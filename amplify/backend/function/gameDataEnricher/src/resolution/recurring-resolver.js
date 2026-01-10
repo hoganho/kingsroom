@@ -2,6 +2,11 @@
  * recurring-resolver.js
  * REFACTORED: More forgiving matching logic for recurring game resolution
  * 
+ * UPDATED: v2.1.0
+ * - Added PATTERN_DETECTION thresholds for structural similarity in pattern detection
+ * - Enhanced findSimilarUnassignedGames to check buy-in and time similarity
+ * - Aligns single-game processing with bulk-recurring-processor clustering logic
+ * 
  * Key Changes:
  * 1. STRUCTURAL MATCHING FIRST - venue + day + sessionMode + variant is primary
  * 2. HEAVY NAME NORMALIZATION - strips marketing terms, amounts, structure keywords
@@ -129,6 +134,26 @@ const MATCH_THRESHOLDS = {
     BUYIN_IMPOSSIBLE_RATIO: 10, // 10x difference is probably different game
 };
 
+/**
+ * Pattern detection thresholds - used by findSimilarUnassignedGames
+ * These align with bulk-recurring-processor clustering logic
+ */
+const PATTERN_DETECTION = {
+    // Buy-in tolerance ratio for pattern detection
+    // Games within this ratio are considered structurally similar
+    // E.g., 2.0 means $100 and $200 are similar, but $100 and $300 are not
+    BUYIN_TOLERANCE_RATIO: 2.0,
+    
+    // Time tolerance in minutes for pattern detection
+    // Games starting within this window are considered same time slot
+    TIME_TOLERANCE_MINUTES: 90,
+    
+    // Minimum structural similarity score to confirm a pattern
+    // For CASH games: just needs buy-in similarity
+    // For TOURNAMENTS: combines buy-in, time, and name similarity
+    MIN_STRUCTURAL_SIMILARITY: 0.5
+};
+
 // ===================================================================
 // SESSION MODE DETECTION (SIMPLIFIED)
 // ===================================================================
@@ -173,6 +198,17 @@ const detectSessionMode = (game) => {
 };
 
 /**
+ * Detect game type category for clustering separation
+ * Returns: 'CASH' | 'TOURNAMENT'
+ * 
+ * Used by bootstrap to ensure cash games are NEVER clustered with tournaments
+ */
+const detectGameCategory = (game) => {
+    const sessionInfo = detectSessionMode(game);
+    return sessionInfo.mode === 'CASH' ? 'CASH' : 'TOURNAMENT';
+};
+
+/**
  * Normalize session mode to consistent values
  */
 const normalizeSessionMode = (mode) => {
@@ -180,6 +216,175 @@ const normalizeSessionMode = (mode) => {
     const upper = mode.toUpperCase();
     if (upper === 'CASH' || upper === 'CASH_GAME') return 'CASH';
     return 'TOURNAMENT';
+};
+
+// ===================================================================
+// GAME VARIANT DETECTION
+// ===================================================================
+
+/**
+ * Detect game variant from a single game
+ * Priority: 1. Game.gameVariant field, 2. Infer from name
+ * 
+ * @param {Object} game - Game object with optional gameVariant and name
+ * @returns {string} - Game variant enum value
+ */
+const detectGameVariantFromGame = (game) => {
+    // First: Check for explicit gameVariant field
+    if (game.gameVariant && typeof game.gameVariant === 'string') {
+        return game.gameVariant;
+    }
+    
+    // Second: Infer from name
+    return detectGameVariantFromName(game.name);
+};
+
+/**
+ * Detect game variant from name string
+ * 
+ * @param {string} name - Game name
+ * @returns {string} - Game variant enum value (default: NLHE)
+ */
+const detectGameVariantFromName = (name) => {
+    if (!name) return 'NLHE';
+    
+    const nameLower = name.toLowerCase();
+    
+    // PLO5 - 5-card Pot Limit Omaha
+    if (/\bplo5\b|pot.?limit.?omaha.?5|5.?card.?plo|plo.?5/i.test(nameLower)) return 'PLO5';
+    
+    // PLO - Pot Limit Omaha (4-card)
+    if (/\bplo4?\b|pot.?limit.?omaha|omaha/i.test(nameLower)) return 'PLO';
+    
+    // Mixed games (HORSE, 8-game, etc.)
+    if (/\bmixed\b|horse|h\.?o\.?r\.?s\.?e|8.?game/i.test(nameLower)) return 'MIXED';
+    
+    // Stud games
+    if (/\bstud\b|7.?card/i.test(nameLower)) return 'STUD';
+    
+    // Razz
+    if (/\brazz\b/i.test(nameLower)) return 'RAZZ';
+    
+    // Draw games (2-7, Badugi, etc.)
+    if (/\bdraw\b|2-7|27|badugi/i.test(nameLower)) return 'DRAW';
+    
+    // Limit Hold'em (not no-limit, not pot-limit)
+    if (/\blimit\b(?!.*(no|pot))/i.test(nameLower)) return 'LHE';
+    
+    // Default to No-Limit Hold'em (most common)
+    return 'NLHE';
+};
+
+/**
+ * Detect game variant from a cluster of games
+ * Priority: 1. Most common explicit gameVariant, 2. Infer from names
+ * 
+ * @param {Object[]} games - Array of game objects
+ * @returns {string} - Game variant enum value
+ */
+const detectGameVariantFromCluster = (games) => {
+    if (!games || games.length === 0) return 'NLHE';
+    
+    // First: Check for explicit gameVariant fields on games
+    const explicitVariants = games
+        .map(g => g.gameVariant)
+        .filter(v => v && typeof v === 'string');
+    
+    if (explicitVariants.length > 0) {
+        // Return most common explicit variant
+        const counts = {};
+        explicitVariants.forEach(v => { counts[v] = (counts[v] || 0) + 1; });
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        return sorted[0][0];
+    }
+    
+    // Second: Infer from combined names
+    const allNames = games.map(g => (g.name || '').toLowerCase()).join(' ');
+    return detectGameVariantFromName(allNames);
+};
+
+// ===================================================================
+// FREQUENCY DETECTION
+// ===================================================================
+
+/**
+ * Detect frequency from name string
+ * Priority: 
+ *   1. Explicit keywords (weekly, monthly, daily)
+ *   2. Day patterns (Mon, Monday, etc.) → WEEKLY
+ *   3. Month patterns (Jan, January, etc.) → MONTHLY
+ *   4. Default: WEEKLY
+ * 
+ * @param {string} name - Game name
+ * @returns {string} - Frequency enum value (default: WEEKLY)
+ */
+const detectFrequencyFromName = (name) => {
+    if (!name) return 'WEEKLY';
+    
+    const nameLower = name.toLowerCase();
+    
+    // Check for explicit frequency keywords first
+    if (/\bweekly\b/i.test(nameLower)) return 'WEEKLY';
+    if (/\bmonthly\b/i.test(nameLower)) return 'MONTHLY';
+    if (/\bdaily\b/i.test(nameLower)) return 'DAILY';
+    if (/\bfortnightly\b|\bbi-?weekly\b/i.test(nameLower)) return 'BIWEEKLY';
+    
+    // Check for day names/abbreviations → WEEKLY
+    // These indicate a weekly recurring game on that day
+    const dayPatterns = [
+        /\bmon(?:day)?\b/i,
+        /\btue(?:s(?:day)?)?\b/i,
+        /\bwed(?:nesday)?\b/i,
+        /\bthu(?:rs(?:day)?)?\b/i,
+        /\bfri(?:day)?\b/i,
+        /\bsat(?:urday)?\b/i,
+        /\bsun(?:day)?\b/i,
+    ];
+    
+    for (const pattern of dayPatterns) {
+        if (pattern.test(nameLower)) return 'WEEKLY';
+    }
+    
+    // Check for month names/abbreviations → MONTHLY
+    const monthPatterns = [
+        /\bjan(?:uary)?\b/i,
+        /\bfeb(?:ruary)?\b/i,
+        /\bmar(?:ch)?\b/i,
+        /\bapr(?:il)?\b/i,
+        /\bmay\b/i,
+        /\bjun(?:e)?\b/i,
+        /\bjul(?:y)?\b/i,
+        /\baug(?:ust)?\b/i,
+        /\bsep(?:t(?:ember)?)?\b/i,
+        /\boct(?:ober)?\b/i,
+        /\bnov(?:ember)?\b/i,
+        /\bdec(?:ember)?\b/i,
+        /\b1st\s+(of\s+)?(the\s+)?month\b/i,
+        /\bfirst\s+(of\s+)?(the\s+)?month\b/i,
+        /\blast\s+(of\s+)?(the\s+)?month\b/i,
+        /\bend\s+of\s+month\b/i,
+    ];
+    
+    for (const pattern of monthPatterns) {
+        if (pattern.test(nameLower)) return 'MONTHLY';
+    }
+    
+    // Default to WEEKLY (most common for recurring poker games)
+    return 'WEEKLY';
+};
+
+/**
+ * Detect frequency from a cluster of games
+ * Combines all names and detects frequency pattern
+ * 
+ * @param {Object[]} games - Array of game objects
+ * @returns {string} - Frequency enum value
+ */
+const detectFrequencyFromCluster = (games) => {
+    if (!games || games.length === 0) return 'WEEKLY';
+    
+    const allNames = games.map(g => (g.name || '').toLowerCase()).join(' ');
+    return detectFrequencyFromName(allNames);
 };
 
 // ===================================================================
@@ -319,7 +524,7 @@ const getRecurringGamesByVenue = async (venueId) => {
     try {
         const result = await client.send(new QueryCommand({
             TableName: tableName,
-            IndexName: 'byVenue',
+            IndexName: 'byVenueRecurringGame',  // Fixed: was 'byVenue'
             KeyConditionExpression: 'venueId = :vid',
             FilterExpression: 'isActive = :active',
             ExpressionAttributeValues: {
@@ -345,9 +550,11 @@ const getRecurringGamesByVenueAndDay = async (venueId, dayOfWeek) => {
     const tableName = getTableName('RecurringGame');
     
     try {
+        // Query by venueId only, filter by dayOfWeek in FilterExpression
+        // The GSI has composite sort key (dayOfWeek#name), so we filter instead
         const result = await client.send(new QueryCommand({
             TableName: tableName,
-            IndexName: 'byVenue',
+            IndexName: 'byVenueRecurringGame',
             KeyConditionExpression: 'venueId = :vid',
             FilterExpression: 'dayOfWeek = :dow AND isActive = :active',
             ExpressionAttributeValues: {
@@ -359,7 +566,7 @@ const getRecurringGamesByVenueAndDay = async (venueId, dayOfWeek) => {
         
         return result.Items || [];
     } catch (error) {
-        console.error('[RECURRING] Error fetching recurring games:', error);
+        console.error('[RECURRING] Error fetching recurring games by day:', error);
         return [];
     }
 };
@@ -372,15 +579,20 @@ const getRecurringGamesByVenueAndDay = async (venueId, dayOfWeek) => {
  * - If we've seen 1+ similar unassigned games → pattern is repeating → create
  * - If this is the first → might be ad-hoc → defer creation
  * 
+ * UPDATED: Now includes structural similarity checks (buy-in, time) to align
+ * with bulk clustering logic. This ensures single-game processing creates
+ * the same templates that bulk processing would.
+ * 
  * @param {string} venueId - Venue ID
  * @param {string} dayOfWeek - Day of week (e.g., "MONDAY")
  * @param {string} sessionMode - "CASH" or "TOURNAMENT"
  * @param {string} gameVariant - Game variant (e.g., "NLHE")
  * @param {string} gameName - Game name for similarity matching
  * @param {string} excludeGameId - Game ID to exclude from results (the current game)
+ * @param {Object} gameData - Full game object for structural comparison (buyIn, gameStartDateTime)
  * @returns {Array} Array of similar unassigned games
  */
-const findSimilarUnassignedGames = async (venueId, dayOfWeek, sessionMode, gameVariant, gameName, excludeGameId = null) => {
+const findSimilarUnassignedGames = async (venueId, dayOfWeek, sessionMode, gameVariant, gameName, excludeGameId = null, gameData = {}) => {
     if (!venueId || !dayOfWeek) return [];
     
     const client = getDocClient();
@@ -412,9 +624,12 @@ const findSimilarUnassignedGames = async (venueId, dayOfWeek, sessionMode, gameV
         
         if (candidates.length === 0) return [];
         
+        // Filter out series games - they shouldn't be part of recurring game analysis
+        const nonSeriesGames = candidates.filter(g => g.isSeries !== true && g.isSeries !== 'true');
+        
         // Filter by session mode
         const normalizedMode = normalizeSessionMode(sessionMode);
-        const modeFiltered = candidates.filter(g => {
+        const modeFiltered = nonSeriesGames.filter(g => {
             const gameMode = detectSessionMode(g).mode;
             return normalizeSessionMode(gameMode) === normalizedMode;
         });
@@ -429,23 +644,84 @@ const findSimilarUnassignedGames = async (venueId, dayOfWeek, sessionMode, gameV
             );
         }
         
-        // For CASH games: structural match is enough
-        if (normalizedMode === 'CASH') {
-            const similar = variantFiltered.filter(g => g.id !== excludeGameId);
-            console.log(`[RECURRING] Cash game pattern: ${similar.length} similar games found`);
-            return similar;
-        }
+        // Get reference game's structural data
+        const refBuyIn = gameData.buyIn || 0;
+        const refTime = getTimeAsMinutes(gameData.gameStartDateTime);
         
-        // For TOURNAMENTS: also check name similarity
-        const normalizedInput = normalizeGameName(gameName);
+        // Helper: Check if buy-ins are similar for pattern detection
+        const buyInsAreSimilarForPattern = (buyIn1, buyIn2) => {
+            if (!buyIn1 || !buyIn2 || buyIn1 <= 0 || buyIn2 <= 0) return true; // Missing data = compatible
+            const ratio = Math.max(buyIn1, buyIn2) / Math.min(buyIn1, buyIn2);
+            return ratio <= PATTERN_DETECTION.BUYIN_TOLERANCE_RATIO;
+        };
+        
+        // Helper: Check if times are similar for pattern detection
+        const timesAreSimilarForPattern = (time1, time2) => {
+            if (time1 === null || time2 === null) return true; // Missing data = compatible
+            const diff = Math.abs(time1 - time2);
+            return diff <= PATTERN_DETECTION.TIME_TOLERANCE_MINUTES;
+        };
+        
+        // Helper: Calculate structural similarity score (0-1)
+        const calculatePatternSimilarity = (candidateGame) => {
+            const candBuyIn = candidateGame.buyIn || 0;
+            const candTime = getTimeAsMinutes(candidateGame.gameStartDateTime);
+            
+            // For CASH games: primarily check buy-in (stakes)
+            if (normalizedMode === 'CASH') {
+                return buyInsAreSimilarForPattern(refBuyIn, candBuyIn) ? 1.0 : 0.3;
+            }
+            
+            // For TOURNAMENTS: combine buy-in, time, and name similarity
+            let score = 0;
+            let factors = 0;
+            
+            // Buy-in check (30% weight)
+            if (refBuyIn > 0 && candBuyIn > 0) {
+                if (buyInsAreSimilarForPattern(refBuyIn, candBuyIn)) {
+                    score += 0.3;
+                }
+                factors += 0.3;
+            }
+            
+            // Time check (20% weight)
+            if (refTime !== null && candTime !== null) {
+                if (timesAreSimilarForPattern(refTime, candTime)) {
+                    score += 0.2;
+                }
+                factors += 0.2;
+            }
+            
+            // Name similarity (50% weight)
+            const nameSim = calculateNameSimilarity(gameName, candidateGame.name || '');
+            score += nameSim * 0.5;
+            factors += 0.5;
+            
+            // Normalize if we have missing factors
+            if (factors > 0 && factors < 1.0) {
+                score = score / factors;
+            }
+            
+            return score;
+        };
+        
+        // Filter by structural similarity
         const similar = variantFiltered.filter(g => {
             if (g.id === excludeGameId) return false;
             
-            const similarity = calculateNameSimilarity(gameName, g.name);
-            return similarity >= MATCH_THRESHOLDS.PATTERN_SIMILARITY;
+            const similarity = calculatePatternSimilarity(g);
+            return similarity >= PATTERN_DETECTION.MIN_STRUCTURAL_SIMILARITY;
         });
         
-        console.log(`[RECURRING] Tournament pattern: ${similar.length} similar games found (name similarity >= ${MATCH_THRESHOLDS.PATTERN_SIMILARITY})`);
+        console.log(`[RECURRING] After structural similarity filter (>=${PATTERN_DETECTION.MIN_STRUCTURAL_SIMILARITY}): ${similar.length} similar games`);
+        
+        // Log details for debugging
+        if (similar.length > 0 && similar.length <= 5) {
+            similar.forEach(g => {
+                const sim = calculatePatternSimilarity(g);
+                console.log(`[RECURRING]   - "${g.name}" (buyIn: $${g.buyIn || '?'}) similarity: ${sim.toFixed(2)}`);
+            });
+        }
         
         return similar;
         
@@ -489,6 +765,11 @@ const detectCandidatePatterns = async (venueId, minOccurrences = 2) => {
         const groups = new Map();
         
         for (const game of games) {
+            // Skip series games - they shouldn't be part of recurring game analysis
+            if (game.isSeries === true || game.isSeries === 'true') {
+                continue;
+            }
+            
             const sessionInfo = detectSessionMode(game);
             const sessionMode = sessionInfo.mode;
             const dayOfWeek = game.gameDayOfWeek || getDayOfWeek(game.gameStartDateTime);
@@ -584,6 +865,7 @@ const detectCandidatePatterns = async (venueId, minOccurrences = 2) => {
 
 /**
  * Create a new recurring game
+ * Automatically detects gameVariant and frequency if not provided
  */
 const createRecurringGame = async (gameData) => {
     const client = getDocClient();
@@ -596,6 +878,28 @@ const createRecurringGame = async (gameData) => {
     const gameType = gameData.gameType || 
         (gameData.sessionMode === 'CASH' ? 'CASH_GAME' : 'TOURNAMENT');
     
+    // Detect gameVariant if not provided
+    // Priority: 1. Explicit gameData.gameVariant, 2. From _sourceGames cluster, 3. From name
+    let gameVariant = gameData.gameVariant;
+    if (!gameVariant) {
+        if (gameData._sourceGames && gameData._sourceGames.length > 0) {
+            gameVariant = detectGameVariantFromCluster(gameData._sourceGames);
+        } else {
+            gameVariant = detectGameVariantFromName(gameData.name);
+        }
+    }
+    
+    // Detect frequency if not provided
+    // Priority: 1. Explicit gameData.frequency, 2. From _sourceGames cluster, 3. From name
+    let frequency = gameData.frequency;
+    if (!frequency) {
+        if (gameData._sourceGames && gameData._sourceGames.length > 0) {
+            frequency = detectFrequencyFromCluster(gameData._sourceGames);
+        } else {
+            frequency = detectFrequencyFromName(gameData.name);
+        }
+    }
+    
     const { initializeStats } = require('../utils/recurring-game-stats');
     
     // Initialize with evolving statistics
@@ -607,8 +911,9 @@ const createRecurringGame = async (gameData) => {
         ...gameData,
         ...statsData,  // Add evolving statistics
         gameType,
+        gameVariant,  // Use detected variant
+        frequency,    // Use detected frequency
         'dayOfWeek#name': `${gameData.dayOfWeek}#${gameData.name}`,
-        frequency: gameData.frequency || 'WEEKLY',
         isActive: true,
         isPaused: false,
         createdAt: now,
@@ -625,7 +930,7 @@ const createRecurringGame = async (gameData) => {
             ConditionExpression: 'attribute_not_exists(id)'
         }));
         
-        console.log(`[RECURRING] Created new recurring game: "${item.name}" (${id}) [${gameType}]`);
+        console.log(`[RECURRING] Created new recurring game: "${item.name}" (${id}) [${gameType}] variant=${gameVariant} freq=${frequency}`);
         return item;
     } catch (error) {
         if (error.name === 'ConditionalCheckFailedException') {
@@ -1104,7 +1409,8 @@ const resolveRecurringAssignment = async ({
                 sessionMode, 
                 game.gameVariant, 
                 name,
-                game.id  // Exclude current game from results
+                game.id,  // Exclude current game from results
+                game      // Pass full game for structural comparison
             );
             
             if (similarGames.length === 0) {
@@ -1263,17 +1569,27 @@ module.exports = {
     extractCoreTokens,
     generateRecurringDisplayName,
     
-    // Session mode
+    // Session mode detection
     detectSessionMode,
+    detectGameCategory,  // Simple wrapper for clustering
     normalizeSessionMode,
     CASH_GAME_PATTERNS,
+    
+    // Game variant detection (NEW)
+    detectGameVariantFromGame,
+    detectGameVariantFromName,
+    detectGameVariantFromCluster,
+    
+    // Frequency detection (NEW)
+    detectFrequencyFromName,
+    detectFrequencyFromCluster,
     
     // Database
     getRecurringGamesByVenue,
     getRecurringGamesByVenueAndDay,
     createRecurringGame,
     findSimilarUnassignedGames,
-    detectCandidatePatterns,  // NEW: Admin pattern detection
+    detectCandidatePatterns,
     
     // Field inheritance
     inheritFieldsFromTemplate,
@@ -1291,5 +1607,6 @@ module.exports = {
     
     // Constants
     SCORING_WEIGHTS,
-    MATCH_THRESHOLDS
+    MATCH_THRESHOLDS,
+    PATTERN_DETECTION
 };

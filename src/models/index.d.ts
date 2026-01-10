@@ -1334,365 +1334,229 @@ export declare type SaveRecurringAssignmentInfo = LazyLoading extends LazyLoadin
 
 export declare const SaveRecurringAssignmentInfo: (new (init: ModelInit<SaveRecurringAssignmentInfo>) => SaveRecurringAssignmentInfo)
 
-type EagerAssignGameResult = {
-  readonly success: boolean;
-  readonly game?: Game | null;
-  readonly recurringGame?: RecurringGame | null;
-  readonly message?: string | null;
-  readonly confidence?: number | null;
-}
-
-type LazyAssignGameResult = {
-  readonly success: boolean;
-  readonly game: AsyncItem<Game | undefined>;
-  readonly recurringGame: AsyncItem<RecurringGame | undefined>;
-  readonly message?: string | null;
-  readonly confidence?: number | null;
-}
-
-export declare type AssignGameResult = LazyLoading extends LazyLoadingDisabled ? EagerAssignGameResult : LazyAssignGameResult
-
-export declare const AssignGameResult: (new (init: ModelInit<AssignGameResult>) => AssignGameResult)
-
-type EagerDetectRecurringGamesResult = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly gamesAnalyzed?: number | null;
-  readonly recurringGamesCreated?: number | null;
-  readonly recurringGamesUpdated?: number | null;
-  readonly gamesAssigned?: number | null;
-  readonly gamesPendingReview?: number | null;
-  readonly newRecurringGames?: (RecurringGame | null)[] | null;
-  readonly assignmentResults?: (AssignGameResult | null)[] | null;
-  readonly preview?: string | null;
-  readonly errors?: (string | null)[] | null;
-}
-
-type LazyDetectRecurringGamesResult = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly gamesAnalyzed?: number | null;
-  readonly recurringGamesCreated?: number | null;
-  readonly recurringGamesUpdated?: number | null;
-  readonly gamesAssigned?: number | null;
-  readonly gamesPendingReview?: number | null;
-  readonly newRecurringGames: AsyncCollection<RecurringGame>;
-  readonly assignmentResults?: (AssignGameResult | null)[] | null;
-  readonly preview?: string | null;
-  readonly errors?: (string | null)[] | null;
-}
-
-export declare type DetectRecurringGamesResult = LazyLoading extends LazyLoadingDisabled ? EagerDetectRecurringGamesResult : LazyDetectRecurringGamesResult
-
-export declare const DetectRecurringGamesResult: (new (init: ModelInit<DetectRecurringGamesResult>) => DetectRecurringGamesResult)
-
-type EagerBulkAssignResult = {
-  readonly success: boolean;
-  readonly totalGames?: number | null;
-  readonly successfulAssignments?: number | null;
-  readonly failedAssignments?: number | null;
-  readonly results?: (AssignGameResult | null)[] | null;
-  readonly errors?: (string | null)[] | null;
-}
-
-type LazyBulkAssignResult = {
-  readonly success: boolean;
-  readonly totalGames?: number | null;
-  readonly successfulAssignments?: number | null;
-  readonly failedAssignments?: number | null;
-  readonly results?: (AssignGameResult | null)[] | null;
-  readonly errors?: (string | null)[] | null;
-}
-
-export declare type BulkAssignResult = LazyLoading extends LazyLoadingDisabled ? EagerBulkAssignResult : LazyBulkAssignResult
-
-export declare const BulkAssignResult: (new (init: ModelInit<BulkAssignResult>) => BulkAssignResult)
-
-type EagerRecurringGameAdminThresholds = {
-  readonly highConfidence: number;
-  readonly mediumConfidence: number;
-  readonly crossDaySuggestion: number;
-  readonly duplicateSimilarity: number;
-}
-
-type LazyRecurringGameAdminThresholds = {
-  readonly highConfidence: number;
-  readonly mediumConfidence: number;
-  readonly crossDaySuggestion: number;
-  readonly duplicateSimilarity: number;
-}
-
-export declare type RecurringGameAdminThresholds = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameAdminThresholds : LazyRecurringGameAdminThresholds
-
-export declare const RecurringGameAdminThresholds: (new (init: ModelInit<RecurringGameAdminThresholds>) => RecurringGameAdminThresholds)
-
-type EagerRecurringGameMatchDetails = {
-  readonly matchType?: string | null;
-  readonly matchedTo?: string | null;
-  readonly matchedToId?: string | null;
-  readonly matchedToDay?: string | null;
-  readonly gameDay?: string | null;
-  readonly score?: number | null;
-  readonly previousId?: string | null;
-  readonly needsReview?: boolean | null;
-  readonly scoringDetails?: string | null;
-}
-
-type LazyRecurringGameMatchDetails = {
-  readonly matchType?: string | null;
-  readonly matchedTo?: string | null;
-  readonly matchedToId?: string | null;
-  readonly matchedToDay?: string | null;
-  readonly gameDay?: string | null;
-  readonly score?: number | null;
-  readonly previousId?: string | null;
-  readonly needsReview?: boolean | null;
-  readonly scoringDetails?: string | null;
-}
-
-export declare type RecurringGameMatchDetails = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameMatchDetails : LazyRecurringGameMatchDetails
-
-export declare const RecurringGameMatchDetails: (new (init: ModelInit<RecurringGameMatchDetails>) => RecurringGameMatchDetails)
-
-type EagerRecurringGameTopCandidate = {
-  readonly id: string;
-  readonly name: string;
-  readonly score: number;
-  readonly dayOfWeek?: string | null;
-}
-
-type LazyRecurringGameTopCandidate = {
-  readonly id: string;
-  readonly name: string;
-  readonly score: number;
-  readonly dayOfWeek?: string | null;
-}
-
-export declare type RecurringGameTopCandidate = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameTopCandidate : LazyRecurringGameTopCandidate
-
-export declare const RecurringGameTopCandidate: (new (init: ModelInit<RecurringGameTopCandidate>) => RecurringGameTopCandidate)
-
-type EagerRecurringGameSummary = {
-  readonly id: string;
-  readonly name: string;
-  readonly dayOfWeek?: string | null;
-  readonly venueId?: string | null;
-  readonly currentRecurringGameId?: string | null;
-}
-
-type LazyRecurringGameSummary = {
-  readonly id: string;
-  readonly name: string;
-  readonly dayOfWeek?: string | null;
-  readonly venueId?: string | null;
-  readonly currentRecurringGameId?: string | null;
-}
-
-export declare type RecurringGameSummary = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameSummary : LazyRecurringGameSummary
-
-export declare const RecurringGameSummary: (new (init: ModelInit<RecurringGameSummary>) => RecurringGameSummary)
-
-type EagerReResolveRecurringGameResult = {
-  readonly success: boolean;
-  readonly error?: string | null;
-  readonly game?: RecurringGameSummary | null;
-  readonly action: string;
-  readonly newRecurringGameId?: string | null;
-  readonly matchDetails?: RecurringGameMatchDetails | null;
-  readonly topCandidates?: RecurringGameTopCandidate[] | null;
-  readonly thresholdsUsed?: RecurringGameAdminThresholds | null;
-  readonly applied?: boolean | null;
-}
-
-type LazyReResolveRecurringGameResult = {
-  readonly success: boolean;
-  readonly error?: string | null;
-  readonly game?: RecurringGameSummary | null;
-  readonly action: string;
-  readonly newRecurringGameId?: string | null;
-  readonly matchDetails?: RecurringGameMatchDetails | null;
-  readonly topCandidates?: RecurringGameTopCandidate[] | null;
-  readonly thresholdsUsed?: RecurringGameAdminThresholds | null;
-  readonly applied?: boolean | null;
-}
-
-export declare type ReResolveRecurringGameResult = LazyLoading extends LazyLoadingDisabled ? EagerReResolveRecurringGameResult : LazyReResolveRecurringGameResult
-
-export declare const ReResolveRecurringGameResult: (new (init: ModelInit<ReResolveRecurringGameResult>) => ReResolveRecurringGameResult)
-
-type EagerRecurringGameActionSummary = {
-  readonly REASSIGN: number;
-  readonly CONFIRM: number;
-  readonly SUGGEST_REASSIGN: number;
-  readonly SUGGEST_CROSS_DAY: number;
-  readonly SUGGEST_UNASSIGN: number;
-  readonly NO_CHANGE: number;
-  readonly SKIPPED: number;
-  readonly ERROR: number;
-}
-
-type LazyRecurringGameActionSummary = {
-  readonly REASSIGN: number;
-  readonly CONFIRM: number;
-  readonly SUGGEST_REASSIGN: number;
-  readonly SUGGEST_CROSS_DAY: number;
-  readonly SUGGEST_UNASSIGN: number;
-  readonly NO_CHANGE: number;
-  readonly SKIPPED: number;
-  readonly ERROR: number;
-}
-
-export declare type RecurringGameActionSummary = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameActionSummary : LazyRecurringGameActionSummary
-
-export declare const RecurringGameActionSummary: (new (init: ModelInit<RecurringGameActionSummary>) => RecurringGameActionSummary)
-
-type EagerRecurringGameActionDetail = {
+type EagerProcessedGameDetail = {
   readonly gameId: string;
-  readonly gameName: string;
-  readonly action: string;
-  readonly matchDetails?: RecurringGameMatchDetails | null;
+  readonly gameName?: string | null;
+  readonly status: string;
+  readonly recurringGameId?: string | null;
+  readonly recurringGameName?: string | null;
+  readonly confidence?: number | null;
+  readonly wasCreated?: boolean | null;
   readonly error?: string | null;
+  readonly suggestedTemplateName?: string | null;
+  readonly clusterSize?: number | null;
 }
 
-type LazyRecurringGameActionDetail = {
+type LazyProcessedGameDetail = {
   readonly gameId: string;
-  readonly gameName: string;
-  readonly action: string;
-  readonly matchDetails?: RecurringGameMatchDetails | null;
+  readonly gameName?: string | null;
+  readonly status: string;
+  readonly recurringGameId?: string | null;
+  readonly recurringGameName?: string | null;
+  readonly confidence?: number | null;
+  readonly wasCreated?: boolean | null;
   readonly error?: string | null;
+  readonly suggestedTemplateName?: string | null;
+  readonly clusterSize?: number | null;
 }
 
-export declare type RecurringGameActionDetail = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameActionDetail : LazyRecurringGameActionDetail
+export declare type ProcessedGameDetail = LazyLoading extends LazyLoadingDisabled ? EagerProcessedGameDetail : LazyProcessedGameDetail
 
-export declare const RecurringGameActionDetail: (new (init: ModelInit<RecurringGameActionDetail>) => RecurringGameActionDetail)
+export declare const ProcessedGameDetail: (new (init: ModelInit<ProcessedGameDetail>) => ProcessedGameDetail)
 
-type EagerReResolveVenueRecurringGamesResult = {
-  readonly success?: boolean | null;
-  readonly venueId: string;
-  readonly totalGames: number;
-  readonly eligibleGames: number;
-  readonly processed: number;
-  readonly actions: RecurringGameActionSummary;
-  readonly details: RecurringGameActionDetail[];
-  readonly preview: boolean;
-}
-
-type LazyReResolveVenueRecurringGamesResult = {
-  readonly success?: boolean | null;
-  readonly venueId: string;
-  readonly totalGames: number;
-  readonly eligibleGames: number;
-  readonly processed: number;
-  readonly actions: RecurringGameActionSummary;
-  readonly details: RecurringGameActionDetail[];
-  readonly preview: boolean;
-}
-
-export declare type ReResolveVenueRecurringGamesResult = LazyLoading extends LazyLoadingDisabled ? EagerReResolveVenueRecurringGamesResult : LazyReResolveVenueRecurringGamesResult
-
-export declare const ReResolveVenueRecurringGamesResult: (new (init: ModelInit<ReResolveVenueRecurringGamesResult>) => ReResolveVenueRecurringGamesResult)
-
-type EagerRecurringGameDuplicateEntry = {
-  readonly id: string;
-  readonly name: string;
-  readonly similarity: number;
+type EagerPotentialTemplate = {
+  readonly suggestedName: string;
+  readonly dayOfWeek: string;
+  readonly gameType: string;
+  readonly sessionMode: string;
+  readonly variant?: string | null;
   readonly gameCount: number;
+  readonly avgBuyIn?: number | null;
+  readonly buyInRange?: string | null;
+  readonly timeSlot?: string | null;
+  readonly confidence?: string | null;
+  readonly sampleGames?: PatternSampleGame[] | null;
+  readonly status?: string | null;
 }
 
-type LazyRecurringGameDuplicateEntry = {
-  readonly id: string;
-  readonly name: string;
-  readonly similarity: number;
+type LazyPotentialTemplate = {
+  readonly suggestedName: string;
+  readonly dayOfWeek: string;
+  readonly gameType: string;
+  readonly sessionMode: string;
+  readonly variant?: string | null;
   readonly gameCount: number;
+  readonly avgBuyIn?: number | null;
+  readonly buyInRange?: string | null;
+  readonly timeSlot?: string | null;
+  readonly confidence?: string | null;
+  readonly sampleGames?: PatternSampleGame[] | null;
+  readonly status?: string | null;
 }
 
-export declare type RecurringGameDuplicateEntry = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameDuplicateEntry : LazyRecurringGameDuplicateEntry
+export declare type PotentialTemplate = LazyLoading extends LazyLoadingDisabled ? EagerPotentialTemplate : LazyPotentialTemplate
 
-export declare const RecurringGameDuplicateEntry: (new (init: ModelInit<RecurringGameDuplicateEntry>) => RecurringGameDuplicateEntry)
+export declare const PotentialTemplate: (new (init: ModelInit<PotentialTemplate>) => PotentialTemplate)
 
-type EagerRecurringGameDuplicateGroup = {
-  readonly canonicalId: string;
-  readonly canonicalName: string;
-  readonly canonicalDayOfWeek: string;
-  readonly canonicalGameCount: number;
-  readonly duplicates: RecurringGameDuplicateEntry[];
-  readonly totalGamesToReassign: number;
+type EagerProcessUnassignedGamesResult = {
+  readonly success: boolean;
+  readonly processed: number;
+  readonly assigned: number;
+  readonly created: number;
+  readonly deferred: number;
+  readonly noMatch: number;
+  readonly errors: number;
+  readonly dryRun: boolean;
+  readonly message?: string | null;
+  readonly error?: string | null;
+  readonly details: ProcessedGameDetail[];
+  readonly potentialTemplates?: PotentialTemplate[] | null;
 }
 
-type LazyRecurringGameDuplicateGroup = {
-  readonly canonicalId: string;
-  readonly canonicalName: string;
-  readonly canonicalDayOfWeek: string;
-  readonly canonicalGameCount: number;
-  readonly duplicates: RecurringGameDuplicateEntry[];
-  readonly totalGamesToReassign: number;
+type LazyProcessUnassignedGamesResult = {
+  readonly success: boolean;
+  readonly processed: number;
+  readonly assigned: number;
+  readonly created: number;
+  readonly deferred: number;
+  readonly noMatch: number;
+  readonly errors: number;
+  readonly dryRun: boolean;
+  readonly message?: string | null;
+  readonly error?: string | null;
+  readonly details: ProcessedGameDetail[];
+  readonly potentialTemplates?: PotentialTemplate[] | null;
 }
 
-export declare type RecurringGameDuplicateGroup = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameDuplicateGroup : LazyRecurringGameDuplicateGroup
+export declare type ProcessUnassignedGamesResult = LazyLoading extends LazyLoadingDisabled ? EagerProcessUnassignedGamesResult : LazyProcessUnassignedGamesResult
 
-export declare const RecurringGameDuplicateGroup: (new (init: ModelInit<RecurringGameDuplicateGroup>) => RecurringGameDuplicateGroup)
+export declare const ProcessUnassignedGamesResult: (new (init: ModelInit<ProcessUnassignedGamesResult>) => ProcessUnassignedGamesResult)
 
-type EagerFindRecurringGameDuplicatesResult = {
+type EagerUnassignedGamesStats = {
+  readonly total: number;
+  readonly unprocessed: number;
+  readonly candidateRecurring: number;
+  readonly notRecurring: number;
+  readonly assigned: number;
+  readonly other?: number | null;
+  readonly overallTotal: number;
+  readonly overallUnprocessed: number;
+  readonly overallCandidateRecurring: number;
+  readonly overallNotRecurring: number;
+  readonly overallAssigned: number;
+  readonly overallOther?: number | null;
+  readonly byVenue?: string | null;
+  readonly byDay?: string | null;
+  readonly byStatus?: string | null;
+}
+
+type LazyUnassignedGamesStats = {
+  readonly total: number;
+  readonly unprocessed: number;
+  readonly candidateRecurring: number;
+  readonly notRecurring: number;
+  readonly assigned: number;
+  readonly other?: number | null;
+  readonly overallTotal: number;
+  readonly overallUnprocessed: number;
+  readonly overallCandidateRecurring: number;
+  readonly overallNotRecurring: number;
+  readonly overallAssigned: number;
+  readonly overallOther?: number | null;
+  readonly byVenue?: string | null;
+  readonly byDay?: string | null;
+  readonly byStatus?: string | null;
+}
+
+export declare type UnassignedGamesStats = LazyLoading extends LazyLoadingDisabled ? EagerUnassignedGamesStats : LazyUnassignedGamesStats
+
+export declare const UnassignedGamesStats: (new (init: ModelInit<UnassignedGamesStats>) => UnassignedGamesStats)
+
+type EagerPatternSampleGame = {
+  readonly id: string;
+  readonly name?: string | null;
+  readonly date?: string | null;
+}
+
+type LazyPatternSampleGame = {
+  readonly id: string;
+  readonly name?: string | null;
+  readonly date?: string | null;
+}
+
+export declare type PatternSampleGame = LazyLoading extends LazyLoadingDisabled ? EagerPatternSampleGame : LazyPatternSampleGame
+
+export declare const PatternSampleGame: (new (init: ModelInit<PatternSampleGame>) => PatternSampleGame)
+
+type EagerCandidatePattern = {
+  readonly dayOfWeek: string;
+  readonly sessionMode: string;
+  readonly variant?: string | null;
+  readonly gameCount: number;
+  readonly suggestedName: string;
+  readonly sampleGames: PatternSampleGame[];
+}
+
+type LazyCandidatePattern = {
+  readonly dayOfWeek: string;
+  readonly sessionMode: string;
+  readonly variant?: string | null;
+  readonly gameCount: number;
+  readonly suggestedName: string;
+  readonly sampleGames: PatternSampleGame[];
+}
+
+export declare type CandidatePattern = LazyLoading extends LazyLoadingDisabled ? EagerCandidatePattern : LazyCandidatePattern
+
+export declare const CandidatePattern: (new (init: ModelInit<CandidatePattern>) => CandidatePattern)
+
+type EagerPreviewPatternsResult = {
+  readonly venueId: string;
+  readonly minOccurrences: number;
+  readonly patternCount: number;
+  readonly patterns: CandidatePattern[];
+}
+
+type LazyPreviewPatternsResult = {
+  readonly venueId: string;
+  readonly minOccurrences: number;
+  readonly patternCount: number;
+  readonly patterns: CandidatePattern[];
+}
+
+export declare type PreviewPatternsResult = LazyLoading extends LazyLoadingDisabled ? EagerPreviewPatternsResult : LazyPreviewPatternsResult
+
+export declare const PreviewPatternsResult: (new (init: ModelInit<PreviewPatternsResult>) => PreviewPatternsResult)
+
+type EagerRecurringGameVenueStats = {
   readonly success?: boolean | null;
   readonly venueId: string;
   readonly totalRecurringGames: number;
-  readonly duplicateGroups: number;
-  readonly duplicateEntries: number;
-  readonly groups: RecurringGameDuplicateGroup[];
+  readonly totalGames: number;
+  readonly orphanedRecurringGames: number;
+  readonly orphans: OrphanedRecurringGame[];
+  readonly unassignedGames: number;
+  readonly unassignedSample: UnassignedGameSample[];
+  readonly recurringGamesByDay: string;
+  readonly gameDistribution: RecurringGameDistribution[];
 }
 
-type LazyFindRecurringGameDuplicatesResult = {
+type LazyRecurringGameVenueStats = {
   readonly success?: boolean | null;
   readonly venueId: string;
   readonly totalRecurringGames: number;
-  readonly duplicateGroups: number;
-  readonly duplicateEntries: number;
-  readonly groups: RecurringGameDuplicateGroup[];
+  readonly totalGames: number;
+  readonly orphanedRecurringGames: number;
+  readonly orphans: OrphanedRecurringGame[];
+  readonly unassignedGames: number;
+  readonly unassignedSample: UnassignedGameSample[];
+  readonly recurringGamesByDay: string;
+  readonly gameDistribution: RecurringGameDistribution[];
 }
 
-export declare type FindRecurringGameDuplicatesResult = LazyLoading extends LazyLoadingDisabled ? EagerFindRecurringGameDuplicatesResult : LazyFindRecurringGameDuplicatesResult
+export declare type RecurringGameVenueStats = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameVenueStats : LazyRecurringGameVenueStats
 
-export declare const FindRecurringGameDuplicatesResult: (new (init: ModelInit<FindRecurringGameDuplicatesResult>) => FindRecurringGameDuplicatesResult)
-
-type EagerMergeRecurringGameDuplicatesDetail = {
-  readonly duplicateId: string;
-  readonly gamesCount: number;
-}
-
-type LazyMergeRecurringGameDuplicatesDetail = {
-  readonly duplicateId: string;
-  readonly gamesCount: number;
-}
-
-export declare type MergeRecurringGameDuplicatesDetail = LazyLoading extends LazyLoadingDisabled ? EagerMergeRecurringGameDuplicatesDetail : LazyMergeRecurringGameDuplicatesDetail
-
-export declare const MergeRecurringGameDuplicatesDetail: (new (init: ModelInit<MergeRecurringGameDuplicatesDetail>) => MergeRecurringGameDuplicatesDetail)
-
-type EagerMergeRecurringGameDuplicatesResult = {
-  readonly success: boolean;
-  readonly error?: string | null;
-  readonly canonicalId?: string | null;
-  readonly canonicalName?: string | null;
-  readonly duplicatesMerged: number;
-  readonly gamesReassigned: number;
-  readonly preview: boolean;
-  readonly details?: MergeRecurringGameDuplicatesDetail[] | null;
-}
-
-type LazyMergeRecurringGameDuplicatesResult = {
-  readonly success: boolean;
-  readonly error?: string | null;
-  readonly canonicalId?: string | null;
-  readonly canonicalName?: string | null;
-  readonly duplicatesMerged: number;
-  readonly gamesReassigned: number;
-  readonly preview: boolean;
-  readonly details?: MergeRecurringGameDuplicatesDetail[] | null;
-}
-
-export declare type MergeRecurringGameDuplicatesResult = LazyLoading extends LazyLoadingDisabled ? EagerMergeRecurringGameDuplicatesResult : LazyMergeRecurringGameDuplicatesResult
-
-export declare const MergeRecurringGameDuplicatesResult: (new (init: ModelInit<MergeRecurringGameDuplicatesResult>) => MergeRecurringGameDuplicatesResult)
+export declare const RecurringGameVenueStats: (new (init: ModelInit<RecurringGameVenueStats>) => RecurringGameVenueStats)
 
 type EagerOrphanedRecurringGame = {
   readonly id: string;
@@ -1728,79 +1592,127 @@ export declare type UnassignedGameSample = LazyLoading extends LazyLoadingDisabl
 
 export declare const UnassignedGameSample: (new (init: ModelInit<UnassignedGameSample>) => UnassignedGameSample)
 
-type EagerRecurringGameDistributionItem = {
+type EagerRecurringGameDistribution = {
   readonly id: string;
   readonly name: string;
   readonly dayOfWeek: string;
   readonly gameCount: number;
 }
 
-type LazyRecurringGameDistributionItem = {
+type LazyRecurringGameDistribution = {
   readonly id: string;
   readonly name: string;
   readonly dayOfWeek: string;
   readonly gameCount: number;
 }
 
-export declare type RecurringGameDistributionItem = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameDistributionItem : LazyRecurringGameDistributionItem
+export declare type RecurringGameDistribution = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameDistribution : LazyRecurringGameDistribution
 
-export declare const RecurringGameDistributionItem: (new (init: ModelInit<RecurringGameDistributionItem>) => RecurringGameDistributionItem)
+export declare const RecurringGameDistribution: (new (init: ModelInit<RecurringGameDistribution>) => RecurringGameDistribution)
 
-type EagerRecurringGamesByDayCount = {
-  readonly SUNDAY?: number | null;
-  readonly MONDAY?: number | null;
-  readonly TUESDAY?: number | null;
-  readonly WEDNESDAY?: number | null;
-  readonly THURSDAY?: number | null;
-  readonly FRIDAY?: number | null;
-  readonly SATURDAY?: number | null;
+type EagerDuplicateEntry = {
+  readonly id: string;
+  readonly name: string;
+  readonly similarity: number;
+  readonly gameCount: number;
 }
 
-type LazyRecurringGamesByDayCount = {
-  readonly SUNDAY?: number | null;
-  readonly MONDAY?: number | null;
-  readonly TUESDAY?: number | null;
-  readonly WEDNESDAY?: number | null;
-  readonly THURSDAY?: number | null;
-  readonly FRIDAY?: number | null;
-  readonly SATURDAY?: number | null;
+type LazyDuplicateEntry = {
+  readonly id: string;
+  readonly name: string;
+  readonly similarity: number;
+  readonly gameCount: number;
 }
 
-export declare type RecurringGamesByDayCount = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGamesByDayCount : LazyRecurringGamesByDayCount
+export declare type DuplicateEntry = LazyLoading extends LazyLoadingDisabled ? EagerDuplicateEntry : LazyDuplicateEntry
 
-export declare const RecurringGamesByDayCount: (new (init: ModelInit<RecurringGamesByDayCount>) => RecurringGamesByDayCount)
+export declare const DuplicateEntry: (new (init: ModelInit<DuplicateEntry>) => DuplicateEntry)
 
-type EagerRecurringGameVenueStats = {
+type EagerDuplicateGroup = {
+  readonly canonicalId: string;
+  readonly canonicalName: string;
+  readonly canonicalDayOfWeek: string;
+  readonly canonicalGameCount: number;
+  readonly duplicates: DuplicateEntry[];
+  readonly totalGamesToReassign: number;
+}
+
+type LazyDuplicateGroup = {
+  readonly canonicalId: string;
+  readonly canonicalName: string;
+  readonly canonicalDayOfWeek: string;
+  readonly canonicalGameCount: number;
+  readonly duplicates: DuplicateEntry[];
+  readonly totalGamesToReassign: number;
+}
+
+export declare type DuplicateGroup = LazyLoading extends LazyLoadingDisabled ? EagerDuplicateGroup : LazyDuplicateGroup
+
+export declare const DuplicateGroup: (new (init: ModelInit<DuplicateGroup>) => DuplicateGroup)
+
+type EagerFindDuplicatesResult = {
   readonly success?: boolean | null;
   readonly venueId: string;
   readonly totalRecurringGames: number;
-  readonly totalGames: number;
-  readonly orphanedRecurringGames: number;
-  readonly orphans: OrphanedRecurringGame[];
-  readonly unassignedGames: number;
-  readonly unassignedSample: UnassignedGameSample[];
-  readonly recurringGamesByDay: RecurringGamesByDayCount;
-  readonly gameDistribution: RecurringGameDistributionItem[];
+  readonly duplicateGroups: number;
+  readonly duplicateEntries: number;
+  readonly groups: DuplicateGroup[];
 }
 
-type LazyRecurringGameVenueStats = {
+type LazyFindDuplicatesResult = {
   readonly success?: boolean | null;
   readonly venueId: string;
   readonly totalRecurringGames: number;
-  readonly totalGames: number;
-  readonly orphanedRecurringGames: number;
-  readonly orphans: OrphanedRecurringGame[];
-  readonly unassignedGames: number;
-  readonly unassignedSample: UnassignedGameSample[];
-  readonly recurringGamesByDay: RecurringGamesByDayCount;
-  readonly gameDistribution: RecurringGameDistributionItem[];
+  readonly duplicateGroups: number;
+  readonly duplicateEntries: number;
+  readonly groups: DuplicateGroup[];
 }
 
-export declare type RecurringGameVenueStats = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameVenueStats : LazyRecurringGameVenueStats
+export declare type FindDuplicatesResult = LazyLoading extends LazyLoadingDisabled ? EagerFindDuplicatesResult : LazyFindDuplicatesResult
 
-export declare const RecurringGameVenueStats: (new (init: ModelInit<RecurringGameVenueStats>) => RecurringGameVenueStats)
+export declare const FindDuplicatesResult: (new (init: ModelInit<FindDuplicatesResult>) => FindDuplicatesResult)
 
-type EagerCleanupOrphanedRecurringGamesResult = {
+type EagerMergeDetail = {
+  readonly duplicateId: string;
+  readonly gamesCount: number;
+}
+
+type LazyMergeDetail = {
+  readonly duplicateId: string;
+  readonly gamesCount: number;
+}
+
+export declare type MergeDetail = LazyLoading extends LazyLoadingDisabled ? EagerMergeDetail : LazyMergeDetail
+
+export declare const MergeDetail: (new (init: ModelInit<MergeDetail>) => MergeDetail)
+
+type EagerMergeDuplicatesResult = {
+  readonly success: boolean;
+  readonly error?: string | null;
+  readonly canonicalId?: string | null;
+  readonly canonicalName?: string | null;
+  readonly duplicatesMerged: number;
+  readonly gamesReassigned: number;
+  readonly preview: boolean;
+  readonly details?: MergeDetail[] | null;
+}
+
+type LazyMergeDuplicatesResult = {
+  readonly success: boolean;
+  readonly error?: string | null;
+  readonly canonicalId?: string | null;
+  readonly canonicalName?: string | null;
+  readonly duplicatesMerged: number;
+  readonly gamesReassigned: number;
+  readonly preview: boolean;
+  readonly details?: MergeDetail[] | null;
+}
+
+export declare type MergeDuplicatesResult = LazyLoading extends LazyLoadingDisabled ? EagerMergeDuplicatesResult : LazyMergeDuplicatesResult
+
+export declare const MergeDuplicatesResult: (new (init: ModelInit<MergeDuplicatesResult>) => MergeDuplicatesResult)
+
+type EagerCleanupOrphansResult = {
   readonly success?: boolean | null;
   readonly venueId: string;
   readonly orphansFound: number;
@@ -1809,7 +1721,7 @@ type EagerCleanupOrphanedRecurringGamesResult = {
   readonly orphans: OrphanedRecurringGame[];
 }
 
-type LazyCleanupOrphanedRecurringGamesResult = {
+type LazyCleanupOrphansResult = {
   readonly success?: boolean | null;
   readonly venueId: string;
   readonly orphansFound: number;
@@ -1818,67 +1730,131 @@ type LazyCleanupOrphanedRecurringGamesResult = {
   readonly orphans: OrphanedRecurringGame[];
 }
 
-export declare type CleanupOrphanedRecurringGamesResult = LazyLoading extends LazyLoadingDisabled ? EagerCleanupOrphanedRecurringGamesResult : LazyCleanupOrphanedRecurringGamesResult
+export declare type CleanupOrphansResult = LazyLoading extends LazyLoadingDisabled ? EagerCleanupOrphansResult : LazyCleanupOrphansResult
 
-export declare const CleanupOrphanedRecurringGamesResult: (new (init: ModelInit<CleanupOrphanedRecurringGamesResult>) => CleanupOrphanedRecurringGamesResult)
+export declare const CleanupOrphansResult: (new (init: ModelInit<CleanupOrphansResult>) => CleanupOrphansResult)
 
-type EagerBootstrapTemplateDetail = {
-  readonly name: string;
-  readonly dayOfWeek: string;
-  readonly gameCount: number;
-  readonly avgBuyIn?: number | null;
-  readonly sampleGames?: string[] | null;
-  readonly status: string;
-  readonly templateId?: string | null;
-  readonly gamesAssigned?: number | null;
+type EagerMatchDetails = {
+  readonly matchedTo?: string | null;
+  readonly score?: number | null;
+  readonly previousId?: string | null;
+  readonly newId?: string | null;
+  readonly dayOfWeek?: string | null;
+}
+
+type LazyMatchDetails = {
+  readonly matchedTo?: string | null;
+  readonly score?: number | null;
+  readonly previousId?: string | null;
+  readonly newId?: string | null;
+  readonly dayOfWeek?: string | null;
+}
+
+export declare type MatchDetails = LazyLoading extends LazyLoadingDisabled ? EagerMatchDetails : LazyMatchDetails
+
+export declare const MatchDetails: (new (init: ModelInit<MatchDetails>) => MatchDetails)
+
+type EagerGameActionDetail = {
+  readonly gameId: string;
+  readonly gameName: string;
+  readonly action: string;
+  readonly matchDetails?: MatchDetails | null;
   readonly error?: string | null;
 }
 
-type LazyBootstrapTemplateDetail = {
-  readonly name: string;
-  readonly dayOfWeek: string;
-  readonly gameCount: number;
-  readonly avgBuyIn?: number | null;
-  readonly sampleGames?: string[] | null;
-  readonly status: string;
-  readonly templateId?: string | null;
-  readonly gamesAssigned?: number | null;
+type LazyGameActionDetail = {
+  readonly gameId: string;
+  readonly gameName: string;
+  readonly action: string;
+  readonly matchDetails?: MatchDetails | null;
   readonly error?: string | null;
 }
 
-export declare type BootstrapTemplateDetail = LazyLoading extends LazyLoadingDisabled ? EagerBootstrapTemplateDetail : LazyBootstrapTemplateDetail
+export declare type GameActionDetail = LazyLoading extends LazyLoadingDisabled ? EagerGameActionDetail : LazyGameActionDetail
 
-export declare const BootstrapTemplateDetail: (new (init: ModelInit<BootstrapTemplateDetail>) => BootstrapTemplateDetail)
+export declare const GameActionDetail: (new (init: ModelInit<GameActionDetail>) => GameActionDetail)
 
-type EagerBootstrapRecurringGamesResult = {
-  readonly success: boolean;
-  readonly venueId: string;
-  readonly venueName?: string | null;
-  readonly preview: boolean;
-  readonly totalGamesAnalyzed: number;
-  readonly eligibleGames: number;
-  readonly templatesCreated: number;
-  readonly gamesAssigned: number;
-  readonly templateDetails: BootstrapTemplateDetail[];
-  readonly errors?: (string | null)[] | null;
+type EagerActionSummary = {
+  readonly REASSIGN: number;
+  readonly CONFIRM: number;
+  readonly SUGGEST_REASSIGN: number;
+  readonly SUGGEST_CROSS_DAY: number;
+  readonly SUGGEST_UNASSIGN: number;
+  readonly NO_CHANGE: number;
+  readonly SKIPPED: number;
+  readonly ERROR: number;
 }
 
-type LazyBootstrapRecurringGamesResult = {
-  readonly success: boolean;
-  readonly venueId: string;
-  readonly venueName?: string | null;
-  readonly preview: boolean;
-  readonly totalGamesAnalyzed: number;
-  readonly eligibleGames: number;
-  readonly templatesCreated: number;
-  readonly gamesAssigned: number;
-  readonly templateDetails: BootstrapTemplateDetail[];
-  readonly errors?: (string | null)[] | null;
+type LazyActionSummary = {
+  readonly REASSIGN: number;
+  readonly CONFIRM: number;
+  readonly SUGGEST_REASSIGN: number;
+  readonly SUGGEST_CROSS_DAY: number;
+  readonly SUGGEST_UNASSIGN: number;
+  readonly NO_CHANGE: number;
+  readonly SKIPPED: number;
+  readonly ERROR: number;
 }
 
-export declare type BootstrapRecurringGamesResult = LazyLoading extends LazyLoadingDisabled ? EagerBootstrapRecurringGamesResult : LazyBootstrapRecurringGamesResult
+export declare type ActionSummary = LazyLoading extends LazyLoadingDisabled ? EagerActionSummary : LazyActionSummary
 
-export declare const BootstrapRecurringGamesResult: (new (init: ModelInit<BootstrapRecurringGamesResult>) => BootstrapRecurringGamesResult)
+export declare const ActionSummary: (new (init: ModelInit<ActionSummary>) => ActionSummary)
+
+type EagerReResolveGameResult = {
+  readonly success: boolean;
+  readonly gameId: string;
+  readonly gameName?: string | null;
+  readonly previousRecurringGameId?: string | null;
+  readonly recurringGameId?: string | null;
+  readonly recurringGameName?: string | null;
+  readonly matched?: boolean | null;
+  readonly matchScore?: number | null;
+  readonly preview: boolean;
+  readonly error?: string | null;
+}
+
+type LazyReResolveGameResult = {
+  readonly success: boolean;
+  readonly gameId: string;
+  readonly gameName?: string | null;
+  readonly previousRecurringGameId?: string | null;
+  readonly recurringGameId?: string | null;
+  readonly recurringGameName?: string | null;
+  readonly matched?: boolean | null;
+  readonly matchScore?: number | null;
+  readonly preview: boolean;
+  readonly error?: string | null;
+}
+
+export declare type ReResolveGameResult = LazyLoading extends LazyLoadingDisabled ? EagerReResolveGameResult : LazyReResolveGameResult
+
+export declare const ReResolveGameResult: (new (init: ModelInit<ReResolveGameResult>) => ReResolveGameResult)
+
+type EagerReResolveVenueResult = {
+  readonly success?: boolean | null;
+  readonly venueId: string;
+  readonly totalGames: number;
+  readonly eligibleGames: number;
+  readonly processed: number;
+  readonly actions: ActionSummary;
+  readonly details: GameActionDetail[];
+  readonly preview: boolean;
+}
+
+type LazyReResolveVenueResult = {
+  readonly success?: boolean | null;
+  readonly venueId: string;
+  readonly totalGames: number;
+  readonly eligibleGames: number;
+  readonly processed: number;
+  readonly actions: ActionSummary;
+  readonly details: GameActionDetail[];
+  readonly preview: boolean;
+}
+
+export declare type ReResolveVenueResult = LazyLoading extends LazyLoadingDisabled ? EagerReResolveVenueResult : LazyReResolveVenueResult
+
+export declare const ReResolveVenueResult: (new (init: ModelInit<ReResolveVenueResult>) => ReResolveVenueResult)
 
 type EagerRecurringGameWithStats = {
   readonly recurringGame?: RecurringGame | null;
@@ -1945,236 +1921,6 @@ type LazySearchRecurringGamesResult = {
 export declare type SearchRecurringGamesResult = LazyLoading extends LazyLoadingDisabled ? EagerSearchRecurringGamesResult : LazySearchRecurringGamesResult
 
 export declare const SearchRecurringGamesResult: (new (init: ModelInit<SearchRecurringGamesResult>) => SearchRecurringGamesResult)
-
-type EagerGapInfo = {
-  readonly recurringGameId: string;
-  readonly recurringGameName: string;
-  readonly expectedDate: string;
-  readonly dayOfWeek: string;
-  readonly weekKey: string;
-  readonly possibleMatchGameId?: string | null;
-  readonly possibleMatchGameName?: string | null;
-  readonly matchConfidence?: number | null;
-}
-
-type LazyGapInfo = {
-  readonly recurringGameId: string;
-  readonly recurringGameName: string;
-  readonly expectedDate: string;
-  readonly dayOfWeek: string;
-  readonly weekKey: string;
-  readonly possibleMatchGameId?: string | null;
-  readonly possibleMatchGameName?: string | null;
-  readonly matchConfidence?: number | null;
-}
-
-export declare type GapInfo = LazyLoading extends LazyLoadingDisabled ? EagerGapInfo : LazyGapInfo
-
-export declare const GapInfo: (new (init: ModelInit<GapInfo>) => GapInfo)
-
-type EagerDetectGapsResult = {
-  readonly success: boolean;
-  readonly venueId: string;
-  readonly venueName?: string | null;
-  readonly startDate: string;
-  readonly endDate: string;
-  readonly weeksAnalyzed: number;
-  readonly recurringGamesChecked: number;
-  readonly expectedOccurrences: number;
-  readonly confirmedOccurrences: number;
-  readonly gapsFound: number;
-  readonly gaps: GapInfo[];
-  readonly instancesCreated?: number | null;
-}
-
-type LazyDetectGapsResult = {
-  readonly success: boolean;
-  readonly venueId: string;
-  readonly venueName?: string | null;
-  readonly startDate: string;
-  readonly endDate: string;
-  readonly weeksAnalyzed: number;
-  readonly recurringGamesChecked: number;
-  readonly expectedOccurrences: number;
-  readonly confirmedOccurrences: number;
-  readonly gapsFound: number;
-  readonly gaps: GapInfo[];
-  readonly instancesCreated?: number | null;
-}
-
-export declare type DetectGapsResult = LazyLoading extends LazyLoadingDisabled ? EagerDetectGapsResult : LazyDetectGapsResult
-
-export declare const DetectGapsResult: (new (init: ModelInit<DetectGapsResult>) => DetectGapsResult)
-
-type EagerReconcileInstancesResult = {
-  readonly success: boolean;
-  readonly venueId: string;
-  readonly gamesAnalyzed: number;
-  readonly instancesCreated: number;
-  readonly instancesUpdated: number;
-  readonly orphanGames: number;
-  readonly preview: boolean;
-  readonly details: ReconcileInstanceDetail[];
-}
-
-type LazyReconcileInstancesResult = {
-  readonly success: boolean;
-  readonly venueId: string;
-  readonly gamesAnalyzed: number;
-  readonly instancesCreated: number;
-  readonly instancesUpdated: number;
-  readonly orphanGames: number;
-  readonly preview: boolean;
-  readonly details: ReconcileInstanceDetail[];
-}
-
-export declare type ReconcileInstancesResult = LazyLoading extends LazyLoadingDisabled ? EagerReconcileInstancesResult : LazyReconcileInstancesResult
-
-export declare const ReconcileInstancesResult: (new (init: ModelInit<ReconcileInstancesResult>) => ReconcileInstancesResult)
-
-type EagerReconcileInstanceDetail = {
-  readonly gameId: string;
-  readonly gameName: string;
-  readonly gameDate: string;
-  readonly action: string;
-  readonly instanceId?: string | null;
-  readonly recurringGameId?: string | null;
-  readonly recurringGameName?: string | null;
-}
-
-type LazyReconcileInstanceDetail = {
-  readonly gameId: string;
-  readonly gameName: string;
-  readonly gameDate: string;
-  readonly action: string;
-  readonly instanceId?: string | null;
-  readonly recurringGameId?: string | null;
-  readonly recurringGameName?: string | null;
-}
-
-export declare type ReconcileInstanceDetail = LazyLoading extends LazyLoadingDisabled ? EagerReconcileInstanceDetail : LazyReconcileInstanceDetail
-
-export declare const ReconcileInstanceDetail: (new (init: ModelInit<ReconcileInstanceDetail>) => ReconcileInstanceDetail)
-
-type EagerInstanceSummary = {
-  readonly weekKey: string;
-  readonly weekStartDate: string;
-  readonly confirmedCount: number;
-  readonly cancelledCount: number;
-  readonly skippedCount: number;
-  readonly unknownCount: number;
-  readonly noShowCount: number;
-  readonly totalExpected: number;
-  readonly complianceRate: number;
-  readonly instances: RecurringGameInstance[];
-}
-
-type LazyInstanceSummary = {
-  readonly weekKey: string;
-  readonly weekStartDate: string;
-  readonly confirmedCount: number;
-  readonly cancelledCount: number;
-  readonly skippedCount: number;
-  readonly unknownCount: number;
-  readonly noShowCount: number;
-  readonly totalExpected: number;
-  readonly complianceRate: number;
-  readonly instances: AsyncCollection<RecurringGameInstance>;
-}
-
-export declare type InstanceSummary = LazyLoading extends LazyLoadingDisabled ? EagerInstanceSummary : LazyInstanceSummary
-
-export declare const InstanceSummary: (new (init: ModelInit<InstanceSummary>) => InstanceSummary)
-
-type EagerVenueComplianceReport = {
-  readonly success: boolean;
-  readonly venueId: string;
-  readonly venueName?: string | null;
-  readonly startDate: string;
-  readonly endDate: string;
-  readonly totalExpected: number;
-  readonly totalConfirmed: number;
-  readonly totalCancelled: number;
-  readonly totalSkipped: number;
-  readonly totalUnknown: number;
-  readonly totalNoShow: number;
-  readonly overallComplianceRate: number;
-  readonly weekSummaries: InstanceSummary[];
-  readonly needsReviewCount: number;
-  readonly unknownCount: number;
-}
-
-type LazyVenueComplianceReport = {
-  readonly success: boolean;
-  readonly venueId: string;
-  readonly venueName?: string | null;
-  readonly startDate: string;
-  readonly endDate: string;
-  readonly totalExpected: number;
-  readonly totalConfirmed: number;
-  readonly totalCancelled: number;
-  readonly totalSkipped: number;
-  readonly totalUnknown: number;
-  readonly totalNoShow: number;
-  readonly overallComplianceRate: number;
-  readonly weekSummaries: InstanceSummary[];
-  readonly needsReviewCount: number;
-  readonly unknownCount: number;
-}
-
-export declare type VenueComplianceReport = LazyLoading extends LazyLoadingDisabled ? EagerVenueComplianceReport : LazyVenueComplianceReport
-
-export declare const VenueComplianceReport: (new (init: ModelInit<VenueComplianceReport>) => VenueComplianceReport)
-
-type EagerRecordMissedInstanceResult = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly instance?: RecurringGameInstance | null;
-  readonly wasCreated: boolean;
-}
-
-type LazyRecordMissedInstanceResult = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly instance: AsyncItem<RecurringGameInstance | undefined>;
-  readonly wasCreated: boolean;
-}
-
-export declare type RecordMissedInstanceResult = LazyLoading extends LazyLoadingDisabled ? EagerRecordMissedInstanceResult : LazyRecordMissedInstanceResult
-
-export declare const RecordMissedInstanceResult: (new (init: ModelInit<RecordMissedInstanceResult>) => RecordMissedInstanceResult)
-
-type EagerUpdateInstanceResult = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly instance?: RecurringGameInstance | null;
-}
-
-type LazyUpdateInstanceResult = {
-  readonly success: boolean;
-  readonly message?: string | null;
-  readonly instance: AsyncItem<RecurringGameInstance | undefined>;
-}
-
-export declare type UpdateInstanceResult = LazyLoading extends LazyLoadingDisabled ? EagerUpdateInstanceResult : LazyUpdateInstanceResult
-
-export declare const UpdateInstanceResult: (new (init: ModelInit<UpdateInstanceResult>) => UpdateInstanceResult)
-
-type EagerInstancesNeedingReviewResult = {
-  readonly items: RecurringGameInstance[];
-  readonly nextToken?: string | null;
-  readonly totalCount?: number | null;
-}
-
-type LazyInstancesNeedingReviewResult = {
-  readonly items: AsyncCollection<RecurringGameInstance>;
-  readonly nextToken?: string | null;
-  readonly totalCount?: number | null;
-}
-
-export declare type InstancesNeedingReviewResult = LazyLoading extends LazyLoadingDisabled ? EagerInstancesNeedingReviewResult : LazyInstancesNeedingReviewResult
-
-export declare const InstancesNeedingReviewResult: (new (init: ModelInit<InstancesNeedingReviewResult>) => InstancesNeedingReviewResult)
 
 type EagerEnrichGameDataOutput = {
   readonly success: boolean;
@@ -6248,10 +5994,12 @@ type EagerRecurringGame = {
   readonly gameType: GameType | keyof typeof GameType;
   readonly gameVariant: GameVariant | keyof typeof GameVariant;
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly sessionMode?: string | null;
   readonly typicalBuyIn?: number | null;
   readonly typicalRake?: number | null;
   readonly typicalStartingStack?: number | null;
   readonly typicalGuarantee?: number | null;
+  readonly typicalDuration?: number | null;
   readonly hasJackpotContributions?: boolean | null;
   readonly jackpotContributionAmount?: number | null;
   readonly hasAccumulatorTickets?: boolean | null;
@@ -6272,13 +6020,16 @@ type EagerRecurringGame = {
   readonly autoDetectionConfidence?: number | null;
   readonly wasManuallyCreated?: boolean | null;
   readonly requiresReview?: boolean | null;
+  readonly reviewReason?: string | null;
   readonly totalInstancesRun?: number | null;
+  readonly totalInstancesCancelled?: number | null;
   readonly avgAttendance?: number | null;
   readonly lastMonthAttendance?: number | null;
-  readonly instances?: (RecurringGameInstance | null)[] | null;
+  readonly lastConfirmedDate?: string | null;
+  readonly lastCancelledDate?: string | null;
   readonly gameInstances?: (Game | null)[] | null;
+  readonly instances?: (RecurringGameInstance | null)[] | null;
   readonly metrics?: (RecurringGameMetrics | null)[] | null;
-  readonly mergedInto?: string | null;
   readonly notes?: string | null;
   readonly adminNotes?: string | null;
   readonly createdAt: string;
@@ -6308,10 +6059,12 @@ type LazyRecurringGame = {
   readonly gameType: GameType | keyof typeof GameType;
   readonly gameVariant: GameVariant | keyof typeof GameVariant;
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly sessionMode?: string | null;
   readonly typicalBuyIn?: number | null;
   readonly typicalRake?: number | null;
   readonly typicalStartingStack?: number | null;
   readonly typicalGuarantee?: number | null;
+  readonly typicalDuration?: number | null;
   readonly hasJackpotContributions?: boolean | null;
   readonly jackpotContributionAmount?: number | null;
   readonly hasAccumulatorTickets?: boolean | null;
@@ -6332,13 +6085,16 @@ type LazyRecurringGame = {
   readonly autoDetectionConfidence?: number | null;
   readonly wasManuallyCreated?: boolean | null;
   readonly requiresReview?: boolean | null;
+  readonly reviewReason?: string | null;
   readonly totalInstancesRun?: number | null;
+  readonly totalInstancesCancelled?: number | null;
   readonly avgAttendance?: number | null;
   readonly lastMonthAttendance?: number | null;
-  readonly instances: AsyncCollection<RecurringGameInstance>;
+  readonly lastConfirmedDate?: string | null;
+  readonly lastCancelledDate?: string | null;
   readonly gameInstances: AsyncCollection<Game>;
+  readonly instances: AsyncCollection<RecurringGameInstance>;
   readonly metrics: AsyncCollection<RecurringGameMetrics>;
-  readonly mergedInto?: string | null;
   readonly notes?: string | null;
   readonly adminNotes?: string | null;
   readonly createdAt: string;
@@ -6377,14 +6133,8 @@ type EagerRecurringGameInstance = {
   readonly cancellationReason?: string | null;
   readonly needsReview?: boolean | null;
   readonly reviewReason?: string | null;
-  readonly reviewedAt?: string | null;
-  readonly reviewedBy?: string | null;
-  readonly replacementGameId?: string | null;
-  readonly replacementGameName?: string | null;
-  readonly replacementReason?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
-  readonly source: string;
 }
 
 type LazyRecurringGameInstance = {
@@ -6410,14 +6160,8 @@ type LazyRecurringGameInstance = {
   readonly cancellationReason?: string | null;
   readonly needsReview?: boolean | null;
   readonly reviewReason?: string | null;
-  readonly reviewedAt?: string | null;
-  readonly reviewedBy?: string | null;
-  readonly replacementGameId?: string | null;
-  readonly replacementGameName?: string | null;
-  readonly replacementReason?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
-  readonly source: string;
 }
 
 export declare type RecurringGameInstance = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameInstance : LazyRecurringGameInstance

@@ -1220,10 +1220,12 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -1244,10 +1246,13 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -1507,10 +1512,12 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -1531,15 +1538,19 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -1549,7 +1560,6 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -1807,10 +1817,12 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -1831,10 +1843,13 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -3387,10 +3402,12 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -3411,10 +3428,13 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -3674,10 +3694,12 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -3698,15 +3720,19 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -3716,7 +3742,6 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -3974,10 +3999,12 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -3998,10 +4025,13 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -5174,10 +5204,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -5198,10 +5230,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -6920,10 +6955,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -6944,15 +6981,19 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -6962,7 +7003,6 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -7575,10 +7615,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -7599,10 +7641,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -8028,10 +8073,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -8052,10 +8099,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -9420,10 +9470,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -9444,10 +9496,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -10468,10 +10523,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -10492,10 +10549,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -11179,10 +11239,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -11203,10 +11265,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -12321,10 +12386,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -12345,10 +12412,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -13249,10 +13319,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -13273,10 +13345,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -13849,10 +13924,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         gameType
         gameVariant
         tournamentType
+        sessionMode
         typicalBuyIn
         typicalRake
         typicalStartingStack
         typicalGuarantee
+        typicalDuration
         hasJackpotContributions
         jackpotContributionAmount
         hasAccumulatorTickets
@@ -13873,46 +13950,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         autoDetectionConfidence
         wasManuallyCreated
         requiresReview
+        reviewReason
         totalInstancesRun
+        totalInstancesCancelled
         avgAttendance
         lastMonthAttendance
-        instances {
-          items {
-            id
-            recurringGameId
-            gameId
-            expectedDate
-            dayOfWeek
-            weekKey
-            venueId
-            entityId
-            recurringGameName
-            status
-            hasDeviation
-            deviationType
-            deviationDetails
-            notes
-            adminNotes
-            cancellationReason
-            needsReview
-            reviewReason
-            reviewedAt
-            reviewedBy
-            replacementGameId
-            replacementGameName
-            replacementReason
-            createdAt
-            updatedAt
-            source
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
+        lastConfirmedDate
+        lastCancelledDate
         gameInstances {
           items {
             id
@@ -14062,6 +14106,37 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           startedAt
           __typename
         }
+        instances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         metrics {
           items {
             id
@@ -14140,7 +14215,6 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           startedAt
           __typename
         }
-        mergedInto
         notes
         adminNotes
         createdAt
@@ -15120,10 +15194,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -15144,10 +15220,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -15407,10 +15486,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -15431,15 +15512,19 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -15449,7 +15534,6 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -15707,10 +15791,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -15731,10 +15817,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -16883,10 +16972,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -16907,10 +16998,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -17319,10 +17413,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -17343,15 +17439,19 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -17361,7 +17461,6 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -17526,10 +17625,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -17550,10 +17651,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -18193,10 +18297,12 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -18217,10 +18323,13 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -19598,10 +19707,12 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -19622,10 +19733,13 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -19885,10 +19999,12 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -19909,15 +20025,19 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -19927,7 +20047,6 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -20185,10 +20304,12 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -20209,10 +20330,13 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -21292,10 +21416,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -21316,10 +21442,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -23038,10 +23167,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -23062,15 +23193,19 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -23080,7 +23215,6 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -23693,10 +23827,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -23717,10 +23853,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -24146,10 +24285,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -24170,10 +24311,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -25538,10 +25682,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -25562,10 +25708,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -26586,10 +26735,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -26610,10 +26761,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -27297,10 +27451,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -27321,10 +27477,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -28439,10 +28598,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -28463,10 +28624,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -29367,10 +29531,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -29391,10 +29557,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -29967,10 +30136,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         gameType
         gameVariant
         tournamentType
+        sessionMode
         typicalBuyIn
         typicalRake
         typicalStartingStack
         typicalGuarantee
+        typicalDuration
         hasJackpotContributions
         jackpotContributionAmount
         hasAccumulatorTickets
@@ -29991,46 +30162,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         autoDetectionConfidence
         wasManuallyCreated
         requiresReview
+        reviewReason
         totalInstancesRun
+        totalInstancesCancelled
         avgAttendance
         lastMonthAttendance
-        instances {
-          items {
-            id
-            recurringGameId
-            gameId
-            expectedDate
-            dayOfWeek
-            weekKey
-            venueId
-            entityId
-            recurringGameName
-            status
-            hasDeviation
-            deviationType
-            deviationDetails
-            notes
-            adminNotes
-            cancellationReason
-            needsReview
-            reviewReason
-            reviewedAt
-            reviewedBy
-            replacementGameId
-            replacementGameName
-            replacementReason
-            createdAt
-            updatedAt
-            source
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
+        lastConfirmedDate
+        lastCancelledDate
         gameInstances {
           items {
             id
@@ -30180,6 +30318,37 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           startedAt
           __typename
         }
+        instances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         metrics {
           items {
             id
@@ -30258,7 +30427,6 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           startedAt
           __typename
         }
-        mergedInto
         notes
         adminNotes
         createdAt
@@ -31238,10 +31406,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -31262,10 +31432,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -31525,10 +31698,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -31549,15 +31724,19 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -31567,7 +31746,6 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -31825,10 +32003,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -31849,10 +32029,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -33001,10 +33184,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -33025,10 +33210,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -33437,10 +33625,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -33461,15 +33651,19 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -33479,7 +33673,6 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -33644,10 +33837,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -33668,10 +33863,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -34311,10 +34509,12 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -34335,10 +34535,13 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -35457,10 +35660,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -35481,10 +35686,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -37203,10 +37411,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -37227,15 +37437,19 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -37245,7 +37459,6 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -37858,10 +38071,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -37882,10 +38097,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -38311,10 +38529,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -38335,10 +38555,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -39703,10 +39926,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -39727,10 +39952,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -40751,10 +40979,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -40775,10 +41005,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -41462,10 +41695,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -41486,10 +41721,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -42604,10 +42842,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -42628,10 +42868,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -43532,10 +43775,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -43556,10 +43801,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -44132,10 +44380,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         gameType
         gameVariant
         tournamentType
+        sessionMode
         typicalBuyIn
         typicalRake
         typicalStartingStack
         typicalGuarantee
+        typicalDuration
         hasJackpotContributions
         jackpotContributionAmount
         hasAccumulatorTickets
@@ -44156,46 +44406,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         autoDetectionConfidence
         wasManuallyCreated
         requiresReview
+        reviewReason
         totalInstancesRun
+        totalInstancesCancelled
         avgAttendance
         lastMonthAttendance
-        instances {
-          items {
-            id
-            recurringGameId
-            gameId
-            expectedDate
-            dayOfWeek
-            weekKey
-            venueId
-            entityId
-            recurringGameName
-            status
-            hasDeviation
-            deviationType
-            deviationDetails
-            notes
-            adminNotes
-            cancellationReason
-            needsReview
-            reviewReason
-            reviewedAt
-            reviewedBy
-            replacementGameId
-            replacementGameName
-            replacementReason
-            createdAt
-            updatedAt
-            source
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
+        lastConfirmedDate
+        lastCancelledDate
         gameInstances {
           items {
             id
@@ -44345,6 +44562,37 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           startedAt
           __typename
         }
+        instances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         metrics {
           items {
             id
@@ -44423,7 +44671,6 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           startedAt
           __typename
         }
-        mergedInto
         notes
         adminNotes
         createdAt
@@ -45403,10 +45650,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -45427,10 +45676,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -45690,10 +45942,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -45714,15 +45968,19 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -45732,7 +45990,6 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -45990,10 +46247,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -46014,10 +46273,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -47166,10 +47428,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -47190,10 +47454,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -47602,10 +47869,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -47626,15 +47895,19 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -47644,7 +47917,6 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -47809,10 +48081,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -47833,10 +48107,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -48476,10 +48753,12 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -48500,10 +48779,13 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -49622,10 +49904,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -49646,10 +49930,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -51368,10 +51655,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -51392,15 +51681,19 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -51410,7 +51703,6 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -52023,10 +52315,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -52047,10 +52341,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -52476,10 +52773,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -52500,10 +52799,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -53868,10 +54170,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -53892,10 +54196,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -54916,10 +55223,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -54940,10 +55249,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -55627,10 +55939,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -55651,10 +55965,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -56769,10 +57086,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -56793,10 +57112,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -57697,10 +58019,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -57721,10 +58045,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -58297,10 +58624,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         gameType
         gameVariant
         tournamentType
+        sessionMode
         typicalBuyIn
         typicalRake
         typicalStartingStack
         typicalGuarantee
+        typicalDuration
         hasJackpotContributions
         jackpotContributionAmount
         hasAccumulatorTickets
@@ -58321,46 +58650,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         autoDetectionConfidence
         wasManuallyCreated
         requiresReview
+        reviewReason
         totalInstancesRun
+        totalInstancesCancelled
         avgAttendance
         lastMonthAttendance
-        instances {
-          items {
-            id
-            recurringGameId
-            gameId
-            expectedDate
-            dayOfWeek
-            weekKey
-            venueId
-            entityId
-            recurringGameName
-            status
-            hasDeviation
-            deviationType
-            deviationDetails
-            notes
-            adminNotes
-            cancellationReason
-            needsReview
-            reviewReason
-            reviewedAt
-            reviewedBy
-            replacementGameId
-            replacementGameName
-            replacementReason
-            createdAt
-            updatedAt
-            source
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
+        lastConfirmedDate
+        lastCancelledDate
         gameInstances {
           items {
             id
@@ -58510,6 +58806,37 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           startedAt
           __typename
         }
+        instances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         metrics {
           items {
             id
@@ -58588,7 +58915,6 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           startedAt
           __typename
         }
-        mergedInto
         notes
         adminNotes
         createdAt
@@ -59568,10 +59894,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -59592,10 +59920,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -59855,10 +60186,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -59879,15 +60212,19 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -59897,7 +60234,6 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -60155,10 +60491,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -60179,10 +60517,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -61331,10 +61672,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -61355,10 +61698,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -61767,10 +62113,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -61791,15 +62139,19 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -61809,7 +62161,6 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -61974,10 +62325,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -61998,10 +62351,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -62641,10 +62997,12 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -62665,10 +63023,13 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -64048,10 +64409,12 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -64072,10 +64435,13 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -64335,10 +64701,12 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -64359,15 +64727,19 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -64377,7 +64749,6 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -64635,10 +65006,12 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -64659,10 +65032,13 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -66003,10 +66379,12 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -66027,10 +66405,13 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -66290,10 +66671,12 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -66314,15 +66697,19 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -66332,7 +66719,6 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -66590,10 +66976,12 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -66614,10 +67002,13 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -67958,10 +68349,12 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -67982,10 +68375,13 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -68245,10 +68641,12 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -68269,15 +68667,19 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -68287,7 +68689,6 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -68545,10 +68946,12 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -68569,10 +68972,13 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -70168,10 +70574,12 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -70192,10 +70600,13 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -70455,10 +70866,12 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -70479,15 +70892,19 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -70497,7 +70914,6 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -70755,10 +71171,12 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -70779,10 +71197,13 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -72358,10 +72779,12 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -72382,10 +72805,13 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -72645,10 +73071,12 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -72669,15 +73097,19 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -72687,7 +73119,6 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -72945,10 +73376,12 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -72969,10 +73402,13 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -74548,10 +74984,12 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -74572,10 +75010,13 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -74835,10 +75276,12 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -74859,15 +75302,19 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -74877,7 +75324,6 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -75135,10 +75581,12 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -75159,10 +75607,13 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -76715,10 +77166,12 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -76739,10 +77192,13 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -77002,10 +77458,12 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -77026,15 +77484,19 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -77044,7 +77506,6 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -77302,10 +77763,12 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -77326,10 +77789,13 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -78895,10 +79361,12 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -78919,10 +79387,13 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -79182,10 +79653,12 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -79206,15 +79679,19 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -79224,7 +79701,6 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -79482,10 +79958,12 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -79506,10 +79984,13 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -81075,10 +81556,12 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -81099,10 +81582,13 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
@@ -81362,10 +81848,12 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           gameType
           gameVariant
           tournamentType
+          sessionMode
           typicalBuyIn
           typicalRake
           typicalStartingStack
           typicalGuarantee
+          typicalDuration
           hasJackpotContributions
           jackpotContributionAmount
           hasAccumulatorTickets
@@ -81386,15 +81874,19 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           autoDetectionConfidence
           wasManuallyCreated
           requiresReview
+          reviewReason
           totalInstancesRun
+          totalInstancesCancelled
           avgAttendance
           lastMonthAttendance
-          instances {
+          lastConfirmedDate
+          lastCancelledDate
+          gameInstances {
             nextToken
             startedAt
             __typename
           }
-          gameInstances {
+          instances {
             nextToken
             startedAt
             __typename
@@ -81404,7 +81896,6 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             startedAt
             __typename
           }
-          mergedInto
           notes
           adminNotes
           createdAt
@@ -81662,10 +82153,12 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameType
             gameVariant
             tournamentType
+            sessionMode
             typicalBuyIn
             typicalRake
             typicalStartingStack
             typicalGuarantee
+            typicalDuration
             hasJackpotContributions
             jackpotContributionAmount
             hasAccumulatorTickets
@@ -81686,10 +82179,13 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             autoDetectionConfidence
             wasManuallyCreated
             requiresReview
+            reviewReason
             totalInstancesRun
+            totalInstancesCancelled
             avgAttendance
             lastMonthAttendance
-            mergedInto
+            lastConfirmedDate
+            lastCancelledDate
             notes
             adminNotes
             createdAt
