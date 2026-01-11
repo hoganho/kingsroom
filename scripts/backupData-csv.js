@@ -120,12 +120,15 @@ function convertToCsv(items) {
   return [headerRow, ...dataRows].join('\n');
 }
 
-function makeTimestampedDirName(prefix) {
+function makeTimestamp() {
   const now = new Date();
   const pad = (n) => n.toString().padStart(2, '0');
-  const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(
+  return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(
     now.getHours()
   )}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+}
+
+function makeTimestampedDirName(prefix, timestamp) {
   return `${prefix}_${timestamp}`;
 }
 
@@ -139,7 +142,7 @@ function tableMatchesFilters(tableName) {
   if (!tableName.includes(config.API_ID)) return false;
 
   // Comment out to search all tables
-  //if (!tableName.includes("SocialPost-")) return false;
+  if (!tableName.includes("Game-")) return false;
 
   return true;
 }
@@ -177,7 +180,7 @@ async function getTablesToBackup() {
 // BACKUP ONE TABLE
 // ------------------------------------------------------------------
 
-async function backupTableData(tableName, backupDir) {
+async function backupTableData(tableName, backupDir, timestamp) {
   logger.info(`Starting to back up all data from table: ${tableName}`);
 
   let lastEvaluatedKey = undefined;
@@ -211,7 +214,7 @@ async function backupTableData(tableName, backupDir) {
     return;
   }
 
-  const fileName = path.join(backupDir, `${tableName}.csv`);
+  const fileName = path.join(backupDir, `${tableName}_${timestamp}.csv`);
 
   const csvData = convertToCsv(allTableItems);
   await fs.writeFile(fileName, csvData);
@@ -305,8 +308,11 @@ async function main() {
     return;
   }
 
+  // Generate timestamp once for consistent naming across directory and files
+  const timestamp = makeTimestamp();
+
   // Create timestamped backup directory inside DATA_OUTPUT_DIR
-  const backupDirName = makeTimestampedDirName(config.BACKUP_PREFIX);
+  const backupDirName = makeTimestampedDirName(config.BACKUP_PREFIX, timestamp);
   const fullBackupPath = path.join(DATA_OUTPUT_DIR, backupDirName);
 
   try {
@@ -323,7 +329,7 @@ async function main() {
   for (const tableName of TABLES_TO_BACKUP) {
     try {
       logger.info(`\nProcessing table: ${tableName}`);
-      await backupTableData(tableName, fullBackupPath);
+      await backupTableData(tableName, fullBackupPath, timestamp);
     } catch (err) {
       logger.error(`Error while processing ${tableName}: ${err.message}`);
       logger.error('Continuing to the next table...');

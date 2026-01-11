@@ -2,6 +2,10 @@
 // GAME CONTENT HASH UTILITY
 // ===================================================================
 //
+// VERSION: 1.1.0
+// - Added isStatusDataStale, statusDataStaleAt, statusDataStaleReason to NON_MEANINGFUL_FIELDS
+//   These are administrative flags that shouldn't trigger downstream reprocessing
+//
 // Calculates a hash of "meaningful" Game fields to detect real changes.
 // Used by saveGameFunction to set dataChangedAt only when content changes.
 // Downstream Lambdas can then skip processing if dataChangedAt unchanged.
@@ -115,6 +119,13 @@ const NON_MEANINGFUL_FIELDS = [
     'lastEditedAt',
     'lastEditedBy',
     'editHistory',
+    
+    // === STATUS DATA QUALITY FLAGS (v1.1.0) ===
+    // Administrative flags that indicate data staleness/quality issues
+    // These should NOT trigger downstream reprocessing
+    'isStatusDataStale',
+    'statusDataStaleAt',
+    'statusDataStaleReason',
     
     // Assignment status (process tracks these, not triggers)
     'venueAssignmentStatus',

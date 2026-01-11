@@ -486,6 +486,7 @@ const VenueCard: React.FC<VenueCardProps> = ({ data, seriesType, onNavigate }) =
               {data.totalGames} games
             </span>
             <TrendIndicator trend={data.attendanceTrend} percent={data.attendanceTrendPercent} />
+            {!isEmpty && <HealthBadge health={data.overallHealth} />}
           </div>
         </div>
       </div>

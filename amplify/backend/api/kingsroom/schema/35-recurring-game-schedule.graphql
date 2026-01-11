@@ -1,0 +1,272 @@
+# 35-recurring-game-schedule.graphql
+# ===================================================================
+# RECURRING GAME SCHEDULE & INSTANCE TRACKING
+# VERSION 2.0.0 - Aligned with recurringGameService.ts frontend
+# ===================================================================
+
+# ===================================================================
+# INPUT TYPES (must match frontend exactly)
+# ===================================================================
+
+input DetectInstanceGapsInput {
+  venueId: ID!
+  startDate: AWSDate!
+  endDate: AWSDate!
+  createInstances: Boolean
+}
+
+input ReconcileInstancesInput {
+  venueId: ID!
+  startDate: AWSDate!
+  endDate: AWSDate!
+  preview: Boolean
+}
+
+input RecordMissedInstanceInput {
+  recurringGameId: ID!
+  expectedDate: AWSDate!
+  status: RecurringGameInstanceStatus!
+  cancellationReason: String
+  notes: String
+}
+
+input UpdateInstanceStatusInput {
+  instanceId: ID!
+  status: RecurringGameInstanceStatus!
+  cancellationReason: String
+  notes: String
+  adminNotes: String
+}
+
+# ===================================================================
+# RESULT TYPES - GAP DETECTION
+# ===================================================================
+
+type GapInfo @aws_iam @aws_cognito_user_pools {
+  recurringGameId: ID!
+  recurringGameName: String
+  expectedDate: AWSDate!
+  dayOfWeek: String!
+  weekKey: String!
+  possibleMatchGameId: ID
+  possibleMatchGameName: String
+  matchConfidence: Float
+}
+
+type DetectGapsResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  venueId: ID!
+  venueName: String
+  startDate: AWSDate!
+  endDate: AWSDate!
+  weeksAnalyzed: Int!
+  recurringGamesChecked: Int!
+  expectedOccurrences: Int!
+  confirmedOccurrences: Int!
+  gapsFound: Int!
+  gaps: [GapInfo!]!
+  instancesCreated: Int
+  error: String
+}
+
+# ===================================================================
+# RESULT TYPES - RECONCILIATION
+# ===================================================================
+
+type ReconcileInstanceDetail @aws_iam @aws_cognito_user_pools {
+  gameId: ID!
+  gameName: String
+  gameDate: AWSDate
+  action: String!
+  instanceId: ID
+  recurringGameId: ID
+  recurringGameName: String
+}
+
+type ReconcileInstancesResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  venueId: ID!
+  gamesAnalyzed: Int!
+  instancesCreated: Int!
+  instancesUpdated: Int!
+  orphanGames: Int!
+  preview: Boolean!
+  details: [ReconcileInstanceDetail!]!
+  error: String
+}
+
+# ===================================================================
+# RESULT TYPES - COMPLIANCE REPORT
+# ===================================================================
+
+type InstanceSummary @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  recurringGameId: ID!
+  recurringGameName: String
+  gameId: ID
+  expectedDate: AWSDate!
+  dayOfWeek: String!
+  status: RecurringGameInstanceStatus!
+  hasDeviation: Boolean
+  deviationType: String
+  cancellationReason: String
+  notes: String
+  needsReview: Boolean
+  reviewReason: String
+}
+
+type WeekSummary @aws_iam @aws_cognito_user_pools {
+  weekKey: String!
+  weekStartDate: AWSDate
+  confirmedCount: Int!
+  cancelledCount: Int!
+  skippedCount: Int!
+  unknownCount: Int!
+  noShowCount: Int!
+  totalExpected: Int!
+  complianceRate: Float!
+  instances: [InstanceSummary!]!
+}
+
+type VenueComplianceReport @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  venueId: ID!
+  venueName: String
+  startDate: AWSDate!
+  endDate: AWSDate!
+  totalExpected: Int!
+  totalConfirmed: Int!
+  totalCancelled: Int!
+  totalSkipped: Int!
+  totalUnknown: Int!
+  totalNoShow: Int!
+  overallComplianceRate: Float!
+  weekSummaries: [WeekSummary!]!
+  needsReviewCount: Int!
+  unknownCount: Int!
+  error: String
+}
+
+# ===================================================================
+# RESULT TYPES - RECORD/UPDATE INSTANCE
+# ===================================================================
+
+type RecurringGameInstanceResult @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  recurringGameId: ID!
+  recurringGameName: String
+  expectedDate: AWSDate!
+  dayOfWeek: String!
+  status: RecurringGameInstanceStatus!
+  cancellationReason: String
+  notes: String
+  adminNotes: String
+}
+
+type RecordMissedInstanceResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  message: String
+  wasCreated: Boolean!
+  instance: RecurringGameInstanceResult
+  error: String
+}
+
+type UpdateInstanceStatusResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  message: String
+  instance: RecurringGameInstanceResult
+  error: String
+}
+
+# ===================================================================
+# RESULT TYPES - WEEK INSTANCES
+# ===================================================================
+
+type WeekInstancesResult @aws_iam @aws_cognito_user_pools {
+  weekKey: String!
+  weekStartDate: AWSDate
+  confirmedCount: Int!
+  cancelledCount: Int!
+  skippedCount: Int!
+  unknownCount: Int!
+  noShowCount: Int!
+  totalExpected: Int!
+  complianceRate: Float!
+  instances: [InstanceSummary!]!
+}
+
+# ===================================================================
+# RESULT TYPES - INSTANCES NEEDING REVIEW
+# ===================================================================
+
+type InstanceNeedingReview @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  recurringGameId: ID!
+  recurringGameName: String
+  gameId: ID
+  expectedDate: AWSDate!
+  dayOfWeek: String!
+  weekKey: String
+  venueId: ID
+  status: RecurringGameInstanceStatus!
+  hasDeviation: Boolean
+  deviationType: String
+  deviationDetails: String
+  cancellationReason: String
+  notes: String
+  needsReview: Boolean
+  reviewReason: String
+}
+
+type InstancesNeedingReviewResult @aws_iam @aws_cognito_user_pools {
+  items: [InstanceNeedingReview!]!
+  nextToken: String
+  totalCount: Int
+}
+
+# ===================================================================
+# MUTATIONS (detectGaps and reconcile are mutations in frontend)
+# ===================================================================
+
+extend type Mutation {
+  # Detect gaps - frontend calls this as a mutation
+  detectRecurringGameGaps(input: DetectInstanceGapsInput!): DetectGapsResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+
+  # Reconcile instances with games
+  reconcileRecurringInstances(input: ReconcileInstancesInput!): ReconcileInstancesResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+
+  # Record a missed instance
+  recordMissedInstance(input: RecordMissedInstanceInput!): RecordMissedInstanceResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+
+  # Update instance status
+  updateInstanceStatus(input: UpdateInstanceStatusInput!): UpdateInstanceStatusResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+}
+
+# ===================================================================
+# QUERIES
+# ===================================================================
+
+extend type Query {
+  # Get compliance report - uses direct args not input type
+  getVenueComplianceReport(venueId: ID!, startDate: AWSDate!, endDate: AWSDate!): VenueComplianceReport!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+
+  # Get instances for a specific week
+  getWeekInstances(venueId: ID!, weekKey: String!): WeekInstancesResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+
+  # List instances needing review
+  listInstancesNeedingReview(venueId: ID, entityId: ID, limit: Int, nextToken: String): InstancesNeedingReviewResult!
+    @function(name: "gameDataEnricher-${env}")
+    @auth(rules: [{ allow: private }])
+}

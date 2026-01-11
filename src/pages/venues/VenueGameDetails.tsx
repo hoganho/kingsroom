@@ -85,9 +85,8 @@ const getRecurringGameQuery = /* GraphQL */ `
       tournamentType
       typicalBuyIn
       typicalGuarantee
+      typicalRake
       startTime
-      rake
-      venueFee
       hasJackpotContributions
       jackpotContributionAmount
       hasAccumulatorTickets

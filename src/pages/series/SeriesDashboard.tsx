@@ -4,7 +4,7 @@
 // REQUIRES: TournamentSeriesMetrics populated via refreshAllMetrics
 // Data format: TournamentSeriesMetrics with timeRange: ALL | 12M | 6M | 3M | 1M
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   ArrowPathIcon,
@@ -14,8 +14,6 @@ import {
   UserGroupIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  MapPinIcon,
-  ClockIcon,
 } from "@heroicons/react/24/outline"
 
 import { cx, formatCurrency } from "@/lib/utils"
@@ -301,13 +299,35 @@ function formatProfit(value: number): string {
   return value < 0 ? `-${formatted}` : formatted
 }
 
+/**
+ * Format currency in a compact way for KPI cards
+ * e.g., $1,234,567 -> $1.23M, $12,345 -> $12.3K
+ */
+function formatCompactCurrency(value: number): string {
+  const isNegative = value < 0
+  const absValue = Math.abs(value)
+  
+  let formatted: string
+  if (absValue >= 1_000_000) {
+    formatted = `$${(absValue / 1_000_000).toFixed(2)}M`
+  } else if (absValue >= 10_000) {
+    formatted = `$${(absValue / 1_000).toFixed(1)}K`
+  } else if (absValue >= 1_000) {
+    formatted = `$${(absValue / 1_000).toFixed(2)}K`
+  } else {
+    formatted = `$${absValue.toFixed(0)}`
+  }
+  
+  return isNegative ? `-${formatted}` : formatted
+}
+
 // ============================================
 // SUB-COMPONENTS
 // ============================================
 
 // Horizontal scroll row for series cards
 function HorizontalScrollRow({ children }: { children: React.ReactNode }) {
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
 
@@ -369,91 +389,96 @@ function HorizontalScrollRow({ children }: { children: React.ReactNode }) {
   )
 }
 
-// Series Card Component
+// Series Card Component - Styled to match VenueCard
 interface SeriesCardProps {
   data: SeriesDisplayStats
   onNavigate: (seriesId: string) => void
 }
 
 function SeriesCard({ data, onNavigate }: SeriesCardProps) {
-  const profitColor = data.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'
+  const isEmpty = !data || data.totalEvents === 0
   
   return (
-    <Card
-      className="flex-shrink-0 w-72 cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-purple-500"
+    <div 
+      className={cx(
+        "flex-shrink-0 w-[340px] rounded-2xl shadow-sm border overflow-hidden cursor-pointer",
+        "hover:shadow-md hover:border-gray-300 transition-all",
+        "bg-gradient-to-br from-purple-50 to-white border-purple-200"
+      )}
       onClick={() => onNavigate(data.tournamentSeriesId)}
     >
-      <div className="p-4">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-50 truncate text-sm">
-              {data.seriesName}
-            </h3>
-            {data.year && (
-              <span className="text-xs text-gray-500">{data.year}</span>
-            )}
+      {/* Card Header */}
+      <div className="p-4 flex items-center gap-3 border-b border-purple-100 bg-purple-50/50">
+        <div className="relative">
+          {/* Series Icon/Avatar */}
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center text-white border-2 border-white shadow-sm">
+            <TrophyIcon className="w-6 h-6" />
           </div>
-          <TrophyIcon className="w-5 h-5 text-purple-500 flex-shrink-0 ml-2" />
+          {/* Profitability indicator dot */}
+          <div className={cx(
+            "absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white",
+            data.profitability === 'highly-profitable' && 'bg-green-500',
+            data.profitability === 'profitable' && 'bg-blue-500',
+            data.profitability === 'break-even' && 'bg-yellow-500',
+            data.profitability === 'loss' && 'bg-red-500',
+            !['highly-profitable', 'profitable', 'break-even', 'loss'].includes(data.profitability) && 'bg-gray-400'
+          )} />
         </div>
-
-        {/* Key Metrics */}
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div>
-            <p className="text-xs text-gray-500">Events</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-50">
-              {data.totalEvents}
-            </p>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-gray-900 truncate" title={data.seriesName}>
+            {data.seriesName}
+          </h3>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-xs text-gray-500">
+              {data.totalEvents} events
+            </span>
+            {!isEmpty && <ProfitabilityBadge profitability={data.profitability} />}
           </div>
+        </div>
+      </div>
+
+      {/* Card Body */}
+      {isEmpty ? (
+        <div className="p-6 text-center text-gray-400">
+          <CalendarIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No events in this period</p>
+        </div>
+      ) : (
+        <div className="p-4 grid grid-cols-2 gap-3">
           <div>
             <p className="text-xs text-gray-500">Entries</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-50">
-              {data.totalEntries.toLocaleString()}
-            </p>
+            <p className="text-lg font-semibold text-gray-900">{data.totalEntries.toLocaleString()}</p>
+            <p className="text-xs text-gray-400">avg {data.avgEntriesPerEvent?.toFixed(1) || '-'}/event</p>
           </div>
           <div>
             <p className="text-xs text-gray-500">Prizepool</p>
-            <p className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-              {formatCurrency(data.totalPrizepool)}
-            </p>
+            <p className="text-lg font-semibold text-gray-900">{formatCompactCurrency(data.totalPrizepool)}</p>
           </div>
           <div>
             <p className="text-xs text-gray-500">Profit</p>
-            <p className={`text-sm font-semibold ${profitColor}`}>
-              {formatProfit(data.totalProfit)}
+            <p className={cx("text-lg font-semibold", data.totalProfit >= 0 ? 'text-green-600' : 'text-red-600')}>
+              {formatCompactCurrency(data.totalProfit)}
             </p>
+            <ConsistencyBadge consistency={data.consistency} />
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Duration</p>
+            <p className="text-sm font-medium text-gray-700">
+              {data.seriesDurationDays !== null 
+                ? `${data.seriesDurationDays} days`
+                : '-'}
+            </p>
+            <p className="text-xs text-gray-400">{data.uniqueVenues} venue{data.uniqueVenues !== 1 ? 's' : ''}</p>
           </div>
         </div>
-
-        {/* Badges */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          <ProfitabilityBadge profitability={data.profitability} />
-          <ConsistencyBadge consistency={data.consistency} />
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100 dark:border-gray-800">
-          <span className="flex items-center gap-1">
-            <MapPinIcon className="w-3.5 h-3.5" />
-            {data.uniqueVenues} venue{data.uniqueVenues !== 1 ? 's' : ''}
-          </span>
-          {data.seriesDurationDays !== null && (
-            <span className="flex items-center gap-1">
-              <ClockIcon className="w-3.5 h-3.5" />
-              {data.seriesDurationDays} days
-            </span>
-          )}
-        </div>
-      </div>
-    </Card>
+      )}
+    </div>
   )
 }
 
 // ============================================
 // MAIN COMPONENT
 // ============================================
-
-import React from 'react'
 
 export function SeriesDashboard() {
   const navigate = useNavigate()

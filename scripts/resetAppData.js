@@ -81,6 +81,7 @@ const getTableName = (modelName) => `${modelName}-${ENV_CONFIG.API_ID}-${ENV_CON
 // ============================================================================
 
 const CORE_TABLE_MODELS = [
+  'ActiveGame',
   'Game',
   'GameCost',
   'GameFinancialSnapshot',
@@ -100,6 +101,7 @@ const CORE_TABLE_MODELS = [
   'EntityMetrics',
   'RecurringGame',
   'RecurringGameMetrics',
+  'RecurringGameInstance',
   'VenueMetrics',
   'TournamentSeriesMetrics',
   'RecentlyFinishedGame',

@@ -1,7 +1,13 @@
 // src/pages/venues/VenueDetails.tsx
-// VERSION: 3.0.0 - BREAKING CHANGE: Now groups recurring games by recurringGameId
+// VERSION: 3.1.0 - Groups recurring games by day of week
 //
 // CHANGELOG:
+// - v3.1.0: Groups recurring games by day of week (Monday first)
+//           - Added DAYS_OF_WEEK_ORDERED constant
+//           - Added scheduleStatsByDay useMemo for grouping
+//           - Displays each day as a section with its games
+//           - Shows "No recurring game on {day}" for empty days
+//           - Removed redundant dayOfWeek from ScheduleCard
 // - v3.0.0: BREAKING - Groups by recurringGameId instead of venueGameTypeKey
 //           - GraphQL now fetches recurringGameId and recurringGame { id, name }
 //           - buildScheduleGroupStats groups by recurringGameId
@@ -200,6 +206,19 @@ function getTimeRangeBounds(range: TimeRangeKey): { from: string | null; to: str
   from.setMonth(from.getMonth() - months);
   return { from: from.toISOString(), to: to.toISOString() };
 }
+
+// Days of week ordered starting from Monday
+const DAYS_OF_WEEK_ORDERED = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+] as const;
+
+type DayOfWeek = typeof DAYS_OF_WEEK_ORDERED[number];
 
 // ============================================
 // GRAPHQL QUERIES
@@ -663,53 +682,50 @@ interface ScheduleCardProps {
 }
 
 const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onClick }) => {
-  const profitColor = schedule.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600';
   const avgEntries = schedule.totalGames > 0 ? schedule.totalEntries / schedule.totalGames : 0;
 
   return (
-    <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-blue-500"
+    <div 
+      className="flex-shrink-0 rounded-2xl shadow-sm border border-blue-200 overflow-hidden cursor-pointer hover:shadow-md hover:border-blue-300 transition-all bg-white"
       onClick={onClick}
     >
-      <div className="flex items-start justify-between">
+      {/* Card Header */}
+      <div className="p-4 flex items-center gap-3 border-b border-blue-100 bg-blue-50/30">
         <div className="flex-1 min-w-0">
-          <Text className="font-semibold text-gray-900 truncate" title={schedule.displayName}>
+          <h3 className="font-semibold text-gray-900 truncate" title={schedule.displayName}>
             {schedule.displayName}
-          </Text>
-          {schedule.dayOfWeek && (
-            <Text className="text-xs text-gray-500 mt-0.5">
-              {schedule.dayOfWeek}
-            </Text>
-          )}
+          </h3>
         </div>
-        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+        <span className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
           {schedule.totalGames} games
         </span>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      {/* Card Body */}
+      <div className="p-4 grid grid-cols-2 gap-3">
         <div>
-          <Text className="text-xs text-gray-500">Avg Entries</Text>
-          <Text className="font-semibold">{avgEntries.toFixed(1)}</Text>
+          <p className="text-xs text-gray-500">Entries</p>
+          <p className="text-lg font-semibold text-gray-900">{schedule.totalEntries.toLocaleString()}</p>
+          <p className="text-xs text-gray-400">avg {avgEntries.toFixed(1)}/game</p>
         </div>
         <div>
-          <Text className="text-xs text-gray-500">Total Prizepool</Text>
-          <Text className="font-semibold">{formatCompactCurrency(schedule.totalPrizepool)}</Text>
+          <p className="text-xs text-gray-500">Prizepool</p>
+          <p className="text-lg font-semibold text-gray-900">{formatCompactCurrency(schedule.totalPrizepool)}</p>
         </div>
         <div>
-          <Text className="text-xs text-gray-500">Total Profit</Text>
-          <Text className={`font-semibold ${profitColor}`}>
+          <p className="text-xs text-gray-500">Total Profit</p>
+          <p className={`text-lg font-semibold ${schedule.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {formatCompactCurrency(schedule.totalProfit)}
-          </Text>
+          </p>
         </div>
         <div>
-          <Text className="text-xs text-gray-500">Avg Profit</Text>
-          <Text className={`font-semibold ${schedule.avgProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+          <p className="text-xs text-gray-500">Avg Profit</p>
+          <p className={`text-lg font-semibold ${schedule.avgProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {formatCompactCurrency(schedule.avgProfit)}
-          </Text>
+          </p>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
@@ -947,6 +963,39 @@ export const VenueDetails: React.FC = () => {
   );
 
   const trendData = useMemo(() => buildOverallTrendData(allSnapshots), [allSnapshots]);
+
+  // Group recurring games by day of week
+  const scheduleStatsByDay = useMemo(() => {
+    const grouped: Record<DayOfWeek, ScheduleGroupStats[]> = {
+      Monday: [],
+      Tuesday: [],
+      Wednesday: [],
+      Thursday: [],
+      Friday: [],
+      Saturday: [],
+      Sunday: [],
+    };
+    
+    // Helper to normalize day names (handles "MONDAY", "monday", "Monday", etc.)
+    const normalizeDay = (day: string | null): DayOfWeek | null => {
+      if (!day) return null;
+      const normalized = day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+      return DAYS_OF_WEEK_ORDERED.includes(normalized as DayOfWeek) ? normalized as DayOfWeek : null;
+    };
+    
+    scheduleStats.forEach((schedule) => {
+      const day = normalizeDay(schedule.dayOfWeek);
+      if (day) {
+        grouped[day].push(schedule);
+      }
+    });
+    
+    // Debug log to see what we're grouping
+    console.log('[VenueDetails] scheduleStats dayOfWeek values:', scheduleStats.map(s => s.dayOfWeek));
+    console.log('[VenueDetails] Grouped by day:', Object.entries(grouped).map(([day, games]) => `${day}: ${games.length}`));
+    
+    return grouped;
+  }, [scheduleStats]);
 
   const gameRows = useMemo(() => {
     const snapshotsToShow = gameHistoryFilter === 'recurring' 
@@ -1250,7 +1299,7 @@ export const VenueDetails: React.FC = () => {
               </Card>
             </div>
 
-            {/* Recurring Games Section - NOW GROUPED BY recurringGameId */}
+            {/* Recurring Games Section - GROUPED BY DAY OF WEEK */}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <Text className="text-xs font-semibold uppercase text-gray-500">
@@ -1261,25 +1310,47 @@ export const VenueDetails: React.FC = () => {
                 </span>
               </div>
 
-              <Grid numItemsSm={1} numItemsMd={2} numItemsLg={3} className="gap-4">
-                {scheduleStats.map((schedule) => (
-                  <ScheduleCard 
-                    key={schedule.recurringGameId} 
-                    schedule={schedule}
-                    // UPDATED: Navigate using recurringGameId
-                    onClick={() => navigate(
-                      `/venues/game?venueId=${venue.id}&recurringGameId=${encodeURIComponent(schedule.recurringGameId)}`
-                    )}
-                  />
-                ))}
-
-                {scheduleStats.length === 0 && (
-                  <Text className="col-span-full text-sm text-gray-400 text-center py-8">
+              {scheduleStats.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-8 text-center">
+                  <p className="text-sm text-gray-400">
                     No recurring game data available for the selected filters.
                     {seriesType === 'SERIES' && ' Try switching to "Regular" or "All Games".'}
-                  </Text>
-                )}
-              </Grid>
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {DAYS_OF_WEEK_ORDERED.map((day) => {
+                    const gamesForDay = scheduleStatsByDay[day];
+                    
+                    return (
+                      <div key={day}>
+                        <p className="text-sm font-medium text-gray-700 mb-2">
+                          {day}
+                        </p>
+                        {gamesForDay.length > 0 ? (
+                          <Grid numItemsSm={1} numItemsMd={2} numItemsLg={3} className="gap-4">
+                            {gamesForDay.map((schedule) => (
+                              <ScheduleCard 
+                                key={schedule.recurringGameId} 
+                                schedule={schedule}
+                                onClick={() => navigate(
+                                  `/venues/game?venueId=${venue.id}&recurringGameId=${encodeURIComponent(schedule.recurringGameId)}`
+                                )}
+                              />
+                            ))}
+                          </Grid>
+                        ) : (
+                          <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-4 text-center">
+                            <p className="text-sm text-gray-400">
+                              No recurring game on {day}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Ad-hoc Games Section */}

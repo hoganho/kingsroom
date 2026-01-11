@@ -1,7 +1,7 @@
 /**
  * CONSOLIDATION LOGIC MODULE
  * 
- * VERSION: 1.2.0 - Added totalEntries calculation from prizepool, improved finalDay detection
+ * VERSION: 2.0.0 - Enhanced parent field population
  * 
  * Pure functions for tournament consolidation that can be used by:
  * 1. DynamoDB Stream Handler (actual consolidation)
@@ -15,6 +15,20 @@
  * *** FIX: calculateAggregatedTotals now aggregates rakeRevenue and warns about totalUniquePlayers ***
  * *** FIX: calculateAggregatedTotals now calculates totalEntries from prizepool formula ***
  * *** FIX: Improved finalDayChild detection based on dayNumber and status ***
+ * 
+ * *** NEW v2.0.0: Added gameYearMonth derivation for PARENT records ***
+ * *** NEW v2.0.0: Added buyInTier calculation for PARENT records ***
+ * *** NEW v2.0.0: Added gameDayOfWeek derivation for PARENT records ***
+ * *** NEW v2.0.0: Added totalBuyInsCollected aggregation (previously 0 in parents) ***
+ * *** NEW v2.0.0: Added prizepoolPlayerContributions aggregation (previously 0 in parents) ***
+ * *** NEW v2.0.0: Added prizepoolAddedValue from final day child (previously 0 in parents) ***
+ * *** NEW v2.0.0: Added prizepoolSurplus from final day child (previously 0 in parents) ***
+ * *** NEW v2.0.0: Added guaranteeOverlayCost from final day child (previously 0 in parents) ***
+ * *** NEW v2.0.0: Added gameProfit aggregation (previously 0 in parents) ***
+ * *** NEW v2.0.0: Added gameActualStartDateTime (earliest from children) ***
+ * *** NEW v2.0.0: Added gameEndDateTime (latest from children) ***
+ * *** NEW v2.0.0: Added totalDuration calculation ***
+ * *** NEW v2.0.0: Added gameTags merging from children ***
  */
 
 // --- PURE FUNCTIONS ---
@@ -221,6 +235,82 @@ const getDateBucket = (dateTimeStr) => {
     } catch {
         return null;
     }
+};
+
+/**
+ * *** NEW v2.0.0: Derives the day of week from a datetime string ***
+ * Used to populate gameDayOfWeek on PARENT records (previously always empty)
+ * 
+ * @param {string} dateTimeStr - ISO datetime string
+ * @returns {string|null} - Day name like "MONDAY", "TUESDAY", etc. or null
+ */
+const getDayOfWeek = (dateTimeStr) => {
+    if (!dateTimeStr) return null;
+    try {
+        const date = new Date(dateTimeStr);
+        if (isNaN(date.getTime())) return null;
+        const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        return days[date.getDay()];
+    } catch {
+        return null;
+    }
+};
+
+/**
+ * *** NEW v2.0.0: Calculates buy-in tier based on buy-in amount ***
+ * Used to populate buyInTier on PARENT records (previously always empty)
+ * 
+ * Tier thresholds:
+ * - FREEROLL: $0
+ * - LOW: $1-$50
+ * - MID: $51-$200
+ * - HIGH: $201-$1000
+ * - SUPER_HIGH: $1001+
+ * 
+ * @param {number} buyIn - Buy-in amount
+ * @returns {string} - Tier classification
+ */
+const calculateBuyInTier = (buyIn) => {
+    if (!buyIn || buyIn <= 0) return 'FREEROLL';
+    if (buyIn <= 50) return 'LOW';
+    if (buyIn <= 200) return 'MID';
+    if (buyIn <= 1000) return 'HIGH';
+    return 'SUPER_HIGH';
+};
+
+/**
+ * *** NEW v2.0.0: Merges game tags from multiple children, removing duplicates ***
+ * Used to populate gameTags on PARENT records (previously always empty [])
+ * 
+ * Handles both array and JSON string formats for gameTags field
+ * 
+ * @param {Array} children - Child game objects
+ * @returns {Array} - Merged unique tags
+ */
+const mergeGameTags = (children) => {
+    const allTags = new Set();
+    
+    for (const child of children) {
+        if (child.gameTags && Array.isArray(child.gameTags)) {
+            // Direct array format
+            child.gameTags.forEach(tag => allTags.add(tag));
+        } else if (typeof child.gameTags === 'string') {
+            // Handle JSON string format (e.g., from CSV import)
+            try {
+                const tags = JSON.parse(child.gameTags);
+                if (Array.isArray(tags)) {
+                    tags.forEach(tag => allTags.add(tag));
+                }
+            } catch {
+                // Not JSON, might be a single tag
+                if (child.gameTags.trim()) {
+                    allTags.add(child.gameTags.trim());
+                }
+            }
+        }
+    }
+    
+    return Array.from(allTags);
 };
 
 /**
@@ -440,6 +530,13 @@ const previewConsolidation = (game) => {
  * *** FIX: totalUniquePlayers is now clearly marked as "sum from children" - 
  *          actual unique count must come from PlayerEntry/PlayerResult deduplication ***
  * 
+ * *** NEW v2.0.0: Now returns ALL fields that should be populated on PARENT records ***
+ * - gameYearMonth, gameDayOfWeek, buyInTier (derived from earliest start)
+ * - totalBuyInsCollected, prizepoolPlayerContributions, gameProfit (aggregated)
+ * - prizepoolAddedValue, prizepoolSurplus, guaranteeOverlayCost (from final day)
+ * - gameActualStartDateTime, gameEndDateTime, totalDuration (date tracking)
+ * - gameTags (merged from children)
+ * 
  * @param {Object[]} children - Array of child game objects
  * @param {number} [expectedTotalEntries] - Expected total entries for comparison
  * @returns {Object} Aggregated totals for parent record
@@ -481,6 +578,9 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
     let seriesCategory = null;
     let seriesTitleId = null;
     let holidayType = null;
+    
+    // *** NEW v2.0.0: Track actual start times separately from scheduled ***
+    let earliestActualStart = Number.MAX_SAFE_INTEGER;
 
     for (const child of sortedChildren) {
         // Simple sums
@@ -496,7 +596,8 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         rakeSubsidy += (child.rakeSubsidy || 0);
         totalBuyInsCollected += (child.totalBuyInsCollected || 0);
         prizepoolPlayerContributions += (child.prizepoolPlayerContributions || 0);
-        prizepoolAddedValue += (child.prizepoolAddedValue || 0);
+        // *** NEW v2.0.0: prizepoolAddedValue is NOT summed - it comes from final day ***
+        // We track it here but will override with final day value below
         gameProfit += (child.gameProfit || 0);
         
         // fullRakeRealized is true only if ALL children have it true
@@ -529,12 +630,19 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
             holidayType = child.holidayType;
         }
 
-        // Date range
+        // Date range - scheduled start
         if (child.gameStartDateTime) {
             const start = new Date(child.gameStartDateTime).getTime();
             if (start < earliestStart) earliestStart = start;
         }
         
+        // *** NEW v2.0.0: Track actual start time (for gameActualStartDateTime) ***
+        if (child.gameActualStartDateTime) {
+            const actualStart = new Date(child.gameActualStartDateTime).getTime();
+            if (actualStart < earliestActualStart) earliestActualStart = actualStart;
+        }
+        
+        // Date range - end time
         if (child.gameEndDateTime) {
             const end = new Date(child.gameEndDateTime).getTime();
             if (end > latestEnd) latestEnd = end;
@@ -569,8 +677,12 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         playersRemaining = finalDayChild.playersRemaining ?? null;
         totalChipsInPlay = finalDayChild.totalChipsInPlay ?? null;
         averagePlayerStack = finalDayChild.averagePlayerStack ?? null;
+        
+        // *** NEW v2.0.0: These fields come from final day child only (not aggregated) ***
+        // These represent the final tournament state, not a sum across days
         guaranteeOverlayCost = finalDayChild.guaranteeOverlayCost ?? 0;
         prizepoolSurplus = finalDayChild.prizepoolSurplus ?? 0;
+        prizepoolAddedValue = finalDayChild.prizepoolAddedValue ?? 0;
         
         // *** FIX: Calculate totalEntries from finalDay using prizepool formula ***
         // Formula: totalEntries = prizepoolPaid / (buyIn - rake)
@@ -640,6 +752,21 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         const durationMs = latestEnd - earliestStart;
         totalDuration = Math.floor(durationMs / 1000);
     }
+    
+    // *** NEW v2.0.0: Derive date-based fields from earliest start ***
+    const earliestStartDate = earliestStart < Number.MAX_SAFE_INTEGER 
+        ? new Date(earliestStart).toISOString() 
+        : null;
+    
+    const gameYearMonth = getDateBucket(earliestStartDate);
+    const gameDayOfWeek = getDayOfWeek(earliestStartDate);
+    
+    // *** NEW v2.0.0: Calculate buy-in tier from first child's buyIn ***
+    const representativeBuyIn = sortedChildren[0]?.buyIn || 0;
+    const buyInTier = calculateBuyInTier(representativeBuyIn);
+    
+    // *** NEW v2.0.0: Merge game tags from all children ***
+    const gameTags = mergeGameTags(sortedChildren);
 
     return {
         totalInitialEntries,
@@ -670,10 +797,20 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
         earliestStart: earliestStart < Number.MAX_SAFE_INTEGER 
             ? new Date(earliestStart).toISOString() 
             : null,
+        // *** NEW v2.0.0: Include actual start time ***
+        gameActualStartDateTime: earliestActualStart < Number.MAX_SAFE_INTEGER 
+            ? new Date(earliestActualStart).toISOString() 
+            : null,
         latestEnd: latestEnd > 0 
             ? new Date(latestEnd).toISOString() 
             : null,
         totalDuration,
+        // *** NEW v2.0.0: Derived date-based fields ***
+        gameYearMonth,
+        gameDayOfWeek,
+        buyInTier,
+        // *** NEW v2.0.0: Merged tags ***
+        gameTags,
         parentStatus,
         isPartialData,
         missingFlightCount,
@@ -694,6 +831,8 @@ const calculateAggregatedTotals = (children, expectedTotalEntries) => {
  * *** FIX: Uses structured fields for parent name derivation ***
  * *** FIX: Now copies seriesCategory, tournamentSeriesTitleId, holidayType from child ***
  * 
+ * *** NEW v2.0.0: Now initializes derived fields (gameYearMonth, buyInTier, gameDayOfWeek) ***
+ * 
  * @param {Object} childGame - The child game triggering parent creation
  * @param {string} consolidationKey - The consolidation key
  * @param {string} parentId - The parent record ID (REQUIRED for sourceUrl)
@@ -704,6 +843,11 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
     if (!parentId) {
         throw new Error('parentId is required for buildParentRecord - needed for sourceUrl GSI');
     }
+    
+    // *** NEW v2.0.0: Calculate derived fields upfront ***
+    const gameYearMonth = getDateBucket(childGame.gameStartDateTime);
+    const gameDayOfWeek = getDayOfWeek(childGame.gameStartDateTime);
+    const buyInTier = calculateBuyInTier(childGame.buyIn);
     
     return {
         // Consolidation fields
@@ -719,16 +863,23 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         // Copy immutable traits from child
         gameType: childGame.gameType || 'TOURNAMENT',
         gameVariant: childGame.gameVariant || 'NLHE',
+        bettingStructure: childGame.bettingStructure || 'NO_LIMIT',
+        variant: childGame.variant || 'HOLD_EM',
         venueId: childGame.venueId,
         buyIn: childGame.buyIn || 0,
         rake: childGame.rake || 0,
         entityId: childGame.entityId,
         
+        // *** NEW v2.0.0: Derived fields (previously empty in PARENT records) ***
+        gameYearMonth,
+        gameDayOfWeek,
+        buyInTier,
+        
         // Guarantee fields
         hasGuarantee: childGame.hasGuarantee || false,
         guaranteeAmount: childGame.guaranteeAmount || 0,
-        guaranteeOverlayCost: 0,
-        prizepoolSurplus: 0,
+        guaranteeOverlayCost: 0,  // Will be updated during aggregation from final day
+        prizepoolSurplus: 0,      // Will be updated during aggregation from final day
         
         // Series fields - *** FIX: Now properly copying from child ***
         tournamentSeriesId: childGame.tournamentSeriesId || null,
@@ -753,6 +904,7 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         isRegular: childGame.isRegular || false,
         isSatellite: childGame.isSatellite || false,
         tournamentType: childGame.tournamentType || null,
+        entryStructure: childGame.entryStructure || null,
         
         // Game state (will be updated by recalculation)
         gameStatus: 'RUNNING',
@@ -768,7 +920,7 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         totalAddons: 0,
         prizepoolPaid: 0,
         prizepoolCalculated: 0,
-        // Financial metrics (new naming)
+        // Financial metrics (new naming) - will be calculated/aggregated
         totalBuyInsCollected: 0,
         projectedRakeRevenue: 0,
         rakeRevenue: 0,  // *** FIX: Added rakeRevenue ***
@@ -787,13 +939,14 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
         // Time tracking - MUST have gameStartDateTime for byRegistrationStatus GSI
         // Initialize from child, will be updated during aggregation to earliest child start
         gameStartDateTime: childGame.gameStartDateTime || new Date().toISOString(),
-        gameEndDateTime: childGame.gameEndDateTime || null,
-        totalDuration: null,
+        gameEndDateTime: null,             // *** NEW v2.0.0: Will be updated during aggregation ***
+        gameActualStartDateTime: null,     // *** NEW v2.0.0: Will be updated during aggregation ***
+        totalDuration: null,               // *** NEW v2.0.0: Will be calculated during aggregation ***
         gameFrequency: 'UNKNOWN',
         
         // Structure
         levels: [],
-        gameTags: [],
+        gameTags: childGame.gameTags || [],  // Will be merged from children during aggregation
         
         // Venue assignment
         venueAssignmentStatus: childGame.venueAssignmentStatus || 'MANUALLY_ASSIGNED',
@@ -819,6 +972,7 @@ const buildParentRecord = (childGame, consolidationKey, parentId) => {
 // --- EXPORTS (CommonJS) ---
 
 module.exports = {
+    // Core functions
     clean,
     deriveParentName,
     getDateBucket,
@@ -826,5 +980,10 @@ module.exports = {
     generateConsolidationKey,
     previewConsolidation,
     calculateAggregatedTotals,
-    buildParentRecord
+    buildParentRecord,
+    
+    // *** NEW v2.0.0: Helper functions ***
+    getDayOfWeek,
+    calculateBuyInTier,
+    mergeGameTags
 };

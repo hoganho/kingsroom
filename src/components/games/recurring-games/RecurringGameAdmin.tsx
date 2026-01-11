@@ -444,43 +444,98 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
     // SCHEDULE/INSTANCE FUNCTIONS
     // ===================================================================
 
+    // Helper to validate date range
+    const validateDateRange = (): { valid: boolean; error?: string; daysDiff?: number } => {
+        if (!selectedVenueId) {
+            return { valid: false, error: 'Please select a venue first' };
+        }
+        const start = new Date(dateRange.startDate);
+        const end = new Date(dateRange.endDate);
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return { valid: false, error: 'Invalid date format' };
+        }
+        if (end < start) {
+            return { valid: false, error: 'End date must be after start date' };
+        }
+        const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysDiff > 180) {
+            return { valid: false, error: `Date range is ${daysDiff} days (~${Math.round(daysDiff/30)} months). Please select 6 months or less. Click "4 Weeks" or "12 Weeks" button.`, daysDiff };
+        }
+        return { valid: true, daysDiff };
+    };
+
     const loadComplianceReport = async () => {
-        if (!selectedVenueId) return;
+        const validation = validateDateRange();
+        if (!validation.valid) {
+            setError(validation.error || 'Invalid input');
+            return;
+        }
         setIsLoading(true);
         setError(null);
         try {
-            const result = await getVenueComplianceReport(selectedVenueId, dateRange.startDate, dateRange.endDate);
+            console.log('[loadComplianceReport] Calling:', { venueId: selectedVenueId, ...dateRange });
+            const result = await getVenueComplianceReport(selectedVenueId!, dateRange.startDate, dateRange.endDate);
+            console.log('[loadComplianceReport] Result:', result);
+            if (!result.success) {
+                throw new Error((result as any).error || 'Operation failed');
+            }
             setComplianceReport(result);
         } catch (err: any) {
-            setError(err.message || 'Failed to load compliance report');
+            console.error('[loadComplianceReport] Error:', err);
+            const msg = err.errors?.[0]?.message || err.message || 'Failed to load compliance report';
+            setError(`Compliance Report: ${msg}`);
         } finally {
             setIsLoading(false);
         }
     };
 
     const detectGaps = async () => {
-        if (!selectedVenueId) return;
+        const validation = validateDateRange();
+        if (!validation.valid) {
+            setError(validation.error || 'Invalid input');
+            return;
+        }
         setIsLoading(true);
         setError(null);
+        setGapsResult(null);
         try {
-            const result = await detectRecurringGameGaps(selectedVenueId, dateRange.startDate, dateRange.endDate, false);
+            console.log('[detectGaps] Calling:', { venueId: selectedVenueId, ...dateRange, createInstances: false });
+            const result = await detectRecurringGameGaps(selectedVenueId!, dateRange.startDate, dateRange.endDate, false);
+            console.log('[detectGaps] Result:', result);
+            if (!result.success) {
+                throw new Error((result as any).error || 'Operation failed');
+            }
             setGapsResult(result);
+            if (result.gapsFound === 0) {
+                // No error, but also show a message
+                console.log('[detectGaps] No gaps found - schedule is complete');
+            }
         } catch (err: any) {
-            setError(err.message || 'Failed to detect gaps');
+            console.error('[detectGaps] Error:', err);
+            const msg = err.errors?.[0]?.message || err.message || 'Failed to detect gaps';
+            setError(`Detect Gaps: ${msg}`);
         } finally {
             setIsLoading(false);
         }
     };
 
     const executeReconcile = async (preview: boolean = true) => {
-        if (!selectedVenueId) return;
+        const validation = validateDateRange();
+        if (!validation.valid) {
+            setError(validation.error || 'Invalid input');
+            return;
+        }
         setIsLoading(true);
         setError(null);
         try {
-            const result = await reconcileRecurringInstances(selectedVenueId, dateRange.startDate, dateRange.endDate, preview);
+            console.log('[executeReconcile] Calling:', { venueId: selectedVenueId, ...dateRange, preview });
+            const result = await reconcileRecurringInstances(selectedVenueId!, dateRange.startDate, dateRange.endDate, preview);
+            console.log('[executeReconcile] Result:', result);
             setReconcileResult(result);
         } catch (err: any) {
-            setError(err.message || 'Failed to reconcile instances');
+            console.error('[executeReconcile] Error:', err);
+            const msg = err.errors?.[0]?.message || err.message || 'Failed to reconcile instances';
+            setError(`Reconcile: ${msg}`);
         } finally {
             setIsLoading(false);
         }
@@ -490,6 +545,7 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         if (!missedInstanceModal.gap) return;
         setIsLoading(true);
         try {
+            console.log('[handleRecordMissedInstance] Recording:', missedInstanceModal);
             await recordMissedInstance(
                 missedInstanceModal.gap.recurringGameId,
                 missedInstanceModal.gap.expectedDate,
@@ -500,21 +556,31 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
             setMissedInstanceModal({ isOpen: false, gap: null, status: 'CANCELLED', reason: '' });
             await detectGaps();
         } catch (err: any) {
-            setError(err.message || 'Failed to record missed instance');
+            console.error('[handleRecordMissedInstance] Error:', err);
+            const msg = err.errors?.[0]?.message || err.message || 'Failed to record missed instance';
+            setError(`Record Instance: ${msg}`);
         } finally {
             setIsLoading(false);
         }
     };
 
     const createGapInstances = async () => {
-        if (!selectedVenueId) return;
+        const validation = validateDateRange();
+        if (!validation.valid) {
+            setError(validation.error || 'Invalid input');
+            return;
+        }
         setIsLoading(true);
         setError(null);
         try {
-            const result = await detectRecurringGameGaps(selectedVenueId, dateRange.startDate, dateRange.endDate, true);
+            console.log('[createGapInstances] Calling with createInstances=true:', { venueId: selectedVenueId, ...dateRange });
+            const result = await detectRecurringGameGaps(selectedVenueId!, dateRange.startDate, dateRange.endDate, true);
+            console.log('[createGapInstances] Result:', result);
             setGapsResult(result);
         } catch (err: any) {
-            setError(err.message || 'Failed to create gap instances');
+            console.error('[createGapInstances] Error:', err);
+            const msg = err.errors?.[0]?.message || err.message || 'Failed to create gap instances';
+            setError(`Create Instances: ${msg}`);
         } finally {
             setIsLoading(false);
         }
@@ -924,6 +990,20 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                         <div><p className="text-2xl font-bold text-green-600">{complianceReport.totalConfirmed}</p><p className="text-xs text-gray-500">Confirmed</p></div>
                         <div><p className="text-2xl font-bold text-amber-600">{complianceReport.totalUnknown}</p><p className="text-xs text-gray-500">Unknown</p></div>
                         <div><p className="text-2xl font-bold text-blue-600">{Math.round(complianceReport.overallComplianceRate * 100)}%</p><p className="text-xs text-gray-500">Compliance</p></div>
+                    </div>
+                </div>
+            )}
+            {gapsResult && gapsResult.gaps.length === 0 && (
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                        <CheckCircleIcon className="h-6 w-6 text-green-600" />
+                        <div>
+                            <p className="font-medium text-green-800 dark:text-green-200">No gaps detected!</p>
+                            <p className="text-sm text-green-600 dark:text-green-400">
+                                Checked {gapsResult.recurringGamesChecked} recurring games over {gapsResult.weeksAnalyzed} weeks. 
+                                {gapsResult.expectedOccurrences} expected, {gapsResult.confirmedOccurrences} confirmed.
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}

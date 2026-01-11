@@ -5,7 +5,8 @@
       "dynamodb:PutItem",
       "dynamodb:UpdateItem",
       "dynamodb:Query",
-      "dynamodb:Scan"
+      "dynamodb:Scan",
+      "dynamodb:DeleteItem"
     ],
     "Resource": [
       "arn:aws:dynamodb:*:*:table/Game-*",
@@ -17,7 +18,9 @@
       "arn:aws:dynamodb:*:*:table/RecurringGame-*",
       "arn:aws:dynamodb:*:*:table/RecurringGame-*/index/*",
       "arn:aws:dynamodb:*:*:table/Venue-*",
-      "arn:aws:dynamodb:*:*:table/Venue-*/index/*"
+      "arn:aws:dynamodb:*:*:table/Venue-*/index/*",
+      "arn:aws:dynamodb:*:*:table/RecurringGameInstance-*",
+      "arn:aws:dynamodb:*:*:table/RecurringGameInstance-*/index/*"
     ]
   },
   {

@@ -640,6 +640,9 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -693,6 +696,9 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -2822,6 +2828,9 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -2875,6 +2884,9 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -4518,6 +4530,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
       gameType
       gameVariant
       gameStatus
+      isStatusDataStale
+      statusDataStaleAt
+      statusDataStaleReason
       gameStartDateTime
       gameActualStartDateTime
       gameEndDateTime
@@ -4571,6 +4586,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         gameType
         gameVariant
         gameStatus
+        isStatusDataStale
+        statusDataStaleAt
+        statusDataStaleReason
         gameStartDateTime
         gameActualStartDateTime
         gameEndDateTime
@@ -4624,6 +4642,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -4677,6 +4698,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -5269,6 +5293,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -5701,6 +5728,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -5918,6 +5948,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -6109,6 +6142,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -6484,6 +6520,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -7035,6 +7074,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -7088,6 +7130,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -7829,6 +7874,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -8655,6 +8703,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -8890,6 +8941,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -8943,6 +8997,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -9580,6 +9637,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -9775,6 +9835,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -9943,6 +10006,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -9996,6 +10062,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -10659,6 +10728,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -10712,6 +10784,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -11421,6 +11496,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -11806,6 +11884,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -11859,6 +11940,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -12752,6 +12836,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -13110,6 +13197,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -13964,6 +14054,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -14614,6 +14707,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -14667,6 +14763,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -16392,6 +16491,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -16445,6 +16547,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -18088,6 +18193,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -19127,6 +19235,9 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -19180,6 +19291,9 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -20730,6 +20844,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
       gameType
       gameVariant
       gameStatus
+      isStatusDataStale
+      statusDataStaleAt
+      statusDataStaleReason
       gameStartDateTime
       gameActualStartDateTime
       gameEndDateTime
@@ -20783,6 +20900,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         gameType
         gameVariant
         gameStatus
+        isStatusDataStale
+        statusDataStaleAt
+        statusDataStaleReason
         gameStartDateTime
         gameActualStartDateTime
         gameEndDateTime
@@ -20836,6 +20956,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -20889,6 +21012,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -21481,6 +21607,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -21913,6 +22042,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -22130,6 +22262,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -22321,6 +22456,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -22696,6 +22834,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -23247,6 +23388,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -23300,6 +23444,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -24041,6 +24188,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -24867,6 +25017,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -25102,6 +25255,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -25155,6 +25311,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -25792,6 +25951,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -25987,6 +26149,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -26155,6 +26320,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -26208,6 +26376,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -26871,6 +27042,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -26924,6 +27098,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -27633,6 +27810,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -28018,6 +28198,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -28071,6 +28254,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -28964,6 +29150,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -29322,6 +29511,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -30176,6 +30368,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -30826,6 +31021,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -30879,6 +31077,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -32604,6 +32805,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -32657,6 +32861,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -34300,6 +34507,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -34974,6 +35184,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
       gameType
       gameVariant
       gameStatus
+      isStatusDataStale
+      statusDataStaleAt
+      statusDataStaleReason
       gameStartDateTime
       gameActualStartDateTime
       gameEndDateTime
@@ -35027,6 +35240,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         gameType
         gameVariant
         gameStatus
+        isStatusDataStale
+        statusDataStaleAt
+        statusDataStaleReason
         gameStartDateTime
         gameActualStartDateTime
         gameEndDateTime
@@ -35080,6 +35296,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -35133,6 +35352,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -35725,6 +35947,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -36157,6 +36382,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -36374,6 +36602,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -36565,6 +36796,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -36940,6 +37174,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -37491,6 +37728,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -37544,6 +37784,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -38285,6 +38528,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -39111,6 +39357,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -39346,6 +39595,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -39399,6 +39651,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -40036,6 +40291,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -40231,6 +40489,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -40399,6 +40660,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -40452,6 +40716,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -41115,6 +41382,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -41168,6 +41438,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -41877,6 +42150,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -42262,6 +42538,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -42315,6 +42594,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -43208,6 +43490,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -43566,6 +43851,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -44420,6 +44708,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -45070,6 +45361,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -45123,6 +45417,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -46848,6 +47145,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -46901,6 +47201,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -48544,6 +48847,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -49218,6 +49524,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
       gameType
       gameVariant
       gameStatus
+      isStatusDataStale
+      statusDataStaleAt
+      statusDataStaleReason
       gameStartDateTime
       gameActualStartDateTime
       gameEndDateTime
@@ -49271,6 +49580,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         gameType
         gameVariant
         gameStatus
+        isStatusDataStale
+        statusDataStaleAt
+        statusDataStaleReason
         gameStartDateTime
         gameActualStartDateTime
         gameEndDateTime
@@ -49324,6 +49636,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -49377,6 +49692,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -49969,6 +50287,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -50401,6 +50722,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -50618,6 +50942,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -50809,6 +51136,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -51184,6 +51514,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -51735,6 +52068,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -51788,6 +52124,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -52529,6 +52868,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -53355,6 +53697,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -53590,6 +53935,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -53643,6 +53991,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -54280,6 +54631,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -54475,6 +54829,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -54643,6 +55000,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -54696,6 +55056,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -55359,6 +55722,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -55412,6 +55778,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -56121,6 +56490,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -56506,6 +56878,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -56559,6 +56934,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -57452,6 +57830,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -57810,6 +58191,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -58664,6 +59048,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -59314,6 +59701,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -59367,6 +59757,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -61092,6 +61485,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -61145,6 +61541,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -62788,6 +63187,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -63829,6 +64231,9 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -63882,6 +64287,9 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -65799,6 +66207,9 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -65852,6 +66263,9 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -67769,6 +68183,9 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -67822,6 +68239,9 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -69994,6 +70414,9 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -70047,6 +70470,9 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -72199,6 +72625,9 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -72252,6 +72681,9 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -74404,6 +74836,9 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -74457,6 +74892,9 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -76586,6 +77024,9 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -76639,6 +77080,9 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -78781,6 +79225,9 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -78834,6 +79281,9 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime
@@ -80976,6 +81426,9 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           gameType
           gameVariant
           gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
           gameStartDateTime
           gameActualStartDateTime
           gameEndDateTime
@@ -81029,6 +81482,9 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameType
             gameVariant
             gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
             gameStartDateTime
             gameActualStartDateTime
             gameEndDateTime

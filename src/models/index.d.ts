@@ -2572,6 +2572,382 @@ export declare type DeleteGameWithCleanupResult = LazyLoading extends LazyLoadin
 
 export declare const DeleteGameWithCleanupResult: (new (init: ModelInit<DeleteGameWithCleanupResult>) => DeleteGameWithCleanupResult)
 
+type EagerGapInfo = {
+  readonly recurringGameId: string;
+  readonly recurringGameName?: string | null;
+  readonly expectedDate: string;
+  readonly dayOfWeek: string;
+  readonly weekKey: string;
+  readonly possibleMatchGameId?: string | null;
+  readonly possibleMatchGameName?: string | null;
+  readonly matchConfidence?: number | null;
+}
+
+type LazyGapInfo = {
+  readonly recurringGameId: string;
+  readonly recurringGameName?: string | null;
+  readonly expectedDate: string;
+  readonly dayOfWeek: string;
+  readonly weekKey: string;
+  readonly possibleMatchGameId?: string | null;
+  readonly possibleMatchGameName?: string | null;
+  readonly matchConfidence?: number | null;
+}
+
+export declare type GapInfo = LazyLoading extends LazyLoadingDisabled ? EagerGapInfo : LazyGapInfo
+
+export declare const GapInfo: (new (init: ModelInit<GapInfo>) => GapInfo)
+
+type EagerDetectGapsResult = {
+  readonly success: boolean;
+  readonly venueId: string;
+  readonly venueName?: string | null;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly weeksAnalyzed: number;
+  readonly recurringGamesChecked: number;
+  readonly expectedOccurrences: number;
+  readonly confirmedOccurrences: number;
+  readonly gapsFound: number;
+  readonly gaps: GapInfo[];
+  readonly instancesCreated?: number | null;
+  readonly error?: string | null;
+}
+
+type LazyDetectGapsResult = {
+  readonly success: boolean;
+  readonly venueId: string;
+  readonly venueName?: string | null;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly weeksAnalyzed: number;
+  readonly recurringGamesChecked: number;
+  readonly expectedOccurrences: number;
+  readonly confirmedOccurrences: number;
+  readonly gapsFound: number;
+  readonly gaps: GapInfo[];
+  readonly instancesCreated?: number | null;
+  readonly error?: string | null;
+}
+
+export declare type DetectGapsResult = LazyLoading extends LazyLoadingDisabled ? EagerDetectGapsResult : LazyDetectGapsResult
+
+export declare const DetectGapsResult: (new (init: ModelInit<DetectGapsResult>) => DetectGapsResult)
+
+type EagerReconcileInstanceDetail = {
+  readonly gameId: string;
+  readonly gameName?: string | null;
+  readonly gameDate?: string | null;
+  readonly action: string;
+  readonly instanceId?: string | null;
+  readonly recurringGameId?: string | null;
+  readonly recurringGameName?: string | null;
+}
+
+type LazyReconcileInstanceDetail = {
+  readonly gameId: string;
+  readonly gameName?: string | null;
+  readonly gameDate?: string | null;
+  readonly action: string;
+  readonly instanceId?: string | null;
+  readonly recurringGameId?: string | null;
+  readonly recurringGameName?: string | null;
+}
+
+export declare type ReconcileInstanceDetail = LazyLoading extends LazyLoadingDisabled ? EagerReconcileInstanceDetail : LazyReconcileInstanceDetail
+
+export declare const ReconcileInstanceDetail: (new (init: ModelInit<ReconcileInstanceDetail>) => ReconcileInstanceDetail)
+
+type EagerReconcileInstancesResult = {
+  readonly success: boolean;
+  readonly venueId: string;
+  readonly gamesAnalyzed: number;
+  readonly instancesCreated: number;
+  readonly instancesUpdated: number;
+  readonly orphanGames: number;
+  readonly preview: boolean;
+  readonly details: ReconcileInstanceDetail[];
+  readonly error?: string | null;
+}
+
+type LazyReconcileInstancesResult = {
+  readonly success: boolean;
+  readonly venueId: string;
+  readonly gamesAnalyzed: number;
+  readonly instancesCreated: number;
+  readonly instancesUpdated: number;
+  readonly orphanGames: number;
+  readonly preview: boolean;
+  readonly details: ReconcileInstanceDetail[];
+  readonly error?: string | null;
+}
+
+export declare type ReconcileInstancesResult = LazyLoading extends LazyLoadingDisabled ? EagerReconcileInstancesResult : LazyReconcileInstancesResult
+
+export declare const ReconcileInstancesResult: (new (init: ModelInit<ReconcileInstancesResult>) => ReconcileInstancesResult)
+
+type EagerInstanceSummary = {
+  readonly id: string;
+  readonly recurringGameId: string;
+  readonly recurringGameName?: string | null;
+  readonly gameId?: string | null;
+  readonly expectedDate: string;
+  readonly dayOfWeek: string;
+  readonly status: RecurringGameInstanceStatus | keyof typeof RecurringGameInstanceStatus;
+  readonly hasDeviation?: boolean | null;
+  readonly deviationType?: string | null;
+  readonly cancellationReason?: string | null;
+  readonly notes?: string | null;
+  readonly needsReview?: boolean | null;
+  readonly reviewReason?: string | null;
+}
+
+type LazyInstanceSummary = {
+  readonly id: string;
+  readonly recurringGameId: string;
+  readonly recurringGameName?: string | null;
+  readonly gameId?: string | null;
+  readonly expectedDate: string;
+  readonly dayOfWeek: string;
+  readonly status: RecurringGameInstanceStatus | keyof typeof RecurringGameInstanceStatus;
+  readonly hasDeviation?: boolean | null;
+  readonly deviationType?: string | null;
+  readonly cancellationReason?: string | null;
+  readonly notes?: string | null;
+  readonly needsReview?: boolean | null;
+  readonly reviewReason?: string | null;
+}
+
+export declare type InstanceSummary = LazyLoading extends LazyLoadingDisabled ? EagerInstanceSummary : LazyInstanceSummary
+
+export declare const InstanceSummary: (new (init: ModelInit<InstanceSummary>) => InstanceSummary)
+
+type EagerWeekSummary = {
+  readonly weekKey: string;
+  readonly weekStartDate?: string | null;
+  readonly confirmedCount: number;
+  readonly cancelledCount: number;
+  readonly skippedCount: number;
+  readonly unknownCount: number;
+  readonly noShowCount: number;
+  readonly totalExpected: number;
+  readonly complianceRate: number;
+  readonly instances: InstanceSummary[];
+}
+
+type LazyWeekSummary = {
+  readonly weekKey: string;
+  readonly weekStartDate?: string | null;
+  readonly confirmedCount: number;
+  readonly cancelledCount: number;
+  readonly skippedCount: number;
+  readonly unknownCount: number;
+  readonly noShowCount: number;
+  readonly totalExpected: number;
+  readonly complianceRate: number;
+  readonly instances: InstanceSummary[];
+}
+
+export declare type WeekSummary = LazyLoading extends LazyLoadingDisabled ? EagerWeekSummary : LazyWeekSummary
+
+export declare const WeekSummary: (new (init: ModelInit<WeekSummary>) => WeekSummary)
+
+type EagerVenueComplianceReport = {
+  readonly success: boolean;
+  readonly venueId: string;
+  readonly venueName?: string | null;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly totalExpected: number;
+  readonly totalConfirmed: number;
+  readonly totalCancelled: number;
+  readonly totalSkipped: number;
+  readonly totalUnknown: number;
+  readonly totalNoShow: number;
+  readonly overallComplianceRate: number;
+  readonly weekSummaries: WeekSummary[];
+  readonly needsReviewCount: number;
+  readonly unknownCount: number;
+  readonly error?: string | null;
+}
+
+type LazyVenueComplianceReport = {
+  readonly success: boolean;
+  readonly venueId: string;
+  readonly venueName?: string | null;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly totalExpected: number;
+  readonly totalConfirmed: number;
+  readonly totalCancelled: number;
+  readonly totalSkipped: number;
+  readonly totalUnknown: number;
+  readonly totalNoShow: number;
+  readonly overallComplianceRate: number;
+  readonly weekSummaries: WeekSummary[];
+  readonly needsReviewCount: number;
+  readonly unknownCount: number;
+  readonly error?: string | null;
+}
+
+export declare type VenueComplianceReport = LazyLoading extends LazyLoadingDisabled ? EagerVenueComplianceReport : LazyVenueComplianceReport
+
+export declare const VenueComplianceReport: (new (init: ModelInit<VenueComplianceReport>) => VenueComplianceReport)
+
+type EagerRecurringGameInstanceResult = {
+  readonly id: string;
+  readonly recurringGameId: string;
+  readonly recurringGameName?: string | null;
+  readonly expectedDate: string;
+  readonly dayOfWeek: string;
+  readonly status: RecurringGameInstanceStatus | keyof typeof RecurringGameInstanceStatus;
+  readonly cancellationReason?: string | null;
+  readonly notes?: string | null;
+  readonly adminNotes?: string | null;
+}
+
+type LazyRecurringGameInstanceResult = {
+  readonly id: string;
+  readonly recurringGameId: string;
+  readonly recurringGameName?: string | null;
+  readonly expectedDate: string;
+  readonly dayOfWeek: string;
+  readonly status: RecurringGameInstanceStatus | keyof typeof RecurringGameInstanceStatus;
+  readonly cancellationReason?: string | null;
+  readonly notes?: string | null;
+  readonly adminNotes?: string | null;
+}
+
+export declare type RecurringGameInstanceResult = LazyLoading extends LazyLoadingDisabled ? EagerRecurringGameInstanceResult : LazyRecurringGameInstanceResult
+
+export declare const RecurringGameInstanceResult: (new (init: ModelInit<RecurringGameInstanceResult>) => RecurringGameInstanceResult)
+
+type EagerRecordMissedInstanceResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly wasCreated: boolean;
+  readonly instance?: RecurringGameInstanceResult | null;
+  readonly error?: string | null;
+}
+
+type LazyRecordMissedInstanceResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly wasCreated: boolean;
+  readonly instance?: RecurringGameInstanceResult | null;
+  readonly error?: string | null;
+}
+
+export declare type RecordMissedInstanceResult = LazyLoading extends LazyLoadingDisabled ? EagerRecordMissedInstanceResult : LazyRecordMissedInstanceResult
+
+export declare const RecordMissedInstanceResult: (new (init: ModelInit<RecordMissedInstanceResult>) => RecordMissedInstanceResult)
+
+type EagerUpdateInstanceStatusResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly instance?: RecurringGameInstanceResult | null;
+  readonly error?: string | null;
+}
+
+type LazyUpdateInstanceStatusResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly instance?: RecurringGameInstanceResult | null;
+  readonly error?: string | null;
+}
+
+export declare type UpdateInstanceStatusResult = LazyLoading extends LazyLoadingDisabled ? EagerUpdateInstanceStatusResult : LazyUpdateInstanceStatusResult
+
+export declare const UpdateInstanceStatusResult: (new (init: ModelInit<UpdateInstanceStatusResult>) => UpdateInstanceStatusResult)
+
+type EagerWeekInstancesResult = {
+  readonly weekKey: string;
+  readonly weekStartDate?: string | null;
+  readonly confirmedCount: number;
+  readonly cancelledCount: number;
+  readonly skippedCount: number;
+  readonly unknownCount: number;
+  readonly noShowCount: number;
+  readonly totalExpected: number;
+  readonly complianceRate: number;
+  readonly instances: InstanceSummary[];
+}
+
+type LazyWeekInstancesResult = {
+  readonly weekKey: string;
+  readonly weekStartDate?: string | null;
+  readonly confirmedCount: number;
+  readonly cancelledCount: number;
+  readonly skippedCount: number;
+  readonly unknownCount: number;
+  readonly noShowCount: number;
+  readonly totalExpected: number;
+  readonly complianceRate: number;
+  readonly instances: InstanceSummary[];
+}
+
+export declare type WeekInstancesResult = LazyLoading extends LazyLoadingDisabled ? EagerWeekInstancesResult : LazyWeekInstancesResult
+
+export declare const WeekInstancesResult: (new (init: ModelInit<WeekInstancesResult>) => WeekInstancesResult)
+
+type EagerInstanceNeedingReview = {
+  readonly id: string;
+  readonly recurringGameId: string;
+  readonly recurringGameName?: string | null;
+  readonly gameId?: string | null;
+  readonly expectedDate: string;
+  readonly dayOfWeek: string;
+  readonly weekKey?: string | null;
+  readonly venueId?: string | null;
+  readonly status: RecurringGameInstanceStatus | keyof typeof RecurringGameInstanceStatus;
+  readonly hasDeviation?: boolean | null;
+  readonly deviationType?: string | null;
+  readonly deviationDetails?: string | null;
+  readonly cancellationReason?: string | null;
+  readonly notes?: string | null;
+  readonly needsReview?: boolean | null;
+  readonly reviewReason?: string | null;
+}
+
+type LazyInstanceNeedingReview = {
+  readonly id: string;
+  readonly recurringGameId: string;
+  readonly recurringGameName?: string | null;
+  readonly gameId?: string | null;
+  readonly expectedDate: string;
+  readonly dayOfWeek: string;
+  readonly weekKey?: string | null;
+  readonly venueId?: string | null;
+  readonly status: RecurringGameInstanceStatus | keyof typeof RecurringGameInstanceStatus;
+  readonly hasDeviation?: boolean | null;
+  readonly deviationType?: string | null;
+  readonly deviationDetails?: string | null;
+  readonly cancellationReason?: string | null;
+  readonly notes?: string | null;
+  readonly needsReview?: boolean | null;
+  readonly reviewReason?: string | null;
+}
+
+export declare type InstanceNeedingReview = LazyLoading extends LazyLoadingDisabled ? EagerInstanceNeedingReview : LazyInstanceNeedingReview
+
+export declare const InstanceNeedingReview: (new (init: ModelInit<InstanceNeedingReview>) => InstanceNeedingReview)
+
+type EagerInstancesNeedingReviewResult = {
+  readonly items: InstanceNeedingReview[];
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+type LazyInstancesNeedingReviewResult = {
+  readonly items: InstanceNeedingReview[];
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+export declare type InstancesNeedingReviewResult = LazyLoading extends LazyLoadingDisabled ? EagerInstancesNeedingReviewResult : LazyInstancesNeedingReviewResult
+
+export declare const InstancesNeedingReviewResult: (new (init: ModelInit<InstancesNeedingReviewResult>) => InstancesNeedingReviewResult)
+
 type EagerAwardTicketResult = {
   readonly success: boolean;
   readonly ticketId?: string | null;
@@ -5165,6 +5541,9 @@ type EagerGame = {
   readonly gameType: GameType | keyof typeof GameType;
   readonly gameVariant: GameVariant | keyof typeof GameVariant;
   readonly gameStatus: GameStatus | keyof typeof GameStatus;
+  readonly isStatusDataStale?: boolean | null;
+  readonly statusDataStaleAt?: string | null;
+  readonly statusDataStaleReason?: string | null;
   readonly gameStartDateTime: string;
   readonly gameActualStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
@@ -5324,6 +5703,9 @@ type LazyGame = {
   readonly gameType: GameType | keyof typeof GameType;
   readonly gameVariant: GameVariant | keyof typeof GameVariant;
   readonly gameStatus: GameStatus | keyof typeof GameStatus;
+  readonly isStatusDataStale?: boolean | null;
+  readonly statusDataStaleAt?: string | null;
+  readonly statusDataStaleReason?: string | null;
   readonly gameStartDateTime: string;
   readonly gameActualStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;

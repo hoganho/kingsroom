@@ -29,6 +29,9 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   gameType: GameType!
   gameVariant: GameVariant!
   gameStatus: GameStatus! @index(name: "byStatus", queryField: "gamesByStatus", sortKeyFields: ["gameStartDateTime"])
+  isStatusDataStale: Boolean @default(value: "false")
+  statusDataStaleAt: AWSDateTime
+  statusDataStaleReason: String
 
   # --- Scheduling & Timestamps ---
   gameStartDateTime: AWSDateTime!
@@ -778,4 +781,7 @@ input SaveGameDataInput {
   instanceNumber: Int
   isReplacementInstance: Boolean
   replacementReason: String
+  isStatusDataStale: Boolean
+  statusDataStaleAt: AWSDateTime
+  statusDataStaleReason: String
 }

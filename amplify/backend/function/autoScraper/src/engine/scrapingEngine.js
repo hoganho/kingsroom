@@ -4,8 +4,17 @@
  * Core scraping logic extracted from index.js for maintainability.
  * Handles bulk scraping, gap processing, and event streaming.
  * 
- * VERSION: 1.8.0
+ * VERSION: 1.9.0
  * 
+ * UPDATED v1.9.0:
+ * - FIX: "Tournament not found" is now treated as NOT_FOUND, not an error
+ *   - "Tournament not found" is a valid status from the scraper API indicating
+ *     the tournament ID doesn't exist (similar to NOT_IN_USE)
+ *   - Previously this was wrapped in FETCH_ERROR and caused immediate stop
+ *   - Now increments consecutiveNotFound and uses threshold logic
+ *   - Only genuine errors (network failures, API key issues) stop immediately
+ * - NEW: isTournamentNotFoundStatus() helper to detect this status
+ *
  * UPDATED v1.8.0:
  * - SIMPLIFIED: Stop immediately on ANY error - no threshold checking
  *   - Removed all MAX_TOTAL_ERRORS and MAX_CONSECUTIVE_ERRORS logic
@@ -153,6 +162,40 @@ function isUnknownErrorResponse(parsedData) {
 }
 
 /**
+ * NEW v1.9.0: Check if the UNKNOWN response is actually a "Tournament not found" status
+ * 
+ * "Tournament not found" is a valid status from the scraper API indicating the
+ * tournament ID doesn't exist on the source site. This is NOT an error - it's
+ * similar to NOT_FOUND/NOT_IN_USE and should use threshold logic.
+ * 
+ * The fetch handler wraps this in FETCH_ERROR format for transport, but it's
+ * actually a normal status response that should be handled like NOT_FOUND.
+ * 
+ * @param {object} parsedData - The parsed tournament data
+ * @returns {boolean} True if this is a "Tournament not found" status (not a real error)
+ */
+function isTournamentNotFoundStatus(parsedData) {
+    if (!parsedData) return false;
+    
+    // Check for "Tournament not found" in various fields
+    const errorMsg = parsedData.errorMessage || parsedData.error || '';
+    const name = parsedData.name || '';
+    
+    // Common patterns for "tournament not found" status
+    const notFoundPatterns = [
+        'tournament not found',
+        'event not found',
+        'no tournament',
+        'does not exist',
+        'invalid tournament',
+    ];
+    
+    const combinedText = `${errorMsg} ${name}`.toLowerCase();
+    
+    return notFoundPatterns.some(pattern => combinedText.includes(pattern));
+}
+
+/**
  * Check if the page exists but couldn't be parsed into tournament data.
  * This is NOT an error - it's just an empty/unparseable slot.
  * Treat these like NOT_FOUND (don't increment error counters).
@@ -196,6 +239,8 @@ function isUnparseableResponse(parsedData) {
  * Check if the parsed data represents an ACTUAL error response from the scraper.
  * These are real failures that should increment error counters.
  * 
+ * UPDATED v1.9.0: "Tournament not found" is NOT a real error - check isTournamentNotFoundStatus first
+ * 
  * UPDATED v1.5.2: Also checks status and source fields for 'ERROR' value
  * 
  * UPDATED v1.5.1: Only true errors - unparseable pages moved to isUnparseableResponse
@@ -208,6 +253,10 @@ function isUnparseableResponse(parsedData) {
 function isErrorResponse(parsedData) {
     // No data at all = something went wrong
     if (!parsedData) return true;
+    
+    // v1.9.0: "Tournament not found" is a status, not an error
+    // Check this BEFORE checking error fields
+    if (isTournamentNotFoundStatus(parsedData)) return false;
     
     // Explicit error message from scraper/backend = real error
     if (parsedData.errorMessage) return true;
@@ -653,7 +702,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
     const MAX_CONSECUTIVE_NOT_FOUND = options.maxConsecutiveNotFound || DEFAULT_MAX_CONSECUTIVE_NOT_FOUND || 10;
     const MAX_CONSECUTIVE_BLANKS = options.maxConsecutiveBlanks || DEFAULT_MAX_CONSECUTIVE_BLANKS || 5;
     
-    console.log(`[ScrapingEngine] v1.8.0: Stop on first error. NOT_FOUND threshold=${MAX_CONSECUTIVE_NOT_FOUND}, BLANKS threshold=${MAX_CONSECUTIVE_BLANKS}`);
+    console.log(`[ScrapingEngine] v1.9.0: Stop on first error (except "Tournament not found"). NOT_FOUND threshold=${MAX_CONSECUTIVE_NOT_FOUND}, BLANKS threshold=${MAX_CONSECUTIVE_BLANKS}`);
     
     // Initialize results - merge with accumulated results from previous invocation if continuing
     const accumulated = options.accumulatedResults || {};
@@ -1035,39 +1084,75 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
             const isUnknownError = isUnknownErrorResponse(parsedData);
             
             // ═══════════════════════════════════════════════════════════════
-            // v1.8.0: UNKNOWN status = FETCH ERROR = IMMEDIATE STOP
-            // No threshold checking - any error stops the job immediately
+            // v1.9.0 FIX: Check if UNKNOWN is actually "Tournament not found" status
+            // "Tournament not found" is NOT an error - treat like NOT_FOUND
+            // Only genuine errors (network failures, API key issues) stop immediately
             // ═══════════════════════════════════════════════════════════════
             if (isUnknownError) {
-                results.errors++;
-                results.consecutiveBlanks = 0;
-                results.consecutiveNotFound = 0;
-                
-                // Extract error message from parsedData
-                // v1.7.0: Check for "FETCH_ERROR:" prefix in name field (GraphQL passthrough)
+                // Extract error message for logging
                 let errorMsg = parsedData.errorMessage || parsedData.error;
                 if (!errorMsg && parsedData.name?.startsWith('FETCH_ERROR:')) {
                     errorMsg = parsedData.name.substring('FETCH_ERROR:'.length).trim();
                 }
                 errorMsg = errorMsg || parsedData.name || 'Fetch failed (UNKNOWN status)';
-                results.lastErrorMessage = errorMsg;
                 
-                console.error(`[ScrapingEngine] ID ${currentId}: FETCH ERROR - ${errorMsg} - STOPPING IMMEDIATELY`);
-                
-                publishGameProcessedEvent(jobId, entityId, currentId, url, {
-                    action: 'ERROR',
-                    message: errorMsg,
-                    errorMessage: errorMsg,
-                    durationMs: Date.now() - gameStartTime,
-                    dataSource: dataSource,
-                    s3Key: parsedData.s3Key,
-                    parsedData: { gameStatus: 'UNKNOWN', error: errorMsg },
-                    saveResult: null,
-                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
-                
-                // v1.8.0: IMMEDIATE STOP on any error
-                results.stopReason = STOP_REASON.ERROR;
-                break;
+                // v1.9.0: Check if this is actually a "Tournament not found" status
+                if (isTournamentNotFoundStatus(parsedData)) {
+                    // ─────────────────────────────────────────────────────────────
+                    // "Tournament not found" = NOT_FOUND status, not an error
+                    // Use threshold logic like other NOT_FOUND responses
+                    // ─────────────────────────────────────────────────────────────
+                    results.consecutiveBlanks++;
+                    results.consecutiveNotFound++;
+                    results.blanks++;
+                    results.notFoundCount++;
+                    
+                    console.log(`[ScrapingEngine] ID ${currentId}: Tournament not found (consecutive: ${results.consecutiveNotFound}/${MAX_CONSECUTIVE_NOT_FOUND})`);
+                    
+                    publishGameProcessedEvent(jobId, entityId, currentId, url, {
+                        action: 'NOT_FOUND',
+                        message: errorMsg,
+                        durationMs: Date.now() - gameStartTime,
+                        dataSource: dataSource,
+                        s3Key: parsedData.s3Key,
+                        parsedData: { gameStatus: 'NOT_FOUND', originalStatus: 'UNKNOWN' },
+                        saveResult: null,
+                    }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                    
+                    // Check NOT_FOUND thresholds
+                    if (results.consecutiveNotFound >= MAX_CONSECUTIVE_NOT_FOUND && mode !== 'gaps') {
+                        console.log(`[ScrapingEngine] NOT_FOUND threshold reached: ${results.consecutiveNotFound}`);
+                        results.stopReason = STOP_REASON.NOT_FOUND;
+                        break;
+                    }
+                    
+                } else {
+                    // ─────────────────────────────────────────────────────────────
+                    // Genuine error (network failure, API key issue, etc.)
+                    // v1.8.0: IMMEDIATE STOP
+                    // ─────────────────────────────────────────────────────────────
+                    results.errors++;
+                    results.consecutiveBlanks = 0;
+                    results.consecutiveNotFound = 0;
+                    results.lastErrorMessage = errorMsg;
+                    
+                    console.error(`[ScrapingEngine] ID ${currentId}: FETCH ERROR - ${errorMsg} - STOPPING IMMEDIATELY`);
+                    
+                    publishGameProcessedEvent(jobId, entityId, currentId, url, {
+                        action: 'ERROR',
+                        message: errorMsg,
+                        errorMessage: errorMsg,
+                        durationMs: Date.now() - gameStartTime,
+                        dataSource: dataSource,
+                        s3Key: parsedData.s3Key,
+                        parsedData: { gameStatus: 'UNKNOWN', error: errorMsg },
+                        saveResult: null,
+                    }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                    
+                    // v1.8.0: IMMEDIATE STOP on any error
+                    results.stopReason = STOP_REASON.ERROR;
+                    break;
+                }
                 
             } else if (isNotFound) {
                 // ─────────────────────────────────────────────────────────────
@@ -1442,8 +1527,36 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
             // This ensures configuration/network errors are properly counted
             // v1.7.1 FIX: Also check for UNKNOWN status - this is a FETCH error!
             // v1.8.0: IMMEDIATE STOP on any error - no threshold checking
+            // v1.9.0 FIX: "Tournament not found" is NOT an error - treat as NOT_FOUND
             // ═══════════════════════════════════════════════════════════════
             const isUnknownError = isUnknownErrorResponse(parsedData);
+            
+            // v1.9.0: Check if UNKNOWN is actually "Tournament not found" first
+            if (isUnknownError && isTournamentNotFoundStatus(parsedData)) {
+                // "Tournament not found" = NOT_FOUND status, not an error
+                let errorMsg = parsedData.errorMessage || parsedData.error;
+                if (!errorMsg && parsedData.name?.startsWith('FETCH_ERROR:')) {
+                    errorMsg = parsedData.name.substring('FETCH_ERROR:'.length).trim();
+                }
+                errorMsg = errorMsg || parsedData.name || 'Tournament not found';
+                
+                console.log(`[ScrapingEngine] Gap ID ${tournamentId}: Tournament not found - treating as NOT_FOUND`);
+                results.blanks++;
+                results.notFoundCount++;
+                results.consecutiveBlanks++;
+                results.consecutiveNotFound++;
+                
+                publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
+                    action: 'NOT_FOUND',
+                    message: errorMsg,
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: dataSource,
+                    parsedData: { gameStatus: 'NOT_FOUND', originalStatus: 'UNKNOWN' },
+                    saveResult: null,
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
+                continue;  // Continue to next gap ID, don't stop
+            }
             
             if (isErrorResponse(parsedData) || isUnknownError) {
                 // Extract error message, including from FETCH_ERROR: prefix
@@ -1731,6 +1844,7 @@ module.exports = {
     isUnknownErrorResponse,
     isUnparseableResponse,  // NEW v1.5.1
     isErrorResponse,
+    isTournamentNotFoundStatus,  // NEW v1.9.0
     shouldSkipNotPublished,
     shouldSkipNotFoundGap,
     extractPlayerData,

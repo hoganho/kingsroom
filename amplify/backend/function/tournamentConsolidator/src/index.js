@@ -12,7 +12,23 @@ Amplify Params - DO NOT EDIT */
 
 /**
  * TOURNAMENT CONSOLIDATOR LAMBDA - REFACTORED
- * VERSION: 1.5.0
+ * VERSION: 2.0.0
+ * 
+ * CHANGES v2.0.0:
+ * - PARENT records now store ALL aggregated/derived fields:
+ *   - gameYearMonth (derived from earliest child start)
+ *   - buyInTier (calculated from buyIn)
+ *   - gameDayOfWeek (derived from earliest child start)
+ *   - totalBuyInsCollected (SUM from children)
+ *   - prizepoolPlayerContributions (SUM from children)
+ *   - prizepoolAddedValue (from final day child)
+ *   - prizepoolSurplus (from final day child)
+ *   - guaranteeOverlayCost (from final day child)
+ *   - gameProfit (SUM from children)
+ *   - gameActualStartDateTime (earliest from children)
+ *   - gameEndDateTime (latest from children)
+ *   - totalDuration (calculated)
+ *   - gameTags (merged unique from children)
  * 
  * CHANGES v1.5.0:
  * - Added content hash check to skip non-meaningful changes
@@ -268,7 +284,12 @@ const fetchConsolidationDetails = async (
         siblingCount,
         totalChildrenForProjection: allChildren.length,
         projectedUniquePlayers: projectedTotals.totalUniquePlayers,
-        projectedEntries: projectedTotals.totalEntries
+        projectedEntries: projectedTotals.totalEntries,
+        // *** NEW v2.0.0: Log additional projected fields ***
+        gameYearMonth: projectedTotals.gameYearMonth,
+        buyInTier: projectedTotals.buyInTier,
+        gameDayOfWeek: projectedTotals.gameDayOfWeek,
+        totalBuyInsCollected: projectedTotals.totalBuyInsCollected
     });
     
     return {
@@ -302,7 +323,14 @@ const fetchConsolidationDetails = async (
             latestEnd: projectedTotals.latestEnd,
             projectedStatus: projectedTotals.parentStatus,
             isPartialData: projectedTotals.isPartialData,
-            missingFlightCount: projectedTotals.missingFlightCount
+            missingFlightCount: projectedTotals.missingFlightCount,
+            // *** NEW v2.0.0: Include new projected fields in response ***
+            gameYearMonth: projectedTotals.gameYearMonth,
+            buyInTier: projectedTotals.buyInTier,
+            gameDayOfWeek: projectedTotals.gameDayOfWeek,
+            totalBuyInsCollected: projectedTotals.totalBuyInsCollected,
+            gameProfit: projectedTotals.gameProfit,
+            totalDuration: projectedTotals.totalDuration
         }
     };
 };
@@ -379,6 +407,21 @@ const calculateActualUniquePlayers = async (parentId) => {
 
 /**
  * Recalculates parent totals from all children
+ * 
+ * *** NEW v2.0.0: Now updates ALL aggregated and derived fields ***
+ * Previously only updated: totalUniquePlayers, totalInitialEntries, totalEntries,
+ *   totalRebuys, totalAddons, prizepoolPaid, prizepoolCalculated, gameStartDateTime,
+ *   gameStatus, rakeRevenue
+ * 
+ * Now also updates:
+ *   - gameYearMonth, gameDayOfWeek, buyInTier (derived)
+ *   - totalBuyInsCollected, prizepoolPlayerContributions, gameProfit (aggregated)
+ *   - prizepoolAddedValue, prizepoolSurplus, guaranteeOverlayCost (from final day)
+ *   - gameActualStartDateTime, gameEndDateTime, totalDuration (date tracking)
+ *   - gameTags (merged from children)
+ *   - projectedRakeRevenue, rakeSubsidy, fullRakeRealized (rake fields)
+ *   - playersRemaining, totalChipsInPlay, averagePlayerStack (live tracking)
+ *   - isPartialData, missingFlightCount (status tracking)
  */
 const recalculateParentTotals = async (parentId, currentParentRecord) => {
     // Fetch all children
@@ -453,15 +496,136 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
     
     let dynamicExpression = '';
     
-    // Add optional fields
+    // ═══════════════════════════════════════════════════════════════
+    // *** NEW v2.0.0: Add all the previously missing fields ***
+    // ═══════════════════════════════════════════════════════════════
+    
+    // --- Date/Time fields ---
     if (aggregated.latestEnd) {
         dynamicExpression += ', gameEndDateTime = :endDate';
         dynamicValues[':endDate'] = aggregated.latestEnd;
     }
     
+    // *** NEW v2.0.0: gameActualStartDateTime (earliest actual start from children) ***
+    if (aggregated.gameActualStartDateTime) {
+        dynamicExpression += ', gameActualStartDateTime = :actualStart';
+        dynamicValues[':actualStart'] = aggregated.gameActualStartDateTime;
+    }
+    
+    // *** NEW v2.0.0: totalDuration (calculated from earliest to latest) ***
+    if (aggregated.totalDuration !== null) {
+        dynamicExpression += ', totalDuration = :duration';
+        dynamicValues[':duration'] = aggregated.totalDuration;
+    }
+    
+    // --- Derived date fields ---
+    // *** NEW v2.0.0: gameYearMonth (derived from earliest start) ***
+    if (aggregated.gameYearMonth) {
+        dynamicExpression += ', gameYearMonth = :ym';
+        dynamicValues[':ym'] = aggregated.gameYearMonth;
+    }
+    
+    // *** NEW v2.0.0: gameDayOfWeek (derived from earliest start) ***
+    if (aggregated.gameDayOfWeek) {
+        dynamicExpression += ', gameDayOfWeek = :dow';
+        dynamicValues[':dow'] = aggregated.gameDayOfWeek;
+    }
+    
+    // *** NEW v2.0.0: buyInTier (calculated from buyIn amount) ***
+    if (aggregated.buyInTier) {
+        dynamicExpression += ', buyInTier = :bit';
+        dynamicValues[':bit'] = aggregated.buyInTier;
+    }
+    
+    // --- Financial fields (now aggregated) ---
+    // *** NEW v2.0.0: totalBuyInsCollected (SUM from children) ***
+    if (aggregated.totalBuyInsCollected !== undefined && aggregated.totalBuyInsCollected !== null) {
+        dynamicExpression += ', totalBuyInsCollected = :tbc';
+        dynamicValues[':tbc'] = aggregated.totalBuyInsCollected;
+    }
+    
+    // *** NEW v2.0.0: prizepoolPlayerContributions (SUM from children) ***
+    if (aggregated.prizepoolPlayerContributions !== undefined && aggregated.prizepoolPlayerContributions !== null) {
+        dynamicExpression += ', prizepoolPlayerContributions = :ppc';
+        dynamicValues[':ppc'] = aggregated.prizepoolPlayerContributions;
+    }
+    
+    // *** NEW v2.0.0: prizepoolAddedValue (from final day child) ***
+    if (aggregated.prizepoolAddedValue !== undefined && aggregated.prizepoolAddedValue !== null) {
+        dynamicExpression += ', prizepoolAddedValue = :pav';
+        dynamicValues[':pav'] = aggregated.prizepoolAddedValue;
+    }
+    
+    // *** NEW v2.0.0: prizepoolSurplus (from final day child) ***
+    if (aggregated.prizepoolSurplus !== undefined && aggregated.prizepoolSurplus !== null) {
+        dynamicExpression += ', prizepoolSurplus = :ps';
+        dynamicValues[':ps'] = aggregated.prizepoolSurplus;
+    }
+    
+    // *** NEW v2.0.0: guaranteeOverlayCost (from final day child) ***
+    if (aggregated.guaranteeOverlayCost !== undefined && aggregated.guaranteeOverlayCost !== null) {
+        dynamicExpression += ', guaranteeOverlayCost = :goc';
+        dynamicValues[':goc'] = aggregated.guaranteeOverlayCost;
+    }
+    
+    // *** NEW v2.0.0: gameProfit (SUM from children) ***
+    if (aggregated.gameProfit !== undefined && aggregated.gameProfit !== null) {
+        dynamicExpression += ', gameProfit = :gp';
+        dynamicValues[':gp'] = aggregated.gameProfit;
+    }
+    
+    // --- Rake fields ---
     if (aggregated.rakeRevenue !== undefined && aggregated.rakeRevenue !== null) {
         dynamicExpression += ', rakeRevenue = :rr';
         dynamicValues[':rr'] = aggregated.rakeRevenue;
+    }
+    
+    if (aggregated.projectedRakeRevenue !== undefined && aggregated.projectedRakeRevenue !== null) {
+        dynamicExpression += ', projectedRakeRevenue = :prr';
+        dynamicValues[':prr'] = aggregated.projectedRakeRevenue;
+    }
+    
+    if (aggregated.rakeSubsidy !== undefined && aggregated.rakeSubsidy !== null) {
+        dynamicExpression += ', rakeSubsidy = :rs';
+        dynamicValues[':rs'] = aggregated.rakeSubsidy;
+    }
+    
+    if (aggregated.fullRakeRealized !== undefined) {
+        dynamicExpression += ', fullRakeRealized = :frr';
+        dynamicValues[':frr'] = aggregated.fullRakeRealized;
+    }
+    
+    // --- Stack/chip tracking from final day ---
+    if (aggregated.playersRemaining !== null) {
+        dynamicExpression += ', playersRemaining = :pr';
+        dynamicValues[':pr'] = aggregated.playersRemaining;
+    }
+    
+    if (aggregated.totalChipsInPlay !== null) {
+        dynamicExpression += ', totalChipsInPlay = :tcip';
+        dynamicValues[':tcip'] = aggregated.totalChipsInPlay;
+    }
+    
+    if (aggregated.averagePlayerStack !== null) {
+        dynamicExpression += ', averagePlayerStack = :aps';
+        dynamicValues[':aps'] = aggregated.averagePlayerStack;
+    }
+    
+    // --- Partial data tracking ---
+    if (aggregated.isPartialData !== undefined) {
+        dynamicExpression += ', isPartialData = :ipd';
+        dynamicValues[':ipd'] = aggregated.isPartialData;
+    }
+    
+    if (aggregated.missingFlightCount !== undefined) {
+        dynamicExpression += ', missingFlightCount = :mfc';
+        dynamicValues[':mfc'] = aggregated.missingFlightCount;
+    }
+    
+    // *** NEW v2.0.0: Game tags (merged from children) ***
+    if (aggregated.gameTags && aggregated.gameTags.length > 0) {
+        dynamicExpression += ', gameTags = :gt';
+        dynamicValues[':gt'] = aggregated.gameTags;
     }
     
     // Copy series fields from children if not set on parent
@@ -471,9 +635,13 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
             dynamicExpression += ', seriesCategory = :sc';
             dynamicValues[':sc'] = representativeChild.seriesCategory;
         }
-        if (!currentParentRecord.seriesTitleId && representativeChild.seriesTitleId) {
-            dynamicExpression += ', seriesTitleId = :stid';
-            dynamicValues[':stid'] = representativeChild.seriesTitleId;
+        if (!currentParentRecord.tournamentSeriesTitleId && representativeChild.tournamentSeriesTitleId) {
+            dynamicExpression += ', tournamentSeriesTitleId = :stid';
+            dynamicValues[':stid'] = representativeChild.tournamentSeriesTitleId;
+        }
+        if (!currentParentRecord.holidayType && representativeChild.holidayType) {
+            dynamicExpression += ', holidayType = :ht';
+            dynamicValues[':ht'] = representativeChild.holidayType;
         }
     }
     
@@ -483,7 +651,9 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
         '#v': '_version'
     };
     
-    console.log(`[Consolidator] Updating parent with expression: ${finalExpression.substring(0, 100)}...`);
+    // *** NEW v2.0.0: Enhanced logging to show new fields ***
+    console.log(`[Consolidator] Updating parent ${parentId} with ${Object.keys(dynamicValues).length} fields`);
+    console.log(`[Consolidator] Key fields: gameYearMonth=${aggregated.gameYearMonth}, buyInTier=${aggregated.buyInTier}, totalBuyInsCollected=${aggregated.totalBuyInsCollected}`);
     
     await ddbDocClient.send(new UpdateCommand({
         TableName: GAME_TABLE,
@@ -493,7 +663,17 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
         ExpressionAttributeNames: finalNames
     }));
     
-    console.log(`[Consolidator] Recalculated Parent ${parentId}. TotalUniquePlayers: ${actualUniquePlayers}, Entries: ${calculatedTotalEntries}, Children: ${aggregated.childCount}`);
+    console.log(`[Consolidator] Recalculated Parent ${parentId}:`, {
+        totalUniquePlayers: actualUniquePlayers,
+        totalEntries: calculatedTotalEntries,
+        childCount: aggregated.childCount,
+        // *** NEW v2.0.0: Log new aggregated fields ***
+        gameYearMonth: aggregated.gameYearMonth,
+        buyInTier: aggregated.buyInTier,
+        totalBuyInsCollected: aggregated.totalBuyInsCollected,
+        gameProfit: aggregated.gameProfit,
+        totalDuration: aggregated.totalDuration
+    });
 
     // Consolidate player data
     const tableNames = {
@@ -690,7 +870,7 @@ const handleDynamoDBStream = async (event) => {
 // ===================================================================
 
 exports.handler = async (event) => {
-    console.log('[Consolidator] v1.5.0 - With content hash check');
+    console.log('[Consolidator] v2.0.0 - With full parent field population');
     
     try {
         // Route based on event type

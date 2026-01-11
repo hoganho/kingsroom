@@ -649,23 +649,200 @@ export const mergeRecurringGameDuplicates = async (canonicalId: string, duplicat
 export const cleanupOrphanedRecurringGames = async (venueId: string, preview: boolean = true): Promise<CleanupOrphansResult> => { const result = await getClient().graphql({ query: cleanupOrphanedRecurringGamesMutation, variables: { venueId, preview } }) as any; return result.data.cleanupOrphanedRecurringGames; };
 
 // ============================================================================
-// INSTANCE TRACKING OPERATIONS
+// INSTANCE TRACKING OPERATIONS (with improved error handling)
 // ============================================================================
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const detectRecurringGameGaps = async (venueId: string, startDate: string, endDate: string, createInstances: boolean = false): Promise<DetectGapsResult> => { const result = await getClient().graphql({ query: detectRecurringGameGapsMutation, variables: { input: { venueId, startDate, endDate, createInstances } } }) as any; return result.data.detectRecurringGameGaps; };
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const reconcileRecurringInstances = async (venueId: string, startDate: string, endDate: string, preview: boolean = true): Promise<ReconcileInstancesResult> => { const result = await getClient().graphql({ query: reconcileRecurringInstancesMutation, variables: { input: { venueId, startDate, endDate, preview } } }) as any; return result.data.reconcileRecurringInstances; };
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const recordMissedInstance = async (recurringGameId: string, expectedDate: string, status: 'CANCELLED' | 'SKIPPED' | 'NO_SHOW' | 'UNKNOWN', cancellationReason?: string, notes?: string): Promise<RecordMissedInstanceResult> => { const result = await getClient().graphql({ query: recordMissedInstanceMutation, variables: { input: { recurringGameId, expectedDate, status, cancellationReason, notes } } }) as any; return result.data.recordMissedInstance; };
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const updateInstanceStatus = async (instanceId: string, status: string, cancellationReason?: string, notes?: string, adminNotes?: string): Promise<UpdateInstanceResult> => { const result = await getClient().graphql({ query: updateInstanceStatusMutation, variables: { input: { instanceId, status, cancellationReason, notes, adminNotes } } }) as any; return result.data.updateInstanceStatus; };
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getVenueComplianceReport = async (venueId: string, startDate: string, endDate: string): Promise<VenueComplianceReport> => { const result = await getClient().graphql({ query: getVenueComplianceReportQuery, variables: { venueId, startDate, endDate } }) as any; return result.data.getVenueComplianceReport; };
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getWeekInstances = async (venueId: string, weekKey: string): Promise<InstanceWeekSummary> => { const result = await getClient().graphql({ query: getWeekInstancesQuery, variables: { venueId, weekKey } }) as any; return result.data.getWeekInstances; };
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const listInstancesNeedingReview = async (venueId?: string, entityId?: string, limit?: number, nextToken?: string): Promise<InstancesNeedingReviewResult> => { const result = await getClient().graphql({ query: listInstancesNeedingReviewQuery, variables: { venueId, entityId, limit, nextToken } }) as any; return result.data.listInstancesNeedingReview; };
+export const detectRecurringGameGaps = async (
+    venueId: string, 
+    startDate: string, 
+    endDate: string, 
+    createInstances: boolean = false
+): Promise<DetectGapsResult> => {
+    try {
+        console.log('[detectRecurringGameGaps] Request:', { venueId, startDate, endDate, createInstances });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await getClient().graphql({ 
+            query: detectRecurringGameGapsMutation, 
+            variables: { input: { venueId, startDate, endDate, createInstances } } 
+        }) as any;
+        
+        if (result.errors?.length > 0) {
+            console.error('[detectRecurringGameGaps] GraphQL errors:', result.errors);
+            throw new Error(result.errors.map((e: { message: string }) => e.message).join('; '));
+        }
+        if (!result.data?.detectRecurringGameGaps) {
+            throw new Error('No data returned. The operation may not be deployed.');
+        }
+        console.log('[detectRecurringGameGaps] Success:', result.data.detectRecurringGameGaps);
+        return result.data.detectRecurringGameGaps;
+    } catch (error) {
+        console.error('[detectRecurringGameGaps] Exception:', error);
+        throw error;
+    }
+};
+
+export const reconcileRecurringInstances = async (
+    venueId: string, 
+    startDate: string, 
+    endDate: string, 
+    preview: boolean = true
+): Promise<ReconcileInstancesResult> => {
+    try {
+        console.log('[reconcileRecurringInstances] Request:', { venueId, startDate, endDate, preview });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await getClient().graphql({ 
+            query: reconcileRecurringInstancesMutation, 
+            variables: { input: { venueId, startDate, endDate, preview } } 
+        }) as any;
+        
+        if (result.errors?.length > 0) {
+            console.error('[reconcileRecurringInstances] GraphQL errors:', result.errors);
+            throw new Error(result.errors.map((e: { message: string }) => e.message).join('; '));
+        }
+        if (!result.data?.reconcileRecurringInstances) {
+            throw new Error('No data returned. The operation may not be deployed.');
+        }
+        console.log('[reconcileRecurringInstances] Success:', result.data.reconcileRecurringInstances);
+        return result.data.reconcileRecurringInstances;
+    } catch (error) {
+        console.error('[reconcileRecurringInstances] Exception:', error);
+        throw error;
+    }
+};
+
+export const recordMissedInstance = async (
+    recurringGameId: string, 
+    expectedDate: string, 
+    status: 'CANCELLED' | 'SKIPPED' | 'NO_SHOW' | 'UNKNOWN', 
+    cancellationReason?: string, 
+    notes?: string
+): Promise<RecordMissedInstanceResult> => {
+    try {
+        console.log('[recordMissedInstance] Request:', { recurringGameId, expectedDate, status });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await getClient().graphql({ 
+            query: recordMissedInstanceMutation, 
+            variables: { input: { recurringGameId, expectedDate, status, cancellationReason, notes } } 
+        }) as any;
+        
+        if (result.errors?.length > 0) {
+            console.error('[recordMissedInstance] GraphQL errors:', result.errors);
+            throw new Error(result.errors.map((e: { message: string }) => e.message).join('; '));
+        }
+        if (!result.data?.recordMissedInstance) {
+            throw new Error('No data returned. The operation may not be deployed.');
+        }
+        return result.data.recordMissedInstance;
+    } catch (error) {
+        console.error('[recordMissedInstance] Exception:', error);
+        throw error;
+    }
+};
+
+export const updateInstanceStatus = async (
+    instanceId: string, 
+    status: string, 
+    cancellationReason?: string, 
+    notes?: string, 
+    adminNotes?: string
+): Promise<UpdateInstanceResult> => {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await getClient().graphql({ 
+            query: updateInstanceStatusMutation, 
+            variables: { input: { instanceId, status, cancellationReason, notes, adminNotes } } 
+        }) as any;
+        
+        if (result.errors?.length > 0) {
+            throw new Error(result.errors.map((e: { message: string }) => e.message).join('; '));
+        }
+        if (!result.data?.updateInstanceStatus) {
+            throw new Error('No data returned. The operation may not be deployed.');
+        }
+        return result.data.updateInstanceStatus;
+    } catch (error) {
+        console.error('[updateInstanceStatus] Exception:', error);
+        throw error;
+    }
+};
+
+export const getVenueComplianceReport = async (
+    venueId: string, 
+    startDate: string, 
+    endDate: string
+): Promise<VenueComplianceReport> => {
+    try {
+        console.log('[getVenueComplianceReport] Request:', { venueId, startDate, endDate });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await getClient().graphql({ 
+            query: getVenueComplianceReportQuery, 
+            variables: { venueId, startDate, endDate } 
+        }) as any;
+        
+        if (result.errors?.length > 0) {
+            console.error('[getVenueComplianceReport] GraphQL errors:', result.errors);
+            throw new Error(result.errors.map((e: { message: string }) => e.message).join('; '));
+        }
+        if (!result.data?.getVenueComplianceReport) {
+            throw new Error('No data returned. The operation may not be deployed.');
+        }
+        console.log('[getVenueComplianceReport] Success');
+        return result.data.getVenueComplianceReport;
+    } catch (error) {
+        console.error('[getVenueComplianceReport] Exception:', error);
+        throw error;
+    }
+};
+
+export const getWeekInstances = async (
+    venueId: string, 
+    weekKey: string
+): Promise<InstanceWeekSummary> => {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await getClient().graphql({ 
+            query: getWeekInstancesQuery, 
+            variables: { venueId, weekKey } 
+        }) as any;
+        
+        if (result.errors?.length > 0) {
+            throw new Error(result.errors.map((e: { message: string }) => e.message).join('; '));
+        }
+        if (!result.data?.getWeekInstances) {
+            throw new Error('No data returned. The operation may not be deployed.');
+        }
+        return result.data.getWeekInstances;
+    } catch (error) {
+        console.error('[getWeekInstances] Exception:', error);
+        throw error;
+    }
+};
+
+export const listInstancesNeedingReview = async (
+    venueId?: string, 
+    entityId?: string, 
+    limit?: number, 
+    nextToken?: string
+): Promise<InstancesNeedingReviewResult> => {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await getClient().graphql({ 
+            query: listInstancesNeedingReviewQuery, 
+            variables: { venueId, entityId, limit, nextToken } 
+        }) as any;
+        
+        if (result.errors?.length > 0) {
+            throw new Error(result.errors.map((e: { message: string }) => e.message).join('; '));
+        }
+        if (!result.data?.listInstancesNeedingReview) {
+            throw new Error('No data returned. The operation may not be deployed.');
+        }
+        return result.data.listInstancesNeedingReview;
+    } catch (error) {
+        console.error('[listInstancesNeedingReview] Exception:', error);
+        throw error;
+    }
+};
 
 // ============================================================================
 // BULK PROCESSING OPERATIONS (NEW v3.0.0)
