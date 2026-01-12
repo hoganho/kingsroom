@@ -2283,8 +2283,24 @@ type EagerGameCostCalculation = {
   readonly totalTournamentDirectorCost?: number | null;
   readonly totalFloorStaffCost?: number | null;
   readonly totalSecurityCost?: number | null;
+  readonly totalStaffCost?: number | null;
   readonly totalPrizeContribution?: number | null;
   readonly totalJackpotContribution?: number | null;
+  readonly totalBountyCost?: number | null;
+  readonly totalDirectGameCost?: number | null;
+  readonly totalGuaranteeOverlayCost?: number | null;
+  readonly totalAddedValueCost?: number | null;
+  readonly totalVenueRentalCost?: number | null;
+  readonly totalEquipmentRentalCost?: number | null;
+  readonly totalFoodBeverageCost?: number | null;
+  readonly totalOperationsCost?: number | null;
+  readonly totalMarketingCost?: number | null;
+  readonly totalStreamingCost?: number | null;
+  readonly totalInsuranceCost?: number | null;
+  readonly totalLicensingCost?: number | null;
+  readonly totalComplianceCost?: number | null;
+  readonly totalStaffTravelCost?: number | null;
+  readonly totalPlayerAccommodationCost?: number | null;
   readonly totalPromotionCost?: number | null;
   readonly totalOtherCost?: number | null;
   readonly totalCost?: number | null;
@@ -2301,8 +2317,24 @@ type LazyGameCostCalculation = {
   readonly totalTournamentDirectorCost?: number | null;
   readonly totalFloorStaffCost?: number | null;
   readonly totalSecurityCost?: number | null;
+  readonly totalStaffCost?: number | null;
   readonly totalPrizeContribution?: number | null;
   readonly totalJackpotContribution?: number | null;
+  readonly totalBountyCost?: number | null;
+  readonly totalDirectGameCost?: number | null;
+  readonly totalGuaranteeOverlayCost?: number | null;
+  readonly totalAddedValueCost?: number | null;
+  readonly totalVenueRentalCost?: number | null;
+  readonly totalEquipmentRentalCost?: number | null;
+  readonly totalFoodBeverageCost?: number | null;
+  readonly totalOperationsCost?: number | null;
+  readonly totalMarketingCost?: number | null;
+  readonly totalStreamingCost?: number | null;
+  readonly totalInsuranceCost?: number | null;
+  readonly totalLicensingCost?: number | null;
+  readonly totalComplianceCost?: number | null;
+  readonly totalStaffTravelCost?: number | null;
+  readonly totalPlayerAccommodationCost?: number | null;
   readonly totalPromotionCost?: number | null;
   readonly totalOtherCost?: number | null;
   readonly totalCost?: number | null;
@@ -2340,9 +2372,31 @@ type EagerGameFinancialSnapshotCalculation = {
   readonly guaranteeOverlayCost?: number | null;
   readonly guaranteeCoverageRate?: number | null;
   readonly guaranteeMet?: boolean | null;
-  readonly totalCost?: number | null;
+  readonly totalGuaranteeOverlayCost?: number | null;
+  readonly totalAddedValueCost?: number | null;
+  readonly totalPrizeContribution?: number | null;
   readonly totalDealerCost?: number | null;
   readonly totalStaffCost?: number | null;
+  readonly totalTournamentDirectorCost?: number | null;
+  readonly totalFloorStaffCost?: number | null;
+  readonly totalSecurityCost?: number | null;
+  readonly totalJackpotContribution?: number | null;
+  readonly totalBountyCost?: number | null;
+  readonly totalDirectGameCost?: number | null;
+  readonly totalVenueRentalCost?: number | null;
+  readonly totalEquipmentRentalCost?: number | null;
+  readonly totalFoodBeverageCost?: number | null;
+  readonly totalOperationsCost?: number | null;
+  readonly totalMarketingCost?: number | null;
+  readonly totalStreamingCost?: number | null;
+  readonly totalInsuranceCost?: number | null;
+  readonly totalLicensingCost?: number | null;
+  readonly totalComplianceCost?: number | null;
+  readonly totalStaffTravelCost?: number | null;
+  readonly totalPlayerAccommodationCost?: number | null;
+  readonly totalPromotionCost?: number | null;
+  readonly totalOtherCost?: number | null;
+  readonly totalCost?: number | null;
   readonly gameProfit?: number | null;
   readonly netProfit?: number | null;
   readonly profitMargin?: number | null;
@@ -2352,6 +2406,7 @@ type EagerGameFinancialSnapshotCalculation = {
   readonly rakePerEntry?: number | null;
   readonly staffCostPerPlayer?: number | null;
   readonly dealerCostPerHour?: number | null;
+  readonly guaranteeOverlayPerPlayer?: number | null;
 }
 
 type LazyGameFinancialSnapshotCalculation = {
@@ -2380,9 +2435,31 @@ type LazyGameFinancialSnapshotCalculation = {
   readonly guaranteeOverlayCost?: number | null;
   readonly guaranteeCoverageRate?: number | null;
   readonly guaranteeMet?: boolean | null;
-  readonly totalCost?: number | null;
+  readonly totalGuaranteeOverlayCost?: number | null;
+  readonly totalAddedValueCost?: number | null;
+  readonly totalPrizeContribution?: number | null;
   readonly totalDealerCost?: number | null;
   readonly totalStaffCost?: number | null;
+  readonly totalTournamentDirectorCost?: number | null;
+  readonly totalFloorStaffCost?: number | null;
+  readonly totalSecurityCost?: number | null;
+  readonly totalJackpotContribution?: number | null;
+  readonly totalBountyCost?: number | null;
+  readonly totalDirectGameCost?: number | null;
+  readonly totalVenueRentalCost?: number | null;
+  readonly totalEquipmentRentalCost?: number | null;
+  readonly totalFoodBeverageCost?: number | null;
+  readonly totalOperationsCost?: number | null;
+  readonly totalMarketingCost?: number | null;
+  readonly totalStreamingCost?: number | null;
+  readonly totalInsuranceCost?: number | null;
+  readonly totalLicensingCost?: number | null;
+  readonly totalComplianceCost?: number | null;
+  readonly totalStaffTravelCost?: number | null;
+  readonly totalPlayerAccommodationCost?: number | null;
+  readonly totalPromotionCost?: number | null;
+  readonly totalOtherCost?: number | null;
+  readonly totalCost?: number | null;
   readonly gameProfit?: number | null;
   readonly netProfit?: number | null;
   readonly profitMargin?: number | null;
@@ -2392,6 +2469,7 @@ type LazyGameFinancialSnapshotCalculation = {
   readonly rakePerEntry?: number | null;
   readonly staffCostPerPlayer?: number | null;
   readonly dealerCostPerHour?: number | null;
+  readonly guaranteeOverlayPerPlayer?: number | null;
 }
 
 export declare type GameFinancialSnapshotCalculation = LazyLoading extends LazyLoadingDisabled ? EagerGameFinancialSnapshotCalculation : LazyGameFinancialSnapshotCalculation
@@ -2404,6 +2482,9 @@ type EagerFinancialsSummary = {
   readonly totalBuyInsCollected?: number | null;
   readonly totalCost?: number | null;
   readonly totalDealerCost?: number | null;
+  readonly totalGuaranteeOverlayCost?: number | null;
+  readonly totalAddedValueCost?: number | null;
+  readonly totalPrizeContribution?: number | null;
   readonly prizepoolTotal?: number | null;
   readonly prizepoolPlayerContributions?: number | null;
   readonly prizepoolAddedValue?: number | null;
@@ -2417,6 +2498,12 @@ type EagerFinancialsSummary = {
   readonly costPerPlayer?: number | null;
   readonly profitPerPlayer?: number | null;
   readonly rakePerEntry?: number | null;
+  readonly guaranteeOverlayPerPlayer?: number | null;
+  readonly isSeries?: boolean | null;
+  readonly isSeriesParent?: boolean | null;
+  readonly tournamentSeriesId?: string | null;
+  readonly seriesName?: string | null;
+  readonly recurringGameId?: string | null;
 }
 
 type LazyFinancialsSummary = {
@@ -2425,6 +2512,9 @@ type LazyFinancialsSummary = {
   readonly totalBuyInsCollected?: number | null;
   readonly totalCost?: number | null;
   readonly totalDealerCost?: number | null;
+  readonly totalGuaranteeOverlayCost?: number | null;
+  readonly totalAddedValueCost?: number | null;
+  readonly totalPrizeContribution?: number | null;
   readonly prizepoolTotal?: number | null;
   readonly prizepoolPlayerContributions?: number | null;
   readonly prizepoolAddedValue?: number | null;
@@ -2438,6 +2528,12 @@ type LazyFinancialsSummary = {
   readonly costPerPlayer?: number | null;
   readonly profitPerPlayer?: number | null;
   readonly rakePerEntry?: number | null;
+  readonly guaranteeOverlayPerPlayer?: number | null;
+  readonly isSeries?: boolean | null;
+  readonly isSeriesParent?: boolean | null;
+  readonly tournamentSeriesId?: string | null;
+  readonly seriesName?: string | null;
+  readonly recurringGameId?: string | null;
 }
 
 export declare type FinancialsSummary = LazyLoading extends LazyLoadingDisabled ? EagerFinancialsSummary : LazyFinancialsSummary
@@ -5667,6 +5763,7 @@ type EagerGame = {
   readonly gameCost?: GameCost | null;
   readonly gameFinancialSnapshotId?: string | null;
   readonly gameFinancialSnapshot?: GameFinancialSnapshot | null;
+  readonly recurringGameInstances?: (RecurringGameInstance | null)[] | null;
   readonly linkedSocialPosts?: (SocialPost | null)[] | null;
   readonly socialPostLinks?: (SocialPostGameLink | null)[] | null;
   readonly linkedSocialPostCount?: number | null;
@@ -5829,6 +5926,7 @@ type LazyGame = {
   readonly gameCost: AsyncItem<GameCost | undefined>;
   readonly gameFinancialSnapshotId?: string | null;
   readonly gameFinancialSnapshot: AsyncItem<GameFinancialSnapshot | undefined>;
+  readonly recurringGameInstances: AsyncCollection<RecurringGameInstance>;
   readonly linkedSocialPosts: AsyncCollection<SocialPost>;
   readonly socialPostLinks: AsyncCollection<SocialPostGameLink>;
   readonly linkedSocialPostCount?: number | null;
@@ -6049,6 +6147,7 @@ type EagerGameFinancialSnapshot = {
   readonly rakePerEntry?: number | null;
   readonly dealerCostPerHour?: number | null;
   readonly staffCostPerPlayer?: number | null;
+  readonly guaranteeOverlayPerPlayer?: number | null;
   readonly promoSpendPerPlayer?: number | null;
   readonly guaranteeCoverageRate?: number | null;
   readonly guaranteeMet?: boolean | null;
@@ -6132,6 +6231,7 @@ type LazyGameFinancialSnapshot = {
   readonly rakePerEntry?: number | null;
   readonly dealerCostPerHour?: number | null;
   readonly staffCostPerPlayer?: number | null;
+  readonly guaranteeOverlayPerPlayer?: number | null;
   readonly promoSpendPerPlayer?: number | null;
   readonly guaranteeCoverageRate?: number | null;
   readonly guaranteeMet?: boolean | null;
@@ -6500,6 +6600,7 @@ type EagerRecurringGameInstance = {
   readonly recurringGameId: string;
   readonly recurringGame?: RecurringGame | null;
   readonly gameId?: string | null;
+  readonly game?: Game | null;
   readonly expectedDate: string;
   readonly dayOfWeek: string;
   readonly weekKey: string;
@@ -6527,6 +6628,7 @@ type LazyRecurringGameInstance = {
   readonly recurringGameId: string;
   readonly recurringGame: AsyncItem<RecurringGame | undefined>;
   readonly gameId?: string | null;
+  readonly game: AsyncItem<Game | undefined>;
   readonly expectedDate: string;
   readonly dayOfWeek: string;
   readonly weekKey: string;

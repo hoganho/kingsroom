@@ -2,6 +2,15 @@
 # ===================================================================
 # GAME FINANCIALS PROCESSOR
 # Schema for calculating and persisting game financial data
+# 
+# VERSION 2.0.0 - totalGuaranteeOverlayCost now included in totalCost
+# 
+# CHANGELOG:
+# - v2.0.0: totalGuaranteeOverlayCost tracking
+#           - totalGuaranteeOverlayCost now distinct from prizepoolAddedValue
+#           - totalGuaranteeOverlayCost included in totalCost calculation
+#           - costPerPlayer reflects total cost including overlay
+#           - Added guaranteeOverlayPerPlayer metric
 # ===================================================================
 
 # ===================================================================
@@ -44,9 +53,12 @@ input GameFinancialsGameInput {
   rakeRevenue: Float
   totalBuyInsCollected: Float
   prizepoolPlayerContributions: Float
-  prizepoolAddedValue: Float
+  
+  # v2.0.0: Separated overlay cost from promotional added value
+  prizepoolAddedValue: Float         # Promotional added value (e.g., "+$5k added prizepool")
+  guaranteeOverlayCost: Float        # Unplanned cost from not meeting guarantee
+  
   prizepoolSurplus: Float
-  guaranteeOverlayCost: Float
   gameProfit: Float
   
   # Results
@@ -103,15 +115,45 @@ type GameCostCalculation {
   venueId: ID
   gameDate: AWSDateTime
   
-  # Cost breakdown
+  # Staff costs
   totalDealerCost: Float
   totalTournamentDirectorCost: Float
   totalFloorStaffCost: Float
   totalSecurityCost: Float
-  totalPrizeContribution: Float
+  totalStaffCost: Float
+  
+  # Direct game costs
+  totalPrizeContribution: Float              # Promotional added value (NOT overlay)
   totalJackpotContribution: Float
+  totalBountyCost: Float
+  totalDirectGameCost: Float
+  
+  # v2.0.0: Overlay and added value costs (SEPARATED)
+  totalGuaranteeOverlayCost: Float           # Unplanned cost from not meeting guarantee
+  totalAddedValueCost: Float                 # Planned promotional expense
+  
+  # Operations costs
+  totalVenueRentalCost: Float
+  totalEquipmentRentalCost: Float
+  totalFoodBeverageCost: Float
+  totalOperationsCost: Float
+  
+  # Marketing costs
+  totalMarketingCost: Float
+  totalStreamingCost: Float
+  
+  # Compliance costs
+  totalInsuranceCost: Float
+  totalLicensingCost: Float
+  totalComplianceCost: Float
+  
+  # Other costs
+  totalStaffTravelCost: Float
+  totalPlayerAccommodationCost: Float
   totalPromotionCost: Float
   totalOtherCost: Float
+  
+  # Total (NOW INCLUDES OVERLAY)
   totalCost: Float
   
   # Calculation metadata
@@ -142,11 +184,11 @@ type GameFinancialSnapshotCalculation {
   
   # Prizepool
   prizepoolPlayerContributions: Float
-  prizepoolAddedValue: Float
+  prizepoolAddedValue: Float                 # Promotional added value only
   prizepoolTotal: Float
   prizepoolSurplus: Float
   
-  # Prizepool Adjustments (NEW)
+  # Prizepool Adjustments
   prizepoolPaidDelta: Float
   prizepoolJackpotContributions: Float
   prizepoolAccumulatorTicketPayoutEstimate: Float
@@ -157,23 +199,52 @@ type GameFinancialSnapshotCalculation {
   guaranteeCoverageRate: Float
   guaranteeMet: Boolean
   
-  # Costs
-  totalCost: Float
+  # v2.0.0: Overlay and added value costs (SEPARATED)
+  totalGuaranteeOverlayCost: Float           # Unplanned cost from not meeting guarantee
+  totalAddedValueCost: Float                 # Planned promotional expense
+  totalPrizeContribution: Float              # = totalAddedValueCost (NOT overlay)
+  
+  # Staff costs
   totalDealerCost: Float
   totalStaffCost: Float
+  totalTournamentDirectorCost: Float
+  totalFloorStaffCost: Float
+  totalSecurityCost: Float
+  
+  # Other cost breakdowns
+  totalJackpotContribution: Float
+  totalBountyCost: Float
+  totalDirectGameCost: Float
+  totalVenueRentalCost: Float
+  totalEquipmentRentalCost: Float
+  totalFoodBeverageCost: Float
+  totalOperationsCost: Float
+  totalMarketingCost: Float
+  totalStreamingCost: Float
+  totalInsuranceCost: Float
+  totalLicensingCost: Float
+  totalComplianceCost: Float
+  totalStaffTravelCost: Float
+  totalPlayerAccommodationCost: Float
+  totalPromotionCost: Float
+  totalOtherCost: Float
+  
+  # Total cost (NOW INCLUDES OVERLAY)
+  totalCost: Float
   
   # Profit
   gameProfit: Float
   netProfit: Float
   profitMargin: Float
   
-  # Per-player metrics
+  # Per-player metrics (v2.0.0: costPerPlayer now includes overlay)
   revenuePerPlayer: Float
-  costPerPlayer: Float
+  costPerPlayer: Float                       # Now includes overlay cost
   profitPerPlayer: Float
   rakePerEntry: Float
   staffCostPerPlayer: Float
   dealerCostPerHour: Float
+  guaranteeOverlayPerPlayer: Float           # NEW: Overlay cost per player
 }
 
 # Summary for quick FE display
@@ -183,14 +254,17 @@ type FinancialsSummary {
   rakeRevenue: Float
   totalBuyInsCollected: Float
   
-  # Costs
-  totalCost: Float
+  # Costs (v2.0.0: Now includes overlay breakdown)
+  totalCost: Float                           # Includes overlay
   totalDealerCost: Float
+  totalGuaranteeOverlayCost: Float           # Unplanned overlay cost
+  totalAddedValueCost: Float                 # Promotional added value
+  totalPrizeContribution: Float              # = totalAddedValueCost
   
   # Prizepool
   prizepoolTotal: Float
   prizepoolPlayerContributions: Float
-  prizepoolAddedValue: Float
+  prizepoolAddedValue: Float                 # Promotional only
   
   # Guarantee
   guaranteeMet: Boolean
@@ -202,11 +276,19 @@ type FinancialsSummary {
   netProfit: Float
   profitMargin: Float
   
-  # Per-player
+  # Per-player (v2.0.0: costPerPlayer includes overlay)
   revenuePerPlayer: Float
-  costPerPlayer: Float
+  costPerPlayer: Float                       # Includes overlay
   profitPerPlayer: Float
   rakePerEntry: Float
+  guaranteeOverlayPerPlayer: Float           # NEW
+  
+  # Series/Recurring metadata
+  isSeries: Boolean
+  isSeriesParent: Boolean
+  tournamentSeriesId: ID
+  seriesName: String
+  recurringGameId: ID
 }
 
 # Save operation result

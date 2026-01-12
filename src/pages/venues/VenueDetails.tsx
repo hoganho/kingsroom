@@ -1,24 +1,15 @@
 // src/pages/venues/VenueDetails.tsx
-// VERSION: 3.1.0 - Groups recurring games by day of week
+// VERSION: 3.2.0 - Ad-hoc games expandable table
 //
 // CHANGELOG:
+// - v3.2.0: Ad-hoc games section now uses expandable P/L table
+//           - Same format as VenueGameDetails recurring games table
+//           - STATUS column replaced with GAME NAME column (ad-hoc games have no status)
+//           - Click row to expand details, click game name to navigate
+//           - Added P/L bar chart for ad-hoc games
 // - v3.1.0: Groups recurring games by day of week (Monday first)
-//           - Added DAYS_OF_WEEK_ORDERED constant
-//           - Added scheduleStatsByDay useMemo for grouping
-//           - Displays each day as a section with its games
-//           - Shows "No recurring game on {day}" for empty days
-//           - Removed redundant dayOfWeek from ScheduleCard
 // - v3.0.0: BREAKING - Groups by recurringGameId instead of venueGameTypeKey
-//           - GraphQL now fetches recurringGameId and recurringGame { id, name }
-//           - buildScheduleGroupStats groups by recurringGameId
-//           - Navigation to VenueGameDetails uses recurringGameId param
-//           - ScheduleGroupStats interface updated to use recurringGameId
-//           - Games without recurringGameId remain in ad-hoc section
 // - v2.4.0: Non-SUPER_ADMIN users now properly locked to REGULAR game stats only
-// - v2.3.0: Added Tournament ID column to game history table and ad-hoc games table
-// - v2.2.0: Ad-hoc games now displayed in full table format
-// - v2.1.0: Added ad-hoc games support (isSeries=false AND isRegular=false)
-// - v2.0.0: Now uses VenueMetrics for summary cards (matches VenuesDashboard)
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -32,6 +23,9 @@ import {
   BanknotesIcon,
   ChartBarIcon,
   Squares2X2Icon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/24/outline';
 import {
   XAxis,
@@ -794,6 +788,371 @@ const ProfitTrendChart: React.FC<{ data: { date: string; profit: number }[] }> =
 };
 
 // ============================================
+// AD-HOC GAMES P/L BAR CHART
+// ============================================
+
+interface AdHocPLBarChartProps {
+  games: GameRowData[];
+}
+
+const AdHocPLBarChart: React.FC<AdHocPLBarChartProps> = ({ games }) => {
+  // Sort by date (oldest first for left-to-right timeline)
+  const sortedGames = useMemo(() => {
+    return [...games].sort((a, b) => a.date.localeCompare(b.date));
+  }, [games]);
+
+  // Calculate scale
+  const maxProfit = Math.max(...sortedGames.map(d => d.profit), 0);
+  const minProfit = Math.min(...sortedGames.map(d => d.profit), 0);
+  const range = Math.max(Math.abs(maxProfit), Math.abs(minProfit)) || 1000;
+  
+  const chartHeight = 120;
+  const barWidth = Math.max(4, Math.min(12, Math.floor(800 / sortedGames.length) - 2));
+  const chartWidth = sortedGames.length * (barWidth + 2);
+  const zeroLine = chartHeight / 2;
+
+  if (sortedGames.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
+        No data to display
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <div className="min-w-full" style={{ minWidth: Math.max(chartWidth, 300) }}>
+        {/* Y-axis labels */}
+        <div className="flex">
+          <div className="w-16 flex flex-col justify-between text-xs text-gray-500 pr-2" style={{ height: chartHeight }}>
+            <span>{formatCompactCurrency(range)}</span>
+            <span>$0</span>
+            <span>{formatCompactCurrency(-range)}</span>
+          </div>
+          
+          {/* Chart area */}
+          <div className="flex-1 relative" style={{ height: chartHeight }}>
+            {/* Zero line */}
+            <div 
+              className="absolute left-0 right-0 border-t border-gray-300" 
+              style={{ top: zeroLine }}
+            />
+            
+            {/* Bars */}
+            <div className="flex items-end h-full" style={{ paddingBottom: zeroLine }}>
+              {sortedGames.map((d) => {
+                const barHeight = Math.abs(d.profit) / range * (chartHeight / 2 - 4);
+                const isPositive = d.profit >= 0;
+                
+                let displayDate = '';
+                try {
+                  displayDate = format(parseISO(d.date), 'dd MMM');
+                } catch {
+                  displayDate = '';
+                }
+                
+                return (
+                  <div 
+                    key={d.id}
+                    className="flex flex-col items-center group relative"
+                    style={{ width: barWidth + 2 }}
+                  >
+                    {/* Bar for positive values */}
+                    {isPositive && (
+                      <div
+                        className="rounded-t transition-all bg-blue-500 hover:bg-blue-600"
+                        style={{ 
+                          width: barWidth,
+                          height: Math.max(2, barHeight),
+                        }}
+                        title={`${displayDate}: ${formatCurrency(d.profit)}`}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Negative bars (rendered separately below zero line) */}
+            <div 
+              className="absolute left-0 flex" 
+              style={{ top: zeroLine }}
+            >
+              {sortedGames.map((d) => {
+                const barHeight = Math.abs(d.profit) / range * (chartHeight / 2 - 4);
+                const isNegative = d.profit < 0;
+                
+                let displayDate = '';
+                try {
+                  displayDate = format(parseISO(d.date), 'dd MMM');
+                } catch {
+                  displayDate = '';
+                }
+                
+                return (
+                  <div 
+                    key={`neg-${d.id}`}
+                    className="flex flex-col items-center"
+                    style={{ width: barWidth + 2 }}
+                  >
+                    {isNegative && (
+                      <div
+                        className="rounded-b transition-all bg-red-500 hover:bg-red-600"
+                        style={{ 
+                          width: barWidth,
+                          height: Math.max(2, barHeight),
+                        }}
+                        title={`${displayDate}: ${formatCurrency(d.profit)}`}
+                      />
+                    )}
+                    {/* Empty space for positive bars */}
+                    {!isNegative && (
+                      <div style={{ width: barWidth, height: 0 }} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+        
+        {/* Legend */}
+        <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-blue-500 rounded" />
+            <span>Profit</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-red-500 rounded" />
+            <span>Loss</span>
+          </div>
+          <span className="ml-auto">← Oldest to Newest →</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// AD-HOC GAMES P/L ROW COMPONENT
+// ============================================
+
+interface AdHocPLRowProps {
+  game: GameRowData;
+  onNavigate: (gameId: string) => void;
+}
+
+const AdHocPLRow: React.FC<AdHocPLRowProps> = ({ game, onNavigate }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleRowClick = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const handleNavigateToGame = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onNavigate(game.gameId);
+  };
+
+  // Format date
+  let displayDate = '-';
+  try {
+    displayDate = format(parseISO(game.date), 'dd-MMM-yy');
+  } catch {
+    displayDate = '-';
+  }
+
+  const profitColorClass = game.profit >= 0 ? 'text-blue-600' : 'text-red-600';
+  const marginColorClass = game.profitMargin !== null && game.profitMargin >= 0 ? 'text-blue-600' : 'text-red-600';
+
+  return (
+    <>
+      {/* Main Row */}
+      <tr
+        className="border-b border-gray-100 transition-colors hover:bg-gray-50 cursor-pointer"
+        onClick={handleRowClick}
+      >
+        {/* Expand Toggle */}
+        <td className="px-3 py-3 w-10">
+          <span className="p-1">
+            {isExpanded ? (
+              <ChevronDownIcon className="h-4 w-4 text-gray-500" />
+            ) : (
+              <ChevronRightIcon className="h-4 w-4 text-gray-500" />
+            )}
+          </span>
+        </td>
+
+        {/* Date */}
+        <td className="px-3 py-3 whitespace-nowrap text-sm">
+          {displayDate}
+        </td>
+
+        {/* Game Name */}
+        <td className="px-3 py-3 whitespace-nowrap">
+          <span className="font-medium text-gray-900 text-sm">
+            {game.name.length > 30 ? game.name.substring(0, 30) + '...' : game.name}
+          </span>
+        </td>
+
+        {/* Tournament ID */}
+        <td className="px-3 py-3 whitespace-nowrap text-xs font-mono text-gray-500">
+          {game.tournamentId || '-'}
+        </td>
+
+        {/* Buy-In */}
+        <td className="px-3 py-3 whitespace-nowrap text-sm">
+          {formatCurrency(game.buyIn)}
+        </td>
+
+        {/* Entries / Unique */}
+        <td className="px-3 py-3 whitespace-nowrap text-sm">
+          {game.entries} / {game.registrations}
+        </td>
+
+        {/* PP (Prizepool) */}
+        <td className="px-3 py-3 whitespace-nowrap text-sm">
+          {formatCompactCurrency(game.prizepool)}
+        </td>
+
+        {/* Revenue */}
+        <td className="px-3 py-3 whitespace-nowrap text-sm font-medium">
+          {game.revenue > 0 ? formatCompactCurrency(game.revenue) : '-'}
+        </td>
+
+        {/* Costs */}
+        <td className="px-3 py-3 whitespace-nowrap text-sm">
+          {game.cost > 0 ? formatCompactCurrency(game.cost) : '-'}
+        </td>
+
+        {/* P/L */}
+        <td className="px-3 py-3 whitespace-nowrap text-sm">
+          <span className={`font-semibold ${profitColorClass}`}>
+            {formatCurrency(game.profit)}
+          </span>
+        </td>
+
+        {/* Margin */}
+        <td className="px-3 py-3 whitespace-nowrap text-sm">
+          {game.profitMargin !== null ? (
+            <span className={marginColorClass}>
+              {(game.profitMargin * 100).toFixed(1)}%
+            </span>
+          ) : '-'}
+        </td>
+      </tr>
+
+      {/* Expanded Detail Row */}
+      {isExpanded && (
+        <tr className="bg-slate-50">
+          <td colSpan={11} className="px-6 py-4">
+            {/* Game Name Header */}
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleNavigateToGame}
+                  className="inline-flex items-center gap-2 text-lg font-semibold text-indigo-600 hover:text-indigo-900 hover:underline group"
+                  title="Open Game Details"
+                >
+                  {game.name}
+                  <ArrowTopRightOnSquareIcon className="h-4 w-4 opacity-50 group-hover:opacity-100" />
+                </button>
+              </div>
+              <div className="text-sm text-gray-500">
+                ID: {game.tournamentId || '-'}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Revenue Breakdown */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <BanknotesIcon className="h-4 w-4 text-emerald-500" />
+                  Revenue
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Revenue</span>
+                    <span className="font-semibold text-emerald-600">{formatCurrency(game.revenue)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cost Breakdown */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <BanknotesIcon className="h-4 w-4 text-red-500" />
+                  Costs
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Costs</span>
+                    <span className="font-semibold text-red-600">{formatCurrency(game.cost)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Prizepool Details */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <TrophyIcon className="h-4 w-4 text-amber-500" />
+                  Prizepool
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Buy-in</span>
+                    <span className="font-medium">{formatCurrency(game.buyIn)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Entries</span>
+                    <span className="font-medium">{game.entries}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Unique Players</span>
+                    <span className="font-medium">{game.registrations}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-gray-200">
+                    <span className="font-semibold text-gray-700">Prizepool</span>
+                    <span className="font-semibold">{formatCurrency(game.prizepool)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Net Position */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">Net Position</h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Revenue</span>
+                    <span className="font-medium text-emerald-600">{formatCurrency(game.revenue)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Costs</span>
+                    <span className="font-medium text-red-600">({formatCurrency(game.cost)})</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-3 border-t-2 border-gray-300">
+                    <span className="font-bold text-gray-800">Net Profit</span>
+                    <span className={`text-lg font-bold ${profitColorClass}`}>
+                      {formatCurrency(game.profit)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-500">Profit Margin</span>
+                    <span className={`font-medium ${marginColorClass}`}>
+                      {game.profitMargin !== null ? `${(game.profitMargin * 100).toFixed(1)}%` : '-'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+};
+
+// ============================================
 // MAIN COMPONENT
 // ============================================
 
@@ -1367,35 +1726,106 @@ export const VenueDetails: React.FC = () => {
               </div>
 
               {adHocStats.totalGames > 0 ? (
-                <Card>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                    <div>
-                      <Text className="text-xs text-gray-500">Total Games</Text>
-                      <Metric className="text-lg">{adHocStats.totalGames}</Metric>
+                <>
+                  {/* Summary Stats */}
+                  <Card className="mb-4">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div>
+                        <Text className="text-xs text-gray-500">Total Games</Text>
+                        <Metric className="text-lg">{adHocStats.totalGames}</Metric>
+                      </div>
+                      <div>
+                        <Text className="text-xs text-gray-500">Total Entries</Text>
+                        <Metric className="text-lg">{adHocStats.totalEntries.toLocaleString()}</Metric>
+                        <Text className="text-xs text-gray-400">Avg {adHocStats.avgEntries.toFixed(1)}/game</Text>
+                      </div>
+                      <div>
+                        <Text className="text-xs text-gray-500">Total Prizepool</Text>
+                        <Metric className="text-lg">{formatCompactCurrency(adHocStats.totalPrizepool)}</Metric>
+                      </div>
+                      <div>
+                        <Text className="text-xs text-gray-500">Total Profit</Text>
+                        <Metric className={`text-lg ${adHocStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                          {formatCompactCurrency(adHocStats.totalProfit)}
+                        </Metric>
+                      </div>
+                      <div>
+                        <Text className="text-xs text-gray-500">Avg Profit/Game</Text>
+                        <Metric className={`text-lg ${adHocStats.avgProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                          {formatCompactCurrency(adHocStats.avgProfit)}
+                        </Metric>
+                      </div>
                     </div>
-                    <div>
-                      <Text className="text-xs text-gray-500">Total Entries</Text>
-                      <Metric className="text-lg">{adHocStats.totalEntries.toLocaleString()}</Metric>
-                      <Text className="text-xs text-gray-400">Avg {adHocStats.avgEntries.toFixed(1)}/game</Text>
+                  </Card>
+
+                  {/* P/L Bar Chart */}
+                  <Card className="mb-4">
+                    <Text className="text-sm font-semibold mb-3">P/L by Game</Text>
+                    <AdHocPLBarChart games={adHocStats.games} />
+                  </Card>
+
+                  {/* Games Table */}
+                  <Card>
+                    <div className="flex items-center justify-between mb-3">
+                      <Text className="text-sm font-semibold">Game History P&L</Text>
+                      <Text className="text-xs text-gray-500">Click row to expand details</Text>
                     </div>
-                    <div>
-                      <Text className="text-xs text-gray-500">Total Prizepool</Text>
-                      <Metric className="text-lg">{formatCompactCurrency(adHocStats.totalPrizepool)}</Metric>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full text-sm">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                          <tr>
+                            <th className="px-3 py-2 text-left w-10"></th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Game</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">ID</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Buy-In</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Ent/Unq</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">PP</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Rev</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Costs</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">P/L</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Margin</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white">
+                          {adHocStats.games.map((game) => (
+                            <AdHocPLRow
+                              key={game.id}
+                              game={game}
+                              onNavigate={(gameId) => navigate(`/games/${gameId}`)}
+                            />
+                          ))}
+                        </tbody>
+
+                        {/* Summary Footer */}
+                        <tfoot className="bg-gray-50 border-t-2 border-gray-300">
+                          <tr className="font-semibold">
+                            <td className="px-3 py-3"></td>
+                            <td className="px-3 py-3 text-sm text-gray-700" colSpan={2}>
+                              TOTALS ({adHocStats.totalGames} games)
+                            </td>
+                            <td className="px-3 py-3"></td>
+                            <td className="px-3 py-3"></td>
+                            <td className="px-3 py-3 text-sm">
+                              {adHocStats.totalEntries}
+                            </td>
+                            <td className="px-3 py-3 text-sm">
+                              {formatCompactCurrency(adHocStats.totalPrizepool)}
+                            </td>
+                            <td className="px-3 py-3"></td>
+                            <td className="px-3 py-3"></td>
+                            <td className="px-3 py-3 text-sm">
+                              <span className={adHocStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600'}>
+                                {formatCurrency(adHocStats.totalProfit)}
+                              </span>
+                            </td>
+                            <td className="px-3 py-3"></td>
+                          </tr>
+                        </tfoot>
+                      </table>
                     </div>
-                    <div>
-                      <Text className="text-xs text-gray-500">Total Profit</Text>
-                      <Metric className={`text-lg ${adHocStats.totalProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                        {formatCompactCurrency(adHocStats.totalProfit)}
-                      </Metric>
-                    </div>
-                    <div>
-                      <Text className="text-xs text-gray-500">Avg Profit/Game</Text>
-                      <Metric className={`text-lg ${adHocStats.avgProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                        {formatCompactCurrency(adHocStats.avgProfit)}
-                      </Metric>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                </>
               ) : (
                 <Card>
                   <Text className="text-sm text-gray-400 text-center py-4">

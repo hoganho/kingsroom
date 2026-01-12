@@ -150,7 +150,8 @@ type RecurringGameInstance
   # The actual game that ran (null if cancelled/skipped/unknown)
   gameId: ID
     @index(name: "byGameInstance")
-  
+  game: Game @belongsTo(fields: ["gameId"])
+
   # === DATE INFO ===
   expectedDate: AWSDate!
     @index(name: "byExpectedDate", sortKeyFields: ["recurringGameId"])

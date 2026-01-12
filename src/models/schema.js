@@ -2103,6 +2103,22 @@ export const schema = {
                         ]
                     }
                 },
+                "recurringGameInstances": {
+                    "name": "recurringGameInstances",
+                    "isArray": true,
+                    "type": {
+                        "model": "RecurringGameInstance"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "game"
+                        ]
+                    }
+                },
                 "linkedSocialPosts": {
                     "name": "linkedSocialPosts",
                     "isArray": true,
@@ -3294,6 +3310,13 @@ export const schema = {
                 },
                 "staffCostPerPlayer": {
                     "name": "staffCostPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeOverlayPerPlayer": {
+                    "name": "guaranteeOverlayPerPlayer",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -4892,6 +4915,21 @@ export const schema = {
                     "type": "ID",
                     "isRequired": false,
                     "attributes": []
+                },
+                "game": {
+                    "name": "game",
+                    "isArray": false,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "gameId"
+                        ]
+                    }
                 },
                 "expectedDate": {
                     "name": "expectedDate",
@@ -21482,6 +21520,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "totalStaffCost": {
+                    "name": "totalStaffCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "totalPrizeContribution": {
                     "name": "totalPrizeContribution",
                     "isArray": false,
@@ -21491,6 +21536,111 @@ export const schema = {
                 },
                 "totalJackpotContribution": {
                     "name": "totalJackpotContribution",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalBountyCost": {
+                    "name": "totalBountyCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalDirectGameCost": {
+                    "name": "totalDirectGameCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalGuaranteeOverlayCost": {
+                    "name": "totalGuaranteeOverlayCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalAddedValueCost": {
+                    "name": "totalAddedValueCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalVenueRentalCost": {
+                    "name": "totalVenueRentalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalEquipmentRentalCost": {
+                    "name": "totalEquipmentRentalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalFoodBeverageCost": {
+                    "name": "totalFoodBeverageCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalOperationsCost": {
+                    "name": "totalOperationsCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalMarketingCost": {
+                    "name": "totalMarketingCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalStreamingCost": {
+                    "name": "totalStreamingCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalInsuranceCost": {
+                    "name": "totalInsuranceCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalLicensingCost": {
+                    "name": "totalLicensingCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalComplianceCost": {
+                    "name": "totalComplianceCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalStaffTravelCost": {
+                    "name": "totalStaffTravelCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPlayerAccommodationCost": {
+                    "name": "totalPlayerAccommodationCost",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -21715,8 +21865,22 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "totalCost": {
-                    "name": "totalCost",
+                "totalGuaranteeOverlayCost": {
+                    "name": "totalGuaranteeOverlayCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalAddedValueCost": {
+                    "name": "totalAddedValueCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPrizeContribution": {
+                    "name": "totalPrizeContribution",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -21731,6 +21895,146 @@ export const schema = {
                 },
                 "totalStaffCost": {
                     "name": "totalStaffCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTournamentDirectorCost": {
+                    "name": "totalTournamentDirectorCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalFloorStaffCost": {
+                    "name": "totalFloorStaffCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalSecurityCost": {
+                    "name": "totalSecurityCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalJackpotContribution": {
+                    "name": "totalJackpotContribution",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalBountyCost": {
+                    "name": "totalBountyCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalDirectGameCost": {
+                    "name": "totalDirectGameCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalVenueRentalCost": {
+                    "name": "totalVenueRentalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalEquipmentRentalCost": {
+                    "name": "totalEquipmentRentalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalFoodBeverageCost": {
+                    "name": "totalFoodBeverageCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalOperationsCost": {
+                    "name": "totalOperationsCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalMarketingCost": {
+                    "name": "totalMarketingCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalStreamingCost": {
+                    "name": "totalStreamingCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalInsuranceCost": {
+                    "name": "totalInsuranceCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalLicensingCost": {
+                    "name": "totalLicensingCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalComplianceCost": {
+                    "name": "totalComplianceCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalStaffTravelCost": {
+                    "name": "totalStaffTravelCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPlayerAccommodationCost": {
+                    "name": "totalPlayerAccommodationCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPromotionCost": {
+                    "name": "totalPromotionCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalOtherCost": {
+                    "name": "totalOtherCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -21798,6 +22102,13 @@ export const schema = {
                     "type": "Float",
                     "isRequired": false,
                     "attributes": []
+                },
+                "guaranteeOverlayPerPlayer": {
+                    "name": "guaranteeOverlayPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -21834,6 +22145,27 @@ export const schema = {
                 },
                 "totalDealerCost": {
                     "name": "totalDealerCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalGuaranteeOverlayCost": {
+                    "name": "totalGuaranteeOverlayCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalAddedValueCost": {
+                    "name": "totalAddedValueCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPrizeContribution": {
+                    "name": "totalPrizeContribution",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -21927,6 +22259,48 @@ export const schema = {
                     "name": "rakePerEntry",
                     "isArray": false,
                     "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeOverlayPerPlayer": {
+                    "name": "guaranteeOverlayPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSeries": {
+                    "name": "isSeries",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSeriesParent": {
+                    "name": "isSeriesParent",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentSeriesId": {
+                    "name": "tournamentSeriesId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesName": {
+                    "name": "seriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameId": {
+                    "name": "recurringGameId",
+                    "isArray": false,
+                    "type": "ID",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -28837,5 +29211,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "8188eb7941afe9f2d416287acab2a9dd"
+    "version": "cfd30a913ace110bbbd14177d8ce28d4"
 };

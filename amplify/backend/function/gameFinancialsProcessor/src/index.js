@@ -25,9 +25,15 @@ Amplify Params - DO NOT EDIT */
  * GAME FINANCIALS PROCESSOR LAMBDA
  * ===================================================================
  * 
- * VERSION: 1.5.0
+ * VERSION: 2.0.0
  * 
  * CHANGELOG:
+ * - v2.0.0: Added totalGuaranteeOverlayCost support
+ *           - totalGuaranteeOverlayCost now included in totalCost calculation
+ *           - costPerPlayer now reflects total cost including overlay
+ *           - Clear separation between overlay cost and promotional added value
+ *           - totalPrizeContribution = promotional added value (NOT overlay)
+ *           - Added guaranteeOverlayPerPlayer metric
  * - v1.5.0: Added content hash check to skip non-meaningful Game table changes
  *           Only processes records where dataChangedAt changed
  * - v1.4.0: Updates Game.gameCostId and Game.gameFinancialSnapshotId after saving
@@ -160,6 +166,13 @@ const shouldProcessStreamRecord = (record) => {
 
 /**
  * Calculate GameCost data
+ * 
+ * v2.0.0: Added totalGuaranteeOverlayCost (from game.guaranteeOverlayCost)
+ *         Added totalAddedValueCost (from game.prizepoolAddedValue - promotional only)
+ *         These are now DISTINCT costs:
+ *         - totalGuaranteeOverlayCost: Unplanned cost from not meeting guarantee
+ *         - totalAddedValueCost: Planned promotional expense
+ *         - totalPrizeContribution: Legacy field, now equals totalAddedValueCost
  */
 const calculateGameCost = (game, existingCost = null) => {
     const totalEntries = game.totalEntries || 0;
@@ -170,34 +183,138 @@ const calculateGameCost = (game, existingCost = null) => {
     const totalTournamentDirectorCost = existingCost?.totalTournamentDirectorCost || 0;
     const totalFloorStaffCost = existingCost?.totalFloorStaffCost || 0;
     const totalSecurityCost = existingCost?.totalSecurityCost || 0;
-    const totalPrizeContribution = existingCost?.totalPrizeContribution || 0;
     const totalJackpotContribution = existingCost?.totalJackpotContribution || 0;
     const totalPromotionCost = existingCost?.totalPromotionCost || 0;
     const totalOtherCost = existingCost?.totalOtherCost || 0;
+    const totalBountyCost = existingCost?.totalBountyCost || 0;
+    const totalVenueRentalCost = existingCost?.totalVenueRentalCost || 0;
+    const totalEquipmentRentalCost = existingCost?.totalEquipmentRentalCost || 0;
+    const totalFoodBeverageCost = existingCost?.totalFoodBeverageCost || 0;
+    const totalMarketingCost = existingCost?.totalMarketingCost || 0;
+    const totalStreamingCost = existingCost?.totalStreamingCost || 0;
+    const totalInsuranceCost = existingCost?.totalInsuranceCost || 0;
+    const totalLicensingCost = existingCost?.totalLicensingCost || 0;
+    const totalStaffTravelCost = existingCost?.totalStaffTravelCost || 0;
+    const totalPlayerAccommodationCost = existingCost?.totalPlayerAccommodationCost || 0;
     
-    const totalCost = computedDealerCost +
-        totalTournamentDirectorCost +
-        totalFloorStaffCost +
-        totalSecurityCost +
-        totalPrizeContribution +
+    // ===================================================================
+    // OVERLAY AND ADDED VALUE COSTS (NEW in v2.0.0)
+    // ===================================================================
+    
+    // totalGuaranteeOverlayCost: Unplanned cost from not meeting guarantee
+    // This comes from the enricher's guaranteeOverlayCost calculation
+    const totalGuaranteeOverlayCost = game.guaranteeOverlayCost || 0;
+    
+    // totalAddedValueCost: Planned promotional expense (e.g., "+$5k added prizepool")
+    // This comes from prizepoolAddedValue which is NOW SEPARATE from overlay
+    const totalAddedValueCost = game.prizepoolAddedValue || 0;
+    
+    // totalPrizeContribution: Legacy field for promotional added value
+    // Now explicitly equals totalAddedValueCost (NOT overlay)
+    const totalPrizeContribution = totalAddedValueCost;
+    
+    // ===================================================================
+    // STAFF COST AGGREGATION
+    // ===================================================================
+    
+    const totalStaffCost = computedDealerCost + 
+        totalTournamentDirectorCost + 
+        totalFloorStaffCost + 
+        totalSecurityCost;
+    
+    // ===================================================================
+    // DIRECT GAME COSTS (excludes overlay - that's unplanned)
+    // ===================================================================
+    
+    const totalDirectGameCost = totalStaffCost + 
+        totalPrizeContribution + 
+        totalJackpotContribution + 
+        totalBountyCost;
+    
+    // ===================================================================
+    // OPERATIONS COSTS
+    // ===================================================================
+    
+    const totalOperationsCost = totalVenueRentalCost + 
+        totalEquipmentRentalCost + 
+        totalFoodBeverageCost;
+    
+    // ===================================================================
+    // COMPLIANCE COSTS
+    // ===================================================================
+    
+    const totalComplianceCost = totalInsuranceCost + totalLicensingCost;
+    
+    // ===================================================================
+    // TOTAL COST - NOW INCLUDES OVERLAY COST
+    // ===================================================================
+    
+    // Total cost includes ALL costs including guarantee overlay
+    const totalCost = totalStaffCost +
+        totalPrizeContribution +        // Promotional added value
         totalJackpotContribution +
+        totalBountyCost +
+        totalVenueRentalCost +
+        totalEquipmentRentalCost +
+        totalFoodBeverageCost +
+        totalMarketingCost +
+        totalStreamingCost +
+        totalInsuranceCost +
+        totalLicensingCost +
+        totalStaffTravelCost +
+        totalPlayerAccommodationCost +
         totalPromotionCost +
-        totalOtherCost;
+        totalOtherCost +
+        totalGuaranteeOverlayCost;      // OVERLAY COST NOW INCLUDED
     
     return {
         gameId: game.id,
         entityId: game.entityId,
         venueId: game.venueId,
         gameDate: game.gameStartDateTime,
+        
+        // Staff costs
         totalDealerCost: computedDealerCost,
         totalTournamentDirectorCost,
         totalFloorStaffCost,
         totalSecurityCost,
-        totalPrizeContribution,
+        totalStaffCost,
+        
+        // Direct game costs
+        totalPrizeContribution,         // Promotional added value only
         totalJackpotContribution,
+        totalBountyCost,
+        totalDirectGameCost,
+        
+        // Overlay cost (v2.0.0 - separated from added value)
+        totalGuaranteeOverlayCost,      // Unplanned overlay cost
+        totalAddedValueCost,            // Planned promotional expense
+        
+        // Operations costs
+        totalVenueRentalCost,
+        totalEquipmentRentalCost,
+        totalFoodBeverageCost,
+        totalOperationsCost,
+        
+        // Marketing costs
+        totalMarketingCost,
+        totalStreamingCost,
+        
+        // Compliance costs
+        totalInsuranceCost,
+        totalLicensingCost,
+        totalComplianceCost,
+        
+        // Other costs
+        totalStaffTravelCost,
+        totalPlayerAccommodationCost,
         totalPromotionCost,
         totalOtherCost,
+        
+        // Totals
         totalCost,
+        
+        // Calculation metadata
         dealerRatePerEntry,
         entriesUsedForCalculation: totalEntries
     };
@@ -209,6 +326,11 @@ const calculateGameCost = (game, existingCost = null) => {
 
 /**
  * Calculate GameFinancialSnapshot data
+ * 
+ * v2.0.0: 
+ * - totalGuaranteeOverlayCost now included in totalCost
+ * - costPerPlayer reflects total cost including overlay
+ * - Clear separation between overlay and promotional added value
  */
 const calculateGameFinancialSnapshot = (game, costData) => {
     // Revenue metrics
@@ -219,8 +341,12 @@ const calculateGameFinancialSnapshot = (game, costData) => {
     
     // Prizepool metrics
     const prizepoolPlayerContributions = game.prizepoolPlayerContributions || 0;
+    
+    // prizepoolAddedValue is now ONLY promotional added value (NOT overlay)
     const prizepoolAddedValue = game.prizepoolAddedValue || 0;
-    const prizepoolTotal = game.prizepoolPaid || game.prizepoolCalculated || (prizepoolPlayerContributions + prizepoolAddedValue);
+    
+    // prizepoolTotal includes player contributions + overlay (paid) + promotional added value
+    const prizepoolTotal = game.prizepoolPaid || game.prizepoolCalculated || (prizepoolPlayerContributions + (game.guaranteeOverlayCost || 0) + prizepoolAddedValue);
     const prizepoolSurplus = game.prizepoolSurplus || null;
     
     // Guarantee metrics
@@ -231,42 +357,86 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         ? Math.round((prizepoolPlayerContributions / guaranteeAmount) * 100) / 100 
         : null;
     
-    // Cost metrics
+    // ===================================================================
+    // OVERLAY COST - NOW PROPERLY TRACKED
+    // ===================================================================
+    
+    // totalGuaranteeOverlayCost: Unplanned cost from not meeting guarantee
+    const totalGuaranteeOverlayCost = guaranteeOverlayCost;
+    
+    // totalAddedValueCost = prizepoolAddedValue (planned promotional expense)
+    const totalAddedValueCost = prizepoolAddedValue;
+    
+    // totalPrizeContribution = promotional added value (NOT overlay)
+    const totalPrizeContribution = prizepoolAddedValue;
+    
+    // ===================================================================
+    // COST METRICS - NOW INCLUDES OVERLAY
+    // ===================================================================
+    
+    // Total cost from GameCost calculation (already includes overlay in v2.0.0)
     const totalCost = costData?.totalCost || 0;
     const totalDealerCost = costData?.totalDealerCost || 0;
     const totalStaffCost = (costData?.totalDealerCost || 0) + 
                            (costData?.totalTournamentDirectorCost || 0) + 
                            (costData?.totalFloorStaffCost || 0);
     
-    // Profit calculations
+    // ===================================================================
+    // PROFIT CALCULATIONS
+    // ===================================================================
+    
+    // gameProfit: Simple profit from enricher (rakeRevenue - guaranteeOverlayCost)
     const gameProfit = game.gameProfit || (rakeRevenue - guaranteeOverlayCost);
-    const netProfit = totalRevenue - totalCost - guaranteeOverlayCost;
+    
+    // netProfit: Full profit calculation (revenue - all costs)
+    // Note: guaranteeOverlayCost is now part of totalCost, so we don't subtract it again
+    const netProfit = totalRevenue - totalCost;
+    
     const profitMargin = totalRevenue > 0 
         ? Math.round((netProfit / totalRevenue) * 100) / 100 
         : null;
     
-    // Player/Entry metrics
+    // ===================================================================
+    // PLAYER/ENTRY METRICS
+    // ===================================================================
+    
     const totalUniquePlayers = game.totalUniquePlayers || 0;
     const totalEntries = game.totalEntries || 0;
     
-    // Per-player metrics
+    // ===================================================================
+    // PER-PLAYER METRICS - NOW INCLUDES OVERLAY IN COST
+    // ===================================================================
+    
     const revenuePerPlayer = totalUniquePlayers > 0 
         ? Math.round((totalRevenue / totalUniquePlayers) * 100) / 100 
         : null;
+    
+    // costPerPlayer now includes overlay cost (since it's in totalCost)
     const costPerPlayer = totalUniquePlayers > 0 
         ? Math.round((totalCost / totalUniquePlayers) * 100) / 100 
         : null;
+    
     const profitPerPlayer = totalUniquePlayers > 0 
         ? Math.round((netProfit / totalUniquePlayers) * 100) / 100 
         : null;
+    
     const rakePerEntry = totalEntries > 0 
         ? Math.round((rakeRevenue / totalEntries) * 100) / 100 
         : null;
+    
     const staffCostPerPlayer = totalUniquePlayers > 0 
         ? Math.round((totalStaffCost / totalUniquePlayers) * 100) / 100 
         : null;
     
-    // Duration
+    // guaranteeOverlayPerPlayer: How much overlay cost per player (useful metric)
+    const guaranteeOverlayPerPlayer = totalUniquePlayers > 0 && totalGuaranteeOverlayCost > 0
+        ? Math.round((totalGuaranteeOverlayCost / totalUniquePlayers) * 100) / 100
+        : null;
+    
+    // ===================================================================
+    // DURATION METRICS
+    // ===================================================================
+    
     let gameDurationMinutes = null;
     if (game.gameStartDateTime && game.gameEndDateTime) {
         const start = new Date(game.gameStartDateTime);
@@ -280,7 +450,10 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         ? Math.round((totalDealerCost / (gameDurationMinutes / 60)) * 100) / 100 
         : null;
     
-    // Prizepool adjustments
+    // ===================================================================
+    // PRIZEPOOL ADJUSTMENTS
+    // ===================================================================
+    
     const prizepoolCalculated = game.prizepoolCalculated || 0;
     const prizepoolPaidDelta = (game.prizepoolPaid || 0) - prizepoolCalculated;
     
@@ -297,9 +470,22 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         ? numberOfAccumulatorTicketsPaid * accumulatorTicketValue 
         : 0;
     
-    // Series flags
+    // ===================================================================
+    // SERIES FLAGS
+    // ===================================================================
+    
     const isSeries = determineIsSeries(game);
     const isSeriesParent = determineIsSeriesParent(game);
+    
+    // ===================================================================
+    // LOGGING
+    // ===================================================================
+    
+    if (totalGuaranteeOverlayCost > 0) {
+        console.log(`[FINANCIALS SNAPSHOT] 💰 Game ${game.id} has overlay cost: $${totalGuaranteeOverlayCost}`);
+        console.log(`[FINANCIALS SNAPSHOT]    - costPerPlayer now: $${costPerPlayer} (includes overlay)`);
+        console.log(`[FINANCIALS SNAPSHOT]    - guaranteeOverlayPerPlayer: $${guaranteeOverlayPerPlayer}`);
+    }
     
     return {
         gameId: game.id,
@@ -323,7 +509,7 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         
         // Prizepool
         prizepoolPlayerContributions,
-        prizepoolAddedValue,
+        prizepoolAddedValue,            // Promotional added value only
         prizepoolTotal,
         prizepoolSurplus,
         prizepoolPaidDelta,
@@ -336,12 +522,36 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         guaranteeCoverageRate,
         guaranteeMet,
         
-        // Costs
-        totalCost,
+        // ===================================================================
+        // COSTS (v2.0.0 - Now properly includes overlay)
+        // ===================================================================
+        totalCost,                      // Includes overlay cost
         totalDealerCost,
         totalStaffCost,
         totalTournamentDirectorCost: costData?.totalTournamentDirectorCost || 0,
         totalFloorStaffCost: costData?.totalFloorStaffCost || 0,
+        totalSecurityCost: costData?.totalSecurityCost || 0,
+        
+        // Overlay and added value (v2.0.0 - properly separated)
+        totalGuaranteeOverlayCost,      // Unplanned cost from not meeting guarantee
+        totalAddedValueCost,            // Planned promotional expense
+        totalPrizeContribution,         // = totalAddedValueCost (NOT overlay)
+        
+        // Other cost breakdowns
+        totalJackpotContribution: costData?.totalJackpotContribution || 0,
+        totalBountyCost: costData?.totalBountyCost || 0,
+        totalDirectGameCost: costData?.totalDirectGameCost || 0,
+        totalVenueRentalCost: costData?.totalVenueRentalCost || 0,
+        totalEquipmentRentalCost: costData?.totalEquipmentRentalCost || 0,
+        totalFoodBeverageCost: costData?.totalFoodBeverageCost || 0,
+        totalOperationsCost: costData?.totalOperationsCost || 0,
+        totalMarketingCost: costData?.totalMarketingCost || 0,
+        totalStreamingCost: costData?.totalStreamingCost || 0,
+        totalInsuranceCost: costData?.totalInsuranceCost || 0,
+        totalLicensingCost: costData?.totalLicensingCost || 0,
+        totalComplianceCost: costData?.totalComplianceCost || 0,
+        totalStaffTravelCost: costData?.totalStaffTravelCost || 0,
+        totalPlayerAccommodationCost: costData?.totalPlayerAccommodationCost || 0,
         totalPromotionCost: costData?.totalPromotionCost || 0,
         totalOtherCost: costData?.totalOtherCost || 0,
         
@@ -350,13 +560,14 @@ const calculateGameFinancialSnapshot = (game, costData) => {
         netProfit,
         profitMargin,
         
-        // Per-player metrics
+        // Per-player metrics (v2.0.0 - costPerPlayer now includes overlay)
         revenuePerPlayer,
-        costPerPlayer,
+        costPerPlayer,                  // Now includes overlay cost
         profitPerPlayer,
         rakePerEntry,
         staffCostPerPlayer,
         dealerCostPerHour,
+        guaranteeOverlayPerPlayer,      // NEW: Overlay cost per player
         
         // Series flags
         isSeries,
@@ -399,57 +610,33 @@ const getExistingGameCost = async (gameId) => {
 };
 
 /**
- * Save GameCost to database
+ * Save or update GameCost
  */
-const saveGameCost = async (costData, existingCost = null) => {
+const saveGameCost = async (costData, existingCost) => {
     const now = new Date().toISOString();
-    const timestamp = Date.now();
+    const tableName = getTableName('GameCost');
     
     try {
-        if (existingCost) {
-            await ddbDocClient.send(new UpdateCommand({
-                TableName: getTableName('GameCost'),
-                Key: { id: existingCost.id },
-                UpdateExpression: `SET 
-                    totalDealerCost = :dc, 
-                    totalCost = :tc, 
-                    updatedAt = :now, 
-                    #lastChanged = :ts, 
-                    #ver = :ver`,
-                ExpressionAttributeNames: { 
-                    '#lastChanged': '_lastChangedAt',
-                    '#ver': '_version'
-                },
-                ExpressionAttributeValues: { 
-                    ':dc': costData.totalDealerCost, 
-                    ':tc': costData.totalCost, 
-                    ':now': now, 
-                    ':ts': timestamp,
-                    ':ver': (existingCost._version || 1) + 1
-                }
-            }));
-            
-            console.log(`[FINANCIALS] Updated GameCost ${existingCost.id}`);
-            return { action: 'UPDATED', costId: existingCost.id };
-        }
+        const costId = existingCost?.id || uuidv4();
+        const item = {
+            ...costData,
+            id: costId,
+            __typename: 'GameCost',
+            createdAt: existingCost?.createdAt || now,
+            updatedAt: now
+        };
         
-        const costId = uuidv4();
         await ddbDocClient.send(new PutCommand({
-            TableName: getTableName('GameCost'),
-            Item: {
-                id: costId,
-                ...costData,
-                createdAt: now,
-                updatedAt: now,
-                _version: 1,
-                _lastChangedAt: timestamp,
-                __typename: 'GameCost'
-            }
+            TableName: tableName,
+            Item: item
         }));
         
-        console.log(`[FINANCIALS] Created GameCost ${costId}`);
-        return { action: 'CREATED', costId };
+        console.log(`[FINANCIALS] ${existingCost ? 'Updated' : 'Created'} GameCost: ${costId}`);
         
+        return {
+            action: existingCost ? 'UPDATED' : 'CREATED',
+            costId
+        };
     } catch (error) {
         console.error(`[FINANCIALS] Error saving GameCost:`, error);
         return { action: 'ERROR', error: error.message };
@@ -457,79 +644,43 @@ const saveGameCost = async (costData, existingCost = null) => {
 };
 
 /**
- * Save GameFinancialSnapshot to database
+ * Save or update GameFinancialSnapshot
  */
 const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
     const now = new Date().toISOString();
-    const timestamp = Date.now();
-    const snapshotTable = getTableName('GameFinancialSnapshot');
+    const tableName = getTableName('GameFinancialSnapshot');
     
     try {
-        const existingResult = await ddbDocClient.send(new QueryCommand({
-            TableName: snapshotTable,
+        // Check for existing snapshot
+        const existingQuery = await ddbDocClient.send(new QueryCommand({
+            TableName: tableName,
             IndexName: 'byGameFinancialSnapshot',
             KeyConditionExpression: 'gameId = :gameId',
             ExpressionAttributeValues: { ':gameId': snapshotData.gameId }
         }));
+        const existingSnapshot = existingQuery.Items?.[0];
         
-        const snapshotFields = {
+        const snapshotId = existingSnapshot?.id || uuidv4();
+        const item = {
             ...snapshotData,
-            gameCostId: costSaveResult?.costId || null,
-            snapshotType: 'AUTO',
-            isReconciled: false,
-            updatedAt: now,
-            _lastChangedAt: timestamp
+            id: snapshotId,
+            gameCostId: costSaveResult?.costId,
+            __typename: 'GameFinancialSnapshot',
+            createdAt: existingSnapshot?.createdAt || now,
+            updatedAt: now
         };
         
-        const gameId = snapshotFields.gameId;
-        delete snapshotFields.gameId;
-        
-        // Remove null GSI key fields
-        if (!snapshotFields.tournamentSeriesId) delete snapshotFields.tournamentSeriesId;
-        if (!snapshotFields.recurringGameId) delete snapshotFields.recurringGameId;
-
-        if (existingResult.Items?.[0]) {
-            const existing = existingResult.Items[0];
-            
-            const updateKeys = Object.keys(snapshotFields);
-            const updateExpression = 'SET ' + updateKeys.map(key => `#${key} = :${key}`).join(', ') + ', #ver = :ver';
-            const expressionAttributeNames = {
-                ...Object.fromEntries(updateKeys.map(k => [`#${k}`, k])),
-                '#ver': '_version'
-            };
-            const expressionAttributeValues = {
-                ...Object.fromEntries(updateKeys.map(k => [`:${k}`, snapshotFields[k]])),
-                ':ver': (existing._version || 1) + 1
-            };
-
-            await ddbDocClient.send(new UpdateCommand({
-                TableName: snapshotTable,
-                Key: { id: existing.id },
-                UpdateExpression: updateExpression,
-                ExpressionAttributeNames: expressionAttributeNames,
-                ExpressionAttributeValues: expressionAttributeValues
-            }));
-            
-            console.log(`[FINANCIALS] Updated GameFinancialSnapshot ${existing.id}`);
-            return { action: 'UPDATED', snapshotId: existing.id };
-        }
-
-        const snapshotId = uuidv4();
         await ddbDocClient.send(new PutCommand({
-            TableName: snapshotTable,
-            Item: {
-                id: snapshotId,
-                gameId: gameId,
-                ...snapshotFields,
-                createdAt: now,
-                _version: 1,
-                __typename: 'GameFinancialSnapshot'
-            }
+            TableName: tableName,
+            Item: item
         }));
         
-        console.log(`[FINANCIALS] Created GameFinancialSnapshot ${snapshotId}`);
-        return { action: 'CREATED', snapshotId };
+        console.log(`[FINANCIALS] ${existingSnapshot ? 'Updated' : 'Created'} GameFinancialSnapshot: ${snapshotId}`);
         
+        return {
+            action: existingSnapshot ? 'UPDATED' : 'CREATED',
+            snapshotId
+        };
     } catch (error) {
         console.error(`[FINANCIALS] Error saving GameFinancialSnapshot:`, error);
         return { action: 'ERROR', error: error.message };
@@ -537,77 +688,72 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
 };
 
 /**
- * Update Game record with gameCostId and gameFinancialSnapshotId
+ * Update Game record with foreign key references
  */
 const updateGameFinancialForeignKeys = async (gameId, costSaveResult, snapshotSaveResult) => {
-    const updates = {};
-    
-    if (costSaveResult?.action === 'CREATED' && costSaveResult?.costId) {
-        updates.gameCostId = costSaveResult.costId;
+    if (!costSaveResult?.costId && !snapshotSaveResult?.snapshotId) {
+        return { action: 'SKIPPED', reason: 'No IDs to update' };
     }
-    
-    if (snapshotSaveResult?.action === 'CREATED' && snapshotSaveResult?.snapshotId) {
-        updates.gameFinancialSnapshotId = snapshotSaveResult.snapshotId;
-    }
-    
-    if (Object.keys(updates).length === 0) {
-        return { updated: false };
-    }
-    
-    const now = new Date().toISOString();
-    const timestamp = Date.now();
     
     try {
-        const updateExpression = 'SET ' + 
-            Object.keys(updates).map(key => `#${key} = :${key}`).join(', ') + 
-            ', updatedAt = :now, #lastChanged = :ts';
+        const updateExpression = [];
+        const expressionAttributeValues = {};
+        const expressionAttributeNames = {};
         
-        const expressionAttributeNames = {
-            ...Object.fromEntries(Object.keys(updates).map(k => [`#${k}`, k])),
-            '#lastChanged': '_lastChangedAt'
-        };
+        if (costSaveResult?.costId) {
+            updateExpression.push('#gameCostId = :gameCostId');
+            expressionAttributeNames['#gameCostId'] = 'gameCostId';
+            expressionAttributeValues[':gameCostId'] = costSaveResult.costId;
+        }
         
-        const expressionAttributeValues = {
-            ...Object.fromEntries(Object.keys(updates).map(k => [`:${k}`, updates[k]])),
-            ':now': now,
-            ':ts': timestamp
-        };
+        if (snapshotSaveResult?.snapshotId) {
+            updateExpression.push('#gameFinancialSnapshotId = :gameFinancialSnapshotId');
+            expressionAttributeNames['#gameFinancialSnapshotId'] = 'gameFinancialSnapshotId';
+            expressionAttributeValues[':gameFinancialSnapshotId'] = snapshotSaveResult.snapshotId;
+        }
+        
+        // Always update updatedAt
+        updateExpression.push('#updatedAt = :updatedAt');
+        expressionAttributeNames['#updatedAt'] = 'updatedAt';
+        expressionAttributeValues[':updatedAt'] = new Date().toISOString();
         
         await ddbDocClient.send(new UpdateCommand({
             TableName: getTableName('Game'),
             Key: { id: gameId },
-            UpdateExpression: updateExpression,
+            UpdateExpression: `SET ${updateExpression.join(', ')}`,
             ExpressionAttributeNames: expressionAttributeNames,
-            ExpressionAttributeValues: expressionAttributeValues,
-            ConditionExpression: 'attribute_exists(id)'
+            ExpressionAttributeValues: expressionAttributeValues
         }));
         
-        console.log(`[FINANCIALS] Updated Game ${gameId} with FK:`, updates);
-        return { updated: true, fields: Object.keys(updates) };
+        console.log(`[FINANCIALS] Updated Game ${gameId} with FK references`);
         
+        return { action: 'UPDATED', gameId };
     } catch (error) {
-        console.error(`[FINANCIALS] Failed to update Game FKs for ${gameId}:`, error.message);
-        return { updated: false, error: error.message };
+        console.error(`[FINANCIALS] Error updating Game FKs:`, error);
+        return { action: 'ERROR', error: error.message };
     }
 };
 
 // ===================================================================
-// CORE PROCESSING FUNCTION
+// PROCESS GAME FINANCIALS
 // ===================================================================
 
 /**
- * Process game financials - calculate and optionally save
+ * Process financials for a single game
  */
 const processGameFinancials = async (game, options = {}) => {
-    const { saveToDatabase = false } = options;
     const startTime = Date.now();
+    const { saveToDatabase = false } = options;
     
-    const isSeries = determineIsSeries(game);
-    const isSeriesParent = determineIsSeriesParent(game);
-    console.log(`[FINANCIALS] Processing game ${game.id} (save: ${saveToDatabase}, isSeries: ${isSeries})`);
+    console.log(`[FINANCIALS] Processing game: ${game.id} (save: ${saveToDatabase})`);
     
-    const existingCost = saveToDatabase ? await getExistingGameCost(game.id) : null;
+    // Fetch existing cost to preserve manual entries
+    const existingCost = await getExistingGameCost(game.id);
+    
+    // Calculate cost data
     const costData = calculateGameCost(game, existingCost);
+    
+    // Calculate snapshot data
     const snapshotData = calculateGameFinancialSnapshot(game, costData);
     
     const result = {
@@ -622,6 +768,12 @@ const processGameFinancials = async (game, options = {}) => {
             totalBuyInsCollected: snapshotData.totalBuyInsCollected,
             totalCost: snapshotData.totalCost,
             totalDealerCost: snapshotData.totalDealerCost,
+            
+            // Overlay and added value (v2.0.0)
+            totalGuaranteeOverlayCost: snapshotData.totalGuaranteeOverlayCost,
+            totalAddedValueCost: snapshotData.totalAddedValueCost,
+            totalPrizeContribution: snapshotData.totalPrizeContribution,
+            
             prizepoolTotal: snapshotData.prizepoolTotal,
             prizepoolPlayerContributions: snapshotData.prizepoolPlayerContributions,
             prizepoolAddedValue: snapshotData.prizepoolAddedValue,
@@ -635,6 +787,7 @@ const processGameFinancials = async (game, options = {}) => {
             costPerPlayer: snapshotData.costPerPlayer,
             profitPerPlayer: snapshotData.profitPerPlayer,
             rakePerEntry: snapshotData.rakePerEntry,
+            guaranteeOverlayPerPlayer: snapshotData.guaranteeOverlayPerPlayer,
             isSeries: snapshotData.isSeries,
             isSeriesParent: snapshotData.isSeriesParent,
             tournamentSeriesId: snapshotData.tournamentSeriesId,
@@ -666,7 +819,7 @@ const processGameFinancials = async (game, options = {}) => {
 // ===================================================================
 
 exports.handler = async (event) => {
-    console.log('[FINANCIALS] v1.5.0 - With content hash check');
+    console.log('[FINANCIALS] v2.0.0 - With totalGuaranteeOverlayCost in totalCost');
     
     // Check if this is a DynamoDB Stream event
     if (event.Records && Array.isArray(event.Records)) {
@@ -728,6 +881,7 @@ const handleStreamEvent = async (event) => {
         errors: 0,
         seriesGames: 0,
         recurringGames: 0,
+        gamesWithOverlay: 0,
         details: []
     };
     
@@ -766,6 +920,9 @@ const handleStreamEvent = async (event) => {
             if (game.recurringGameId) {
                 results.recurringGames++;
             }
+            if (game.guaranteeOverlayCost && game.guaranteeOverlayCost > 0) {
+                results.gamesWithOverlay++;
+            }
             
             const result = await processGameFinancials(game, { saveToDatabase: true });
             
@@ -775,6 +932,8 @@ const handleStreamEvent = async (event) => {
                 eventName,
                 isSeries: result.summary?.isSeries,
                 isSeriesParent: result.summary?.isSeriesParent,
+                hasOverlay: (result.summary?.totalGuaranteeOverlayCost || 0) > 0,
+                totalGuaranteeOverlayCost: result.summary?.totalGuaranteeOverlayCost,
                 cost: result.costSaveResult,
                 snapshot: result.snapshotSaveResult,
                 gameFkUpdate: result.gameFkUpdateResult
@@ -787,7 +946,7 @@ const handleStreamEvent = async (event) => {
         }
     }
     
-    console.log(`[FINANCIALS] Stream complete: ${results.processed} processed, ${results.skipped} skipped, ${results.errors} errors`);
+    console.log(`[FINANCIALS] Stream complete: ${results.processed} processed, ${results.skipped} skipped, ${results.errors} errors, ${results.gamesWithOverlay} with overlay`);
     return results;
 };
 
@@ -836,6 +995,7 @@ exports.batchProcess = async (event) => {
         processed: results.filter(r => r.success).length,
         seriesGames: results.filter(r => r.summary?.isSeries).length,
         recurringGames: results.filter(r => r.summary?.recurringGameId).length,
+        gamesWithOverlay: results.filter(r => (r.summary?.totalGuaranteeOverlayCost || 0) > 0).length,
         failed: results.filter(r => !r.success).length,
         results
     };

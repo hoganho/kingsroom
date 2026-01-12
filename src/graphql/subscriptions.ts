@@ -1074,6 +1074,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -1101,6 +1102,11 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -3262,6 +3268,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -3289,6 +3296,11 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -5076,6 +5088,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -5103,6 +5116,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -6333,6 +6351,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           rakePerEntry
           dealerCostPerHour
           staffCostPerPlayer
+          guaranteeOverlayPerPlayer
           promoSpendPerPlayer
           guaranteeCoverageRate
           guaranteeMet
@@ -6360,6 +6379,37 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           _version
           _deleted
           _lastChangedAt
+          __typename
+        }
+        recurringGameInstances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
           __typename
         }
         linkedSocialPosts {
@@ -7508,6 +7558,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -7535,6 +7586,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -9375,6 +9431,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -9402,6 +9459,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -10440,6 +10502,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -10467,6 +10530,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -11162,6 +11230,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -11189,6 +11258,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -11422,6 +11496,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         rakePerEntry
         dealerCostPerHour
         staffCostPerPlayer
+        guaranteeOverlayPerPlayer
         promoSpendPerPlayer
         guaranteeCoverageRate
         guaranteeMet
@@ -11449,6 +11524,244 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         _version
         _deleted
         _lastChangedAt
+        __typename
+      }
+      recurringGameInstances {
+        items {
+          id
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            tournamentType
+            sessionMode
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            typicalDuration
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            reviewReason
+            totalInstancesRun
+            totalInstancesCancelled
+            avgAttendance
+            lastMonthAttendance
+            lastConfirmedDate
+            lastCancelledDate
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
+            gameStartDateTime
+            gameActualStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            venueFee
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
+            totalRebuys
+            totalAddons
+            totalInitialEntries
+            totalEntries
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSatellite
+            gameTags
+            dealerDealt
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
+            parentGameId
+            consolidationType
+            consolidationKey
+            isPartialData
+            missingFlightCount
+            expectedTotalEntries
+            needsReview
+            notes
+            gameDayOfWeek
+            gameYearMonth
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
+            contentHash
+            dataChangedAt
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
+            venueId
+            tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
+            entityId
+            createdAt
+            updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          expectedDate
+          dayOfWeek
+          weekKey
+          venueId
+          entityId
+          recurringGameName
+          status
+          hasDeviation
+          deviationType
+          deviationDetails
+          notes
+          adminNotes
+          cancellationReason
+          needsReview
+          reviewReason
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
         __typename
       }
       linkedSocialPosts {
@@ -12318,6 +12631,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -12345,6 +12659,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -15141,6 +15460,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -15168,6 +15488,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -16925,6 +17250,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -16952,6 +17278,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -19669,6 +20000,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -19696,6 +20028,11 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -21390,6 +21727,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -21417,6 +21755,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -22647,6 +22990,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           rakePerEntry
           dealerCostPerHour
           staffCostPerPlayer
+          guaranteeOverlayPerPlayer
           promoSpendPerPlayer
           guaranteeCoverageRate
           guaranteeMet
@@ -22674,6 +23018,37 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           _version
           _deleted
           _lastChangedAt
+          __typename
+        }
+        recurringGameInstances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
           __typename
         }
         linkedSocialPosts {
@@ -23822,6 +24197,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -23849,6 +24225,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -25689,6 +26070,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -25716,6 +26098,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -26754,6 +27141,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -26781,6 +27169,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -27476,6 +27869,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -27503,6 +27897,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -27736,6 +28135,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         rakePerEntry
         dealerCostPerHour
         staffCostPerPlayer
+        guaranteeOverlayPerPlayer
         promoSpendPerPlayer
         guaranteeCoverageRate
         guaranteeMet
@@ -27763,6 +28163,244 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         _version
         _deleted
         _lastChangedAt
+        __typename
+      }
+      recurringGameInstances {
+        items {
+          id
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            tournamentType
+            sessionMode
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            typicalDuration
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            reviewReason
+            totalInstancesRun
+            totalInstancesCancelled
+            avgAttendance
+            lastMonthAttendance
+            lastConfirmedDate
+            lastCancelledDate
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
+            gameStartDateTime
+            gameActualStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            venueFee
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
+            totalRebuys
+            totalAddons
+            totalInitialEntries
+            totalEntries
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSatellite
+            gameTags
+            dealerDealt
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
+            parentGameId
+            consolidationType
+            consolidationKey
+            isPartialData
+            missingFlightCount
+            expectedTotalEntries
+            needsReview
+            notes
+            gameDayOfWeek
+            gameYearMonth
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
+            contentHash
+            dataChangedAt
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
+            venueId
+            tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
+            entityId
+            createdAt
+            updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          expectedDate
+          dayOfWeek
+          weekKey
+          venueId
+          entityId
+          recurringGameName
+          status
+          hasDeviation
+          deviationType
+          deviationDetails
+          notes
+          adminNotes
+          cancellationReason
+          needsReview
+          reviewReason
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
         __typename
       }
       linkedSocialPosts {
@@ -28632,6 +29270,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -28659,6 +29298,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -31455,6 +32099,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -31482,6 +32127,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -33239,6 +33889,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -33266,6 +33917,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -35730,6 +36386,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -35757,6 +36414,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -36987,6 +37649,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           rakePerEntry
           dealerCostPerHour
           staffCostPerPlayer
+          guaranteeOverlayPerPlayer
           promoSpendPerPlayer
           guaranteeCoverageRate
           guaranteeMet
@@ -37014,6 +37677,37 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           _version
           _deleted
           _lastChangedAt
+          __typename
+        }
+        recurringGameInstances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
           __typename
         }
         linkedSocialPosts {
@@ -38162,6 +38856,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -38189,6 +38884,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -40029,6 +40729,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -40056,6 +40757,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -41094,6 +41800,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -41121,6 +41828,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -41816,6 +42528,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -41843,6 +42556,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -42076,6 +42794,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         rakePerEntry
         dealerCostPerHour
         staffCostPerPlayer
+        guaranteeOverlayPerPlayer
         promoSpendPerPlayer
         guaranteeCoverageRate
         guaranteeMet
@@ -42103,6 +42822,244 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         _version
         _deleted
         _lastChangedAt
+        __typename
+      }
+      recurringGameInstances {
+        items {
+          id
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            tournamentType
+            sessionMode
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            typicalDuration
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            reviewReason
+            totalInstancesRun
+            totalInstancesCancelled
+            avgAttendance
+            lastMonthAttendance
+            lastConfirmedDate
+            lastCancelledDate
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
+            gameStartDateTime
+            gameActualStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            venueFee
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
+            totalRebuys
+            totalAddons
+            totalInitialEntries
+            totalEntries
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSatellite
+            gameTags
+            dealerDealt
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
+            parentGameId
+            consolidationType
+            consolidationKey
+            isPartialData
+            missingFlightCount
+            expectedTotalEntries
+            needsReview
+            notes
+            gameDayOfWeek
+            gameYearMonth
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
+            contentHash
+            dataChangedAt
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
+            venueId
+            tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
+            entityId
+            createdAt
+            updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          expectedDate
+          dayOfWeek
+          weekKey
+          venueId
+          entityId
+          recurringGameName
+          status
+          hasDeviation
+          deviationType
+          deviationDetails
+          notes
+          adminNotes
+          cancellationReason
+          needsReview
+          reviewReason
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
         __typename
       }
       linkedSocialPosts {
@@ -42972,6 +43929,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -42999,6 +43957,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -45795,6 +46758,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -45822,6 +46786,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -47579,6 +48548,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -47606,6 +48576,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -50070,6 +51045,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -50097,6 +51073,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -51327,6 +52308,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           rakePerEntry
           dealerCostPerHour
           staffCostPerPlayer
+          guaranteeOverlayPerPlayer
           promoSpendPerPlayer
           guaranteeCoverageRate
           guaranteeMet
@@ -51354,6 +52336,37 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           _version
           _deleted
           _lastChangedAt
+          __typename
+        }
+        recurringGameInstances {
+          items {
+            id
+            recurringGameId
+            gameId
+            expectedDate
+            dayOfWeek
+            weekKey
+            venueId
+            entityId
+            recurringGameName
+            status
+            hasDeviation
+            deviationType
+            deviationDetails
+            notes
+            adminNotes
+            cancellationReason
+            needsReview
+            reviewReason
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
           __typename
         }
         linkedSocialPosts {
@@ -52502,6 +53515,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -52529,6 +53543,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -54369,6 +55388,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -54396,6 +55416,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -55434,6 +56459,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -55461,6 +56487,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -56156,6 +57187,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -56183,6 +57215,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -56416,6 +57453,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         rakePerEntry
         dealerCostPerHour
         staffCostPerPlayer
+        guaranteeOverlayPerPlayer
         promoSpendPerPlayer
         guaranteeCoverageRate
         guaranteeMet
@@ -56443,6 +57481,244 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         _version
         _deleted
         _lastChangedAt
+        __typename
+      }
+      recurringGameInstances {
+        items {
+          id
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            tournamentType
+            sessionMode
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            typicalDuration
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            isActive
+            isPaused
+            pausedReason
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            reviewReason
+            totalInstancesRun
+            totalInstancesCancelled
+            avgAttendance
+            lastMonthAttendance
+            lastConfirmedDate
+            lastCancelledDate
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
+            gameStartDateTime
+            gameActualStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            venueFee
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
+            totalRebuys
+            totalAddons
+            totalInitialEntries
+            totalEntries
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSatellite
+            gameTags
+            dealerDealt
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
+            parentGameId
+            consolidationType
+            consolidationKey
+            isPartialData
+            missingFlightCount
+            expectedTotalEntries
+            needsReview
+            notes
+            gameDayOfWeek
+            gameYearMonth
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
+            contentHash
+            dataChangedAt
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
+            venueId
+            tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
+            entityId
+            createdAt
+            updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          expectedDate
+          dayOfWeek
+          weekKey
+          venueId
+          entityId
+          recurringGameName
+          status
+          hasDeviation
+          deviationType
+          deviationDetails
+          notes
+          adminNotes
+          cancellationReason
+          needsReview
+          reviewReason
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
         __typename
       }
       linkedSocialPosts {
@@ -57312,6 +58588,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -57339,6 +58616,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -60135,6 +61417,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -60162,6 +61445,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -61919,6 +63207,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -61946,6 +63235,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -64665,6 +65959,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -64692,6 +65987,11 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -66641,6 +67941,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -66668,6 +67969,11 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -68617,6 +69923,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -68644,6 +69951,11 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -70848,6 +72160,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -70875,6 +72188,11 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -73059,6 +74377,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -73086,6 +74405,11 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -75270,6 +76594,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -75297,6 +76622,11 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -77458,6 +78788,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -77485,6 +78816,11 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -79659,6 +80995,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -79686,6 +81023,11 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {
@@ -81860,6 +83202,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             rakePerEntry
             dealerCostPerHour
             staffCostPerPlayer
+            guaranteeOverlayPerPlayer
             promoSpendPerPlayer
             guaranteeCoverageRate
             guaranteeMet
@@ -81887,6 +83230,11 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
             __typename
           }
           linkedSocialPosts {

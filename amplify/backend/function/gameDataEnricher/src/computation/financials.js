@@ -2,12 +2,22 @@
  * financials.js
  * Financial metric calculations for games
  * 
+ * VERSION 2.0.0 - Separated overlay cost from promotional added value
+ * 
  * ENHANCED: Smart guarantee inference from prizepoolPaid
  * 
  * SIMPLIFIED MODEL:
  *   Revenue: rakeRevenue = rake × entriesForRake
  *   Cost: guaranteeOverlayCost = max(0, guarantee - playerContributions)
  *   Profit: gameProfit = rakeRevenue - guaranteeOverlayCost
+ * 
+ * CRITICAL DISTINCTION:
+ *   - guaranteeOverlayCost: Cost to venue from not meeting guarantee (goes to totalCost)
+ *   - prizepoolAddedValue: Promotional added value (e.g., "+$5k added prizepool bonus")
+ *   
+ *   These are SEPARATE concepts:
+ *   - Overlay is an UNPLANNED cost when guarantee isn't met
+ *   - Added value is a PLANNED promotional expense to attract players
  * 
  * GUARANTEE INFERENCE:
  *   If prizepoolPaid > prizepoolPlayerContributions (even by $1),
@@ -91,7 +101,11 @@ const inferGuaranteeFromPayout = (gameData, prizepoolPlayerContributions) => {
 /**
  * Calculate all financial metrics for a game
  * 
- * ENHANCED: 
+ * ENHANCED v2.0.0:
+ * - SEPARATED guaranteeOverlayCost (unplanned cost) from prizepoolAddedValue (promotional)
+ * - prizepoolAddedValue only set from explicit input, NOT from overlay calculation
+ * - guaranteeOverlayCost flows to totalCost calculations via totalGuaranteeOverlayCost
+ * 
  * - Now infers guarantee from prizepoolPaid if not explicitly set
  * - Jackpot contribution calculations (deducted from prizepool)
  * - Accumulator ticket payout calculations
@@ -111,6 +125,9 @@ const calculateFinancials = (gameData) => {
     guaranteeAmount: inputGuaranteeAmount = 0,
     hasGuarantee: inputHasGuarantee,
     prizepoolPaid,
+    
+    // Promotional added value (explicit input, NOT derived from overlay)
+    prizepoolAddedValue: inputPrizepoolAddedValue = 0,
     
     // Jackpot contributions (inherited from RecurringGame)
     hasJackpotContributions = false,
@@ -215,12 +232,11 @@ const calculateFinancials = (gameData) => {
   }
   
   // ===================================================================
-  // GUARANTEE IMPACT
+  // GUARANTEE IMPACT - OVERLAY COST
   // ===================================================================
   
   let guaranteeOverlayCost = 0;
   let prizepoolSurplus = null;
-  let prizepoolAddedValue = 0;
   
   const isGuaranteed = hasGuarantee && guaranteeAmount > 0;
   
@@ -229,26 +245,35 @@ const calculateFinancials = (gameData) => {
     
     if (shortfall > 0) {
       // Guarantee not met - house pays overlay
+      // This is an UNPLANNED COST, NOT promotional added value
       guaranteeOverlayCost = shortfall;
-      prizepoolAddedValue = shortfall;
       prizepoolSurplus = null;
     } else {
       // Guarantee exceeded - surplus goes to players
       prizepoolSurplus = -shortfall;
-      prizepoolAddedValue = 0;
       guaranteeOverlayCost = 0;
     }
   }
   
   result.guaranteeOverlayCost = guaranteeOverlayCost;
-  result.prizepoolAddedValue = prizepoolAddedValue;
   result.prizepoolSurplus = prizepoolSurplus;
+  
+  // ===================================================================
+  // PRIZEPOOL ADDED VALUE - PROMOTIONAL (SEPARATE FROM OVERLAY)
+  // ===================================================================
+  
+  // prizepoolAddedValue is ONLY set from explicit input
+  // It represents PLANNED promotional expenses like "+$5k added prizepool bonus"
+  // It is NOT the same as overlay cost (which is unplanned)
+  const prizepoolAddedValue = inputPrizepoolAddedValue || 0;
+  result.prizepoolAddedValue = prizepoolAddedValue;
   
   // ===================================================================
   // PROFIT
   // ===================================================================
   
   // Simple profit calculation: revenue - cost
+  // NOTE: guaranteeOverlayCost is already included as a cost
   const gameProfit = rakeRevenue - guaranteeOverlayCost;
   result.gameProfit = gameProfit;
   
@@ -256,8 +281,8 @@ const calculateFinancials = (gameData) => {
   // CALCULATED PRIZEPOOL & DELTA
   // ===================================================================
   
-  // Calculate prizepool
-  const prizepoolCalculated = prizepoolPlayerContributions + prizepoolAddedValue;
+  // Calculate prizepool = player contributions + overlay + promotional added value
+  const prizepoolCalculated = prizepoolPlayerContributions + guaranteeOverlayCost + prizepoolAddedValue;
   result.prizepoolCalculated = prizepoolCalculated;
   
   // Delta = what we actually paid vs what we calculated (rounding adjustments)
@@ -278,6 +303,14 @@ const calculateFinancials = (gameData) => {
       gameProfit,
       isUnderwater: gameProfit < 0
     });
+  }
+  
+  if (guaranteeOverlayCost > 0) {
+    console.log(`[FINANCIALS] 💰 Overlay cost: $${guaranteeOverlayCost} (guarantee: $${guaranteeAmount}, contributions: $${prizepoolPlayerContributions})`);
+  }
+  
+  if (prizepoolAddedValue > 0) {
+    console.log(`[FINANCIALS] 🎁 Promotional added value: $${prizepoolAddedValue}`);
   }
   
   if (hasJackpotContributions) {
@@ -310,10 +343,10 @@ const calculateRakeRevenue = (rake, totalInitialEntries, totalRebuys) => {
 /**
  * Calculate player contributions to prizepool
  */
-const calculatePrizepoolPlayerContributions = (buyIn, rake, totalInitialEntries, totalRebuys, totalAddons) => {
+const calculatePrizepoolPlayerContributions = (buyIn, rake, totalInitialEntries, totalRebuys, totalAddons, jackpotPerEntry = 0) => {
   const entriesForRake = (totalInitialEntries || 0) + (totalRebuys || 0);
-  const prizepoolFromEntriesAndRebuys = ((buyIn || 0) - (rake || 0)) * entriesForRake;
-  const prizepoolFromAddons = (buyIn || 0) * (totalAddons || 0);
+  const prizepoolFromEntriesAndRebuys = ((buyIn || 0) - (rake || 0) - jackpotPerEntry) * entriesForRake;
+  const prizepoolFromAddons = ((buyIn || 0) - jackpotPerEntry) * (totalAddons || 0);
   return prizepoolFromEntriesAndRebuys + prizepoolFromAddons;
 };
 

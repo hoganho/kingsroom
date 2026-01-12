@@ -205,6 +205,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   gameCost: GameCost @hasOne(fields: ["gameCostId"])
   gameFinancialSnapshotId: ID
   gameFinancialSnapshot: GameFinancialSnapshot @hasOne(fields: ["gameFinancialSnapshotId"])
+  recurringGameInstances: [RecurringGameInstance] @hasMany(indexName: "byGameInstance", fields: ["id"])
 
   # === SOCIAL PULSE RELATIONSHIPS ===
   linkedSocialPosts: [SocialPost] @hasMany(indexName: "bySocialPostGame", fields: ["id"])
@@ -236,7 +237,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   recurringGame: RecurringGame @belongsTo(fields: ["recurringGameId"])
   recurringGameAssignmentConfidence: Float
   recurringGameAssignmentStatus: RecurringGameAssignmentStatus @default(value: "PENDING_ASSIGNMENT")
-  
+
   # === SCHEDULE TRACKING ===
   wasScheduledInstance: Boolean @default(value: "false")
   deviationNotes: String
@@ -345,6 +346,7 @@ type GameFinancialSnapshot
   rakePerEntry: Float
   dealerCostPerHour: Float
   staffCostPerPlayer: Float
+  guaranteeOverlayPerPlayer: Float
   promoSpendPerPlayer: Float
   guaranteeCoverageRate: Float
   guaranteeMet: Boolean
