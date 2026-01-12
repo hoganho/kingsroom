@@ -19165,6 +19165,9 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
     isSeries
     seriesName
     sourceUrl
+    isSatellite
+    isRecurring
+    recurringGameName
     refreshEnabled
     refreshIntervalMinutes
     lastRefreshedAt
@@ -35804,6 +35807,9 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
     isSeries
     seriesName
     sourceUrl
+    isSatellite
+    isRecurring
+    recurringGameName
     refreshEnabled
     refreshIntervalMinutes
     lastRefreshedAt
@@ -50463,6 +50469,9 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
     isSeries
     seriesName
     sourceUrl
+    isSatellite
+    isRecurring
+    recurringGameName
     refreshEnabled
     refreshIntervalMinutes
     lastRefreshedAt
@@ -65122,6 +65131,9 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
     isSeries
     seriesName
     sourceUrl
+    isSatellite
+    isRecurring
+    recurringGameName
     refreshEnabled
     refreshIntervalMinutes
     lastRefreshedAt

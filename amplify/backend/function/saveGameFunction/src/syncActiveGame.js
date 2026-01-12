@@ -3,6 +3,16 @@
  * syncActiveGame.js - ActiveGame Table Synchronization
  * ===================================================================
  * 
+ * VERSION: 2.2.0
+ * - Added UpcomingGame table management for SCHEDULED games
+ * - Games with SCHEDULED status and future start dates are added to UpcomingGame
+ * - Status transitions properly clean up from UpcomingGame
+ * 
+ * VERSION: 2.1.0
+ * - Added venue logo fetching from Venue table for venueLogoCached
+ * - Added isSatellite, isRecurring, recurringGameName fields to projections
+ * - Fixed venueLogoCached always being null (was looking at non-existent field)
+ * 
  * VERSION: 2.0.0
  * - Added stale game detection: games started >7 days ago but not FINISHED
  *   are removed from ActiveGame and marked with isStatusDataStale flag
@@ -10,18 +20,20 @@
  *   are NOT added to RecentlyFinishedGame (historical backfill data)
  * 
  * PURPOSE:
- * Maintains the ActiveGame and RecentlyFinishedGame tables as lightweight
+ * Maintains the ActiveGame, UpcomingGame, and RecentlyFinishedGame tables as lightweight
  * projections of the Game table for fast dashboard queries.
  * 
  * INTEGRATION:
  * Called from saveGameFunction after every game create/update.
  * 
  * LIFECYCLE:
+ * - SCHEDULED (future start) → Create/Update UpcomingGame
  * - INITIATING, REGISTERING, RUNNING, CLOCK_STOPPED → Create/Update ActiveGame
+ *   (also deletes from UpcomingGame if transitioning from SCHEDULED)
  *   (unless game started >7 days ago → mark as stale instead)
- * - FINISHED → Delete ActiveGame, Create RecentlyFinishedGame
+ * - FINISHED → Delete ActiveGame/UpcomingGame, Create RecentlyFinishedGame
  *   (unless gameStartDateTime >7 days ago → skip RecentlyFinishedGame)
- * - CANCELLED, NOT_IN_USE, NOT_PUBLISHED → Delete ActiveGame (if exists)
+ * - CANCELLED, NOT_IN_USE, NOT_PUBLISHED → Delete from all projection tables
  * 
  * ===================================================================
  */
@@ -35,6 +47,9 @@ const { v4: uuidv4 } = require('uuid');
 
 // Statuses that should have an ActiveGame record
 const ACTIVE_STATUSES = ['INITIATING', 'REGISTERING', 'RUNNING', 'CLOCK_STOPPED'];
+
+// Statuses that should have an UpcomingGame record (future games)
+const UPCOMING_STATUSES = ['SCHEDULED'];
 
 // Statuses that trigger move to RecentlyFinishedGame
 const FINISHED_STATUSES = ['FINISHED', 'COMPLETED'];
@@ -84,6 +99,80 @@ const getTableName = (modelName) => {
     if (process.env[envVarName]) return process.env[envVarName];
     return `${modelName}-${apiId}-${env}`;
 };
+
+// ===================================================================
+// VENUE LOGO HELPER
+// ===================================================================
+
+/**
+ * Fetch venue details (name, logo) from the Venue table
+ * @param {string} venueId - Venue ID
+ * @param {Object} ddbDocClient - DynamoDB Document Client
+ * @returns {Object|null} - { name, logo } or null if not found
+ */
+async function fetchVenueDetails(venueId, ddbDocClient) {
+    if (!venueId) return null;
+    
+    try {
+        const venueTable = getTableName('Venue');
+        const result = await ddbDocClient.send(new GetCommand({
+            TableName: venueTable,
+            Key: { id: venueId },
+            ProjectionExpression: '#name, logo',
+            ExpressionAttributeNames: { '#name': 'name' }
+        }));
+        
+        if (result.Item) {
+            return {
+                name: result.Item.name || null,
+                logo: result.Item.logo || null
+            };
+        }
+    } catch (err) {
+        console.warn(`[syncActiveGame] Error fetching venue ${venueId}:`, err.message);
+    }
+    
+    return null;
+}
+
+/**
+ * Get venue logo from various sources (input, game, or fetch from Venue table)
+ * @param {Object} game - Game record
+ * @param {Object} input - Input object with venue info
+ * @param {Object} ddbDocClient - DynamoDB Document Client
+ * @returns {Object} - { venueName, venueLogoCached }
+ */
+async function resolveVenueDetails(game, input, ddbDocClient) {
+    // First, check input for venue details
+    const inputVenueName = input?.venue?.venueName || null;
+    const inputVenueLogo = input?.venue?.logo || input?.venue?.venueLogo || null;
+    
+    // If we have logo from input, use it
+    if (inputVenueLogo) {
+        return {
+            venueName: inputVenueName || game.venueName || null,
+            venueLogoCached: inputVenueLogo
+        };
+    }
+    
+    // Otherwise, try to fetch from Venue table
+    const venueId = game.venueId || input?.venue?.venueId;
+    if (venueId) {
+        const venueDetails = await fetchVenueDetails(venueId, ddbDocClient);
+        if (venueDetails) {
+            return {
+                venueName: inputVenueName || venueDetails.name || game.venueName || null,
+                venueLogoCached: venueDetails.logo || null
+            };
+        }
+    }
+    
+    // Fallback - no logo available
+    return {
+        venueName: inputVenueName || game.venueName || null,
+        venueLogoCached: null
+    };
+}
 
 // ===================================================================
 // DATE/TIME HELPERS
@@ -189,9 +278,11 @@ async function syncActiveGame(game, input, wasNewGame, existingGame, ddbDocClien
     try {
         // Determine what action to take based on status
         const isActive = ACTIVE_STATUSES.includes(gameStatus);
+        const isUpcoming = UPCOMING_STATUSES.includes(gameStatus);
         const isFinished = FINISHED_STATUSES.includes(gameStatus);
         const isInactive = INACTIVE_STATUSES.includes(gameStatus);
         const wasActive = previousStatus && ACTIVE_STATUSES.includes(previousStatus);
+        const wasUpcoming = previousStatus && UPCOMING_STATUSES.includes(previousStatus);
         const wasFinished = previousStatus && FINISHED_STATUSES.includes(previousStatus);
         
         let action = 'NO_CHANGE';
@@ -199,9 +290,36 @@ async function syncActiveGame(game, input, wasNewGame, existingGame, ddbDocClien
         let staleGameUpdate = null;
         
         // ═══════════════════════════════════════════════════════════════════
-        // Case 1: Game is in an active state → Check if stale, then Create/Update
+        // Case 0: Game is SCHEDULED (upcoming) → Create/Update UpcomingGame
         // ═══════════════════════════════════════════════════════════════════
-        if (isActive) {
+        if (isUpcoming) {
+            // Check if game start is in the future
+            const gameStartDate = game.gameStartDateTime ? new Date(game.gameStartDateTime) : null;
+            const now = new Date();
+            
+            if (gameStartDate && gameStartDate > now) {
+                // Game is in the future - add to UpcomingGame
+                const result = await upsertUpcomingGame(game, input, ddbDocClient);
+                action = result.created ? 'UPCOMING_GAME_CREATED' : 'UPCOMING_GAME_UPDATED';
+                activeGameId = result.id;
+            } else {
+                // Game start is in the past but still SCHEDULED - might need cleanup
+                console.log(`[syncActiveGame] SCHEDULED game ${gameId} has past start date - skipping UpcomingGame`);
+                action = 'SCHEDULED_PAST_START_SKIPPED';
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════
+        // Case 1: Game is in an active state → Check if stale, then Create/Update
+        // Also: Delete from UpcomingGame if transitioning from SCHEDULED
+        // ═══════════════════════════════════════════════════════════════════
+        else if (isActive) {
+            // If transitioning from SCHEDULED, remove from UpcomingGame
+            if (wasUpcoming) {
+                await deleteUpcomingGame(gameId, ddbDocClient);
+                console.log(`[syncActiveGame] Removed game ${gameId} from UpcomingGame (now active)`);
+            }
+            
             const staleCheck = checkIfGameIsStale(game);
             
             if (staleCheck.isStale) {
@@ -229,11 +347,16 @@ async function syncActiveGame(game, input, wasNewGame, existingGame, ddbDocClien
         }
         
         // ═══════════════════════════════════════════════════════════════════
-        // Case 2: Game just finished → Delete ActiveGame, optionally create RecentlyFinished
+        // Case 2: Game just finished → Delete ActiveGame/UpcomingGame, optionally create RecentlyFinished
         // ═══════════════════════════════════════════════════════════════════
         else if (isFinished && !wasFinished) {
-            // Always delete from ActiveGame (if exists)
+            // Delete from ActiveGame (if exists)
             await deleteActiveGame(gameId, ddbDocClient);
+            
+            // Delete from UpcomingGame (if transitioning from SCHEDULED)
+            if (wasUpcoming) {
+                await deleteUpcomingGame(gameId, ddbDocClient);
+            }
             
             // Clear stale flag if it was set (game is now properly finished)
             if (existingGame?.isStatusDataStale) {
@@ -254,17 +377,22 @@ async function syncActiveGame(game, input, wasNewGame, existingGame, ddbDocClien
         }
         
         // ═══════════════════════════════════════════════════════════════════
-        // Case 3: Game is inactive (cancelled, etc.) → Delete ActiveGame
+        // Case 3: Game is inactive (cancelled, etc.) → Delete from all projection tables
         // ═══════════════════════════════════════════════════════════════════
-        else if (isInactive && wasActive) {
-            await deleteActiveGame(gameId, ddbDocClient);
+        else if (isInactive) {
+            if (wasActive) {
+                await deleteActiveGame(gameId, ddbDocClient);
+            }
+            if (wasUpcoming) {
+                await deleteUpcomingGame(gameId, ddbDocClient);
+            }
             
             // Clear stale flag if set
             if (existingGame?.isStatusDataStale) {
                 await clearStaleFlag(gameId, ddbDocClient);
             }
             
-            action = 'ACTIVE_GAME_DELETED';
+            action = wasActive ? 'ACTIVE_GAME_DELETED' : (wasUpcoming ? 'UPCOMING_GAME_DELETED' : 'NO_CHANGE');
         }
         
         // ═══════════════════════════════════════════════════════════════════
@@ -422,6 +550,9 @@ async function upsertActiveGame(game, input, ddbDocClient) {
     const now = new Date().toISOString();
     const timestamp = Date.now();
     
+    // Resolve venue details (fetch logo from Venue table if needed)
+    const venueDetails = await resolveVenueDetails(game, input, ddbDocClient);
+    
     // Check if record exists
     let existingActiveGame = null;
     try {
@@ -460,10 +591,10 @@ async function upsertActiveGame(game, input, ddbDocClient) {
         previousStatus: existingActiveGame?.gameStatus || null,
         statusChangedAt: existingActiveGame?.gameStatus !== game.gameStatus ? now : (existingActiveGame?.statusChangedAt || now),
         
-        // Denormalized display fields
+        // Denormalized display fields (with venue logo from Venue table)
         name: game.name,
-        venueName: input?.venue?.venueName || game.venueName || null,
-        venueLogoCached: game.venueLogoCached || null,
+        venueName: venueDetails.venueName,
+        venueLogoCached: venueDetails.venueLogoCached,
         entityName: input?.entityName || game.entityName || null,
         
         gameStartDateTime: game.gameStartDateTime,
@@ -487,6 +618,11 @@ async function upsertActiveGame(game, input, ddbDocClient) {
         tournamentType: game.tournamentType || null,
         isSeries: game.isSeries || false,
         seriesName: game.seriesName || null,
+        
+        // New fields for badges
+        isSatellite: game.isSatellite || false,
+        isRecurring: !!game.recurringGameId,
+        recurringGameName: game.recurringGameName || null,
         
         // Source
         sourceUrl: game.sourceUrl || input?.source?.sourceId || null,
@@ -562,6 +698,127 @@ async function deleteActiveGame(gameId, ddbDocClient) {
 }
 
 // ===================================================================
+// UPCOMING GAME OPERATIONS
+// ===================================================================
+
+/**
+ * Create or update an UpcomingGame record
+ */
+async function upsertUpcomingGame(game, input, ddbDocClient) {
+    const upcomingGameTable = getTableName('UpcomingGame');
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+    
+    // Resolve venue details (fetch logo from Venue table if needed)
+    const venueDetails = await resolveVenueDetails(game, input, ddbDocClient);
+    
+    // Check if record exists
+    let existingUpcomingGame = null;
+    try {
+        const result = await ddbDocClient.send(new QueryCommand({
+            TableName: upcomingGameTable,
+            IndexName: 'byGameIdUpcoming',
+            KeyConditionExpression: 'gameId = :gameId',
+            ExpressionAttributeValues: { ':gameId': game.id },
+            Limit: 1
+        }));
+        existingUpcomingGame = result.Items?.[0];
+    } catch (err) {
+        console.warn('[syncActiveGame] Error checking existing UpcomingGame:', err.message);
+    }
+    
+    // Build the UpcomingGame record
+    const upcomingGameRecord = {
+        id: existingUpcomingGame?.id || game.id, // Use game ID as UpcomingGame ID for 1:1 mapping
+        gameId: game.id,
+        entityId: game.entityId || input?.source?.entityId,
+        venueId: game.venueId || null,
+        tournamentId: game.tournamentId || null,
+        
+        // Denormalized display fields (with venue logo from Venue table)
+        name: game.name,
+        venueName: venueDetails.venueName,
+        venueLogoCached: venueDetails.venueLogoCached,
+        entityName: input?.entityName || game.entityName || null,
+        
+        gameStartDateTime: game.gameStartDateTime,
+        scheduledToStartAt: game.gameStartDateTime, // Same as start for scheduled games
+        
+        // Financial info
+        buyIn: game.buyIn || null,
+        guaranteeAmount: game.guaranteeAmount || null,
+        hasGuarantee: game.hasGuarantee || false,
+        
+        // Classification
+        gameType: game.gameType || null,
+        gameVariant: game.gameVariant || null,
+        isSeries: game.isSeries || false,
+        seriesName: game.seriesName || null,
+        isMainEvent: game.isMainEvent || false,
+        
+        // New fields for badges
+        isSatellite: game.isSatellite || false,
+        isRecurring: !!game.recurringGameId,
+        recurringGameName: game.recurringGameName || null,
+        
+        // Source
+        sourceUrl: game.sourceUrl || input?.source?.sourceId || null,
+        
+        // Metadata
+        createdAt: existingUpcomingGame?.createdAt || now,
+        updatedAt: now,
+        
+        // DynamoDB metadata
+        _version: (existingUpcomingGame?._version || 0) + 1,
+        _lastChangedAt: timestamp,
+        __typename: 'UpcomingGame'
+    };
+    
+    await ddbDocClient.send(new PutCommand({
+        TableName: upcomingGameTable,
+        Item: upcomingGameRecord
+    }));
+    
+    console.log(`[syncActiveGame] ${existingUpcomingGame ? 'Updated' : 'Created'} UpcomingGame for game ${game.id}`);
+    
+    return {
+        id: upcomingGameRecord.id,
+        created: !existingUpcomingGame
+    };
+}
+
+/**
+ * Delete an UpcomingGame record
+ */
+async function deleteUpcomingGame(gameId, ddbDocClient) {
+    const upcomingGameTable = getTableName('UpcomingGame');
+    
+    // Find by gameId
+    try {
+        const result = await ddbDocClient.send(new QueryCommand({
+            TableName: upcomingGameTable,
+            IndexName: 'byGameIdUpcoming',
+            KeyConditionExpression: 'gameId = :gameId',
+            ExpressionAttributeValues: { ':gameId': gameId },
+            Limit: 1
+        }));
+        
+        if (result.Items?.[0]) {
+            await ddbDocClient.send(new DeleteCommand({
+                TableName: upcomingGameTable,
+                Key: { id: result.Items[0].id }
+            }));
+            console.log(`[syncActiveGame] Deleted UpcomingGame for game ${gameId}`);
+            return true;
+        }
+    } catch (err) {
+        console.warn('[syncActiveGame] Error deleting UpcomingGame:', err.message);
+    }
+    
+    return false;
+}
+
+// ===================================================================
 // RECENTLY FINISHED GAME OPERATIONS
 // ===================================================================
 
@@ -572,6 +829,9 @@ async function createRecentlyFinishedGame(game, input, ddbDocClient) {
     const recentlyFinishedTable = getTableName('RecentlyFinishedGame');
     const now = new Date().toISOString();
     const timestamp = Date.now();
+    
+    // Resolve venue details (fetch logo from Venue table if needed)
+    const venueDetails = await resolveVenueDetails(game, input, ddbDocClient);
     
     // Calculate TTL (7 days from game START date, since most games start/end same day)
     const gameStartMs = game.gameStartDateTime 
@@ -595,10 +855,10 @@ async function createRecentlyFinishedGame(game, input, ddbDocClient) {
         venueId: game.venueId || null,
         tournamentId: game.tournamentId || null,
         
-        // Denormalized display fields
+        // Denormalized display fields (with venue logo from Venue table)
         name: game.name,
-        venueName: input?.venue?.venueName || game.venueName || null,
-        venueLogoCached: game.venueLogoCached || null,
+        venueName: venueDetails.venueName,
+        venueLogoCached: venueDetails.venueLogoCached,
         entityName: input?.entityName || game.entityName || null,
         
         gameStartDateTime: game.gameStartDateTime,
@@ -617,6 +877,11 @@ async function createRecentlyFinishedGame(game, input, ddbDocClient) {
         isSeries: game.isSeries || false,
         seriesName: game.seriesName || null,
         isMainEvent: game.isMainEvent || false,
+        
+        // New fields for badges
+        isSatellite: game.isSatellite || false,
+        isRecurring: !!game.recurringGameId,
+        recurringGameName: game.recurringGameName || null,
         
         sourceUrl: game.sourceUrl || input?.source?.sourceId || null,
         
@@ -698,14 +963,20 @@ module.exports = {
     syncActiveGame,
     // Export constants for testing
     ACTIVE_STATUSES,
+    UPCOMING_STATUSES,
     FINISHED_STATUSES,
     INACTIVE_STATUSES,
     REFRESH_INTERVALS,
     STALE_GAME_THRESHOLD_DAYS,
     MAX_AGE_FOR_RECENTLY_FINISHED_DAYS,
     STALE_REASONS,
-    // Export helpers for testing
+    // Export helpers for testing/backfill
     checkIfGameIsStale,
     isGameTooOldForRecentlyFinished,
-    daysSince
+    daysSince,
+    fetchVenueDetails,
+    resolveVenueDetails,
+    // Export UpcomingGame functions for backfill
+    upsertUpcomingGame,
+    deleteUpcomingGame
 };

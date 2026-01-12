@@ -4,8 +4,23 @@
  * Core scraping logic extracted from index.js for maintainability.
  * Handles bulk scraping, gap processing, and event streaming.
  * 
- * VERSION: 1.9.0
+ * VERSION: 1.10.1
  * 
+ * UPDATED v1.10.1:
+ * - FIX: Only force refresh for NOT_FOUND gaps, not all gaps (prevents Lambda timeout)
+ *   - v1.10.0 forced web refresh for ALL gaps when skipNotFoundGaps=false
+ *   - This caused Lambda timeouts when processing many gaps (305 gaps × 3.7s = 19 min)
+ *   - Now uses prefetch cache to check each gap's ScrapeURL status
+ *   - NOT_FOUND/BLANK/NOT_IN_USE -> force refresh (S3 has useless "not found" HTML)
+ *   - NOT_PUBLISHED -> use S3 cache (valid data, ~200ms vs ~3s)
+ *
+ * UPDATED v1.10.0:
+ * - FIX: NOT_FOUND gaps now bypass S3 cache when skipNotFoundGaps=false
+ *   - When re-scraping NOT_FOUND gaps, S3 cache contains useless "not found" HTML
+ *   - New isNotFoundGapStatus() helper to detect NOT_FOUND/BLANK/NOT_IN_USE in ScrapeURL
+ *   - Sets forceRefresh=true for these URLs to always fetch from web
+ *   - Applies in both main loop AND processGapIds()
+ *
  * UPDATED v1.9.0:
  * - FIX: "Tournament not found" is now treated as NOT_FOUND, not an error
  *   - "Tournament not found" is a valid status from the scraper API indicating
@@ -118,6 +133,23 @@ function shouldSkipNotPublished(scrapeURLStatus, options) {
 function shouldSkipNotFoundGap(scrapeURLStatus, options) {
     if (!options.skipNotFoundGaps) return false;
     if (!scrapeURLStatus.found) return false;
+    
+    const status = (scrapeURLStatus.lastScrapeStatus || '').toUpperCase();
+    return status === 'NOT_FOUND' || status === 'BLANK' || status === 'NOT_IN_USE';
+}
+
+/**
+ * Check if a ScrapeURL status indicates a NOT_FOUND gap
+ * Used to determine if we should force refresh (bypass S3 cache)
+ * when re-scraping these URLs.
+ * 
+ * NEW in v1.10.0
+ * 
+ * @param {object} scrapeURLStatus - Status from prefetch cache
+ * @returns {boolean} True if this is a NOT_FOUND/BLANK/NOT_IN_USE status
+ */
+function isNotFoundGapStatus(scrapeURLStatus) {
+    if (!scrapeURLStatus || !scrapeURLStatus.found) return false;
     
     const status = (scrapeURLStatus.lastScrapeStatus || '').toUpperCase();
     return status === 'NOT_FOUND' || status === 'BLANK' || status === 'NOT_IN_USE';
@@ -702,7 +734,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
     const MAX_CONSECUTIVE_NOT_FOUND = options.maxConsecutiveNotFound || DEFAULT_MAX_CONSECUTIVE_NOT_FOUND || 10;
     const MAX_CONSECUTIVE_BLANKS = options.maxConsecutiveBlanks || DEFAULT_MAX_CONSECUTIVE_BLANKS || 5;
     
-    console.log(`[ScrapingEngine] v1.9.0: Stop on first error (except "Tournament not found"). NOT_FOUND threshold=${MAX_CONSECUTIVE_NOT_FOUND}, BLANKS threshold=${MAX_CONSECUTIVE_BLANKS}`);
+    console.log(`[ScrapingEngine] v1.10.1: Stop on first error (except "Tournament not found"). NOT_FOUND threshold=${MAX_CONSECUTIVE_NOT_FOUND}, BLANKS threshold=${MAX_CONSECUTIVE_BLANKS}`);
     
     // Initialize results - merge with accumulated results from previous invocation if continuing
     const accumulated = options.accumulatedResults || {};
@@ -967,6 +999,16 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     
                     currentId++;
                     continue;
+                }
+                
+                // ═══════════════════════════════════════════════════════════════
+                // v1.10.0: Force refresh for NOT_FOUND gaps when re-scraping them
+                // When skipNotFoundGaps=false, user wants to re-check these URLs.
+                // S3 cache contains useless "not found" HTML, so bypass it.
+                // ═══════════════════════════════════════════════════════════════
+                if (!options.skipNotFoundGaps && isNotFoundGapStatus(scrapeURLStatus) && !gameForceRefresh) {
+                    gameForceRefresh = true;
+                    console.log(`[ScrapingEngine] ID ${currentId} was NOT_FOUND - forcing web refresh to check for new tournament`);
                 }
                 
                 // v1.5.0: Auto mode per-game forceRefresh for in-progress games
@@ -1458,6 +1500,12 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
 /**
  * Process specific gap IDs (with event streaming)
  * 
+ * v1.10.1: FIX - Only force refresh for NOT_FOUND gaps, not all gaps
+ *   - Added prefetch cache to check each gap's status
+ *   - NOT_FOUND/BLANK/NOT_IN_USE -> force refresh (S3 has useless "not found" HTML)
+ *   - NOT_PUBLISHED -> use S3 cache (valid data)
+ *   - This prevents Lambda timeout when processing many gaps
+ * v1.10.0: Force web refresh when skipNotFoundGaps=false (S3 cache contains useless data)
  * v1.8.0: Stop immediately on any error - no threshold checking
  * UPDATED v1.4.0: Added onProgress callback for real-time stats
  * UPDATED v1.3.0: Separate NOT_FOUND vs NOT_PUBLISHED handling
@@ -1469,6 +1517,8 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         buildTournamentUrl,
         updateScraperJob,
         publishGameProcessedEvent,
+        ddbDocClient,
+        scrapeURLTable,
         STOP_REASON,
         PROGRESS_UPDATE_FREQUENCY,
         // NEW v1.4.0: Real-time progress callback
@@ -1498,6 +1548,19 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         notPublishedCount: 0,
     };
     
+    // v1.10.1: Initialize prefetch cache to check status of each gap ID
+    // Only force refresh for NOT_FOUND gaps (S3 has useless data)
+    // NOT_PUBLISHED gaps can use S3 cache (valid data)
+    let prefetchCache = null;
+    const shouldCheckStatus = !options.skipNotFoundGaps && !options.forceRefresh;
+    
+    if (shouldCheckStatus && ddbDocClient && scrapeURLTable) {
+        prefetchCache = new ScrapeURLPrefetchCache(entityId, ddbDocClient, scrapeURLTable);
+        console.log(`[ScrapingEngine] Gap processing: Using prefetch cache to selectively force refresh only NOT_FOUND gaps`);
+    } else if (!options.skipNotFoundGaps && !options.forceRefresh) {
+        console.log(`[ScrapingEngine] Gap processing: skipNotFoundGaps=false but no prefetch cache available, using S3 cache`);
+    }
+    
     for (const tournamentId of gapIds) {
         const gameStartTime = Date.now();
         const url = await buildTournamentUrl(entityId, tournamentId);
@@ -1505,11 +1568,28 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         results.totalProcessed++;
         results.currentId = tournamentId;
         
+        // v1.10.1: Determine per-gap forceRefresh based on ScrapeURL status
+        let gapForceRefresh = options.forceRefresh || false;
+        
+        if (prefetchCache && !gapForceRefresh) {
+            try {
+                const scrapeURLStatus = await prefetchCache.getStatus(tournamentId);
+                if (isNotFoundGapStatus(scrapeURLStatus)) {
+                    gapForceRefresh = true;
+                    console.log(`[ScrapingEngine] Gap ID ${tournamentId}: Was NOT_FOUND, forcing web refresh`);
+                }
+                // NOT_PUBLISHED and other statuses use S3 cache (faster)
+            } catch (prefetchError) {
+                // If prefetch fails, use S3 cache (safer/faster)
+                console.warn(`[ScrapingEngine] Gap ID ${tournamentId}: Prefetch failed, using S3 cache`);
+            }
+        }
+        
         try {
             const fetchData = await withRetry(async () => {
                 return await callGraphQL(FETCH_TOURNAMENT_DATA, {
                     url: url,
-                    forceRefresh: options.forceRefresh || false,
+                    forceRefresh: gapForceRefresh,
                     entityId: entityId,
                     scraperApiKey: options.scraperApiKey || null
                 });
@@ -1845,6 +1925,7 @@ module.exports = {
     isUnparseableResponse,  // NEW v1.5.1
     isErrorResponse,
     isTournamentNotFoundStatus,  // NEW v1.9.0
+    isNotFoundGapStatus,  // NEW v1.10.0
     shouldSkipNotPublished,
     shouldSkipNotFoundGap,
     extractPlayerData,

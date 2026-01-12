@@ -61,7 +61,10 @@ type ActiveGame
   isSeries: Boolean
   seriesName: String
   sourceUrl: AWSURL
-  
+  isSatellite: Boolean
+  isRecurring: Boolean
+  recurringGameName: String
+
   # === REFRESH SCHEDULING ===
   refreshEnabled: Boolean @default(value: "true")
   refreshIntervalMinutes: Int @default(value: "15")
@@ -122,7 +125,10 @@ type RecentlyFinishedGame
   seriesName: String
   isMainEvent: Boolean
   sourceUrl: AWSURL
-  
+  isSatellite: Boolean
+  isRecurring: Boolean
+  recurringGameName: String
+
   ttl: AWSTimestamp
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
@@ -165,7 +171,10 @@ type UpcomingGame
   isMainEvent: Boolean
   sourceUrl: AWSURL
   scheduledToStartAt: AWSDateTime
-  
+  isSatellite: Boolean
+  isRecurring: Boolean
+  recurringGameName: String
+
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }

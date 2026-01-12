@@ -8502,6 +8502,52 @@ export declare const DataSync: (new (init: ModelInit<DataSync>) => DataSync) & {
   copyOf(source: DataSync, mutator: (draft: MutableModel<DataSync>) => MutableModel<DataSync> | void): DataSync;
 }
 
+type EagerScraperSettings = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScraperSettings, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly autoRefreshEnabled: boolean;
+  readonly lastToggledAt?: string | null;
+  readonly lastToggledBy?: string | null;
+  readonly disabledReason?: string | null;
+  readonly scheduleTime?: string | null;
+  readonly maxGamesPerJob?: number | null;
+  readonly consecutiveBlankThreshold?: number | null;
+  readonly runningRefreshIntervalMinutes?: number | null;
+  readonly startingSoonRefreshIntervalMinutes?: number | null;
+  readonly upcomingRefreshIntervalMinutes?: number | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyScraperSettings = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScraperSettings, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly autoRefreshEnabled: boolean;
+  readonly lastToggledAt?: string | null;
+  readonly lastToggledBy?: string | null;
+  readonly disabledReason?: string | null;
+  readonly scheduleTime?: string | null;
+  readonly maxGamesPerJob?: number | null;
+  readonly consecutiveBlankThreshold?: number | null;
+  readonly runningRefreshIntervalMinutes?: number | null;
+  readonly startingSoonRefreshIntervalMinutes?: number | null;
+  readonly upcomingRefreshIntervalMinutes?: number | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type ScraperSettings = LazyLoading extends LazyLoadingDisabled ? EagerScraperSettings : LazyScraperSettings
+
+export declare const ScraperSettings: (new (init: ModelInit<ScraperSettings>) => ScraperSettings) & {
+  copyOf(source: ScraperSettings, mutator: (draft: MutableModel<ScraperSettings>) => MutableModel<ScraperSettings> | void): ScraperSettings;
+}
+
 type EagerS3Storage = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<S3Storage, 'id'>;
@@ -8624,6 +8670,9 @@ type EagerActiveGame = {
   readonly isSeries?: boolean | null;
   readonly seriesName?: string | null;
   readonly sourceUrl?: string | null;
+  readonly isSatellite?: boolean | null;
+  readonly isRecurring?: boolean | null;
+  readonly recurringGameName?: string | null;
   readonly refreshEnabled?: boolean | null;
   readonly refreshIntervalMinutes?: number | null;
   readonly lastRefreshedAt?: string | null;
@@ -8678,6 +8727,9 @@ type LazyActiveGame = {
   readonly isSeries?: boolean | null;
   readonly seriesName?: string | null;
   readonly sourceUrl?: string | null;
+  readonly isSatellite?: boolean | null;
+  readonly isRecurring?: boolean | null;
+  readonly recurringGameName?: string | null;
   readonly refreshEnabled?: boolean | null;
   readonly refreshIntervalMinutes?: number | null;
   readonly lastRefreshedAt?: string | null;
@@ -8729,6 +8781,9 @@ type EagerRecentlyFinishedGame = {
   readonly seriesName?: string | null;
   readonly isMainEvent?: boolean | null;
   readonly sourceUrl?: string | null;
+  readonly isSatellite?: boolean | null;
+  readonly isRecurring?: boolean | null;
+  readonly recurringGameName?: string | null;
   readonly ttl?: number | null;
   readonly createdAt: string;
   readonly updatedAt: string;
@@ -8763,6 +8818,9 @@ type LazyRecentlyFinishedGame = {
   readonly seriesName?: string | null;
   readonly isMainEvent?: boolean | null;
   readonly sourceUrl?: string | null;
+  readonly isSatellite?: boolean | null;
+  readonly isRecurring?: boolean | null;
+  readonly recurringGameName?: string | null;
   readonly ttl?: number | null;
   readonly createdAt: string;
   readonly updatedAt: string;
@@ -8801,6 +8859,9 @@ type EagerUpcomingGame = {
   readonly isMainEvent?: boolean | null;
   readonly sourceUrl?: string | null;
   readonly scheduledToStartAt?: string | null;
+  readonly isSatellite?: boolean | null;
+  readonly isRecurring?: boolean | null;
+  readonly recurringGameName?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -8832,6 +8893,9 @@ type LazyUpcomingGame = {
   readonly isMainEvent?: boolean | null;
   readonly sourceUrl?: string | null;
   readonly scheduledToStartAt?: string | null;
+  readonly isSatellite?: boolean | null;
+  readonly isRecurring?: boolean | null;
+  readonly recurringGameName?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

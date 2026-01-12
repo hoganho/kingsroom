@@ -210,6 +210,54 @@ type DataSync @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# ScraperSettings - Global Scraper Control
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# PURPOSE: Global settings to control auto-refresh behavior
+# 
+# When autoRefreshEnabled = false:
+# - refreshRunningGames Lambda exits immediately (no scraping, minimal cost)
+# - HomePage disables auto-refresh timers (manual refresh only)
+# - Useful during weekends/holidays to save ScraperAPI costs
+#
+# USAGE:
+# - Single global record with id = "GLOBAL_SCRAPER_SETTINGS"
+# - Toggle via Scraper Admin > Settings tab
+# - Lambda checks this before processing any games
+# ═══════════════════════════════════════════════════════════════════════════════
+
+type ScraperSettings @model(subscriptions: null) 
+  @auth(rules: [
+    { allow: groups, groups: ["SUPER_ADMIN"], operations: [create, read, update, delete] },
+    { allow: groups, groups: ["ENTITY_ADMIN"], operations: [read, update] },
+    { allow: private, operations: [read] }
+  ]) {
+  id: ID!
+  
+  # Global auto-refresh toggle
+  # When OFF: EventBridge Lambda exits early, HomePage doesn't auto-refresh
+  # When ON: Normal operation with scheduled refreshes
+  autoRefreshEnabled: Boolean!
+  
+  # Audit trail for toggle changes
+  lastToggledAt: AWSDateTime
+  lastToggledBy: String
+  
+  # Optional: reason for disabling (e.g., "Weekend - no games", "Cost saving")
+  disabledReason: String
+  
+  # Schedule settings
+  scheduleTime: String                    # e.g., "06:00" AEST for daily bulk jobs
+  maxGamesPerJob: Int                     # Max games to process per refresh run
+  consecutiveBlankThreshold: Int          # Stop scanning after N consecutive blanks
+  
+  # Refresh intervals in minutes (allows admin customization)
+  runningRefreshIntervalMinutes: Int      # Default: 30 (for RUNNING/CLOCK_STOPPED)
+  startingSoonRefreshIntervalMinutes: Int # Default: 60 (for games <24h away)
+  upcomingRefreshIntervalMinutes: Int     # Default: 720 (12 hours, for games >24h away)
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # S3Storage - FIXED VERSION
 # ═══════════════════════════════════════════════════════════════════════════════
 # 

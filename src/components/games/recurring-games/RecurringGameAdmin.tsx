@@ -458,8 +458,9 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
             return { valid: false, error: 'End date must be after start date' };
         }
         const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-        if (daysDiff > 180) {
-            return { valid: false, error: `Date range is ${daysDiff} days (~${Math.round(daysDiff/30)} months). Please select 6 months or less. Click "4 Weeks" or "12 Weeks" button.`, daysDiff };
+        // Allow up to 4 years (~1460 days) - weekly games would generate ~200 instances per recurring game
+        if (daysDiff > 1460) {
+            return { valid: false, error: `Date range is ${daysDiff} days (~${Math.round(daysDiff/365)} years). Please select 4 years or less.`, daysDiff };
         }
         return { valid: true, daysDiff };
     };
@@ -974,6 +975,8 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(1))}>1 Week</Button>
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(4))}>4 Weeks</Button>
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(12))}>12 Weeks</Button>
+                        <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(52))}>1 Year</Button>
+                        <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(104))}>2 Years</Button>
                     </div>
                 </div>
             </div>

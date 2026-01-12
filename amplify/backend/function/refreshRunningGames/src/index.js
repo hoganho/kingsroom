@@ -3,13 +3,18 @@
  * REFRESH RUNNING GAMES - Scheduled Lambda
  * ===================================================================
  * 
- * VERSION: 2.0.0 - Updated refresh intervals to align with HomePage
+ * VERSION: 2.1.0 - Added global auto-refresh toggle check
  * 
  * PURPOSE:
  * Runs on a schedule to find stale ActiveGame records and trigger 
  * re-scraping to keep dashboard data fresh from the live source (not S3 cache).
  * 
- * REFRESH SCHEDULE:
+ * NEW IN v2.1.0:
+ * - Checks ScraperSettings.autoRefreshEnabled before doing any work
+ * - If disabled, exits immediately with minimal Lambda cost
+ * - This allows admins to "pause" all scraping during inactive periods
+ * 
+ * REFRESH SCHEDULE (when enabled):
  * - RUNNING/CLOCK_STOPPED: Every 30 minutes (clock-aligned)
  * - INITIATING/REGISTERING/SCHEDULED (<24h): Every 1 hour
  * - INITIATING/REGISTERING/SCHEDULED (>24h): Every 12 hours
@@ -21,6 +26,7 @@
  * ENVIRONMENT VARIABLES:
  * - API_KINGSROOM_GRAPHQLAPIIDOUTPUT
  * - API_KINGSROOM_ACTIVEGAMETABLE_NAME
+ * - API_KINGSROOM_SCRAPERSETTINGSTABLE_NAME (new)
  * - FUNCTION_WEBSCRAPERFUNCTION_NAME (e.g., webScraperFunction-dev)
  * - ENV
  * - REGION
@@ -29,7 +35,7 @@
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, QueryCommand, UpdateCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, QueryCommand, UpdateCommand, ScanCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 
 // Initialize clients
@@ -41,23 +47,15 @@ const lambdaClient = new LambdaClient({});
 // CONFIGURATION
 // ===================================================================
 
-// How long before each status/category is considered "stale" and needs refresh
-// These align with the HomePage auto-refresh intervals
-const STALE_THRESHOLD_MINUTES = {
-    // Running games - refresh every 30 minutes
+// Global settings record ID (must match frontend)
+const GLOBAL_SETTINGS_ID = 'GLOBAL_SCRAPER_SETTINGS';
+
+// Default thresholds (can be overridden by ScraperSettings)
+const DEFAULT_STALE_THRESHOLD_MINUTES = {
     RUNNING: 30,
     CLOCK_STOPPED: 30,
-    
-    // Starting soon (<24h) - refresh every 60 minutes (1 hour)
     STARTING_SOON: 60,
-    
-    // Upcoming (>24h) - refresh every 720 minutes (12 hours)
-    UPCOMING: 720,
-    
-    // Legacy fallbacks for any status not explicitly handled
-    REGISTERING: 60,
-    INITIATING: 60,
-    SCHEDULED: 60
+    UPCOMING: 720
 };
 
 // 24 hours in milliseconds
@@ -70,35 +68,100 @@ const MAX_REFRESH_PER_RUN = 50;
 const BATCH_SIZE = 10;
 
 // ===================================================================
-// HELPERS
+// TABLE NAME HELPERS
 // ===================================================================
 
-const getTableName = () => {
+const getActiveGameTableName = () => {
     const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
     const env = process.env.ENV;
     
-    // Use explicit env var if available
     if (process.env.API_KINGSROOM_ACTIVEGAMETABLE_NAME) {
         return process.env.API_KINGSROOM_ACTIVEGAMETABLE_NAME;
     }
     
-    // Fallback to constructed name
     return `ActiveGame-${apiId}-${env}`;
+};
+
+const getScraperSettingsTableName = () => {
+    const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
+    const env = process.env.ENV;
+    
+    if (process.env.API_KINGSROOM_SCRAPERSETTINGSTABLE_NAME) {
+        return process.env.API_KINGSROOM_SCRAPERSETTINGSTABLE_NAME;
+    }
+    
+    return `ScraperSettings-${apiId}-${env}`;
 };
 
 const getScraperFunctionName = () => {
     return process.env.FUNCTION_WEBSCRAPERFUNCTION_NAME || `webScraperFunction-${process.env.ENV || 'dev'}`;
 };
 
+// ===================================================================
+// CHECK GLOBAL SETTINGS
+// ===================================================================
+
+/**
+ * Check if auto-refresh is enabled in ScraperSettings
+ * Returns { enabled: boolean, settings: object | null }
+ */
+async function checkAutoRefreshEnabled() {
+    try {
+        const result = await docClient.send(new GetCommand({
+            TableName: getScraperSettingsTableName(),
+            Key: { id: GLOBAL_SETTINGS_ID }
+        }));
+
+        if (result.Item) {
+            return {
+                enabled: result.Item.autoRefreshEnabled === true,
+                settings: result.Item
+            };
+        }
+
+        // No settings found - default to enabled
+        console.log('[REFRESH] No ScraperSettings found, defaulting to enabled');
+        return { enabled: true, settings: null };
+
+    } catch (error) {
+        // If table doesn't exist or other error, default to enabled
+        // This ensures the system works before ScraperSettings is set up
+        console.warn('[REFRESH] Could not check ScraperSettings:', error.message);
+        console.log('[REFRESH] Defaulting to enabled');
+        return { enabled: true, settings: null };
+    }
+}
+
+/**
+ * Get refresh thresholds from settings or use defaults
+ */
+function getThresholdsFromSettings(settings) {
+    if (!settings) return DEFAULT_STALE_THRESHOLD_MINUTES;
+
+    return {
+        RUNNING: settings.runningRefreshIntervalMinutes || DEFAULT_STALE_THRESHOLD_MINUTES.RUNNING,
+        CLOCK_STOPPED: settings.runningRefreshIntervalMinutes || DEFAULT_STALE_THRESHOLD_MINUTES.CLOCK_STOPPED,
+        STARTING_SOON: settings.startingSoonRefreshIntervalMinutes || DEFAULT_STALE_THRESHOLD_MINUTES.STARTING_SOON,
+        UPCOMING: settings.upcomingRefreshIntervalMinutes || DEFAULT_STALE_THRESHOLD_MINUTES.UPCOMING
+    };
+}
+
+// ===================================================================
+// STALENESS HELPERS
+// ===================================================================
+
 /**
  * Determine the appropriate stale threshold based on game status and start time
  */
-const getStaleThreshold = (game) => {
+const getStaleThreshold = (game, thresholds) => {
     const status = game.gameStatus;
     
-    // Running and clock stopped games always use the 30-minute threshold
-    if (status === 'RUNNING' || status === 'CLOCK_STOPPED') {
-        return STALE_THRESHOLD_MINUTES.RUNNING;
+    // Running and clock stopped games
+    if (status === 'RUNNING') {
+        return thresholds.RUNNING;
+    }
+    if (status === 'CLOCK_STOPPED') {
+        return thresholds.CLOCK_STOPPED;
     }
     
     // For pre-start statuses, check if it's starting soon (<24h) or upcoming (>24h)
@@ -108,19 +171,16 @@ const getStaleThreshold = (game) => {
         const timeUntilStart = startTime.getTime() - now.getTime();
         
         if (timeUntilStart <= 0) {
-            // Already past start time - treat as starting soon
-            return STALE_THRESHOLD_MINUTES.STARTING_SOON;
+            return thresholds.STARTING_SOON;
         } else if (timeUntilStart <= STARTING_SOON_THRESHOLD_MS) {
-            // Starting within 24 hours
-            return STALE_THRESHOLD_MINUTES.STARTING_SOON;
+            return thresholds.STARTING_SOON;
         } else {
-            // More than 24 hours away
-            return STALE_THRESHOLD_MINUTES.UPCOMING;
+            return thresholds.UPCOMING;
         }
     }
     
     // Fallback
-    return STALE_THRESHOLD_MINUTES[status] || 60;
+    return thresholds.STARTING_SOON;
 };
 
 /**
@@ -151,8 +211,8 @@ const categorizeGame = (game) => {
 /**
  * Check if a game is stale based on its status, start time, and last refresh time
  */
-const isStale = (game, now) => {
-    const thresholdMinutes = getStaleThreshold(game);
+const isStale = (game, now, thresholds) => {
+    const thresholdMinutes = getStaleThreshold(game, thresholds);
     const lastRefresh = new Date(game.lastRefreshedAt || game.activatedAt || game.createdAt);
     const minutesSinceRefresh = (now - lastRefresh) / (1000 * 60);
     
@@ -173,9 +233,8 @@ const isStale = (game, now) => {
  */
 async function findActiveGames() {
     const allGames = [];
-    const tableName = getTableName();
+    const tableName = getActiveGameTableName();
     
-    // Query each active status using the byStatus GSI
     const activeStatuses = ['RUNNING', 'REGISTERING', 'CLOCK_STOPPED', 'INITIATING', 'SCHEDULED'];
     
     for (const status of activeStatuses) {
@@ -210,7 +269,6 @@ async function findActiveGames() {
             console.log(`[REFRESH] Found ${allGames.filter(g => g.gameStatus === status).length} games with status ${status}`);
             
         } catch (error) {
-            // If byStatus GSI doesn't exist, fall back to scan
             if (error.name === 'ValidationException' && error.message.includes('byStatus')) {
                 console.warn(`[REFRESH] byStatus GSI not found, falling back to scan for ${status}`);
                 await findActiveGamesByScan(tableName, status, allGames);
@@ -255,7 +313,6 @@ async function findActiveGamesByScan(tableName, status, accumulator) {
 
 /**
  * Trigger the scraper Lambda for a specific game
- * Setting forceRefresh: true ensures we get fresh data from the live site
  */
 async function triggerScraper(game) {
     if (!game.sourceUrl) {
@@ -267,14 +324,14 @@ async function triggerScraper(game) {
         operation: 'fetchTournamentData',
         url: game.sourceUrl,
         entityId: game.entityId,
-        forceRefresh: true, // CRITICAL: This bypasses S3 cache and fetches from live site
+        forceRefresh: true, // CRITICAL: Bypasses S3 cache
         scraperJobId: `REFRESH_${game.gameId}_${Date.now()}`
     };
     
     try {
         await lambdaClient.send(new InvokeCommand({
             FunctionName: getScraperFunctionName(),
-            InvocationType: 'Event', // Async invocation
+            InvocationType: 'Event',
             Payload: JSON.stringify(scraperPayload)
         }));
         
@@ -295,7 +352,7 @@ async function markRefreshAttempt(activeGameId) {
     
     try {
         await docClient.send(new UpdateCommand({
-            TableName: getTableName(),
+            TableName: getActiveGameTableName(),
             Key: { id: activeGameId },
             UpdateExpression: 'SET lastRefreshAttemptAt = :now, refreshAttemptCount = if_not_exists(refreshAttemptCount, :zero) + :one',
             ExpressionAttributeValues: {
@@ -341,14 +398,42 @@ async function processBatch(games, results) {
 exports.handler = async (event) => {
     const startTime = Date.now();
     console.log('[REFRESH] ========================================');
-    console.log('[REFRESH] Starting scheduled refresh check v2.0.0');
+    console.log('[REFRESH] Starting scheduled refresh check v2.1.0');
+    
+    // ================================================================
+    // STEP 0: Check if auto-refresh is enabled
+    // ================================================================
+    const { enabled: autoRefreshEnabled, settings: scraperSettings } = await checkAutoRefreshEnabled();
+    
+    if (!autoRefreshEnabled) {
+        console.log('[REFRESH] ⏸️  Auto-refresh is DISABLED in ScraperSettings');
+        console.log('[REFRESH] Exiting without processing any games');
+        
+        if (scraperSettings?.disabledReason) {
+            console.log(`[REFRESH] Reason: ${scraperSettings.disabledReason}`);
+        }
+        
+        return {
+            success: true,
+            autoRefreshEnabled: false,
+            message: 'Auto-refresh is disabled. No games processed.',
+            disabledReason: scraperSettings?.disabledReason || null,
+            durationMs: Date.now() - startTime
+        };
+    }
+    
+    console.log('[REFRESH] ✅ Auto-refresh is ENABLED');
+    
+    // Get thresholds from settings (or use defaults)
+    const thresholds = getThresholdsFromSettings(scraperSettings);
+    
     console.log('[REFRESH] Config:', {
-        tableName: getTableName(),
+        tableName: getActiveGameTableName(),
         scraperFunction: getScraperFunctionName(),
         thresholds: {
-            'RUNNING/CLOCK_STOPPED': `${STALE_THRESHOLD_MINUTES.RUNNING} mins`,
-            'STARTING_SOON (<24h)': `${STALE_THRESHOLD_MINUTES.STARTING_SOON} mins`,
-            'UPCOMING (>24h)': `${STALE_THRESHOLD_MINUTES.UPCOMING} mins`
+            'RUNNING/CLOCK_STOPPED': `${thresholds.RUNNING} mins`,
+            'STARTING_SOON (<24h)': `${thresholds.STARTING_SOON} mins`,
+            'UPCOMING (>24h)': `${thresholds.UPCOMING} mins`
         }
     });
     
@@ -371,16 +456,20 @@ exports.handler = async (event) => {
         
         if (activeGames.length === 0) {
             console.log('[REFRESH] No active games found, exiting');
-            return { success: true, ...results, durationMs: Date.now() - startTime };
+            return { 
+                success: true, 
+                autoRefreshEnabled: true,
+                ...results, 
+                durationMs: Date.now() - startTime 
+            };
         }
         
-        // Step 2: Filter to stale games based on dynamic thresholds
+        // Step 2: Filter to stale games
         const staleGames = [];
         
         for (const game of activeGames) {
-            const staleness = isStale(game, now);
+            const staleness = isStale(game, now, thresholds);
             
-            // Initialize status counter
             if (!results.byStatus[game.gameStatus]) {
                 results.byStatus[game.gameStatus] = { total: 0, stale: 0, refreshed: 0 };
             }
@@ -409,22 +498,24 @@ exports.handler = async (event) => {
         
         if (staleGames.length === 0) {
             console.log('[REFRESH] No stale games, exiting');
-            return { success: true, ...results, durationMs: Date.now() - startTime };
+            return { 
+                success: true, 
+                autoRefreshEnabled: true,
+                ...results, 
+                durationMs: Date.now() - startTime 
+            };
         }
         
-        // Step 3: Prioritize games for refresh
-        // Priority: RUNNING > CLOCK_STOPPED > STARTING_SOON > UPCOMING
+        // Step 3: Prioritize games
         const priorityOrder = ['RUNNING', 'CLOCK_STOPPED', 'STARTING_SOON', 'UPCOMING'];
         staleGames.sort((a, b) => {
             const aPriority = priorityOrder.indexOf(a.category);
             const bPriority = priorityOrder.indexOf(b.category);
             
-            // First sort by category priority
             if (aPriority !== bPriority) {
                 return aPriority - bPriority;
             }
             
-            // Within same category, sort by staleness (most stale first)
             return b.minutesSinceRefresh - a.minutesSinceRefresh;
         });
         
@@ -444,14 +535,14 @@ exports.handler = async (event) => {
             await processBatch(batch, results);
         }
         
-        // Update status counters for refreshed games
+        // Update status counters
         for (const game of gamesToRefresh) {
             if (!results.errors.find(e => e.gameId === game.gameId)) {
                 results.byStatus[game.gameStatus].refreshed++;
             }
         }
         
-        // Step 5: Log summary
+        // Step 5: Summary
         const duration = Date.now() - startTime;
         console.log('[REFRESH] ========================================');
         console.log('[REFRESH] Completed in', duration, 'ms');
@@ -471,6 +562,7 @@ exports.handler = async (event) => {
         
         return {
             success: true,
+            autoRefreshEnabled: true,
             ...results,
             durationMs: duration
         };
@@ -479,6 +571,7 @@ exports.handler = async (event) => {
         console.error('[REFRESH] Fatal error:', error);
         return {
             success: false,
+            autoRefreshEnabled: true,
             error: error.message,
             ...results,
             durationMs: Date.now() - startTime

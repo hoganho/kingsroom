@@ -145,27 +145,47 @@ export const formatAEST = (
 };
 
 /**
- * Format a date for display, showing relative time for recent dates
+ * Format a date for display, showing relative time for recent/upcoming dates
+ * Handles both past dates ("X ago") and future dates ("in X")
  */
 export const formatRelativeAEST = (date: Date | string): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const absDiffMs = Math.abs(diffMs);
+  const isFuture = diffMs < 0;
   
-  if (diffMins < 60) {
-    return diffMins <= 1 ? 'Just now' : `${diffMins} minutes ago`;
-  }
-  if (diffHours < 24) {
-    return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`;
-  }
-  if (diffDays < 7) {
-    return diffDays === 1 ? 'Yesterday' : `${diffDays} days ago`;
-  }
+  const absDiffMins = Math.floor(absDiffMs / (1000 * 60));
+  const absDiffHours = Math.floor(absDiffMs / (1000 * 60 * 60));
+  const absDiffDays = Math.floor(absDiffMs / (1000 * 60 * 60 * 24));
   
-  return formatAEST(date, { includeDay: true, shortDay: true });
+  if (isFuture) {
+    // Future dates - "in X"
+    if (absDiffMins < 60) {
+      return absDiffMins <= 1 ? 'In a moment' : `In ${absDiffMins} minutes`;
+    }
+    if (absDiffHours < 24) {
+      return absDiffHours === 1 ? 'In 1 hour' : `In ${absDiffHours} hours`;
+    }
+    if (absDiffDays < 7) {
+      return absDiffDays === 1 ? 'Tomorrow' : `In ${absDiffDays} days`;
+    }
+    // More than a week away - show formatted date
+    return formatAEST(date, { includeDay: true, shortDay: true });
+  } else {
+    // Past dates - "X ago"
+    if (absDiffMins < 60) {
+      return absDiffMins <= 1 ? 'Just now' : `${absDiffMins} minutes ago`;
+    }
+    if (absDiffHours < 24) {
+      return absDiffHours === 1 ? '1 hour ago' : `${absDiffHours} hours ago`;
+    }
+    if (absDiffDays < 7) {
+      return absDiffDays === 1 ? 'Yesterday' : `${absDiffDays} days ago`;
+    }
+    // More than a week ago - show formatted date
+    return formatAEST(date, { includeDay: true, shortDay: true });
+  }
 };
 
 /**

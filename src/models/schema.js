@@ -11939,6 +11939,153 @@ export const schema = {
                 }
             ]
         },
+        "ScraperSettings": {
+            "name": "ScraperSettings",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "autoRefreshEnabled": {
+                    "name": "autoRefreshEnabled",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastToggledAt": {
+                    "name": "lastToggledAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastToggledBy": {
+                    "name": "lastToggledBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "disabledReason": {
+                    "name": "disabledReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scheduleTime": {
+                    "name": "scheduleTime",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "maxGamesPerJob": {
+                    "name": "maxGamesPerJob",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveBlankThreshold": {
+                    "name": "consecutiveBlankThreshold",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "runningRefreshIntervalMinutes": {
+                    "name": "runningRefreshIntervalMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startingSoonRefreshIntervalMinutes": {
+                    "name": "startingSoonRefreshIntervalMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "upcomingRefreshIntervalMinutes": {
+                    "name": "upcomingRefreshIntervalMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "ScraperSettings",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "groupClaim": "cognito:groups",
+                                "provider": "userPools",
+                                "allow": "groups",
+                                "groups": [
+                                    "SUPER_ADMIN"
+                                ],
+                                "operations": [
+                                    "create",
+                                    "read",
+                                    "update",
+                                    "delete"
+                                ]
+                            },
+                            {
+                                "groupClaim": "cognito:groups",
+                                "provider": "userPools",
+                                "allow": "groups",
+                                "groups": [
+                                    "ENTITY_ADMIN"
+                                ],
+                                "operations": [
+                                    "read",
+                                    "update"
+                                ]
+                            },
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "S3Storage": {
             "name": "S3Storage",
             "fields": {
@@ -12580,6 +12727,27 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "isSatellite": {
+                    "name": "isSatellite",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isRecurring": {
+                    "name": "isRecurring",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameName": {
+                    "name": "recurringGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "refreshEnabled": {
                     "name": "refreshEnabled",
                     "isArray": false,
@@ -12984,6 +13152,27 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "isSatellite": {
+                    "name": "isSatellite",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isRecurring": {
+                    "name": "isRecurring",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameName": {
+                    "name": "recurringGameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "ttl": {
                     "name": "ttl",
                     "isArray": false,
@@ -13273,6 +13462,27 @@ export const schema = {
                     "name": "scheduledToStartAt",
                     "isArray": false,
                     "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSatellite": {
+                    "name": "isSatellite",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isRecurring": {
+                    "name": "isRecurring",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameName": {
+                    "name": "recurringGameName",
+                    "isArray": false,
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -29211,5 +29421,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "cfd30a913ace110bbbd14177d8ce28d4"
+    "version": "e4916ee81d8417ecf27377a5d89b89a1"
 };

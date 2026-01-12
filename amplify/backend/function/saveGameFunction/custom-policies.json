@@ -147,7 +147,9 @@
     "arn:aws:dynamodb:ap-southeast-2:*:table/ActiveGame-*",
     "arn:aws:dynamodb:ap-southeast-2:*:table/ActiveGame-*/index/*",
     "arn:aws:dynamodb:ap-southeast-2:*:table/RecentlyFinishedGame-*",
-    "arn:aws:dynamodb:ap-southeast-2:*:table/RecentlyFinishedGame-*/index/*"
+    "arn:aws:dynamodb:ap-southeast-2:*:table/RecentlyFinishedGame-*/index/*",
+    "arn:aws:dynamodb:ap-southeast-2:*:table/UpcomingGame-*",
+    "arn:aws:dynamodb:ap-southeast-2:*:table/UpcomingGame-*/index/*"
   ]
 }
 ]

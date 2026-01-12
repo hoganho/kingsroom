@@ -1,16 +1,25 @@
 // src/pages/HomePage.tsx
-// VERSION: 2.2.0 - Added INITIATING status support, AEST timezone formatting
+// VERSION: 3.0.0 - Enhanced dashboard with auto-refresh, game type badges, venue logos, dual date display
 //
 // ARCHITECTURE:
-// - ActiveGame table: Fast queries for RUNNING, REGISTERING, CLOCK_STOPPED, INITIATING games
+// - ActiveGame table: Fast queries for RUNNING, REGISTERING, CLOCK_STOPPED, INITIATING, SCHEDULED games
 // - RecentlyFinishedGame table: Games finished in last 7 days (auto-cleaned via TTL)
 // - UpcomingGame table: Games scheduled to start soon
 // - Subscriptions: Real-time updates via onActiveGameChange
 //
-// PERFORMANCE:
-// - Dashboard loads in <500ms even with thousands of games
-// - Real-time updates without polling
-// - 15-minute auto-refresh for stale RUNNING games
+// SECTIONS:
+// 1. Running Games (RUNNING + CLOCK_STOPPED) - Auto-refresh every 30 min, grouped by registration status
+// 2. Starting Soon (<24h, INITIATING/SCHEDULED/REGISTERING) - Auto-refresh every 1 hour
+// 3. Upcoming Games (>24h, INITIATING/SCHEDULED/REGISTERING) - Auto-refresh every 12 hours
+// 4. Recently Finished (CANCELLED/FINISHED) - Sorted by finish date
+//
+// FEATURES:
+// - Dual date display (relative + absolute AEST)
+// - Game type badges (Series, Satellite, Recurring, Main Event)
+// - Registration status badges (OPEN, FINAL)
+// - Venue logos with fallback initials
+// - Manual refresh per section
+// - Clock-aligned auto-refresh (on the hour and half hour)
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
@@ -25,6 +34,10 @@ import {
   PauseCircleIcon,
   SignalIcon,
   ExclamationTriangleIcon,
+  StarIcon,
+  ArrowPathRoundedSquareIcon,
+  BoltIcon,
+  XCircleIcon,
 } from '@heroicons/react/24/outline';
 
 import { generateClient } from 'aws-amplify/api';
@@ -34,7 +47,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { KpiCard } from '@/components/ui/KpiCard';
 import { useEntity } from '@/contexts/EntityContext';
-import { toAEST } from '@/utils/dateUtils';
+import { toAEST, formatRelativeAEST, formatAEST } from '@/utils/dateUtils';
+import { useScraperSettings } from '@/hooks/scraper/useScraperSettings';
 
 // ============================================
 // GRAPHQL QUERIES
@@ -75,6 +89,9 @@ const listActiveGamesByEntity = /* GraphQL */ `
         isSeries
         seriesName
         isMainEvent
+        isSatellite
+        isRecurring
+        recurringGameName
         sourceUrl
         lastRefreshedAt
         refreshCount
@@ -83,9 +100,6 @@ const listActiveGamesByEntity = /* GraphQL */ `
     }
   }
 `;
-
-// Note: listActiveGamesByStatus query available if needed for cross-entity queries
-// Currently using listActiveGamesByEntity for entity-scoped dashboard
 
 // Query RecentlyFinishedGame table for fast finished game access
 const listRecentlyFinishedByEntity = /* GraphQL */ `
@@ -116,6 +130,9 @@ const listRecentlyFinishedByEntity = /* GraphQL */ `
         isSeries
         seriesName
         isMainEvent
+        isSatellite
+        isRecurring
+        recurringGameName
         sourceUrl
       }
       nextToken
@@ -150,6 +167,7 @@ const gamesByStatusFinished = /* GraphQL */ `
         isSeries
         seriesName
         isMainEvent
+        isSatellite
         venue {
           name
           logo
@@ -185,40 +203,10 @@ const listUpcomingByEntity = /* GraphQL */ `
         isSeries
         seriesName
         isMainEvent
+        isSatellite
+        isRecurring
+        recurringGameName
         sourceUrl
-      }
-      nextToken
-    }
-  }
-`;
-
-// Fallback: Query Game table for upcoming games
-const gamesByStatusUpcoming = /* GraphQL */ `
-  query GamesByStatusUpcoming($now: String!, $limit: Int) {
-    gamesByStatus(
-      gameStatus: SCHEDULED
-      gameStartDateTime: { ge: $now }
-      limit: $limit
-      sortDirection: ASC
-    ) {
-      items {
-        id
-        entityId
-        tournamentId
-        name
-        gameStartDateTime
-        gameStatus
-        buyIn
-        guaranteeAmount
-        hasGuarantee
-        sourceUrl
-        isSeries
-        seriesName
-        isMainEvent
-        venue {
-          name
-          logo
-        }
       }
       nextToken
     }
@@ -234,9 +222,11 @@ const onActiveGameChangeSubscription = /* GraphQL */ `
       entityId
       name
       venueName
+      venueLogoCached
       gameStatus
       registrationStatus
       gameStartDateTime
+      gameEndDateTime
       totalEntries
       totalUniquePlayers
       playersRemaining
@@ -245,6 +235,12 @@ const onActiveGameChangeSubscription = /* GraphQL */ `
       prizepoolCalculated
       sourceUrl
       lastRefreshedAt
+      isSeries
+      seriesName
+      isMainEvent
+      isSatellite
+      isRecurring
+      recurringGameName
     }
   }
 `;
@@ -277,9 +273,14 @@ interface ActiveGameData {
   hasGuarantee?: boolean | null;
   hasOverlay?: boolean | null;
   gameType?: string | null;
+  gameVariant?: string | null;
+  tournamentType?: string | null;
   isSeries?: boolean | null;
   seriesName?: string | null;
   isMainEvent?: boolean | null;
+  isSatellite?: boolean | null;
+  isRecurring?: boolean | null;
+  recurringGameName?: string | null;
   sourceUrl?: string | null;
   lastRefreshedAt?: string | null;
   refreshCount?: number | null;
@@ -289,14 +290,16 @@ interface FinishedGameData {
   id: string;
   gameId?: string | null;
   entityId?: string | null;
+  venueId?: string | null;
   tournamentId?: number | null;
   name: string;
   venueName?: string | null;
   venueLogoCached?: string | null;
+  entityName?: string | null;
   venue?: { name: string; logo?: string | null } | null;
   gameStartDateTime: string;
-  finishedAt?: string | null;
   gameEndDateTime?: string | null;
+  finishedAt?: string | null;
   totalDuration?: number | null;
   totalEntries?: number | null;
   totalUniquePlayers?: number | null;
@@ -307,6 +310,9 @@ interface FinishedGameData {
   isSeries?: boolean | null;
   seriesName?: string | null;
   isMainEvent?: boolean | null;
+  isSatellite?: boolean | null;
+  isRecurring?: boolean | null;
+  recurringGameName?: string | null;
   sourceUrl?: string | null;
 }
 
@@ -314,24 +320,28 @@ interface UpcomingGameData {
   id: string;
   gameId?: string | null;
   entityId?: string | null;
+  venueId?: string | null;
   tournamentId?: number | null;
   name: string;
   venueName?: string | null;
   venueLogoCached?: string | null;
   venue?: { name: string; logo?: string | null } | null;
   gameStartDateTime: string;
-  gameStatus?: string | null;
   buyIn?: number | null;
   guaranteeAmount?: number | null;
   hasGuarantee?: boolean | null;
   gameType?: string | null;
+  gameVariant?: string | null;
   isSeries?: boolean | null;
   seriesName?: string | null;
   isMainEvent?: boolean | null;
+  isSatellite?: boolean | null;
+  isRecurring?: boolean | null;
+  recurringGameName?: string | null;
   sourceUrl?: string | null;
 }
 
-type GameVariant = 'running' | 'registering' | 'clockStopped' | 'initiating' | 'finished' | 'upcoming';
+type GameVariant = 'running' | 'clockStopped' | 'startingSoon' | 'upcoming' | 'finished';
 
 // GraphQL response types
 interface ActiveGamesByEntityData {
@@ -369,6 +379,85 @@ interface OnActiveGameChangeData {
 interface AmplifySubscription {
   unsubscribe: () => void;
 }
+
+// ============================================
+// CONSTANTS
+// ============================================
+
+// Auto-refresh intervals in milliseconds
+const UPCOMING_REFRESH_INTERVAL = 12 * 60 * 60 * 1000;  // 12 hours (fallback)
+
+// 24 hours in milliseconds for "starting soon" threshold
+const STARTING_SOON_THRESHOLD = 24 * 60 * 60 * 1000;
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Calculate milliseconds until the next half-hour mark
+ * Used for clock-aligned refresh (on the hour and half hour)
+ */
+const getMillisecondsUntilNextHalfHour = (): number => {
+  const now = new Date();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  const milliseconds = now.getMilliseconds();
+  
+  // Calculate minutes until next half hour (0 or 30)
+  const minutesUntilNext = minutes < 30 ? (30 - minutes) : (60 - minutes);
+  
+  // Convert to milliseconds and subtract current seconds/ms
+  return (minutesUntilNext * 60 * 1000) - (seconds * 1000) - milliseconds;
+};
+
+/**
+ * Calculate milliseconds until the next hour
+ */
+const getMillisecondsUntilNextHour = (): number => {
+  const now = new Date();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  const milliseconds = now.getMilliseconds();
+  
+  const minutesUntilNext = 60 - minutes;
+  return (minutesUntilNext * 60 * 1000) - (seconds * 1000) - milliseconds;
+};
+
+/**
+ * Format a date showing both relative and absolute time in AEST
+ */
+const formatDualDateTime = (dateString: string | null | undefined): { relative: string; absolute: string } => {
+  if (!dateString) return { relative: '-', absolute: '-' };
+  
+  try {
+    const relative = formatRelativeAEST(dateString);
+    const absolute = formatAEST(dateString, { includeTime: true, includeDay: true, shortDay: true });
+    return { relative, absolute };
+  } catch {
+    return { relative: 'Invalid Date', absolute: 'Invalid Date' };
+  }
+};
+
+/**
+ * Check if a date is within the next 24 hours
+ */
+const isWithin24Hours = (dateString: string): boolean => {
+  const gameDate = new Date(dateString);
+  const now = new Date();
+  const diff = gameDate.getTime() - now.getTime();
+  return diff > 0 && diff <= STARTING_SOON_THRESHOLD;
+};
+
+/**
+ * Check if a date is more than 24 hours from now
+ */
+const isMoreThan24Hours = (dateString: string): boolean => {
+  const gameDate = new Date(dateString);
+  const now = new Date();
+  const diff = gameDate.getTime() - now.getTime();
+  return diff > STARTING_SOON_THRESHOLD;
+};
 
 // ============================================
 // HORIZONTAL SCROLL ROW COMPONENT
@@ -445,6 +534,136 @@ const HorizontalScrollRow: React.FC<HorizontalScrollRowProps> = ({ children }) =
 };
 
 // ============================================
+// GAME TYPE BADGES COMPONENT
+// ============================================
+
+interface GameTypeBadgesProps {
+  game: ActiveGameData | FinishedGameData | UpcomingGameData;
+}
+
+const GameTypeBadges: React.FC<GameTypeBadgesProps> = ({ game }) => {
+  const badges: React.ReactNode[] = [];
+  
+  // Series badge
+  if (game.isSeries) {
+    badges.push(
+      <Badge key="series" variant="default" className="text-[10px] bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800">
+        <TrophyIcon className="w-3 h-3 mr-0.5" />
+        Series
+      </Badge>
+    );
+  }
+  
+  // Main Event badge
+  if (game.isMainEvent) {
+    badges.push(
+      <Badge key="main" variant="default" className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
+        <StarIcon className="w-3 h-3 mr-0.5" />
+        Main Event
+      </Badge>
+    );
+  }
+  
+  // Satellite badge
+  if (game.isSatellite) {
+    badges.push(
+      <Badge key="satellite" variant="default" className="text-[10px] bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800">
+        <BoltIcon className="w-3 h-3 mr-0.5" />
+        Satellite
+      </Badge>
+    );
+  }
+  
+  // Recurring badge
+  if (game.isRecurring) {
+    badges.push(
+      <Badge key="recurring" variant="default" className="text-[10px] bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 border-teal-200 dark:border-teal-800">
+        <ArrowPathRoundedSquareIcon className="w-3 h-3 mr-0.5" />
+        Recurring
+      </Badge>
+    );
+  }
+  
+  if (badges.length === 0) return null;
+  
+  return (
+    <div className="flex flex-wrap gap-1 mt-1">
+      {badges}
+    </div>
+  );
+};
+
+// ============================================
+// REGISTRATION STATUS BADGE COMPONENT
+// ============================================
+
+interface RegistrationBadgeProps {
+  status: string | null | undefined;
+}
+
+const RegistrationBadge: React.FC<RegistrationBadgeProps> = ({ status }) => {
+  if (!status || !['OPEN', 'FINAL'].includes(status)) return null;
+  
+  if (status === 'OPEN') {
+    return (
+      <Badge variant="success" className="text-[10px]">
+        <SignalIcon className="w-3 h-3 mr-0.5" />
+        Reg Open
+      </Badge>
+    );
+  }
+  
+  if (status === 'FINAL') {
+    return (
+      <Badge variant="warning" className="text-[10px]">
+        <XCircleIcon className="w-3 h-3 mr-0.5" />
+        Final
+      </Badge>
+    );
+  }
+  
+  return null;
+};
+
+// ============================================
+// VENUE LOGO COMPONENT
+// ============================================
+
+interface VenueLogoProps {
+  logo: string | null | undefined;
+  name: string | null | undefined;
+  size?: 'sm' | 'md';
+}
+
+const VenueLogo: React.FC<VenueLogoProps> = ({ logo, name, size = 'sm' }) => {
+  const sizeClasses = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm';
+  
+  if (logo) {
+    return (
+      <img 
+        src={logo} 
+        alt={name || 'Venue'} 
+        className={cx(sizeClasses, "rounded-full object-cover border border-gray-200 dark:border-gray-700 shadow-sm")}
+      />
+    );
+  }
+  
+  // Fallback to initials
+  const initials = name 
+    ? name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+    : '?';
+  
+  return (
+    <div className={cx(
+      sizeClasses,
+      "rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white font-semibold border border-gray-200 dark:border-gray-700 shadow-sm"
+    )}>
+      {initials}
+    </div>
+  );
+};
+
+// ============================================
 // GAME CARD COMPONENT
 // ============================================
 
@@ -454,18 +673,14 @@ interface GameCardProps {
 }
 
 const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
-  const formatDateTime = (dateString: string): string => {
-    try {
-      const aest = toAEST(dateString);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const hours = aest.hours % 12 || 12;
-      const ampm = aest.hours >= 12 ? 'PM' : 'AM';
-      const mins = String(aest.minutes).padStart(2, '0');
-      return `${aest.day} ${months[aest.month]} ${aest.year} @ ${hours}:${mins} ${ampm}`;
-    } catch {
-      return 'Invalid Date';
-    }
-  };
+  const { relative: relativeDate, absolute: absoluteDate } = formatDualDateTime(game.gameStartDateTime);
+  
+  // For finished games, also show finish date
+  const finishDate = ('finishedAt' in game && game.finishedAt) 
+    ? formatDualDateTime(game.finishedAt) 
+    : ('gameEndDateTime' in game && game.gameEndDateTime) 
+      ? formatDualDateTime(game.gameEndDateTime)
+      : null;
 
   const getStatusBadge = (): React.ReactNode => {
     switch (variant) {
@@ -476,13 +691,6 @@ const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
             Live
           </Badge>
         );
-      case 'registering':
-        return (
-          <Badge variant="neutral" className="flex items-center gap-1">
-            <SignalIcon className="w-3 h-3" />
-            Registering
-          </Badge>
-        );
       case 'clockStopped':
         return (
           <Badge variant="warning" className="flex items-center gap-1">
@@ -490,14 +698,23 @@ const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
             Paused
           </Badge>
         );
-      case 'initiating':
+      case 'startingSoon':
         return (
-          <Badge variant="neutral" className="flex items-center gap-1">
+          <Badge variant="neutral" className="flex items-center gap-1 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
             <ClockIcon className="w-3 h-3" />
-            Starting
+            Soon
           </Badge>
         );
       case 'finished':
+        const gameStatus = ('gameStatus' in game && game.gameStatus) || 'FINISHED';
+        if (gameStatus === 'CANCELLED') {
+          return (
+            <Badge variant="error" className="flex items-center gap-1">
+              <XCircleIcon className="w-3 h-3" />
+              Cancelled
+            </Badge>
+          );
+        }
         return (
           <Badge variant="default" className="flex items-center gap-1">
             <CheckCircleIcon className="w-3 h-3" />
@@ -507,7 +724,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
       case 'upcoming':
         return (
           <Badge variant="neutral" className="flex items-center gap-1">
-            <ClockIcon className="w-3 h-3" />
+            <CalendarIcon className="w-3 h-3" />
             Upcoming
           </Badge>
         );
@@ -521,38 +738,53 @@ const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
     return formatter ? formatter(value) : value.toLocaleString();
   };
 
-  // Get venue name from either flat field or nested object
+  // Get venue name and logo from either flat field or nested object
   const venueName = 'venueName' in game && game.venueName 
     ? game.venueName 
     : ('venue' in game && game.venue?.name) || null;
+  
+  const venueLogo = 'venueLogoCached' in game && game.venueLogoCached
+    ? game.venueLogoCached
+    : ('venue' in game && game.venue?.logo) || null;
 
-  // Check for overlay indicator
+  // Check for overlay indicator (running games only)
   const hasOverlay = 'hasOverlay' in game ? game.hasOverlay : false;
+  
+  // Registration status (running games)
+  const registrationStatus = 'registrationStatus' in game ? game.registrationStatus : null;
 
   return (
     <div className={cx(
       "flex-shrink-0 w-[320px] sm:w-[340px] bg-white dark:bg-gray-950 rounded-xl shadow-sm border overflow-hidden transition-all self-start cursor-pointer group",
       variant === 'running' && "border-green-200 dark:border-green-800 hover:border-green-300",
-      variant === 'registering' && "border-blue-200 dark:border-blue-800 hover:border-blue-300",
       variant === 'clockStopped' && "border-yellow-200 dark:border-yellow-800 hover:border-yellow-300",
+      variant === 'startingSoon' && "border-orange-200 dark:border-orange-800 hover:border-orange-300",
       variant === 'finished' && "border-gray-200 dark:border-gray-800 hover:border-gray-300",
-      variant === 'upcoming' && "border-gray-200 dark:border-gray-800 hover:border-gray-300",
+      variant === 'upcoming' && "border-blue-200 dark:border-blue-800 hover:border-blue-300",
       "hover:shadow-md"
     )}>
       {/* Card Header */}
       <div className="p-4 border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-start gap-3 mb-2">
+          {/* Venue Logo */}
+          <VenueLogo logo={venueLogo} name={venueName} />
+          
           <div className="min-w-0 flex-1">
             {venueName && (
               <p className="text-[10px] sm:text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide truncate">
                 {venueName}
               </p>
             )}
-            <h4 className="font-semibold text-gray-900 dark:text-gray-50 text-sm sm:text-base leading-tight truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <h4 className="font-semibold text-gray-900 dark:text-gray-50 text-sm sm:text-base leading-tight line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
               {game.name}
             </h4>
+            
+            {/* Game Type Badges */}
+            <GameTypeBadges game={game} />
           </div>
-          <div className="flex items-center gap-1">
+          
+          {/* Status Badges */}
+          <div className="flex flex-col items-end gap-1">
             {hasOverlay && (
               <Badge variant="error" className="text-[10px]">
                 <ExclamationTriangleIcon className="w-3 h-3 mr-0.5" />
@@ -560,27 +792,47 @@ const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
               </Badge>
             )}
             {getStatusBadge()}
+            {(variant === 'running' || variant === 'clockStopped') && (
+              <RegistrationBadge status={registrationStatus} />
+            )}
           </div>
         </div>
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-          <CalendarIcon className="w-3.5 h-3.5" />
-          <span>{formatDateTime(game.gameStartDateTime)}</span>
+        
+        {/* Date Display - Dual format */}
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-2 text-xs">
+            <CalendarIcon className="w-3.5 h-3.5 text-gray-400" />
+            <span className="text-gray-900 dark:text-gray-100 font-medium">{relativeDate}</span>
+          </div>
+          <div className="pl-5.5 text-[10px] text-gray-500 dark:text-gray-400">
+            {absoluteDate}
+          </div>
         </div>
+        
+        {/* Finish date for completed games */}
+        {variant === 'finished' && finishDate && (
+          <div className="flex flex-col gap-0.5 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-2 text-xs">
+              <CheckCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+              <span className="text-gray-600 dark:text-gray-300">Finished: {finishDate.relative}</span>
+            </div>
+            <div className="pl-5.5 text-[10px] text-gray-500 dark:text-gray-400">
+              {finishDate.absolute}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Card Body - Stats Grid */}
       <div className="p-4 grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
-        {(variant === 'running' || variant === 'registering' || variant === 'clockStopped' || variant === 'initiating') && (
+        {(variant === 'running' || variant === 'clockStopped') && (
           <>
             <div className="flex flex-col">
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                {variant === 'running' ? 'Players Remaining' : 'Entries'}
+                {variant === 'running' ? 'Players Remaining' : 'Players Remaining'}
               </span>
               <span className="font-semibold text-gray-900 dark:text-gray-50">
-                {variant === 'running' 
-                  ? valOrDash((game as ActiveGameData).playersRemaining)
-                  : valOrDash((game as ActiveGameData).totalEntries)
-                }
+                {valOrDash((game as ActiveGameData).playersRemaining)}
               </span>
             </div>
             <div className="flex flex-col">
@@ -596,11 +848,41 @@ const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
               </span>
             </div>
             <div className="flex flex-col">
+              <span className="text-xs text-gray-500 dark:text-gray-400">Prizepool</span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                {valOrDash((game as ActiveGameData).prizepoolPaid || (game as ActiveGameData).prizepoolCalculated, formatCurrency)}
+              </span>
+            </div>
+          </>
+        )}
+
+        {variant === 'startingSoon' && (
+          <>
+            <div className="flex flex-col">
               <span className="text-xs text-gray-500 dark:text-gray-400">Buy-in</span>
               <span className="font-semibold text-gray-900 dark:text-gray-50">
                 {valOrDash(game.buyIn, formatCurrency)}
               </span>
             </div>
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-500 dark:text-gray-400">Guarantee</span>
+              <span className="font-semibold text-gray-900 dark:text-gray-50">
+                {('hasGuarantee' in game && game.hasGuarantee)
+                  ? valOrDash(('guaranteeAmount' in game ? game.guaranteeAmount : null), formatCurrency)
+                  : '-'
+                }
+              </span>
+            </div>
+            {'totalEntries' in game && (game as ActiveGameData).totalEntries && (
+              <>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Entries</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-50">
+                    {valOrDash((game as ActiveGameData).totalEntries)}
+                  </span>
+                </div>
+              </>
+            )}
           </>
         )}
 
@@ -668,13 +950,10 @@ const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
           </a>
         )}
         {'lastRefreshedAt' in game && game.lastRefreshedAt && (() => {
-          const aest = toAEST(game.lastRefreshedAt);
-          const hours = aest.hours % 12 || 12;
-          const ampm = aest.hours >= 12 ? 'PM' : 'AM';
-          const mins = String(aest.minutes).padStart(2, '0');
+          const { relative } = formatDualDateTime(game.lastRefreshedAt);
           return (
             <span className="text-[10px] text-gray-400">
-              Updated {hours}:{mins} {ampm}
+              Updated {relative}
             </span>
           );
         })()}
@@ -692,26 +971,65 @@ interface SectionHeaderProps {
   count: number;
   icon: React.ReactNode;
   colorClass?: string;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
+  lastRefreshed?: Date | null;
+  nextRefresh?: Date | null;
 }
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({ 
   title, 
   count, 
   icon, 
-  colorClass = 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' 
-}) => (
-  <div className="flex items-center gap-3 mb-4">
-    <div className={cx("flex items-center justify-center w-10 h-10 rounded-lg", colorClass)}>
-      {icon}
+  colorClass = 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
+  onRefresh,
+  isRefreshing,
+  lastRefreshed,
+  nextRefresh
+}) => {
+  const formatTime = (date: Date | null): string => {
+    if (!date) return '-';
+    const aest = toAEST(date);
+    const hours = aest.hours % 12 || 12;
+    const ampm = aest.hours >= 12 ? 'PM' : 'AM';
+    const mins = String(aest.minutes).padStart(2, '0');
+    return `${hours}:${mins} ${ampm}`;
+  };
+
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-3">
+        <div className={cx("flex items-center justify-center w-10 h-10 rounded-lg", colorClass)}>
+          {icon}
+        </div>
+        <div>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-50">{title}</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {count} game{count !== 1 ? 's' : ''}
+            {lastRefreshed && (
+              <span className="ml-2">• Last: {formatTime(lastRefreshed)}</span>
+            )}
+            {nextRefresh && (
+              <span className="ml-2 text-gray-400">• Next: {formatTime(nextRefresh)}</span>
+            )}
+          </p>
+        </div>
+      </div>
+      
+      {onRefresh && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onRefresh} 
+          disabled={isRefreshing}
+          className="text-gray-500 hover:text-indigo-600"
+        >
+          <ArrowPathIcon className={cx("w-4 h-4", isRefreshing && "animate-spin")} />
+        </Button>
+      )}
     </div>
-    <div>
-      <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-50">{title}</h2>
-      <p className="text-xs text-gray-500 dark:text-gray-400">
-        {count} game{count !== 1 ? 's' : ''}
-      </p>
-    </div>
-  </div>
-);
+  );
+};
 
 // ============================================
 // EMPTY STATE COMPONENT
@@ -751,6 +1069,136 @@ const LiveIndicator: React.FC<LiveIndicatorProps> = ({ isConnected }) => (
 );
 
 // ============================================
+// REFRESH STATUS BANNER COMPONENT
+// ============================================
+
+interface RefreshStatusBannerProps {
+  isAutoRefreshEnabled: boolean;
+  lastUpdated: Date | null;
+  nextRefresh: Date | null;
+  onManualRefresh: () => void;
+  isRefreshing: boolean;
+  disabledReason?: string | null;
+}
+
+const RefreshStatusBanner: React.FC<RefreshStatusBannerProps> = ({
+  isAutoRefreshEnabled,
+  lastUpdated,
+  nextRefresh,
+  onManualRefresh,
+  isRefreshing,
+  disabledReason,
+}) => {
+  // Calculate time since last update
+  const getTimeSinceUpdate = (): string => {
+    if (!lastUpdated) return 'Never';
+    
+    const now = new Date();
+    const diffMs = now.getTime() - lastUpdated.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    return `${Math.floor(diffHours / 24)} day${Math.floor(diffHours / 24) !== 1 ? 's' : ''} ago`;
+  };
+
+  // Calculate time until next refresh
+  const getTimeUntilRefresh = (): string => {
+    if (!nextRefresh) return '-';
+    
+    const now = new Date();
+    const diffMs = nextRefresh.getTime() - now.getTime();
+    
+    if (diffMs <= 0) return 'Soon';
+    
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    
+    if (diffMins < 60) return `${diffMins} min${diffMins !== 1 ? 's' : ''}`;
+    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ${diffMins % 60} min`;
+  };
+
+  if (isAutoRefreshEnabled) {
+    // AUTO-REFRESH ON
+    return (
+      <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-sm font-medium text-green-800 dark:text-green-300">
+              Auto-refresh ON
+            </span>
+          </div>
+          <div className="h-4 w-px bg-green-300 dark:bg-green-700" />
+          <div className="flex items-center gap-4 text-sm text-green-700 dark:text-green-400">
+            <span>
+              <span className="font-medium">{getTimeSinceUpdate()}</span>
+              <span className="text-green-600 dark:text-green-500"> since last refresh</span>
+            </span>
+            <span className="text-green-500 dark:text-green-600">•</span>
+            <span>
+              <span className="font-medium">{getTimeUntilRefresh()}</span>
+              <span className="text-green-600 dark:text-green-500"> to next refresh</span>
+            </span>
+          </div>
+        </div>
+        <Button 
+          onClick={onManualRefresh} 
+          variant="secondary" 
+          size="sm" 
+          disabled={isRefreshing}
+          className="bg-white dark:bg-gray-800 border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30"
+        >
+          <ArrowPathIcon className={cx("h-4 w-4 mr-1.5", isRefreshing && "animate-spin")} />
+          Refresh Now
+        </Button>
+      </div>
+    );
+  }
+
+  // AUTO-REFRESH OFF
+  return (
+    <div className="mb-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-300 dark:border-amber-800 rounded-xl flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-amber-500 rounded-full" />
+          <span className="text-sm font-medium text-amber-800 dark:text-amber-300">
+            Auto-refresh OFF
+          </span>
+        </div>
+        <div className="h-4 w-px bg-amber-300 dark:bg-amber-700" />
+        <div className="flex items-center gap-4 text-sm text-amber-700 dark:text-amber-400">
+          <span>
+            <span className="font-medium">{getTimeSinceUpdate()}</span>
+            <span className="text-amber-600 dark:text-amber-500"> since last refresh</span>
+          </span>
+          {disabledReason && (
+            <>
+              <span className="text-amber-500 dark:text-amber-600">•</span>
+              <span className="text-amber-600 dark:text-amber-500 italic">
+                {disabledReason}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+      <Button 
+        onClick={onManualRefresh} 
+        variant="secondary" 
+        size="sm" 
+        disabled={isRefreshing}
+        className="bg-white dark:bg-gray-800 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/30"
+      >
+        <ArrowPathIcon className={cx("h-4 w-4 mr-1.5", isRefreshing && "animate-spin")} />
+        Manual Refresh
+      </Button>
+    </div>
+  );
+};
+
+// ============================================
 // MAIN COMPONENT
 // ============================================
 
@@ -758,13 +1206,20 @@ export const HomePage: React.FC = () => {
   const { selectedEntities, loading: entityLoading } = useEntity();
   const client = useMemo(() => generateClient(), []);
   
-  // Game state
+  // Global scraper settings - controls auto-refresh behavior
+  const { 
+    settings: scraperSettings,
+    loading: settingsLoading,
+    isAutoRefreshEnabled,
+    refreshIntervals,
+  } = useScraperSettings();
+  
+  // Game state - restructured for new sections
   const [runningGames, setRunningGames] = useState<ActiveGameData[]>([]);
-  const [registeringGames, setRegisteringGames] = useState<ActiveGameData[]>([]);
   const [clockStoppedGames, setClockStoppedGames] = useState<ActiveGameData[]>([]);
-  const [initiatingGames, setInitiatingGames] = useState<ActiveGameData[]>([]);
+  const [startingSoonGames, setStartingSoonGames] = useState<(ActiveGameData | UpcomingGameData)[]>([]);
+  const [upcomingGames, setUpcomingGames] = useState<(ActiveGameData | UpcomingGameData)[]>([]);
   const [finishedGames, setFinishedGames] = useState<FinishedGameData[]>([]);
-  const [upcomingGames, setUpcomingGames] = useState<UpcomingGameData[]>([]);
   
   // UI state
   const [loading, setLoading] = useState(true);
@@ -772,8 +1227,26 @@ export const HomePage: React.FC = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // Section-specific refresh state
+  const [runningRefreshing, setRunningRefreshing] = useState(false);
+  const [runningLastRefreshed, setRunningLastRefreshed] = useState<Date | null>(null);
+  const [runningNextRefresh, setRunningNextRefresh] = useState<Date | null>(null);
+  
+  const [startingSoonRefreshing, setStartingSoonRefreshing] = useState(false);
+  const [startingSoonLastRefreshed, setStartingSoonLastRefreshed] = useState<Date | null>(null);
+  const [startingSoonNextRefresh, setStartingSoonNextRefresh] = useState<Date | null>(null);
+  
+  const [upcomingRefreshing, setUpcomingRefreshing] = useState(false);
+  const [upcomingLastRefreshed, setUpcomingLastRefreshed] = useState<Date | null>(null);
+  const [upcomingNextRefresh, setUpcomingNextRefresh] = useState<Date | null>(null);
+  
   // Subscription ref
   const subscriptionRef = useRef<AmplifySubscription | null>(null);
+  
+  // Timer refs for auto-refresh
+  const runningTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const startingSoonTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const upcomingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get selected entity IDs
   const entityIds = useMemo(() => selectedEntities.map(e => e.id), [selectedEntities]);
@@ -782,16 +1255,13 @@ export const HomePage: React.FC = () => {
   // DATA FETCHING
   // ============================================
 
-  const fetchActiveGames = useCallback(async (): Promise<{
+  const fetchRunningGames = useCallback(async (): Promise<{
     running: ActiveGameData[];
-    registering: ActiveGameData[];
     clockStopped: ActiveGameData[];
-    initiating: ActiveGameData[];
   }> => {
-    if (entityIds.length === 0) return { running: [], registering: [], clockStopped: [], initiating: [] };
+    if (entityIds.length === 0) return { running: [], clockStopped: [] };
 
     try {
-      // Fetch active games for all selected entities in parallel
       const fetchPromises = entityIds.flatMap(entityId => [
         client.graphql({
           query: listActiveGamesByEntity,
@@ -799,58 +1269,136 @@ export const HomePage: React.FC = () => {
         }),
         client.graphql({
           query: listActiveGamesByEntity,
-          variables: { entityId, statusFilter: { eq: 'REGISTERING' }, limit: 50 }
-        }),
-        client.graphql({
-          query: listActiveGamesByEntity,
           variables: { entityId, statusFilter: { eq: 'CLOCK_STOPPED' }, limit: 50 }
-        }),
-        client.graphql({
-          query: listActiveGamesByEntity,
-          variables: { entityId, statusFilter: { eq: 'INITIATING' }, limit: 50 }
         })
       ]);
 
       const results = await Promise.all(fetchPromises);
       
       const running: ActiveGameData[] = [];
-      const registering: ActiveGameData[] = [];
       const clockStopped: ActiveGameData[] = [];
-      const initiating: ActiveGameData[] = [];
 
-      // Process results (4 queries per entity)
-      for (let i = 0; i < results.length; i += 4) {
+      for (let i = 0; i < results.length; i += 2) {
         const runningResult = results[i] as GraphQLResult<ActiveGamesByEntityData>;
-        const registeringResult = results[i + 1] as GraphQLResult<ActiveGamesByEntityData>;
-        const clockStoppedResult = results[i + 2] as GraphQLResult<ActiveGamesByEntityData>;
-        const initiatingResult = results[i + 3] as GraphQLResult<ActiveGamesByEntityData>;
+        const clockStoppedResult = results[i + 1] as GraphQLResult<ActiveGamesByEntityData>;
 
         if (runningResult.data?.activeGamesByEntity?.items) {
           running.push(...runningResult.data.activeGamesByEntity.items.filter(Boolean));
         }
-        if (registeringResult.data?.activeGamesByEntity?.items) {
-          registering.push(...registeringResult.data.activeGamesByEntity.items.filter(Boolean));
-        }
         if (clockStoppedResult.data?.activeGamesByEntity?.items) {
           clockStopped.push(...clockStoppedResult.data.activeGamesByEntity.items.filter(Boolean));
         }
-        if (initiatingResult.data?.activeGamesByEntity?.items) {
-          initiating.push(...initiatingResult.data.activeGamesByEntity.items.filter(Boolean));
+      }
+
+      // Sort: First by registration status (OPEN first, then CLOSED), then by gameStartDateTime earliest to latest
+      const sortRunningGames = (games: ActiveGameData[]) => {
+        return games.sort((a, b) => {
+          // Registration status priority: OPEN > FINAL > null/other
+          const regOrder = (status: string | null | undefined) => {
+            if (status === 'OPEN') return 0;
+            if (status === 'FINAL') return 1;
+            return 2; // CLOSED or null
+          };
+          
+          const regCompare = regOrder(a.registrationStatus) - regOrder(b.registrationStatus);
+          if (regCompare !== 0) return regCompare;
+          
+          // Within same registration status, sort by start time earliest to latest
+          return new Date(a.gameStartDateTime).getTime() - new Date(b.gameStartDateTime).getTime();
+        });
+      };
+
+      return {
+        running: sortRunningGames(running),
+        clockStopped: sortRunningGames(clockStopped)
+      };
+    } catch (err) {
+      console.error('[HomePage] Error fetching running games:', err);
+      throw err;
+    }
+  }, [client, entityIds]);
+
+  const fetchStartingSoonAndUpcoming = useCallback(async (): Promise<{
+    startingSoon: (ActiveGameData | UpcomingGameData)[];
+    upcoming: (ActiveGameData | UpcomingGameData)[];
+  }> => {
+    if (entityIds.length === 0) return { startingSoon: [], upcoming: [] };
+
+    try {
+      // Fetch from both ActiveGame (INITIATING, REGISTERING, SCHEDULED) and UpcomingGame tables
+      const fetchPromises = entityIds.flatMap(entityId => [
+        client.graphql({
+          query: listActiveGamesByEntity,
+          variables: { entityId, statusFilter: { eq: 'INITIATING' }, limit: 50 }
+        }),
+        client.graphql({
+          query: listActiveGamesByEntity,
+          variables: { entityId, statusFilter: { eq: 'REGISTERING' }, limit: 50 }
+        }),
+        client.graphql({
+          query: listActiveGamesByEntity,
+          variables: { entityId, statusFilter: { eq: 'SCHEDULED' }, limit: 50 }
+        }),
+        client.graphql({
+          query: listUpcomingByEntity,
+          variables: { entityId, limit: 50 }
+        })
+      ]);
+
+      const results = await Promise.all(fetchPromises);
+      
+      const allGames: (ActiveGameData | UpcomingGameData)[] = [];
+      const seenIds = new Set<string>();
+
+      // Process results (4 queries per entity)
+      for (let i = 0; i < results.length; i += 4) {
+        const initiatingResult = results[i] as GraphQLResult<ActiveGamesByEntityData>;
+        const registeringResult = results[i + 1] as GraphQLResult<ActiveGamesByEntityData>;
+        const scheduledResult = results[i + 2] as GraphQLResult<ActiveGamesByEntityData>;
+        const upcomingResult = results[i + 3] as GraphQLResult<UpcomingGamesByEntityData>;
+
+        // Add from ActiveGame tables (avoiding duplicates)
+        [initiatingResult, registeringResult, scheduledResult].forEach(result => {
+          if (result.data?.activeGamesByEntity?.items) {
+            result.data.activeGamesByEntity.items.filter(Boolean).forEach(game => {
+              if (!seenIds.has(game.id)) {
+                seenIds.add(game.id);
+                allGames.push(game);
+              }
+            });
+          }
+        });
+
+        // Add from UpcomingGame table (avoiding duplicates)
+        if (upcomingResult.data?.upcomingGamesByEntity?.items) {
+          upcomingResult.data.upcomingGamesByEntity.items.filter(Boolean).forEach(game => {
+            if (!seenIds.has(game.id)) {
+              seenIds.add(game.id);
+              allGames.push(game);
+            }
+          });
         }
       }
 
-      // Sort by start time descending
-      const sortByDateDesc = (a: ActiveGameData, b: ActiveGameData) => 
-        new Date(b.gameStartDateTime).getTime() - new Date(a.gameStartDateTime).getTime();
+      // Filter games that haven't started yet
+      const now = new Date();
+      const futureGames = allGames.filter(game => {
+        const startTime = new Date(game.gameStartDateTime);
+        return startTime > now;
+      });
 
-      return {
-        running: running.sort(sortByDateDesc),
-        registering: registering.sort(sortByDateDesc),
-        clockStopped: clockStopped.sort(sortByDateDesc),
-        initiating: initiating.sort(sortByDateDesc)
-      };
+      // Split into starting soon (<24h) and upcoming (>24h)
+      const startingSoon = futureGames
+        .filter(game => isWithin24Hours(game.gameStartDateTime))
+        .sort((a, b) => new Date(a.gameStartDateTime).getTime() - new Date(b.gameStartDateTime).getTime());
+      
+      const upcoming = futureGames
+        .filter(game => isMoreThan24Hours(game.gameStartDateTime))
+        .sort((a, b) => new Date(a.gameStartDateTime).getTime() - new Date(b.gameStartDateTime).getTime());
+
+      return { startingSoon, upcoming };
     } catch (err) {
-      console.error('[HomePage] Error fetching active games:', err);
+      console.error('[HomePage] Error fetching starting soon/upcoming games:', err);
       throw err;
     }
   }, [client, entityIds]);
@@ -905,90 +1453,105 @@ export const HomePage: React.FC = () => {
         }
       }
 
-      // Sort by finished time descending
-      return finished.sort((a, b) => 
-        new Date(b.finishedAt || b.gameStartDateTime).getTime() - 
-        new Date(a.finishedAt || a.gameStartDateTime).getTime()
-      );
+      // Sort by finished time descending (most recent first)
+      return finished.sort((a, b) => {
+        const aFinish = a.finishedAt || a.gameEndDateTime || a.gameStartDateTime;
+        const bFinish = b.finishedAt || b.gameEndDateTime || b.gameStartDateTime;
+        return new Date(bFinish).getTime() - new Date(aFinish).getTime();
+      });
     } catch (err) {
       console.error('[HomePage] Error fetching finished games:', err);
       throw err;
     }
   }, [client, entityIds]);
 
-  const fetchUpcomingGames = useCallback(async (): Promise<UpcomingGameData[]> => {
-    if (entityIds.length === 0) return [];
+  // ============================================
+  // REFRESH HANDLERS
+  // ============================================
 
+  const refreshRunningGames = useCallback(async () => {
+    setRunningRefreshing(true);
     try {
-      // Try UpcomingGame table first
-      const fetchPromises = entityIds.map(entityId =>
-        client.graphql({
-          query: listUpcomingByEntity,
-          variables: { entityId, limit: 20 }
-        })
-      );
-
-      const results = await Promise.all(fetchPromises);
-      const upcoming: UpcomingGameData[] = [];
-
-      results.forEach(result => {
-        const typedResult = result as GraphQLResult<UpcomingGamesByEntityData>;
-        if (typedResult.data?.upcomingGamesByEntity?.items) {
-          upcoming.push(...typedResult.data.upcomingGamesByEntity.items.filter(Boolean));
-        }
-      });
-
-      // Fall back to GSI query if needed
-      if (upcoming.length === 0) {
-        console.log('[HomePage] UpcomingGame empty, falling back to GSI query');
-        const now = new Date().toISOString();
-
-        const fallbackResult = await client.graphql({
-          query: gamesByStatusUpcoming,
-          variables: { now, limit: 30 }
-        }) as GraphQLResult<GamesByStatusData>;
-
-        if (fallbackResult.data?.gamesByStatus?.items) {
-          const gsiGames = fallbackResult.data.gamesByStatus.items
-            .filter(Boolean)
-            .filter((g) => !g.entityId || entityIds.includes(g.entityId))
-            .map((g): UpcomingGameData => ({
-              ...g,
-              venueName: g.venue?.name ?? null,
-              venueLogoCached: g.venue?.logo ?? null
-            }));
-          return gsiGames;
-        }
-      }
-
-      // Sort by start time ascending (soonest first)
-      return upcoming.sort((a, b) => 
-        new Date(a.gameStartDateTime).getTime() - new Date(b.gameStartDateTime).getTime()
-      );
+      const result = await fetchRunningGames();
+      setRunningGames(result.running);
+      setClockStoppedGames(result.clockStopped);
+      setRunningLastRefreshed(new Date());
+      
+      // Calculate next refresh time (next half hour)
+      const nextRefresh = new Date(Date.now() + getMillisecondsUntilNextHalfHour());
+      setRunningNextRefresh(nextRefresh);
     } catch (err) {
-      console.error('[HomePage] Error fetching upcoming games:', err);
-      throw err;
+      console.error('[HomePage] Error refreshing running games:', err);
+    } finally {
+      setRunningRefreshing(false);
     }
-  }, [client, entityIds]);
+  }, [fetchRunningGames]);
+
+  const refreshStartingSoon = useCallback(async () => {
+    setStartingSoonRefreshing(true);
+    try {
+      const result = await fetchStartingSoonAndUpcoming();
+      setStartingSoonGames(result.startingSoon);
+      // Don't update upcoming here - it has its own refresh cycle
+      setStartingSoonLastRefreshed(new Date());
+      
+      // Calculate next refresh time (next hour)
+      const nextRefresh = new Date(Date.now() + getMillisecondsUntilNextHour());
+      setStartingSoonNextRefresh(nextRefresh);
+    } catch (err) {
+      console.error('[HomePage] Error refreshing starting soon games:', err);
+    } finally {
+      setStartingSoonRefreshing(false);
+    }
+  }, [fetchStartingSoonAndUpcoming]);
+
+  const refreshUpcoming = useCallback(async () => {
+    setUpcomingRefreshing(true);
+    try {
+      const result = await fetchStartingSoonAndUpcoming();
+      setUpcomingGames(result.upcoming);
+      // Also update starting soon since we fetched it anyway
+      setStartingSoonGames(result.startingSoon);
+      setUpcomingLastRefreshed(new Date());
+      
+      // Calculate next refresh time (12 hours from now)
+      const nextRefresh = new Date(Date.now() + UPCOMING_REFRESH_INTERVAL);
+      setUpcomingNextRefresh(nextRefresh);
+    } catch (err) {
+      console.error('[HomePage] Error refreshing upcoming games:', err);
+    } finally {
+      setUpcomingRefreshing(false);
+    }
+  }, [fetchStartingSoonAndUpcoming]);
 
   const fetchAllData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const [activeResult, finished, upcoming] = await Promise.all([
-        fetchActiveGames(),
-        fetchFinishedGames(),
-        fetchUpcomingGames()
+      const [runningResult, startingUpcomingResult, finished] = await Promise.all([
+        fetchRunningGames(),
+        fetchStartingSoonAndUpcoming(),
+        fetchFinishedGames()
       ]);
 
-      setRunningGames(activeResult.running);
-      setRegisteringGames(activeResult.registering);
-      setClockStoppedGames(activeResult.clockStopped);
-      setInitiatingGames(activeResult.initiating);
+      setRunningGames(runningResult.running);
+      setClockStoppedGames(runningResult.clockStopped);
+      setStartingSoonGames(startingUpcomingResult.startingSoon);
+      setUpcomingGames(startingUpcomingResult.upcoming);
       setFinishedGames(finished);
-      setUpcomingGames(upcoming);
-      setLastUpdated(new Date());
+      
+      const now = new Date();
+      setLastUpdated(now);
+      setRunningLastRefreshed(now);
+      setStartingSoonLastRefreshed(now);
+      setUpcomingLastRefreshed(now);
+      
+      // Set next refresh times
+      setRunningNextRefresh(new Date(Date.now() + getMillisecondsUntilNextHalfHour()));
+      setStartingSoonNextRefresh(new Date(Date.now() + getMillisecondsUntilNextHour()));
+      setUpcomingNextRefresh(new Date(Date.now() + UPCOMING_REFRESH_INTERVAL));
+      
     } catch (err) {
       console.error('[HomePage] Error fetching data:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard data';
@@ -996,7 +1559,105 @@ export const HomePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [fetchActiveGames, fetchFinishedGames, fetchUpcomingGames]);
+  }, [fetchRunningGames, fetchStartingSoonAndUpcoming, fetchFinishedGames]);
+
+  // ============================================
+  // AUTO-REFRESH SETUP
+  // ============================================
+
+  useEffect(() => {
+    // Clear any existing timers first
+    const clearAllTimers = () => {
+      if (runningTimerRef.current) {
+        clearTimeout(runningTimerRef.current);
+        clearInterval(runningTimerRef.current);
+        runningTimerRef.current = null;
+      }
+      if (startingSoonTimerRef.current) {
+        clearTimeout(startingSoonTimerRef.current);
+        clearInterval(startingSoonTimerRef.current);
+        startingSoonTimerRef.current = null;
+      }
+      if (upcomingTimerRef.current) {
+        clearInterval(upcomingTimerRef.current);
+        upcomingTimerRef.current = null;
+      }
+    };
+
+    clearAllTimers();
+
+    // Don't setup auto-refresh if:
+    // - Entity is still loading
+    // - No entities selected
+    // - Auto-refresh is disabled in settings
+    // - Settings are still loading
+    if (entityLoading || entityIds.length === 0 || settingsLoading) {
+      return clearAllTimers;
+    }
+
+    if (!isAutoRefreshEnabled) {
+      console.log('[HomePage] Auto-refresh is DISABLED - skipping timer setup');
+      // Clear next refresh times when disabled
+      setRunningNextRefresh(null);
+      setStartingSoonNextRefresh(null);
+      setUpcomingNextRefresh(null);
+      return clearAllTimers;
+    }
+
+    console.log('[HomePage] Auto-refresh is ENABLED - setting up timers');
+    console.log('[HomePage] Refresh intervals:', refreshIntervals);
+
+    // Convert refresh intervals from minutes to milliseconds
+    const runningIntervalMs = refreshIntervals.running * 60 * 1000;
+    const startingSoonIntervalMs = refreshIntervals.startingSoon * 60 * 1000;
+    const upcomingIntervalMs = refreshIntervals.upcoming * 60 * 1000;
+
+    // Setup running games auto-refresh (clock-aligned to half hour)
+    const setupRunningRefresh = () => {
+      const msUntilNextHalfHour = getMillisecondsUntilNextHalfHour();
+      
+      runningTimerRef.current = setTimeout(() => {
+        refreshRunningGames();
+        runningTimerRef.current = setInterval(refreshRunningGames, runningIntervalMs);
+      }, msUntilNextHalfHour);
+      
+      // Set next refresh time
+      setRunningNextRefresh(new Date(Date.now() + msUntilNextHalfHour));
+    };
+
+    // Setup starting soon auto-refresh (clock-aligned to hour)
+    const setupStartingSoonRefresh = () => {
+      const msUntilNextHour = getMillisecondsUntilNextHour();
+      
+      startingSoonTimerRef.current = setTimeout(() => {
+        refreshStartingSoon();
+        startingSoonTimerRef.current = setInterval(refreshStartingSoon, startingSoonIntervalMs);
+      }, msUntilNextHour);
+      
+      setStartingSoonNextRefresh(new Date(Date.now() + msUntilNextHour));
+    };
+
+    // Setup upcoming games auto-refresh
+    const setupUpcomingRefresh = () => {
+      upcomingTimerRef.current = setInterval(refreshUpcoming, upcomingIntervalMs);
+      setUpcomingNextRefresh(new Date(Date.now() + upcomingIntervalMs));
+    };
+
+    setupRunningRefresh();
+    setupStartingSoonRefresh();
+    setupUpcomingRefresh();
+
+    return clearAllTimers;
+  }, [
+    entityLoading, 
+    entityIds, 
+    settingsLoading,
+    isAutoRefreshEnabled, 
+    refreshIntervals,
+    refreshRunningGames, 
+    refreshStartingSoon, 
+    refreshUpcoming
+  ]);
 
   // ============================================
   // SUBSCRIPTION SETUP
@@ -1008,13 +1669,11 @@ export const HomePage: React.FC = () => {
     }
 
     try {
-      // Subscribe to active game changes
       const subscriptionObservable = client.graphql({
         query: onActiveGameChangeSubscription,
         variables: entityIds.length === 1 ? { entityId: entityIds[0] } : {}
       });
 
-      // Handle subscription with type casting
       const observable = subscriptionObservable as unknown as {
         subscribe: (handlers: {
           next: (value: { data?: OnActiveGameChangeData }) => void;
@@ -1028,25 +1687,26 @@ export const HomePage: React.FC = () => {
             const updatedGame = data.onActiveGameChange;
             console.log('[HomePage] Received active game update:', updatedGame.name, updatedGame.gameStatus);
             
-            // Update the appropriate list based on status
             const updateLists = () => {
               switch (updatedGame.gameStatus) {
                 case 'RUNNING':
                   setRunningGames(prev => {
                     const filtered = prev.filter(g => g.id !== updatedGame.id);
-                    return [updatedGame, ...filtered];
+                    const updated = [updatedGame, ...filtered];
+                    // Re-sort by registration status then start time
+                    return updated.sort((a, b) => {
+                      const regOrder = (status: string | null | undefined) => {
+                        if (status === 'OPEN') return 0;
+                        if (status === 'FINAL') return 1;
+                        return 2;
+                      };
+                      const regCompare = regOrder(a.registrationStatus) - regOrder(b.registrationStatus);
+                      if (regCompare !== 0) return regCompare;
+                      return new Date(a.gameStartDateTime).getTime() - new Date(b.gameStartDateTime).getTime();
+                    });
                   });
-                  setRegisteringGames(prev => prev.filter(g => g.id !== updatedGame.id));
                   setClockStoppedGames(prev => prev.filter(g => g.id !== updatedGame.id));
-                  setInitiatingGames(prev => prev.filter(g => g.id !== updatedGame.id));
-                  break;
-                case 'REGISTERING':
-                  setRegisteringGames(prev => {
-                    const filtered = prev.filter(g => g.id !== updatedGame.id);
-                    return [updatedGame, ...filtered];
-                  });
-                  setRunningGames(prev => prev.filter(g => g.id !== updatedGame.id));
-                  setInitiatingGames(prev => prev.filter(g => g.id !== updatedGame.id));
+                  setStartingSoonGames(prev => prev.filter(g => g.id !== updatedGame.id));
                   break;
                 case 'CLOCK_STOPPED':
                   setClockStoppedGames(prev => {
@@ -1055,20 +1715,37 @@ export const HomePage: React.FC = () => {
                   });
                   setRunningGames(prev => prev.filter(g => g.id !== updatedGame.id));
                   break;
+                case 'REGISTERING':
                 case 'INITIATING':
-                  setInitiatingGames(prev => {
-                    const filtered = prev.filter(g => g.id !== updatedGame.id);
-                    return [updatedGame, ...filtered];
-                  });
+                case 'SCHEDULED':
+                  // Check if it should be in starting soon or upcoming
+                  if (isWithin24Hours(updatedGame.gameStartDateTime)) {
+                    setStartingSoonGames(prev => {
+                      const filtered = prev.filter(g => g.id !== updatedGame.id);
+                      const updated = [updatedGame, ...filtered];
+                      return updated.sort((a, b) => 
+                        new Date(a.gameStartDateTime).getTime() - new Date(b.gameStartDateTime).getTime()
+                      );
+                    });
+                  } else {
+                    setUpcomingGames(prev => {
+                      const filtered = prev.filter(g => g.id !== updatedGame.id);
+                      const updated = [updatedGame, ...filtered];
+                      return updated.sort((a, b) => 
+                        new Date(a.gameStartDateTime).getTime() - new Date(b.gameStartDateTime).getTime()
+                      );
+                    });
+                  }
+                  setRunningGames(prev => prev.filter(g => g.id !== updatedGame.id));
                   break;
                 case 'FINISHED':
                 case 'CANCELLED':
                   // Remove from all active lists
                   setRunningGames(prev => prev.filter(g => g.id !== updatedGame.id));
-                  setRegisteringGames(prev => prev.filter(g => g.id !== updatedGame.id));
                   setClockStoppedGames(prev => prev.filter(g => g.id !== updatedGame.id));
-                  setInitiatingGames(prev => prev.filter(g => g.id !== updatedGame.id));
-                  // Optionally refresh finished games
+                  setStartingSoonGames(prev => prev.filter(g => g.id !== updatedGame.id));
+                  setUpcomingGames(prev => prev.filter(g => g.id !== updatedGame.id));
+                  // Refresh finished games
                   fetchFinishedGames().then(setFinishedGames).catch(console.error);
                   break;
               }
@@ -1125,20 +1802,13 @@ export const HomePage: React.FC = () => {
     finishedGames.reduce((sum, g) => sum + (g.prizepoolPaid || g.prizepoolCalculated || 0), 0),
     [finishedGames]
   );
+  
+  // Combined running games count (RUNNING + CLOCK_STOPPED)
+  const totalRunningCount = runningGames.length + clockStoppedGames.length;
 
   // ============================================
   // RENDER
   // ============================================
-
-  const formatTimestamp = (date: Date | null): string => {
-    if (!date) return '-';
-    const aest = toAEST(date);
-    const hours = aest.hours % 12 || 12;
-    const ampm = aest.hours >= 12 ? 'PM' : 'AM';
-    const mins = String(aest.minutes).padStart(2, '0');
-    const secs = String(aest.seconds).padStart(2, '0');
-    return `${hours}:${mins}:${secs} ${ampm}`;
-  };
 
   if (loading && !lastUpdated) {
     return (
@@ -1167,17 +1837,18 @@ export const HomePage: React.FC = () => {
         </div>
         <div className="flex items-center gap-3">
           <LiveIndicator isConnected={isSubscribed} />
-          {lastUpdated && (
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              Updated: {formatTimestamp(lastUpdated)}
-            </span>
-          )}
-          <Button onClick={fetchAllData} variant="secondary" size="sm" disabled={loading}>
-            <ArrowPathIcon className={cx("h-4 w-4 mr-1.5", loading && "animate-spin")} />
-            Refresh
-          </Button>
         </div>
       </div>
+
+      {/* Auto-Refresh Status Banner */}
+      <RefreshStatusBanner
+        isAutoRefreshEnabled={isAutoRefreshEnabled}
+        lastUpdated={lastUpdated}
+        nextRefresh={runningNextRefresh}
+        onManualRefresh={fetchAllData}
+        isRefreshing={loading}
+        disabledReason={scraperSettings?.disabledReason}
+      />
 
       {/* Error Alert */}
       {error && (
@@ -1187,26 +1858,21 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-6 mb-8">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-5 mb-8">
         <KpiCard
           title="Running"
-          value={runningGames.length}
+          value={totalRunningCount}
           icon={<PlayIcon className="h-5 w-5" />}
         />
         <KpiCard
-          title="Registering"
-          value={registeringGames.length}
-          icon={<SignalIcon className="h-5 w-5" />}
-        />
-        <KpiCard
-          title="Clock Stopped"
-          value={clockStoppedGames.length}
-          icon={<PauseCircleIcon className="h-5 w-5" />}
-        />
-        <KpiCard
-          title="Starting"
-          value={initiatingGames.length}
+          title="Starting Soon"
+          value={startingSoonGames.length}
           icon={<ClockIcon className="h-5 w-5" />}
+        />
+        <KpiCard
+          title="Upcoming"
+          value={upcomingGames.length}
+          icon={<CalendarIcon className="h-5 w-5" />}
         />
         <KpiCard
           title="Finished (7d)"
@@ -1220,100 +1886,83 @@ export const HomePage: React.FC = () => {
         />
       </div>
 
-      {/* Running Games Section */}
+      {/* Section 1: Running Games (RUNNING + CLOCK_STOPPED) */}
       <section className="mb-10">
         <SectionHeader
           title="Running Games"
-          count={runningGames.length}
+          count={totalRunningCount}
           icon={<PlayIcon className="w-5 h-5" />}
           colorClass="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+          onRefresh={refreshRunningGames}
+          isRefreshing={runningRefreshing}
+          lastRefreshed={runningLastRefreshed}
+          nextRefresh={runningNextRefresh}
         />
-        {runningGames.length === 0 ? (
+        {totalRunningCount === 0 ? (
           <EmptyState message="No games currently running" />
         ) : (
-          <HorizontalScrollRow>
-            {runningGames.map((game) => (
-              <GameCard key={game.id} game={game} variant="running" />
-            ))}
-          </HorizontalScrollRow>
+          <>
+            {/* Running games with registration OPEN first */}
+            {runningGames.length > 0 && (
+              <HorizontalScrollRow>
+                {runningGames.map((game) => (
+                  <GameCard key={game.id} game={game} variant="running" />
+                ))}
+              </HorizontalScrollRow>
+            )}
+            
+            {/* Clock stopped games */}
+            {clockStoppedGames.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1">
+                  <PauseCircleIcon className="w-4 h-4" />
+                  Clock Stopped ({clockStoppedGames.length})
+                </p>
+                <HorizontalScrollRow>
+                  {clockStoppedGames.map((game) => (
+                    <GameCard key={game.id} game={game} variant="clockStopped" />
+                  ))}
+                </HorizontalScrollRow>
+              </div>
+            )}
+          </>
         )}
       </section>
 
-      {/* Registering Games Section */}
-      {registeringGames.length > 0 && (
-        <section className="mb-10">
-          <SectionHeader
-            title="Registration Open"
-            count={registeringGames.length}
-            icon={<SignalIcon className="w-5 h-5" />}
-            colorClass="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-          />
-          <HorizontalScrollRow>
-            {registeringGames.map((game) => (
-              <GameCard key={game.id} game={game} variant="registering" />
-            ))}
-          </HorizontalScrollRow>
-        </section>
-      )}
-
-      {/* Clock Stopped Section */}
-      {clockStoppedGames.length > 0 && (
-        <section className="mb-10">
-          <SectionHeader
-            title="Clock Stopped"
-            count={clockStoppedGames.length}
-            icon={<PauseCircleIcon className="w-5 h-5" />}
-            colorClass="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400"
-          />
-          <HorizontalScrollRow>
-            {clockStoppedGames.map((game) => (
-              <GameCard key={game.id} game={game} variant="clockStopped" />
-            ))}
-          </HorizontalScrollRow>
-        </section>
-      )}
-
-      {/* Initiating Games Section */}
-      {initiatingGames.length > 0 && (
-        <section className="mb-10">
-          <SectionHeader
-            title="Starting Soon"
-            count={initiatingGames.length}
-            icon={<ClockIcon className="w-5 h-5" />}
-            colorClass="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-          />
-          <HorizontalScrollRow>
-            {initiatingGames.map((game) => (
-              <GameCard key={game.id} game={game} variant="initiating" />
-            ))}
-          </HorizontalScrollRow>
-        </section>
-      )}
-
-      {/* Recently Finished Section */}
+      {/* Section 2: Starting Soon (<24 hours) */}
       <section className="mb-10">
         <SectionHeader
-          title="Recently Finished"
-          count={finishedGames.length}
-          icon={<CheckCircleIcon className="w-5 h-5" />}
+          title="Starting Soon"
+          count={startingSoonGames.length}
+          icon={<ClockIcon className="w-5 h-5" />}
+          colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+          onRefresh={refreshStartingSoon}
+          isRefreshing={startingSoonRefreshing}
+          lastRefreshed={startingSoonLastRefreshed}
+          nextRefresh={startingSoonNextRefresh}
         />
-        {finishedGames.length === 0 ? (
-          <EmptyState message="No games finished in the last 7 days" />
+        {startingSoonGames.length === 0 ? (
+          <EmptyState message="No games starting in the next 24 hours" />
         ) : (
           <HorizontalScrollRow>
-            {finishedGames.map((game) => (
-              <GameCard key={game.id} game={game} variant="finished" />
+            {startingSoonGames.map((game) => (
+              <GameCard key={game.id} game={game} variant="startingSoon" />
             ))}
           </HorizontalScrollRow>
         )}
       </section>
 
-      {/* Upcoming Games Section */}
+      {/* Section 3: Upcoming Games (>24 hours) */}
       <section className="mb-10">
         <SectionHeader
           title="Upcoming Games"
           count={upcomingGames.length}
-          icon={<ClockIcon className="w-5 h-5" />}
+          icon={<CalendarIcon className="w-5 h-5" />}
+          colorClass="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+          onRefresh={refreshUpcoming}
+          isRefreshing={upcomingRefreshing}
+          lastRefreshed={upcomingLastRefreshed}
+          nextRefresh={upcomingNextRefresh}
         />
         {upcomingGames.length === 0 ? (
           <EmptyState message="No upcoming games scheduled" />
@@ -1321,6 +1970,25 @@ export const HomePage: React.FC = () => {
           <HorizontalScrollRow>
             {upcomingGames.map((game) => (
               <GameCard key={game.id} game={game} variant="upcoming" />
+            ))}
+          </HorizontalScrollRow>
+        )}
+      </section>
+
+      {/* Section 4: Recently Finished */}
+      <section className="mb-10">
+        <SectionHeader
+          title="Recently Finished"
+          count={finishedGames.length}
+          icon={<CheckCircleIcon className="w-5 h-5" />}
+          colorClass="bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400"
+        />
+        {finishedGames.length === 0 ? (
+          <EmptyState message="No games finished in the last 7 days" />
+        ) : (
+          <HorizontalScrollRow>
+            {finishedGames.map((game) => (
+              <GameCard key={game.id} game={game} variant="finished" />
             ))}
           </HorizontalScrollRow>
         )}
