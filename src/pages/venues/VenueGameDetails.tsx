@@ -47,7 +47,7 @@ import {
   FunnelIcon,
 } from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns';
-import { Dialog, Transition, Listbox } from '@headlessui/react';
+import { Dialog, Transition } from '@headlessui/react';
 import {
   ComposedChart,
   Bar,
@@ -92,8 +92,6 @@ const GAME_STATUS_OPTIONS = [
   'CANCELLED', 'FINISHED', 'NOT_IN_USE', 'NOT_PUBLISHED', 
   'CLOCK_STOPPED', 'UNKNOWN'
 ] as const;
-
-type GameStatusType = typeof GAME_STATUS_OPTIONS[number];
 
 // Status abbreviations and colors for badges
 const STATUS_CONFIG: Record<string, { abbr: string; bg: string; text: string }> = {
