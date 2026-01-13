@@ -87,6 +87,7 @@ type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules:
   url: AWSURL! @index(name: "byURL", queryField: "scrapeURLByURL")
   tournamentId: Int! @index(name: "byTournamentId")
   doNotScrape: Boolean!
+  doNotScrapeReason: String
   sourceDataIssue: Boolean
   gameDataVerified: Boolean
   missingKeysFromScrape: [String]

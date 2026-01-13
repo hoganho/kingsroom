@@ -1,8 +1,15 @@
 // src/components/scraper/admin/URLStatusGrid.tsx
 // Visual grid panel showing URL status for all tournament IDs in an entity
-// Color coding: GREEN=has game, ORANGE=NOT_PUBLISHED, RED=ERROR, WHITE(border)=NOT_FOUND
+// Grid starts at ID=1 and goes to the maximum ID
+// Color coding:
+//   GREEN = gameId is not empty (has associated game)
+//   YELLOW = doNotScrapeReason = NOT_PUBLISHED
+//   RED = lastScrapeStatus = ERROR
+//   WHITE (border) = lastScrapeStatus = NOT_FOUND
+//   GRAY = has ScrapeURL record but doesn't match above criteria
+//   LIGHT GRAY = no ScrapeURL record for this ID
 
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
     Grid3X3,
     RefreshCw,
@@ -24,7 +31,7 @@ import { useS3Fetch } from '../../../hooks/useS3Fetch';
 interface ScrapeURLGridItem {
     tournamentId: number;
     gameId: string | null;
-    gameStatus: string | null;
+    doNotScrapeReason: string | null;  // Changed from gameStatus
     lastScrapeStatus: string | null;
     latestS3Key: string | null;
     doNotScrape: boolean;
@@ -37,7 +44,8 @@ interface GridBounds {
     totalSlots: number;
 }
 
-type URLStatus = 'HAS_GAME' | 'NOT_PUBLISHED' | 'ERROR' | 'NOT_FOUND' | 'UNKNOWN' | 'EMPTY';
+// Status priority: HAS_GAME > NOT_PUBLISHED > ERROR > NOT_FOUND > OTHER > EMPTY
+type URLStatus = 'HAS_GAME' | 'NOT_PUBLISHED' | 'ERROR' | 'NOT_FOUND' | 'OTHER' | 'EMPTY';
 
 // ===================================================================
 // GRAPHQL QUERIES
@@ -60,7 +68,7 @@ const LIST_SCRAPE_URLS_FOR_GRID = /* GraphQL */ `
       items {
         tournamentId
         gameId
-        gameStatus
+        doNotScrapeReason
         lastScrapeStatus
         latestS3Key
         doNotScrape
@@ -87,48 +95,55 @@ const GET_TOURNAMENT_BOUNDS = /* GraphQL */ `
 // ===================================================================
 
 const determineURLStatus = (item: ScrapeURLGridItem | undefined): URLStatus => {
+    // No ScrapeURL record exists for this tournament ID
     if (!item) return 'EMPTY';
     
-    // Priority 1: Has associated game (GREEN)
+    // Priority 1: GREEN - Has associated game (gameId is not empty)
     if (item.gameId && item.gameId.trim() !== '') {
         return 'HAS_GAME';
     }
     
-    // Priority 2: NOT_PUBLISHED (ORANGE)
-    if (item.gameStatus?.toUpperCase() === 'NOT_PUBLISHED') {
+    // Priority 2: YELLOW - doNotScrapeReason = NOT_PUBLISHED
+    if (item.doNotScrapeReason?.toUpperCase() === 'NOT_PUBLISHED') {
         return 'NOT_PUBLISHED';
     }
     
-    // Priority 3: ERROR (RED)
+    // Priority 3: RED - lastScrapeStatus = ERROR
     if (item.lastScrapeStatus?.toUpperCase() === 'ERROR') {
         return 'ERROR';
     }
     
-    // Priority 4: NOT_FOUND (WHITE with border)
-    const status = item.lastScrapeStatus?.toUpperCase();
-    if (status === 'NOT_FOUND' || status === 'BLANK' || status === 'NOT_IN_USE') {
+    // Priority 4: WHITE - lastScrapeStatus = NOT_FOUND
+    const scrapeStatus = item.lastScrapeStatus?.toUpperCase();
+    if (scrapeStatus === 'NOT_FOUND' || scrapeStatus === 'BLANK' || scrapeStatus === 'NOT_IN_USE') {
         return 'NOT_FOUND';
     }
     
-    // Everything else
-    return 'UNKNOWN';
+    // Has a ScrapeURL record but doesn't match the above criteria
+    return 'OTHER';
 };
 
 const getStatusColor = (status: URLStatus): string => {
     switch (status) {
         case 'HAS_GAME':
+            // GREEN - has associated game
             return 'bg-green-500 hover:bg-green-400';
         case 'NOT_PUBLISHED':
-            return 'bg-orange-400 hover:bg-orange-300';
+            // YELLOW - game status is NOT_PUBLISHED
+            return 'bg-yellow-400 hover:bg-yellow-300';
         case 'ERROR':
+            // RED - scrape error
             return 'bg-red-500 hover:bg-red-400';
         case 'NOT_FOUND':
-            return 'bg-white border border-gray-300 hover:bg-gray-100';
-        case 'UNKNOWN':
-            return 'bg-blue-300 hover:bg-blue-200';
+            // WHITE with border - not found
+            return 'bg-white border border-gray-400 hover:bg-gray-50';
+        case 'OTHER':
+            // GRAY - has record but doesn't match criteria
+            return 'bg-gray-400 hover:bg-gray-300';
         case 'EMPTY':
         default:
-            return 'bg-gray-100 hover:bg-gray-200';
+            // LIGHT GRAY - no ScrapeURL record
+            return 'bg-gray-200 hover:bg-gray-300 border border-gray-300';
     }
 };
 
@@ -138,8 +153,8 @@ const getStatusLabel = (status: URLStatus): string => {
         case 'NOT_PUBLISHED': return 'Not Published';
         case 'ERROR': return 'Error';
         case 'NOT_FOUND': return 'Not Found';
-        case 'UNKNOWN': return 'Unknown';
-        case 'EMPTY': return 'No Data';
+        case 'OTHER': return 'Other';
+        case 'EMPTY': return 'No Record';
         default: return 'Unknown';
     }
 };
@@ -164,46 +179,13 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
     const [loadingProgress, setLoadingProgress] = useState('');
     const [error, setError] = useState<string | null>(null);
     
-    // UI state
+    // UI state - default to 50 columns as requested
     const [hoveredId, setHoveredId] = useState<number | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-    const [columnsPerRow, setColumnsPerRow] = useState(100);
+    const [columnsPerRow, setColumnsPerRow] = useState(50);
     const [selectedCell, setSelectedCell] = useState<number | null>(null);
     
     const containerRef = useRef<HTMLDivElement>(null);
-
-    // Calculate grid dimensions based on container size
-    const calculateGridSize = useCallback(() => {
-        if (!containerRef.current || !bounds) return;
-        
-        const containerWidth = containerRef.current.clientWidth - 32; // Account for padding
-        const containerHeight = window.innerHeight - 300; // Leave room for header/legend
-        
-        const totalCells = bounds.maxId - bounds.minId + 1;
-        
-        // Start with 100 columns and adjust
-        let cols = columnsPerRow;
-        let cellSize = Math.floor(containerWidth / cols);
-        
-        // Ensure minimum cell size of 6px for visibility
-        while (cellSize < 6 && cols > 20) {
-            cols = Math.floor(cols * 0.8);
-            cellSize = Math.floor(containerWidth / cols);
-        }
-        
-        // Calculate rows needed
-        const rows = Math.ceil(totalCells / cols);
-        const totalHeight = rows * cellSize;
-        
-        // If height exceeds container, reduce columns to fit
-        if (totalHeight > containerHeight && cellSize > 6) {
-            const maxRows = Math.floor(containerHeight / 6);
-            cols = Math.ceil(totalCells / maxRows);
-            cols = Math.min(cols, Math.floor(containerWidth / 6));
-        }
-        
-        setColumnsPerRow(cols);
-    }, [bounds, columnsPerRow]);
 
     // Load data when opened
     useEffect(() => {
@@ -211,19 +193,6 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
             loadGridData();
         }
     }, [isOpen, currentEntity?.id]);
-
-    // Recalculate grid on window resize
-    useEffect(() => {
-        const handleResize = () => calculateGridSize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [calculateGridSize]);
-
-    useEffect(() => {
-        if (bounds) {
-            calculateGridSize();
-        }
-    }, [bounds, calculateGridSize]);
 
     // ===================================================================
     // DATA LOADING
@@ -253,8 +222,8 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                 return;
             }
 
-            // Use 0 as minimum if not specified, or the actual lowest
-            const minId = Math.max(0, (boundsData.lowestId || 1) - 10); // Include some buffer
+            // Always start at ID 1, go to highest ID
+            const minId = 1;
             const maxId = boundsData.highestId;
             
             setBounds({
@@ -290,7 +259,7 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                         dataMap.set(item.tournamentId, {
                             tournamentId: item.tournamentId,
                             gameId: item.gameId || null,
-                            gameStatus: item.gameStatus || null,
+                            doNotScrapeReason: item.doNotScrapeReason || null,
                             lastScrapeStatus: item.lastScrapeStatus || null,
                             latestS3Key: item.latestS3Key || null,
                             doNotScrape: item.doNotScrape || false,
@@ -350,11 +319,18 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
     // GRID RENDERING
     // ===================================================================
 
+    // Calculate cell size based on container width and column count
+    const cellSize = useMemo(() => {
+        if (!containerRef.current) return 12;
+        const containerWidth = containerRef.current.clientWidth - 32; // Account for padding
+        const size = Math.floor(containerWidth / columnsPerRow) - 1; // -1 for gap
+        return Math.max(8, Math.min(size, 20)); // Min 8px, max 20px
+    }, [columnsPerRow, bounds]); // Recalc when bounds load (triggers re-render)
+
     const gridCells = useMemo(() => {
         if (!bounds) return [];
 
         const cells: React.ReactNode[] = [];
-        const cellSize = Math.max(6, Math.floor((containerRef.current?.clientWidth || 800) / columnsPerRow) - 1);
 
         for (let id = bounds.minId; id <= bounds.maxId; id++) {
             const item = urlData.get(id);
@@ -366,27 +342,25 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                     key={id}
                     className={`
                         ${colorClass}
-                        cursor-pointer transition-all duration-75
+                        cursor-pointer transition-all duration-75 rounded-sm
                         ${selectedCell === id ? 'ring-2 ring-blue-500 ring-offset-1' : ''}
-                        ${hoveredId === id ? 'scale-150 z-10' : ''}
+                        ${hoveredId === id ? 'scale-125 z-10 shadow-md' : ''}
                     `}
                     style={{
                         width: cellSize,
                         height: cellSize,
-                        minWidth: 6,
-                        minHeight: 6
+                        flexShrink: 0
                     }}
                     onClick={() => handleCellClick(id)}
                     onMouseEnter={(e) => handleMouseEnter(e, id)}
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
-                    title={`ID: ${id}`}
                 />
             );
         }
 
         return cells;
-    }, [bounds, urlData, columnsPerRow, selectedCell, hoveredId]);
+    }, [bounds, urlData, cellSize, selectedCell, hoveredId]);
 
     // Statistics
     const stats = useMemo(() => {
@@ -396,7 +370,7 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
         let notPublished = 0;
         let errors = 0;
         let notFound = 0;
-        let unknown = 0;
+        let other = 0;
         let empty = 0;
 
         for (let id = bounds.minId; id <= bounds.maxId; id++) {
@@ -406,12 +380,12 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                 case 'NOT_PUBLISHED': notPublished++; break;
                 case 'ERROR': errors++; break;
                 case 'NOT_FOUND': notFound++; break;
-                case 'UNKNOWN': unknown++; break;
+                case 'OTHER': other++; break;
                 case 'EMPTY': empty++; break;
             }
         }
 
-        return { hasGame, notPublished, errors, notFound, unknown, empty, total: bounds.totalSlots };
+        return { hasGame, notPublished, errors, notFound, other, empty, total: bounds.totalSlots };
     }, [bounds, urlData]);
 
     // ===================================================================
@@ -435,15 +409,16 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                         )}
                     </div>
                     <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500 mr-2">{columnsPerRow} cols</span>
                         <button
-                            onClick={() => setColumnsPerRow(Math.max(20, columnsPerRow - 20))}
+                            onClick={() => setColumnsPerRow(Math.max(10, columnsPerRow - 10))}
                             className="p-2 hover:bg-gray-100 rounded"
                             title="Fewer columns (larger cells)"
                         >
                             <ZoomIn className="h-4 w-4" />
                         </button>
                         <button
-                            onClick={() => setColumnsPerRow(Math.min(200, columnsPerRow + 20))}
+                            onClick={() => setColumnsPerRow(Math.min(150, columnsPerRow + 10))}
                             className="p-2 hover:bg-gray-100 rounded"
                             title="More columns (smaller cells)"
                         >
@@ -473,7 +448,7 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                         <span>Has Game {stats && `(${stats.hasGame.toLocaleString()})`}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-orange-400 rounded" />
+                        <div className="w-4 h-4 bg-yellow-400 rounded" />
                         <span>Not Published {stats && `(${stats.notPublished.toLocaleString()})`}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -481,12 +456,16 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                         <span>Error {stats && `(${stats.errors.toLocaleString()})`}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-white border border-gray-300 rounded" />
+                        <div className="w-4 h-4 bg-white border border-gray-400 rounded" />
                         <span>Not Found {stats && `(${stats.notFound.toLocaleString()})`}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-gray-100 border border-gray-200 rounded" />
-                        <span>No Data {stats && `(${stats.empty.toLocaleString()})`}</span>
+                        <div className="w-4 h-4 bg-gray-400 rounded" />
+                        <span>Other {stats && `(${stats.other.toLocaleString()})`}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-4 h-4 bg-gray-200 border border-gray-300 rounded" />
+                        <span>No Record {stats && `(${stats.empty.toLocaleString()})`}</span>
                     </div>
                     {bounds && (
                         <div className="ml-auto text-gray-500">
@@ -519,8 +498,11 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                         </div>
                     ) : bounds ? (
                         <div 
-                            className="flex flex-wrap gap-px"
-                            style={{ maxWidth: '100%' }}
+                            className="grid gap-px"
+                            style={{ 
+                                gridTemplateColumns: `repeat(${columnsPerRow}, ${cellSize}px)`,
+                                width: 'fit-content'
+                            }}
                         >
                             {gridCells}
                         </div>

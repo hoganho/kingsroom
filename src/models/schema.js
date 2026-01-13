@@ -10824,6 +10824,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "doNotScrapeReason": {
+                    "name": "doNotScrapeReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "sourceDataIssue": {
                     "name": "sourceDataIssue",
                     "isArray": false,
@@ -17044,7 +17051,7 @@ export const schema = {
                 "NLHE",
                 "PLO",
                 "PLOM",
-                "PL04",
+                "PLO4",
                 "PLOM4",
                 "PLOM45",
                 "PLOM456",
@@ -29432,5 +29439,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "1f85c5a22db48aa85ca22ad5b17de83e"
+    "version": "280dd385a3c93765b5b3012ca5bb9106"
 };

@@ -45,7 +45,7 @@ const GameVariant = {
   "NLHE": "NLHE",
   "PLO": "PLO",
   "PLOM": "PLOM",
-  "PL04": "PL04",
+  "PLO4": "PLO4",
   "PLOM4": "PLOM4",
   "PLOM45": "PLOM45",
   "PLOM456": "PLOM456",

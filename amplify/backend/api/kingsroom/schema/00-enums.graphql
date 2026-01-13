@@ -48,7 +48,7 @@ enum GameVariant {
   NLHE
   PLO
   PLOM
-  PL04
+  PLO4
   PLOM4
   PLOM45
   PLOM456

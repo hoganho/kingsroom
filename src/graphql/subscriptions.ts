@@ -162,6 +162,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -442,6 +443,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -2232,6 +2234,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
     url
     tournamentId
     doNotScrape
+    doNotScrapeReason
     sourceDataIssue
     gameDataVerified
     missingKeysFromScrape
@@ -2359,6 +2362,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -2639,6 +2643,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -13442,6 +13447,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             url
             tournamentId
             doNotScrape
+            doNotScrapeReason
             sourceDataIssue
             gameDataVerified
             missingKeysFromScrape
@@ -14845,6 +14851,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -18458,6 +18465,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             url
             tournamentId
             doNotScrape
+            doNotScrapeReason
             sourceDataIssue
             gameDataVerified
             missingKeysFromScrape
@@ -19395,6 +19403,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -30105,6 +30114,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             url
             tournamentId
             doNotScrape
+            doNotScrapeReason
             sourceDataIssue
             gameDataVerified
             missingKeysFromScrape
@@ -31508,6 +31518,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -35121,6 +35132,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             url
             tournamentId
             doNotScrape
+            doNotScrapeReason
             sourceDataIssue
             gameDataVerified
             missingKeysFromScrape
@@ -44785,6 +44797,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             url
             tournamentId
             doNotScrape
+            doNotScrapeReason
             sourceDataIssue
             gameDataVerified
             missingKeysFromScrape
@@ -46188,6 +46201,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -49801,6 +49815,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             url
             tournamentId
             doNotScrape
+            doNotScrapeReason
             sourceDataIssue
             gameDataVerified
             missingKeysFromScrape
@@ -59465,6 +59480,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             url
             tournamentId
             doNotScrape
+            doNotScrapeReason
             sourceDataIssue
             gameDataVerified
             missingKeysFromScrape
@@ -60868,6 +60884,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -64481,6 +64498,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             url
             tournamentId
             doNotScrape
+            doNotScrapeReason
             sourceDataIssue
             gameDataVerified
             missingKeysFromScrape
@@ -65420,6 +65438,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -67405,6 +67424,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -69390,6 +69410,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -71350,6 +71371,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -71630,6 +71652,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -73570,6 +73593,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -73850,6 +73874,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -75790,6 +75815,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -76070,6 +76096,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -77860,6 +77887,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
     url
     tournamentId
     doNotScrape
+    doNotScrapeReason
     sourceDataIssue
     gameDataVerified
     missingKeysFromScrape
@@ -77987,6 +78015,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -78267,6 +78296,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -80070,6 +80100,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
     url
     tournamentId
     doNotScrape
+    doNotScrapeReason
     sourceDataIssue
     gameDataVerified
     missingKeysFromScrape
@@ -80197,6 +80228,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -80477,6 +80509,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -82280,6 +82313,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
     url
     tournamentId
     doNotScrape
+    doNotScrapeReason
     sourceDataIssue
     gameDataVerified
     missingKeysFromScrape
@@ -82407,6 +82441,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape
@@ -82687,6 +82722,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           url
           tournamentId
           doNotScrape
+          doNotScrapeReason
           sourceDataIssue
           gameDataVerified
           missingKeysFromScrape

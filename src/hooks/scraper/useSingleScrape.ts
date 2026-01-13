@@ -11,6 +11,11 @@
 // - ADDED: Error classification improvements (from useErrorTracking)
 // - ADDED: Retry support for transient errors
 // - scrape() returns { parsedData, enrichedData } to avoid stale state issues
+//
+// v2.1.0 - BUGFIX:
+// - FIXED: Stale closure issue in save() when called immediately after scrape()
+// - ADDED: resultRef to track current status for save() validation
+// - CHANGED: save() now validates against resultRef instead of stale closure
 
 import { useState, useCallback, useRef } from 'react';
 import { ScrapedGameData } from '../../API';
@@ -103,6 +108,12 @@ const VALID_TRANSITIONS: Record<ProcessingStatus, ProcessingStatus[]> = {
   'skipped': [],
 };
 
+/**
+ * States that are allowed to transition TO saving when save() is called immediately after scrape()
+ * This handles the stale closure issue where React hasn't re-rendered yet
+ */
+const SAVEABLE_FROM_STATES: ProcessingStatus[] = ['review', 'scraping'];
+
 const TERMINAL_STATES: ProcessingStatus[] = ['success', 'warning', 'skipped'];
 const RETRYABLE_STATES: ProcessingStatus[] = ['error'];
 const SAVEABLE_STATES: ProcessingStatus[] = ['review'];
@@ -188,6 +199,10 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
   
   // Track last tournament ID for retry
   const lastTournamentIdRef = useRef<number | null>(null);
+  
+  // v2.1.0 FIX: Use a ref to track the CURRENT result status
+  // This avoids stale closure issues when save() is called immediately after scrape()
+  const resultRef = useRef<ProcessingResult | null>(null);
 
   // =========================================================================
   // COMPUTED STATE (from useResultStateMachine)
@@ -198,31 +213,19 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
   const isTerminal = result?.status ? TERMINAL_STATES.includes(result.status) : false;
 
   // =========================================================================
-  // STATE UPDATE HELPER
+  // STATE UPDATE HELPER - v2.1.0: Helper to set result AND keep ref in sync
   // =========================================================================
   
-  const updateResult = useCallback((
-    updates: Partial<ProcessingResult> & { status?: ProcessingStatus }
-  ) => {
-    setResult(prev => {
-      if (!prev) return null;
-      
-      // Validate state transition if status is changing
-      const newStatus = updates.status 
-        ? safeTransition(prev.status, updates.status, prev.id)
-        : prev.status;
-      
-      return {
-        ...prev,
-        ...updates,
-        status: newStatus,
-      };
-    });
+  // v2.1.0: Helper to set result AND keep ref in sync
+  const setResultWithRef = useCallback((newResult: ProcessingResult | null) => {
+    resultRef.current = newResult;
+    setResult(newResult);
   }, []);
 
   // =========================================================================
   // SCRAPE - Fetch and optionally enrich data
   // v2.0.0: Proper NOT_FOUND vs error handling
+  // v2.1.0: Uses setResultWithRef to keep ref in sync
   // =========================================================================
   
   const scrape = useCallback(async (tournamentId: number): Promise<ScrapeResult> => {
@@ -231,141 +234,135 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
     // Store for retry
     lastTournamentIdRef.current = tournamentId;
     
-    // Clear previous state
+    // Clear previous state - v2.1.0: Use setResultWithRef
     setIsProcessing(true);
     setEnrichedData(null);
     setLastErrorType(null);
-    setResult({
+    
+    const initialResult: ProcessingResult = {
       id: tournamentId,
       url,
       status: 'scraping',
       message: 'Fetching tournament data...',
-    });
-
-    scraperLogger.logItemStart(tournamentId, url);
-
-    // Track enriched data locally to return directly
-    let localEnrichedData: EnrichedGameDataWithContext | null = null;
+    };
+    setResultWithRef(initialResult);
 
     try {
-      // Fetch from backend
+      // =====================================================================
+      // STEP 1: Fetch tournament data
+      // =====================================================================
+      
       const parsedData = await fetchGameDataFromBackend(
-        url, 
+        url,
         !options.useS3, // forceRefresh
-        scraperApiKey, 
+        scraperApiKey,
         entityId
       );
-
+      
       if (!parsedData) {
         const errorType: ErrorType = 'UNKNOWN';
         setLastErrorType(errorType);
-        setResult({
+        const errorResult: ProcessingResult = {
           id: tournamentId,
           url,
           status: 'error',
           message: 'No data returned from scraper',
           errorType,
-        });
+        };
+        setResultWithRef(errorResult);
         scraperLogger.logFetchError(tournamentId, 'No data returned', errorType);
         setIsProcessing(false);
         return { parsedData: null, enrichedData: null, outcome: 'error', errorType };
       }
-
-      const dataAsRecord = parsedData as Record<string, unknown>;
+      
+      // Get data source and normalize status
       const normalizedStatus = normalizeGameStatus(parsedData.gameStatus);
       const dataSource = getDataSource(parsedData);
 
       // =====================================================================
-      // v2.0.0 FIX: Check for NOT_FOUND/NOT_PUBLISHED BEFORE checking errors
-      // These are successful retrievals of empty/hidden slots, NOT errors
+      // STEP 2: Handle NOT_FOUND / NOT_PUBLISHED responses (NOT errors!)
+      // v2.0.0: These are normal operational responses, not errors
       // =====================================================================
       
-      // Check for NOT_FOUND (empty tournament slot)
+      // Check for NOT_FOUND (empty tournament slot) - either from response or gameStatus
       if (isNotFoundGameStatus(normalizedStatus) || isNotFoundResponse(parsedData)) {
-        // Log with the NEW logNotFound method (not logFetchError!)
-        scraperLogger.logNotFound(tournamentId, normalizedStatus || 'NOT_FOUND');
-        
-        setResult({
+        const notFoundResult: ProcessingResult = {
           id: tournamentId,
           url,
-          status: 'skipped',
-          message: `Tournament not found (${normalizedStatus || 'NOT_FOUND'})`,
+          status: 'success',
+          message: `Tournament status: ${normalizedStatus || parsedData.gameStatus}`,
           parsedData,
           dataSource,
-        });
+        };
+        setResultWithRef(notFoundResult);
+        
+        scraperLogger.logNotFound(tournamentId, normalizedStatus || 'NOT_FOUND');
         setIsProcessing(false);
         return { parsedData, enrichedData: null, outcome: 'not_found' };
       }
 
-      // Check for NOT_PUBLISHED (hidden tournament)
-      if (isNotPublishedGameStatus(normalizedStatus) || isNotPublishedResponse(parsedData)) {
-        scraperLogger.logNotPublished(tournamentId);
-        
-        setResult({
+      // Check for NOT_PUBLISHED status
+      if (isNotPublishedResponse(parsedData) || isNotPublishedGameStatus(normalizedStatus)) {
+        const notPublishedResult: ProcessingResult = {
           id: tournamentId,
           url,
-          status: 'skipped',
-          message: 'Tournament not published (hidden)',
+          status: 'success',
+          message: 'Tournament not yet published',
           parsedData,
           dataSource,
-        });
+        };
+        setResultWithRef(notPublishedResult);
+        
+        scraperLogger.logNotPublished(tournamentId);
         setIsProcessing(false);
         return { parsedData, enrichedData: null, outcome: 'not_published' };
       }
 
-      // =====================================================================
-      // Now check for actual errors (after ruling out NOT_FOUND/NOT_PUBLISHED)
-      // =====================================================================
-      
-      const errorMsg = (dataAsRecord.error || dataAsRecord.errorMessage) as string | undefined;
-      
-      // Only treat as error if there's an error message AND it's not a name placeholder
-      // v2.0.0: "Error processing tournament" name is now only an error if NOT a NOT_FOUND status
-      if (errorMsg) {
-        const errorType = classifyError(errorMsg, parsedData);
-        setLastErrorType(errorType);
-        
-        setResult({
-          id: tournamentId,
-          url,
-          status: 'error',
-          message: errorMsg,
-          errorType,
-          parsedData,
-          dataSource,
-        });
-        scraperLogger.logFetchError(tournamentId, errorMsg, errorType);
-        setIsProcessing(false);
-        return { parsedData, enrichedData: null, outcome: 'error', errorType };
-      }
-      
-      // Log successful fetch
-      scraperLogger.logFetchSuccess(
-        tournamentId, 
-        dataSource === 's3' ? 'S3_CACHE' : 'LIVE', 
-        parsedData.name || undefined
-      );
-
-      // Check for doNotScrape flag
-      const isDoNotScrape = dataAsRecord.skipped && dataAsRecord.skipReason === 'DO_NOT_SCRAPE';
-      if (isDoNotScrape && !options.ignoreDoNotScrape) {
-        scraperLogger.logSkipped(tournamentId, 'DO_NOT_SCRAPE');
-        
-        setResult({
+      // Check for DO_NOT_SCRAPE
+      const dataAsRecord = parsedData as Record<string, unknown>;
+      if (dataAsRecord.skipped && dataAsRecord.skipReason === 'DO_NOT_SCRAPE') {
+        const skippedResult: ProcessingResult = {
           id: tournamentId,
           url,
           status: 'skipped',
-          message: 'Marked as Do Not Scrape',
+          message: 'Tournament marked as do-not-scrape',
           parsedData,
           dataSource,
-        });
+        };
+        setResultWithRef(skippedResult);
+        
+        scraperLogger.logSkipped(tournamentId, 'DO_NOT_SCRAPE');
         setIsProcessing(false);
         return { parsedData, enrichedData: null, outcome: 'skipped' };
       }
 
+      // Check for error in parsed response
+      const errorMsg = (dataAsRecord.error || dataAsRecord.errorMessage) as string | undefined;
+      if (errorMsg || parsedData.name === 'Error processing tournament') {
+        const errorType = classifyError(errorMsg || 'Unknown parse error');
+        setLastErrorType(errorType);
+        
+        const errorResult: ProcessingResult = {
+          id: tournamentId,
+          url,
+          status: 'error',
+          message: errorMsg || 'Error processing tournament',
+          parsedData,
+          errorType,
+          dataSource,
+        };
+        setResultWithRef(errorResult);
+        
+        scraperLogger.logFetchError(tournamentId, errorMsg || 'Parse error', errorType);
+        setIsProcessing(false);
+        return { parsedData, enrichedData: null, outcome: 'error', errorType };
+      }
+
       // =====================================================================
-      // Success path - Enrich data for review modal
+      // STEP 3: Successful fetch - enrich data and set to review
       // =====================================================================
+      
+      let localEnrichedData: EnrichedGameDataWithContext | null = null;
       
       const autoVenueId = parsedData.venueMatch?.autoAssignedVenue?.id;
       
@@ -383,7 +380,8 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
         console.warn('[useSingleScrape] Enrichment failed, using raw data:', enrichError);
       }
       
-      setResult({
+      // v2.1.0: Use setResultWithRef to keep ref in sync
+      const reviewResult: ProcessingResult = {
         id: tournamentId,
         url,
         status: 'review',
@@ -391,7 +389,8 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
         parsedData,
         autoVenueId: autoVenueId || undefined,
         dataSource,
-      });
+      };
+      setResultWithRef(reviewResult);
 
       setIsProcessing(false);
       return { parsedData, enrichedData: localEnrichedData, outcome: 'success' };
@@ -401,19 +400,20 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
       const errorType = classifyError(errorMessage);
       setLastErrorType(errorType);
       
-      setResult({
+      const errorResult: ProcessingResult = {
         id: tournamentId,
         url,
         status: 'error',
         message: errorMessage,
         errorType,
-      });
+      };
+      setResultWithRef(errorResult);
       
       scraperLogger.logFetchError(tournamentId, errorMessage, errorType);
       setIsProcessing(false);
       return { parsedData: null, enrichedData: null, outcome: 'error', errorType };
     }
-  }, [entityId, baseUrl, urlPath, scraperApiKey, options, defaultVenueId]);
+  }, [entityId, baseUrl, urlPath, scraperApiKey, options, defaultVenueId, setResultWithRef]);
 
   // =========================================================================
   // RETRY - Re-attempt the last scrape (from useErrorTracking concepts)
@@ -443,16 +443,18 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
     const newStatus = safeTransition(result.status, 'skipped', result.id);
     if (newStatus === 'skipped') {
       scraperLogger.logSkipped(result.id, reason || 'User skipped');
-      setResult({
+      const skippedResult: ProcessingResult = {
         ...result,
         status: 'skipped',
         message: reason || 'Skipped by user',
-      });
+      };
+      setResultWithRef(skippedResult);
     }
-  }, [result]);
+  }, [result, setResultWithRef]);
 
   // =========================================================================
   // SAVE - Save the scraped data to database
+  // v2.1.0 FIX: Use resultRef instead of stale closure result
   // =========================================================================
   
   const save = useCallback(async (
@@ -461,31 +463,48 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
     overrideUrl?: string,
     overrideTournamentId?: number
   ): Promise<{ success: boolean; gameId?: string }> => {
-    const urlToUse = overrideUrl || result?.url;
-    const idToUse = overrideTournamentId ?? result?.id;
+    // v2.1.0 FIX: Use resultRef.current for up-to-date state
+    const currentResult = resultRef.current;
+    
+    const urlToUse = overrideUrl || currentResult?.url;
+    const idToUse = overrideTournamentId ?? currentResult?.id;
     
     if (!urlToUse || idToUse === undefined) {
       console.warn('[useSingleScrape] save() called but missing url or id');
       return { success: false };
     }
 
-    const dataToSave = editedData || result?.parsedData;
+    const dataToSave = editedData || currentResult?.parsedData;
     if (!dataToSave) {
       console.warn('[useSingleScrape] save() called but no data to save');
       return { success: false };
     }
     
-    // Validate state transition
-    if (result && !canTransition(result.status, 'saving')) {
-      console.warn('[useSingleScrape] Cannot transition from', result.status, 'to saving');
-      return { success: false };
+    // v2.1.0 FIX: Validate state transition using resultRef (not stale closure)
+    // Also allow saving from states that might be current due to React batching
+    if (currentResult) {
+      const currentStatus = currentResult.status;
+      const canSaveFromCurrentState = 
+        canTransition(currentStatus, 'saving') || 
+        SAVEABLE_FROM_STATES.includes(currentStatus);
+      
+      if (!canSaveFromCurrentState) {
+        console.warn(
+          '[useSingleScrape] Cannot save from state:', currentStatus,
+          '(allowed:', [...SAVEABLE_FROM_STATES, ...VALID_TRANSITIONS[currentStatus] || []].join(', '), ')'
+        );
+        return { success: false };
+      }
     }
     
-    updateResult({
+    // Update state to saving
+    const savingResult: ProcessingResult = {
+      ...(currentResult || { id: idToUse, url: urlToUse }),
       status: 'saving',
       message: 'Saving to database...',
       selectedVenueId: venueId,
-    });
+    };
+    setResultWithRef(savingResult);
     
     setIsProcessing(true);
     scraperLogger.info('ITEM_SAVING', 'Saving tournament', { tournamentId: idToUse });
@@ -507,13 +526,14 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
       const gameId = saveResult.gameId || undefined;
       const action = saveResult.action || 'CREATED';
 
-      setResult(prev => prev ? {
-        ...prev,
+      const successResult: ProcessingResult = {
+        ...(resultRef.current || { id: idToUse, url: urlToUse }),
         status: 'success',
         message: `${action === 'UPDATED' ? 'Updated' : 'Created'} game ${gameId}`,
         savedGameId: gameId,
         selectedVenueId: venueId,
-      } : null);
+      };
+      setResultWithRef(successResult);
 
       scraperLogger.logSaveSuccess(idToUse, gameId || 'unknown', action === 'UPDATED' ? 'UPDATE' : 'CREATE');
       setIsProcessing(false);
@@ -524,31 +544,33 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
       const errorMessage = (error as Error)?.message || 'Save failed';
       setLastErrorType('SAVE');
       
-      setResult(prev => prev ? {
-        ...prev,
+      const errorResult: ProcessingResult = {
+        ...(resultRef.current || { id: idToUse, url: urlToUse }),
         status: 'error',
         message: `Save failed: ${errorMessage}`,
         errorType: 'SAVE',
-      } : null);
+      };
+      setResultWithRef(errorResult);
 
       scraperLogger.error('ITEM_SAVE_ERROR', errorMessage, { tournamentId: idToUse });
       setIsProcessing(false);
       
       return { success: false };
     }
-  }, [result, entityId, options, updateResult]); 
+  }, [entityId, options, setResultWithRef]); // v2.1.0: Removed result from deps - using ref instead
 
   // =========================================================================
   // RESET - Clear state for new processing
+  // v2.1.0: Also clears resultRef
   // =========================================================================
   
   const reset = useCallback(() => {
-    setResult(null);
+    setResultWithRef(null);
     setEnrichedData(null);
     setIsProcessing(false);
     setLastErrorType(null);
     lastTournamentIdRef.current = null;
-  }, []);
+  }, [setResultWithRef]);
 
   return {
     // State

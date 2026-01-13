@@ -45,7 +45,7 @@ export enum GameVariant {
   NLHE = "NLHE",
   PLO = "PLO",
   PLOM = "PLOM",
-  PL04 = "PL04",
+  PLO4 = "PLO4",
   PLOM4 = "PLOM4",
   PLOM45 = "PLOM45",
   PLOM456 = "PLOM456",
@@ -8184,6 +8184,7 @@ type EagerScrapeURL = {
   readonly url: string;
   readonly tournamentId: number;
   readonly doNotScrape: boolean;
+  readonly doNotScrapeReason?: string | null;
   readonly sourceDataIssue?: boolean | null;
   readonly gameDataVerified?: boolean | null;
   readonly missingKeysFromScrape?: (string | null)[] | null;
@@ -8239,6 +8240,7 @@ type LazyScrapeURL = {
   readonly url: string;
   readonly tournamentId: number;
   readonly doNotScrape: boolean;
+  readonly doNotScrapeReason?: string | null;
   readonly sourceDataIssue?: boolean | null;
   readonly gameDataVerified?: boolean | null;
   readonly missingKeysFromScrape?: (string | null)[] | null;

@@ -1,6 +1,6 @@
 // src/components/games/recurring-games/RecurringGameAdmin.tsx
 // Comprehensive admin panel for recurring game management
-// VERSION 3.1.0 - Added "Since First Game" schedule option and backfill
+// VERSION 3.1.0 - Added recurring game selector and confirmation screen for schedule tab
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -44,6 +44,7 @@ import {
     recordMissedInstance,
     getDateRangeForWeeks,
     getDateRangeFromFirstGame,
+    fetchRecurringGamesByVenue,
     // Bulk processing (v3.0.0)
     getUnassignedGamesStats,
     previewCandidatePatterns,
@@ -77,6 +78,13 @@ interface Venue {
     id: string;
     name: string;
     entityId?: string;
+}
+
+interface RecurringGameOption {
+    id: string;
+    name: string;
+    dayOfWeek?: string;
+    firstGameDate?: string;
 }
 
 interface RecurringGameAdminProps {
@@ -233,6 +241,17 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         reason: string;
     }>({ isOpen: false, gap: null, status: 'CANCELLED', reason: '' });
 
+    // Schedule tab - recurring game selection
+    const [recurringGamesList, setRecurringGamesList] = useState<RecurringGameOption[]>([]);
+    const [selectedRecurringGameId, setSelectedRecurringGameId] = useState<string>(''); // empty = all games
+    const [scheduleCreationResult, setScheduleCreationResult] = useState<{
+        success: boolean;
+        instancesCreated: number;
+        gapsFound: number;
+        recurringGameName: string;
+        dateRange: { startDate: string; endDate: string };
+    } | null>(null);
+
     // Bulk Processing state (v3.0.0)
     const [bulkStats, setBulkStats] = useState<UnassignedGamesStats | null>(null);
     const [candidatePatterns, setCandidatePatterns] = useState<CandidatePattern[]>([]);
@@ -258,6 +277,10 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         setCandidatePatterns([]);
         setBulkResult(null);
         setError(null);
+        // Reset schedule tab state
+        setRecurringGamesList([]);
+        setSelectedRecurringGameId('');
+        setScheduleCreationResult(null);
         onVenueChange?.(venueId);
     };
 
@@ -268,9 +291,70 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         }
     }, [selectedVenueId, activeTab]);
 
+    // Load recurring games when schedule tab is opened
+    useEffect(() => {
+        if (selectedVenueId && activeTab === 'schedule') {
+            loadRecurringGamesForVenue();
+        }
+    }, [selectedVenueId, activeTab]);
+
     // ===================================================================
     // DATA LOADING FUNCTIONS
     // ===================================================================
+
+    const loadRecurringGamesForVenue = async () => {
+        if (!selectedVenueId) return;
+        try {
+            const games = await fetchRecurringGamesByVenue(selectedVenueId);
+            // Sort by name for better UX
+            const sorted = games
+                .filter(g => g.isActive !== false)
+                .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+                .map(g => ({
+                    id: g.id,
+                    name: g.name || 'Unnamed',
+                    dayOfWeek: g.dayOfWeek || undefined,
+                    firstGameDate: g.firstGameDate || undefined,
+                }));
+            setRecurringGamesList(sorted);
+        } catch (err: any) {
+            console.error('[loadRecurringGamesForVenue] Error:', err);
+        }
+    };
+
+    const handleSinceFirstGame = async () => {
+        if (!selectedVenueId) return;
+        setIsLoading(true);
+        setError(null);
+        try {
+            // If a specific recurring game is selected, use its firstGameDate
+            if (selectedRecurringGameId) {
+                const selectedGame = recurringGamesList.find(g => g.id === selectedRecurringGameId);
+                if (selectedGame?.firstGameDate) {
+                    const startDate = selectedGame.firstGameDate.split('T')[0]; // Extract date from ISO datetime
+                    const endDate = new Date().toISOString().split('T')[0];
+                    setDateRange({ startDate, endDate });
+                    console.log('[handleSinceFirstGame] Set date range from selected game:', { startDate, endDate });
+                } else {
+                    setError('Selected recurring game does not have a first game date recorded');
+                }
+            } else {
+                // Use venue-wide first game date
+                const result = await getDateRangeFromFirstGame(selectedVenueId);
+                if (result.success) {
+                    setDateRange({ startDate: result.startDate, endDate: result.endDate });
+                    console.log('[handleSinceFirstGame] Set date range:', result);
+                } else {
+                    setError(result.error || 'Failed to get first game date');
+                }
+            }
+        } catch (err: any) {
+            console.error('[handleSinceFirstGame] Error:', err);
+            setError(err.message || 'Failed to get first game date');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const loadStats = async () => {
         if (!selectedVenueId) return;
@@ -466,33 +550,6 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         return { valid: true, daysDiff };
     };
 
-    // Handler for "Since First Game" button - sets date range from earliest game to today
-    const handleSinceFirstGame = async () => {
-        if (!selectedVenueId) {
-            setError('Please select a venue first');
-            return;
-        }
-        setIsLoading(true);
-        setError(null);
-        try {
-            const result = await getDateRangeFromFirstGame(selectedVenueId);
-            if (result.success && result.startDate) {
-                setDateRange({
-                    startDate: result.startDate,
-                    endDate: result.endDate
-                });
-                console.log(`[handleSinceFirstGame] Set date range: ${result.startDate} to ${result.endDate}`);
-            } else {
-                setError(result.error || 'No firstGameDate found. Run the migration script first: node migrate-backfill-firstGameDate.mjs --execute');
-            }
-        } catch (err: any) {
-            console.error('[handleSinceFirstGame] Error:', err);
-            setError(err.message || 'Failed to get first game date');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     const loadComplianceReport = async () => {
         const validation = validateDateRange();
         if (!validation.valid) {
@@ -606,6 +663,18 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
             const result = await detectRecurringGameGaps(selectedVenueId!, dateRange.startDate, dateRange.endDate, true);
             console.log('[createGapInstances] Result:', result);
             setGapsResult(result);
+            
+            // Set confirmation result
+            const selectedGame = selectedRecurringGameId 
+                ? recurringGamesList.find(g => g.id === selectedRecurringGameId)
+                : null;
+            setScheduleCreationResult({
+                success: result.success,
+                instancesCreated: result.instancesCreated || 0,
+                gapsFound: result.gapsFound,
+                recurringGameName: selectedGame?.name || 'All Recurring Games',
+                dateRange: { ...dateRange },
+            });
         } catch (err: any) {
             console.error('[createGapInstances] Error:', err);
             const msg = err.errors?.[0]?.message || err.message || 'Failed to create gap instances';
@@ -993,70 +1062,236 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
         </div>
     );
 
-    const renderScheduleTab = () => (
-        <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-2"><label className="text-sm text-gray-600">From:</label><input type="date" value={dateRange.startDate} onChange={(e) => setDateRange(d => ({ ...d, startDate: e.target.value }))} className="px-3 py-1.5 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm" /></div>
-                    <div className="flex items-center gap-2"><label className="text-sm text-gray-600">To:</label><input type="date" value={dateRange.endDate} onChange={(e) => setDateRange(d => ({ ...d, endDate: e.target.value }))} className="px-3 py-1.5 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm" /></div>
-                    <div className="flex flex-wrap gap-2">
+    const renderScheduleTab = () => {
+        // Filter gaps by selected recurring game if one is selected
+        const filteredGaps = gapsResult?.gaps?.filter(gap => 
+            !selectedRecurringGameId || gap.recurringGameId === selectedRecurringGameId
+        ) || [];
+
+        // Show confirmation screen if schedule was just created
+        if (scheduleCreationResult) {
+            return (
+                <div className="space-y-6">
+                    <div className={cx(
+                        'rounded-lg p-6 border',
+                        scheduleCreationResult.success 
+                            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                    )}>
+                        <div className="flex items-start gap-4">
+                            {scheduleCreationResult.success ? (
+                                <CheckCircleIcon className="h-8 w-8 text-green-600 flex-shrink-0" />
+                            ) : (
+                                <ExclamationTriangleIcon className="h-8 w-8 text-red-600 flex-shrink-0" />
+                            )}
+                            <div className="flex-1">
+                                <h3 className={cx(
+                                    'text-lg font-semibold mb-2',
+                                    scheduleCreationResult.success ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'
+                                )}>
+                                    {scheduleCreationResult.success ? 'Schedule Created Successfully!' : 'Schedule Creation Failed'}
+                                </h3>
+                                <div className="space-y-2 text-sm">
+                                    <p className={scheduleCreationResult.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}>
+                                        <span className="font-medium">Recurring Game:</span> {scheduleCreationResult.recurringGameName}
+                                    </p>
+                                    <p className={scheduleCreationResult.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}>
+                                        <span className="font-medium">Date Range:</span> {scheduleCreationResult.dateRange.startDate} to {scheduleCreationResult.dateRange.endDate}
+                                    </p>
+                                    <p className={scheduleCreationResult.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}>
+                                        <span className="font-medium">Gaps Found:</span> {scheduleCreationResult.gapsFound}
+                                    </p>
+                                    <p className={scheduleCreationResult.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}>
+                                        <span className="font-medium">Instances Created:</span> {scheduleCreationResult.instancesCreated}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-6 flex gap-3">
+                            <Button variant="secondary" onClick={() => setScheduleCreationResult(null)}>
+                                <ArrowPathIcon className="h-4 w-4 mr-2" />
+                                Create Another Schedule
+                            </Button>
+                            <Button variant="secondary" onClick={loadComplianceReport}>
+                                <ChartBarIcon className="h-4 w-4 mr-2" />
+                                View Compliance Report
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-6">
+                {/* Recurring Game Selector */}
+                <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
+                    <div className="flex flex-col gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Recurring Game
+                            </label>
+                            <select
+                                value={selectedRecurringGameId}
+                                onChange={(e) => setSelectedRecurringGameId(e.target.value)}
+                                className="w-full md:w-96 px-3 py-2 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                            >
+                                <option value="">All Recurring Games ({recurringGamesList.length})</option>
+                                {recurringGamesList.map(game => (
+                                    <option key={game.id} value={game.id}>
+                                        {game.name} {game.dayOfWeek ? `(${game.dayOfWeek})` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            {recurringGamesList.length === 0 && (
+                                <p className="mt-1 text-xs text-gray-500">Loading recurring games...</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Date Range Selection */}
+                <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        Date Range
+                    </label>
+                    <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm text-gray-600 dark:text-gray-400">From:</label>
+                            <input 
+                                type="date" 
+                                value={dateRange.startDate} 
+                                onChange={(e) => setDateRange(d => ({ ...d, startDate: e.target.value }))} 
+                                className="px-3 py-1.5 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm" 
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm text-gray-600 dark:text-gray-400">To:</label>
+                            <input 
+                                type="date" 
+                                value={dateRange.endDate} 
+                                onChange={(e) => setDateRange(d => ({ ...d, endDate: e.target.value }))} 
+                                className="px-3 py-1.5 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm" 
+                            />
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-3">
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(1))}>1 Week</Button>
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(4))}>4 Weeks</Button>
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(12))}>12 Weeks</Button>
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(52))}>1 Year</Button>
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(104))}>2 Years</Button>
-                        <Button variant="secondary" size="sm" onClick={handleSinceFirstGame} isLoading={isLoading} title="Set date range from the earliest game date for this venue's recurring games">Since First Game</Button>
+                        <Button variant="primary" size="sm" onClick={handleSinceFirstGame} isLoading={isLoading}>
+                            <ClockIcon className="h-4 w-4 mr-1" />
+                            Since First Game
+                        </Button>
                     </div>
                 </div>
-            </div>
-            <div className="flex flex-wrap gap-3">
-                <Button onClick={loadComplianceReport} isLoading={isLoading}><ChartBarIcon className="h-4 w-4 mr-2" />Compliance Report</Button>
-                <Button onClick={detectGaps} isLoading={isLoading} variant="secondary"><ExclamationTriangleIcon className="h-4 w-4 mr-2" />Detect Gaps</Button>
-                <Button onClick={() => executeReconcile(true)} isLoading={isLoading} variant="secondary"><ArrowsRightLeftIcon className="h-4 w-4 mr-2" />Preview Reconcile</Button>
-            </div>
-            {complianceReport && (
-                <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-4">Compliance Summary</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                        <div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{complianceReport.totalExpected}</p><p className="text-xs text-gray-500">Expected</p></div>
-                        <div><p className="text-2xl font-bold text-green-600">{complianceReport.totalConfirmed}</p><p className="text-xs text-gray-500">Confirmed</p></div>
-                        <div><p className="text-2xl font-bold text-amber-600">{complianceReport.totalUnknown}</p><p className="text-xs text-gray-500">Unknown</p></div>
-                        <div><p className="text-2xl font-bold text-blue-600">{Math.round(complianceReport.overallComplianceRate * 100)}%</p><p className="text-xs text-gray-500">Compliance</p></div>
-                    </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3">
+                    <Button onClick={loadComplianceReport} isLoading={isLoading}>
+                        <ChartBarIcon className="h-4 w-4 mr-2" />
+                        Compliance Report
+                    </Button>
+                    <Button onClick={detectGaps} isLoading={isLoading} variant="secondary">
+                        <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+                        Detect Gaps
+                    </Button>
+                    <Button onClick={() => executeReconcile(true)} isLoading={isLoading} variant="secondary">
+                        <ArrowsRightLeftIcon className="h-4 w-4 mr-2" />
+                        Preview Reconcile
+                    </Button>
                 </div>
-            )}
-            {gapsResult && gapsResult.gaps.length === 0 && (
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                        <CheckCircleIcon className="h-6 w-6 text-green-600" />
-                        <div>
-                            <p className="font-medium text-green-800 dark:text-green-200">No gaps detected!</p>
-                            <p className="text-sm text-green-600 dark:text-green-400">
-                                Checked {gapsResult.recurringGamesChecked} recurring games over {gapsResult.weeksAnalyzed} weeks. 
-                                {gapsResult.expectedOccurrences} expected, {gapsResult.confirmedOccurrences} confirmed.
-                            </p>
+
+                {/* Compliance Report */}
+                {complianceReport && (
+                    <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg p-4">
+                        <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-4">Compliance Summary</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div>
+                                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{complianceReport.totalExpected}</p>
+                                <p className="text-xs text-gray-500">Expected</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-green-600">{complianceReport.totalConfirmed}</p>
+                                <p className="text-xs text-gray-500">Confirmed</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-amber-600">{complianceReport.totalUnknown}</p>
+                                <p className="text-xs text-gray-500">Unknown</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-blue-600">{Math.round(complianceReport.overallComplianceRate * 100)}%</p>
+                                <p className="text-xs text-gray-500">Compliance</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-            {gapsResult && gapsResult.gaps.length > 0 && (
-                <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg overflow-hidden">
-                    <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100">Detected Gaps ({gapsResult.gapsFound})</h3>
-                        <Button size="sm" variant="secondary" onClick={createGapInstances} isLoading={isLoading}>Create UNKNOWN Instances</Button>
-                    </div>
-                    <div className="max-h-64 overflow-y-auto">
-                        {gapsResult.gaps.slice(0, 20).map((gap, idx) => (
-                            <div key={idx} className="flex items-center justify-between px-4 py-3 border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
-                                <div><p className="text-sm font-medium text-gray-900 dark:text-gray-100">{gap.recurringGameName}</p><p className="text-xs text-gray-500">{gap.dayOfWeek} • {formatAEST(gap.expectedDate)}</p></div>
-                                <Button size="sm" variant="secondary" onClick={() => setMissedInstanceModal({ isOpen: true, gap, status: 'CANCELLED', reason: '' })}>Record Status</Button>
+                )}
+
+                {/* No Gaps Message */}
+                {gapsResult && filteredGaps.length === 0 && (
+                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                        <div className="flex items-center gap-3">
+                            <CheckCircleIcon className="h-6 w-6 text-green-600" />
+                            <div>
+                                <p className="font-medium text-green-800 dark:text-green-200">
+                                    {selectedRecurringGameId ? 'No gaps for selected game!' : 'No gaps detected!'}
+                                </p>
+                                <p className="text-sm text-green-600 dark:text-green-400">
+                                    Checked {gapsResult.recurringGamesChecked} recurring games over {gapsResult.weeksAnalyzed} weeks. 
+                                    {gapsResult.expectedOccurrences} expected, {gapsResult.confirmedOccurrences} confirmed.
+                                </p>
                             </div>
-                        ))}
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
-    );
+                )}
+
+                {/* Gaps List */}
+                {gapsResult && filteredGaps.length > 0 && (
+                    <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg overflow-hidden">
+                        <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
+                            <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                                Detected Gaps ({filteredGaps.length}
+                                {selectedRecurringGameId && gapsResult.gapsFound !== filteredGaps.length && 
+                                    ` of ${gapsResult.gapsFound} total`
+                                })
+                            </h3>
+                            <Button size="sm" onClick={createGapInstances} isLoading={isLoading}>
+                                <PlayIcon className="h-4 w-4 mr-2" />
+                                Create UNKNOWN Instances
+                            </Button>
+                        </div>
+                        <div className="max-h-96 overflow-y-auto">
+                            {filteredGaps.slice(0, 50).map((gap, idx) => (
+                                <div 
+                                    key={idx} 
+                                    className="flex items-center justify-between px-4 py-3 border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                >
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{gap.recurringGameName}</p>
+                                        <p className="text-xs text-gray-500">{gap.dayOfWeek} • {formatAEST(gap.expectedDate)}</p>
+                                    </div>
+                                    <Button 
+                                        size="sm" 
+                                        variant="secondary" 
+                                        onClick={() => setMissedInstanceModal({ isOpen: true, gap, status: 'CANCELLED', reason: '' })}
+                                    >
+                                        Record Status
+                                    </Button>
+                                </div>
+                            ))}
+                            {filteredGaps.length > 50 && (
+                                <div className="px-4 py-3 text-center text-sm text-gray-500">
+                                    Showing first 50 of {filteredGaps.length} gaps
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     // ===================================================================
     // MAIN RENDER
