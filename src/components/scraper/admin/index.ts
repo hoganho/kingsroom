@@ -5,7 +5,6 @@
 export { CollapsibleSection } from './CollapsibleSection';
 export { ErrorHandlingModal } from './ErrorHandlingModal';
 export { ProgressSummary } from './ProgressSummary';
-export { ScraperConfig } from './ScraperConfig';
 export { ScraperResults } from './ScraperResults';
 export { SkippedIDsAnalyzer } from './SkippedIDsAnalyzer';
 

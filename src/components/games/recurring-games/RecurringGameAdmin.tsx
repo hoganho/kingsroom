@@ -1,6 +1,6 @@
 // src/components/games/recurring-games/RecurringGameAdmin.tsx
 // Comprehensive admin panel for recurring game management
-// VERSION 3.0.0 - Uses gameDataEnricher for bulk processing (bootstrap removed)
+// VERSION 3.1.0 - Added "Since First Game" schedule option and backfill
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -43,6 +43,7 @@ import {
     getVenueComplianceReport,
     recordMissedInstance,
     getDateRangeForWeeks,
+    getDateRangeFromFirstGame,
     // Bulk processing (v3.0.0)
     getUnassignedGamesStats,
     previewCandidatePatterns,
@@ -463,6 +464,33 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
             return { valid: false, error: `Date range is ${daysDiff} days (~${Math.round(daysDiff/365)} years). Please select 4 years or less.`, daysDiff };
         }
         return { valid: true, daysDiff };
+    };
+
+    // Handler for "Since First Game" button - sets date range from earliest game to today
+    const handleSinceFirstGame = async () => {
+        if (!selectedVenueId) {
+            setError('Please select a venue first');
+            return;
+        }
+        setIsLoading(true);
+        setError(null);
+        try {
+            const result = await getDateRangeFromFirstGame(selectedVenueId);
+            if (result.success && result.startDate) {
+                setDateRange({
+                    startDate: result.startDate,
+                    endDate: result.endDate
+                });
+                console.log(`[handleSinceFirstGame] Set date range: ${result.startDate} to ${result.endDate}`);
+            } else {
+                setError(result.error || 'No firstGameDate found. Run the migration script first: node migrate-backfill-firstGameDate.mjs --execute');
+            }
+        } catch (err: any) {
+            console.error('[handleSinceFirstGame] Error:', err);
+            setError(err.message || 'Failed to get first game date');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const loadComplianceReport = async () => {
@@ -971,12 +999,13 @@ export const RecurringGameAdmin: React.FC<RecurringGameAdminProps> = ({
                 <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-2"><label className="text-sm text-gray-600">From:</label><input type="date" value={dateRange.startDate} onChange={(e) => setDateRange(d => ({ ...d, startDate: e.target.value }))} className="px-3 py-1.5 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm" /></div>
                     <div className="flex items-center gap-2"><label className="text-sm text-gray-600">To:</label><input type="date" value={dateRange.endDate} onChange={(e) => setDateRange(d => ({ ...d, endDate: e.target.value }))} className="px-3 py-1.5 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm" /></div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(1))}>1 Week</Button>
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(4))}>4 Weeks</Button>
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(12))}>12 Weeks</Button>
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(52))}>1 Year</Button>
                         <Button variant="secondary" size="sm" onClick={() => setDateRange(getDateRangeForWeeks(104))}>2 Years</Button>
+                        <Button variant="secondary" size="sm" onClick={handleSinceFirstGame} isLoading={isLoading} title="Set date range from the earliest game date for this venue's recurring games">Since First Game</Button>
                     </div>
                 </div>
             </div>

@@ -1245,6 +1245,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -1537,6 +1538,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -1842,6 +1844,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -3439,6 +3442,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -3731,6 +3735,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -4036,6 +4041,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -5259,6 +5265,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -7057,6 +7064,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -7729,6 +7737,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -8190,6 +8199,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -9602,6 +9612,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -10673,6 +10684,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -11401,6 +11413,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -11558,6 +11571,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -12802,6 +12816,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -13741,6 +13756,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -14346,6 +14362,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         isActive
         isPaused
         pausedReason
+        firstGameDate
         lastGameDate
         nextScheduledDate
         expectedInstanceCount
@@ -15631,6 +15648,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -15923,6 +15941,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -16228,6 +16247,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -17421,6 +17441,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -17862,6 +17883,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -18074,6 +18096,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -18749,6 +18772,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -20174,6 +20198,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -20466,6 +20491,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -20771,6 +20797,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -21901,6 +21928,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -23699,6 +23727,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -24371,6 +24400,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -24832,6 +24862,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -26244,6 +26275,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -27315,6 +27347,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -28043,6 +28076,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -28200,6 +28234,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -29444,6 +29479,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -30383,6 +30419,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -30988,6 +31025,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         isActive
         isPaused
         pausedReason
+        firstGameDate
         lastGameDate
         nextScheduledDate
         expectedInstanceCount
@@ -32273,6 +32311,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -32565,6 +32604,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -32870,6 +32910,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -34063,6 +34104,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -34504,6 +34546,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -34716,6 +34759,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -35391,6 +35435,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -36563,6 +36608,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -38361,6 +38407,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -39033,6 +39080,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -39494,6 +39542,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -40906,6 +40955,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -41977,6 +42027,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -42705,6 +42756,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -42862,6 +42914,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -44106,6 +44159,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -45045,6 +45099,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -45650,6 +45705,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         isActive
         isPaused
         pausedReason
+        firstGameDate
         lastGameDate
         nextScheduledDate
         expectedInstanceCount
@@ -46935,6 +46991,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -47227,6 +47284,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -47532,6 +47590,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -48725,6 +48784,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -49166,6 +49226,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -49378,6 +49439,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -50053,6 +50115,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -51225,6 +51288,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -53023,6 +53087,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -53695,6 +53760,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -54156,6 +54222,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -55568,6 +55635,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -56639,6 +56707,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -57367,6 +57436,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -57524,6 +57594,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -58768,6 +58839,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -59707,6 +59779,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -60312,6 +60385,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         isActive
         isPaused
         pausedReason
+        firstGameDate
         lastGameDate
         nextScheduledDate
         expectedInstanceCount
@@ -61597,6 +61671,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -61889,6 +61964,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -62194,6 +62270,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -63387,6 +63464,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -63828,6 +63906,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -64040,6 +64119,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -64715,6 +64795,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -66142,6 +66223,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -66434,6 +66516,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -66739,6 +66822,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -68124,6 +68208,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -68416,6 +68501,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -68721,6 +68807,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -70106,6 +70193,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -70398,6 +70486,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -70703,6 +70792,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -72343,6 +72433,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -72635,6 +72726,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -72940,6 +73032,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -74560,6 +74653,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -74852,6 +74946,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -75157,6 +75252,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -76777,6 +76873,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -77069,6 +77166,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -77374,6 +77472,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -78971,6 +79070,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -79263,6 +79363,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -79568,6 +79669,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -81178,6 +81280,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -81470,6 +81573,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -81775,6 +81879,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -83385,6 +83490,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount
@@ -83677,6 +83783,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           isActive
           isPaused
           pausedReason
+          firstGameDate
           lastGameDate
           nextScheduledDate
           expectedInstanceCount
@@ -83982,6 +84089,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             isActive
             isPaused
             pausedReason
+            firstGameDate
             lastGameDate
             nextScheduledDate
             expectedInstanceCount

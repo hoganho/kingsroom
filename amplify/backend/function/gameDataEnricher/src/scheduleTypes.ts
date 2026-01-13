@@ -1,5 +1,6 @@
 // scheduleTypes.ts
 // Type definitions for recurring game schedule operations
+// VERSION: 3.1.0 - Added firstGameDate field
 
 // NOTE: These types should match the auto-generated API.ts from amplify codegen
 // If using the generated types, replace these with:
@@ -153,6 +154,13 @@ export interface RecordMissedInstanceResult {
   error?: string;
 }
 
+export interface DateRangeFromFirstGameResult {
+  success: boolean;
+  startDate: string;
+  endDate: string;
+  error?: string;
+}
+
 // ===================================================================
 // INTERNAL TYPES
 // ===================================================================
@@ -168,7 +176,8 @@ export interface RecurringGameRecord {
   isActive: boolean;
   isPaused?: boolean;
   startTime?: string;
-  lastGameDate?: string;
+  firstGameDate?: string;  // AWSDateTime: ISO datetime of earliest assigned game
+  lastGameDate?: string;   // AWSDateTime: ISO datetime of most recent assigned game
   nextScheduledDate?: string;
 }
 
@@ -231,4 +240,5 @@ export interface UpdateInstanceInput {
   deviationDetails?: string;
   needsReview?: boolean;
   reviewReason?: string;
+  notes?: string;
 }

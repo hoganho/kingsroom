@@ -1,0 +1,430 @@
+{
+  "generatedAt": "2026-01-13T04:56:47.611Z",
+  "totalUnmatched": 21,
+  "summary": {
+    "noGamesForRecurring": 0,
+    "noGameOnDate": 21
+  },
+  "instances": [
+    {
+      "instanceId": "3b678b44-0b76-4e7f-ac46-12989e014605",
+      "recurringGameId": "40a6a0f8-9911-4af9-bf42-4598b7ea4d65",
+      "recurringGameName": "Thursday St George Leagues Club $5000 GTD",
+      "expectedDate": "2024-05-02",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2023-01-19",
+        "2023-03-09",
+        "2023-03-16",
+        "2023-03-23",
+        "2023-03-30",
+        "2023-04-06",
+        "2023-04-20",
+        "2023-04-27",
+        "2023-06-08",
+        "2023-06-15"
+      ]
+    },
+    {
+      "instanceId": "602a4223-c761-4c23-898d-5f32ff6927fc",
+      "recurringGameId": "40a6a0f8-9911-4af9-bf42-4598b7ea4d65",
+      "recurringGameName": "Thursday St George Leagues Club $5000 GTD",
+      "expectedDate": "2025-12-11",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2023-01-19",
+        "2023-03-09",
+        "2023-03-16",
+        "2023-03-23",
+        "2023-03-30",
+        "2023-04-06",
+        "2023-04-20",
+        "2023-04-27",
+        "2023-06-08",
+        "2023-06-15"
+      ]
+    },
+    {
+      "instanceId": "a6ef7080-f756-4805-83af-962aed163fea",
+      "recurringGameId": "40a6a0f8-9911-4af9-bf42-4598b7ea4d65",
+      "recurringGameName": "Thursday St George Leagues Club $5000 GTD",
+      "expectedDate": "2025-12-18",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2023-01-19",
+        "2023-03-09",
+        "2023-03-16",
+        "2023-03-23",
+        "2023-03-30",
+        "2023-04-06",
+        "2023-04-20",
+        "2023-04-27",
+        "2023-06-08",
+        "2023-06-15"
+      ]
+    },
+    {
+      "instanceId": "0a053454-50d9-4bcb-b0a6-849391ac98b9",
+      "recurringGameId": "40a6a0f8-9911-4af9-bf42-4598b7ea4d65",
+      "recurringGameName": "Thursday St George Leagues Club $5000 GTD",
+      "expectedDate": "2024-06-06",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2023-01-19",
+        "2023-03-09",
+        "2023-03-16",
+        "2023-03-23",
+        "2023-03-30",
+        "2023-04-06",
+        "2023-04-20",
+        "2023-04-27",
+        "2023-06-08",
+        "2023-06-15"
+      ]
+    },
+    {
+      "instanceId": "3c3969d3-fef9-4858-8b1c-03f89fe614d4",
+      "recurringGameId": "2bd04caa-5510-4d47-9156-f0b86767b3d6",
+      "recurringGameName": "Wenty Leagues 20k Special",
+      "expectedDate": "2025-12-17",
+      "venueId": "0b9c0861-c0ba-4a71-8ffc-8ad410c0c303",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2024-01-17",
+        "2024-01-24",
+        "2024-01-31",
+        "2024-02-07",
+        "2024-02-28",
+        "2024-03-06",
+        "2024-03-13",
+        "2024-03-20",
+        "2024-03-27",
+        "2024-04-03"
+      ]
+    },
+    {
+      "instanceId": "430dafcc-9bef-455b-9766-d398dfa8ba8b",
+      "recurringGameId": "2bd04caa-5510-4d47-9156-f0b86767b3d6",
+      "recurringGameName": "Wenty Leagues 20k Special",
+      "expectedDate": "2026-01-14",
+      "venueId": "0b9c0861-c0ba-4a71-8ffc-8ad410c0c303",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2024-01-17",
+        "2024-01-24",
+        "2024-01-31",
+        "2024-02-07",
+        "2024-02-28",
+        "2024-03-06",
+        "2024-03-13",
+        "2024-03-20",
+        "2024-03-27",
+        "2024-04-03"
+      ]
+    },
+    {
+      "instanceId": "b84c9190-f679-49d2-bc0c-026acd9bb953",
+      "recurringGameId": "2bd04caa-5510-4d47-9156-f0b86767b3d6",
+      "recurringGameName": "Wenty Leagues 20k Special",
+      "expectedDate": "2024-12-04",
+      "venueId": "0b9c0861-c0ba-4a71-8ffc-8ad410c0c303",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2024-01-17",
+        "2024-01-24",
+        "2024-01-31",
+        "2024-02-07",
+        "2024-02-28",
+        "2024-03-06",
+        "2024-03-13",
+        "2024-03-20",
+        "2024-03-27",
+        "2024-04-03"
+      ]
+    },
+    {
+      "instanceId": "d33474c3-07fb-4308-8d18-e497a0d5e31b",
+      "recurringGameId": "2bd04caa-5510-4d47-9156-f0b86767b3d6",
+      "recurringGameName": "Wenty Leagues 20k Special",
+      "expectedDate": "2026-01-07",
+      "venueId": "0b9c0861-c0ba-4a71-8ffc-8ad410c0c303",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2024-01-17",
+        "2024-01-24",
+        "2024-01-31",
+        "2024-02-07",
+        "2024-02-28",
+        "2024-03-06",
+        "2024-03-13",
+        "2024-03-20",
+        "2024-03-27",
+        "2024-04-03"
+      ]
+    },
+    {
+      "instanceId": "fbd73ada-54be-4f41-a135-3453a72f995b",
+      "recurringGameId": "7a42b132-12b8-4aba-946e-d4662e39a012",
+      "recurringGameName": "Friday St George Leagues Club $8 000 GTD $8000 GTD",
+      "expectedDate": "2024-06-07",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2023-03-31",
+        "2023-04-07",
+        "2023-04-21",
+        "2023-04-28",
+        "2023-05-05",
+        "2023-06-09",
+        "2023-06-16",
+        "2023-06-23",
+        "2023-06-30",
+        "2023-07-07"
+      ]
+    },
+    {
+      "instanceId": "1dbfc7b3-b909-4f52-bea9-ef6de224a5dd",
+      "recurringGameId": "7a42b132-12b8-4aba-946e-d4662e39a012",
+      "recurringGameName": "Friday St George Leagues Club $8 000 GTD $8000 GTD",
+      "expectedDate": "2024-05-03",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2023-03-31",
+        "2023-04-07",
+        "2023-04-21",
+        "2023-04-28",
+        "2023-05-05",
+        "2023-06-09",
+        "2023-06-16",
+        "2023-06-23",
+        "2023-06-30",
+        "2023-07-07"
+      ]
+    },
+    {
+      "instanceId": "26ba0d9b-a213-4c32-9515-e35c3576977a",
+      "recurringGameId": "7a42b132-12b8-4aba-946e-d4662e39a012",
+      "recurringGameName": "Friday St George Leagues Club $8 000 GTD $8000 GTD",
+      "expectedDate": "2025-12-19",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2023-03-31",
+        "2023-04-07",
+        "2023-04-21",
+        "2023-04-28",
+        "2023-05-05",
+        "2023-06-09",
+        "2023-06-16",
+        "2023-06-23",
+        "2023-06-30",
+        "2023-07-07"
+      ]
+    },
+    {
+      "instanceId": "f4a8d60a-091d-4eb3-b770-c7c61e99d76b",
+      "recurringGameId": "7a42b132-12b8-4aba-946e-d4662e39a012",
+      "recurringGameName": "Friday St George Leagues Club $8 000 GTD $8000 GTD",
+      "expectedDate": "2025-08-22",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2023-03-31",
+        "2023-04-07",
+        "2023-04-21",
+        "2023-04-28",
+        "2023-05-05",
+        "2023-06-09",
+        "2023-06-16",
+        "2023-06-23",
+        "2023-06-30",
+        "2023-07-07"
+      ]
+    },
+    {
+      "instanceId": "dc8c9fdb-169a-4e79-96ee-058bd6bb5b86",
+      "recurringGameId": "7a42b132-12b8-4aba-946e-d4662e39a012",
+      "recurringGameName": "Friday St George Leagues Club $8 000 GTD $8000 GTD",
+      "expectedDate": "2025-12-12",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2023-03-31",
+        "2023-04-07",
+        "2023-04-21",
+        "2023-04-28",
+        "2023-05-05",
+        "2023-06-09",
+        "2023-06-16",
+        "2023-06-23",
+        "2023-06-30",
+        "2023-07-07"
+      ]
+    },
+    {
+      "instanceId": "083748d6-0ca5-402b-8e84-c7c126115e7f",
+      "recurringGameId": "931091b1-2b97-4242-8d88-d6a7463d558c",
+      "recurringGameName": "Hillside Hotel Mondays",
+      "expectedDate": "2025-12-15",
+      "venueId": "ee247836-4dbd-48a5-b4be-a514fd86eb65",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2025-08-25",
+        "2025-09-01",
+        "2025-09-08",
+        "2025-09-15",
+        "2025-09-22",
+        "2025-09-29",
+        "2025-10-06",
+        "2025-10-13",
+        "2025-10-20",
+        "2025-10-27"
+      ]
+    },
+    {
+      "instanceId": "cf63f146-16d3-46bb-a498-50054947982e",
+      "recurringGameId": "931091b1-2b97-4242-8d88-d6a7463d558c",
+      "recurringGameName": "Hillside Hotel Mondays",
+      "expectedDate": "2026-01-19",
+      "venueId": "ee247836-4dbd-48a5-b4be-a514fd86eb65",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2025-08-25",
+        "2025-09-01",
+        "2025-09-08",
+        "2025-09-15",
+        "2025-09-22",
+        "2025-09-29",
+        "2025-10-06",
+        "2025-10-13",
+        "2025-10-20",
+        "2025-10-27"
+      ]
+    },
+    {
+      "instanceId": "96d6c5f1-88c0-4182-bca3-ab88ffb6674f",
+      "recurringGameId": "145bb3e7-1f46-476f-86a2-9451aff11f36",
+      "recurringGameName": "Monday St George Leagues Club $5000 GTD",
+      "expectedDate": "2025-12-15",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2023-01-30",
+        "2023-02-06",
+        "2023-02-13",
+        "2023-03-06",
+        "2023-03-13",
+        "2023-03-20",
+        "2023-03-27",
+        "2023-04-03",
+        "2023-04-17",
+        "2023-04-24"
+      ]
+    },
+    {
+      "instanceId": "e8b369f1-7d84-4dd9-83bc-6aa770a619f6",
+      "recurringGameId": "069c39e9-1510-4b9b-82f8-01b1e70f57e5",
+      "recurringGameName": "Wednesday Night CASH GAME",
+      "expectedDate": "2025-04-23",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2025-04-02",
+        "2025-04-09",
+        "2025-04-30",
+        "2025-05-07",
+        "2025-05-14",
+        "2025-05-21",
+        "2025-05-28",
+        "2025-06-04",
+        "2025-06-18",
+        "2025-06-25"
+      ]
+    },
+    {
+      "instanceId": "9f901127-c212-4ca7-b02f-029b6653333b",
+      "recurringGameId": "069c39e9-1510-4b9b-82f8-01b1e70f57e5",
+      "recurringGameName": "Wednesday Night CASH GAME",
+      "expectedDate": "2025-12-17",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2025-04-02",
+        "2025-04-09",
+        "2025-04-30",
+        "2025-05-07",
+        "2025-05-14",
+        "2025-05-21",
+        "2025-05-28",
+        "2025-06-04",
+        "2025-06-18",
+        "2025-06-25"
+      ]
+    },
+    {
+      "instanceId": "d9bda030-39a6-40df-8fdb-4b4aa1fca45d",
+      "recurringGameId": "069c39e9-1510-4b9b-82f8-01b1e70f57e5",
+      "recurringGameName": "Wednesday Night CASH GAME",
+      "expectedDate": "2026-01-14",
+      "venueId": "fd4f7fb1-67fd-4398-b4b4-d85722256d45",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2025-04-02",
+        "2025-04-09",
+        "2025-04-30",
+        "2025-05-07",
+        "2025-05-14",
+        "2025-05-21",
+        "2025-05-28",
+        "2025-06-04",
+        "2025-06-18",
+        "2025-06-25"
+      ]
+    },
+    {
+      "instanceId": "0e070ecd-6212-40d5-9153-b0ceadb48116",
+      "recurringGameId": "a956e2a5-5d64-49d3-b5d3-67ba3d334873",
+      "recurringGameName": "Bella Vista Hotel Tuesdays",
+      "expectedDate": "2025-12-16",
+      "venueId": "6316925d-1163-4b25-8d26-5728a03d99b8",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2025-05-20",
+        "2025-05-27",
+        "2025-06-03",
+        "2025-06-10",
+        "2025-06-17",
+        "2025-06-24",
+        "2025-07-01",
+        "2025-07-08",
+        "2025-07-15",
+        "2025-08-12"
+      ]
+    },
+    {
+      "instanceId": "8a6991bb-c988-45f3-bdc0-5863c48d0fe0",
+      "recurringGameId": "a956e2a5-5d64-49d3-b5d3-67ba3d334873",
+      "recurringGameName": "Bella Vista Hotel Tuesdays",
+      "expectedDate": "2026-02-03",
+      "venueId": "6316925d-1163-4b25-8d26-5728a03d99b8",
+      "reason": "NO_GAME_ON_DATE",
+      "availableDates": [
+        "2025-05-20",
+        "2025-05-27",
+        "2025-06-03",
+        "2025-06-10",
+        "2025-06-17",
+        "2025-06-24",
+        "2025-07-01",
+        "2025-07-08",
+        "2025-07-15",
+        "2025-08-12"
+      ]
+    }
+  ]
+}

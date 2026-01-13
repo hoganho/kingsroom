@@ -880,6 +880,21 @@
                 "arn:aws:dynamodb:ap-southeast-2:495599763953:table/Game-*/stream/*"
               ],
               "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Query",
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:495599763953:table/Game-*",
+                "arn:aws:dynamodb:ap-southeast-2:495599763953:table/Game-*/index/*"
+              ],
+              "Effect": "Allow"
             }
           ]
         },

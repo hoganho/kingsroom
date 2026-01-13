@@ -4,8 +4,8 @@
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
-      "Default": "NONE",
-      "Description": " Schedule Expression"
+      "Default": "cron(0 20 * * ? *)",
+      "Description": "Schedule Expression - Default: 20:00 UTC daily. Set to NONE to disable."
     },
     "deploymentBucketName": {
       "Type": "String"
@@ -40,6 +40,18 @@
           "Ref": "env"
         },
         "NONE"
+      ]
+    },
+    "CloudWatchRuleEnabled": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "CloudWatchRule"
+            },
+            "NONE"
+          ]
+        }
       ]
     }
   },
@@ -854,8 +866,9 @@
     },
     "CloudWatchEvent": {
       "Type": "AWS::Events::Rule",
+      "Condition": "CloudWatchRuleEnabled",
       "Properties": {
-        "Description": "Schedule rule for Lambda",
+        "Description": "Schedule rule for scraperManagement Lambda",
         "ScheduleExpression": {
           "Ref": "CloudWatchRule"
         },
@@ -877,6 +890,7 @@
     },
     "PermissionForEventsToInvokeLambda": {
       "Type": "AWS::Lambda::Permission",
+      "Condition": "CloudWatchRuleEnabled",
       "Properties": {
         "FunctionName": {
           "Ref": "LambdaFunction"
@@ -995,6 +1009,7 @@
       }
     },
     "CloudWatchEventRule": {
+      "Condition": "CloudWatchRuleEnabled",
       "Value": {
         "Ref": "CloudWatchEvent"
       }

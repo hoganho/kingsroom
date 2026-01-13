@@ -4,8 +4,8 @@
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
-      "Default": "NONE",
-      "Description": " Schedule Expression"
+      "Default": "cron(5 20 * * ? *)",
+      "Description": "Schedule Expression - Default: 20:05 UTC daily (5 mins after scraperManagement). Set to NONE to disable."
     },
     "deploymentBucketName": {
       "Type": "String"
@@ -36,6 +36,18 @@
           "Ref": "env"
         },
         "NONE"
+      ]
+    },
+    "CloudWatchRuleEnabled": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "CloudWatchRule"
+            },
+            "NONE"
+          ]
+        }
       ]
     }
   },
@@ -221,6 +233,32 @@
                 ]
               ]
             },
+            "API_KINGSROOM_TOURNAMENTSERIESSTABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TournamentSeriesTable:Name"
+              }
+            },
+            "API_KINGSROOM_TOURNAMENTSERIESSTABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TournamentSeriesTable:Name"
+                    }
+                  }
+                ]
+              ]
+            },
             "API_KINGSROOM_ENTITYMETRICSTABLE_NAME": {
               "Fn::ImportValue": {
                 "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:EntityMetricsTable:Name"
@@ -298,6 +336,32 @@
                   }
                 ]
               ]
+            },
+            "API_KINGSROOM_TOURNAMENTSERIESMETRICSTABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TournamentSeriesMetricsTable:Name"
+              }
+            },
+            "API_KINGSROOM_TOURNAMENTSERIESMETRICSTABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TournamentSeriesMetricsTable:Name"
+                    }
+                  }
+                ]
+              ]
             }
           }
         },
@@ -310,6 +374,48 @@
         "Runtime": "nodejs22.x",
         "Layers": [],
         "Timeout": 300
+      }
+    },
+    "CloudWatchEvent": {
+      "Type": "AWS::Events::Rule",
+      "Condition": "CloudWatchRuleEnabled",
+      "Properties": {
+        "Description": "Scheduled rule for refreshAllMetrics Lambda - runs 5 mins after scraperManagement",
+        "ScheduleExpression": {
+          "Ref": "CloudWatchRule"
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaFunction",
+                "Arn"
+              ]
+            },
+            "Id": {
+              "Ref": "LambdaFunction"
+            },
+            "Input": "{\"source\":\"aws.events\",\"triggerType\":\"SCHEDULED\",\"fullRefresh\":true}"
+          }
+        ]
+      }
+    },
+    "PermissionForEventsToInvokeLambda": {
+      "Type": "AWS::Lambda::Permission",
+      "Condition": "CloudWatchRuleEnabled",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "CloudWatchEvent",
+            "Arn"
+          ]
+        }
       }
     },
     "LambdaExecutionRole": {
@@ -791,6 +897,63 @@
             {
               "Effect": "Allow",
               "Action": [
+                "dynamodb:Get*",
+                "dynamodb:BatchGetItem",
+                "dynamodb:List*",
+                "dynamodb:Describe*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PartiQLSelect"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TournamentSeriesTable:Name"
+                        }
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TournamentSeriesTable:Name"
+                        }
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
                 "dynamodb:Put*",
                 "dynamodb:Create*",
                 "dynamodb:BatchWriteItem",
@@ -972,6 +1135,70 @@
                       {
                         "Fn::ImportValue": {
                           "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:RecurringGameMetricsTable:Name"
+                        }
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Put*",
+                "dynamodb:Create*",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:Get*",
+                "dynamodb:BatchGetItem",
+                "dynamodb:List*",
+                "dynamodb:Describe*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PartiQLSelect",
+                "dynamodb:Update*",
+                "dynamodb:RestoreTable*",
+                "dynamodb:PartiQLUpdate"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TournamentSeriesMetricsTable:Name"
+                        }
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TournamentSeriesMetricsTable:Name"
                         }
                       },
                       "/index/*"
@@ -1015,6 +1242,12 @@
           "LambdaExecutionRole",
           "Arn"
         ]
+      }
+    },
+    "CloudWatchEventRule": {
+      "Condition": "CloudWatchRuleEnabled",
+      "Value": {
+        "Ref": "CloudWatchEvent"
       }
     }
   }

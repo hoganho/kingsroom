@@ -1123,6 +1123,38 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
                 <span className="text-xs text-amber-600">(bypass S3 cache)</span>
               </label>
             )}
+
+            {/* Auto-Creation Options - Only show when Scrape + Save is selected */}
+            {scrapeFlow === 'scrape_save' && (
+              <>
+                <div className="w-full border-t border-gray-200 my-2" /> {/* Separator */}
+                
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={options.autoCreateSeries ?? true} 
+                    onChange={(e) => setOptions(o => ({ ...o, autoCreateSeries: e.target.checked }))} 
+                    disabled={isProcessing} 
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500" 
+                  />
+                  <span>Auto-Create Series</span>
+                  <span className="text-xs text-gray-500">(when pattern detected)</span>
+                </label>
+                
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={options.autoCreateRecurring ?? true} 
+                    onChange={(e) => setOptions(o => ({ ...o, autoCreateRecurring: e.target.checked }))} 
+                    disabled={isProcessing} 
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500" 
+                  />
+                  <span>Auto-Create Recurring</span>
+                  <span className="text-xs text-gray-500">(when pattern detected)</span>
+                </label>
+              </>
+            )}
+
           </div>
 
           {/* Venue Selection */}

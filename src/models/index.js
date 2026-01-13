@@ -523,7 +523,9 @@ const SeriesResolutionStatus = {
   "NOT_SERIES": "NOT_SERIES",
   "SKIPPED": "SKIPPED",
   "PENDING_REVIEW": "PENDING_REVIEW",
-  "FAILED": "FAILED"
+  "FAILED": "FAILED",
+  "NO_MATCH": "NO_MATCH",
+  "DEFERRED": "DEFERRED"
 };
 
 const RecurringResolutionStatus = {
@@ -532,7 +534,9 @@ const RecurringResolutionStatus = {
   "NOT_RECURRING": "NOT_RECURRING",
   "SKIPPED": "SKIPPED",
   "PENDING_REVIEW": "PENDING_REVIEW",
-  "FAILED": "FAILED"
+  "FAILED": "FAILED",
+  "NO_MATCH": "NO_MATCH",
+  "DEFERRED": "DEFERRED"
 };
 
 const SessionMode = {

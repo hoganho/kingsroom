@@ -65,10 +65,24 @@ function getWeekKey(dateStr) {
 }
 
 /**
- * Get day of week from date
+ * Get day of week from date IN AEST TIMEZONE
+ * 
+ * IMPORTANT: If passed a full datetime string, converts to AEST first!
+ * If passed just a date string (YYYY-MM-DD), treats it as AEST date.
  */
 function getDayOfWeek(dateStr) {
     const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    
+    // If it's a full datetime string, convert to AEST first
+    if (dateStr && dateStr.includes('T')) {
+        const aest = toAEST(dateStr);
+        if (aest) {
+            return days[aest.dayOfWeek];
+        }
+    }
+    
+    // For date-only strings (YYYY-MM-DD), treat as AEST date
+    // Add noon to avoid any edge cases
     const date = new Date(dateStr + 'T12:00:00Z');
     return days[date.getUTCDay()];
 }
@@ -132,11 +146,70 @@ function getExpectedDatesSimple(dayOfWeek, startDate, endDate) {
 }
 
 /**
- * Extract date from datetime string
+ * Convert a UTC date to AEST/AEDT and return date components
+ * (Copied from date-utils.js for self-contained use)
+ */
+function toAEST(utcDate) {
+    const AEST_OFFSET_HOURS = 10;
+    const AEDT_OFFSET_HOURS = 11;
+    
+    const d = typeof utcDate === 'string' ? new Date(utcDate) : new Date(utcDate);
+    
+    if (isNaN(d.getTime())) {
+        return null;
+    }
+    
+    // Check if date falls within AEDT (first Sunday in October to first Sunday in April)
+    const month = d.getUTCMonth();
+    let isAEDT = false;
+    if (month >= 3 && month <= 8) {
+        isAEDT = false;
+    } else if (month >= 10 || month <= 1) {
+        isAEDT = true;
+    } else {
+        const dayOfMonth = d.getUTCDate();
+        if (month === 9) {
+            isAEDT = dayOfMonth >= 7;
+        } else {
+            isAEDT = true;
+        }
+    }
+    
+    const offset = isAEDT ? AEDT_OFFSET_HOURS : AEST_OFFSET_HOURS;
+    
+    // Add offset to get AEST/AEDT time
+    const aestTime = new Date(d.getTime() + (offset * 60 * 60 * 1000));
+    
+    return {
+        year: aestTime.getUTCFullYear(),
+        month: aestTime.getUTCMonth(),
+        day: aestTime.getUTCDate(),
+        hours: aestTime.getUTCHours(),
+        minutes: aestTime.getUTCMinutes(),
+        dayOfWeek: aestTime.getUTCDay(),
+        isoDate: `${aestTime.getUTCFullYear()}-${String(aestTime.getUTCMonth() + 1).padStart(2, '0')}-${String(aestTime.getUTCDate()).padStart(2, '0')}`
+    };
+}
+
+/**
+ * Extract date from datetime string IN AEST TIMEZONE
+ * 
+ * IMPORTANT: This converts to AEST before extracting the date!
+ * A game at 8:00 AM AEST on Wednesday = 9:00 PM Tuesday UTC
+ * We need the AEST date (Wednesday), not the UTC date (Tuesday)
  */
 function extractDate(dateTimeStr) {
     if (!dateTimeStr) return null;
-    return dateTimeStr.split('T')[0];
+    
+    // Convert to AEST and extract the date
+    const aest = toAEST(dateTimeStr);
+    if (!aest) {
+        // Fallback to UTC if conversion fails
+        console.warn('[extractDate] Failed to convert to AEST, falling back to UTC:', dateTimeStr);
+        return dateTimeStr.split('T')[0];
+    }
+    
+    return aest.isoDate;
 }
 
 // ============================================================================
@@ -1202,6 +1275,51 @@ async function createConfirmedInstance({ recurringGame, game, matchConfidence })
 }
 
 // ============================================================================
+// UPDATE INSTANCE GAME ID (for post-save linkage)
+// ============================================================================
+
+/**
+ * Update an instance's gameId after the game has been saved
+ * Called by the enricher after saveGameFunction returns with the actual gameId
+ * 
+ * This is needed because createConfirmedInstance is called during recurring
+ * resolution (Step 5), but the game doesn't have an ID until it's saved (Step 8).
+ * 
+ * @param {string} instanceId - The instance ID to update
+ * @param {string} gameId - The actual game ID from the save result
+ * @returns {Promise<boolean>} Whether the update succeeded
+ */
+async function updateInstanceGameId(instanceId, gameId) {
+    if (!instanceId || !gameId) {
+        console.warn('[updateInstanceGameId] Missing instanceId or gameId');
+        return false;
+    }
+    
+    console.log(`[updateInstanceGameId] Updating instance ${instanceId} with gameId ${gameId}`);
+    
+    const docClient = getDocClient();
+    const instanceTable = getTableName('RecurringGameInstance');
+    
+    try {
+        await docClient.send(new UpdateCommand({
+            TableName: instanceTable,
+            Key: { id: instanceId },
+            UpdateExpression: 'SET gameId = :gameId, updatedAt = :now',
+            ExpressionAttributeValues: {
+                ':gameId': gameId,
+                ':now': new Date().toISOString(),
+            },
+        }));
+        
+        console.log(`[updateInstanceGameId] Successfully updated instance ${instanceId}`);
+        return true;
+    } catch (error) {
+        console.error('[updateInstanceGameId] Error:', error);
+        return false;
+    }
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -1223,8 +1341,9 @@ module.exports = {
     
     // For resolver use
     createConfirmedInstance,
+    updateInstanceGameId,
     
-    // Utilities (exported for use by other modules)
+    // Utilities
     getWeekKey,
     getDayOfWeek,
     getExpectedDates,

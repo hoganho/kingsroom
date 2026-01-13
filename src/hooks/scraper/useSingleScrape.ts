@@ -491,12 +491,17 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
     scraperLogger.info('ITEM_SAVING', 'Saving tournament', { tournamentId: idToUse });
 
     try {
+      // UPDATED: Pass autoCreateSeries and autoCreateRecurring from options
       const saveResult = await saveGameDataToBackend(
         urlToUse,
         venueId,
         dataToSave,
         null,
-        entityId
+        entityId,
+        {
+          autoCreateSeries: options.autoCreateSeries ?? true,
+          autoCreateRecurring: options.autoCreateRecurring ?? true,
+        }
       );
 
       const gameId = saveResult.gameId || undefined;
@@ -531,7 +536,7 @@ export const useSingleScrape = (config: UseSingleScrapeConfig): UseSingleScrapeR
       
       return { success: false };
     }
-  }, [result, entityId, updateResult]);
+  }, [result, entityId, options, updateResult]); 
 
   // =========================================================================
   // RESET - Clear state for new processing

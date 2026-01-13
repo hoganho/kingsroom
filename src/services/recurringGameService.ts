@@ -100,6 +100,8 @@ const listRecurringGamesQuery = /* GraphQL */ `
                 totalInstancesRun
                 notes
                 adminNotes
+                firstGameDate
+                lastGameDate
                 _version
                 _lastChangedAt
                 createdAt
@@ -350,6 +352,13 @@ const DAY_KEYWORDS: Record<string, string> = {
 // ============================================================================
 // TYPES
 // ============================================================================
+
+export interface DateRangeFromFirstGameResult {
+    success: boolean;
+    startDate: string;
+    endDate: string;
+    error?: string;
+}
 
 export interface AdminThresholds {
     highConfidence: number;
@@ -841,6 +850,60 @@ export const listInstancesNeedingReview = async (
     } catch (error) {
         console.error('[listInstancesNeedingReview] Exception:', error);
         throw error;
+    }
+};
+
+/**
+ * Get date range from first game to today for a venue
+ * Uses the firstGameDate from recurring games (populated by migration script)
+ * 
+ * Prerequisites: Run migrate-backfill-firstGameDate.mjs to populate firstGameDate
+ */
+export const getDateRangeFromFirstGame = async (
+    venueId: string
+): Promise<DateRangeFromFirstGameResult> => {
+    try {
+        console.log('[getDateRangeFromFirstGame] Request:', { venueId });
+        
+        // Get recurring games for this venue to find the earliest firstGameDate
+        const recurringGames = await fetchRecurringGamesByVenue(venueId);
+        
+        // Find the earliest firstGameDate among all recurring games
+        // firstGameDate is AWSDateTime (ISO format), extract date portion for comparison
+        const firstDates = recurringGames
+            .map(rg => rg.firstGameDate)
+            .filter((d): d is string => !!d)
+            .map(d => d.split('T')[0]) // Extract YYYY-MM-DD from ISO datetime
+            .sort();
+        
+        if (firstDates.length === 0) {
+            console.log('[getDateRangeFromFirstGame] No firstGameDate found, run migration script first');
+            return {
+                success: false,
+                startDate: '',
+                endDate: '',
+                error: 'No firstGameDate found on recurring games. Run the migration script: node migrate-backfill-firstGameDate.mjs --execute'
+            };
+        }
+        
+        const earliestDate = firstDates[0];
+        const today = new Date().toISOString().split('T')[0];
+        
+        console.log(`[getDateRangeFromFirstGame] Found range: ${earliestDate} to ${today}`);
+        
+        return {
+            success: true,
+            startDate: earliestDate,
+            endDate: today
+        };
+    } catch (error) {
+        console.error('[getDateRangeFromFirstGame] Exception:', error);
+        return {
+            success: false,
+            startDate: '',
+            endDate: '',
+            error: error instanceof Error ? error.message : 'Failed to get first game date'
+        };
     }
 };
 

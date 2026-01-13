@@ -571,6 +571,8 @@ enum SeriesResolutionStatus {
   SKIPPED               # Resolution was skipped (per options)
   PENDING_REVIEW        # Needs manual review (low confidence)
   FAILED                # Resolution failed (error)
+  NO_MATCH              # No matching series found (autoCreate disabled)
+  DEFERRED              # Creation deferred pending pattern confirmation
 }
 
 enum RecurringResolutionStatus {
@@ -580,4 +582,6 @@ enum RecurringResolutionStatus {
   SKIPPED               # Resolution was skipped (per options)
   PENDING_REVIEW        # Needs manual review (low confidence)
   FAILED                # Resolution failed (error)
+  NO_MATCH              # No matching recurring game found (autoCreate disabled)
+  DEFERRED              # Creation deferred pending pattern confirmation
 }

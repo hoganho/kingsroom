@@ -1,7 +1,7 @@
 # 31-recurring-games.graphql
 # ===================================================================
 # RECURRING GAMES
-# VERSION 3.2.0 - Based on working schema + bulk processing operations
+# VERSION 3.3.0 - Added firstGameDate for schedule generation
 # ===================================================================
 
 type RecurringGame
@@ -62,6 +62,8 @@ type RecurringGame
   isPaused: Boolean @default(value: "false") 
   pausedReason: String 
   
+  # NEW: Track first and last game dates for schedule generation
+  firstGameDate: AWSDateTime        # DateTime of earliest game assigned to this template
   lastGameDate: AWSDateTime 
   nextScheduledDate: AWSDateTime 
   expectedInstanceCount: Int 

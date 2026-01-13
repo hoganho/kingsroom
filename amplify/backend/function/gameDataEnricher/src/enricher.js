@@ -13,7 +13,7 @@
  * - Added classification field derivation (variant, bettingStructure, buyInTier, sessionMode)
  * - Uses entryStructure (not tournamentStructure) to avoid @model conflict
  * - Uses cashRakeType (not rakeStructure) to avoid @model conflict
- * 
+ *  
  * This is the core of the enricher - it coordinates:
  * 1. Validation
  * 2. Data completion
@@ -418,7 +418,10 @@ const enrichGameData = async (input) => {
       const recurringResult = await resolveRecurringAssignment({
         game: enrichedGame,
         entityId,
-        autoCreate: options.autoCreateRecurring === true
+        autoCreate: options.autoCreateRecurring === true,
+        // When saving (autoCreate=true), don't require pattern confirmation
+        // so recurring games are created immediately on first occurrence
+        requirePatternConfirmation: options.autoCreateRecurring !== true
       });
       
       // Apply recurring updates to game
@@ -626,6 +629,29 @@ const enrichGameData = async (input) => {
           });
         } else {
           console.log(`[ENRICHER] Save successful: ${saveResult.action} (gameId: ${saveResult.gameId})`);
+          
+          // Update instance with actual gameId now that the game is saved
+          // This is needed because instance was created during recurring resolution
+          // (Step 5) before the game had an ID
+          if (saveResult.gameId && result.enrichmentMetadata.recurringResolution?.instance?.instanceId) {
+            try {
+              const { updateInstanceGameId } = require('./resolution/instance-manager');
+              const instanceId = result.enrichmentMetadata.recurringResolution.instance.instanceId;
+              const updated = await updateInstanceGameId(instanceId, saveResult.gameId);
+              if (updated) {
+                console.log(`[ENRICHER] Updated instance ${instanceId} with gameId ${saveResult.gameId}`);
+                result.enrichmentMetadata.recurringResolution.instance.gameId = saveResult.gameId;
+              }
+            } catch (instanceUpdateError) {
+              console.warn('[ENRICHER] Failed to update instance gameId (non-fatal):', instanceUpdateError.message);
+            }
+          }
+          
+          // Also update the enrichedGame with the saved gameId for consistency
+          if (saveResult.gameId) {
+            enrichedGame.id = saveResult.gameId;
+            result.enrichedGame = enrichedGame;
+          }
         }
         
       } catch (saveError) {

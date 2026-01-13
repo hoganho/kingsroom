@@ -58,12 +58,11 @@ export interface ScrapeOptions {
   overrideExisting: boolean;
   skipNotPublished: boolean;
   skipNotFoundGaps: boolean;
-  /** 
-   * NEW v3.1: Force live web fetch for refresh mode (bypass S3 cache)
-   * When enabled with refresh mode, all unfinished games will be re-fetched from live web
-   * instead of using S3 cache, ensuring the most up-to-date standings and player counts.
-   */
   forceRefreshFromWeb: boolean;
+    /** Auto-create TournamentSeries when pattern detected (default: true) */
+  autoCreateSeries: boolean;
+  /** Auto-create RecurringGame when pattern detected (default: true) */
+  autoCreateRecurring: boolean;
 }
 
 export interface IdSelectionParams {
@@ -86,7 +85,9 @@ export const DEFAULT_SCRAPE_OPTIONS: ScrapeOptions = {
   overrideExisting: false,
   skipNotPublished: true,
   skipNotFoundGaps: true,
-  forceRefreshFromWeb: false,  // NEW v3.1: Default to using S3 cache
+  forceRefreshFromWeb: false,
+  autoCreateSeries: true,
+  autoCreateRecurring: true,
 };
 
 export const DEFAULT_ID_SELECTION_PARAMS: IdSelectionParams = {
@@ -170,6 +171,10 @@ export interface BatchJobInput {
   saveToDatabase?: boolean;
   defaultVenueId?: string;
   
+  // === NEW: Auto-creation options ===
+  autoCreateSeries?: boolean;
+  autoCreateRecurring?: boolean;
+
   // Mode-specific parameters
   bulkCount?: number;
   startId?: number;
@@ -729,8 +734,9 @@ export const buildBatchJobInput = (
     ignoreDoNotScrape: options.ignoreDoNotScrape,
     saveToDatabase,
     defaultVenueId: defaultVenueId || undefined,
-    ...thresholds,
-  };
+    autoCreateSeries: options.autoCreateSeries,
+    autoCreateRecurring: options.autoCreateRecurring,
+    ...thresholds,  };
 
   // Add mode-specific parameters
   switch (mode) {

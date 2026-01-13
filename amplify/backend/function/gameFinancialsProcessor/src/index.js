@@ -661,6 +661,8 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
         const existingSnapshot = existingQuery.Items?.[0];
         
         const snapshotId = existingSnapshot?.id || uuidv4();
+        
+        // Build item, excluding null/undefined values for GSI partition keys
         const item = {
             ...snapshotData,
             id: snapshotId,
@@ -669,6 +671,15 @@ const saveGameFinancialSnapshot = async (snapshotData, costSaveResult) => {
             createdAt: existingSnapshot?.createdAt || now,
             updatedAt: now
         };
+        
+        // Remove null/undefined GSI partition keys to avoid DynamoDB validation errors
+        // These indexes use these fields as partition keys which cannot be null
+        if (item.recurringGameId === null || item.recurringGameId === undefined) {
+            delete item.recurringGameId;
+        }
+        if (item.tournamentSeriesId === null || item.tournamentSeriesId === undefined) {
+            delete item.tournamentSeriesId;
+        }
         
         await ddbDocClient.send(new PutCommand({
             TableName: tableName,

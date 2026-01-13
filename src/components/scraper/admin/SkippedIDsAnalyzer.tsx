@@ -1,6 +1,6 @@
 // src/components/scraper/admin/SkippedIDsAnalyzer.tsx
 // Modernized version using useGameIdTracking hook with server-side gap detection
-// UPDATED: Added skipNotPublished checkbox to exclude NOT_PUBLISHED IDs from gaps
+// UPDATED: Added URL Status Grid button for visual ID visualization
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { 
@@ -12,7 +12,8 @@ import {
     RefreshCw,
     TrendingUp,
     Database,
-    Clock
+    Clock,
+    Grid3X3
 } from 'lucide-react';
 import { 
     useGameIdTracking,
@@ -21,6 +22,7 @@ import {
     type GapRange 
 } from '../../../hooks/useGameIdTracking';
 import { useEntity } from '../../../contexts/EntityContext';
+import { URLStatusGrid } from './URLStatusGrid';
 
 export const SkippedIDsAnalyzer: React.FC = () => {
     const { currentEntity } = useEntity();
@@ -29,6 +31,7 @@ export const SkippedIDsAnalyzer: React.FC = () => {
     const [customRange, setCustomRange] = useState({ start: '', end: '' });
     const [forceRefresh, setForceRefresh] = useState(false);
     const [skipNotPublished, setSkipNotPublished] = useState(true); // Default to skip NOT_PUBLISHED
+    const [showStatusGrid, setShowStatusGrid] = useState(false);
     
     // Use the new hook
     const {
@@ -154,161 +157,111 @@ export const SkippedIDsAnalyzer: React.FC = () => {
         <div className="space-y-4">
             {/* Analysis Controls */}
             <div className="bg-white rounded-lg shadow p-4">
-                <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <Database className="h-5 w-5 mr-2 text-blue-600" />
-                    Tournament ID Gap Analysis
-                    <span className="ml-2 text-xs font-normal text-gray-500">
-                        (Powered by server-side processing)
-                    </span>
-                </h3>
-                
-                <div className="space-y-4">
-                    <div className="flex items-end space-x-3">
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                ID Range (optional)
-                            </label>
-                            <div className="flex space-x-2">
-                                <input
-                                    type="number"
-                                    placeholder="Start ID"
-                                    value={customRange.start}
-                                    onChange={(e) => setCustomRange(prev => ({ ...prev, start: e.target.value }))}
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
-                                    disabled={loading}
-                                />
-                                <span className="flex items-center px-2">to</span>
-                                <input
-                                    type="number"
-                                    placeholder="End ID"
-                                    value={customRange.end}
-                                    onChange={(e) => setCustomRange(prev => ({ ...prev, end: e.target.value }))}
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
-                                    disabled={loading}
-                                />
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">
-                                Leave empty to analyze the full range of stored tournaments
-                            </p>
-                        </div>
-                        
-                        <div className="flex flex-col space-y-2">
-                            <div className="flex space-x-4">
-                                <label className="flex items-center text-sm text-gray-600">
-                                    <input
-                                        type="checkbox"
-                                        checked={forceRefresh}
-                                        onChange={(e) => setForceRefresh(e.target.checked)}
-                                        className="mr-2"
-                                        disabled={loading}
-                                    />
-                                    Force Refresh
-                                </label>
-                                <label className="flex items-center text-sm text-gray-600">
-                                    <input
-                                        type="checkbox"
-                                        checked={skipNotPublished}
-                                        onChange={(e) => setSkipNotPublished(e.target.checked)}
-                                        className="mr-2"
-                                        disabled={loading}
-                                    />
-                                    Skip NOT_PUBLISHED
-                                </label>
-                            </div>
-                            <button
-                                onClick={handleAnalyze}
-                                disabled={loading || !currentEntity}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                            >
-                                {loading ? (
-                                    <>
-                                        <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                        </svg>
-                                        Analyzing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Search className="h-4 w-4 mr-2" />
-                                        Analyze
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold flex items-center">
+                        <Database className="h-5 w-5 mr-2 text-blue-600" />
+                        Tournament ID Gap Analysis
+                        <span className="ml-2 text-xs font-normal text-gray-500">
+                            (Powered by server-side processing)
+                        </span>
+                    </h3>
                     
-                    {/* Skip NOT_PUBLISHED explanation */}
-                    {skipNotPublished && (
-                        <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
-                            <strong>Skip NOT_PUBLISHED:</strong> Tournament IDs that were previously scraped but found to be 
-                            NOT_PUBLISHED will not appear as gaps. Uncheck to see all missing IDs regardless of previous scrape results.
-                        </div>
-                    )}
-                    
-                    {!currentEntity && (
-                        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
-                            <p className="text-sm text-yellow-800">Please select an entity to analyze tournament ID gaps</p>
-                        </div>
-                    )}
-                    
-                    {error && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded">
-                            <p className="text-sm text-red-800">{error.message}</p>
-                        </div>
-                    )}
+                    {/* URL Status Grid Button */}
+                    <button
+                        onClick={() => setShowStatusGrid(true)}
+                        className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                        <Grid3X3 className="h-4 w-4" />
+                        Visual Grid
+                    </button>
                 </div>
+                
+                {/* Custom Range Inputs */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label className="block text-sm text-gray-600 mb-1">Start ID (optional)</label>
+                        <input
+                            type="number"
+                            value={customRange.start}
+                            onChange={(e) => setCustomRange(prev => ({ ...prev, start: e.target.value }))}
+                            placeholder="e.g., 1000"
+                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm text-gray-600 mb-1">End ID (optional)</label>
+                        <input
+                            type="number"
+                            value={customRange.end}
+                            onChange={(e) => setCustomRange(prev => ({ ...prev, end: e.target.value }))}
+                            placeholder="e.g., 2000"
+                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
+                    <div className="flex items-end">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={skipNotPublished}
+                                onChange={(e) => setSkipNotPublished(e.target.checked)}
+                                className="h-4 w-4 text-blue-600 rounded"
+                            />
+                            <span className="text-sm text-gray-700">Skip NOT_PUBLISHED</span>
+                        </label>
+                    </div>
+                    <div className="flex items-end gap-2">
+                        <button
+                            onClick={handleAnalyze}
+                            disabled={loading || !currentEntity}
+                            className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                                <Search className="h-4 w-4 mr-2" />
+                            )}
+                            Analyze Gaps
+                        </button>
+                    </div>
+                </div>
+                
+                {error && (
+                    <div className="p-3 bg-red-50 text-red-700 rounded-lg mb-4">
+                        <AlertTriangle className="h-4 w-4 inline mr-2" />
+                        {error.message}
+                    </div>
+                )}
             </div>
             
             {/* Results */}
             {scrapingStatus && (
                 <div className="bg-white rounded-lg shadow p-4">
-                    {/* Summary Stats */}
-                    <div className="grid grid-cols-4 gap-4 mb-6">
-                        <div className="p-4 bg-blue-50 rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-blue-600">Total Games</span>
-                                <Database className="h-4 w-4 text-blue-600" />
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div className="p-3 bg-blue-50 rounded-lg">
+                            <div className="text-2xl font-bold text-blue-600">
+                                {scrapingStatus.totalGamesStored.toLocaleString()}
                             </div>
-                            <p className="text-2xl font-bold text-blue-700">{scrapingStatus.totalGamesStored}</p>
-                            <p className="text-xs text-blue-600 mt-1">
-                                IDs: {scrapingStatus.lowestTournamentId} - {scrapingStatus.highestTournamentId}
-                            </p>
+                            <div className="text-xs text-gray-600">Total Games Stored</div>
                         </div>
-                        
-                        <div className="p-4 bg-green-50 rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-green-600">Coverage</span>
-                                <TrendingUp className="h-4 w-4 text-green-600" />
+                        <div className="p-3 bg-orange-50 rounded-lg">
+                            <div className="text-2xl font-bold text-orange-600">
+                                {scrapingStatus.gapSummary.totalMissingIds.toLocaleString()}
                             </div>
-                            <p className="text-2xl font-bold text-green-700">
+                            <div className="text-xs text-gray-600">Missing IDs</div>
+                        </div>
+                        <div className="p-3 bg-purple-50 rounded-lg">
+                            <div className="text-2xl font-bold text-purple-600">
+                                {scrapingStatus.gapSummary.totalGaps.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-gray-600">Gap Ranges</div>
+                        </div>
+                        <div className="p-3 bg-green-50 rounded-lg">
+                            <div className="text-2xl font-bold text-green-600 flex items-center">
+                                <TrendingUp className="h-5 w-5 mr-1" />
                                 {scrapingStatus.gapSummary.coveragePercentage.toFixed(1)}%
-                            </p>
-                            <p className="text-xs text-green-600 mt-1">of ID range</p>
-                        </div>
-                        
-                        <div className="p-4 bg-yellow-50 rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-yellow-600">Missing IDs</span>
-                                <AlertTriangle className="h-4 w-4 text-yellow-600" />
                             </div>
-                            <p className="text-2xl font-bold text-yellow-700">
-                                {scrapingStatus.gapSummary.totalMissingIds}
-                            </p>
-                            <p className="text-xs text-yellow-600 mt-1">
-                                in {scrapingStatus.gapSummary.totalGaps} gaps
-                            </p>
-                        </div>
-                        
-                        <div className="p-4 bg-purple-50 rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-purple-600">Unfinished</span>
-                                <Clock className="h-4 w-4 text-purple-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-purple-700">
-                                {scrapingStatus.unfinishedGameCount}
-                            </p>
-                            <p className="text-xs text-purple-600 mt-1">games in progress</p>
+                            <div className="text-xs text-gray-600">Coverage</div>
                         </div>
                     </div>
                     
@@ -468,6 +421,12 @@ export const SkippedIDsAnalyzer: React.FC = () => {
                     </div>
                 </div>
             )}
+            
+            {/* URL Status Grid Modal */}
+            <URLStatusGrid 
+                isOpen={showStatusGrid} 
+                onClose={() => setShowStatusGrid(false)} 
+            />
         </div>
     );
 };

@@ -128,12 +128,60 @@ const RECURRING_GAME_METRICS_TABLE = getTableName('RecurringGameMetrics');
 const TOURNAMENT_SERIES_METRICS_TABLE = getTableName('TournamentSeriesMetrics');
 
 // ============================================
-// MAIN HANDLER
+// MAIN HANDLER (Updated for EventBridge Support)
 // ============================================
+// VERSION: 2.2.0 - Added EventBridge/CloudWatch scheduled trigger support
+//
+// INVOCATION SOURCES:
+// 1. GraphQL Mutation (from MetricsManagement page): event.arguments.input
+// 2. EventBridge Scheduled Rule: event.source === 'aws.events' || event.triggerType === 'SCHEDULED'
+// 3. Direct Lambda Invoke: event.input
+//
+// When triggered by EventBridge, performs a FULL refresh with all time ranges,
+// all series types, and all metric types enabled.
 
 exports.handler = async (event) => {
-  console.log('[METRICS] Starting metrics refresh v2.0.0', JSON.stringify(event, null, 2));
+  console.log('[METRICS] Starting metrics refresh v2.2.0', JSON.stringify(event, null, 2));
   
+  // ============================================
+  // DETECT INVOCATION SOURCE
+  // ============================================
+  const isEventBridgeTrigger = 
+    event.source === 'aws.events' || 
+    event['detail-type'] === 'Scheduled Event' ||
+    event.triggerType === 'SCHEDULED';
+  
+  const isGraphQLTrigger = !!event.arguments?.input;
+  const isDirectInvoke = !!event.input && !isEventBridgeTrigger;
+  
+  console.log('[METRICS] Invocation source:', {
+    isEventBridgeTrigger,
+    isGraphQLTrigger,
+    isDirectInvoke,
+    eventSource: event.source,
+    detailType: event['detail-type']
+  });
+
+  // ============================================
+  // CONFIGURATION DEFAULTS
+  // ============================================
+  
+  // Default configuration for scheduled (EventBridge) runs - FULL REFRESH
+  const SCHEDULED_DEFAULTS = {
+    entityId: null,
+    venueId: null,
+    recurringGameId: null,
+    tournamentSeriesId: null,
+    timeRanges: ['ALL', '12M', '6M', '3M', '1M'],
+    seriesTypes: ['ALL', 'SERIES', 'REGULAR'],
+    includeEntityMetrics: true,
+    includeVenueMetrics: true,
+    includeRecurringGameMetrics: true,
+    includeTournamentSeriesMetrics: true,
+    dryRun: false,
+    verbose: false
+  };
+
   // LOGGING: Debug Configuration
   console.log('[METRICS] Configuration:', {
     Tables: {
@@ -158,26 +206,68 @@ exports.handler = async (event) => {
     };
   }
 
-  // Parse input
-  const input = event.arguments?.input || event.input || {};
+  // ============================================
+  // PARSE INPUT BASED ON SOURCE
+  // ============================================
+  let input = {};
+  
+  if (isEventBridgeTrigger) {
+    // EventBridge trigger - use scheduled defaults, but allow override via event.input
+    console.log('[METRICS] EventBridge scheduled trigger detected - using full refresh defaults');
+    input = { 
+      ...SCHEDULED_DEFAULTS, 
+      ...(event.input || {}),
+      // Mark this as a scheduled run for logging/tracking
+      _triggeredBy: 'EVENTBRIDGE_SCHEDULE',
+      _scheduledAt: event.time || new Date().toISOString()
+    };
+  } else if (isGraphQLTrigger) {
+    // GraphQL mutation from MetricsManagement page
+    input = event.arguments.input || {};
+    input._triggeredBy = 'GRAPHQL_MUTATION';
+  } else if (isDirectInvoke) {
+    // Direct Lambda invoke
+    input = event.input || {};
+    input._triggeredBy = 'DIRECT_INVOKE';
+  } else {
+    // Fallback - treat as scheduled with defaults
+    console.log('[METRICS] Unknown trigger source - using scheduled defaults');
+    input = { ...SCHEDULED_DEFAULTS, _triggeredBy: 'UNKNOWN' };
+  }
+
   const {
     entityId = null,
     venueId = null,
     recurringGameId = null,
     tournamentSeriesId = null,
     timeRanges = TIME_RANGES,
-    seriesTypes = SERIES_TYPES.map(st => st.key), // Allow filtering which series types to calculate
+    seriesTypes = SERIES_TYPES.map(st => st.key),
     includeEntityMetrics = true,
     includeVenueMetrics = true,
     includeRecurringGameMetrics = true,
     includeTournamentSeriesMetrics = true,
     dryRun = false,
-    verbose = false
+    verbose = false,
+    _triggeredBy = 'UNKNOWN'
   } = input;
+
+  console.log('[METRICS] Parsed configuration:', {
+    triggeredBy: _triggeredBy,
+    entityId,
+    venueId,
+    timeRanges,
+    seriesTypes,
+    includeEntityMetrics,
+    includeVenueMetrics,
+    includeRecurringGameMetrics,
+    includeTournamentSeriesMetrics,
+    dryRun
+  });
 
   const result = {
     success: true,
     message: '',
+    triggeredBy: _triggeredBy,
     entityMetricsUpdated: 0,
     venueMetricsUpdated: 0,
     recurringGameMetricsUpdated: 0,
@@ -191,7 +281,7 @@ exports.handler = async (event) => {
     errors: [],
     warnings: [],
     refreshedAt: new Date().toISOString(),
-    // New: breakdown by series type
+    // Breakdown by series type
     bySeriesType: {
       ALL: { entity: 0, venue: 0, recurringGame: 0 },
       SERIES: { entity: 0, venue: 0, tournamentSeries: 0 },

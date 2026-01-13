@@ -372,7 +372,10 @@ const SeriesResolutionStatus = {
   CREATED_NEW: 'CREATED_NEW',
   NOT_SERIES: 'NOT_SERIES',
   SKIPPED: 'SKIPPED',
-  FAILED: 'FAILED'
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  FAILED: 'FAILED',
+  NO_MATCH: 'NO_MATCH',
+  DEFERRED: 'DEFERRED'
 };
 
 const RecurringResolutionStatus = {
@@ -380,8 +383,12 @@ const RecurringResolutionStatus = {
   CREATED_NEW: 'CREATED_NEW',
   NOT_RECURRING: 'NOT_RECURRING',
   SKIPPED: 'SKIPPED',
-  FAILED: 'FAILED'
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  FAILED: 'FAILED',
+  NO_MATCH: 'NO_MATCH',
+  DEFERRED: 'DEFERRED'
 };
+
 
 // ===================================================================
 // DEFAULT VALUES

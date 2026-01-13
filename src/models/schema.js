@@ -4568,6 +4568,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "firstGameDate": {
+                    "name": "firstGameDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "lastGameDate": {
                     "name": "lastGameDate",
                     "isArray": false,
@@ -17613,7 +17620,9 @@ export const schema = {
                 "NOT_SERIES",
                 "SKIPPED",
                 "PENDING_REVIEW",
-                "FAILED"
+                "FAILED",
+                "NO_MATCH",
+                "DEFERRED"
             ]
         },
         "RecurringResolutionStatus": {
@@ -17624,7 +17633,9 @@ export const schema = {
                 "NOT_RECURRING",
                 "SKIPPED",
                 "PENDING_REVIEW",
-                "FAILED"
+                "FAILED",
+                "NO_MATCH",
+                "DEFERRED"
             ]
         },
         "SessionMode": {
@@ -29421,5 +29432,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "e4916ee81d8417ecf27377a5d89b89a1"
+    "version": "1f85c5a22db48aa85ca22ad5b17de83e"
 };

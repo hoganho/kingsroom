@@ -16,6 +16,8 @@
  * - getEffectiveBuyIn: Returns the value to compare against (average or typical)
  * - calculateTrend: Determines if values are increasing/decreasing/stable
  * 
+ * VERSION: 3.1.0 - Added firstGameDate tracking
+ * 
  * Location: amplify/backend/function/gameDataEnricher/src/utils/recurring-game-stats.js
  *           (also copy to recurringGameAdmin/src/)
  */
@@ -74,6 +76,38 @@ const calculateAverage = (history) => {
 };
 
 // ===================================================================
+// DATE COMPARISON HELPERS
+// ===================================================================
+
+/**
+ * Compare two datetime strings and return the earlier one
+ * @param {string} date1 - DateTime string (ISO format)
+ * @param {string} date2 - DateTime string (ISO format)
+ * @returns {string} The earlier datetime
+ */
+const getEarlierDateTime = (date1, date2) => {
+    if (!date1) return date2;
+    if (!date2) return date1;
+    
+    // Compare as strings (ISO format sorts correctly)
+    return date1 < date2 ? date1 : date2;
+};
+
+/**
+ * Compare two datetime strings and return the later one
+ * @param {string} date1 - DateTime string (ISO format)
+ * @param {string} date2 - DateTime string (ISO format)
+ * @returns {string} The later datetime
+ */
+const getLaterDateTime = (date1, date2) => {
+    if (!date1) return date2;
+    if (!date2) return date1;
+    
+    // Compare as strings (ISO format sorts correctly)
+    return date1 > date2 ? date1 : date2;
+};
+
+// ===================================================================
 // MAIN UPDATE FUNCTION
 // ===================================================================
 
@@ -114,7 +148,9 @@ const updateRecurringGameStats = async ({ recurringGameId, game, existingRecurri
         }
         
         const evolutionWindow = recurringGame.evolutionWindow || DEFAULT_EVOLUTION_WINDOW;
-        const gameDate = game.gameStartDateTime?.split('T')[0] || new Date().toISOString().split('T')[0];
+        // Use full ISO datetime from gameStartDateTime
+        const gameDateTime = game.gameStartDateTime || new Date().toISOString();
+        const gameDate = gameDateTime.split('T')[0]; // For history tracking
         
         // Parse existing history (stored as JSON strings)
         let recentBuyIns = parseHistory(recurringGame.recentBuyIns);
@@ -158,7 +194,7 @@ const updateRecurringGameStats = async ({ recurringGameId, game, existingRecurri
         const guaranteeTrend = calculateTrend(recentGuarantees);
         const entriesTrend = calculateTrend(recentEntries);
         
-        // Build update
+        // Build update - use full ISO datetime for both date fields
         const updates = {
             averageBuyIn: Math.round(averageBuyIn),
             averageGuarantee: Math.round(averageGuarantee),
@@ -171,8 +207,10 @@ const updateRecurringGameStats = async ({ recurringGameId, game, existingRecurri
             guaranteeTrend,
             entriesTrend,
             lastStatsUpdate: new Date().toISOString(),
-            // Update last game date
-            lastGameDate: gameDate > (recurringGame.lastGameDate || '2000-01-01') ? gameDate : recurringGame.lastGameDate,
+            // Update last game date (keep the later datetime)
+            lastGameDate: getLaterDateTime(gameDateTime, recurringGame.lastGameDate),
+            // Update first game date (keep the earlier datetime)
+            firstGameDate: getEarlierDateTime(gameDateTime, recurringGame.firstGameDate),
             // Increment instance count
             totalInstancesRun: (recurringGame.totalInstancesRun || 0) + 1
         };
@@ -189,7 +227,7 @@ const updateRecurringGameStats = async ({ recurringGameId, game, existingRecurri
         // Apply update to DynamoDB
         await updateRecurringGame(recurringGameId, updates);
         
-        console.log(`[STATS] Updated: avgBuyIn=$${averageBuyIn}, avgGtd=$${averageGuarantee}, trend=${buyInTrend}`);
+        console.log(`[STATS] Updated: avgBuyIn=$${averageBuyIn}, avgGtd=$${averageGuarantee}, trend=${buyInTrend}, firstGameDate=${updates.firstGameDate}, lastGameDate=${updates.lastGameDate}`);
         
         return {
             success: true,
@@ -199,57 +237,62 @@ const updateRecurringGameStats = async ({ recurringGameId, game, existingRecurri
                 averageGuarantee: Math.round(averageGuarantee),
                 averageEntries: Math.round(averageEntries * 10) / 10,
                 buyInTrend,
-                recentGameCount: recentBuyIns.length
+                recentGameCount: recentBuyIns.length,
+                firstGameDate: updates.firstGameDate,
+                lastGameDate: updates.lastGameDate
             }
         };
         
     } catch (error) {
         console.error(`[STATS] Error updating stats for ${recurringGameId}:`, error);
-        return { success: false, reason: error.message };
+        return { success: false, reason: 'error', error: error.message };
     }
 };
 
 // ===================================================================
-// HELPER FUNCTIONS
+// HISTORY MANAGEMENT
 // ===================================================================
 
 /**
- * Parse history from JSON string or return empty array
+ * Parse history JSON safely
  */
-const parseHistory = (jsonString) => {
-    if (!jsonString) return [];
+const parseHistory = (historyJson) => {
+    if (!historyJson) return [];
+    if (Array.isArray(historyJson)) return historyJson;
     try {
-        const parsed = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
-        return Array.isArray(parsed) ? parsed : [];
-    } catch {
+        return JSON.parse(historyJson);
+    } catch (e) {
         return [];
     }
 };
 
 /**
- * Add a value to history, maintaining max size and sorted by date
+ * Add a value to history, maintaining max size
  */
-const addToHistory = (history, newEntry, maxSize) => {
+const addToHistory = (history, entry, maxSize) => {
     // Check if this game is already in history
-    const existingIndex = history.findIndex(h => h.gameId === newEntry.gameId);
+    const existingIndex = history.findIndex(h => h.gameId === entry.gameId);
     if (existingIndex >= 0) {
         // Update existing entry
-        history[existingIndex] = newEntry;
-    } else {
-        // Add new entry
-        history.push(newEntry);
+        history[existingIndex] = entry;
+        return history;
     }
     
-    // Sort by date (oldest first)
-    history.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    // Add new entry
+    const updated = [...history, entry];
     
-    // Trim to max size (keep most recent)
-    if (history.length > maxSize) {
-        history = history.slice(-maxSize);
+    // Sort by date (newest last) and trim to window size
+    updated.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    
+    if (updated.length > maxSize) {
+        return updated.slice(-maxSize);
     }
-    
-    return history;
+    return updated;
 };
+
+// ===================================================================
+// DATABASE OPERATIONS
+// ===================================================================
 
 /**
  * Get recurring game from database
@@ -271,9 +314,11 @@ const updateRecurringGame = async (recurringGameId, updates) => {
     const expressionValues = { ':now': new Date().toISOString() };
     
     Object.entries(updates).forEach(([key, value]) => {
-        updateExpressions.push(`#${key} = :${key}`);
-        expressionNames[`#${key}`] = key;
-        expressionValues[`:${key}`] = value;
+        if (value !== undefined) {
+            updateExpressions.push(`#${key} = :${key}`);
+            expressionNames[`#${key}`] = key;
+            expressionValues[`:${key}`] = value;
+        }
     });
     
     // Always update updatedAt
@@ -385,6 +430,16 @@ const initializeStats = (templateData, initialGames = []) => {
     const now = new Date().toISOString();
     const today = now.split('T')[0];
     
+    // Find first and last game datetimes from initial games
+    const gameDateTimes = initialGames
+        .map(g => g.gameStartDateTime)
+        .filter(d => d)
+        .sort();
+    
+    // Both use AWSDateTime format (ISO)
+    const firstGameDate = gameDateTimes.length > 0 ? gameDateTimes[0] : null;
+    const lastGameDate = gameDateTimes.length > 0 ? gameDateTimes[gameDateTimes.length - 1] : null;
+    
     // Build history arrays
     const recentBuyIns = initialGames
         .filter(g => g.buyIn > 0)
@@ -415,6 +470,9 @@ const initializeStats = (templateData, initialGames = []) => {
     
     return {
         ...templateData,
+        // Date tracking
+        firstGameDate,
+        lastGameDate,
         // Averages
         averageBuyIn: buyIns.length > 0 ? Math.round(buyIns.reduce((a, b) => a + b, 0) / buyIns.length) : templateData.typicalBuyIn || 0,
         averageGuarantee: guarantees.length > 0 ? Math.round(guarantees.reduce((a, b) => a + b, 0) / guarantees.length) : templateData.typicalGuarantee || 0,
@@ -458,6 +516,14 @@ module.exports = {
     // Trend calculation
     calculateTrend,
     calculateAverage,
+    
+    // DateTime helpers
+    getEarlierDateTime,
+    getLaterDateTime,
+    
+    // History helpers
+    parseHistory,
+    addToHistory,
     
     // Constants
     DEFAULT_EVOLUTION_WINDOW

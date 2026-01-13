@@ -523,7 +523,9 @@ export enum SeriesResolutionStatus {
   NOT_SERIES = "NOT_SERIES",
   SKIPPED = "SKIPPED",
   PENDING_REVIEW = "PENDING_REVIEW",
-  FAILED = "FAILED"
+  FAILED = "FAILED",
+  NO_MATCH = "NO_MATCH",
+  DEFERRED = "DEFERRED"
 }
 
 export enum RecurringResolutionStatus {
@@ -532,7 +534,9 @@ export enum RecurringResolutionStatus {
   NOT_RECURRING = "NOT_RECURRING",
   SKIPPED = "SKIPPED",
   PENDING_REVIEW = "PENDING_REVIEW",
-  FAILED = "FAILED"
+  FAILED = "FAILED",
+  NO_MATCH = "NO_MATCH",
+  DEFERRED = "DEFERRED"
 }
 
 export enum SessionMode {
@@ -6489,6 +6493,7 @@ type EagerRecurringGame = {
   readonly isActive: boolean;
   readonly isPaused?: boolean | null;
   readonly pausedReason?: string | null;
+  readonly firstGameDate?: string | null;
   readonly lastGameDate?: string | null;
   readonly nextScheduledDate?: string | null;
   readonly expectedInstanceCount?: number | null;
@@ -6554,6 +6559,7 @@ type LazyRecurringGame = {
   readonly isActive: boolean;
   readonly isPaused?: boolean | null;
   readonly pausedReason?: string | null;
+  readonly firstGameDate?: string | null;
   readonly lastGameDate?: string | null;
   readonly nextScheduledDate?: string | null;
   readonly expectedInstanceCount?: number | null;
