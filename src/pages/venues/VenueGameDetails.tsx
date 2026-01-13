@@ -1,17 +1,15 @@
 // src/pages/venues/VenueGameDetails.tsx
-// VERSION: 3.9.0 - Added edit functionality for UNKNOWN status instances
+// VERSION: 3.9.0 - Income statement style expanded view
 //
 // CHANGELOG:
-// - v3.9.0: Added UNKNOWN instance editing
-//           - Edit (pencil) icon for UNKNOWN/NO_SHOW instances
-//           - Display instance.notes for UNKNOWN instances instead of dashes
-//           - RecurringGameInstanceEditModal integration
+// - v3.9.0: Income statement format for expanded row
+//           - 3-column layout: Revenue | Costs | Summary
+//           - Grouped costs: Staff, Prize/Guarantee, Operating
+//           - Clear calculation: Revenue - Costs = Net Profit
+//           - Per Player metrics section
+//           - Guarantee coverage section
+//           - Only shows line items with values > 0
 // - v3.8.1: Better responsive column handling
-//           - Margin column now visible on all screen sizes
-//           - Tighter padding (px-1, py-1) for compact rows
-//           - Right-aligned numeric columns
-//           - Rev/Costs at sm+, Buy-In/PP at lg+, GTD at xl+
-// - v3.8.0: Compact table + status badges
 //           - Added game status column with colored badges (INI, FIN, RUN, etc.)
 //           - Reduced row height and column padding
 //           - Responsive column hiding: Margin (sm+), Rev/Costs (md+), Buy-In/PP (lg+), GTD (xl+)
@@ -47,10 +45,9 @@ import {
   ArrowTopRightOnSquareIcon,
   CheckIcon,
   FunnelIcon,
-  PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition, Listbox } from '@headlessui/react';
 import {
   ComposedChart,
   Bar,
@@ -69,7 +66,6 @@ import { useEntity } from '../../contexts/EntityContext';
 import { getClient } from '../../utils/apiClient';
 import { MetricCard } from '../../components/ui/MetricCard';
 import { TimeRangeToggle } from '../../components/ui/TimeRangeToggle';
-import { RecurringGameInstanceEditModal } from '../../components/games/recurring-games/RecurringGameInstanceEditModal';
 
 // ---- Time range utilities ----
 
@@ -96,6 +92,8 @@ const GAME_STATUS_OPTIONS = [
   'CANCELLED', 'FINISHED', 'NOT_IN_USE', 'NOT_PUBLISHED', 
   'CLOCK_STOPPED', 'UNKNOWN'
 ] as const;
+
+type GameStatusType = typeof GAME_STATUS_OPTIONS[number];
 
 // Status abbreviations and colors for badges
 const STATUS_CONFIG: Record<string, { abbr: string; bg: string; text: string }> = {
@@ -128,24 +126,6 @@ const TOURNAMENT_TYPE_OPTIONS = ['FREEZEOUT', 'REBUY', 'SATELLITE', 'DEEPSTACK']
 
 // Instance status types (matches RecurringGameInstanceStatus enum)
 type InstanceStatus = 'CONFIRMED' | 'CANCELLED' | 'SKIPPED' | 'REPLACED' | 'UNKNOWN' | 'NO_SHOW';
-
-// Instance status types for edit modal (excludes REPLACED since we only edit UNKNOWN instances)
-type EditableInstanceStatus = 'CONFIRMED' | 'CANCELLED' | 'SKIPPED' | 'NO_SHOW' | 'UNKNOWN';
-
-// Instance data for edit modal
-interface RecurringGameInstanceEditData {
-  id: string;
-  recurringGameId: string;
-  recurringGameName?: string;
-  expectedDate: string;
-  dayOfWeek?: string;
-  status: EditableInstanceStatus;
-  notes?: string;
-  cancellationReason?: string;
-  adminNotes?: string;
-  needsReview?: boolean;
-  reviewReason?: string;
-}
 
 // ---- GraphQL Queries ----
 
@@ -931,10 +911,9 @@ const PLChart: React.FC<PLChartProps> = ({ instances }) => {
 interface PLRowProps {
   enrichedInstance: EnrichedInstance;
   onRowClick: (gameId: string) => void;
-  onEditInstance: (instance: RecurringGameInstanceEditData) => void;
 }
 
-const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick, onEditInstance }) => {
+const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { instance, game, financialSnapshot } = enrichedInstance;
   
@@ -956,24 +935,6 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick, onEditInsta
     if (game?.id) {
       onRowClick(game.id);
     }
-  };
-
-  // Handle edit icon click for UNKNOWN instances
-  const handleEditInstance = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Status is cast to EditableInstanceStatus since we only show edit for UNKNOWN/NO_SHOW instances
-    onEditInstance({
-      id: instance.id,
-      recurringGameId: instance.recurringGameId,
-      recurringGameName: instance.recurringGameName || undefined,
-      expectedDate: instance.expectedDate,
-      dayOfWeek: instance.dayOfWeek,
-      status: instance.status as EditableInstanceStatus,
-      notes: instance.notes || undefined,
-      cancellationReason: instance.cancellationReason || undefined,
-      needsReview: instance.needsReview || undefined,
-      reviewReason: instance.reviewReason || undefined,
-    });
   };
 
   // Format date
@@ -1007,9 +968,9 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick, onEditInsta
         `}
         onClick={handleRowClick}
       >
-        {/* Expand Toggle / Edit Icon */}
+        {/* Expand Toggle */}
         <td className="pl-2 pr-0 py-1 w-5">
-          {hasData ? (
+          {hasData && (
             <span>
               {isExpanded ? (
                 <ChevronDownIcon className="h-3.5 w-3.5 text-gray-500" />
@@ -1017,15 +978,7 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick, onEditInsta
                 <ChevronRightIcon className="h-3.5 w-3.5 text-gray-400" />
               )}
             </span>
-          ) : isUnknown ? (
-            <button
-              onClick={handleEditInstance}
-              className="p-0.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded"
-              title="Edit instance"
-            >
-              <PencilSquareIcon className="h-3.5 w-3.5" />
-            </button>
-          ) : null}
+          )}
         </td>
 
         {/* Date */}
@@ -1040,15 +993,9 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick, onEditInsta
           </div>
         </td>
 
-        {/* Status Badge / Notes for Unknown */}
+        {/* Status Badge */}
         <td className="px-1 py-1">
-          {isUnknown && !hasData ? (
-            <span className="text-xs text-gray-500 italic truncate max-w-[150px] block" title={instance.notes || undefined}>
-              {instance.notes || (instance.status === 'CANCELLED' ? 'Cancelled' : instance.status === 'SKIPPED' ? 'Skipped' : instance.status === 'NO_SHOW' ? 'No Show' : 'Unknown')}
-            </span>
-          ) : (
-            <GameStatusBadge status={game?.gameStatus} />
-          )}
+          <GameStatusBadge status={game?.gameStatus} />
         </td>
 
         {/* P/L */}
@@ -1109,16 +1056,15 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick, onEditInsta
         </td>
       </tr>
 
-      {/* Expanded Details Row */}
+      {/* Expanded Details Row - Income Statement Format */}
       {isExpanded && hasData && (
-        <tr className="bg-blue-50/20 border-b border-gray-200">
-          <td colSpan={10} className="px-4 py-3">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-              {/* Tournament Info */}
+        <tr className="bg-slate-50/80 border-b border-gray-200">
+          <td colSpan={10} className="px-3 py-3">
+            {/* Header: Game Info */}
+            <div className="flex items-start justify-between mb-3 pb-2 border-b border-gray-200">
               <div>
-                <Text className="text-xs text-gray-500 mb-0.5">Game</Text>
                 <div className="flex items-center gap-2">
-                  <Text className="font-medium text-gray-900 text-sm">{game?.name || 'Unnamed'}</Text>
+                  <span className="font-semibold text-gray-900">{game?.name || 'Unnamed Game'}</span>
                   <button
                     onClick={handleNavigateToGame}
                     className="p-0.5 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded"
@@ -1128,89 +1074,295 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick, onEditInsta
                   </button>
                 </div>
                 {game?.tournamentId && (
-                  <Text className="text-xs text-gray-400">ID: {game.tournamentId}</Text>
+                  <span className="text-xs text-gray-400">ID: {game.tournamentId}</span>
                 )}
               </div>
-
-              {/* Entries */}
-              <div>
-                <Text className="text-xs text-gray-500 mb-0.5">Entries</Text>
-                <Text className="font-medium text-gray-900 text-sm">
-                  {game?.totalEntries ?? 0} total ({game?.totalUniquePlayers ?? 0} unique)
-                </Text>
+              <div className="text-right text-xs text-gray-500">
+                <div>{game?.totalEntries ?? 0} entries ({game?.totalUniquePlayers ?? 0} unique)</div>
                 {(game?.totalRebuys || game?.totalAddons) ? (
-                  <Text className="text-xs text-gray-500">
-                    {game?.totalRebuys ?? 0} rebuys, {game?.totalAddons ?? 0} add-ons
-                  </Text>
+                  <div>{game?.totalRebuys ?? 0} rebuys • {game?.totalAddons ?? 0} add-ons</div>
                 ) : null}
               </div>
+            </div>
 
-              {/* Prizepool Details */}
+            {/* Income Statement Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              
+              {/* Column 1: Revenue */}
               <div>
-                <Text className="text-xs text-gray-500 mb-0.5">Prizepool Details</Text>
-                <Text className="font-medium text-gray-900 text-sm">
-                  Player: {formatCurrency(financialSnapshot?.prizepoolPlayerContributions)}
-                </Text>
-                {financialSnapshot?.prizepoolAddedValue ? (
-                  <Text className="text-xs text-gray-500">
-                    Added: {formatCurrency(financialSnapshot.prizepoolAddedValue)}
-                  </Text>
-                ) : null}
+                <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1.5 pb-1 border-b border-gray-200">
+                  Revenue
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Rake Revenue</span>
+                    <span className="text-gray-900">{formatCurrency(financialSnapshot?.rakeRevenue)}</span>
+                  </div>
+                  {(financialSnapshot?.venueFee ?? 0) > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Venue Fee</span>
+                      <span className="text-gray-900">{formatCurrency(financialSnapshot?.venueFee)}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-between mt-2 pt-1.5 border-t border-gray-300 font-semibold">
+                  <span className="text-gray-700">Total Revenue</span>
+                  <span className="text-emerald-600">{formatCurrency(financialSnapshot?.totalRevenue)}</span>
+                </div>
+
+                {/* Prizepool Info (non-financial context) */}
+                <div className="mt-3 pt-2 border-t border-dashed border-gray-200">
+                  <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1">
+                    Prizepool
+                  </div>
+                  <div className="space-y-0.5 text-gray-500">
+                    <div className="flex justify-between">
+                      <span>Player Contrib.</span>
+                      <span>{formatCurrency(financialSnapshot?.prizepoolPlayerContributions)}</span>
+                    </div>
+                    {(financialSnapshot?.prizepoolAddedValue ?? 0) > 0 && (
+                      <div className="flex justify-between">
+                        <span>Added Value</span>
+                        <span>{formatCurrency(financialSnapshot?.prizepoolAddedValue)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-medium text-gray-700">
+                      <span>Total Paid</span>
+                      <span>{formatCurrency(game?.prizepoolPaid)}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Cost Breakdown */}
-              {hasFinancials && (
-                <>
-                  <div>
-                    <Text className="text-xs text-gray-500 mb-0.5">Staff Costs</Text>
-                    <Text className="text-gray-700 text-sm">
-                      Dealers: {formatCurrency(financialSnapshot?.totalDealerCost)}
-                    </Text>
-                    <Text className="text-gray-700 text-sm">
-                      TD: {formatCurrency(financialSnapshot?.totalTournamentDirectorCost)}
-                    </Text>
+              {/* Column 2: Costs */}
+              <div>
+                <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1.5 pb-1 border-b border-gray-200">
+                  Costs
+                </div>
+                
+                {/* Staff Costs */}
+                {((financialSnapshot?.totalDealerCost ?? 0) > 0 || 
+                  (financialSnapshot?.totalTournamentDirectorCost ?? 0) > 0 ||
+                  (financialSnapshot?.totalFloorStaffCost ?? 0) > 0 ||
+                  (financialSnapshot?.totalSecurityCost ?? 0) > 0) && (
+                  <div className="mb-2">
+                    <div className="text-[10px] text-gray-500 uppercase mb-0.5">Staff</div>
+                    <div className="space-y-0.5 pl-2 border-l-2 border-gray-200">
+                      {(financialSnapshot?.totalDealerCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Dealers</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalDealerCost)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalTournamentDirectorCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Tournament Director</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalTournamentDirectorCost)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalFloorStaffCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Floor Staff</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalFloorStaffCost)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalSecurityCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Security</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalSecurityCost)}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                )}
 
-                  <div>
-                    <Text className="text-xs text-gray-500 mb-0.5">Overlay</Text>
-                    <Text className={`font-medium text-sm ${(financialSnapshot?.totalGuaranteeOverlayCost ?? 0) > 0 ? 'text-red-600' : 'text-gray-700'}`}>
-                      {formatCurrency(financialSnapshot?.totalGuaranteeOverlayCost)}
-                    </Text>
-                    <Text className="text-xs text-gray-500">
-                      Coverage: {financialSnapshot?.guaranteeCoverageRate 
-                        ? `${(financialSnapshot.guaranteeCoverageRate * 100).toFixed(0)}%` 
-                        : '-'}
-                    </Text>
+                {/* Prize/Guarantee Costs */}
+                {((financialSnapshot?.totalGuaranteeOverlayCost ?? 0) > 0 || 
+                  (financialSnapshot?.totalAddedValueCost ?? 0) > 0 ||
+                  (financialSnapshot?.totalPrizeContribution ?? 0) > 0 ||
+                  (financialSnapshot?.totalJackpotContribution ?? 0) > 0 ||
+                  (financialSnapshot?.totalBountyCost ?? 0) > 0) && (
+                  <div className="mb-2">
+                    <div className="text-[10px] text-gray-500 uppercase mb-0.5">Prize & Guarantee</div>
+                    <div className="space-y-0.5 pl-2 border-l-2 border-gray-200">
+                      {(financialSnapshot?.totalGuaranteeOverlayCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Guarantee Overlay</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalGuaranteeOverlayCost)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalAddedValueCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Added Value</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalAddedValueCost)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalPrizeContribution ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Prize Contribution</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalPrizeContribution)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalJackpotContribution ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Jackpot Contrib.</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalJackpotContribution)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalBountyCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Bounty</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalBountyCost)}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                )}
 
-                  <div>
-                    <Text className="text-xs text-gray-500 mb-0.5">Per Player</Text>
-                    <Text className="text-gray-700 text-sm">
-                      Revenue: {formatCurrency(financialSnapshot?.revenuePerPlayer)}
-                    </Text>
-                    <Text className="text-gray-700 text-sm">
-                      Profit: {formatCurrency(financialSnapshot?.profitPerPlayer)}
-                    </Text>
+                {/* Operating Costs */}
+                {((financialSnapshot?.totalVenueRentalCost ?? 0) > 0 || 
+                  (financialSnapshot?.totalEquipmentRentalCost ?? 0) > 0 ||
+                  (financialSnapshot?.totalFoodBeverageCost ?? 0) > 0 ||
+                  (financialSnapshot?.totalMarketingCost ?? 0) > 0 ||
+                  (financialSnapshot?.totalPromotionCost ?? 0) > 0 ||
+                  (financialSnapshot?.totalOtherCost ?? 0) > 0) && (
+                  <div className="mb-2">
+                    <div className="text-[10px] text-gray-500 uppercase mb-0.5">Operating</div>
+                    <div className="space-y-0.5 pl-2 border-l-2 border-gray-200">
+                      {(financialSnapshot?.totalVenueRentalCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Venue Rental</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalVenueRentalCost)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalEquipmentRentalCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Equipment</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalEquipmentRentalCost)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalFoodBeverageCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">F&B</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalFoodBeverageCost)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalMarketingCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Marketing</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalMarketingCost)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalPromotionCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Promotion</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalPromotionCost)}</span>
+                        </div>
+                      )}
+                      {(financialSnapshot?.totalOtherCost ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Other</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalOtherCost)}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                )}
 
-                  <div>
-                    <Text className="text-xs text-gray-500 mb-0.5">Other Costs</Text>
-                    <Text className="text-gray-700 text-sm">
-                      Venue: {formatCurrency(financialSnapshot?.totalVenueRentalCost)}
-                    </Text>
-                    <Text className="text-gray-700 text-sm">
-                      Promo: {formatCurrency(financialSnapshot?.totalPromotionCost)}
-                    </Text>
+                <div className="flex justify-between mt-2 pt-1.5 border-t border-gray-300 font-semibold">
+                  <span className="text-gray-700">Total Costs</span>
+                  <span className="text-red-600">{formatCurrency(financialSnapshot?.totalCost)}</span>
+                </div>
+              </div>
+
+              {/* Column 3: Summary / Net Profit */}
+              <div>
+                <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1.5 pb-1 border-b border-gray-200">
+                  Summary
+                </div>
+                
+                <div className="space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Revenue</span>
+                    <span className="text-emerald-600">{formatCurrency(financialSnapshot?.totalRevenue)}</span>
                   </div>
-                </>
-              )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Less: Costs</span>
+                    <span className="text-red-600">({formatCurrency(Math.abs(financialSnapshot?.totalCost ?? 0))})</span>
+                  </div>
+                  <div className="flex justify-between pt-2 mt-1 border-t-2 border-gray-400 font-bold text-sm">
+                    <span className="text-gray-900">Net Profit</span>
+                    <span className={netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}>
+                      {formatCurrency(netProfit)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-gray-500">
+                    <span>Margin</span>
+                    <span className={profitMargin !== null && profitMargin >= 0 ? 'text-emerald-600' : 'text-red-600'}>
+                      {profitMargin !== null ? `${(profitMargin * 100).toFixed(1)}%` : '-'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Per Player Metrics */}
+                <div className="mt-3 pt-2 border-t border-dashed border-gray-200">
+                  <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1">
+                    Per Player
+                  </div>
+                  <div className="space-y-0.5 text-gray-500">
+                    <div className="flex justify-between">
+                      <span>Revenue</span>
+                      <span>{formatCurrency(financialSnapshot?.revenuePerPlayer)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Cost</span>
+                      <span>{formatCurrency(financialSnapshot?.costPerPlayer)}</span>
+                    </div>
+                    <div className="flex justify-between font-medium text-gray-700">
+                      <span>Profit</span>
+                      <span className={((financialSnapshot?.profitPerPlayer ?? 0) >= 0) ? 'text-emerald-600' : 'text-red-600'}>
+                        {formatCurrency(financialSnapshot?.profitPerPlayer)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Guarantee Info */}
+                {game?.hasGuarantee && (
+                  <div className="mt-3 pt-2 border-t border-dashed border-gray-200">
+                    <div className="font-semibold text-gray-700 uppercase tracking-wide text-[10px] mb-1">
+                      Guarantee
+                    </div>
+                    <div className="space-y-0.5 text-gray-500">
+                      <div className="flex justify-between">
+                        <span>Amount</span>
+                        <span>{formatCurrency(game?.guaranteeAmount)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Coverage</span>
+                        <span className={((financialSnapshot?.guaranteeCoverageRate ?? 0) >= 1) ? 'text-emerald-600' : 'text-amber-600'}>
+                          {financialSnapshot?.guaranteeCoverageRate 
+                            ? `${(financialSnapshot.guaranteeCoverageRate * 100).toFixed(0)}%` 
+                            : '-'}
+                        </span>
+                      </div>
+                      {(financialSnapshot?.totalGuaranteeOverlayCost ?? 0) > 0 && (
+                        <div className="flex justify-between font-medium">
+                          <span>Overlay</span>
+                          <span className="text-red-600">{formatCurrency(financialSnapshot?.totalGuaranteeOverlayCost)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Notes */}
             {instance.notes && (
-              <div className="mt-2 pt-2 border-t border-gray-200">
-                <Text className="text-xs text-gray-500">Notes</Text>
-                <Text className="text-sm text-gray-700">{instance.notes}</Text>
+              <div className="mt-3 pt-2 border-t border-gray-200">
+                <span className="text-[10px] text-gray-500 uppercase">Notes: </span>
+                <span className="text-xs text-gray-700">{instance.notes}</span>
               </div>
             )}
           </td>
@@ -1567,10 +1719,6 @@ export const VenueGameDetails: React.FC = () => {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
-  
-  // Instance edit modal state
-  const [isInstanceModalOpen, setIsInstanceModalOpen] = useState(false);
-  const [selectedInstance, setSelectedInstance] = useState<RecurringGameInstanceEditData | null>(null);
 
   // Compute available game statuses and their counts from the data
   const { availableStatuses, statusCounts } = useMemo(() => {
@@ -1758,23 +1906,6 @@ export const VenueGameDetails: React.FC = () => {
 
   const handleSaveSuccess = () => {
     fetchData();
-  };
-
-  // Handler for opening instance edit modal
-  const handleEditInstance = (instance: RecurringGameInstanceEditData) => {
-    setSelectedInstance(instance);
-    setIsInstanceModalOpen(true);
-  };
-
-  // Handler for instance edit modal close
-  const handleInstanceModalClose = () => {
-    setIsInstanceModalOpen(false);
-    setSelectedInstance(null);
-  };
-
-  // Handler for instance save success
-  const handleInstanceSaveSuccess = () => {
-    fetchData(); // Refresh the data
   };
 
   const summaryStats = useMemo(() => buildSummaryStats(enrichedInstances), [enrichedInstances]);
@@ -1979,7 +2110,6 @@ export const VenueGameDetails: React.FC = () => {
                   key={enrichedInstance.instance.id}
                   enrichedInstance={enrichedInstance}
                   onRowClick={handleRowClick}
-                  onEditInstance={handleEditInstance}
                 />
               ))}
               {enrichedInstances.length === 0 && (
@@ -2034,14 +2164,6 @@ export const VenueGameDetails: React.FC = () => {
         onClose={handleModalClose}
         gameId={selectedGameId}
         onSaveSuccess={handleSaveSuccess}
-      />
-
-      {/* Instance Edit Modal */}
-      <RecurringGameInstanceEditModal
-        isOpen={isInstanceModalOpen}
-        onClose={handleInstanceModalClose}
-        instance={selectedInstance}
-        onSaveSuccess={handleInstanceSaveSuccess}
       />
     </PageWrapper>
   );
