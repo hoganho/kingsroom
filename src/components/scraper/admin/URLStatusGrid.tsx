@@ -1,13 +1,19 @@
 // src/components/scraper/admin/URLStatusGrid.tsx
-// Visual grid panel showing URL status for all tournament IDs in an entity
+// Visual grid panel showing URL/Game status for all tournament IDs in an entity
 // Grid starts at ID=1 and goes to the maximum ID
-// Color coding:
-//   GREEN = gameId is not empty (has associated game)
-//   YELLOW = doNotScrapeReason = NOT_PUBLISHED
-//   RED = lastScrapeStatus = ERROR
-//   WHITE (border) = lastScrapeStatus = NOT_FOUND
-//   GRAY = has ScrapeURL record but doesn't match above criteria
-//   LIGHT GRAY = no ScrapeURL record for this ID
+// 
+// TWO VIEWS:
+// 1. URL Status View:
+//    GREEN = gameId is not empty (has associated game)
+//    YELLOW = doNotScrapeReason = NOT_PUBLISHED
+//    RED = lastScrapeStatus = ERROR
+//    WHITE (border) = lastScrapeStatus = NOT_FOUND
+//    GRAY = has ScrapeURL record but doesn't match above criteria
+//    LIGHT GRAY = no ScrapeURL record for this ID
+//
+// 2. Game Status View:
+//    Colors based on Game.gameStatus enum
+//    WHITE = no game for this tournament ID
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
@@ -18,7 +24,9 @@ import {
     Info,
     ExternalLink,
     ZoomIn,
-    ZoomOut
+    ZoomOut,
+    Link,
+    Gamepad2
 } from 'lucide-react';
 import { generateClient } from 'aws-amplify/api';
 import { useEntity } from '../../../contexts/EntityContext';
@@ -28,13 +36,22 @@ import { useS3Fetch } from '../../../hooks/useS3Fetch';
 // TYPES
 // ===================================================================
 
+type ViewMode = 'url' | 'game';
+
 interface ScrapeURLGridItem {
     tournamentId: number;
     gameId: string | null;
-    doNotScrapeReason: string | null;  // Changed from gameStatus
+    doNotScrapeReason: string | null;
     lastScrapeStatus: string | null;
     latestS3Key: string | null;
     doNotScrape: boolean;
+    gameName: string | null;
+}
+
+interface GameGridItem {
+    tournamentId: number;
+    gameId: string;
+    gameStatus: string | null;
     gameName: string | null;
 }
 
@@ -44,8 +61,32 @@ interface GridBounds {
     totalSlots: number;
 }
 
-// Status priority: HAS_GAME > NOT_PUBLISHED > ERROR > NOT_FOUND > OTHER > EMPTY
+// URL Status types
 type URLStatus = 'HAS_GAME' | 'NOT_PUBLISHED' | 'ERROR' | 'NOT_FOUND' | 'OTHER' | 'EMPTY';
+
+// Game Status types (from GameStatus enum)
+type GameStatusType = 
+    | 'INITIATING' | 'SCHEDULED' | 'REGISTERING' | 'RUNNING' 
+    | 'CANCELLED' | 'FINISHED' | 'NOT_IN_USE' | 'NOT_PUBLISHED' 
+    | 'CLOCK_STOPPED' | 'UNKNOWN' | 'NO_GAME';
+
+// ===================================================================
+// GAME STATUS CONFIG
+// ===================================================================
+
+const GAME_STATUS_CONFIG: Record<GameStatusType, { label: string; bg: string; hover: string }> = {
+    INITIATING: { label: 'Initiating', bg: 'bg-slate-300', hover: 'hover:bg-slate-200' },
+    SCHEDULED: { label: 'Scheduled', bg: 'bg-blue-400', hover: 'hover:bg-blue-300' },
+    REGISTERING: { label: 'Registering', bg: 'bg-cyan-400', hover: 'hover:bg-cyan-300' },
+    RUNNING: { label: 'Running', bg: 'bg-emerald-500', hover: 'hover:bg-emerald-400' },
+    CANCELLED: { label: 'Cancelled', bg: 'bg-red-400', hover: 'hover:bg-red-300' },
+    FINISHED: { label: 'Finished', bg: 'bg-green-500', hover: 'hover:bg-green-400' },
+    NOT_IN_USE: { label: 'Not In Use', bg: 'bg-gray-300', hover: 'hover:bg-gray-200' },
+    NOT_PUBLISHED: { label: 'Not Published', bg: 'bg-amber-400', hover: 'hover:bg-amber-300' },
+    CLOCK_STOPPED: { label: 'Clock Stopped', bg: 'bg-orange-400', hover: 'hover:bg-orange-300' },
+    UNKNOWN: { label: 'Unknown', bg: 'bg-purple-400', hover: 'hover:bg-purple-300' },
+    NO_GAME: { label: 'No Game', bg: 'bg-white border border-gray-300', hover: 'hover:bg-gray-50' },
+};
 
 // ===================================================================
 // GRAPHQL QUERIES
@@ -53,7 +94,7 @@ type URLStatus = 'HAS_GAME' | 'NOT_PUBLISHED' | 'ERROR' | 'NOT_FOUND' | 'OTHER' 
 
 const getClient = () => generateClient();
 
-// Query to get all ScrapeURLs for an entity with the fields we need
+// Query to get all ScrapeURLs for an entity
 const LIST_SCRAPE_URLS_FOR_GRID = /* GraphQL */ `
   query ScrapeURLSByEntityId(
     $entityId: ID!
@@ -79,6 +120,29 @@ const LIST_SCRAPE_URLS_FOR_GRID = /* GraphQL */ `
   }
 `;
 
+// Query to get all Games for an entity (with tournamentId)
+const LIST_GAMES_FOR_GRID = /* GraphQL */ `
+  query GamesByEntity(
+    $entityId: ID!
+    $limit: Int
+    $nextToken: String
+  ) {
+    gamesByEntity(
+      entityId: $entityId
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        tournamentId
+        gameStatus
+        name
+      }
+      nextToken
+    }
+  }
+`;
+
 // Query to get bounds (min/max tournament IDs)
 const GET_TOURNAMENT_BOUNDS = /* GraphQL */ `
   query GetTournamentIdBounds($entityId: ID!) {
@@ -91,63 +155,51 @@ const GET_TOURNAMENT_BOUNDS = /* GraphQL */ `
 `;
 
 // ===================================================================
-// UTILITY FUNCTIONS
+// UTILITY FUNCTIONS - URL STATUS
 // ===================================================================
 
 const determineURLStatus = (item: ScrapeURLGridItem | undefined): URLStatus => {
-    // No ScrapeURL record exists for this tournament ID
     if (!item) return 'EMPTY';
     
-    // Priority 1: GREEN - Has associated game (gameId is not empty)
     if (item.gameId && item.gameId.trim() !== '') {
         return 'HAS_GAME';
     }
     
-    // Priority 2: YELLOW - doNotScrapeReason = NOT_PUBLISHED
     if (item.doNotScrapeReason?.toUpperCase() === 'NOT_PUBLISHED') {
         return 'NOT_PUBLISHED';
     }
     
-    // Priority 3: RED - lastScrapeStatus = ERROR
     if (item.lastScrapeStatus?.toUpperCase() === 'ERROR') {
         return 'ERROR';
     }
     
-    // Priority 4: WHITE - lastScrapeStatus = NOT_FOUND
     const scrapeStatus = item.lastScrapeStatus?.toUpperCase();
     if (scrapeStatus === 'NOT_FOUND' || scrapeStatus === 'BLANK' || scrapeStatus === 'NOT_IN_USE') {
         return 'NOT_FOUND';
     }
     
-    // Has a ScrapeURL record but doesn't match the above criteria
     return 'OTHER';
 };
 
-const getStatusColor = (status: URLStatus): string => {
+const getURLStatusColor = (status: URLStatus): string => {
     switch (status) {
         case 'HAS_GAME':
-            // GREEN - has associated game
             return 'bg-green-500 hover:bg-green-400';
         case 'NOT_PUBLISHED':
-            // YELLOW - game status is NOT_PUBLISHED
             return 'bg-yellow-400 hover:bg-yellow-300';
         case 'ERROR':
-            // RED - scrape error
             return 'bg-red-500 hover:bg-red-400';
         case 'NOT_FOUND':
-            // WHITE with border - not found
             return 'bg-white border border-gray-400 hover:bg-gray-50';
         case 'OTHER':
-            // GRAY - has record but doesn't match criteria
             return 'bg-gray-400 hover:bg-gray-300';
         case 'EMPTY':
         default:
-            // LIGHT GRAY - no ScrapeURL record
             return 'bg-gray-200 hover:bg-gray-300 border border-gray-300';
     }
 };
 
-const getStatusLabel = (status: URLStatus): string => {
+const getURLStatusLabel = (status: URLStatus): string => {
     switch (status) {
         case 'HAS_GAME': return 'Has Game';
         case 'NOT_PUBLISHED': return 'Not Published';
@@ -157,6 +209,30 @@ const getStatusLabel = (status: URLStatus): string => {
         case 'EMPTY': return 'No Record';
         default: return 'Unknown';
     }
+};
+
+// ===================================================================
+// UTILITY FUNCTIONS - GAME STATUS
+// ===================================================================
+
+const determineGameStatus = (item: GameGridItem | undefined): GameStatusType => {
+    if (!item) return 'NO_GAME';
+    
+    const status = item.gameStatus?.toUpperCase() as GameStatusType;
+    if (status && GAME_STATUS_CONFIG[status]) {
+        return status;
+    }
+    
+    return 'UNKNOWN';
+};
+
+const getGameStatusColor = (status: GameStatusType): string => {
+    const config = GAME_STATUS_CONFIG[status];
+    return `${config.bg} ${config.hover}`;
+};
+
+const getGameStatusLabel = (status: GameStatusType): string => {
+    return GAME_STATUS_CONFIG[status]?.label || 'Unknown';
 };
 
 // ===================================================================
@@ -172,14 +248,18 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
     const { currentEntity } = useEntity();
     const { getPresignedUrl, isLoading: s3Loading, error: s3Error } = useS3Fetch();
     
+    // View mode state
+    const [viewMode, setViewMode] = useState<ViewMode>('url');
+    
     // Data state
     const [urlData, setUrlData] = useState<Map<number, ScrapeURLGridItem>>(new Map());
+    const [gameData, setGameData] = useState<Map<number, GameGridItem>>(new Map());
     const [bounds, setBounds] = useState<GridBounds | null>(null);
     const [loading, setLoading] = useState(false);
     const [loadingProgress, setLoadingProgress] = useState('');
     const [error, setError] = useState<string | null>(null);
     
-    // UI state - default to 50 columns as requested
+    // UI state
     const [hoveredId, setHoveredId] = useState<number | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
     const [columnsPerRow, setColumnsPerRow] = useState(50);
@@ -222,7 +302,6 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                 return;
             }
 
-            // Always start at ID 1, go to highest ID
             const minId = 1;
             const maxId = boundsData.highestId;
             
@@ -232,15 +311,15 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                 totalSlots: maxId - minId + 1
             });
 
-            // Fetch all ScrapeURL data for this entity
+            // Fetch ScrapeURL data
             setLoadingProgress('Loading URL status data...');
-            const dataMap = new Map<number, ScrapeURLGridItem>();
+            const urlDataMap = new Map<number, ScrapeURLGridItem>();
             let nextToken: string | null = null;
             let pageCount = 0;
 
             do {
                 pageCount++;
-                setLoadingProgress(`Loading page ${pageCount}... (${dataMap.size} URLs loaded)`);
+                setLoadingProgress(`Loading URLs page ${pageCount}... (${urlDataMap.size} loaded)`);
 
                 const response = await client.graphql({
                     query: LIST_SCRAPE_URLS_FOR_GRID,
@@ -256,7 +335,7 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
 
                 for (const item of items) {
                     if (item && item.tournamentId >= minId && item.tournamentId <= maxId) {
-                        dataMap.set(item.tournamentId, {
+                        urlDataMap.set(item.tournamentId, {
                             tournamentId: item.tournamentId,
                             gameId: item.gameId || null,
                             doNotScrapeReason: item.doNotScrapeReason || null,
@@ -269,8 +348,44 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                 }
             } while (nextToken);
 
-            setUrlData(dataMap);
-            setLoadingProgress(`Loaded ${dataMap.size} URLs`);
+            setUrlData(urlDataMap);
+
+            // Fetch Game data
+            setLoadingProgress('Loading game status data...');
+            const gameDataMap = new Map<number, GameGridItem>();
+            nextToken = null;
+            pageCount = 0;
+
+            do {
+                pageCount++;
+                setLoadingProgress(`Loading games page ${pageCount}... (${gameDataMap.size} loaded)`);
+
+                const response = await client.graphql({
+                    query: LIST_GAMES_FOR_GRID,
+                    variables: {
+                        entityId: currentEntity.id,
+                        limit: 1000,
+                        nextToken
+                    }
+                }) as any;
+
+                const items = response.data?.gamesByEntity?.items || [];
+                nextToken = response.data?.gamesByEntity?.nextToken || null;
+
+                for (const item of items) {
+                    if (item && item.tournamentId && item.tournamentId >= minId && item.tournamentId <= maxId) {
+                        gameDataMap.set(item.tournamentId, {
+                            tournamentId: item.tournamentId,
+                            gameId: item.id,
+                            gameStatus: item.gameStatus || null,
+                            gameName: item.name || null
+                        });
+                    }
+                }
+            } while (nextToken);
+
+            setGameData(gameDataMap);
+            setLoadingProgress(`Loaded ${urlDataMap.size} URLs and ${gameDataMap.size} games`);
 
         } catch (err: any) {
             console.error('[URLStatusGrid] Error loading data:', err);
@@ -285,18 +400,18 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
     // ===================================================================
 
     const handleCellClick = async (tournamentId: number) => {
-        const item = urlData.get(tournamentId);
         setSelectedCell(tournamentId);
+        
+        const urlItem = urlData.get(tournamentId);
 
-        if (item?.latestS3Key) {
+        if (urlItem?.latestS3Key) {
             try {
-                const presignedUrl = await getPresignedUrl(item.latestS3Key);
+                const presignedUrl = await getPresignedUrl(urlItem.latestS3Key);
                 window.open(presignedUrl, '_blank');
             } catch (err) {
                 console.error('[URLStatusGrid] Failed to open S3 file:', err);
             }
         } else if (currentEntity) {
-            // Open the source URL if no S3 key
             const url = `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}?id=${tournamentId}`;
             window.open(url, '_blank');
         }
@@ -319,25 +434,35 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
     // GRID RENDERING
     // ===================================================================
 
-    // Calculate cell size based on container width and column count
     const cellSize = useMemo(() => {
         if (!containerRef.current) return 12;
-        const containerWidth = containerRef.current.clientWidth - 32; // Account for padding
-        const size = Math.floor(containerWidth / columnsPerRow) - 1; // -1 for gap
-        return Math.max(8, Math.min(size, 20)); // Min 8px, max 20px
-    }, [columnsPerRow, bounds]); // Recalc when bounds load (triggers re-render)
+        const containerWidth = containerRef.current.clientWidth - 100; // Account for row labels
+        const size = Math.floor(containerWidth / columnsPerRow) - 1;
+        return Math.max(8, Math.min(size, 20));
+    }, [columnsPerRow, bounds]);
 
-    const gridCells = useMemo(() => {
+    // Generate rows with labels
+    const gridRows = useMemo(() => {
         if (!bounds) return [];
 
-        const cells: React.ReactNode[] = [];
+        const rows: { startId: number; endId: number; cells: React.ReactNode[] }[] = [];
+        let currentRow: React.ReactNode[] = [];
+        let rowStartId = bounds.minId;
 
         for (let id = bounds.minId; id <= bounds.maxId; id++) {
-            const item = urlData.get(id);
-            const status = determineURLStatus(item);
-            const colorClass = getStatusColor(status);
+            let colorClass: string;
 
-            cells.push(
+            if (viewMode === 'url') {
+                const item = urlData.get(id);
+                const status = determineURLStatus(item);
+                colorClass = getURLStatusColor(status);
+            } else {
+                const item = gameData.get(id);
+                const status = determineGameStatus(item);
+                colorClass = getGameStatusColor(status);
+            }
+
+            currentRow.push(
                 <div
                     key={id}
                     className={`
@@ -357,21 +482,27 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                     onMouseLeave={handleMouseLeave}
                 />
             );
+
+            // Check if row is complete
+            if (currentRow.length === columnsPerRow || id === bounds.maxId) {
+                rows.push({
+                    startId: rowStartId,
+                    endId: id,
+                    cells: currentRow
+                });
+                currentRow = [];
+                rowStartId = id + 1;
+            }
         }
 
-        return cells;
-    }, [bounds, urlData, cellSize, selectedCell, hoveredId]);
+        return rows;
+    }, [bounds, urlData, gameData, viewMode, cellSize, columnsPerRow, selectedCell, hoveredId]);
 
-    // Statistics
-    const stats = useMemo(() => {
+    // Statistics for URL view
+    const urlStats = useMemo(() => {
         if (!bounds) return null;
 
-        let hasGame = 0;
-        let notPublished = 0;
-        let errors = 0;
-        let notFound = 0;
-        let other = 0;
-        let empty = 0;
+        let hasGame = 0, notPublished = 0, errors = 0, notFound = 0, other = 0, empty = 0;
 
         for (let id = bounds.minId; id <= bounds.maxId; id++) {
             const status = determineURLStatus(urlData.get(id));
@@ -388,6 +519,24 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
         return { hasGame, notPublished, errors, notFound, other, empty, total: bounds.totalSlots };
     }, [bounds, urlData]);
 
+    // Statistics for Game view
+    const gameStats = useMemo(() => {
+        if (!bounds) return null;
+
+        const counts: Record<GameStatusType, number> = {
+            INITIATING: 0, SCHEDULED: 0, REGISTERING: 0, RUNNING: 0,
+            CANCELLED: 0, FINISHED: 0, NOT_IN_USE: 0, NOT_PUBLISHED: 0,
+            CLOCK_STOPPED: 0, UNKNOWN: 0, NO_GAME: 0
+        };
+
+        for (let id = bounds.minId; id <= bounds.maxId; id++) {
+            const status = determineGameStatus(gameData.get(id));
+            counts[status]++;
+        }
+
+        return counts;
+    }, [bounds, gameData]);
+
     // ===================================================================
     // RENDER
     // ===================================================================
@@ -401,7 +550,7 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                 <div className="flex items-center justify-between p-4 border-b">
                     <div className="flex items-center gap-3">
                         <Grid3X3 className="h-5 w-5 text-blue-600" />
-                        <h2 className="text-lg font-semibold">URL Status Grid</h2>
+                        <h2 className="text-lg font-semibold">Status Grid</h2>
                         {currentEntity && (
                             <span className="text-sm text-gray-500">
                                 {currentEntity.entityName}
@@ -441,32 +590,73 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                     </div>
                 </div>
 
+                {/* View Mode Tabs */}
+                <div className="px-4 py-2 border-b bg-gray-50">
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setViewMode('url')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                viewMode === 'url'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                            }`}
+                        >
+                            <Link className="h-4 w-4" />
+                            URL Status
+                        </button>
+                        <button
+                            onClick={() => setViewMode('game')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                viewMode === 'game'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                            }`}
+                        >
+                            <Gamepad2 className="h-4 w-4" />
+                            Game Status
+                        </button>
+                    </div>
+                </div>
+
                 {/* Legend */}
-                <div className="px-4 py-2 bg-gray-50 border-b flex flex-wrap items-center gap-4 text-xs">
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-green-500 rounded" />
-                        <span>Has Game {stats && `(${stats.hasGame.toLocaleString()})`}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-yellow-400 rounded" />
-                        <span>Not Published {stats && `(${stats.notPublished.toLocaleString()})`}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-red-500 rounded" />
-                        <span>Error {stats && `(${stats.errors.toLocaleString()})`}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-white border border-gray-400 rounded" />
-                        <span>Not Found {stats && `(${stats.notFound.toLocaleString()})`}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-gray-400 rounded" />
-                        <span>Other {stats && `(${stats.other.toLocaleString()})`}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-gray-200 border border-gray-300 rounded" />
-                        <span>No Record {stats && `(${stats.empty.toLocaleString()})`}</span>
-                    </div>
+                <div className="px-4 py-2 bg-gray-50 border-b flex flex-wrap items-center gap-3 text-xs">
+                    {viewMode === 'url' ? (
+                        <>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-4 h-4 bg-green-500 rounded" />
+                                <span>Has Game {urlStats && `(${urlStats.hasGame.toLocaleString()})`}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-4 h-4 bg-yellow-400 rounded" />
+                                <span>Not Published {urlStats && `(${urlStats.notPublished.toLocaleString()})`}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-4 h-4 bg-red-500 rounded" />
+                                <span>Error {urlStats && `(${urlStats.errors.toLocaleString()})`}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-4 h-4 bg-white border border-gray-400 rounded" />
+                                <span>Not Found {urlStats && `(${urlStats.notFound.toLocaleString()})`}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-4 h-4 bg-gray-400 rounded" />
+                                <span>Other {urlStats && `(${urlStats.other.toLocaleString()})`}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-4 h-4 bg-gray-200 border border-gray-300 rounded" />
+                                <span>No Record {urlStats && `(${urlStats.empty.toLocaleString()})`}</span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            {(['FINISHED', 'RUNNING', 'CLOCK_STOPPED', 'REGISTERING', 'SCHEDULED', 'NOT_PUBLISHED', 'CANCELLED', 'NO_GAME'] as GameStatusType[]).map(status => (
+                                <div key={status} className="flex items-center gap-1.5">
+                                    <div className={`w-4 h-4 rounded ${GAME_STATUS_CONFIG[status].bg}`} />
+                                    <span>{GAME_STATUS_CONFIG[status].label} {gameStats && `(${gameStats[status].toLocaleString()})`}</span>
+                                </div>
+                            ))}
+                        </>
+                    )}
                     {bounds && (
                         <div className="ml-auto text-gray-500">
                             Range: {bounds.minId.toLocaleString()} - {bounds.maxId.toLocaleString()} 
@@ -496,15 +686,23 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                                 Try Again
                             </button>
                         </div>
-                    ) : bounds ? (
-                        <div 
-                            className="grid gap-px"
-                            style={{ 
-                                gridTemplateColumns: `repeat(${columnsPerRow}, ${cellSize}px)`,
-                                width: 'fit-content'
-                            }}
-                        >
-                            {gridCells}
+                    ) : bounds && gridRows.length > 0 ? (
+                        <div className="flex flex-col items-center gap-px">
+                            {gridRows.map((row, rowIndex) => (
+                                <div key={rowIndex} className="flex items-center gap-2">
+                                    {/* Row label */}
+                                    <div 
+                                        className="text-xs text-gray-500 text-right font-mono"
+                                        style={{ width: 80, flexShrink: 0 }}
+                                    >
+                                        {row.startId}-{row.endId}
+                                    </div>
+                                    {/* Row cells */}
+                                    <div className="flex gap-px">
+                                        {row.cells}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-64 gap-3 text-gray-500">
@@ -525,21 +723,42 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
                         }}
                     >
                         <div className="font-medium">ID: {hoveredId}</div>
-                        {urlData.get(hoveredId) && (
+                        {viewMode === 'url' ? (
                             <>
-                                <div className="text-gray-300 text-xs">
-                                    Status: {getStatusLabel(determineURLStatus(urlData.get(hoveredId)))}
-                                </div>
-                                {urlData.get(hoveredId)?.gameName && (
-                                    <div className="text-gray-300 text-xs truncate max-w-xs">
-                                        {urlData.get(hoveredId)?.gameName}
-                                    </div>
+                                {urlData.get(hoveredId) && (
+                                    <>
+                                        <div className="text-gray-300 text-xs">
+                                            Status: {getURLStatusLabel(determineURLStatus(urlData.get(hoveredId)))}
+                                        </div>
+                                        {urlData.get(hoveredId)?.gameName && (
+                                            <div className="text-gray-300 text-xs truncate max-w-xs">
+                                                {urlData.get(hoveredId)?.gameName}
+                                            </div>
+                                        )}
+                                        {urlData.get(hoveredId)?.latestS3Key && (
+                                            <div className="text-blue-300 text-xs flex items-center gap-1">
+                                                <ExternalLink className="h-3 w-3" />
+                                                Click to view HTML
+                                            </div>
+                                        )}
+                                    </>
                                 )}
-                                {urlData.get(hoveredId)?.latestS3Key && (
-                                    <div className="text-blue-300 text-xs flex items-center gap-1">
-                                        <ExternalLink className="h-3 w-3" />
-                                        Click to view HTML
-                                    </div>
+                            </>
+                        ) : (
+                            <>
+                                {gameData.get(hoveredId) ? (
+                                    <>
+                                        <div className="text-gray-300 text-xs">
+                                            Status: {getGameStatusLabel(determineGameStatus(gameData.get(hoveredId)))}
+                                        </div>
+                                        {gameData.get(hoveredId)?.gameName && (
+                                            <div className="text-gray-300 text-xs truncate max-w-xs">
+                                                {gameData.get(hoveredId)?.gameName}
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="text-gray-300 text-xs">No game for this ID</div>
                                 )}
                             </>
                         )}
@@ -583,7 +802,7 @@ export const URLStatusGridButton: React.FC<URLStatusGridButtonProps> = ({ classN
                 className={`flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${className || ''}`}
             >
                 <Grid3X3 className="h-4 w-4" />
-                URL Status Grid
+                Status Grid
             </button>
             <URLStatusGrid isOpen={isOpen} onClose={() => setIsOpen(false)} />
         </>
