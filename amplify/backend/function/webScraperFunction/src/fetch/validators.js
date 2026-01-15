@@ -106,7 +106,7 @@ const isNotInUse = (html) => {
 const detectSpecialStatus = (html) => {
     if (isTournamentNotFound(html)) return 'NOT_FOUND';
     if (isNotPublished(html)) return 'NOT_PUBLISHED';
-    if (isNotInUse(html)) return 'NOT_IN_USE';
+    if (isNotInUse(html)) return 'BLANK';
     return null;
 };
 

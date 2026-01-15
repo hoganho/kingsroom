@@ -33,7 +33,7 @@
  *   (unless game started >7 days ago → mark as stale instead)
  * - FINISHED → Delete ActiveGame/UpcomingGame, Create RecentlyFinishedGame
  *   (unless gameStartDateTime >7 days ago → skip RecentlyFinishedGame)
- * - CANCELLED, NOT_IN_USE, NOT_PUBLISHED → Delete from all projection tables
+ * - CANCELLED, NOT _IN_USE, NOT_PUBLISHED → Delete from all projection tables
  * 
  * ===================================================================
  */
@@ -55,7 +55,7 @@ const UPCOMING_STATUSES = ['SCHEDULED'];
 const FINISHED_STATUSES = ['FINISHED', 'COMPLETED'];
 
 // Statuses that trigger deletion (no projection needed)
-const INACTIVE_STATUSES = ['CANCELLED', 'NOT_IN_USE', 'NOT_PUBLISHED', 'UNKNOWN'];
+const INACTIVE_STATUSES = ['CANCELLED', 'NOT_FOUND', 'NOT_PUBLISHED', 'UNKNOWN'];
 
 // Refresh intervals by status (in minutes)
 const REFRESH_INTERVALS = {

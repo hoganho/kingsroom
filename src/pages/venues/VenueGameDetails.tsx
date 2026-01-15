@@ -89,7 +89,7 @@ function getTimeRangeBounds(range: TimeRangeKey): { from: string | null; to: str
 
 const GAME_STATUS_OPTIONS = [
   'INITIATING', 'SCHEDULED', 'REGISTERING', 'RUNNING', 
-  'CANCELLED', 'FINISHED', 'NOT_IN_USE', 'NOT_PUBLISHED', 
+  'CANCELLED', 'FINISHED', 'NOT_FOUND', 'NOT_PUBLISHED', 
   'CLOCK_STOPPED', 'UNKNOWN'
 ] as const;
 
@@ -101,7 +101,7 @@ const STATUS_CONFIG: Record<string, { abbr: string; bg: string; text: string }> 
   RUNNING: { abbr: 'RUN', bg: 'bg-emerald-100', text: 'text-emerald-700' },
   CANCELLED: { abbr: 'CAN', bg: 'bg-red-100', text: 'text-red-700' },
   FINISHED: { abbr: 'FIN', bg: 'bg-green-100', text: 'text-green-700' },
-  NOT_IN_USE: { abbr: 'N/U', bg: 'bg-gray-100', text: 'text-gray-500' },
+  NOT_FOUND: { abbr: 'N/U', bg: 'bg-gray-100', text: 'text-gray-500' },
   NOT_PUBLISHED: { abbr: 'N/P', bg: 'bg-amber-100', text: 'text-amber-700' },
   CLOCK_STOPPED: { abbr: 'STOP', bg: 'bg-orange-100', text: 'text-orange-700' },
   UNKNOWN: { abbr: 'UNK', bg: 'bg-purple-100', text: 'text-purple-700' },

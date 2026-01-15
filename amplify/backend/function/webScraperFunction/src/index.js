@@ -3,9 +3,12 @@
  * webScraperFunction - Entry Point
  * ===================================================================
  * 
- * VERSION: 2.1.0
+ * VERSION: 2.2.0
  * 
  * CHANGELOG:
+ * - v2.2.0: Added saveAfterFetch option passthrough to fetch handler
+ *           This enables refreshRunningGames to fetch AND save in one call
+ *           When saveAfterFetch=true, fetch-handler auto-invokes save-handler
  * - v2.1.0: Error message now encoded in 'name' field for GraphQL passthrough
  *           Format: "FETCH_ERROR: <actual error message>"
  *           This ensures scrapingEngine can detect and display real errors.
@@ -18,8 +21,9 @@
  * - Parse HTML to extract tournament data
  * - Track scraping activity (ScrapeURL, ScrapeAttempt, S3Storage)
  * - Return parsed data to caller
+ * - (v2.2.0) Optionally auto-save via saveAfterFetch flag
  * 
- * DOES NOT:
+ * DOES NOT (unless saveAfterFetch=true):
  * - Write to Game table (delegated to gameDataEnricher -> saveGameFunction)
  * - Create/modify venues or series
  * - Process player data
@@ -31,7 +35,7 @@
  * - ScrapeStructure: HTML structure fingerprinting
  * 
  * OPERATIONS:
- * - fetchTournamentData: Fetch + parse a single tournament
+ * - fetchTournamentData: Fetch + parse a single tournament (+ optional save)
  * - saveTournamentData: Passthrough to gameDataEnricher Lambda
  * - fetchTournamentDataRange: Batch fetch multiple tournaments
  * - reScrapeFromCache: Re-parse existing S3 HTML with new strategies
@@ -94,16 +98,19 @@ exports.handler = async (event) => {
             forceRefresh: args.forceRefresh || false,
             overrideDoNotScrape: args.overrideDoNotScrape || false,
             scraperJobId: args.scraperJobId || args.jobId || "MANUAL_RUN",
-            scraperApiKey: args.scraperApiKey || process.env.SCRAPERAPI_KEY || null
+            scraperApiKey: args.scraperApiKey || process.env.SCRAPERAPI_KEY || null,
+            // v2.2.0: New saveAfterFetch option for auto-save after fetch
+            saveAfterFetch: args.saveAfterFetch || false
         };
         
-        console.log(`[Handler] v2.0.0 Operation: ${fieldName}, EntityId: ${entityId}`);
+        console.log(`[Handler] v2.2.0 Operation: ${fieldName}, EntityId: ${entityId}, saveAfterFetch: ${options.saveAfterFetch}`);
         
         // Route to appropriate handler
         switch (fieldName) {
-            // ───────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════════
             // FETCH: Get HTML and parse tournament data
-            // ───────────────────────────────────────────────────────────────
+            // v2.2.0: When saveAfterFetch=true, also saves to Game table
+            // ═══════════════════════════════════════════════════════════════════
             case 'fetchTournamentData':
             case 'FETCH': {
                 // Support both URL fetch and S3 cache re-parse
@@ -127,9 +134,9 @@ exports.handler = async (event) => {
                 }, context);
             }
             
-            // ───────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════════
             // SAVE: Passthrough to gameDataEnricher Lambda
-            // ───────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════════
             case 'saveTournamentData':
             case 'SAVE': {
                 const input = args.input || args;
@@ -167,9 +174,9 @@ exports.handler = async (event) => {
                 }, context);
             }
             
-            // ───────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════════
             // FETCH RANGE: Batch fetch multiple tournaments
-            // ───────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════════
             case 'fetchTournamentDataRange': {
                 if (!args.startId || !args.endId) {
                     throw new Error('startId and endId are required for fetchTournamentDataRange');
@@ -182,9 +189,9 @@ exports.handler = async (event) => {
                 }, context);
             }
             
-            // ───────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════════
             // RE-SCRAPE FROM CACHE: Parse existing S3 HTML
-            // ───────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════════
             case 'reScrapeFromCache': {
                 const input = args.input || args;
                 
@@ -200,9 +207,9 @@ exports.handler = async (event) => {
                 }, context);
             }
             
-            // ───────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════════
             // UNKNOWN OPERATION
-            // ───────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════════
             default:
                 throw new Error(`Unknown operation: ${fieldName}`);
         }
@@ -235,7 +242,10 @@ exports.handler = async (event) => {
                 status: 'ERROR',
                 registrationStatus: 'N_A',
                 entityId: args.entityId || null,
-                source: 'ERROR'
+                source: 'ERROR',
+                // v2.2.0: Auto-save would have failed too
+                autoSaved: false,
+                autoSaveError: errorMsg
             };
         }
         

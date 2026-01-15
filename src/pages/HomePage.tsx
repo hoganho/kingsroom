@@ -1,5 +1,5 @@
 // src/pages/HomePage.tsx
-// VERSION: 3.0.0 - Enhanced dashboard with auto-refresh, game type badges, venue logos, dual date display
+// VERSION: 3.1.0 - Fixed: Manual refresh triggers Lambda, dual status indicators, proper state management
 //
 // ARCHITECTURE:
 // - ActiveGame table: Fast queries for RUNNING, REGISTERING, CLOCK_STOPPED, INITIATING, SCHEDULED games
@@ -18,8 +18,9 @@
 // - Game type badges (Series, Satellite, Recurring, Main Event)
 // - Registration status badges (OPEN, FINAL)
 // - Venue logos with fallback initials
-// - Manual refresh per section
+// - Manual refresh per section (triggers Lambda scraper)
 // - Clock-aligned auto-refresh (on the hour and half hour)
+// - Dual status indicators (Auto-refresh + Live subscription)
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
@@ -245,6 +246,20 @@ const onActiveGameChangeSubscription = /* GraphQL */ `
   }
 `;
 
+// Mutation to trigger Lambda scraper for manual refresh
+const refreshRunningGamesMutation = /* GraphQL */ `
+  mutation RefreshRunningGames($input: RefreshRunningGamesInput) {
+    refreshRunningGames(input: $input) {
+      success
+      gamesRefreshed
+      gamesUpdated
+      gamesFailed
+      errors
+      executionTimeMs
+    }
+  }
+`;
+
 // ============================================
 // TYPES
 // ============================================
@@ -374,6 +389,17 @@ interface GamesByStatusData {
 
 interface OnActiveGameChangeData {
   onActiveGameChange: ActiveGameData;
+}
+
+interface RefreshRunningGamesData {
+  refreshRunningGames: {
+    success: boolean;
+    gamesRefreshed: number;
+    gamesUpdated: number;
+    gamesFailed: number;
+    errors?: string[];
+    executionTimeMs?: number;
+  };
 }
 
 interface AmplifySubscription {
@@ -1046,25 +1072,43 @@ const EmptyState: React.FC<EmptyStateProps> = ({ message }) => (
 );
 
 // ============================================
-// LIVE INDICATOR COMPONENT
+// LIVE INDICATOR COMPONENT (Dual Status)
 // ============================================
 
 interface LiveIndicatorProps {
-  isConnected: boolean;
+  isAutoRefreshEnabled: boolean;
+  isSubscribed: boolean;
 }
 
-const LiveIndicator: React.FC<LiveIndicatorProps> = ({ isConnected }) => (
-  <div className={cx(
-    "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium",
-    isConnected 
-      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" 
-      : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
-  )}>
-    <span className={cx(
-      "w-2 h-2 rounded-full",
-      isConnected ? "bg-green-500 animate-pulse" : "bg-gray-400"
-    )} />
-    {isConnected ? 'Live' : 'Offline'}
+const LiveIndicator: React.FC<LiveIndicatorProps> = ({ isAutoRefreshEnabled, isSubscribed }) => (
+  <div className="flex items-center gap-2">
+    {/* Scraper auto-refresh status */}
+    <div className={cx(
+      "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium",
+      isAutoRefreshEnabled 
+        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" 
+        : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+    )}>
+      <span className={cx(
+        "w-2 h-2 rounded-full",
+        isAutoRefreshEnabled ? "bg-green-500 animate-pulse" : "bg-amber-500"
+      )} />
+      {isAutoRefreshEnabled ? 'Auto-Refresh' : 'Manual Only'}
+    </div>
+    
+    {/* WebSocket subscription status */}
+    <div className={cx(
+      "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium",
+      isSubscribed 
+        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400" 
+        : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+    )}>
+      <span className={cx(
+        "w-2 h-2 rounded-full",
+        isSubscribed ? "bg-blue-500 animate-pulse" : "bg-gray-400"
+      )} />
+      {isSubscribed ? 'Live' : 'Offline'}
+    </div>
   </div>
 );
 
@@ -1406,12 +1450,16 @@ export const HomePage: React.FC = () => {
   const fetchFinishedGames = useCallback(async (): Promise<FinishedGameData[]> => {
     if (entityIds.length === 0) return [];
 
+    // Calculate 7 days ago for filtering
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
     try {
       // Try RecentlyFinishedGame table first
       const fetchPromises = entityIds.map(entityId =>
         client.graphql({
           query: listRecentlyFinishedByEntity,
-          variables: { entityId, limit: 30 }
+          variables: { entityId, limit: 100 } // Increased limit since we filter client-side
         })
       );
 
@@ -1425,11 +1473,15 @@ export const HomePage: React.FC = () => {
         }
       });
 
-      // If RecentlyFinishedGame table is empty, fall back to GSI query
-      if (finished.length === 0) {
-        console.log('[HomePage] RecentlyFinishedGame empty, falling back to GSI query');
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      // CRITICAL FIX: Filter to only include games started in the last 7 days
+      const recentFinished = finished.filter(game => {
+        const gameStart = new Date(game.gameStartDateTime);
+        return gameStart >= sevenDaysAgo;
+      });
+
+      // If no recent games found, fall back to GSI query
+      if (recentFinished.length === 0) {
+        console.log('[HomePage] No recent finished games, falling back to GSI query');
 
         const fallbackResult = await client.graphql({
           query: gamesByStatusFinished,
@@ -1454,7 +1506,7 @@ export const HomePage: React.FC = () => {
       }
 
       // Sort by finished time descending (most recent first)
-      return finished.sort((a, b) => {
+      return recentFinished.sort((a, b) => {
         const aFinish = a.finishedAt || a.gameEndDateTime || a.gameStartDateTime;
         const bFinish = b.finishedAt || b.gameEndDateTime || b.gameStartDateTime;
         return new Date(bFinish).getTime() - new Date(aFinish).getTime();
@@ -1524,22 +1576,67 @@ export const HomePage: React.FC = () => {
     }
   }, [fetchStartingSoonAndUpcoming]);
 
-  const fetchAllData = useCallback(async () => {
+  const fetchAllData = useCallback(async (triggerScraper: boolean = false) => {
     setLoading(true);
     setError(null);
 
     try {
+      // Optionally trigger the scraper Lambda first
+      if (triggerScraper) {
+        console.log('[HomePage] Triggering refreshRunningGames Lambda...');
+        
+        const refreshResult = await client.graphql({
+          query: refreshRunningGamesMutation,
+          variables: { 
+            input: { 
+              entityId: entityIds.length === 1 ? entityIds[0] : null,
+              maxGames: 50,
+              olderThanMinutes: 0  // Refresh all, not just stale ones
+            } 
+          }
+        }) as GraphQLResult<RefreshRunningGamesData>;
+
+        if (refreshResult.data?.refreshRunningGames) {
+          const result = refreshResult.data.refreshRunningGames;
+          console.log('[HomePage] Refresh result:', {
+            success: result.success,
+            refreshed: result.gamesRefreshed,
+            updated: result.gamesUpdated,
+            failed: result.gamesFailed,
+            timeMs: result.executionTimeMs
+          });
+          
+          if (result.errors?.length) {
+            console.warn('[HomePage] Refresh errors:', result.errors);
+          }
+        }
+
+        // Brief delay to allow DynamoDB to propagate updates
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
+
+      // Fetch data from database
       const [runningResult, startingUpcomingResult, finished] = await Promise.all([
         fetchRunningGames(),
         fetchStartingSoonAndUpcoming(),
         fetchFinishedGames()
       ]);
 
+      console.log('[fetchAllData] Results received:', {
+        running: runningResult.running.length,
+        clockStopped: runningResult.clockStopped.length,
+        startingSoon: startingUpcomingResult.startingSoon.length,
+        upcoming: startingUpcomingResult.upcoming.length,
+        finished: finished.length
+      });
+
       setRunningGames(runningResult.running);
       setClockStoppedGames(runningResult.clockStopped);
       setStartingSoonGames(startingUpcomingResult.startingSoon);
       setUpcomingGames(startingUpcomingResult.upcoming);
       setFinishedGames(finished);
+      
+      console.log('[fetchAllData] State updated successfully');
       
       const now = new Date();
       setLastUpdated(now);
@@ -1553,13 +1650,18 @@ export const HomePage: React.FC = () => {
       setUpcomingNextRefresh(new Date(Date.now() + UPCOMING_REFRESH_INTERVAL));
       
     } catch (err) {
-      console.error('[HomePage] Error fetching data:', err);
+      console.error('[fetchAllData] ERROR:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard data';
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [fetchRunningGames, fetchStartingSoonAndUpcoming, fetchFinishedGames]);
+  }, [client, entityIds, fetchRunningGames, fetchStartingSoonAndUpcoming, fetchFinishedGames]);
+
+  // Handler for manual refresh that triggers the scraper
+  const handleManualRefresh = useCallback(() => {
+    fetchAllData(true); // true = trigger scraper Lambda first
+  }, [fetchAllData]);
 
   // ============================================
   // AUTO-REFRESH SETUP
@@ -1776,7 +1878,7 @@ export const HomePage: React.FC = () => {
   // Fetch data when entities change
   useEffect(() => {
     if (!entityLoading && entityIds.length > 0) {
-      fetchAllData();
+      fetchAllData(false); // false = don't trigger scraper on initial load
     }
   }, [entityLoading, entityIds, fetchAllData]);
 
@@ -1836,7 +1938,10 @@ export const HomePage: React.FC = () => {
           <p className="text-sm text-gray-500 dark:text-gray-400">Tournament overview and live updates</p>
         </div>
         <div className="flex items-center gap-3">
-          <LiveIndicator isConnected={isSubscribed} />
+          <LiveIndicator 
+            isAutoRefreshEnabled={isAutoRefreshEnabled} 
+            isSubscribed={isSubscribed} 
+          />
         </div>
       </div>
 
@@ -1845,7 +1950,7 @@ export const HomePage: React.FC = () => {
         isAutoRefreshEnabled={isAutoRefreshEnabled}
         lastUpdated={lastUpdated}
         nextRefresh={runningNextRefresh}
-        onManualRefresh={fetchAllData}
+        onManualRefresh={handleManualRefresh}
         isRefreshing={loading}
         disabledReason={scraperSettings?.disabledReason}
       />

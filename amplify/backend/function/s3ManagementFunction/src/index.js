@@ -78,7 +78,9 @@ function extractMetadata(html) {
     
     // Check for tournament status
     if (html.includes('Tournament not in use')) {
-        metadata.tournamentStatus = 'NOT_IN_USE';
+        metadata.tournamentStatus = 'NOT_FOUND';
+    } else if (html.includes('Not Found')) {
+        metadata.tournamentStatus = 'NOT_FOUND';
     } else if (html.includes('Not Published')) {
         metadata.tournamentStatus = 'NOT_PUBLISHED';
     } else if (html.includes('Registration Open')) {

@@ -3,16 +3,26 @@
  * REFRESH RUNNING GAMES - Scheduled Lambda
  * ===================================================================
  * 
- * VERSION: 2.1.0 - Added global auto-refresh toggle check
+ * VERSION: 2.2.0 - Added saveAfterFetch to complete the refresh cycle
+ * 
+ * CHANGELOG:
+ * - v2.2.0: Added saveAfterFetch: true to scraper payload
+ *           This ensures fetched data is actually saved to Game table
+ *           and triggers syncActiveGame for dashboard updates
+ *           FIXES: Games were being fetched but data was discarded
+ * - v2.1.0: Added global auto-refresh toggle check
  * 
  * PURPOSE:
  * Runs on a schedule to find stale ActiveGame records and trigger 
  * re-scraping to keep dashboard data fresh from the live source (not S3 cache).
  * 
- * NEW IN v2.1.0:
- * - Checks ScraperSettings.autoRefreshEnabled before doing any work
- * - If disabled, exits immediately with minimal Lambda cost
- * - This allows admins to "pause" all scraping during inactive periods
+ * THE COMPLETE REFRESH CYCLE (v2.2.0):
+ * 1. refreshRunningGames finds stale ActiveGame records
+ * 2. Invokes webScraperFunction with saveAfterFetch: true
+ * 3. webScraperFunction fetches fresh HTML and parses it
+ * 4. webScraperFunction auto-saves via save-handler -> gameDataEnricher -> saveGameFunction
+ * 5. saveGameFunction calls syncActiveGame to update ActiveGame table
+ * 6. ActiveGame.lastRefreshedAt is updated, preventing immediate re-refresh
  * 
  * REFRESH SCHEDULE (when enabled):
  * - RUNNING/CLOCK_STOPPED: Every 30 minutes (clock-aligned)
@@ -26,7 +36,7 @@
  * ENVIRONMENT VARIABLES:
  * - API_KINGSROOM_GRAPHQLAPIIDOUTPUT
  * - API_KINGSROOM_ACTIVEGAMETABLE_NAME
- * - API_KINGSROOM_SCRAPERSETTINGSTABLE_NAME (new)
+ * - API_KINGSROOM_SCRAPERSETTINGSTABLE_NAME
  * - FUNCTION_WEBSCRAPERFUNCTION_NAME (e.g., webScraperFunction-dev)
  * - ENV
  * - REGION
@@ -313,6 +323,9 @@ async function findActiveGamesByScan(tableName, status, accumulator) {
 
 /**
  * Trigger the scraper Lambda for a specific game
+ * 
+ * v2.2.0: Now includes saveAfterFetch: true to ensure the fetched data
+ * is saved to the Game table and syncActiveGame is triggered.
  */
 async function triggerScraper(game) {
     if (!game.sourceUrl) {
@@ -320,22 +333,38 @@ async function triggerScraper(game) {
         return false;
     }
     
+    // ═══════════════════════════════════════════════════════════════════════
+    // v2.2.0: CRITICAL FIX - Added saveAfterFetch: true
+    // 
+    // Previously, fetchTournamentData only fetched and parsed data without saving.
+    // The data was discarded since InvocationType is 'Event' (fire-and-forget).
+    // 
+    // With saveAfterFetch: true, the fetch-handler will automatically invoke
+    // save-handler after a successful fetch, which:
+    // 1. Calls gameDataEnricher to enrich the data
+    // 2. Calls saveGameFunction to persist to Game table
+    // 3. saveGameFunction calls syncActiveGame to update ActiveGame table
+    // 4. ActiveGame.lastRefreshedAt is updated
+    // 
+    // This completes the refresh cycle and prevents immediate re-refresh.
+    // ═══════════════════════════════════════════════════════════════════════
     const scraperPayload = {
         operation: 'fetchTournamentData',
         url: game.sourceUrl,
         entityId: game.entityId,
-        forceRefresh: true, // CRITICAL: Bypasses S3 cache
+        forceRefresh: true,          // Bypasses S3 cache for fresh data
+        saveAfterFetch: true,        // v2.2.0: AUTO-SAVE after fetch!
         scraperJobId: `REFRESH_${game.gameId}_${Date.now()}`
     };
     
     try {
         await lambdaClient.send(new InvokeCommand({
             FunctionName: getScraperFunctionName(),
-            InvocationType: 'Event',
+            InvocationType: 'Event',  // Async - fire and forget
             Payload: JSON.stringify(scraperPayload)
         }));
         
-        console.log(`[REFRESH] ✅ Triggered scraper for: ${game.name} (${game.gameStatus})`);
+        console.log(`[REFRESH] ✅ Triggered scraper for: ${game.name} (${game.gameStatus}) [saveAfterFetch=true]`);
         return true;
         
     } catch (error) {
@@ -346,6 +375,8 @@ async function triggerScraper(game) {
 
 /**
  * Update ActiveGame record to mark refresh attempt
+ * Note: The actual lastRefreshedAt update happens in syncActiveGame
+ * after the save is complete. This just tracks when we triggered the scraper.
  */
 async function markRefreshAttempt(activeGameId) {
     const now = new Date().toISOString();
@@ -398,7 +429,8 @@ async function processBatch(games, results) {
 exports.handler = async (event) => {
     const startTime = Date.now();
     console.log('[REFRESH] ========================================');
-    console.log('[REFRESH] Starting scheduled refresh check v2.1.0');
+    console.log('[REFRESH] Starting scheduled refresh check v2.2.0');
+    console.log('[REFRESH] Key change: saveAfterFetch=true ensures data is saved');
     
     // ================================================================
     // STEP 0: Check if auto-refresh is enabled

@@ -430,7 +430,7 @@
         },
         "Runtime": "nodejs22.x",
         "Layers": [],
-        "Timeout": 90,
+        "Timeout": 180,
         "MemorySize": 1024
       }
     },

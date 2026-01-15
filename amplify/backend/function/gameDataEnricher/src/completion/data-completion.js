@@ -149,8 +149,7 @@ const deriveRegistrationStatus = (gameStatus) => {
     case 'FINISHED':
     case 'CANCELLED':
       return 'CLOSED';
-    case 'NOT_IN_USE':
-    case 'NOT_PUBLISHED':
+     case 'NOT_PUBLISHED':
       return 'N_A';
     default:
       return 'SCHEDULED';

@@ -4,7 +4,7 @@
 //
 // v1.1.0:
 // - FIXED: hasEnumErrors() no longer flags NOT_FOUND responses as having enum errors
-//   - null gameVariant is expected for NOT_FOUND/NOT_IN_USE/NOT_PUBLISHED responses
+//   - null gameVariant is expected for NOT_FOUND/NOT _IN_USE/NOT_PUBLISHED responses
 // - NEW: isNotPublishedResponse() - separate helper for hidden tournaments
 // - NEW: isInactiveResponse() - combined check for NOT_FOUND or NOT_PUBLISHED
 // - CHANGED: isNotFoundResponse() no longer includes NOT_PUBLISHED (different status)
@@ -144,13 +144,12 @@ export const shouldPauseForDecision = (
  * Used for consecutive NOT_FOUND tracking
  * 
  * v1.1.0: Separated from NOT_PUBLISHED handling
- * - NOT_FOUND/NOT_IN_USE = empty slot, no tournament exists
+ * - NOT_FOUND/NOT _IN_USE = empty slot, no tournament exists
  * - NOT_PUBLISHED = tournament exists but is hidden (different handling)
  */
 export const isNotFoundResponse = (parsedData: any, errorMsg?: string): boolean => {
   // Check parsedData gameStatus - only true "not found" statuses
-  if (parsedData?.gameStatus === 'NOT_FOUND' || 
-      parsedData?.gameStatus === 'NOT_IN_USE') {
+  if (parsedData?.gameStatus === 'NOT_FOUND') {
     return true;
   }
   
@@ -188,7 +187,7 @@ export const isInactiveResponse = (parsedData: any): boolean => {
 /**
  * Check if parsed data has enum validation errors
  * v1.1.0: Only considers null gameVariant an error for REAL tournament responses
- * NOT_FOUND/NOT_IN_USE/NOT_PUBLISHED responses are expected to have null gameVariant
+ * NOT_FOUND/NOT _IN_USE/NOT_PUBLISHED responses are expected to have null gameVariant
  */
 export const hasEnumErrors = (parsedData: any): boolean => {
   // Check for explicit enum errors first
@@ -197,10 +196,9 @@ export const hasEnumErrors = (parsedData: any): boolean => {
   }
   
   // null gameVariant often indicates enum issue, BUT only for real tournament responses
-  // For NOT_FOUND/NOT_IN_USE/NOT_PUBLISHED, null gameVariant is expected
+  // For NOT_FOUND/NOT _IN_USE/NOT_PUBLISHED, null gameVariant is expected
   if (parsedData?.gameVariant === null) {
     const isEmptySlot = parsedData?.gameStatus === 'NOT_FOUND' ||
-                        parsedData?.gameStatus === 'NOT_IN_USE' ||
                         parsedData?.gameStatus === 'NOT_PUBLISHED';
     return !isEmptySlot;  // Only flag as enum error if NOT an empty slot
   }

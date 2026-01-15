@@ -4,8 +4,32 @@
  * Core scraping logic extracted from index.js for maintainability.
  * Handles bulk scraping, gap processing, and event streaming.
  * 
- * VERSION: 1.10.1
+ * VERSION: 1.13.0
  * 
+ * UPDATED v1.13.0:
+ * - FIX: Uses direct Lambda invocation instead of AppSync GraphQL for
+ *   fetchTournamentData calls. This bypasses AppSync's 30-second resolver
+ *   timeout which was causing "Lambda:ExecutionTimeoutException" errors.
+ * - NEW: fetchTournamentDataWithRetry() helper function for direct invocation
+ * - invokeFetchDirect from ctx is now used by default; falls back to callGraphQL
+ *   if not available (backward compatibility)
+ * - This allows slow ScraperAPI responses (up to Lambda timeout of 120-180s)
+ *
+ * UPDATED v1.12.1:
+ * - FIX: isNotFoundGapStatus() now handles missing ScrapeURL records in gap mode
+ *   - Previously, gaps with no ScrapeURL record returned false (no force refresh)
+ *   - Now accepts isGapMode parameter: when true, missing records also return true
+ *   - Also checks scrapeStatus field (from html-parser v2.3.0) in addition to
+ *     lastScrapeStatus and gameStatus
+ *   - This ensures gaps like ID 1252 (no record) get fresh web fetches
+ *
+ * UPDATED v1.11.0:
+ * - FIX: processGapIds now has cancellation checks, timeout detection, and continuation support
+ *   - Previously, gap processing could run indefinitely without checking for cancellation
+ *   - Now checks job status every 10 URLs for STOPPED_MANUAL
+ *   - Detects Lambda timeout and triggers self-continuation with remaining gap IDs
+ *   - This prevents infinite loops when processing large gap lists with forceRefresh=true
+ *
  * UPDATED v1.10.1:
  * - FIX: Only force refresh for NOT_FOUND gaps, not all gaps (prevents Lambda timeout)
  *   - v1.10.0 forced web refresh for ALL gaps when skipNotFoundGaps=false
@@ -99,6 +123,91 @@ const { FETCH_TOURNAMENT_DATA, SAVE_TOURNAMENT_DATA } = require('../graphql/quer
 const { ScrapeURLPrefetchCache } = require('../lib/prefetchCache');
 
 // ===================================================================
+// DIRECT LAMBDA FETCH HELPER (NEW v1.13.0)
+// ===================================================================
+
+/**
+ * Fetch tournament data using direct Lambda invocation (preferred) or GraphQL (fallback)
+ * 
+ * Direct invocation bypasses AppSync's 30-second resolver timeout limit.
+ * This allows slow ScraperAPI responses to complete (up to Lambda timeout of 120-180s).
+ * 
+ * @param {function} invokeFetchDirect - Direct Lambda invocation function (from ctx)
+ * @param {function} callGraphQL - GraphQL fallback function (from ctx)
+ * @param {object} params - Fetch parameters {url, forceRefresh, entityId, scraperApiKey}
+ * @param {number} maxRetries - Maximum retry attempts (default: 3)
+ * @param {number} retryDelay - Base delay between retries in ms (default: 500)
+ * @returns {object} Fetch result with fetchTournamentData property
+ */
+async function fetchTournamentDataWithRetry(invokeFetchDirect, callGraphQL, params, maxRetries = 3, retryDelay = 500) {
+    const { url, forceRefresh, entityId, scraperApiKey } = params;
+    
+    // Use direct Lambda invocation if available (bypasses 30s AppSync timeout)
+    const useDirect = typeof invokeFetchDirect === 'function';
+    
+    if (useDirect) {
+        console.log(`[ScrapingEngine] Using direct Lambda invocation for fetch (bypasses AppSync 30s timeout)`);
+    }
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            if (useDirect) {
+                // Direct Lambda invocation - no 30s timeout!
+                return await invokeFetchDirect({
+                    url,
+                    forceRefresh,
+                    entityId,
+                    scraperApiKey
+                });
+            } else {
+                // Fallback to GraphQL (subject to 30s timeout)
+                if (attempt === 1) {
+                    console.warn('[ScrapingEngine] invokeFetchDirect not available, using GraphQL fallback (30s timeout applies)');
+                }
+                return await callGraphQL(FETCH_TOURNAMENT_DATA, {
+                    url,
+                    forceRefresh,
+                    entityId,
+                    scraperApiKey
+                });
+            }
+        } catch (error) {
+            const errorMsg = error.message || String(error);
+            const isTimeout = errorMsg.includes('timeout') || 
+                              errorMsg.includes('Timeout') ||
+                              errorMsg.includes('ETIMEDOUT') ||
+                              errorMsg.includes('ExecutionTimeout');
+            const is429 = errorMsg.includes('429') || 
+                          errorMsg.includes('Rate Exceeded') || 
+                          errorMsg.includes('TooManyRequests');
+            
+            // Don't retry on timeout errors - they'll just timeout again
+            if (isTimeout) {
+                console.error(`[ScrapingEngine] Fetch timeout (attempt ${attempt}/${maxRetries}): ${errorMsg}`);
+                throw error;
+            }
+            
+            // Retry on rate limiting errors
+            if (is429 && attempt < maxRetries) {
+                const delay = retryDelay * Math.pow(2, attempt - 1);
+                console.log(`[ScrapingEngine] Rate limited, retrying in ${delay}ms (attempt ${attempt}/${maxRetries})`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                continue;
+            }
+            
+            // For other errors, retry with backoff
+            if (attempt < maxRetries) {
+                const delay = retryDelay * Math.pow(2, attempt - 1);
+                console.log(`[ScrapingEngine] Fetch error, retrying in ${delay}ms (attempt ${attempt}/${maxRetries}): ${errorMsg}`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            } else {
+                throw error;
+            }
+        }
+    }
+}
+
+// ===================================================================
 // IN-PROGRESS GAME STATUS CONSTANTS (NEW v1.5.0)
 // ===================================================================
 
@@ -144,15 +253,32 @@ function shouldSkipNotFoundGap(scrapeURLStatus, options) {
  * when re-scraping these URLs.
  * 
  * NEW in v1.10.0
+ * v1.10.1: Also check gameStatus field
+ * v1.12.1: Also check scrapeStatus field AND return true for missing records in gaps mode
  * 
  * @param {object} scrapeURLStatus - Status from prefetch cache
- * @returns {boolean} True if this is a NOT_FOUND/BLANK/NOT_IN_USE status
+ * @param {boolean} isGapMode - Whether we're in gaps processing mode (optional)
+ * @returns {boolean} True if this is a NOT_FOUND/BLANK/NOT_IN_USE status or missing record in gap mode
  */
-function isNotFoundGapStatus(scrapeURLStatus) {
-    if (!scrapeURLStatus || !scrapeURLStatus.found) return false;
+function isNotFoundGapStatus(scrapeURLStatus, isGapMode = false) {
+    // v1.12.1 FIX: If no record exists and we're processing gaps, force refresh
+    // This handles cases where the ScrapeURL was never created or was deleted
+    if (!scrapeURLStatus || !scrapeURLStatus.found) {
+        // In gap mode, missing record = unknown state = should force refresh
+        return isGapMode;
+    }
     
-    const status = (scrapeURLStatus.lastScrapeStatus || '').toUpperCase();
-    return status === 'NOT_FOUND' || status === 'BLANK' || status === 'NOT_IN_USE';
+    // v1.10.1 FIX: Also check gameStatus field (not just lastScrapeStatus)
+    const lastStatus = (scrapeURLStatus.lastScrapeStatus || '').toUpperCase();
+    const gameStatus = (scrapeURLStatus.gameStatus || '').toUpperCase();
+    // v1.12.1: Also check scrapeStatus field (from html-parser v2.3.0)
+    const scrapeStatus = (scrapeURLStatus.scrapeStatus || '').toUpperCase();
+    
+    const notFoundStatuses = ['NOT_FOUND', 'BLANK', 'NOT_IN_USE'];
+    
+    return notFoundStatuses.includes(lastStatus) || 
+           notFoundStatuses.includes(gameStatus) ||
+           notFoundStatuses.includes(scrapeStatus);
 }
 
 /**
@@ -702,6 +828,7 @@ async function queryUnfinishedGames(entityId, ctx) {
 async function performScrapingEnhanced(entityId, scraperState, jobId, options = {}, ctx) {
     const {
         callGraphQL,
+        invokeFetchDirect,  // NEW v1.13.0: Direct Lambda invocation (bypasses AppSync 30s timeout)
         getEntity,
         buildTournamentUrl,
         getScraperJob,
@@ -734,7 +861,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
     const MAX_CONSECUTIVE_NOT_FOUND = options.maxConsecutiveNotFound || DEFAULT_MAX_CONSECUTIVE_NOT_FOUND || 10;
     const MAX_CONSECUTIVE_BLANKS = options.maxConsecutiveBlanks || DEFAULT_MAX_CONSECUTIVE_BLANKS || 5;
     
-    console.log(`[ScrapingEngine] v1.10.1: Stop on first error (except "Tournament not found"). NOT_FOUND threshold=${MAX_CONSECUTIVE_NOT_FOUND}, BLANKS threshold=${MAX_CONSECUTIVE_BLANKS}`);
+    console.log(`[ScrapingEngine] v1.11.0: Stop on first error (except "Tournament not found"). NOT_FOUND threshold=${MAX_CONSECUTIVE_NOT_FOUND}, BLANKS threshold=${MAX_CONSECUTIVE_BLANKS}`);
     
     // Initialize results - merge with accumulated results from previous invocation if continuing
     const accumulated = options.accumulatedResults || {};
@@ -1029,16 +1156,20 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         results.totalProcessed++;
 
         try {
-            // Fetch via AppSync with retry for rate limiting
-            // v1.5.0: Use per-game forceRefresh for auto mode
-            const fetchData = await withRetry(async () => {
-                return await callGraphQL(FETCH_TOURNAMENT_DATA, {
+            // v1.13.0: Use direct Lambda invocation to bypass AppSync 30s timeout
+            // This allows slow ScraperAPI responses to complete successfully
+            const fetchData = await fetchTournamentDataWithRetry(
+                invokeFetchDirect,
+                callGraphQL,
+                {
                     url: url,
                     forceRefresh: gameForceRefresh,
                     entityId: entityId,
                     scraperApiKey: options.scraperApiKey || null
-                });
-            }, 3, 500);
+                },
+                3,  // maxRetries
+                500 // retryDelay
+            );
             const parsedData = fetchData.fetchTournamentData;
 
             // Determine data source for event
@@ -1500,6 +1631,10 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
 /**
  * Process specific gap IDs (with event streaming)
  * 
+ * v1.11.0: FIX - Added cancellation checks, timeout detection, and continuation support
+ *   - Checks job status every 10 URLs for STOPPED_MANUAL
+ *   - Detects Lambda timeout and triggers self-continuation with remaining gap IDs
+ *   - This prevents infinite loops when processing large gap lists
  * v1.10.1: FIX - Only force refresh for NOT_FOUND gaps, not all gaps
  *   - Added prefetch cache to check each gap's status
  *   - NOT_FOUND/BLANK/NOT_IN_USE -> force refresh (S3 has useless "not found" HTML)
@@ -1513,6 +1648,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
 async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
     const {
         callGraphQL,
+        invokeFetchDirect,  // NEW v1.13.0: Direct Lambda invocation (bypasses AppSync 30s timeout)
         getEntity,
         buildTournamentUrl,
         updateScraperJob,
@@ -1522,11 +1658,17 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         STOP_REASON,
         PROGRESS_UPDATE_FREQUENCY,
         // NEW v1.4.0: Real-time progress callback
-        onProgress
+        onProgress,
+        // NEW v1.11.0: Cancellation and continuation support
+        getScraperJob,
+        LAMBDA_TIMEOUT,
+        LAMBDA_TIMEOUT_BUFFER,
+        invokeContinuation,
+        progressPublisher,
     } = ctx;
     
     // v1.8.0: No error thresholds - we stop on first error
-    console.log(`[ScrapingEngine] Processing ${gapIds.length} gap IDs (stop on first error)`);
+    console.log(`[ScrapingEngine] Processing ${gapIds.length} gap IDs (stop on first error, v1.11.0 with cancellation/timeout support)`);
     
     const entity = await getEntity(entityId);
     console.log(`[ScrapingEngine] Entity: ${entity.entityName}, URL pattern: ${entity.gameUrlDomain}${entity.gameUrlPath}{id}`);
@@ -1561,22 +1703,104 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         console.log(`[ScrapingEngine] Gap processing: skipNotFoundGaps=false but no prefetch cache available, using S3 cache`);
     }
     
+    // Track current index for continuation support
+    let currentGapIndex = 0;
+    
     for (const tournamentId of gapIds) {
         const gameStartTime = Date.now();
         const url = await buildTournamentUrl(entityId, tournamentId);
         
         results.totalProcessed++;
         results.currentId = tournamentId;
+        currentGapIndex++;
+        
+        // ═══════════════════════════════════════════════════════════════
+        // NEW v1.11.0: Cancellation check (every 10 URLs)
+        // ═══════════════════════════════════════════════════════════════
+        if (getScraperJob && results.totalProcessed % 10 === 0) {
+            try {
+                const job = await getScraperJob(jobId);
+                if (job?.status === 'STOPPED_MANUAL') {
+                    console.log(`[ScrapingEngine] Gap processing cancelled by user at index ${results.totalProcessed}, ID ${tournamentId}`);
+                    results.stopReason = STOP_REASON.MANUAL;
+                    break;
+                }
+            } catch (cancelCheckErr) {
+                console.warn(`[ScrapingEngine] Cancellation check failed:`, cancelCheckErr.message);
+                // Continue processing - don't stop on check failure
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // NEW v1.11.0: Timeout check with continuation support
+        // ═══════════════════════════════════════════════════════════════
+        if (LAMBDA_TIMEOUT && LAMBDA_TIMEOUT_BUFFER) {
+            const elapsed = Date.now() - startTime;
+            const timeoutThreshold = LAMBDA_TIMEOUT - LAMBDA_TIMEOUT_BUFFER;
+            
+            if (elapsed > timeoutThreshold) {
+                console.log(`[ScrapingEngine] Gap processing approaching timeout at index ${results.totalProcessed}, ID ${tournamentId}`);
+                
+                // Calculate remaining gap IDs for continuation (starting from current, which hasn't been processed yet)
+                const remainingGapIds = gapIds.slice(currentGapIndex - 1);  // -1 because we already incremented
+                
+                console.log(`[ScrapingEngine] Remaining gap IDs: ${remainingGapIds.length} (starting from ${tournamentId})`);
+                
+                // Publish timeout status
+                if (progressPublisher) {
+                    try {
+                        await progressPublisher.publishProgress(results, 'RUNNING', {
+                            currentId: tournamentId,
+                            stopReason: 'TIMEOUT',
+                            message: `Gap timeout at index ${results.totalProcessed}, ${remainingGapIds.length} IDs remaining`
+                        });
+                    } catch (pubErr) {
+                        console.warn(`[ScrapingEngine] Timeout progress publish failed:`, pubErr.message);
+                    }
+                }
+                
+                // Try to continue in new invocation
+                if (invokeContinuation && remainingGapIds.length > 0) {
+                    try {
+                        // For gap continuation, pass remaining gap IDs in accumulatedResults
+                        await invokeContinuation(
+                            tournamentId,  // currentId for logging
+                            null,          // endId not applicable for gaps
+                            {
+                                ...results,
+                                remainingGapIds: remainingGapIds,
+                            }
+                        );
+                        results.stopReason = STOP_REASON.CONTINUING || 'CONTINUING';
+                        console.log(`[ScrapingEngine] Gap continuation triggered, ${remainingGapIds.length} IDs remaining`);
+                    } catch (contErr) {
+                        console.error(`[ScrapingEngine] Failed to invoke gap continuation:`, contErr.message);
+                        results.stopReason = STOP_REASON.TIMEOUT;
+                        results.lastErrorMessage = `Gap continuation failed: ${contErr.message}`;
+                    }
+                } else {
+                    results.stopReason = STOP_REASON.TIMEOUT;
+                    results.lastErrorMessage = invokeContinuation 
+                        ? 'Gap timeout: No remaining IDs to process' 
+                        : 'Gap timeout: No continuation handler available';
+                }
+                break;
+            }
+        }
         
         // v1.10.1: Determine per-gap forceRefresh based on ScrapeURL status
+        // v1.12.1: Pass isGapMode=true so missing records also trigger force refresh
         let gapForceRefresh = options.forceRefresh || false;
         
         if (prefetchCache && !gapForceRefresh) {
             try {
                 const scrapeURLStatus = await prefetchCache.getStatus(tournamentId);
-                if (isNotFoundGapStatus(scrapeURLStatus)) {
+                if (isNotFoundGapStatus(scrapeURLStatus, true)) {  // isGapMode = true
                     gapForceRefresh = true;
-                    console.log(`[ScrapingEngine] Gap ID ${tournamentId}: Was NOT_FOUND, forcing web refresh`);
+                    const reason = scrapeURLStatus?.found 
+                        ? `Was NOT_FOUND/BLANK/NOT_IN_USE` 
+                        : `No ScrapeURL record exists`;
+                    console.log(`[ScrapingEngine] Gap ID ${tournamentId}: ${reason}, forcing web refresh`);
                 }
                 // NOT_PUBLISHED and other statuses use S3 cache (faster)
             } catch (prefetchError) {
@@ -1586,14 +1810,20 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         }
         
         try {
-            const fetchData = await withRetry(async () => {
-                return await callGraphQL(FETCH_TOURNAMENT_DATA, {
+            // v1.13.0: Use direct Lambda invocation to bypass AppSync 30s timeout
+            // This allows slow ScraperAPI responses to complete successfully
+            const fetchData = await fetchTournamentDataWithRetry(
+                invokeFetchDirect,
+                callGraphQL,
+                {
                     url: url,
                     forceRefresh: gapForceRefresh,
                     entityId: entityId,
                     scraperApiKey: options.scraperApiKey || null
-                });
-            }, 3, 500);
+                },
+                3,  // maxRetries
+                500 // retryDelay
+            );
             const parsedData = fetchData.fetchTournamentData;
             
             const dataSource = (parsedData.source === 'S3_CACHE' || parsedData.source === 'HTTP_304_CACHE') ? 's3' : 'web';
@@ -1914,6 +2144,8 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
 module.exports = {
     performScrapingEnhanced,
     processGapIds,
+    // NEW v1.13.0: Direct Lambda fetch helper
+    fetchTournamentDataWithRetry,
     // NEW v1.5.0: Export for refresh mode
     queryUnfinishedGames,
     isInProgressGameStatus,

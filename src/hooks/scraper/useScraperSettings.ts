@@ -33,6 +33,7 @@ const getScraperSettings = /* GraphQL */ `
       upcomingRefreshIntervalMinutes
       createdAt
       updatedAt
+      _version
     }
   }
 `;
@@ -54,6 +55,7 @@ const listScraperSettings = /* GraphQL */ `
         upcomingRefreshIntervalMinutes
         createdAt
         updatedAt
+        _version
       }
     }
   }
@@ -73,6 +75,7 @@ const createScraperSettings = /* GraphQL */ `
       runningRefreshIntervalMinutes
       startingSoonRefreshIntervalMinutes
       upcomingRefreshIntervalMinutes
+      _version
     }
   }
 `;
@@ -91,6 +94,7 @@ const updateScraperSettings = /* GraphQL */ `
       runningRefreshIntervalMinutes
       startingSoonRefreshIntervalMinutes
       upcomingRefreshIntervalMinutes
+      _version
     }
   }
 `;
@@ -113,6 +117,7 @@ export interface ScraperSettings {
   upcomingRefreshIntervalMinutes?: number | null;
   createdAt?: string;
   updatedAt?: string;
+  _version?: number;
 }
 
 interface GetScraperSettingsData {
@@ -270,6 +275,7 @@ export function useScraperSettings(): UseScraperSettingsReturn {
         variables: {
           input: {
             id: settings.id,
+            _version: settings._version,
             ...updates,
           }
         }
@@ -291,7 +297,7 @@ export function useScraperSettings(): UseScraperSettingsReturn {
     } finally {
       setUpdating(false);
     }
-  }, [client, settings?.id]);
+  }, [client, settings?.id, settings?._version]);
 
   const updateAutoRefresh = useCallback(async (
     enabled: boolean, 

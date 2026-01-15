@@ -2,6 +2,11 @@
 // ==========================================
 // Enhanced batch job progress display with real-time streaming
 //
+// UPDATED v2.3: Fixed pipeline display for NOT_FOUND and NOT_PUBLISHED
+// - StreamingGamesList now uses game.processingAction for accurate status
+// - Passes correct processingMessage that includes action type
+// - dataSource is properly passed through for RETRIEVE display
+//
 // UPDATED v2.2: Updated stat cards for clarity
 // - Renamed "Blanks" → "Not Found" (empty tournament slots)
 // - Added "Not Published" stat (hidden real tournaments)
@@ -49,7 +54,8 @@ import {
   BatchJobStats,
 } from '../../../hooks/scraper/useBatchJobMonitor';
 import { useBatchGameStream } from '../../../hooks/scraper/useBatchGameStream';
-import GameListItem from '../GameListItem';
+import GameListItem, { ProcessingStatusType } from '../GameListItem';
+import type { GameState } from '../../../types/game';
 
 // ===================================================================
 // TYPES
@@ -77,6 +83,82 @@ interface StatCardProps {
   onClick?: () => void;
   clickable?: boolean;
   title?: string;
+}
+
+// ===================================================================
+// HELPER: Derive processing status and message from GameState
+// ===================================================================
+
+/**
+ * Get the correct processingStatus based on the game's processingAction
+ * This ensures accurate pipeline display for all action types
+ */
+function getProcessingStatusFromGame(game: GameState): ProcessingStatusType {
+  const action = game.processingAction;
+  
+  if (action === 'CREATED' || action === 'UPDATED') {
+    return 'success';
+  }
+  if (action === 'ERROR') {
+    return 'error';
+  }
+  if (action === 'NOT_FOUND' || action === 'NOT_PUBLISHED' || action === 'SKIPPED') {
+    return 'skipped';
+  }
+  
+  // Fallback to old logic for backwards compatibility
+  if (game.saveResult?.action === 'CREATED' || game.saveResult?.action === 'UPDATED') {
+    return 'success';
+  }
+  if (game.errorMessage) {
+    return 'error';
+  }
+  
+  return 'skipped';
+}
+
+/**
+ * Get a descriptive processing message based on the game's state
+ * This message is used by derivePipelineState to determine pipeline phases
+ */
+function getProcessingMessageFromGame(game: GameState): string {
+  const action = game.processingAction;
+  
+  switch (action) {
+    case 'CREATED':
+      return `Created: ${game.saveResult?.gameId?.slice(0, 8) || 'new'}`;
+    case 'UPDATED':
+      return `Updated: ${game.saveResult?.gameId?.slice(0, 8) || 'existing'}`;
+    case 'ERROR':
+      return game.errorMessage || 'Processing error';
+    case 'NOT_FOUND':
+      // Include 'not_found' in message so derivePipelineState can detect it
+      return 'NOT_FOUND: Empty tournament slot';
+    case 'NOT_PUBLISHED':
+      // Include 'not_published' in message so derivePipelineState can detect it
+      return 'NOT_PUBLISHED: Tournament is hidden';
+    case 'SKIPPED':
+      return game.errorMessage || 'Skipped';
+    default:
+      // Fallback for games without processingAction
+      if (game.saveResult?.action === 'CREATED') {
+        return `Created: ${game.saveResult.gameId?.slice(0, 8)}`;
+      }
+      if (game.saveResult?.action === 'UPDATED') {
+        return `Updated: ${game.saveResult.gameId?.slice(0, 8)}`;
+      }
+      if (game.errorMessage) {
+        return game.errorMessage;
+      }
+      // Check gameStatus for NOT_FOUND/NOT_PUBLISHED
+      if (game.data?.gameStatus === 'NOT_FOUND') {
+        return 'NOT_FOUND: Empty tournament slot';
+      }
+      if (game.data?.gameStatus === 'NOT_PUBLISHED') {
+        return 'NOT_PUBLISHED: Tournament is hidden';
+      }
+      return 'Skipped';
+  }
 }
 
 // ===================================================================
@@ -484,23 +566,15 @@ const StreamingGamesList: React.FC<StreamingGamesListProps> = ({
                     ${index === 0 && isJobActive ? 'ring-2 ring-blue-300 ring-opacity-50 rounded-lg' : ''}
                   `}
                 >
+                  {/* FIXED v2.3: Use helper functions for accurate status/message */}
                   <GameListItem
                     game={game}
                     compact={true}
                     showVenueSelector={false}
                     showActions={false}
                     dataSource={game.dataSource}
-                    processingStatus={
-                      game.saveResult?.action === 'CREATED' ? 'success' :
-                      game.saveResult?.action === 'UPDATED' ? 'success' :
-                      game.errorMessage ? 'error' :
-                      'skipped'
-                    }
-                    processingMessage={
-                      game.saveResult?.action === 'CREATED' ? `Created: ${game.saveResult.gameId?.slice(0, 8)}` :
-                      game.saveResult?.action === 'UPDATED' ? `Updated: ${game.saveResult.gameId?.slice(0, 8)}` :
-                      game.errorMessage || 'Skipped'
-                    }
+                    processingStatus={getProcessingStatusFromGame(game)}
+                    processingMessage={getProcessingMessageFromGame(game)}
                     tournamentId={game.data?.tournamentId}
                   />
                 </div>
@@ -568,9 +642,9 @@ export const BatchJobProgress: React.FC<BatchJobProgressProps> = ({
     showStreamingGames ? jobId : null,
     {
       maxGames: maxStreamedGames,
-      onGameReceived: (event) => {
-        console.log(`[BatchJobProgress] Game processed: ${event.tournamentId} - ${event.action}`);
-      },
+      //onGameReceived: (event) => {
+      //  console.log(`[BatchJobProgress] Game processed: ${event.tournamentId} - ${event.action}`);
+      //},
     }
   );
 

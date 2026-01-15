@@ -142,7 +142,7 @@ function tableMatchesFilters(tableName) {
   if (!tableName.includes(config.API_ID)) return false;
 
   // Comment out to search all tables
-  //if (!tableName.includes("Snapshot-")) return false;
+  if (!tableName.includes("Game-")) return false;
 
   return true;
 }

@@ -31,6 +31,12 @@
     "functionwebScraperFunctionName": {
       "Type": "String",
       "Default": "functionwebScraperFunctionName"
+    },
+    "scraperApiKey": {
+      "Type": "String",
+      "NoEcho": true,
+      "Description": "ScraperAPI key for web scraping",
+      "Default": ""
     }
   },
   "Conditions": {
@@ -123,6 +129,9 @@
             },
             "FUNCTION_WEBSCRAPERFUNCTION_NAME": {
               "Ref": "functionwebScraperFunctionName"
+            },
+            "SCRAPERAPI_KEY": {
+              "Ref": "scraperApiKey"
             }
           }
         },

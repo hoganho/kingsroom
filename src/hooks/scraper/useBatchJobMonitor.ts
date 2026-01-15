@@ -459,13 +459,6 @@ export const useBatchJobMonitor = (
       onStatsChange?.(newStats, prevStatsRef.current);
     }
 
-    console.log('[useBatchJobMonitor] DEBUG subscription event raw:', {
-        notFoundCount: subscriptionEvent.notFoundCount,
-        notPublishedCount: subscriptionEvent.notPublishedCount,
-        blanks: subscriptionEvent.blanks,
-        gamesSkipped: subscriptionEvent.gamesSkipped,
-    });
-
     setHasChanges(changed);
     prevStatsRef.current = newStats;
     setJob(jobFromEvent);

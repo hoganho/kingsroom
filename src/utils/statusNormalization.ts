@@ -17,7 +17,7 @@ export type NormalizedGameStatus =
   | 'FINISHED'
   | 'CANCELLED'
   | 'NOT_PUBLISHED'
-  | 'NOT_IN_USE'
+  | 'NOT_FOUND'
   | 'UNKNOWN';
 
 /**
@@ -70,13 +70,6 @@ const GAME_STATUS_ALIASES: Record<string, NormalizedGameStatus> = {
   'NOT PUBLISHED': 'NOT_PUBLISHED',
   'UNPUBLISHED': 'NOT_PUBLISHED',
   'DRAFT': 'NOT_PUBLISHED',
-  
-  // NOT_IN_USE variations
-  'NOT_IN_USE': 'NOT_IN_USE',
-  'NOTINUSE': 'NOT_IN_USE',
-  'NOT IN USE': 'NOT_IN_USE',
-  'INACTIVE': 'NOT_IN_USE',
-  'DISABLED': 'NOT_IN_USE',
 };
 
 /**
@@ -117,7 +110,7 @@ export const isGameComplete = (status: string | null | undefined): boolean => {
  */
 export const isGameSkippable = (status: string | null | undefined): boolean => {
   const normalized = normalizeGameStatus(status);
-  return ['NOT_PUBLISHED', 'NOT_IN_USE', 'CANCELLED', 'UNKNOWN'].includes(normalized);
+  return ['NOT_PUBLISHED', 'NOT_FOUND', 'CANCELLED', 'UNKNOWN'].includes(normalized);
 };
 
 // ===================================================================
@@ -190,7 +183,6 @@ const SCRAPE_STATUS_ALIASES: Record<string, NormalizedScrapeStatus> = {
   'SKIPPED': 'SKIPPED',
   'SKIP': 'SKIPPED',
   'IGNORED': 'SKIPPED',
-  'NOT_IN_USE': 'SKIPPED',
 };
 
 /**

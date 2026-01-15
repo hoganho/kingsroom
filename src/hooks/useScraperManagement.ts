@@ -10,6 +10,7 @@ import { generateClient } from 'aws-amplify/api';
 import { 
     scraperManagementQueries,
     startScraperJobMinimal,
+    cancelScraperJobMinimal,
 } from '../graphql/scraperManagement';
 import { 
     // Don't import getScraperJobsReport from auto-generated - it causes null errors
@@ -20,7 +21,6 @@ import {
 } from '../graphql/queries';
 import { 
     // Don't import startScraperJob from auto-generated - it causes null errors due to deeply nested entity metrics
-    cancelScraperJob,
     modifyScrapeURLStatus,
     bulkModifyScrapeURLs
  } from '../graphql/mutations';
@@ -126,20 +126,39 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
         try {
             setLoading(true);
             setError(null);
+            
+            console.log('[useScraperJobs] Cancelling job:', jobId);
+            
+            // FIXED: Use minimal mutation to avoid deeply nested entity null errors
             const response = await client.graphql({
-                query: cancelScraperJob,
+                query: cancelScraperJobMinimal,  // <-- CHANGED from cancelScraperJob
                 variables: { jobId }
             });
-            if (!hasGraphQLData<any>(response)) throw new Error('Invalid response');
+            
+            // Check for GraphQL errors in the response
+            if ((response as any).errors?.length > 0) {
+                const errors = (response as any).errors;
+                console.error('[useScraperJobs] GraphQL errors:', errors);
+                throw new Error(errors[0]?.message || 'GraphQL error during cancellation');
+            }
+            
+            if (!hasGraphQLData<any>(response)) {
+                throw new Error('Invalid response from cancelScraperJob');
+            }
+            
             const cancelledJob = castToType<ScraperJob>(response.data.cancelScraperJob);
+            console.log('[useScraperJobs] Job cancelled successfully:', cancelledJob);
+            
             if (cancelledJob) {
                 setJobs(prev => prev.map(job =>
-                    job.jobId === jobId ? { ...job, ...cancelledJob } : job
+                    (job.id === jobId || job.jobId === jobId) 
+                        ? { ...job, ...cancelledJob } 
+                        : job
                 ));
             }
             return cancelledJob;
         } catch (err) {
-            console.error('Error cancelling job:', err);
+            console.error('[useScraperJobs] Error cancelling job:', err);
             setError('Failed to cancel scraper job');
             throw err;
         } finally {

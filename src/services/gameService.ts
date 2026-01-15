@@ -350,10 +350,9 @@ export const fetchGameDataFromBackend = async (
         }
         
         // ADDITIONAL CHECK: Detect when gameVariant is null (may indicate invalid enum)
-        // v1.1.0: Only warn if this is NOT a NOT_FOUND/NOT_IN_USE response
+        // v1.1.0: Only warn if this is NOT a NOT_FOUND/NOT _IN_USE response
         // For empty tournament slots, null gameVariant is expected and not a warning
         const isNotFoundResponse = result.gameStatus === 'NOT_FOUND' || 
-                                   result.gameStatus === 'NOT_IN_USE' ||
                                    result.gameStatus === 'NOT_PUBLISHED';
         if (result.gameVariant === null && !isNotFoundResponse) {
             console.warn('[GameService] gameVariant is null - may indicate invalid enum value');
@@ -444,13 +443,13 @@ export const shouldAutoRefreshTournament = (data: ScrapedGameData | GameData | n
     const status = data.gameStatus;
     
     // Auto-refresh for active/in-progress games
-    // GameStatus enum: INITIATING, SCHEDULED, RUNNING, CANCELLED, FINISHED, NOT_IN_USE, NOT_PUBLISHED, CLOCK_STOPPED, UNKNOWN
+    // GameStatus enum: INITIATING, SCHEDULED, RUNNING, CANCELLED, FINISHED, NOT _IN_USE, NOT_PUBLISHED, CLOCK_STOPPED, UNKNOWN
     if (status === 'RUNNING' || status === 'INITIATING' || status === 'CLOCK_STOPPED') {
         return true;
     }
     
     // Don't auto-refresh completed or cancelled games
-    if (status === 'FINISHED' || status === 'CANCELLED' || status === 'NOT_PUBLISHED' || status === 'NOT_IN_USE') {
+    if (status === 'FINISHED' || status === 'CANCELLED' || status === 'NOT_PUBLISHED') {
         return false;
     }
     

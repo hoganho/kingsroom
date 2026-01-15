@@ -1,6 +1,14 @@
 // src/components/scraper/GameListItem.tsx
 // REDESIGNED: Clear pipeline phases (Retrieve → Parse → Save)
 // Each phase shows: status, source/target, and outcome
+//
+// v2.2.0 - FIXED: Pipeline display for NOT_FOUND and NOT_PUBLISHED
+//   - RETRIEVE now shows 'success' (page was fetched successfully)
+//   - PARSE now shows 'success' (HTML was parsed, found the result)
+//   - SAVE shows 'skipped' (nothing to save)
+//   - dataSource (s3/web) is now correctly displayed
+//
+// v2.1.0 - Added NOT_FOUND status handling (empty tournament slots)
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -64,6 +72,15 @@ export interface PipelineState {
 // HELPER FUNCTIONS
 // ===================================================================
 
+/**
+ * Check if a gameStatus represents a "placeholder" status (no real tournament data)
+ * NOT_FOUND = URL exists but no tournament assigned (empty slot)
+ * NOT_PUBLISHED = Real tournament exists but hidden from public
+ */
+const isPlaceholderGameStatus = (gameStatus?: string): boolean => {
+  return gameStatus === 'NOT_FOUND' || gameStatus === 'NOT_PUBLISHED';
+};
+
 const getListItemColorClass = (gameStatus?: string, registrationStatus?: string): string => {
   const statusColors: Record<string, string> = {
     'RUNNING': registrationStatus === 'CLOSED' 
@@ -73,12 +90,15 @@ const getListItemColorClass = (gameStatus?: string, registrationStatus?: string)
     'REGISTERING': 'bg-orange-50 border-orange-100 hover:bg-orange-100',
     'CLOCK_STOPPED': 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100',
     'FINISHED': 'bg-gray-50 border-gray-200 hover:bg-gray-100',
+    'NOT_FOUND': 'bg-slate-50 border-slate-200 hover:bg-slate-100',
+    'NOT_PUBLISHED': 'bg-gray-50 border-gray-200 hover:bg-gray-100',
   };
   return statusColors[gameStatus || ''] || 'bg-white border-gray-200 hover:bg-gray-50';
 };
 
-const getProcessingStatusStyles = (status: ProcessingStatusType, isNotPublished?: boolean): string => {
-  if (isNotPublished) {
+const getProcessingStatusStyles = (status: ProcessingStatusType, isPlaceholderStatus?: boolean): string => {
+  // isPlaceholderStatus covers both NOT_PUBLISHED and NOT_FOUND
+  if (isPlaceholderStatus) {
     return 'bg-gray-100 border-gray-300';
   }
   
@@ -109,8 +129,9 @@ const getStatusIcon = (status: ProcessingStatusType) => {
   return icons[status] || Clock;
 };
 
-const getStatusIconColor = (status: ProcessingStatusType, isNotPublished?: boolean): string => {
-  if (isNotPublished && status === 'success') {
+const getStatusIconColor = (status: ProcessingStatusType, isPlaceholderStatus?: boolean): string => {
+  // isPlaceholderStatus covers both NOT_PUBLISHED and NOT_FOUND
+  if (isPlaceholderStatus && status === 'success') {
     return 'text-gray-400';
   }
   
@@ -145,7 +166,14 @@ const formatGameDateTime = (dateTimeString?: string | null): string | null => {
   }
 };
 
-/** Derive pipeline state from processing result */
+/**
+ * Derive pipeline state from processing result
+ * 
+ * FIXED v2.2.0: Correctly handles NOT_FOUND and NOT_PUBLISHED cases
+ * - For these statuses, the page WAS fetched and parsed successfully
+ * - The parsing found "not found" text or "hidden" status
+ * - So RETRIEVE and PARSE are both SUCCESS, only SAVE is skipped
+ */
 const derivePipelineState = (
   processingStatus?: ProcessingStatusType,
   processingMessage?: string,
@@ -160,6 +188,20 @@ const derivePipelineState = (
     parse: { status: 'pending' },
     save: { status: 'pending' },
   };
+
+  // FIXED v2.2.0: Detect NOT_FOUND and NOT_PUBLISHED from multiple sources
+  const messageLC = (processingMessage || '').toLowerCase();
+  const isNotFoundFromMessage = messageLC.includes('not_found') || messageLC.includes('not found');
+  const isNotPublishedFromMessage = messageLC.includes('not_published') || messageLC.includes('not published');
+  const isNotFoundFromData = parsedData?.gameStatus === 'NOT_FOUND';
+  const isNotPublishedFromData = parsedData?.gameStatus === 'NOT_PUBLISHED';
+  
+  const isNotFound = isNotFoundFromMessage || isNotFoundFromData;
+  const isNotPublished = isNotPublishedFromMessage || isNotPublishedFromData;
+  const isPlaceholderResult = isNotFound || isNotPublished;
+  
+  // Determine actual data source (default to 'web' for placeholder results since page was fetched)
+  const actualDataSource = dataSource || (isPlaceholderResult ? 'web' : 'none');
 
   // Handle based on processing status
   switch (processingStatus) {
@@ -201,14 +243,13 @@ const derivePipelineState = (
 
     case 'success':
     case 'warning': {
-      const isNotPublished = parsedData?.gameStatus === 'NOT_PUBLISHED';
       const isDoNotScrape = parsedData?.doNotScrape;
-      const wasRetrievedFromS3 = dataSource === 's3' || parsedData?.s3Key;
-      const wasRetrievedFromWeb = dataSource === 'web' && !parsedData?.s3Key;
-      const wasNotRetrieved = dataSource === 'none' || (!wasRetrievedFromS3 && !wasRetrievedFromWeb && isDoNotScrape);
+      const wasRetrievedFromS3 = actualDataSource === 's3' || parsedData?.s3Key;
+      const wasRetrievedFromWeb = actualDataSource === 'web' && !parsedData?.s3Key;
+      const wasNotRetrieved = actualDataSource === 'none' || (isDoNotScrape && !wasRetrievedFromS3 && !wasRetrievedFromWeb);
       
       // Retrieve phase
-      if (wasNotRetrieved || (isDoNotScrape && !wasRetrievedFromS3 && !wasRetrievedFromWeb)) {
+      if (wasNotRetrieved && !isPlaceholderResult) {
         pipeline.retrieve = { 
           status: 'skipped', 
           source: 'none',
@@ -228,12 +269,26 @@ const derivePipelineState = (
         };
       }
       
-      // Parse phase - skipped if we didn't retrieve OR if it's a placeholder
-      if (wasNotRetrieved || isDoNotScrape || isNotPublished) {
+      // Parse phase - for placeholders, parsing DID happen and found the result
+      if (wasNotRetrieved && !isPlaceholderResult) {
         pipeline.parse = { 
           status: 'skipped', 
           performed: false, 
-          message: isDoNotScrape ? 'Placeholder' : isNotPublished ? 'Not Published' : 'No data'
+          message: isDoNotScrape ? 'Placeholder' : 'No data'
+        };
+      } else if (isNotFound) {
+        // FIXED: For NOT_FOUND, parsing succeeded - we parsed the page and found "not found"
+        pipeline.parse = { 
+          status: 'success', 
+          performed: true, 
+          message: 'Empty slot'
+        };
+      } else if (isNotPublished) {
+        // FIXED: For NOT_PUBLISHED, parsing succeeded - we parsed the page and found it's hidden
+        pipeline.parse = { 
+          status: 'success', 
+          performed: true, 
+          message: 'Hidden'
         };
       } else {
         pipeline.parse = { 
@@ -246,7 +301,7 @@ const derivePipelineState = (
       // Save phase
       if (saveResult || existingGameId) {
         const isUpdate = saveResult?.action === 'UPDATE' || (existingGameId && !saveResult);
-        const saveType = isNotPublished || isDoNotScrape ? 'placeholder' : isUpdate ? 'update' : 'create';
+        const saveType = isPlaceholderResult || isDoNotScrape ? 'placeholder' : isUpdate ? 'update' : 'create';
         pipeline.save = { 
           status: 'success', 
           saved: true,
@@ -257,6 +312,14 @@ const derivePipelineState = (
             : isUpdate 
             ? 'Updated' 
             : 'Created'
+        };
+      } else if (isPlaceholderResult) {
+        // For placeholders without save result, save was intentionally skipped
+        pipeline.save = { 
+          status: 'skipped', 
+          saved: false,
+          saveType: 'none',
+          message: 'Not saved'
         };
       } else {
         // Scrape-only mode - no save attempted
@@ -273,35 +336,106 @@ const derivePipelineState = (
     case 'skipped': {
       const skipReason = processingMessage || 'Skipped';
       const isDoNotScrape = skipReason.toLowerCase().includes('do not scrape');
-      const isNotFound = skipReason.toLowerCase().includes('not found') || skipReason.toLowerCase().includes('not_found');
       
-      pipeline.retrieve = { 
-        status: 'skipped', 
-        source: 'none',
-        message: isDoNotScrape ? 'Do Not Scrape' : isNotFound ? 'Not Found' : 'Skipped'
-      };
-      pipeline.parse = { 
-        status: 'skipped', 
-        performed: false, 
-        message: 'N/A'
-      };
-      
-      // Check if something was actually saved despite "skipped" status
-      if (saveResult || existingGameId) {
-        pipeline.save = { 
+      // FIXED v2.2.0: For NOT_FOUND and NOT_PUBLISHED, the page WAS fetched and parsed
+      // The "skipped" status refers to the SAVE phase, not the entire process
+      if (isNotFound || isNotPublished) {
+        // Retrieve phase - SUCCESS (page was fetched)
+        pipeline.retrieve = { 
           status: 'success', 
-          saved: true,
-          saveType: 'placeholder',
-          gameId: saveResult?.gameId || existingGameId,
-          message: 'Placeholder saved'
+          source: actualDataSource === 's3' ? 's3' : actualDataSource === 'web' ? 'web' : 'web',
+          message: actualDataSource === 's3' ? 'From S3 cache' : 'From live scrape'
         };
-      } else {
+        
+        // Parse phase - SUCCESS (we parsed and found the result)
+        pipeline.parse = { 
+          status: 'success', 
+          performed: true, 
+          message: isNotFound ? 'Empty slot' : 'Hidden'
+        };
+        
+        // Save phase - SKIPPED (nothing to save)
+        if (saveResult || existingGameId) {
+          pipeline.save = { 
+            status: 'success', 
+            saved: true,
+            saveType: 'placeholder',
+            gameId: saveResult?.gameId || existingGameId,
+            message: 'Placeholder saved'
+          };
+        } else {
+          pipeline.save = { 
+            status: 'skipped', 
+            saved: false,
+            saveType: 'none',
+            message: 'Not saved'
+          };
+        }
+      } else if (isDoNotScrape) {
+        // Do Not Scrape - retrieve was skipped
+        pipeline.retrieve = { 
+          status: 'skipped', 
+          source: 'none',
+          message: 'Do Not Scrape'
+        };
+        pipeline.parse = { 
+          status: 'skipped', 
+          performed: false, 
+          message: 'N/A'
+        };
         pipeline.save = { 
           status: 'skipped', 
           saved: false,
           saveType: 'none',
           message: 'Not saved'
         };
+      } else {
+        // Generic skip - determine what was skipped based on dataSource
+        const wasRetrieved = actualDataSource === 's3' || actualDataSource === 'web';
+        
+        if (wasRetrieved) {
+          // Data was retrieved but something else caused the skip
+          pipeline.retrieve = { 
+            status: 'success', 
+            source: actualDataSource === 's3' ? 's3' : 'web',
+            message: actualDataSource === 's3' ? 'From S3 cache' : 'From live scrape'
+          };
+          pipeline.parse = { 
+            status: 'skipped', 
+            performed: false, 
+            message: 'Skipped'
+          };
+        } else {
+          // Nothing was retrieved
+          pipeline.retrieve = { 
+            status: 'skipped', 
+            source: 'none',
+            message: 'Skipped'
+          };
+          pipeline.parse = { 
+            status: 'skipped', 
+            performed: false, 
+            message: 'N/A'
+          };
+        }
+        
+        // Check if something was actually saved despite "skipped" status
+        if (saveResult || existingGameId) {
+          pipeline.save = { 
+            status: 'success', 
+            saved: true,
+            saveType: 'placeholder',
+            gameId: saveResult?.gameId || existingGameId,
+            message: 'Placeholder saved'
+          };
+        } else {
+          pipeline.save = { 
+            status: 'skipped', 
+            saved: false,
+            saveType: 'none',
+            message: 'Not saved'
+          };
+        }
       }
       break;
     }
@@ -312,11 +446,11 @@ const derivePipelineState = (
                           errorMsg.toLowerCase().includes('timeout') ||
                           errorMsg.toLowerCase().includes('network') ||
                           errorMsg.toLowerCase().includes('404') ||
-                          errorMsg.toLowerCase().includes('not found');
+                          (errorMsg.toLowerCase().includes('not found') && !isNotFound);
       const isSaveError = errorMsg.toLowerCase().includes('save');
       
       if (isSaveError) {
-        pipeline.retrieve = { status: 'success', source: dataSource === 's3' ? 's3' : 'web', message: 'Retrieved' };
+        pipeline.retrieve = { status: 'success', source: actualDataSource === 's3' ? 's3' : 'web', message: 'Retrieved' };
         pipeline.parse = { status: 'success', performed: true, message: 'Parsed' };
         pipeline.save = { status: 'error', saved: false, message: errorMsg };
       } else if (isFetchError) {
@@ -325,7 +459,7 @@ const derivePipelineState = (
         pipeline.save = { status: 'not-needed', saved: false, message: 'N/A' };
       } else {
         // Generic error - assume parse error
-        pipeline.retrieve = { status: 'success', source: dataSource === 's3' ? 's3' : 'web', message: 'Retrieved' };
+        pipeline.retrieve = { status: 'success', source: actualDataSource === 's3' ? 's3' : 'web', message: 'Retrieved' };
         pipeline.parse = { status: 'error', performed: false, message: errorMsg };
         pipeline.save = { status: 'not-needed', saved: false, message: 'N/A' };
       }
@@ -406,7 +540,7 @@ const PhaseBadge: React.FC<PhaseBadgeProps> = ({ phase, status, source, message,
         switch (status) {
           case 'pending': return 'Waiting';
           case 'in-progress': return 'Parsing';
-          case 'success': return 'OK';
+          case 'success': return message || 'OK';
           case 'skipped': return 'Skipped';
           case 'error': return 'Failed';
           case 'not-needed': return 'N/A';
@@ -416,7 +550,7 @@ const PhaseBadge: React.FC<PhaseBadgeProps> = ({ phase, status, source, message,
         switch (status) {
           case 'pending': return 'Waiting';
           case 'in-progress': return 'Saving';
-          case 'success': return 'Saved';
+          case 'success': return message || 'Saved';
           case 'skipped': return 'Skipped';
           case 'error': return 'Failed';
           case 'not-needed': return 'Not saved';
@@ -466,7 +600,7 @@ const PhaseBadge: React.FC<PhaseBadgeProps> = ({ phase, status, source, message,
         {status === 'skipped' && <SkipForward className={`h-4 w-4 ${style.iconColor}`} />}
         <span>{outcomeLabel}</span>
       </div>
-      {message && (
+      {message && status !== 'success' && (
         <span className={`text-[10px] ${style.text} opacity-75 mt-0.5 text-center leading-tight`}>
           {message}
         </span>
@@ -605,11 +739,19 @@ export const GameListItem: React.FC<GameListItemProps> = ({
   const hasError = !!game.errorMessage;
   const hasDoNotScrape = !!data?.doNotScrape;
 
+  // Check for placeholder statuses (NOT_FOUND or NOT_PUBLISHED)
+  const isPlaceholder = isPlaceholderGameStatus(data?.gameStatus);
+  const isNotFound = data?.gameStatus === 'NOT_FOUND';
+  const isNotPublished = data?.gameStatus === 'NOT_PUBLISHED';
+
+  // FIXED v2.2.0: Use game.dataSource if prop not provided
+  const effectiveDataSource = dataSource || game.dataSource;
+
   // Derive pipeline state
   const pipeline = derivePipelineState(
     processingStatus,
     processingMessage,
-    dataSource,
+    effectiveDataSource,
     data,
     game.saveResult,
     game.existingGameId || undefined
@@ -626,18 +768,34 @@ export const GameListItem: React.FC<GameListItemProps> = ({
   const formatVenueOption = (venue: Venue) => 
     venue.venueNumber !== undefined ? `${venue.venueNumber} - ${venue.name}` : venue.name;
 
+  /**
+   * Get the appropriate label for placeholder statuses
+   */
+  const getPlaceholderLabel = (): string => {
+    if (isNotFound) return 'Empty Slot';
+    if (isNotPublished) return 'Not Published';
+    return 'Placeholder';
+  };
+
+  /**
+   * Get the display label for gameStatus badge
+   */
+  const getGameStatusDisplayLabel = (gameStatus: string): string => {
+    if (gameStatus === 'NOT_FOUND') return 'EMPTY SLOT';
+    return gameStatus;
+  };
+
   // ===================================================================
   // COMPACT MODE
   // ===================================================================
   if (compact) {
     const StatusIcon = getStatusIcon(processingStatus || 'pending');
     const isAnimating = processingStatus === 'scraping' || processingStatus === 'saving';
-    const isNotPublished = data?.gameStatus === 'NOT_PUBLISHED';
     const formattedDateTime = formatGameDateTime(data?.gameStartDateTime);
 
     return (
       <div
-        className={`border rounded-lg overflow-hidden transition-colors ${getProcessingStatusStyles(processingStatus || 'pending', isNotPublished)} ${onClick ? 'cursor-pointer' : ''}`}
+        className={`border rounded-lg overflow-hidden transition-colors ${getProcessingStatusStyles(processingStatus || 'pending', isPlaceholder)} ${onClick ? 'cursor-pointer' : ''}`}
         onClick={onClick}
       >
         <div className="p-3">
@@ -645,7 +803,7 @@ export const GameListItem: React.FC<GameListItemProps> = ({
           <div className="flex items-center justify-between gap-2">
             {/* Left: Icon + ID + Link */}
             <div className="flex items-center gap-2 min-w-0">
-              <StatusIcon className={`h-5 w-5 flex-shrink-0 ${getStatusIconColor(processingStatus || 'pending', isNotPublished)} ${isAnimating ? 'animate-spin' : ''}`} />
+              <StatusIcon className={`h-5 w-5 flex-shrink-0 ${getStatusIconColor(processingStatus || 'pending', isPlaceholder)} ${isAnimating ? 'animate-spin' : ''}`} />
               
               <span className="text-base font-semibold text-gray-900">
                 {tournamentId || getDisplayId(game.id)}
@@ -664,7 +822,7 @@ export const GameListItem: React.FC<GameListItemProps> = ({
               {/* Overall status badge */}
               {processingStatus && (
                 <span className={`text-xs font-medium px-1.5 py-0.5 rounded whitespace-nowrap ${
-                  isNotPublished && processingStatus === 'success' ? 'bg-gray-200 text-gray-600' :
+                  isPlaceholder && processingStatus === 'success' ? 'bg-gray-200 text-gray-600' :
                   processingStatus === 'success' ? 'bg-green-100 text-green-700' :
                   processingStatus === 'warning' ? 'bg-amber-100 text-amber-700' :
                   processingStatus === 'error' ? 'bg-red-100 text-red-700' :
@@ -673,7 +831,8 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                   processingStatus === 'skipped' ? 'bg-yellow-100 text-yellow-700' :
                   'bg-gray-100 text-gray-600'
                 }`}>
-                  {isNotPublished && processingStatus === 'success' ? 'Placeholder' :
+                  {isPlaceholder && processingStatus === 'success' ? getPlaceholderLabel() :
+                   isPlaceholder && processingStatus === 'skipped' ? getPlaceholderLabel() :
                    processingStatus === 'success' ? 'Complete' :
                    processingStatus === 'warning' ? 'Warning' :
                    processingStatus === 'error' ? 'Error' :
@@ -699,12 +858,12 @@ export const GameListItem: React.FC<GameListItemProps> = ({
               )}
 
               {showActions && onSave && processingStatus !== 'saving' && data && 
-               (!hasDoNotScrape || data?.gameStatus === 'NOT_PUBLISHED') && !game.saveResult && (
+               (!hasDoNotScrape || isPlaceholder) && !game.saveResult && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onSave(); }}
                   disabled={!selectedVenueId && !enableCreateVenue}
                   className="p-1.5 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title={data?.gameStatus === 'NOT_PUBLISHED' ? 'Save as placeholder' : 'Save to database'}
+                  title={isPlaceholder ? 'Save as placeholder' : 'Save to database'}
                 >
                   <Save className="h-4 w-4" />
                 </button>
@@ -718,7 +877,8 @@ export const GameListItem: React.FC<GameListItemProps> = ({
           </div>
           
           {/* Row 3: Game Info (only for success/warning states with data) */}
-          {(processingStatus === 'success' || processingStatus === 'warning') && data && (
+          {(processingStatus === 'success' || processingStatus === 'warning' || 
+            (processingStatus === 'skipped' && isPlaceholder)) && data && (
             <div className="mt-2 ml-7 text-sm">
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center justify-between text-gray-600">
@@ -735,10 +895,11 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                         data.gameStatus === 'SCHEDULED' ? 'bg-blue-100 text-blue-700' :
                         data.gameStatus === 'FINISHED' ? 'bg-gray-200 text-gray-700' :
                         data.gameStatus === 'NOT_PUBLISHED' ? 'bg-gray-200 text-gray-600' :
+                        data.gameStatus === 'NOT_FOUND' ? 'bg-slate-200 text-slate-600' :
                         data.gameStatus === 'CLOCK_STOPPED' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-gray-100 text-gray-600'
                       }`}>
-                        {data.gameStatus}
+                        {getGameStatusDisplayLabel(data.gameStatus)}
                       </span>
                     )}
                   </div>
@@ -750,9 +911,23 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                   )}
                 </div>
                 
-                {data.name && (
+                {data.name && !isNotFound && (
                   <div className="text-gray-700 truncate font-medium">
                     {data.name}
+                  </div>
+                )}
+                
+                {/* Show helpful message for NOT_FOUND status */}
+                {isNotFound && (
+                  <div className="text-gray-500 italic text-xs">
+                    No tournament assigned to this slot
+                  </div>
+                )}
+                
+                {/* Show helpful message for NOT_PUBLISHED status */}
+                {isNotPublished && (
+                  <div className="text-gray-500 italic text-xs">
+                    Tournament exists but is hidden from public
                   </div>
                 )}
                 
@@ -768,8 +943,8 @@ export const GameListItem: React.FC<GameListItemProps> = ({
             </div>
           )}
           
-          {/* Row 3 alternate: Error/Skip message */}
-          {(processingStatus === 'error' || processingStatus === 'skipped') && processingMessage && (
+          {/* Row 3 alternate: Error/Skip message (but not for placeholders) */}
+          {(processingStatus === 'error' || (processingStatus === 'skipped' && !isPlaceholder)) && processingMessage && (
             <div className="mt-2 ml-7">
               <p className={`text-sm ${processingStatus === 'error' ? 'text-red-600' : 'text-gray-500'}`}>
                 {processingMessage}
@@ -816,10 +991,24 @@ export const GameListItem: React.FC<GameListItemProps> = ({
               )}
             </div>
             
-            {data?.name && (
+            {data?.name && !isNotFound && (
               <h3 className="text-base font-medium text-gray-800 truncate">
                 {data.name}
               </h3>
+            )}
+            
+            {/* Show helpful message for NOT_FOUND status */}
+            {isNotFound && (
+              <p className="text-gray-500 italic text-sm">
+                No tournament assigned to this slot
+              </p>
+            )}
+            
+            {/* Show helpful message for NOT_PUBLISHED status */}
+            {isNotPublished && (
+              <p className="text-gray-500 italic text-sm">
+                Tournament exists but is hidden from public
+              </p>
             )}
             
             {/* Game details row */}
@@ -855,10 +1044,11 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                 data.gameStatus === 'SCHEDULED' ? 'bg-blue-100 text-blue-700' :
                 data.gameStatus === 'FINISHED' ? 'bg-gray-200 text-gray-700' :
                 data.gameStatus === 'NOT_PUBLISHED' ? 'bg-gray-200 text-gray-600' :
+                data.gameStatus === 'NOT_FOUND' ? 'bg-slate-200 text-slate-600' :
                 data.gameStatus === 'CLOCK_STOPPED' ? 'bg-yellow-100 text-yellow-700' :
                 'bg-gray-100 text-gray-600'
               }`}>
-                {data.gameStatus}
+                {getGameStatusDisplayLabel(data.gameStatus)}
               </span>
             )}
             

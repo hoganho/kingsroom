@@ -67,7 +67,7 @@ type URLStatus = 'HAS_GAME' | 'NOT_PUBLISHED' | 'ERROR' | 'NOT_FOUND' | 'OTHER' 
 // Game Status types (from GameStatus enum)
 type GameStatusType = 
     | 'INITIATING' | 'SCHEDULED' | 'REGISTERING' | 'RUNNING' 
-    | 'CANCELLED' | 'FINISHED' | 'NOT_IN_USE' | 'NOT_PUBLISHED' 
+    | 'CANCELLED' | 'FINISHED' | 'NOT_PUBLISHED' | 'NOT_FOUND'
     | 'CLOCK_STOPPED' | 'UNKNOWN' | 'NO_GAME';
 
 // ===================================================================
@@ -81,7 +81,7 @@ const GAME_STATUS_CONFIG: Record<GameStatusType, { label: string; bg: string; ho
     RUNNING: { label: 'Running', bg: 'bg-emerald-500', hover: 'hover:bg-emerald-400' },
     CANCELLED: { label: 'Cancelled', bg: 'bg-red-400', hover: 'hover:bg-red-300' },
     FINISHED: { label: 'Finished', bg: 'bg-green-500', hover: 'hover:bg-green-400' },
-    NOT_IN_USE: { label: 'Not In Use', bg: 'bg-gray-300', hover: 'hover:bg-gray-200' },
+    NOT_FOUND: { label: 'Not Found', bg: 'bg-gray-300', hover: 'hover:bg-gray-200' },
     NOT_PUBLISHED: { label: 'Not Published', bg: 'bg-amber-400', hover: 'hover:bg-amber-300' },
     CLOCK_STOPPED: { label: 'Clock Stopped', bg: 'bg-orange-400', hover: 'hover:bg-orange-300' },
     UNKNOWN: { label: 'Unknown', bg: 'bg-purple-400', hover: 'hover:bg-purple-300' },
@@ -174,7 +174,7 @@ const determineURLStatus = (item: ScrapeURLGridItem | undefined): URLStatus => {
     }
     
     const scrapeStatus = item.lastScrapeStatus?.toUpperCase();
-    if (scrapeStatus === 'NOT_FOUND' || scrapeStatus === 'BLANK' || scrapeStatus === 'NOT_IN_USE') {
+    if (scrapeStatus === 'NOT_FOUND' || scrapeStatus === 'BLANK') {
         return 'NOT_FOUND';
     }
     
@@ -525,7 +525,7 @@ export const URLStatusGrid: React.FC<URLStatusGridProps> = ({ isOpen, onClose })
 
         const counts: Record<GameStatusType, number> = {
             INITIATING: 0, SCHEDULED: 0, REGISTERING: 0, RUNNING: 0,
-            CANCELLED: 0, FINISHED: 0, NOT_IN_USE: 0, NOT_PUBLISHED: 0,
+            CANCELLED: 0, FINISHED: 0, NOT_FOUND: 0, NOT_PUBLISHED: 0,
             CLOCK_STOPPED: 0, UNKNOWN: 0, NO_GAME: 0
         };
 

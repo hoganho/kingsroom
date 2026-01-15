@@ -241,6 +241,7 @@ export const useGameIdTracking = (entityId?: string) => {
     setError(null);
 
     try {
+      /*
       console.log('[useGameIdTracking] Fetching scraping status...', {
         entityId: id,
         forceRefresh: options?.forceRefresh,
@@ -248,7 +249,8 @@ export const useGameIdTracking = (entityId?: string) => {
         endId: options?.endId,
         skipNotPublished: options?.skipNotPublished
       });
-
+      */
+     
       const response = await getClient().graphql({
         query: GET_ENTITY_SCRAPING_STATUS,
         variables: {
@@ -263,6 +265,7 @@ export const useGameIdTracking = (entityId?: string) => {
       const result = response.data.getEntityScrapingStatus;
       setScrapingStatus(result);
       
+      /*
       console.log('[useGameIdTracking] Scraping status received:', {
         totalGames: result.totalGamesStored,
         gaps: result.gapSummary.totalGaps,
@@ -270,6 +273,7 @@ export const useGameIdTracking = (entityId?: string) => {
         coverage: result.gapSummary.coveragePercentage,
         cacheAge: result.cacheAge
       });
+      */
 
       return result;
     } catch (err) {

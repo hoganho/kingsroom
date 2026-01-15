@@ -17038,7 +17038,7 @@ export const schema = {
                 "RUNNING",
                 "CANCELLED",
                 "FINISHED",
-                "NOT_IN_USE",
+                "NOT_FOUND",
                 "NOT_PUBLISHED",
                 "CLOCK_STOPPED",
                 "UNKNOWN"
@@ -17418,7 +17418,6 @@ export const schema = {
                 "SAVED_EDITED",
                 "UPDATED_EDITED",
                 "NOT_FOUND",
-                "NOT_IN_USE",
                 "NOT_PUBLISHED"
             ]
         },

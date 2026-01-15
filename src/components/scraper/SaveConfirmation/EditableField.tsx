@@ -58,7 +58,7 @@ const getFieldInputType = (field: keyof GameData): string => {
 // Get select options for enum fields
 const getSelectOptions = (field: keyof GameData): string[] => {
     const options: Partial<Record<keyof GameData, string[]>> = {
-        gameStatus: ['SCHEDULED', 'INITIATING', 'REGISTERING', 'RUNNING', 'CLOCK_STOPPED', 'FINISHED', 'CANCELLED', 'NOT_IN_USE', 'NOT_PUBLISHED'],
+        gameStatus: ['SCHEDULED', 'INITIATING', 'REGISTERING', 'RUNNING', 'CLOCK_STOPPED', 'FINISHED', 'CANCELLED', 'NOT_FOUND', 'NOT_PUBLISHED'],
         registrationStatus: ['SCHEDULED', 'OPEN', 'FINAL', 'CLOSED', 'N_A'],
         gameVariant: ['NLHE', 'PLO', 'PLOM', 'PLO5', 'PLO6'],
         gameType: ['TOURNAMENT', 'CASH_GAME'],

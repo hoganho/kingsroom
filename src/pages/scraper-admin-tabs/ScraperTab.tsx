@@ -5,6 +5,7 @@
 // UPDATED v3.2: Removed error threshold configuration - now managed by backend defaults
 //               Backend defaults: maxTotalErrors=1, maxConsecutiveNotFound=10
 // UPDATED v3.3: Pass skipNotPublished to getScrapingStatus for gap analysis
+// UPDATED v3.4: Show Force Refresh checkbox for gaps mode too (fixes NOT_FOUND re-scrape bug)
 //
 // Architecture:
 // - 'single' mode: Frontend handles with full interactive control (modals, venue selection)
@@ -370,7 +371,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         
         // Check for NOT_FOUND status
         const gameStatus = parsedData.gameStatus?.toUpperCase();
-        if (gameStatus === 'NOT_FOUND' || gameStatus === 'NOT_IN_USE' || gameStatus === 'BLANK') {
+        if (gameStatus === 'NOT_FOUND' || gameStatus === 'BLANK') {
           console.log('[ScraperTab DEBUG] isReviewable: false (NOT_FOUND/BLANK status)', { gameStatus });
           return false;
         }
@@ -594,10 +595,13 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         
         // Scrape options
         useS3: options.useS3,
-        // v3.1: forceRefresh is true if:
+        // v3.4: forceRefresh is true if:
         // 1. useS3 is disabled globally, OR
-        // 2. Refresh mode with forceRefreshFromWeb enabled
-        forceRefresh: !options.useS3 || (idSelectionMode === 'refresh' && options.forceRefreshFromWeb),
+        // 2. Refresh mode with forceRefreshFromWeb enabled, OR
+        // 3. Gaps mode with forceRefreshFromWeb enabled
+        forceRefresh: !options.useS3 || 
+                      (idSelectionMode === 'refresh' && options.forceRefreshFromWeb) ||
+                      (idSelectionMode === 'gaps' && options.forceRefreshFromWeb),
         skipNotPublished: options.skipNotPublished,
         skipNotFoundGaps: options.skipNotFoundGaps,
         skipInProgress: options.skipInProgress,
@@ -1109,8 +1113,8 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
               <span>Skip In-Progress</span>
             </label>
 
-            {/* v3.1: Force Refresh option - only shown for refresh mode */}
-            {idSelectionMode === 'refresh' && (
+            {/* v3.4: Force Refresh option - shown for refresh and gaps modes */}
+            {(idSelectionMode === 'refresh' || idSelectionMode === 'gaps') && (
               <label className="flex items-center gap-2 text-sm cursor-pointer bg-amber-50 px-3 py-1.5 rounded border border-amber-200">
                 <input 
                   type="checkbox" 

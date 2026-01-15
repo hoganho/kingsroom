@@ -121,11 +121,6 @@ const GAME_STATUS_CONFIG: Record<string, { color: string; icon: React.ReactNode;
     icon: <Activity className="w-3 h-3" />,
     label: 'Initiating'
   },
-  'NOT_IN_USE': { 
-    color: 'bg-gray-100 text-gray-600', 
-    icon: <MinusCircle className="w-3 h-3" />,
-    label: 'Not In Use'
-  },
   'NOT_PUBLISHED': { 
     color: 'bg-yellow-100 text-yellow-800', 
     icon: <AlertTriangle className="w-3 h-3" />,

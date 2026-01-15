@@ -21,7 +21,12 @@
 Amplify Params - DO NOT EDIT */
 
 // autoScraper Lambda
-// UPDATED v4.5.0:
+// UPDATED v4.6.0:
+// - NEW: invokeFetchDirect() function for direct Lambda-to-Lambda calls
+// - FIX: Bypasses AppSync's 30-second resolver timeout limit
+// - Direct Lambda invocation allows full 120-180s timeout for slow ScraperAPI responses
+//
+// v4.5.0:
 // - FIXED: buildScrapingContext now passes all required dependencies to scrapingEngine.js
 // - FIXED: Added getEntity and buildTournamentUrl functions
 // - FIXED: Context now includes STOP_REASON and other constants with correct key names
@@ -90,6 +95,9 @@ const PROGRESS_UPDATE_FREQUENCY = 5;
 
 // Job progress publish frequency (in milliseconds) - rate limit for subscription events
 const JOB_PROGRESS_MIN_INTERVAL_MS = 1000;
+
+// v4.6.0: Direct Lambda invocation for webScraperFunction (bypasses AppSync 30s timeout)
+const WEB_SCRAPER_FUNCTION_NAME = process.env.FUNCTION_WEBSCRAPERFUNCTION_NAME;
 
 // Stop reason enum
 const STOP_REASON = {
@@ -226,6 +234,113 @@ async function callGraphQL(query, variables, entityId = null) {
         
     } catch (error) {
         console.error(`[callGraphQL] Error calling ${operationName}:`, error);
+        throw error;
+    }
+}
+
+// ===================================================================
+// DIRECT LAMBDA INVOCATION (NEW v4.6.0)
+// Bypasses AppSync's 30-second resolver timeout limit
+// ===================================================================
+
+/**
+ * Direct Lambda invocation for fetchTournamentData
+ * 
+ * This bypasses AppSync's hard 30-second resolver timeout by calling
+ * webScraperFunction directly via the AWS Lambda SDK.
+ * 
+ * Benefits:
+ * - Full Lambda timeout (120-180s) instead of AppSync's 30s limit
+ * - Handles slow ScraperAPI responses without timeout errors
+ * - Same response format as GraphQL for drop-in replacement
+ * 
+ * @param {object} params - Fetch parameters
+ * @param {string} params.url - Tournament URL to fetch
+ * @param {boolean} params.forceRefresh - Whether to bypass cache
+ * @param {string} params.entityId - Entity ID
+ * @param {string} params.scraperApiKey - Optional API key override
+ * @returns {object} Response in same format as GraphQL: { fetchTournamentData: {...} }
+ */
+async function invokeFetchDirect(params) {
+    const { url, forceRefresh, entityId, scraperApiKey } = params;
+    
+    if (!WEB_SCRAPER_FUNCTION_NAME) {
+        console.error('[invokeFetchDirect] FUNCTION_WEBSCRAPERFUNCTION_NAME not configured');
+        throw new Error('webScraperFunction name not configured - check Amplify function reference');
+    }
+    
+    console.log(`[invokeFetchDirect] Calling webScraperFunction directly (bypassing AppSync 30s limit)`, {
+        url: url?.substring(0, 60) + '...',
+        forceRefresh,
+        entityId: entityId?.substring(0, 8),
+        functionName: WEB_SCRAPER_FUNCTION_NAME.substring(0, 40)
+    });
+    
+    // Build payload in the same format webScraperFunction expects from AppSync
+    const payload = {
+        fieldName: 'fetchTournamentData',
+        arguments: {
+            url,
+            forceRefresh: forceRefresh || false,
+            entityId,
+            scraperApiKey: scraperApiKey || null
+        }
+    };
+    
+    try {
+        const startTime = Date.now();
+        
+        const response = await lambdaClient.send(new InvokeCommand({
+            FunctionName: WEB_SCRAPER_FUNCTION_NAME,
+            InvocationType: 'RequestResponse',  // Synchronous - wait for response
+            Payload: JSON.stringify(payload),
+        }));
+        
+        const duration = Date.now() - startTime;
+        
+        // Parse the response payload
+        const responsePayload = JSON.parse(Buffer.from(response.Payload).toString());
+        
+        // Check for Lambda execution errors (function crashed, timeout, etc.)
+        if (response.FunctionError) {
+            console.error('[invokeFetchDirect] Lambda execution error:', {
+                functionError: response.FunctionError,
+                errorType: responsePayload.errorType,
+                errorMessage: responsePayload.errorMessage,
+                duration
+            });
+            throw new Error(responsePayload.errorMessage || `Lambda execution failed: ${response.FunctionError}`);
+        }
+        
+        // Check for application-level errors in the response
+        if (responsePayload.error || responsePayload.errorMessage) {
+            console.warn('[invokeFetchDirect] Application error in response:', {
+                error: responsePayload.error || responsePayload.errorMessage,
+                gameStatus: responsePayload.gameStatus,
+                duration
+            });
+            // Don't throw - let scrapingEngine handle error responses
+        }
+        
+        console.log(`[invokeFetchDirect] Success (${duration}ms)`, {
+            tournamentId: responsePayload.tournamentId,
+            gameStatus: responsePayload.gameStatus,
+            source: responsePayload.source,
+            s3Key: responsePayload.s3Key?.substring(0, 50)
+        });
+        
+        // Return in the same format as the GraphQL response
+        // This allows drop-in replacement of callGraphQL calls
+        return {
+            fetchTournamentData: responsePayload
+        };
+        
+    } catch (error) {
+        console.error('[invokeFetchDirect] Invocation failed:', {
+            error: error.message,
+            url: url?.substring(0, 60),
+            functionName: WEB_SCRAPER_FUNCTION_NAME?.substring(0, 40)
+        });
         throw error;
     }
 }
@@ -573,6 +688,7 @@ function buildScrapingContext(jobId = null, entityId = null, options = {}) {
     return {
         // ===== Core dependencies =====
         callGraphQL,
+        invokeFetchDirect,  // v4.6.0: Direct Lambda invocation (bypasses AppSync 30s timeout)
         getEntity,
         buildTournamentUrl,
         getScraperJob,

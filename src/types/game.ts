@@ -1,9 +1,25 @@
 // types/game.ts
 // UPDATED: Simplified financial metrics (removed rakeSubsidy complexity)
+// UPDATED v2: Added processingAction field to GameState for tracking original scraper action
 
 import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant, GameFrequency, VenueAssignmentStatus } from '../API';
 
 export type RecurringGameAssignmentStatus = 'AUTO_ASSIGNED' | 'MANUALLY_ASSIGNED' | 'PENDING_ASSIGNMENT' | 'NOT_RECURRING' | 'DEVIATION_FLAGGED';
+
+// ===================================================================
+// NEW: Processing action type for scraper events
+// ===================================================================
+
+/**
+ * Original action from scraper event - preserved for accurate pipeline display
+ * - CREATED: New game saved to database
+ * - UPDATED: Existing game updated
+ * - SKIPPED: Skipped (validation, duplicate, etc.)
+ * - ERROR: Processing error occurred
+ * - NOT_FOUND: Page fetched successfully but tournament slot is empty
+ * - NOT_PUBLISHED: Page fetched successfully but tournament is hidden/unpublished
+ */
+export type ProcessingAction = 'CREATED' | 'UPDATED' | 'SKIPPED' | 'ERROR' | 'NOT_FOUND' | 'NOT_PUBLISHED';
 
 export type TournamentLevelData = {
     levelNumber: number;
@@ -53,7 +69,7 @@ export type TableData = {
 export type BulkGameSummary = {
     id: string;
     name?: string | null;
-    gameStatus?: GameStatus | 'NOT_IN_USE' | null;
+    gameStatus?: GameStatus | null;
     registrationStatus?: RegistrationStatus | 'N_A' | null;
     gameStartDateTime?: string | null;
     inDatabase?: boolean | null;
@@ -197,6 +213,10 @@ export interface GameState {
     entityId?: string | null;
     dataSource?: 's3' | 'web' | 'none';
     s3Key?: string;
+    
+    // NEW v2: Original processing action from scraper
+    // This preserves the exact action type for accurate pipeline display
+    processingAction?: ProcessingAction;
 }
 
 export interface SaveTournamentInput {

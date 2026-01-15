@@ -138,7 +138,7 @@ const getDataSource = (parsedData: ScrapedGameData): DataSourceType => {
 const isNotFoundGameStatus = (status: string | null | undefined): boolean => {
   if (!status) return false;
   const normalized = status.toUpperCase();
-  return normalized === 'NOT_FOUND' || normalized === 'NOT_IN_USE' || normalized === 'BLANK';
+  return normalized === 'NOT_FOUND' || normalized === 'BLANK';
 };
 
 /**

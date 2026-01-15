@@ -1,14 +1,24 @@
 /**
  * ===================================================================
- * Fetch Handler (v2.5.0)
+ * Fetch Handler (v2.7.0)
  * ===================================================================
  * 
  * Handles the fetchTournamentData operation.
  * 
- * VERSION: 2.5.0
+ * VERSION: 2.7.0
  * 
  * CHANGELOG:
- * - v2.5.0: NOT_FOUND/NOT_IN_USE no longer set doNotScrape=true
+ * - v2.7.0: Added saveAfterFetch option for auto-saving after fetch
+ *           This enables refreshRunningGames to fetch AND save in one call
+ *           When saveAfterFetch=true, automatically invokes save-handler
+ *           after successful fetch (skips NOT_FOUND, NOT_PUBLISHED, ERROR)
+ * - v2.6.0: Standardized on NOT_FOUND for empty tournament slots
+ *           Added scrapeStatus field to results (from html-parser v2.3.0)
+ *           NOT_FOUND = URL exists but no tournament assigned (empty slot)
+ *           NOT_PUBLISHED = URL has real tournament but it's hidden
+ *           Neither should create Game records
+ *           Clarified comments to distinguish URL status from game status
+ * - v2.5.0: NOT_FOUND/NOT _IN_USE no longer set doNotScrape=true
  *           These are empty tournament slots that need to keep being checked
  *           Only NOT_PUBLISHED (hidden tournament) sets doNotScrape=true
  * - v2.4.0: Removed lambda-monitoring dependency (no longer maintained)
@@ -20,10 +30,18 @@
  * - Parse HTML to extract tournament data
  * - Track scraping activity
  * - Return parsed data to caller
+ * - (v2.7.0) Optionally auto-save via saveAfterFetch flag
  * 
- * DOES NOT:
+ * DOES NOT (unless saveAfterFetch=true):
  * - Save to Game table (caller must invoke saveTournamentData separately)
  * - Perform series detection (now handled by gameDataEnricher)
+ * 
+ * STATUS TERMINOLOGY (v2.6.0):
+ * - scrapeStatus: URL/scrape-level status (NOT_FOUND, NOT_PUBLISHED, ERROR)
+ *   These indicate the URL's state, NOT a game's state
+ *   Games should NOT be created for NOT_FOUND or NOT_PUBLISHED URLs
+ * - gameStatus: Actual game status (SCHEDULED, RUNNING, COMPLETED, etc.)
+ *   Only meaningful when scrapeStatus indicates a real tournament exists
  * 
  * ===================================================================
  */
@@ -40,6 +58,11 @@ const { DO_NOT_SCRAPE_STATUSES } = require('../config/constants');
 
 // DynamoDB imports for fallback record creation
 const { PutCommand, GetCommand, QueryCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+
+// ===================================================================
+// STATUSES THAT SHOULD NOT TRIGGER AUTO-SAVE
+// ===================================================================
+const SKIP_SAVE_STATUSES = ['NOT_FOUND', 'NOT_PUBLISHED', 'ERROR', 'UNKNOWN'];
 
 /**
  * Extract tournament ID from URL
@@ -386,6 +409,19 @@ const robustGetScrapeURL = async (url, entityId, tournamentId, context) => {
 
 /**
  * Handle fetchTournamentData operation
+ * 
+ * @param {object} options - Fetch options
+ * @param {string} options.url - Tournament URL to fetch
+ * @param {string} options.s3Key - S3 key for re-scrape (alternative to URL)
+ * @param {string} options.entityId - Entity ID
+ * @param {boolean} options.forceRefresh - Force live fetch (skip cache)
+ * @param {boolean} options.overrideDoNotScrape - Override doNotScrape flag
+ * @param {boolean} options.isRescrape - Is this a re-scrape from cache
+ * @param {string} options.scraperJobId - Job ID for tracking
+ * @param {string} options.scraperApiKey - API key for scraper service
+ * @param {boolean} options.saveAfterFetch - (v2.7.0) Auto-save after successful fetch
+ * @param {object} context - Shared context with AWS clients
+ * @returns {object} Fetch result with parsed tournament data
  */
 const handleFetch = async (options, context) => {
     const {
@@ -396,7 +432,8 @@ const handleFetch = async (options, context) => {
         overrideDoNotScrape = false,
         isRescrape = false,
         scraperJobId = null,
-        scraperApiKey = null
+        scraperApiKey = null,
+        saveAfterFetch = false  // v2.7.0: New option for auto-save
     } = options;
     
     const { ddbDocClient, getTableName } = context;
@@ -413,7 +450,7 @@ const handleFetch = async (options, context) => {
     }
     
     const tournamentId = getTournamentIdFromUrl(url);
-    console.log(`[FetchHandler] Starting fetch for tournament ${tournamentId}, entityId: ${entityId}`);
+    console.log(`[FetchHandler] v2.7.0 Starting fetch for tournament ${tournamentId}, entityId: ${entityId}, saveAfterFetch: ${saveAfterFetch}`);
     
     // Get or create ScrapeURL with S3 cache link restoration
     const scrapeURLRecord = await robustGetScrapeURL(url, entityId, tournamentId, context);
@@ -436,14 +473,15 @@ const handleFetch = async (options, context) => {
             status: 'SKIPPED_DONOTSCRAPE',
             processingTime: Date.now() - startTime,
             gameName: scrapeURLRecord.gameName,
-            gameStatus: scrapeURLRecord.gameStatus || 'NOT_IN_USE',
+            gameStatus: scrapeURLRecord.gameStatus || 'NOT_FOUND',
             source: 'SINGLE_SCRAPE'
         }, context).catch(err => console.warn(`[FetchHandler] Attempt tracking failed: ${err.message}`));
         
         return {
             tournamentId,
             name: 'Skipped - Do Not Scrape',
-            gameStatus: scrapeURLRecord.gameStatus || 'NOT_IN_USE',
+            scrapeStatus: 'NOT_FOUND',
+            gameStatus: scrapeURLRecord.gameStatus || 'NOT_FOUND',
             hasGuarantee: false,
             doNotScrape: true,
             s3Key: '',
@@ -513,34 +551,46 @@ const handleFetch = async (options, context) => {
     }
     scrapedData.isNewStructure = isNewStructure;
     
-    // Update doNotScrape if needed
-    // v2.5.0 FIX: NOT_FOUND/NOT_IN_USE should NOT set doNotScrape=true
-    // These are empty slots that we need to keep checking for new tournaments
-    // Only NOT_PUBLISHED (real tournament that's hidden) should be marked doNotScrape
-    const isNotFoundStatus = scrapedData.gameStatus === 'NOT_FOUND' || 
-                             scrapedData.gameStatus === 'NOT_IN_USE';
+    // ═══════════════════════════════════════════════════════════════════════
+    // v2.6.0: Determine scrapeStatus (URL-level status) vs gameStatus
+    // ═══════════════════════════════════════════════════════════════════════
     
-    // Use the configured DO_NOT_SCRAPE_STATUSES, but explicitly exclude NOT_FOUND/NOT_IN_USE
+    const isNotFoundStatus = scrapedData.gameStatus === 'NOT_FOUND' || 
+                             scrapedData.scrapeStatus === 'NOT_FOUND';
+    
+    const isNotPublishedStatus = scrapedData.gameStatus === 'NOT_PUBLISHED' ||
+                                  scrapedData.scrapeStatus === 'NOT_PUBLISHED';
+    
+    if (isNotFoundStatus) {
+        scrapedData.scrapeStatus = 'NOT_FOUND';
+        scrapedData.gameStatus = 'NOT_FOUND';
+    } else if (isNotPublishedStatus) {
+        scrapedData.scrapeStatus = 'NOT_PUBLISHED';
+        scrapedData.gameStatus = 'NOT_PUBLISHED';
+    }
+    
+    // Update doNotScrape if needed
     const shouldMarkDoNotScrape = !isNotFoundStatus && (
         DO_NOT_SCRAPE_STATUSES.includes(scrapedData.gameStatus) ||
         scrapedData.doNotScrape === true
     );
     
     if (shouldMarkDoNotScrape && !scrapeURLRecord.doNotScrape) {
-        console.log(`[FetchHandler] Marking as doNotScrape: ${scrapedData.gameStatus}`);
+        console.log(`[FetchHandler] Marking as doNotScrape: ${scrapedData.gameStatus} (hidden tournament)`);
         updateScrapeURLDoNotScrape(url, true, scrapedData.gameStatus, context)
             .catch(err => console.warn(`[FetchHandler] doNotScrape update failed: ${err.message}`));
     }
     
-    // v2.5.0: Ensure NOT_FOUND/NOT_IN_USE have doNotScrape=false in the result
+    // v2.5.0/v2.6.0: Ensure NOT_FOUND has doNotScrape=false in the result
     if (isNotFoundStatus) {
         scrapedData.doNotScrape = false;
     }
     
-    // Build result
+    // Build result with both scrapeStatus and gameStatus
     const result = {
         tournamentId: scrapedData.tournamentId || tournamentId,
         name: scrapedData.name || 'Unnamed Tournament',
+        scrapeStatus: scrapedData.scrapeStatus,
         gameStatus: scrapedData.gameStatus || 'SCHEDULED',
         hasGuarantee: scrapedData.hasGuarantee || false,
         doNotScrape: scrapedData.doNotScrape || false,
@@ -599,7 +649,60 @@ const handleFetch = async (options, context) => {
         source: 'SINGLE_SCRAPE'
     }, context).catch(err => console.warn(`[FetchHandler] Attempt tracking failed: ${err.message}`));
     
-    console.log(`[FetchHandler] ✅ Fetch complete for tournament ${tournamentId}, status: ${scrapedData.gameStatus}`);
+    // ═══════════════════════════════════════════════════════════════════════
+    // v2.7.0: AUTO-SAVE AFTER FETCH
+    // When saveAfterFetch=true, automatically invoke save-handler
+    // This enables refreshRunningGames to fetch AND save in a single call
+    // ═══════════════════════════════════════════════════════════════════════
+    if (saveAfterFetch) {
+        // Check if we should skip saving (NOT_FOUND, NOT_PUBLISHED, ERROR, etc.)
+        const effectiveStatus = scrapedData.scrapeStatus || scrapedData.gameStatus;
+        const shouldSkipSave = SKIP_SAVE_STATUSES.includes(effectiveStatus);
+        
+        if (shouldSkipSave) {
+            console.log(`[FetchHandler] Skipping auto-save: status is ${effectiveStatus}`);
+            result.autoSaved = false;
+            result.autoSaveSkipped = true;
+            result.autoSaveSkipReason = effectiveStatus;
+        } else {
+            console.log(`[FetchHandler] 🔄 Auto-saving after fetch (saveAfterFetch=true)`);
+            
+            try {
+                // Import save-handler dynamically to avoid circular dependency
+                const { handleSave } = require('./save-handler');
+                
+                const saveResult = await handleSave({
+                    sourceUrl: url,
+                    data: result,
+                    entityId,
+                    scraperJobId,
+                    doNotScrape: scrapedData.doNotScrape || false
+                }, context);
+                
+                result.autoSaved = true;
+                result.autoSaveResult = {
+                    success: true,
+                    gameId: saveResult.id,
+                    action: saveResult.action,
+                    fieldsUpdated: saveResult.fieldsUpdated
+                };
+                
+                console.log(`[FetchHandler] ✅ Auto-save completed: ${saveResult.action} game ${saveResult.id}`);
+                
+            } catch (saveError) {
+                console.error('[FetchHandler] ❌ Auto-save failed:', saveError.message);
+                result.autoSaved = false;
+                result.autoSaveError = saveError.message;
+            }
+        }
+    }
+    
+    // Log completion
+    const statusLog = scrapedData.scrapeStatus 
+        ? `scrapeStatus: ${scrapedData.scrapeStatus}` 
+        : `gameStatus: ${scrapedData.gameStatus}`;
+    const autoSaveLog = saveAfterFetch ? `, autoSaved: ${result.autoSaved}` : '';
+    console.log(`[FetchHandler] ✅ Fetch complete for tournament ${tournamentId}, ${statusLog}${autoSaveLog}`);
     
     return result;
 };
@@ -608,10 +711,10 @@ const handleFetch = async (options, context) => {
  * Handle re-scrape from S3 cache
  */
 const handleRescrapeFromCache = async (s3Key, options, context) => {
-    const { entityId, scraperJobId } = options;
+    const { entityId, scraperJobId, saveAfterFetch = false } = options;
     const startTime = Date.now();
     
-    console.log(`[FetchHandler] Re-scrape from cache: ${s3Key}`);
+    console.log(`[FetchHandler] Re-scrape from cache: ${s3Key}, saveAfterFetch: ${saveAfterFetch}`);
     
     try {
         // Get HTML from S3
@@ -638,6 +741,21 @@ const handleRescrapeFromCache = async (s3Key, options, context) => {
             scrapedData.tournamentId = tournamentId;
         }
         
+        // Determine scrapeStatus for rescrape results
+        const isNotFoundStatus = scrapedData.gameStatus === 'NOT_FOUND' || 
+                                 scrapedData.scrapeStatus === 'NOT_FOUND';
+        
+        const isNotPublishedStatus = scrapedData.gameStatus === 'NOT_PUBLISHED' ||
+                                      scrapedData.scrapeStatus === 'NOT_PUBLISHED';
+        
+        if (isNotFoundStatus) {
+            scrapedData.scrapeStatus = 'NOT_FOUND';
+            scrapedData.gameStatus = 'NOT_FOUND';
+        } else if (isNotPublishedStatus) {
+            scrapedData.scrapeStatus = 'NOT_PUBLISHED';
+            scrapedData.gameStatus = 'NOT_PUBLISHED';
+        }
+        
         // Update S3Storage with new parsed data
         try {
             await updateS3StorageWithParsedData(
@@ -656,11 +774,10 @@ const handleRescrapeFromCache = async (s3Key, options, context) => {
             console.warn('[FetchHandler] S3Storage update during rescrape failed:', updateError.message);
         }
         
-        console.log(`[FetchHandler] ✅ Re-scrape complete, tournamentId: ${scrapedData.tournamentId}, status: ${scrapedData.gameStatus}`);
-        
-        return {
+        const result = {
             tournamentId: scrapedData.tournamentId,
             name: scrapedData.name || 'Unnamed Tournament',
+            scrapeStatus: scrapedData.scrapeStatus,
             gameStatus: scrapedData.gameStatus || 'SCHEDULED',
             hasGuarantee: scrapedData.hasGuarantee || false,
             doNotScrape: scrapedData.doNotScrape || false,
@@ -671,6 +788,53 @@ const handleRescrapeFromCache = async (s3Key, options, context) => {
             isRescrape: true,
             processingTimeMs: Date.now() - startTime
         };
+        
+        // v2.7.0: Auto-save for rescrape if requested
+        if (saveAfterFetch && url) {
+            const effectiveStatus = scrapedData.scrapeStatus || scrapedData.gameStatus;
+            const shouldSkipSave = SKIP_SAVE_STATUSES.includes(effectiveStatus);
+            
+            if (shouldSkipSave) {
+                console.log(`[FetchHandler] Skipping auto-save (rescrape): status is ${effectiveStatus}`);
+                result.autoSaved = false;
+                result.autoSaveSkipped = true;
+            } else {
+                console.log(`[FetchHandler] 🔄 Auto-saving after rescrape`);
+                
+                try {
+                    const { handleSave } = require('./save-handler');
+                    
+                    const saveResult = await handleSave({
+                        sourceUrl: url,
+                        data: result,
+                        entityId,
+                        scraperJobId,
+                        doNotScrape: scrapedData.doNotScrape || false
+                    }, context);
+                    
+                    result.autoSaved = true;
+                    result.autoSaveResult = {
+                        success: true,
+                        gameId: saveResult.id,
+                        action: saveResult.action
+                    };
+                    
+                    console.log(`[FetchHandler] ✅ Rescrape auto-save completed: ${saveResult.action}`);
+                    
+                } catch (saveError) {
+                    console.error('[FetchHandler] ❌ Rescrape auto-save failed:', saveError.message);
+                    result.autoSaved = false;
+                    result.autoSaveError = saveError.message;
+                }
+            }
+        }
+        
+        const statusLog = scrapedData.scrapeStatus 
+            ? `scrapeStatus: ${scrapedData.scrapeStatus}` 
+            : `gameStatus: ${scrapedData.gameStatus}`;
+        console.log(`[FetchHandler] ✅ Re-scrape complete, tournamentId: ${scrapedData.tournamentId}, ${statusLog}`);
+        
+        return result;
         
     } catch (error) {
         console.error(`[FetchHandler] Re-scrape error: ${error.message}`);

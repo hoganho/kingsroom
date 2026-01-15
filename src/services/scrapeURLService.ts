@@ -181,7 +181,7 @@ export const shouldSkipNotFoundGap = async (
     let result = false;
     if (match) {
       const status = match.lastScrapeStatus?.toUpperCase();
-      result = status === 'NOT_FOUND' || status === 'BLANK' || status === 'NOT_IN_USE';
+      result = status === 'NOT_FOUND' || status === 'BLANK';
     }
     
     if (result) {
@@ -346,7 +346,7 @@ export const checkCachedNotFoundGap = (
   if (!entry) return false;
   
   const status = entry.lastScrapeStatus?.toUpperCase();
-  const result = status === 'NOT_FOUND' || status === 'BLANK' || status === 'NOT_IN_USE';
+  const result = status === 'NOT_FOUND' || status === 'BLANK';
   if (result) {
     console.log(`[scrapeURLService] checkCachedNotFoundGap(${tournamentId}): SKIP (${entry.lastScrapeStatus})`);
   }

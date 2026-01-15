@@ -16,7 +16,7 @@ const client = generateClient();
 export enum URLInteractionType {
     SCRAPED_WITH_HTML = 'SCRAPED_WITH_HTML',
     SCRAPED_NOT_PUBLISHED = 'SCRAPED_NOT_PUBLISHED',
-    SCRAPED_NOT_IN_USE = 'SCRAPED_NOT_IN_USE',
+    SCRAPED_NOT_FOUND = 'SCRAPED_NOT_FOUND',
     SCRAPED_ERROR = 'SCRAPED_ERROR',
     MANUAL_UPLOAD = 'MANUAL_UPLOAD',
     NEVER_CHECKED = 'NEVER_CHECKED'
@@ -463,7 +463,7 @@ export const useURLManagement = () => {
                 return ageMinutes > maxAgeMinutes;
             case 'SCRAPED_NOT_PUBLISHED':
                 return ageMinutes > 60; 
-            case 'SCRAPED_NOT_IN_USE':
+            case 'SCRAPED_NOT_FOUND':
                 return ageMinutes > 1440; 
             case 'SCRAPED_ERROR':
                 return ageMinutes > 15; 

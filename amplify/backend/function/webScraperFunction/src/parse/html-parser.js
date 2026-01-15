@@ -8,11 +8,18 @@
  * 
  * Extracted from: scraperStrategies.js
  * 
- * UPDATED: v2.2.0
+ * UPDATED: v2.3.0
+ * - REFACTORED: NOT_FOUND handling
+ *   - Use NOT_FOUND (not NOT _IN_USE) for empty tournament slots
+ *   - NOT_FOUND is a URL/scrape status, NOT a game status
+ *   - Games should NEVER be created for NOT_FOUND URLs
+ *   - doNotScrape is NEVER set for NOT_FOUND (must always re-check)
+ *   - Only NOT_PUBLISHED sets doNotScrape=true
+ * - ADDED: scrapeStatus field to distinguish URL status from game status
+ * 
+ * v2.2.0:
  * - FIXED: gameStatus now uses only valid GraphQL GameStatus enum values
- * - Changed 'NOT_FOUND' to 'NOT_IN_USE' (NOT_FOUND not in enum)
  * - Changed 'ERROR' to 'UNKNOWN' (ERROR not in enum)
- * - This fixes "Can't serialize value for Enum 'GameStatus'" errors
  * 
  * v2.1.0:
  * - Removed series matching (now handled by gameDataEnricher)
@@ -208,6 +215,15 @@ class ScrapeContext {
 const defaultStrategy = {
     /**
      * Detect page state (not found, not published, etc.)
+     * 
+     * UPDATED v2.3.0:
+     * - NOT_FOUND = empty tournament slot (URL exists, no tournament)
+     *   - This is a URL/scrape status, NOT a game status
+     *   - Games should NEVER be created for NOT_FOUND URLs
+     *   - doNotScrape = false (ALWAYS re-check on next scrape)
+     * 
+     * - NOT_PUBLISHED = real tournament that exists but is hidden
+     *   - doNotScrape = true (check manually/monthly)
      */
     detectPageState(ctx, forceRefresh = false) {
         const tournamentId = ctx.data.tournamentId || getTournamentIdFromUrl(ctx.url) || 0;
@@ -217,33 +233,42 @@ const defaultStrategy = {
             const warningText = warningBadge.text().trim().toLowerCase();
             console.log(`[HtmlParser] Warning badge: "${warningText}"`);
             
-            let status = 'UNKNOWN';
-            let name = 'Tournament Status Unknown';
-            
-            if (warningText.includes('not found')) {
-                // NOTE: 'NOT_FOUND' is not in GraphQL GameStatus enum
-                // Use 'NOT_IN_USE' which has similar meaning and IS in the enum
-                status = 'NOT_IN_USE';
-                name = 'Tournament Not Found';
-            } else if (warningText.includes('not published')) {
-                status = 'NOT_PUBLISHED';
-                name = 'Tournament Not Published';
-            } else if (warningText.includes('not in use') || warningText.includes('not available')) {
-                status = 'NOT_IN_USE';
-                name = 'Tournament Not In Use';
+            // Determine if this is NOT_FOUND or NOT_PUBLISHED
+            if (warningText.includes('not published')) {
+                // NOT_PUBLISHED = Real tournament that exists but is hidden
+                // This SHOULD set doNotScrape=true (check manually/monthly)
+                ctx.add('tournamentId', tournamentId);
+                ctx.add('scrapeStatus', 'NOT_PUBLISHED');  // URL/scrape status
+                ctx.add('name', 'Tournament Not Published');
+                ctx.add('doNotScrape', true);  // Don't auto-scrape hidden tournaments
+                ctx.add('hasGuarantee', false);
+                ctx.add('s3Key', '');
+                ctx.add('registrationStatus', 'N_A');
+                
+                console.log(`[HtmlParser] URL Status: NOT_PUBLISHED (doNotScrape=true)`);
+                
+                if (!forceRefresh) {
+                    ctx.abortScrape = true;
+                    console.log(`[HtmlParser] Aborting scrape - NOT_PUBLISHED`);
+                }
+                return;
             }
             
+            // All other warnings = empty tournament slot (NOT_FOUND)
+            // "not found", "not in use", "not available", etc.
             ctx.add('tournamentId', tournamentId);
-            ctx.add('gameStatus', status);
-            ctx.add('name', name);
-            ctx.add('doNotScrape', true);
+            ctx.add('scrapeStatus', 'NOT_FOUND');  // URL/scrape status (NOT game status)
+            ctx.add('name', null);  // No name - this isn't a real tournament
+            ctx.add('doNotScrape', false);  // NEVER set true - must always re-check!
             ctx.add('hasGuarantee', false);
             ctx.add('s3Key', '');
             ctx.add('registrationStatus', 'N_A');
             
+            console.log(`[HtmlParser] URL Status: NOT_FOUND (empty slot, doNotScrape=false)`);
+            
             if (!forceRefresh) {
                 ctx.abortScrape = true;
-                console.log(`[HtmlParser] Aborting scrape - ${status}`);
+                console.log(`[HtmlParser] Aborting scrape - NOT_FOUND (empty slot)`);
             }
             return;
         }
@@ -252,16 +277,32 @@ const defaultStrategy = {
         const pageTitle = ctx.$('title').text().toLowerCase();
         const h1Text = ctx.$('h1').first().text().toLowerCase();
         
-        if (pageTitle.includes('not found') || h1Text.includes('not found') ||
-            pageTitle.includes('error') || h1Text.includes('error')) {
+        if (pageTitle.includes('not found') || h1Text.includes('not found')) {
+            // Empty tournament slot
             ctx.add('tournamentId', tournamentId);
-            // NOTE: 'ERROR' and 'NOT_FOUND' are not in GraphQL GameStatus enum
-            // Use 'UNKNOWN' for errors and 'NOT_IN_USE' for not found
-            ctx.add('gameStatus', pageTitle.includes('error') ? 'UNKNOWN' : 'NOT_IN_USE');
-            ctx.add('name', pageTitle.includes('error') ? 'Tournament Error' : 'Tournament Not Found');
-            ctx.add('doNotScrape', true);
+            ctx.add('scrapeStatus', 'NOT_FOUND');  // URL status
+            ctx.add('name', null);
+            ctx.add('doNotScrape', false);  // NEVER set true for empty slots!
             ctx.add('hasGuarantee', false);
             ctx.add('registrationStatus', 'N_A');
+            
+            console.log(`[HtmlParser] URL Status: NOT_FOUND (from page title/h1)`);
+            
+            if (!forceRefresh) ctx.abortScrape = true;
+            return;
+        }
+        
+        if (pageTitle.includes('error') || h1Text.includes('error')) {
+            // Actual error - use UNKNOWN for game status
+            ctx.add('tournamentId', tournamentId);
+            ctx.add('scrapeStatus', 'ERROR');  // URL status
+            ctx.add('gameStatus', 'UNKNOWN');  // GraphQL-valid game status
+            ctx.add('name', 'Tournament Error');
+            ctx.add('doNotScrape', false);  // Errors should be retried
+            ctx.add('hasGuarantee', false);
+            ctx.add('registrationStatus', 'N_A');
+            
+            console.log(`[HtmlParser] URL Status: ERROR (doNotScrape=false)`);
             
             if (!forceRefresh) ctx.abortScrape = true;
             return;
@@ -293,6 +334,11 @@ const defaultStrategy = {
      * is now handled by gameDataEnricher's series-resolver module.
      */
     getName(ctx) {
+        // Skip if this is a NOT_FOUND URL (no tournament to get name from)
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') {
+            return;
+        }
+        
         const mainTitle = ctx.$('.cw-game-title').first().text().trim();
         const subTitle = ctx.$('.cw-game-shortdesc').first().text().trim();
         const gameName = [mainTitle, subTitle].filter(Boolean).join(' ');
@@ -328,6 +374,9 @@ const defaultStrategy = {
      * - sessionMode (new taxonomy): TOURNAMENT or CASH
      */
     detectGameType(ctx) {
+        // Skip for NOT_FOUND URLs
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const name = ctx.data.name || '';
         const gameTags = ctx.data.gameTags || [];
         const allText = [name, ...gameTags].join(' ');
@@ -356,6 +405,9 @@ const defaultStrategy = {
      * Get game tags (badges)
      */
     getGameTags(ctx) {
+        // Skip for NOT_FOUND URLs
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const tags = [];
         ctx.$('.cw-game-buyins .cw-badge').each((i, el) => {
             const t = ctx.$(el).text().trim();
@@ -373,6 +425,9 @@ const defaultStrategy = {
      * Bounty and speed info are now captured in getClassification()
      */
     getTournamentType(ctx) {
+        // Skip for NOT_FOUND URLs
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const tags = ctx.data.gameTags || [];
         const name = ctx.data.name || '';
         const allText = [...tags, name].join(' ');
@@ -403,6 +458,9 @@ const defaultStrategy = {
      * Get game start date/time
      */
     getGameStartDateTime(ctx) {
+        // Skip for NOT_FOUND URLs
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         // Primary source: embedded JSON data
         if (ctx.gameData && ctx.gameData.start_local) {
             const utcIso = parseAESTToUTC(ctx.gameData.start_local);
@@ -441,6 +499,12 @@ const defaultStrategy = {
      * Get game status
      */
     getStatus(ctx) {
+        // Skip if this is a NOT_FOUND or NOT_PUBLISHED URL
+        // These are URL statuses, not game statuses - no Game record to create
+        if (ctx.data.scrapeStatus === 'NOT_FOUND' || ctx.data.scrapeStatus === 'NOT_PUBLISHED') {
+            return;
+        }
+        
         if (ctx.data.gameStatus) return ctx.data.gameStatus;
         
         let gameStatus = ctx.$('label:contains("Status")').first().next('strong').text().trim().toUpperCase() || 'UNKNOWN_STATUS';
@@ -459,6 +523,9 @@ const defaultStrategy = {
      * Get registration status
      */
     getRegistrationStatus(ctx) {
+        // Skip for NOT_FOUND URLs
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         if (ctx.data.registrationStatus) return ctx.data.registrationStatus;
         
         let regStatus = ctx.$('label:contains("Registration")').parent().text()
@@ -479,6 +546,9 @@ const defaultStrategy = {
      * Get game variant (NLHE, PLO, etc.)
      */
     getGameVariant(ctx) {
+        // Skip for NOT_FOUND URLs
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         let variant = ctx.gameData?.shortlimitgame || 
             ctx.$('#cw_clock_shortlimitgame').first().text().trim();
         if (variant) {
@@ -505,6 +575,9 @@ const defaultStrategy = {
      * Should be called AFTER detectGameType(), getGameVariant(), getTournamentType(), getName()
      */
     getClassification(ctx) {
+        // Skip for NOT_FOUND URLs - no tournament to classify
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const name = ctx.data.name || '';
         const tags = ctx.data.gameTags || [];
         const allText = [...tags, name].join(' ');
@@ -676,6 +749,7 @@ const defaultStrategy = {
      * Get prizepool paid
      */
     getPrizepoolPaid(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
         ctx.parseNumeric('prizepoolPaid', '#cw_clock_prizepool');
     },
     
@@ -683,6 +757,8 @@ const defaultStrategy = {
      * Get total unique players
      */
     getTotalUniquePlayers(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const text = ctx.$('#cw_clock_playersentries').first().text().trim();
         if (!text) return;
         
@@ -704,26 +780,44 @@ const defaultStrategy = {
         }
     },
 
-    getTotalRebuys(ctx) { ctx.parseNumeric('totalRebuys', '#cw_clock_rebuys'); },
-    getTotalAddons(ctx) { ctx.parseNumeric('totalAddons', 'div.cw-clock-label:contains("Add-Ons")'); },
-    getTotalInitialEntries(ctx) { ctx.add('totalInitialEntries', ctx.data.totalUniquePlayers || 0); },
+    getTotalRebuys(ctx) { 
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        ctx.parseNumeric('totalRebuys', '#cw_clock_rebuys'); 
+    },
+    
+    getTotalAddons(ctx) { 
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        ctx.parseNumeric('totalAddons', 'div.cw-clock-label:contains("Add-Ons")'); 
+    },
+    
+    getTotalInitialEntries(ctx) { 
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        ctx.add('totalInitialEntries', ctx.data.totalUniquePlayers || 0); 
+    },
     
     /**
      * Calculate total entries
      */
     getTotalEntries(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const totalInitialEntries = ctx.data.totalInitialEntries || 0;
         const totalRebuys = ctx.data.totalRebuys || 0;
         const totalAddons = ctx.data.totalAddons || 0;
         ctx.add('totalEntries', totalInitialEntries + totalRebuys + totalAddons);
     },
 
-    getTotalDuration(ctx) { ctx.getText('totalDuration', 'div.cw-clock-label:contains("Total Time")'); },
+    getTotalDuration(ctx) { 
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        ctx.getText('totalDuration', 'div.cw-clock-label:contains("Total Time")'); 
+    },
     
     /**
      * Get buy-in amount
      */
     getBuyIn(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         if (ctx.gameData?.costspb0?.cost) {
             ctx.add('buyIn', ctx.gameData.costspb0.cost + (ctx.gameData.costspb0.fee || 0));
         } else {
@@ -732,6 +826,7 @@ const defaultStrategy = {
     },
     
     getRake(ctx) { 
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
         if (ctx.gameData?.costspb0?.fee) ctx.add('rake', ctx.gameData.costspb0.fee); 
     },
     
@@ -739,6 +834,8 @@ const defaultStrategy = {
      * Get starting stack
      */
     getStartingStack(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         if (ctx.gameData?.costspb0?.chips) {
             ctx.add('startingStack', ctx.gameData.costspb0.chips);
         } else {
@@ -750,6 +847,8 @@ const defaultStrategy = {
      * Detect guarantee and extract amount
      */
     getGuarantee(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const shortDesc = ctx.$('.cw-game-shortdesc').text().trim();
         const mainTitle = ctx.$('.cw-game-title').text().trim();
         const combinedName = ctx.data.name || '';
@@ -836,6 +935,8 @@ const defaultStrategy = {
      * Calculate poker economics (simplified model)
      */
     calculatePokerEconomics(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const buyIn = ctx.data.buyIn || 0;
         const rake = ctx.data.rake || 0;
         const totalInitialEntries = ctx.data.totalInitialEntries || 0;
@@ -892,6 +993,8 @@ const defaultStrategy = {
      * Get seating data
      */
     getSeating(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const seating = [];
         ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr').each((i, el) => {
             const $row = ctx.$(el);
@@ -922,6 +1025,8 @@ const defaultStrategy = {
      * Get entries list
      */
     getEntries(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const entries = [];
         let entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
         
@@ -951,6 +1056,7 @@ const defaultStrategy = {
      * Get live tournament data
      */
     getLiveData(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
         if (ctx.data.gameStatus === 'FINISHED' || ctx.data.gameStatus === 'CANCELLED') return;
         
         let playersRemaining = ctx.data.seating?.length || 0;
@@ -976,6 +1082,8 @@ const defaultStrategy = {
      * Get results/payouts
      */
     getResults(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const results = [];
         ctx.$('h4.cw-text-center:contains("Result")').next('table').find('tbody tr').each((i, el) => {
             const $row = ctx.$(el);
@@ -1018,6 +1126,8 @@ const defaultStrategy = {
      * Get tables data
      */
     getTables(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const tables = [];
         const tablesContainer = ctx.$('h4.cw-text-center:contains("Tables")').next('table').find('tbody');
         let currentTableName = null;
@@ -1058,6 +1168,7 @@ const defaultStrategy = {
      * Get blind levels
      */
     getLevels(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
         if (!ctx.levelData) return;
         
         const levels = ctx.levelData.map(level => ({
@@ -1075,6 +1186,7 @@ const defaultStrategy = {
      * Get scheduled breaks
      */
     getBreaks(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
         if (!ctx.levelData) return;
         
         const breaks = [];
@@ -1100,6 +1212,7 @@ const defaultStrategy = {
      * Get tournament flags
      */
     getTournamentFlags(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
         const name = ctx.data.name || '';
         if (/(satellite|satty)/i.test(name)) ctx.add('isSatellite', true);
     },
@@ -1108,6 +1221,8 @@ const defaultStrategy = {
      * Determine game frequency
      */
     getGameFrequency(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         const name = (ctx.data.name || '').toUpperCase();
         const weekdays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
         const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER', 'JAN', 'FEB', 'MAR', 'APR', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -1125,7 +1240,12 @@ const defaultStrategy = {
         }
     },
     
-    getTotalDuration(ctx) {
+    /**
+     * Get total duration (enhanced version with embedded data)
+     */
+    getTotalDurationEnhanced(ctx) {
+        if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
+        
         if (ctx.gameData) {
             // Extract duration in seconds
             if (ctx.gameData.ttime !== undefined && ctx.gameData.ttime > 0) {
@@ -1190,7 +1310,8 @@ const getStatusAndReg = (html) => {
         defaultStrategy.getRegistrationStatus(ctx);
     }
     return {
-        gameStatus: ctx.data.gameStatus,
+        scrapeStatus: ctx.data.scrapeStatus,    // URL status (NOT_FOUND, NOT_PUBLISHED, ERROR, etc.)
+        gameStatus: ctx.data.gameStatus,         // Game status (only for real tournaments)
         registrationStatus: ctx.data.registrationStatus,
         tournamentId: ctx.data.tournamentId
     };
@@ -1201,6 +1322,8 @@ module.exports = {
     defaultStrategy,
     getTournamentIdFromUrl,
     parseDurationToMilliseconds,
+    formatSecondsToHHMMSS,
+    parseHHMMSSToSeconds,
     getStatusAndReg,
     VARIANT_MAPPING
 };

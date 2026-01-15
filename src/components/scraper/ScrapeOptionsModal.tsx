@@ -247,8 +247,8 @@ export const ScrapeOptionsModal: React.FC<ScrapeOptionsModalProps> = ({
     // Helper to determine status display
     const getStatusDisplay = () => {
         if (gameStatus === 'NOT_PUBLISHED') return 'Not Published';
-        if (gameStatus === 'NOT_IN_USE') return 'Not In Use';
-        if (gameStatus === 'UNKNOWN') return 'Unknown / Not Found';
+        if (gameStatus === 'NOT_FOUND') return 'Not Found';
+        if (gameStatus === 'UNKNOWN') return 'Unknown';
         if (doNotScrape) return 'Restricted';
         return null;
     };

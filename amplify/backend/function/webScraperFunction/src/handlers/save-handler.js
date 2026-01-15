@@ -1,13 +1,16 @@
 /**
  * ===================================================================
- * Save Handler (v2.1.0)
+ * Save Handler (v2.2.0)
  * ===================================================================
  * 
  * PASSTHROUGH to gameDataEnricher Lambda (with saveToDatabase: true).
  * 
- * VERSION: 2.1.0
+ * VERSION: 2.2.0
  * 
  * CHANGELOG:
+ * - v2.2.0: Skip saving NOT _IN_USE and NOT_PUBLISHED tournaments
+ *           These are empty slots or hidden tournaments - no Game record needed
+ *           ScrapeURL tracks them for re-checking later
  * - v2.1.0: Removed lambda-monitoring dependency (no longer maintained)
  * - v2.0.0: Added new classification field passthrough
  * 
@@ -133,7 +136,7 @@ const handleSave = async (options, context) => {
     
     const { lambdaClient, ddbDocClient } = context;
     
-    console.log(`[SaveHandler] v2.1.0 Delegating to gameDataEnricher for ${sourceUrl}`);
+    console.log(`[SaveHandler] v2.2.0 Delegating to gameDataEnricher for ${sourceUrl}`);
     
     // Parse data if string
     let parsedData;
@@ -142,6 +145,25 @@ const handleSave = async (options, context) => {
     } catch (error) {
         console.error('[SaveHandler] Failed to parse data:', error);
         parsedData = {};
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // v2.2.0: Skip saving NOT _IN_USE and NOT_PUBLISHED tournaments
+    // These are either empty slots or hidden tournaments - no Game record needed
+    // ScrapeURL already tracks these for re-checking later
+    // ═══════════════════════════════════════════════════════════════════════
+    const skipStatuses = ['NOT_FOUND', 'NOT_PUBLISHED'];
+    if (skipStatuses.includes(parsedData?.gameStatus)) {
+        const tournamentId = parsedData.tournamentId || getTournamentIdFromUrl(sourceUrl);
+        console.log(`[SaveHandler] Skipping save for ${parsedData.gameStatus} tournament ${tournamentId}`);
+        return {
+            success: true,
+            action: 'SKIPPED',
+            reason: parsedData.gameStatus,
+            message: `${parsedData.gameStatus} - no Game record created (tracked in ScrapeURL)`,
+            tournamentId,
+            gameStatus: parsedData.gameStatus
+        };
     }
     
     // DEBUG: Log what we received for player extraction
