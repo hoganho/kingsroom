@@ -6,6 +6,7 @@
 //               Backend defaults: maxTotalErrors=1, maxConsecutiveNotFound=10
 // UPDATED v3.3: Pass skipNotPublished to getScrapingStatus for gap analysis
 // UPDATED v3.4: Show Force Refresh checkbox for gaps mode too (fixes NOT_FOUND re-scrape bug)
+// UPDATED v3.5: Added Range selection for Gaps mode - allows processing only gaps within a specified range
 //
 // Architecture:
 // - 'single' mode: Frontend handles with full interactive control (modals, venue selection)
@@ -279,6 +280,71 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
   };
 
   // =========================================================================
+  // v3.5: HELPER - Filter gaps by range
+  // =========================================================================
+  
+  /**
+   * Filters gap ranges to only include IDs within the specified range.
+   * If rangeStart or rangeEnd are not provided, no filtering is applied for that bound.
+   */
+  const filterGapsByRange = useCallback((
+    gaps: Array<{ start: number; end: number }>,
+    rangeStart?: number,
+    rangeEnd?: number
+  ): number[] => {
+    const filteredIds: number[] = [];
+    
+    for (const gap of gaps) {
+      // Determine effective start and end for this gap
+      const effectiveStart = rangeStart !== undefined ? Math.max(gap.start, rangeStart) : gap.start;
+      const effectiveEnd = rangeEnd !== undefined ? Math.min(gap.end, rangeEnd) : gap.end;
+      
+      // Only process if there's a valid range
+      if (effectiveStart <= effectiveEnd) {
+        for (let i = effectiveStart; i <= effectiveEnd; i++) {
+          filteredIds.push(i);
+        }
+      }
+    }
+    
+    return filteredIds;
+  }, []);
+
+  // =========================================================================
+  // v3.5: Calculate filtered gap count for display
+  // =========================================================================
+  
+  const filteredGapInfo = useMemo(() => {
+    if (!scrapingStatus?.gaps?.length) {
+      return { totalGaps: 0, filteredCount: 0, isFiltered: false };
+    }
+    
+    const gaps = scrapingStatus.gaps as Array<{ start: number; end: number }>;
+    const totalIds = gaps.reduce((sum, gap) => sum + (gap.end - gap.start + 1), 0);
+    
+    const rangeStart = idSelectionParams.gapsRangeStart 
+      ? parseInt(idSelectionParams.gapsRangeStart) 
+      : undefined;
+    const rangeEnd = idSelectionParams.gapsRangeEnd 
+      ? parseInt(idSelectionParams.gapsRangeEnd) 
+      : undefined;
+    
+    // If no range specified, return all gaps
+    if (rangeStart === undefined && rangeEnd === undefined) {
+      return { totalGaps: totalIds, filteredCount: totalIds, isFiltered: false };
+    }
+    
+    // Filter and count
+    const filteredIds = filterGapsByRange(gaps, rangeStart, rangeEnd);
+    
+    return { 
+      totalGaps: totalIds, 
+      filteredCount: filteredIds.length, 
+      isFiltered: true 
+    };
+  }, [scrapingStatus?.gaps, idSelectionParams.gapsRangeStart, idSelectionParams.gapsRangeEnd, filterGapsByRange]);
+
+  // =========================================================================
   // BATCH JOB CALLBACKS (NEW)
   // =========================================================================
 
@@ -505,20 +571,35 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
       // =====================================================================
       scraperLogger.info('PROCESSING_START', `Starting batch job: ${idSelectionMode}`);
 
-      // Get gap IDs if needed
+      // v3.5: Get gap IDs with optional range filtering
       let gapIds: number[] | undefined;
       if (idSelectionMode === 'gaps' && scrapingStatus?.gaps && scrapingStatus.gaps.length > 0) {
-        // Convert GapRange[] to number[] - flatten all gap ranges into individual IDs
-        // GapRange has { start: number; end: number } structure
         const gaps = scrapingStatus.gaps as Array<{ start: number; end: number }>;
-        gapIds = gaps.flatMap((gap) => {
-          // For ranges, generate all IDs between start and end
-          const ids: number[] = [];
-          for (let i = gap.start; i <= gap.end; i++) {
-            ids.push(i);
-          }
-          return ids;
+        
+        // Parse range parameters
+        const rangeStart = idSelectionParams.gapsRangeStart 
+          ? parseInt(idSelectionParams.gapsRangeStart) 
+          : undefined;
+        const rangeEnd = idSelectionParams.gapsRangeEnd 
+          ? parseInt(idSelectionParams.gapsRangeEnd) 
+          : undefined;
+        
+        // Use the helper to filter gaps by range
+        gapIds = filterGapsByRange(gaps, rangeStart, rangeEnd);
+        
+        console.log('[ScraperTab] Gaps mode with range:', {
+          rangeStart,
+          rangeEnd,
+          totalGapRanges: gaps.length,
+          filteredGapIds: gapIds.length,
         });
+        
+        // If range filtering resulted in no gaps, show warning
+        if (gapIds.length === 0) {
+          alert('No gaps found within the specified range. Please adjust your range or leave it blank to process all gaps.');
+          setConfigSectionOpen(true);
+          return;
+        }
       }
 
       // Parse multi-ID string if needed
@@ -613,6 +694,8 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
         // Save options
         saveToDatabase: scrapeFlow === 'scrape_save',
         defaultVenueId: defaultVenueId || undefined,
+        autoCreateSeries: options.autoCreateSeries,
+        autoCreateRecurring: options.autoCreateRecurring,
         
         // Mode-specific parameters
         bulkCount: idSelectionMode === 'bulk' 
@@ -685,7 +768,7 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
   }, [
     currentEntity, idSelectionMode, idSelectionParams, options, scrapeFlow,
     singleScrape, modals.saveConfirmation, defaultVenueId, scrapingStatus, startJob, urlToReparse, 
-    onReparseComplete, suggestedNextId, getScrapingStatus, getUnfinishedGames, scraperApiKey
+    onReparseComplete, suggestedNextId, getScrapingStatus, getUnfinishedGames, scraperApiKey, filterGapsByRange
   ]);
 
   const handleStopProcessing = useCallback(async () => {
@@ -939,8 +1022,10 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
               </div>
             )}
 
+            {/* v3.5: Updated Gaps mode with range selection */}
             {idSelectionMode === 'gaps' && (
-              <div className="col-span-full">
+              <div className="col-span-full space-y-3">
+                {/* Gap status display */}
                 <div className="text-sm text-gray-600">
                   {gapLoading ? (
                     <span className="flex items-center gap-2">
@@ -964,6 +1049,76 @@ export const ScrapeTab: React.FC<ScraperTabProps> = ({ urlToReparse, onReparseCo
                     </span>
                   )}
                 </div>
+
+                {/* v3.5: Range selection for gaps */}
+                {scrapingStatus?.gaps?.length ? (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Range Filter
+                      <span className="ml-2 text-xs text-gray-500 font-normal">
+                        (optional - leave blank to process all gaps)
+                      </span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Start ID</label>
+                        <input
+                          type="number"
+                          value={idSelectionParams.gapsRangeStart || ''}
+                          onChange={(e) => setIdSelectionParams(p => ({ ...p, gapsRangeStart: e.target.value }))}
+                          disabled={isProcessing}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+                          placeholder={`Min: ${scrapingStatus.lowestTournamentId || 'N/A'}`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">End ID</label>
+                        <input
+                          type="number"
+                          value={idSelectionParams.gapsRangeEnd || ''}
+                          onChange={(e) => setIdSelectionParams(p => ({ ...p, gapsRangeEnd: e.target.value }))}
+                          disabled={isProcessing}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+                          placeholder={`Max: ${scrapingStatus.highestTournamentId || 'N/A'}`}
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Show filtered count */}
+                    <div className="mt-2 text-xs">
+                      {filteredGapInfo.isFiltered ? (
+                        <span className={filteredGapInfo.filteredCount > 0 ? 'text-blue-600' : 'text-yellow-600'}>
+                          {filteredGapInfo.filteredCount > 0 ? (
+                            <>
+                              <CheckCircle className="h-3 w-3 inline mr-1" />
+                              {filteredGapInfo.filteredCount} of {filteredGapInfo.totalGaps} gap IDs within range
+                            </>
+                          ) : (
+                            <>
+                              <AlertCircle className="h-3 w-3 inline mr-1" />
+                              No gaps found within specified range
+                            </>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-gray-500">
+                          Processing all {filteredGapInfo.totalGaps} gap IDs
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Quick clear button */}
+                    {(idSelectionParams.gapsRangeStart || idSelectionParams.gapsRangeEnd) && (
+                      <button
+                        onClick={() => setIdSelectionParams(p => ({ ...p, gapsRangeStart: '', gapsRangeEnd: '' }))}
+                        disabled={isProcessing}
+                        className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline disabled:opacity-50"
+                      >
+                        Clear range filter
+                      </button>
+                    )}
+                  </div>
+                ) : null}
               </div>
             )}
 

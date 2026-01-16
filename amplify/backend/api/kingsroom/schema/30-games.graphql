@@ -227,6 +227,7 @@ type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   # === ENTITY RELATIONSHIP ===
   entityId: ID @index(name: "byEntityGame", sortKeyFields: ["gameStartDateTime"], queryField: "gamesByEntity")
              @index(name: "byEntityAndTournamentId", sortKeyFields: ["tournamentId"], queryField: "gamesByEntityAndTournamentId")
+             @index(name: "byEntityStatus", sortKeyFields: ["gameStatus"], queryField: "gamesByEntityStatus")
   entity: Entity @belongsTo(fields: ["entityId"])
 
   createdAt: AWSDateTime!
@@ -709,6 +710,8 @@ input StartScraperJobInput {
   maxConsecutiveBlanks: Int
   maxTotalErrors: Int
   scraperApiKey: String
+  autoCreateSeries: Boolean
+  autoCreateRecurring: Boolean
 }
 
 input SaveGameInput {

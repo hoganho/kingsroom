@@ -97,6 +97,14 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
           },
         })) as any;
 
+        // Handle partial success - GraphQL can return both data AND errors
+        // This happens when nested relations have null values for non-nullable fields
+        // (e.g., linkedGame.gameCost._version, linkedGame.gameFinancialSnapshot._lastChangedAt)
+        if (response.errors && response.errors.length > 0) {
+          console.warn(`[useSocialPosts] Partial response for account ${accountId}: ${response.errors.length} field errors (nested relations with missing data)`);
+          // Continue processing - the main post data is usually still valid
+        }
+
         const data = response.data?.socialPostsBySocialAccountIdAndPostedAt;
         const newItems = (data?.items || []).filter((i: any) => i !== null);
         items = [...items, ...newItems];
@@ -124,8 +132,9 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
             shouldFetch = false;
         }
 
-      } catch (e) {
-        console.warn(`Error fetching account ${accountId}`, e);
+      } catch (e: any) {
+        // True exceptions (network errors, etc.)
+        console.error(`[useSocialPosts] Error fetching account ${accountId}:`, e?.message || e);
         shouldFetch = false;
       }
     }

@@ -1,6 +1,9 @@
 /**
  * gameDataEnricher Lambda - index.js
  * 
+ * VERSION 3.0.1 - Fixed direct Lambda invocation support
+ * CHANGE: When invoked directly with {input: ...} and no fieldName, defaults to enrichGameData
+ * 
  * VERSION 3.0.0 - Consolidated all recurring game operations
  * REPLACES: recurringGameAdmin Lambda entirely
  * 
@@ -55,8 +58,12 @@ exports.handler = async (event, context) => {
     console.log('[GameDataEnricher] Event:', JSON.stringify(event, null, 2));
     
     // Determine operation from GraphQL field name
-    const fieldName = event.fieldName || event.info?.fieldName;
+    // v3.0.1: Default to 'enrichGameData' when invoked directly with input but no fieldName
+    // This supports webScraperFunction -> gameDataEnricher direct Lambda invocation
+    const fieldName = event.fieldName || event.info?.fieldName || (event.input ? 'enrichGameData' : undefined);
     const args = event.arguments || {};
+    
+    console.log(`[GameDataEnricher] Resolved fieldName: ${fieldName}`);
     
     try {
         switch (fieldName) {
@@ -64,7 +71,8 @@ exports.handler = async (event, context) => {
             // ORIGINAL ENRICHMENT
             // ================================================================
             case 'enrichGameData':
-                return await enrichGameData(args.input || args);
+                // Support both GraphQL (args.input) and direct invoke (event.input)
+                return await enrichGameData(args.input || event.input || args);
             
             // ================================================================
             // BULK PROCESSING OPERATIONS

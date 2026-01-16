@@ -80,7 +80,8 @@
       "lambda:InvokeFunction"
     ],
     "Resource": [
-      "arn:aws:lambda:ap-southeast-2:*:function:saveGameFunction-*"
+      "arn:aws:lambda:ap-southeast-2:*:function:saveGameFunction-*",
+      "arn:aws:lambda:ap-southeast-2:*:function:gameDataEnricher-*"
     ]
   },
   {

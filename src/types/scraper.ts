@@ -7,6 +7,10 @@
 // - Jobs will stop on first REAL error (not parse failures)
 // - Note: blanks counter is deprecated, use notFoundCount instead
 //
+// UPDATED v3.5: Added gapsRangeStart and gapsRangeEnd to IdSelectionParams
+//               - Allows filtering gaps to only process IDs within a specified range
+//               - Leave blank to process all gaps (default behavior)
+//
 // UPDATED v3.1: Added forceRefreshFromWeb option for refresh mode
 //               - Refresh mode: Re-fetch unfinished games (RUNNING, REGISTERING, SCHEDULED)
 //               - Auto mode: Backend handles per-game forceRefresh based on game status
@@ -72,6 +76,9 @@ export interface IdSelectionParams {
   rangeEnd: string;       // For range mode (parsed from rangeString)
   maxId: string;          // For auto mode (stop at this ID)
   multiIdString: string;  // For multiId mode: comma-separated IDs and ranges like "100-110, 115, 120-125"
+  // v3.5: NEW - Range filter for gaps mode
+  gapsRangeStart: string; // For gaps mode: only process gaps starting from this ID (optional)
+  gapsRangeEnd: string;   // For gaps mode: only process gaps up to this ID (optional)
   // Legacy fields for backward compatibility
   rangeString?: string;
   nextId?: string;
@@ -97,6 +104,9 @@ export const DEFAULT_ID_SELECTION_PARAMS: IdSelectionParams = {
   rangeEnd: '',
   maxId: '',
   multiIdString: '',
+  // v3.5: NEW - Default to empty (no range restriction)
+  gapsRangeStart: '',
+  gapsRangeEnd: '',
   // Legacy
   rangeString: '',
   nextId: '',

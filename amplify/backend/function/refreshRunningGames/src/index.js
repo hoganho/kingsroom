@@ -3,49 +3,33 @@
  * REFRESH RUNNING GAMES - Scheduled Lambda
  * ===================================================================
  * 
- * VERSION: 2.2.0 - Added saveAfterFetch to complete the refresh cycle
+ * VERSION: 3.1.0 - Optimized refresh logic
  * 
  * CHANGELOG:
- * - v2.2.0: Added saveAfterFetch: true to scraper payload
- *           This ensures fetched data is actually saved to Game table
- *           and triggers syncActiveGame for dashboard updates
- *           FIXES: Games were being fetched but data was discarded
- * - v2.1.0: Added global auto-refresh toggle check
+ * - v3.1.0: OPTIMIZATION - More efficient refresh logic
+ *           - RUNNING/CLOCK_STOPPED: Refresh every 1 hour (was 30 mins)
+ *           - Pre-start games: Only refresh when gameStartDateTime has PASSED
+ *           - EventBridge schedule changed to rate(1 hour)
+ *           - Preserved manual invocation options for backward compatibility
+ * - v3.0.0: ARCHITECTURAL CHANGE - Query Game table directly instead of ActiveGame
  * 
- * PURPOSE:
- * Runs on a schedule to find stale ActiveGame records and trigger 
- * re-scraping to keep dashboard data fresh from the live source (not S3 cache).
+ * NEW REFRESH LOGIC (v3.1.0):
+ * - RUNNING/CLOCK_STOPPED: Every 1 hour (based on updatedAt staleness)
+ * - INITIATING/REGISTERING/SCHEDULED: ONLY when gameStartDateTime has passed
+ *   (no more periodic refreshes for games that haven't started yet)
  * 
- * THE COMPLETE REFRESH CYCLE (v2.2.0):
- * 1. refreshRunningGames finds stale ActiveGame records
- * 2. Invokes webScraperFunction with saveAfterFetch: true
- * 3. webScraperFunction fetches fresh HTML and parses it
- * 4. webScraperFunction auto-saves via save-handler -> gameDataEnricher -> saveGameFunction
- * 5. saveGameFunction calls syncActiveGame to update ActiveGame table
- * 6. ActiveGame.lastRefreshedAt is updated, preventing immediate re-refresh
- * 
- * REFRESH SCHEDULE (when enabled):
- * - RUNNING/CLOCK_STOPPED: Every 30 minutes (clock-aligned)
- * - INITIATING/REGISTERING/SCHEDULED (<24h): Every 1 hour
- * - INITIATING/REGISTERING/SCHEDULED (>24h): Every 12 hours
- * 
- * TRIGGER:
- * EventBridge scheduled rule: rate(15 minutes)
- * (Lambda runs every 15 mins but only refreshes games when their threshold is met)
- * 
- * ENVIRONMENT VARIABLES:
- * - API_KINGSROOM_GRAPHQLAPIIDOUTPUT
- * - API_KINGSROOM_ACTIVEGAMETABLE_NAME
- * - API_KINGSROOM_SCRAPERSETTINGSTABLE_NAME
- * - FUNCTION_WEBSCRAPERFUNCTION_NAME (e.g., webScraperFunction-dev)
- * - ENV
- * - REGION
+ * MANUAL INVOCATION OPTIONS:
+ * - forceRefresh: true - bypasses auto-refresh enabled check
+ * - maxGames: number - override MAX_REFRESH_PER_RUN
+ * - statuses: ['RUNNING', ...] - override which statuses to check (backward compat)
+ * - checkRunning: boolean - enable/disable RUNNING/CLOCK_STOPPED check
+ * - checkPreStart: boolean - enable/disable pre-start games check
  * 
  * ===================================================================
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, QueryCommand, UpdateCommand, ScanCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, QueryCommand, ScanCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 
 // Initialize clients
@@ -57,39 +41,35 @@ const lambdaClient = new LambdaClient({});
 // CONFIGURATION
 // ===================================================================
 
-// Global settings record ID (must match frontend)
 const GLOBAL_SETTINGS_ID = 'GLOBAL_SCRAPER_SETTINGS';
 
-// Default thresholds (can be overridden by ScraperSettings)
+// v3.1.0: Simplified thresholds - only RUNNING games use time-based staleness
 const DEFAULT_STALE_THRESHOLD_MINUTES = {
-    RUNNING: 30,
-    CLOCK_STOPPED: 30,
-    STARTING_SOON: 60,
-    UPCOMING: 720
+    RUNNING: 60,        // Changed from 30 to 60 minutes
+    CLOCK_STOPPED: 60   // Changed from 30 to 60 minutes
 };
 
-// 24 hours in milliseconds
-const STARTING_SOON_THRESHOLD_MS = 24 * 60 * 60 * 1000;
-
-// Maximum games to refresh per invocation (to avoid timeout)
 const MAX_REFRESH_PER_RUN = 50;
-
-// Batch size for Lambda invocations
 const BATCH_SIZE = 10;
+
+// Statuses to check
+const RUNNING_STATUSES = ['RUNNING', 'CLOCK_STOPPED'];
+const PRE_START_STATUSES = ['REGISTERING', 'INITIATING', 'SCHEDULED'];
+const ALL_ACTIVE_STATUSES = [...RUNNING_STATUSES, ...PRE_START_STATUSES];
 
 // ===================================================================
 // TABLE NAME HELPERS
 // ===================================================================
 
-const getActiveGameTableName = () => {
+const getGameTableName = () => {
     const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
     const env = process.env.ENV;
     
-    if (process.env.API_KINGSROOM_ACTIVEGAMETABLE_NAME) {
-        return process.env.API_KINGSROOM_ACTIVEGAMETABLE_NAME;
+    if (process.env.API_KINGSROOM_GAMETABLE_NAME) {
+        return process.env.API_KINGSROOM_GAMETABLE_NAME;
     }
     
-    return `ActiveGame-${apiId}-${env}`;
+    return `Game-${apiId}-${env}`;
 };
 
 const getScraperSettingsTableName = () => {
@@ -103,6 +83,17 @@ const getScraperSettingsTableName = () => {
     return `ScraperSettings-${apiId}-${env}`;
 };
 
+const getScrapeURLTableName = () => {
+    const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
+    const env = process.env.ENV;
+    
+    if (process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME) {
+        return process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME;
+    }
+    
+    return `ScrapeURL-${apiId}-${env}`;
+};
+
 const getScraperFunctionName = () => {
     return process.env.FUNCTION_WEBSCRAPERFUNCTION_NAME || `webScraperFunction-${process.env.ENV || 'dev'}`;
 };
@@ -111,10 +102,6 @@ const getScraperFunctionName = () => {
 // CHECK GLOBAL SETTINGS
 // ===================================================================
 
-/**
- * Check if auto-refresh is enabled in ScraperSettings
- * Returns { enabled: boolean, settings: object | null }
- */
 async function checkAutoRefreshEnabled() {
     try {
         const result = await docClient.send(new GetCommand({
@@ -129,109 +116,150 @@ async function checkAutoRefreshEnabled() {
             };
         }
 
-        // No settings found - default to enabled
         console.log('[REFRESH] No ScraperSettings found, defaulting to enabled');
         return { enabled: true, settings: null };
 
     } catch (error) {
-        // If table doesn't exist or other error, default to enabled
-        // This ensures the system works before ScraperSettings is set up
         console.warn('[REFRESH] Could not check ScraperSettings:', error.message);
-        console.log('[REFRESH] Defaulting to enabled');
         return { enabled: true, settings: null };
     }
 }
 
 /**
  * Get refresh thresholds from settings or use defaults
+ * v3.1.0: Only RUNNING/CLOCK_STOPPED use time-based thresholds now
  */
 function getThresholdsFromSettings(settings) {
     if (!settings) return DEFAULT_STALE_THRESHOLD_MINUTES;
 
     return {
         RUNNING: settings.runningRefreshIntervalMinutes || DEFAULT_STALE_THRESHOLD_MINUTES.RUNNING,
-        CLOCK_STOPPED: settings.runningRefreshIntervalMinutes || DEFAULT_STALE_THRESHOLD_MINUTES.CLOCK_STOPPED,
-        STARTING_SOON: settings.startingSoonRefreshIntervalMinutes || DEFAULT_STALE_THRESHOLD_MINUTES.STARTING_SOON,
-        UPCOMING: settings.upcomingRefreshIntervalMinutes || DEFAULT_STALE_THRESHOLD_MINUTES.UPCOMING
+        CLOCK_STOPPED: settings.runningRefreshIntervalMinutes || DEFAULT_STALE_THRESHOLD_MINUTES.CLOCK_STOPPED
     };
 }
 
 // ===================================================================
-// STALENESS HELPERS
+// DO NOT SCRAPE CHECK
+// ===================================================================
+
+async function checkDoNotScrape(sourceUrl) {
+    if (!sourceUrl) return false;
+    
+    try {
+        const result = await docClient.send(new QueryCommand({
+            TableName: getScrapeURLTableName(),
+            IndexName: 'byURL',
+            KeyConditionExpression: '#url = :url',
+            ExpressionAttributeNames: { '#url': 'url' },
+            ExpressionAttributeValues: { ':url': sourceUrl },
+            ProjectionExpression: 'doNotScrape, doNotScrapeReason',
+            Limit: 1
+        }));
+
+        if (result.Items && result.Items.length > 0) {
+            const scrapeURL = result.Items[0];
+            if (scrapeURL.doNotScrape === true) {
+                console.log(`[REFRESH] ⏭️  Skipping URL (doNotScrape=true): ${sourceUrl}`);
+                if (scrapeURL.doNotScrapeReason) {
+                    console.log(`[REFRESH]    Reason: ${scrapeURL.doNotScrapeReason}`);
+                }
+                return true;
+            }
+        }
+        
+        return false;
+    } catch (error) {
+        console.warn(`[REFRESH] Could not check doNotScrape for ${sourceUrl}:`, error.message);
+        return false;
+    }
+}
+
+async function batchCheckDoNotScrape(games) {
+    const doNotScrapeUrls = new Set();
+    const uniqueUrls = [...new Set(games.map(g => g.sourceUrl).filter(Boolean))];
+    
+    if (uniqueUrls.length === 0) return doNotScrapeUrls;
+    
+    console.log(`[REFRESH] Checking doNotScrape for ${uniqueUrls.length} unique URLs...`);
+    
+    const checkBatchSize = 10;
+    for (let i = 0; i < uniqueUrls.length; i += checkBatchSize) {
+        const batch = uniqueUrls.slice(i, i + checkBatchSize);
+        const checks = await Promise.all(batch.map(async (url) => {
+            const shouldSkip = await checkDoNotScrape(url);
+            return { url, shouldSkip };
+        }));
+        
+        checks.forEach(({ url, shouldSkip }) => {
+            if (shouldSkip) {
+                doNotScrapeUrls.add(url);
+            }
+        });
+    }
+    
+    if (doNotScrapeUrls.size > 0) {
+        console.log(`[REFRESH] Found ${doNotScrapeUrls.size} URLs marked as doNotScrape`);
+    }
+    
+    return doNotScrapeUrls;
+}
+
+// ===================================================================
+// v3.1.0: STALENESS & REFRESH LOGIC
 // ===================================================================
 
 /**
- * Determine the appropriate stale threshold based on game status and start time
+ * Check if a RUNNING/CLOCK_STOPPED game is stale (based on updatedAt)
  */
-const getStaleThreshold = (game, thresholds) => {
-    const status = game.gameStatus;
+const isRunningGameStale = (game, now, thresholds) => {
+    const thresholdMinutes = thresholds[game.gameStatus] || thresholds.RUNNING;
+    const lastUpdate = new Date(game.updatedAt || game.createdAt);
+    const minutesSinceUpdate = (now - lastUpdate) / (1000 * 60);
     
-    // Running and clock stopped games
-    if (status === 'RUNNING') {
-        return thresholds.RUNNING;
-    }
-    if (status === 'CLOCK_STOPPED') {
-        return thresholds.CLOCK_STOPPED;
-    }
-    
-    // For pre-start statuses, check if it's starting soon (<24h) or upcoming (>24h)
-    if (['INITIATING', 'REGISTERING', 'SCHEDULED'].includes(status)) {
-        const startTime = new Date(game.gameStartDateTime);
-        const now = new Date();
-        const timeUntilStart = startTime.getTime() - now.getTime();
-        
-        if (timeUntilStart <= 0) {
-            return thresholds.STARTING_SOON;
-        } else if (timeUntilStart <= STARTING_SOON_THRESHOLD_MS) {
-            return thresholds.STARTING_SOON;
-        } else {
-            return thresholds.UPCOMING;
-        }
-    }
-    
-    // Fallback
-    return thresholds.STARTING_SOON;
+    return {
+        isStale: minutesSinceUpdate >= thresholdMinutes,
+        minutesSinceUpdate: Math.round(minutesSinceUpdate),
+        thresholdMinutes
+    };
 };
 
 /**
- * Categorize a game for reporting purposes
+ * v3.1.0: Check if a pre-start game's start time has passed
+ * Only refresh games whose gameStartDateTime is in the past
+ */
+const hasGameStartTimePassed = (game, now) => {
+    if (!game.gameStartDateTime) {
+        // If no start time, assume it might have started
+        console.log(`[REFRESH] Game ${game.name} has no gameStartDateTime, including for refresh`);
+        return true;
+    }
+    
+    const startTime = new Date(game.gameStartDateTime);
+    const hasPassed = now >= startTime;
+    
+    if (hasPassed) {
+        const minutesPastStart = Math.round((now - startTime) / (1000 * 60));
+        console.log(`[REFRESH] Game "${game.name}" start time passed ${minutesPastStart} mins ago`);
+    }
+    
+    return hasPassed;
+};
+
+/**
+ * Categorize a game for reporting purposes (preserved from v3.0.0)
  */
 const categorizeGame = (game) => {
     const status = game.gameStatus;
     
-    if (status === 'RUNNING' || status === 'CLOCK_STOPPED') {
+    if (RUNNING_STATUSES.includes(status)) {
         return 'RUNNING';
     }
     
-    if (['INITIATING', 'REGISTERING', 'SCHEDULED'].includes(status)) {
-        const startTime = new Date(game.gameStartDateTime);
-        const now = new Date();
-        const timeUntilStart = startTime.getTime() - now.getTime();
-        
-        if (timeUntilStart <= STARTING_SOON_THRESHOLD_MS) {
-            return 'STARTING_SOON';
-        } else {
-            return 'UPCOMING';
-        }
+    if (PRE_START_STATUSES.includes(status)) {
+        return 'START_TIME_PASSED';
     }
     
     return status;
-};
-
-/**
- * Check if a game is stale based on its status, start time, and last refresh time
- */
-const isStale = (game, now, thresholds) => {
-    const thresholdMinutes = getStaleThreshold(game, thresholds);
-    const lastRefresh = new Date(game.lastRefreshedAt || game.activatedAt || game.createdAt);
-    const minutesSinceRefresh = (now - lastRefresh) / (1000 * 60);
-    
-    return {
-        isStale: minutesSinceRefresh >= thresholdMinutes,
-        minutesSinceRefresh: Math.round(minutesSinceRefresh),
-        thresholdMinutes,
-        category: categorizeGame(game)
-    };
 };
 
 // ===================================================================
@@ -239,26 +267,41 @@ const isStale = (game, now, thresholds) => {
 // ===================================================================
 
 /**
- * Query all games in active statuses
+ * Query Game table by status using byStatus GSI
  */
-async function findActiveGames() {
+async function queryGamesByStatus(statusesToCheck) {
     const allGames = [];
-    const tableName = getActiveGameTableName();
+    const gameTableName = getGameTableName();
     
-    const activeStatuses = ['RUNNING', 'REGISTERING', 'CLOCK_STOPPED', 'INITIATING', 'SCHEDULED'];
+    console.log(`[REFRESH] Querying Game table: ${gameTableName}`);
     
-    for (const status of activeStatuses) {
+    for (const status of statusesToCheck) {
         try {
             let lastEvaluatedKey = null;
             
             do {
                 const params = {
-                    TableName: tableName,
+                    TableName: gameTableName,
                     IndexName: 'byStatus',
                     KeyConditionExpression: 'gameStatus = :status',
-                    ExpressionAttributeValues: { ':status': status },
-                    ProjectionExpression: 'id, gameId, gameStatus, sourceUrl, lastRefreshedAt, activatedAt, createdAt, entityId, #name, gameStartDateTime, registrationStatus',
+                    ExpressionAttributeValues: { 
+                        ':status': status,
+                        ':false': false
+                    },
+                    ProjectionExpression: [
+                        'id',
+                        'gameStatus',
+                        'sourceUrl',
+                        'updatedAt',
+                        'createdAt',
+                        'entityId',
+                        '#name',
+                        'gameStartDateTime',
+                        'registrationStatus',
+                        'isStatusDataStale'
+                    ].join(', '),
                     ExpressionAttributeNames: { '#name': 'name' },
+                    FilterExpression: 'attribute_not_exists(isStatusDataStale) OR isStatusDataStale = :false',
                     Limit: 100
                 };
                 
@@ -269,19 +312,24 @@ async function findActiveGames() {
                 const result = await docClient.send(new QueryCommand(params));
                 
                 if (result.Items) {
-                    allGames.push(...result.Items);
+                    const mapped = result.Items.map(game => ({
+                        ...game,
+                        gameId: game.id
+                    }));
+                    allGames.push(...mapped);
                 }
                 
                 lastEvaluatedKey = result.LastEvaluatedKey;
                 
             } while (lastEvaluatedKey);
             
-            console.log(`[REFRESH] Found ${allGames.filter(g => g.gameStatus === status).length} games with status ${status}`);
+            const countForStatus = allGames.filter(g => g.gameStatus === status).length;
+            console.log(`[REFRESH] Found ${countForStatus} games with status ${status}`);
             
         } catch (error) {
             if (error.name === 'ValidationException' && error.message.includes('byStatus')) {
-                console.warn(`[REFRESH] byStatus GSI not found, falling back to scan for ${status}`);
-                await findActiveGamesByScan(tableName, status, allGames);
+                console.warn(`[REFRESH] byStatus GSI not found, falling back to scan`);
+                await findGamesByScan(gameTableName, status, allGames);
             } else {
                 console.error(`[REFRESH] Error querying ${status} games:`, error.message);
             }
@@ -291,18 +339,18 @@ async function findActiveGames() {
     return allGames;
 }
 
-/**
- * Fallback: Scan table if GSI not available
- */
-async function findActiveGamesByScan(tableName, status, accumulator) {
+async function findGamesByScan(tableName, status, accumulator) {
     let lastEvaluatedKey = null;
     
     do {
         const params = {
             TableName: tableName,
-            FilterExpression: 'gameStatus = :status',
-            ExpressionAttributeValues: { ':status': status },
-            ProjectionExpression: 'id, gameId, gameStatus, sourceUrl, lastRefreshedAt, activatedAt, createdAt, entityId, #name, gameStartDateTime, registrationStatus',
+            FilterExpression: 'gameStatus = :status AND (attribute_not_exists(isStatusDataStale) OR isStatusDataStale = :false)',
+            ExpressionAttributeValues: { 
+                ':status': status,
+                ':false': false
+            },
+            ProjectionExpression: 'id, gameStatus, sourceUrl, updatedAt, createdAt, entityId, #name, gameStartDateTime, registrationStatus',
             ExpressionAttributeNames: { '#name': 'name' }
         };
         
@@ -313,7 +361,11 @@ async function findActiveGamesByScan(tableName, status, accumulator) {
         const result = await docClient.send(new ScanCommand(params));
         
         if (result.Items) {
-            accumulator.push(...result.Items);
+            const mapped = result.Items.map(game => ({
+                ...game,
+                gameId: game.id
+            }));
+            accumulator.push(...mapped);
         }
         
         lastEvaluatedKey = result.LastEvaluatedKey;
@@ -321,101 +373,61 @@ async function findActiveGamesByScan(tableName, status, accumulator) {
     } while (lastEvaluatedKey);
 }
 
-/**
- * Trigger the scraper Lambda for a specific game
- * 
- * v2.2.0: Now includes saveAfterFetch: true to ensure the fetched data
- * is saved to the Game table and syncActiveGame is triggered.
- */
 async function triggerScraper(game) {
     if (!game.sourceUrl) {
         console.log(`[REFRESH] Skipping game ${game.gameId} - no sourceUrl`);
-        return false;
+        return { triggered: false, reason: 'no_source_url' };
     }
     
-    // ═══════════════════════════════════════════════════════════════════════
-    // v2.2.0: CRITICAL FIX - Added saveAfterFetch: true
-    // 
-    // Previously, fetchTournamentData only fetched and parsed data without saving.
-    // The data was discarded since InvocationType is 'Event' (fire-and-forget).
-    // 
-    // With saveAfterFetch: true, the fetch-handler will automatically invoke
-    // save-handler after a successful fetch, which:
-    // 1. Calls gameDataEnricher to enrich the data
-    // 2. Calls saveGameFunction to persist to Game table
-    // 3. saveGameFunction calls syncActiveGame to update ActiveGame table
-    // 4. ActiveGame.lastRefreshedAt is updated
-    // 
-    // This completes the refresh cycle and prevents immediate re-refresh.
-    // ═══════════════════════════════════════════════════════════════════════
     const scraperPayload = {
         operation: 'fetchTournamentData',
         url: game.sourceUrl,
         entityId: game.entityId,
-        forceRefresh: true,          // Bypasses S3 cache for fresh data
-        saveAfterFetch: true,        // v2.2.0: AUTO-SAVE after fetch!
+        forceRefresh: true,
+        saveAfterFetch: true,
         scraperJobId: `REFRESH_${game.gameId}_${Date.now()}`
     };
     
     try {
         await lambdaClient.send(new InvokeCommand({
             FunctionName: getScraperFunctionName(),
-            InvocationType: 'Event',  // Async - fire and forget
+            InvocationType: 'Event',
             Payload: JSON.stringify(scraperPayload)
         }));
         
-        console.log(`[REFRESH] ✅ Triggered scraper for: ${game.name} (${game.gameStatus}) [saveAfterFetch=true]`);
-        return true;
+        console.log(`[REFRESH] ✅ Triggered scraper for: ${game.name} (${game.gameStatus})`);
+        return { triggered: true };
         
     } catch (error) {
         console.error(`[REFRESH] ❌ Failed to trigger scraper for ${game.gameId}:`, error.message);
-        return false;
+        return { triggered: false, reason: 'lambda_error', error: error.message };
     }
 }
 
-/**
- * Update ActiveGame record to mark refresh attempt
- * Note: The actual lastRefreshedAt update happens in syncActiveGame
- * after the save is complete. This just tracks when we triggered the scraper.
- */
-async function markRefreshAttempt(activeGameId) {
-    const now = new Date().toISOString();
-    
-    try {
-        await docClient.send(new UpdateCommand({
-            TableName: getActiveGameTableName(),
-            Key: { id: activeGameId },
-            UpdateExpression: 'SET lastRefreshAttemptAt = :now, refreshAttemptCount = if_not_exists(refreshAttemptCount, :zero) + :one',
-            ExpressionAttributeValues: {
-                ':now': now,
-                ':zero': 0,
-                ':one': 1
-            }
-        }));
-    } catch (error) {
-        console.warn(`[REFRESH] Could not mark refresh attempt for ${activeGameId}:`, error.message);
-    }
-}
-
-/**
- * Process a batch of stale games
- */
-async function processBatch(games, results) {
+async function processBatch(games, results, doNotScrapeUrls) {
     const promises = games.map(async (game) => {
         try {
-            const triggered = await triggerScraper(game);
-            if (triggered) {
-                results.refreshed++;
+            if (game.sourceUrl && doNotScrapeUrls.has(game.sourceUrl)) {
+                console.log(`[REFRESH] ⏭️  Skipping ${game.name} - doNotScrape=true`);
+                results.skippedDoNotScrape++;
+                return;
+            }
+            
+            const triggerResult = await triggerScraper(game);
+            results.gamesRefreshed++;
+            
+            if (triggerResult.triggered) {
+                results.gamesUpdated++;
                 results.byCategory[game.category] = (results.byCategory[game.category] || 0) + 1;
-                await markRefreshAttempt(game.id);
+            } else {
+                if (triggerResult.reason === 'no_source_url') {
+                    results.skippedNoUrl++;
+                }
             }
         } catch (error) {
             console.error(`[REFRESH] Error processing game ${game.gameId}:`, error.message);
-            results.errors.push({
-                gameId: game.gameId,
-                name: game.name,
-                error: error.message
-            });
+            results.gamesFailed++;
+            results.errors.push(`${game.name || game.gameId}: ${error.message}`);
         }
     });
     
@@ -429,17 +441,40 @@ async function processBatch(games, results) {
 exports.handler = async (event) => {
     const startTime = Date.now();
     console.log('[REFRESH] ========================================');
-    console.log('[REFRESH] Starting scheduled refresh check v2.2.0');
-    console.log('[REFRESH] Key change: saveAfterFetch=true ensures data is saved');
+    console.log('[REFRESH] Starting scheduled refresh check v3.1.0');
+    console.log('[REFRESH] Optimization: RUNNING every 1h, pre-start only when gameStartDateTime passed');
+    
+    const input = event?.arguments?.input || event || {};
+    
+    console.log('[REFRESH] Received input:', JSON.stringify(input, null, 2));
     
     // ================================================================
-    // STEP 0: Check if auto-refresh is enabled
+    // PARSE OPTIONS - Support both old and new formats
     // ================================================================
+    // Old format (backward compat): { statuses: ['RUNNING', ...] }
+    // New format: { checkRunning: true, checkPreStart: false }
+    const options = {
+        forceRefresh: input?.forceRefresh === true,
+        maxGames: input?.maxGames || MAX_REFRESH_PER_RUN,
+        // Backward compatibility: if statuses is provided, use it
+        statuses: input?.statuses || null,
+        // New options (ignored if statuses is provided)
+        checkRunning: input?.checkRunning !== false,
+        checkPreStart: input?.checkPreStart !== false
+    };
+    
+    console.log('[REFRESH] Options:', options);
+    
+    if (options.forceRefresh) {
+        console.log('[REFRESH] 🔧 Manual invocation with forceRefresh=true');
+    }
+    
+    // Check if auto-refresh is enabled
     const { enabled: autoRefreshEnabled, settings: scraperSettings } = await checkAutoRefreshEnabled();
     
-    if (!autoRefreshEnabled) {
+    if (!autoRefreshEnabled && !options.forceRefresh) {
         console.log('[REFRESH] ⏸️  Auto-refresh is DISABLED in ScraperSettings');
-        console.log('[REFRESH] Exiting without processing any games');
+        console.log('[REFRESH] 💡 Tip: Use { "forceRefresh": true } to bypass this check');
         
         if (scraperSettings?.disabledReason) {
             console.log(`[REFRESH] Reason: ${scraperSettings.disabledReason}`);
@@ -447,143 +482,207 @@ exports.handler = async (event) => {
         
         return {
             success: true,
-            autoRefreshEnabled: false,
-            message: 'Auto-refresh is disabled. No games processed.',
-            disabledReason: scraperSettings?.disabledReason || null,
-            durationMs: Date.now() - startTime
+            gamesRefreshed: 0,
+            gamesUpdated: 0,
+            gamesFailed: 0,
+            errors: [],
+            skippedReason: 'AUTO_REFRESH_DISABLED',
+            executionTimeMs: Date.now() - startTime
         };
+    }
+    
+    if (!autoRefreshEnabled && options.forceRefresh) {
+        console.log('[REFRESH] ⚠️  Auto-refresh is DISABLED but forceRefresh=true, proceeding...');
     }
     
     console.log('[REFRESH] ✅ Auto-refresh is ENABLED');
     
-    // Get thresholds from settings (or use defaults)
     const thresholds = getThresholdsFromSettings(scraperSettings);
+    const now = new Date();
+    
+    // ================================================================
+    // DETERMINE WHICH STATUSES TO CHECK
+    // ================================================================
+    let runningStatusesToCheck = [];
+    let preStartStatusesToCheck = [];
+    
+    if (options.statuses) {
+        // Backward compatibility: use provided statuses array
+        console.log('[REFRESH] Using provided statuses array (backward compat mode)');
+        runningStatusesToCheck = options.statuses.filter(s => RUNNING_STATUSES.includes(s));
+        preStartStatusesToCheck = options.statuses.filter(s => PRE_START_STATUSES.includes(s));
+    } else {
+        // New mode: use checkRunning/checkPreStart flags
+        if (options.checkRunning) {
+            runningStatusesToCheck = RUNNING_STATUSES;
+        }
+        if (options.checkPreStart) {
+            preStartStatusesToCheck = PRE_START_STATUSES;
+        }
+    }
     
     console.log('[REFRESH] Config:', {
-        tableName: getActiveGameTableName(),
+        gameTableName: getGameTableName(),
         scraperFunction: getScraperFunctionName(),
+        maxGames: options.maxGames,
+        runningStatuses: runningStatusesToCheck,
+        preStartStatuses: preStartStatusesToCheck,
         thresholds: {
-            'RUNNING/CLOCK_STOPPED': `${thresholds.RUNNING} mins`,
-            'STARTING_SOON (<24h)': `${thresholds.STARTING_SOON} mins`,
-            'UPCOMING (>24h)': `${thresholds.UPCOMING} mins`
+            'RUNNING/CLOCK_STOPPED': `${thresholds.RUNNING} mins`
         }
     });
     
-    const now = new Date();
     const results = {
-        checked: 0,
-        stale: 0,
-        refreshed: 0,
-        skipped: 0,
+        gamesRefreshed: 0,
+        gamesUpdated: 0,
+        gamesFailed: 0,
         errors: [],
+        checked: { running: 0, preStart: 0, total: 0 },
+        needsRefresh: { running: 0, preStart: 0 },
+        skippedDoNotScrape: 0,
+        skippedNoUrl: 0,
+        skippedLimit: 0,
         byStatus: {},
         byCategory: {}
     };
     
+    const gamesToRefresh = [];
+    
     try {
-        // Step 1: Find all active games
-        const activeGames = await findActiveGames();
-        results.checked = activeGames.length;
-        console.log(`[REFRESH] Found ${activeGames.length} total active games`);
+        // ================================================================
+        // STEP 1: Find and filter RUNNING/CLOCK_STOPPED games (stale check)
+        // ================================================================
+        if (runningStatusesToCheck.length > 0) {
+            console.log('[REFRESH] --- Checking RUNNING/CLOCK_STOPPED games ---');
+            const runningGames = await queryGamesByStatus(runningStatusesToCheck);
+            results.checked.running = runningGames.length;
+            
+            for (const game of runningGames) {
+                const staleness = isRunningGameStale(game, now, thresholds);
+                
+                if (!results.byStatus[game.gameStatus]) {
+                    results.byStatus[game.gameStatus] = { total: 0, needsRefresh: 0, refreshed: 0 };
+                }
+                results.byStatus[game.gameStatus].total++;
+                
+                if (staleness.isStale) {
+                    gamesToRefresh.push({
+                        ...game,
+                        category: categorizeGame(game),
+                        minutesSinceUpdate: staleness.minutesSinceUpdate,
+                        thresholdMinutes: staleness.thresholdMinutes,
+                        priority: 1  // Highest priority
+                    });
+                    results.byStatus[game.gameStatus].needsRefresh++;
+                    results.needsRefresh.running++;
+                }
+            }
+            
+            console.log(`[REFRESH] RUNNING/CLOCK_STOPPED: ${results.needsRefresh.running}/${results.checked.running} need refresh`);
+        }
         
-        if (activeGames.length === 0) {
-            console.log('[REFRESH] No active games found, exiting');
+        // ================================================================
+        // STEP 2: Find pre-start games where gameStartDateTime has passed
+        // ================================================================
+        if (preStartStatusesToCheck.length > 0) {
+            console.log('[REFRESH] --- Checking pre-start games (start time passed) ---');
+            const preStartGames = await queryGamesByStatus(preStartStatusesToCheck);
+            results.checked.preStart = preStartGames.length;
+            
+            for (const game of preStartGames) {
+                if (!results.byStatus[game.gameStatus]) {
+                    results.byStatus[game.gameStatus] = { total: 0, needsRefresh: 0, refreshed: 0 };
+                }
+                results.byStatus[game.gameStatus].total++;
+                
+                if (hasGameStartTimePassed(game, now)) {
+                    gamesToRefresh.push({
+                        ...game,
+                        category: categorizeGame(game),
+                        priority: 2  // Second priority after running games
+                    });
+                    results.byStatus[game.gameStatus].needsRefresh++;
+                    results.needsRefresh.preStart++;
+                }
+            }
+            
+            console.log(`[REFRESH] Pre-start (time passed): ${results.needsRefresh.preStart}/${results.checked.preStart} need refresh`);
+        }
+        
+        results.checked.total = results.checked.running + results.checked.preStart;
+        
+        // ================================================================
+        // STEP 3: Check doNotScrape URLs
+        // ================================================================
+        if (gamesToRefresh.length === 0) {
+            console.log('[REFRESH] No games need refresh, exiting');
             return { 
                 success: true, 
-                autoRefreshEnabled: true,
-                ...results, 
-                durationMs: Date.now() - startTime 
+                gamesRefreshed: 0,
+                gamesUpdated: 0,
+                gamesFailed: 0,
+                errors: [],
+                checked: results.checked.total,
+                executionTimeMs: Date.now() - startTime 
             };
         }
         
-        // Step 2: Filter to stale games
-        const staleGames = [];
+        const doNotScrapeUrls = await batchCheckDoNotScrape(gamesToRefresh);
         
-        for (const game of activeGames) {
-            const staleness = isStale(game, now, thresholds);
-            
-            if (!results.byStatus[game.gameStatus]) {
-                results.byStatus[game.gameStatus] = { total: 0, stale: 0, refreshed: 0 };
+        // ================================================================
+        // STEP 4: Sort by priority and limit
+        // ================================================================
+        gamesToRefresh.sort((a, b) => {
+            // First by priority (1 = RUNNING, 2 = pre-start)
+            if (a.priority !== b.priority) {
+                return a.priority - b.priority;
             }
-            results.byStatus[game.gameStatus].total++;
-            
-            if (staleness.isStale) {
-                staleGames.push({
-                    ...game,
-                    minutesSinceRefresh: staleness.minutesSinceRefresh,
-                    thresholdMinutes: staleness.thresholdMinutes,
-                    category: staleness.category
-                });
-                results.byStatus[game.gameStatus].stale++;
-            }
-        }
-        
-        results.stale = staleGames.length;
-        console.log(`[REFRESH] ${staleGames.length} games are stale and need refresh`);
-        
-        // Log breakdown by category
-        const categoryBreakdown = {};
-        staleGames.forEach(g => {
-            categoryBreakdown[g.category] = (categoryBreakdown[g.category] || 0) + 1;
-        });
-        console.log('[REFRESH] Stale by category:', categoryBreakdown);
-        
-        if (staleGames.length === 0) {
-            console.log('[REFRESH] No stale games, exiting');
-            return { 
-                success: true, 
-                autoRefreshEnabled: true,
-                ...results, 
-                durationMs: Date.now() - startTime 
-            };
-        }
-        
-        // Step 3: Prioritize games
-        const priorityOrder = ['RUNNING', 'CLOCK_STOPPED', 'STARTING_SOON', 'UPCOMING'];
-        staleGames.sort((a, b) => {
-            const aPriority = priorityOrder.indexOf(a.category);
-            const bPriority = priorityOrder.indexOf(b.category);
-            
-            if (aPriority !== bPriority) {
-                return aPriority - bPriority;
-            }
-            
-            return b.minutesSinceRefresh - a.minutesSinceRefresh;
+            // Then by staleness (for running) or how far past start time
+            return (b.minutesSinceUpdate || 0) - (a.minutesSinceUpdate || 0);
         });
         
-        const gamesToRefresh = staleGames.slice(0, MAX_REFRESH_PER_RUN);
+        const limitedGames = gamesToRefresh.slice(0, options.maxGames);
         
-        if (staleGames.length > MAX_REFRESH_PER_RUN) {
-            results.skipped = staleGames.length - MAX_REFRESH_PER_RUN;
-            console.log(`[REFRESH] Limiting to ${MAX_REFRESH_PER_RUN} games, skipping ${results.skipped}`);
+        if (gamesToRefresh.length > options.maxGames) {
+            results.skippedLimit = gamesToRefresh.length - options.maxGames;
+            console.log(`[REFRESH] Limiting to ${options.maxGames} games, skipping ${results.skippedLimit}`);
         }
         
-        // Step 4: Process in batches
-        console.log(`[REFRESH] Processing ${gamesToRefresh.length} games in batches of ${BATCH_SIZE}`);
+        // ================================================================
+        // STEP 5: Process in batches
+        // ================================================================
+        console.log(`[REFRESH] Processing ${limitedGames.length} games in batches of ${BATCH_SIZE}`);
         
-        for (let i = 0; i < gamesToRefresh.length; i += BATCH_SIZE) {
-            const batch = gamesToRefresh.slice(i, i + BATCH_SIZE);
-            console.log(`[REFRESH] Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(gamesToRefresh.length / BATCH_SIZE)}`);
-            await processBatch(batch, results);
+        for (let i = 0; i < limitedGames.length; i += BATCH_SIZE) {
+            const batch = limitedGames.slice(i, i + BATCH_SIZE);
+            console.log(`[REFRESH] Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(limitedGames.length / BATCH_SIZE)}`);
+            await processBatch(batch, results, doNotScrapeUrls);
         }
         
-        // Update status counters
-        for (const game of gamesToRefresh) {
-            if (!results.errors.find(e => e.gameId === game.gameId)) {
-                results.byStatus[game.gameStatus].refreshed++;
+        // Update status counters for refreshed games
+        for (const game of limitedGames) {
+            if (!results.errors.find(e => e.includes(game.gameId))) {
+                if (results.byStatus[game.gameStatus]) {
+                    results.byStatus[game.gameStatus].refreshed++;
+                }
             }
         }
         
-        // Step 5: Summary
+        // ================================================================
+        // STEP 6: Summary
+        // ================================================================
         const duration = Date.now() - startTime;
         console.log('[REFRESH] ========================================');
         console.log('[REFRESH] Completed in', duration, 'ms');
         console.log('[REFRESH] Summary:', {
-            checked: results.checked,
-            stale: results.stale,
-            refreshed: results.refreshed,
-            skipped: results.skipped,
-            errors: results.errors.length
+            checked: results.checked.total,
+            needsRefresh: results.needsRefresh,
+            gamesRefreshed: results.gamesRefreshed,
+            gamesUpdated: results.gamesUpdated,
+            gamesFailed: results.gamesFailed,
+            skippedDoNotScrape: results.skippedDoNotScrape,
+            skippedNoUrl: results.skippedNoUrl,
+            skippedLimit: results.skippedLimit
         });
         console.log('[REFRESH] By status:', results.byStatus);
         console.log('[REFRESH] By category:', results.byCategory);
@@ -594,19 +693,24 @@ exports.handler = async (event) => {
         
         return {
             success: true,
-            autoRefreshEnabled: true,
-            ...results,
-            durationMs: duration
+            gamesRefreshed: results.gamesRefreshed,
+            gamesUpdated: results.gamesUpdated,
+            gamesFailed: results.gamesFailed,
+            errors: results.errors,
+            checked: results.checked.total,
+            executionTimeMs: duration
         };
         
     } catch (error) {
         console.error('[REFRESH] Fatal error:', error);
+        
         return {
             success: false,
-            autoRefreshEnabled: true,
-            error: error.message,
-            ...results,
-            durationMs: Date.now() - startTime
+            gamesRefreshed: results.gamesRefreshed,
+            gamesUpdated: results.gamesUpdated,
+            gamesFailed: results.gamesFailed + 1,
+            errors: [...results.errors, `Fatal error: ${error.message}`],
+            executionTimeMs: Date.now() - startTime
         };
     }
 };

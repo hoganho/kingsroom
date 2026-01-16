@@ -1,5 +1,5 @@
 // src/pages/HomePage.tsx
-// VERSION: 3.1.0 - Fixed: Manual refresh triggers Lambda, dual status indicators, proper state management
+// VERSION: 3.2.0 - Added: GameCard navigation to GameDetails page
 //
 // ARCHITECTURE:
 // - ActiveGame table: Fast queries for RUNNING, REGISTERING, CLOCK_STOPPED, INITIATING, SCHEDULED games
@@ -23,6 +23,7 @@
 // - Dual status indicators (Auto-refresh + Live subscription)
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowPathIcon,
   CalendarIcon,
@@ -699,6 +700,7 @@ interface GameCardProps {
 }
 
 const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
+  const navigate = useNavigate();
   const { relative: relativeDate, absolute: absoluteDate } = formatDualDateTime(game.gameStartDateTime);
   
   // For finished games, also show finish date
@@ -779,8 +781,13 @@ const GameCard: React.FC<GameCardProps> = ({ game, variant }) => {
   // Registration status (running games)
   const registrationStatus = 'registrationStatus' in game ? game.registrationStatus : null;
 
+  // Get the actual Game table ID (gameId) for navigation, fall back to id for direct Game queries
+  const navigateToGameId = ('gameId' in game && game.gameId) ? game.gameId : game.id;
+
   return (
-    <div className={cx(
+    <div 
+      onClick={() => navigate(`/games/details/${navigateToGameId}`)}
+      className={cx(
       "flex-shrink-0 w-[320px] sm:w-[340px] bg-white dark:bg-gray-950 rounded-xl shadow-sm border overflow-hidden transition-all self-start cursor-pointer group",
       variant === 'running' && "border-green-200 dark:border-green-800 hover:border-green-300",
       variant === 'clockStopped' && "border-yellow-200 dark:border-yellow-800 hover:border-yellow-300",
@@ -1450,9 +1457,9 @@ export const HomePage: React.FC = () => {
   const fetchFinishedGames = useCallback(async (): Promise<FinishedGameData[]> => {
     if (entityIds.length === 0) return [];
 
-    // Calculate 7 days ago for filtering
+    // Calculate 7 days ago for filtering (changed to 8 for more coverage)
     const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 8);
 
     try {
       // Try RecentlyFinishedGame table first
@@ -1506,11 +1513,11 @@ export const HomePage: React.FC = () => {
       }
 
       // Sort by finished time descending (most recent first)
-      return recentFinished.sort((a, b) => {
-        const aFinish = a.finishedAt || a.gameEndDateTime || a.gameStartDateTime;
-        const bFinish = b.finishedAt || b.gameEndDateTime || b.gameStartDateTime;
-        return new Date(bFinish).getTime() - new Date(aFinish).getTime();
-      });
+        return recentFinished.sort((a, b) => {
+            const aFinish = a.finishedAt || a.gameEndDateTime || a.gameStartDateTime;
+            const bFinish = b.finishedAt || b.gameEndDateTime || b.gameStartDateTime;
+            return new Date(aFinish).getTime() - new Date(bFinish).getTime();  // Swapped a and b
+        });
     } catch (err) {
       console.error('[HomePage] Error fetching finished games:', err);
       throw err;
@@ -1588,10 +1595,11 @@ export const HomePage: React.FC = () => {
         const refreshResult = await client.graphql({
           query: refreshRunningGamesMutation,
           variables: { 
-            input: { 
+            input: {
+              forceRefresh: true,
               entityId: entityIds.length === 1 ? entityIds[0] : null,
               maxGames: 50,
-              olderThanMinutes: 0  // Refresh all, not just stale ones
+              olderThanMinutes: 0
             } 
           }
         }) as GraphQLResult<RefreshRunningGamesData>;

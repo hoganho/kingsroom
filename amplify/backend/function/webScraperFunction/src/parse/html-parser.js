@@ -8,7 +8,15 @@
  * 
  * Extracted from: scraperStrategies.js
  * 
- * UPDATED: v2.3.0
+ * UPDATED: v2.4.0
+ * - CRITICAL FIX: Added CAPTCHA/bot block detection
+ *   - ScraperAPI can return security challenge pages instead of actual content
+ *   - Detects SiteGround sgcaptcha, Cloudflare challenges, and similar
+ *   - These return scrapeStatus='BOT_BLOCKED' with specific blockType
+ *   - Prevents parser from treating challenge pages as "Unnamed Tournament"
+ *   - This was causing STOPPED_ERROR when page 819 returned sgcaptcha redirect
+ * 
+ * v2.3.0:
  * - REFACTORED: NOT_FOUND handling
  *   - Use NOT_FOUND (not NOT _IN_USE) for empty tournament slots
  *   - NOT_FOUND is a URL/scrape status, NOT a game status
@@ -38,6 +46,57 @@
 
 const cheerio = require('cheerio');
 const { parseAESTToUTC } = require('../utils/dates');
+
+// ===================================================================
+// CAPTCHA/BOT BLOCK DETECTION (NEW v2.4.0)
+// ===================================================================
+
+/**
+ * Detect CAPTCHA or bot protection pages
+ * 
+ * These are NOT actual tournament pages - they are security challenge pages
+ * that should be treated as temporary fetch failures.
+ * 
+ * @param {string} html - HTML content to check
+ * @returns {object} { isBlocked: boolean, blockType: string|null }
+ */
+const detectBotBlock = (html) => {
+    if (!html || typeof html !== 'string') {
+        return { isBlocked: false, blockType: null };
+    }
+    
+    const htmlLower = html.toLowerCase();
+    
+    // SiteGround CAPTCHA/bot protection
+    // Pattern: <meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/...">
+    if (htmlLower.includes('/.well-known/sgcaptcha/') || 
+        htmlLower.includes('sgcaptcha')) {
+        return { isBlocked: true, blockType: 'SITEGROUND_CAPTCHA' };
+    }
+    
+    // Cloudflare challenge
+    if (htmlLower.includes('__cf_chl_opt') || 
+        htmlLower.includes('cf-browser-verification') ||
+        (htmlLower.includes('cloudflare') && htmlLower.includes('challenge'))) {
+        return { isBlocked: true, blockType: 'CLOUDFLARE_CHALLENGE' };
+    }
+    
+    // Generic CAPTCHA detection
+    if ((htmlLower.includes('captcha') && htmlLower.includes('verify')) ||
+        htmlLower.includes('bot detection') ||
+        htmlLower.includes('are you human') ||
+        htmlLower.includes('prove you are human')) {
+        return { isBlocked: true, blockType: 'GENERIC_CAPTCHA' };
+    }
+    
+    // Very short HTML with just a redirect (suspicious - likely a challenge)
+    // Normal tournament pages have body content; challenge pages often don't
+    if (html.length < 500 && !/<body/i.test(html) && /<meta[^>]*refresh/i.test(html)) {
+        return { isBlocked: true, blockType: 'SUSPICIOUS_REDIRECT' };
+    }
+    
+    return { isBlocked: false, blockType: null };
+};
 
 // ===================================================================
 // VARIANT MAPPING (GameVariant -> PokerVariant + BettingStructure)
@@ -216,7 +275,14 @@ const defaultStrategy = {
     /**
      * Detect page state (not found, not published, etc.)
      * 
-     * UPDATED v2.3.0:
+     * UPDATED v2.4.0:
+     * - CRITICAL: Added CAPTCHA/bot block detection FIRST
+     *   - Security challenges (sgcaptcha, Cloudflare) return minimal HTML
+     *   - Without this check, they get parsed as "Unnamed Tournament"
+     *   - Now returns scrapeStatus='BOT_BLOCKED' with blockType
+     *   - Scraping engine should treat as temporary error, not stop job
+     * 
+     * v2.3.0:
      * - NOT_FOUND = empty tournament slot (URL exists, no tournament)
      *   - This is a URL/scrape status, NOT a game status
      *   - Games should NEVER be created for NOT_FOUND URLs
@@ -227,6 +293,36 @@ const defaultStrategy = {
      */
     detectPageState(ctx, forceRefresh = false) {
         const tournamentId = ctx.data.tournamentId || getTournamentIdFromUrl(ctx.url) || 0;
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // v2.4.0 CRITICAL: Check for CAPTCHA/bot block pages FIRST
+        // These are NOT real tournament pages - they're security challenges
+        // ScraperAPI sometimes gets blocked and returns challenge pages
+        // ═══════════════════════════════════════════════════════════════════════
+        const rawHtml = ctx.$.html();
+        const botBlockCheck = detectBotBlock(rawHtml);
+        
+        if (botBlockCheck.isBlocked) {
+            console.log(`[HtmlParser] ⚠️ BOT BLOCK DETECTED: ${botBlockCheck.blockType}`);
+            
+            ctx.add('tournamentId', tournamentId);
+            ctx.add('scrapeStatus', 'BOT_BLOCKED');
+            ctx.add('gameStatus', 'UNKNOWN');  // GraphQL-valid status
+            ctx.add('name', `Bot Block: ${botBlockCheck.blockType}`);
+            ctx.add('blockType', botBlockCheck.blockType);
+            ctx.add('doNotScrape', false);  // Should retry later!
+            ctx.add('hasGuarantee', false);
+            ctx.add('s3Key', '');
+            ctx.add('registrationStatus', 'N_A');
+            
+            // Don't save this garbage HTML to S3
+            ctx.add('skipS3Save', true);
+            
+            ctx.abortScrape = true;
+            console.log(`[HtmlParser] Aborting scrape - BOT_BLOCKED (${botBlockCheck.blockType})`);
+            return;
+        }
+        
         const warningBadge = ctx.$('.cw-badge.cw-bg-warning').first();
         
         if (warningBadge.length) {
@@ -344,10 +440,10 @@ const defaultStrategy = {
         const gameName = [mainTitle, subTitle].filter(Boolean).join(' ');
         
         if (!gameName || gameName === '') {
-            ctx.add('name', ctx.data.gameStatus === 'UNKNOWN_STATUS' || ctx.data.isInactive 
+            ctx.add('name', ctx.data.gameStatus === 'UNKNOWN' || ctx.data.isInactive 
                 ? 'Tournament ID Not In Use' 
                 : 'Unnamed Tournament');
-            if (ctx.data.gameStatus === 'UNKNOWN_STATUS' || ctx.data.isInactive) {
+            if (ctx.data.gameStatus === 'UNKNOWN' || ctx.data.isInactive) {
                 ctx.add('isInactive', true);
             }
             return;
@@ -507,11 +603,11 @@ const defaultStrategy = {
         
         if (ctx.data.gameStatus) return ctx.data.gameStatus;
         
-        let gameStatus = ctx.$('label:contains("Status")').first().next('strong').text().trim().toUpperCase() || 'UNKNOWN_STATUS';
+        let gameStatus = ctx.$('label:contains("Status")').first().next('strong').text().trim().toUpperCase() || 'UNKNOWN';
         
         if (gameStatus.includes('CLOCK STOPPED')) {
             gameStatus = 'CLOCK_STOPPED';
-        } else if (gameStatus === 'UNKNOWN_STATUS') {
+        } else if (gameStatus === 'UNKNOWN') {
             ctx.add('isInactive', true);
         }
         
@@ -1325,5 +1421,6 @@ module.exports = {
     formatSecondsToHHMMSS,
     parseHHMMSSToSeconds,
     getStatusAndReg,
+    detectBotBlock,  // NEW v2.4.0
     VARIANT_MAPPING
 };

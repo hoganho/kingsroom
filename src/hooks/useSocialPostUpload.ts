@@ -1,5 +1,6 @@
 // src/hooks/useSocialPostUpload.ts
 // UPDATED: Minimal save + Lambda processor invocation
+// FIXED: Now downloads external images to S3 (aligns with socialFetcher Lambda behavior)
 // Client-side parsing still used for UI preview, but classification
 // is done by socialPostProcessor Lambda for consistency
 
@@ -106,6 +107,8 @@ export interface UseSocialPostUploadOptions {
 export interface ReviewablePostWithAttachments extends ReviewablePost {
   attachmentFiles?: File[];
   attachmentS3Urls?: string[];
+  /** External URLs from attachmentsDetails.href that need to be downloaded */
+  externalImageUrls?: string[];
 }
 
 export interface UseSocialPostUploadReturn {
@@ -160,7 +163,7 @@ export interface UseSocialPostUploadReturn {
 }
 
 /**
- * Upload a file to S3 and return the URL
+ * Upload a File object to S3 and return the URL
  */
 async function uploadFileToS3(
   file: File,
@@ -234,6 +237,105 @@ async function uploadFileToS3(
   return url;
 }
 
+/**
+ * Download an external image URL and upload to S3
+ * This aligns with socialFetcher Lambda behavior for consistent storage
+ */
+async function downloadAndUploadExternalImage(
+  imageUrl: string,
+  postId: string,
+  accountId: string,
+  index: number
+): Promise<string> {
+  console.log(`[useSocialPostUpload] Downloading external image ${index + 1}:`, imageUrl.substring(0, 100));
+  
+  try {
+    // Get AWS credentials from Cognito
+    const session = await fetchAuthSession();
+    const credentials = session.credentials;
+
+    if (!credentials) {
+      throw new Error('Unable to get AWS credentials. Please sign in again.');
+    }
+
+    // Get S3 config from environment
+    const s3Config = getSocialPostS3Config();
+
+    // Download the image
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to download: HTTP ${response.status}`);
+    }
+    
+    const blob = await response.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    
+    // Determine content type and filename
+    let contentType = blob.type || 'image/jpeg';
+    let fileExtension = 'jpg';
+    
+    if (contentType.includes('png')) fileExtension = 'png';
+    else if (contentType.includes('gif')) fileExtension = 'gif';
+    else if (contentType.includes('webp')) fileExtension = 'webp';
+    else if (imageUrl.includes('.png')) { fileExtension = 'png'; contentType = 'image/png'; }
+    else if (imageUrl.includes('.gif')) { fileExtension = 'gif'; contentType = 'image/gif'; }
+    else if (imageUrl.includes('.webp')) { fileExtension = 'webp'; contentType = 'image/webp'; }
+    
+    // Extract filename from URL or generate one
+    let filename = 'image';
+    try {
+      const urlPath = new URL(imageUrl).pathname;
+      const originalName = urlPath.split('/').pop()?.split('?')[0];
+      if (originalName && originalName.length > 0) {
+        filename = originalName.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 80);
+      }
+    } catch {
+      // Ignore URL parsing errors
+    }
+    
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const s3Key = `${s3Config.prefix}/${accountId}/${postId}/${timestamp}-${index}-${randomString}-${filename}`;
+
+    // Create S3 client
+    const s3Client = new S3Client({
+      region: s3Config.region,
+      credentials: {
+        accessKeyId: credentials.accessKeyId,
+        secretAccessKey: credentials.secretAccessKey,
+        sessionToken: credentials.sessionToken,
+      },
+    });
+
+    // Upload to S3
+    const command = new PutObjectCommand({
+      Bucket: s3Config.bucket,
+      Key: s3Key,
+      Body: new Uint8Array(arrayBuffer),
+      ContentType: contentType,
+      CacheControl: 'max-age=31536000', // Cache for 1 year
+      Metadata: {
+        'post-id': postId,
+        'account-id': accountId,
+        'source-url': imageUrl.substring(0, 500),
+        'downloaded-at': new Date().toISOString(),
+      },
+    });
+
+    await s3Client.send(command);
+
+    // Return the public URL
+    const url = getS3PublicUrl(s3Key);
+    console.log(`[useSocialPostUpload] Downloaded and uploaded external image to S3:`, url);
+    
+    return url;
+  } catch (error) {
+    console.error(`[useSocialPostUpload] Failed to download/upload external image:`, error);
+    // Return original URL as fallback (consistent with socialFetcher behavior)
+    return imageUrl;
+  }
+}
+
 // ============================================
 // GraphQL mutation for processor invocation
 // ============================================
@@ -246,47 +348,67 @@ const PROCESS_SOCIAL_POST_MUTATION = /* GraphQL */ `
       processingStatus
       contentType
       contentTypeConfidence
+      placementsExtracted
+      linksCreated
       extractedGameData {
         id
+        socialPostId
         contentType
+        contentTypeConfidence
         extractedBuyIn
-        extractedGuarantee
-        extractedTotalEntries
         extractedPrizePool
+        extractedTotalEntries
+        extractedWinnerName
+        extractedWinnerPrize
+        extractedAt
+        createdAt
+        updatedAt
       }
       matchCandidates {
         gameId
         gameName
+        gameDate
+        gameStatus
+        venueId
+        venueName
+        entityId
+        buyIn
+        guaranteeAmount
+        totalEntries
         matchConfidence
         matchReason
+        matchSignals
+        rank
+        isPrimaryMatch
         wouldAutoLink
+        rejectionReason
       }
-      primaryMatch {
-        gameId
-        gameName
-        matchConfidence
-      }
-      linksCreated
-      placementsExtracted
+      warnings
       error
     }
   }
 `;
 
-export const useSocialPostUpload = (
-  options: UseSocialPostUploadOptions
-): UseSocialPostUploadReturn => {
-  const { socialAccountId, entityId: providedEntityId, venueId: providedVenueId } = options;
-  
-  const client = useMemo(() => generateClient(), []);
-  
-  // Core state
+// ============================================
+// MAIN HOOK
+// ============================================
+
+export const useSocialPostUpload = ({
+  socialAccountId,
+  entityId: propEntityId,
+  venueId: propVenueId,
+}: UseSocialPostUploadOptions): UseSocialPostUploadReturn => {
+  // State
   const [rawPosts, setRawPosts] = useState<RawFacebookPost[]>([]);
   const [parsedResult, setParsedResult] = useState<ParseMultipleResult | null>(null);
   const [reviewablePosts, setReviewablePosts] = useState<ReviewablePostWithAttachments[]>([]);
   const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; stage?: string } | null>(null);
   
-  // Account context - fetched from the selected SocialAccount
+  // Account context
   const [accountContext, setAccountContext] = useState<{
     accountName: string | null;
     entityId: string | null;
@@ -296,14 +418,12 @@ export const useSocialPostUpload = (
     profileImageUrl: string | null;
   } | null>(null);
   
-  // Loading state
-  const [isLoading, setIsLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; stage?: string } | null>(null);
+  // Resolved entity/venue IDs (props override account defaults)
+  const resolvedEntityId = propEntityId || accountContext?.entityId || null;
+  const resolvedVenueId = propVenueId || accountContext?.venueId || null;
   
-  // Filter/sort state
-  const [filterOptions, setFilterOptionsState] = useState<PostFilterOptions>({
+  // Filter & sort state
+  const [filterOptionsState, setFilterOptionsState] = useState<PostFilterOptions>({
     showResults: true,
     showPromotional: true,
     showGeneral: true,
@@ -315,17 +435,15 @@ export const useSocialPostUpload = (
   });
   
   const [sortOptions, setSortOptions] = useState<PostSortOptions>({
-    field: 'confidence',
-    direction: 'desc',
+    field: 'postType',
+    direction: 'asc',
   });
   
-  // ============ ACCOUNT CONTEXT ============
+  // Client
+  const client = generateClient();
   
-  // Resolve entity/venue: use provided, fall back to account's
-  const resolvedEntityId = providedEntityId || accountContext?.entityId || null;
-  const resolvedVenueId = providedVenueId || accountContext?.venueId || null;
+  // ============ FETCH ACCOUNT CONTEXT ============
   
-  // Fetch account context when socialAccountId changes
   useEffect(() => {
     const fetchAccountContext = async () => {
       if (!socialAccountId) {
@@ -339,7 +457,7 @@ export const useSocialPostUpload = (
           variables: { id: socialAccountId },
         });
         
-        if (hasGraphQLData<{ getSocialAccount: SocialAccount }>(response)) {
+        if (hasGraphQLData<{ getSocialAccount: SocialAccount | null }>(response)) {
           const account = response.data.getSocialAccount;
           if (account) {
             setAccountContext({
@@ -373,35 +491,35 @@ export const useSocialPostUpload = (
     
     // Type filters
     filtered = filtered.filter(p => {
-      if (p.postType === 'RESULT' && !filterOptions.showResults) return false;
-      if (p.postType === 'PROMOTIONAL' && !filterOptions.showPromotional) return false;
-      if (p.postType === 'GENERAL' && !filterOptions.showGeneral) return false;
-      if (p.isComment && !filterOptions.showComments) return false;
+      if (p.postType === 'RESULT' && !filterOptionsState.showResults) return false;
+      if (p.postType === 'PROMOTIONAL' && !filterOptionsState.showPromotional) return false;
+      if (p.postType === 'GENERAL' && !filterOptionsState.showGeneral) return false;
+      if (p.isComment && !filterOptionsState.showComments) return false;
       return true;
     });
     
     // Confidence filter
-    if (filterOptions.minConfidence > 0) {
-      filtered = filtered.filter(p => p.confidence >= filterOptions.minConfidence);
+    if (filterOptionsState.minConfidence > 0) {
+      filtered = filtered.filter(p => p.confidence >= filterOptionsState.minConfidence);
     }
     
     // Venue filter
-    if (filterOptions.hasVenueMatch === true) {
+    if (filterOptionsState.hasVenueMatch === true) {
       filtered = filtered.filter(p => p.venueMatch !== null);
-    } else if (filterOptions.hasVenueMatch === false) {
+    } else if (filterOptionsState.hasVenueMatch === false) {
       filtered = filtered.filter(p => p.venueMatch === null);
     }
     
     // Placements filter
-    if (filterOptions.hasPlacements === true) {
+    if (filterOptionsState.hasPlacements === true) {
       filtered = filtered.filter(p => p.placements.length > 0);
-    } else if (filterOptions.hasPlacements === false) {
+    } else if (filterOptionsState.hasPlacements === false) {
       filtered = filtered.filter(p => p.placements.length === 0);
     }
     
     // Search filter
-    if (filterOptions.searchText) {
-      const search = filterOptions.searchText.toLowerCase();
+    if (filterOptionsState.searchText) {
+      const search = filterOptionsState.searchText.toLowerCase();
       filtered = filtered.filter(p =>
         p.content.toLowerCase().includes(search) ||
         p.author?.name?.toLowerCase().includes(search)
@@ -437,7 +555,7 @@ export const useSocialPostUpload = (
     });
     
     return filtered;
-  }, [reviewablePosts, filterOptions, sortOptions]);
+  }, [reviewablePosts, filterOptionsState, sortOptions]);
   
   // ============ SELECTION ============
   
@@ -497,11 +615,23 @@ export const useSocialPostUpload = (
       const reviewable: ReviewablePostWithAttachments[] = result.allPosts.map((parsed) => {
         const rawPost = posts.find(p => p.post_id === parsed.postId) || posts[0];
         
+        // Extract external image URLs from attachmentsDetails
+        const externalUrls: string[] = [];
+        if (rawPost.attachmentsDetails && Array.isArray(rawPost.attachmentsDetails)) {
+          for (const detail of rawPost.attachmentsDetails) {
+            if (detail.href && typeof detail.href === 'string') {
+              externalUrls.push(detail.href);
+            }
+          }
+        }
+        
         return {
           ...parsed,
           isSelected: parsed.postType === 'RESULT',
           isExpanded: false,
           rawPost,
+          externalImageUrls: externalUrls,
+          imageCount: externalUrls.length || parsed.imageCount,
         };
       });
       
@@ -565,6 +695,23 @@ export const useSocialPostUpload = (
     return matchedFiles;
   }
   
+  /**
+   * Extract external image URLs from a post (from attachmentsDetails.href)
+   */
+  function extractExternalImageUrls(post: RawFacebookPost): string[] {
+    const urls: string[] = [];
+    
+    if (post.attachmentsDetails && Array.isArray(post.attachmentsDetails)) {
+      for (const detail of post.attachmentsDetails) {
+        if (detail.href && typeof detail.href === 'string') {
+          urls.push(detail.href);
+        }
+      }
+    }
+    
+    return urls;
+  }
+  
   const loadPostsFromFiles = useCallback(async (files: FileList | File[]) => {
     setIsLoading(true);
     setError(null);
@@ -573,6 +720,7 @@ export const useSocialPostUpload = (
       const fileArray = Array.from(files);
       const posts: RawFacebookPost[] = [];
       const postAttachmentMap = new Map<string, File[]>();
+      const postExternalUrlMap = new Map<string, string[]>();
       
       // Separate JSON files and attachment files
       const jsonFiles = fileArray.filter(f => f.name.endsWith('.json'));
@@ -603,10 +751,16 @@ export const useSocialPostUpload = (
               };
               posts.push(normalizedPost);
               
-              // Match attachments to this post
+              // Match local attachments to this post
               const matched = matchAttachmentsToPost(normalizedPost, attachmentFiles);
               if (matched.length > 0) {
                 postAttachmentMap.set(normalizedPost.post_id, matched);
+              }
+              
+              // Extract external image URLs for posts without local files
+              const externalUrls = extractExternalImageUrls(normalizedPost);
+              if (externalUrls.length > 0) {
+                postExternalUrlMap.set(normalizedPost.post_id, externalUrls);
               }
             }
           }
@@ -620,9 +774,10 @@ export const useSocialPostUpload = (
         return;
       }
       
-      console.log('[useSocialPostUpload] Loaded posts with attachments:', {
+      console.log('[useSocialPostUpload] Loaded posts:', {
         totalPosts: posts.length,
-        postsWithAttachments: postAttachmentMap.size,
+        postsWithLocalAttachments: postAttachmentMap.size,
+        postsWithExternalUrls: postExternalUrlMap.size,
       });
       
       // Parse all posts for UI preview
@@ -631,10 +786,11 @@ export const useSocialPostUpload = (
         skipComments: false,
       });
       
-      // Convert to reviewable posts WITH attachment files
+      // Convert to reviewable posts WITH attachment files and external URLs
       const reviewable: ReviewablePostWithAttachments[] = result.allPosts.map((parsed) => {
         const rawPost = posts.find(p => p.post_id === parsed.postId) || posts[0];
         const attachmentFilesForPost = postAttachmentMap.get(parsed.postId) || [];
+        const externalUrls = postExternalUrlMap.get(parsed.postId) || [];
         
         return {
           ...parsed,
@@ -642,7 +798,8 @@ export const useSocialPostUpload = (
           isExpanded: false,
           rawPost,
           attachmentFiles: attachmentFilesForPost,
-          imageCount: attachmentFilesForPost.length || parsed.imageCount,
+          externalImageUrls: externalUrls,
+          imageCount: attachmentFilesForPost.length || externalUrls.length || parsed.imageCount,
         };
       });
       
@@ -805,11 +962,17 @@ export const useSocialPostUpload = (
       
       const now = new Date().toISOString();
       
-      // Upload attachments to S3 first (if any)
+      // ================================================================
+      // MEDIA HANDLING - Priority order:
+      // 1. Local attachment files (uploaded by user with folder)
+      // 2. External URLs (from attachmentsDetails.href) - DOWNLOAD TO S3
+      // 3. Legacy images array (fallback, use as-is)
+      // ================================================================
       let mediaUrls: string[] = [];
       
+      // Priority 1: Upload local attachment files to S3
       if (post.attachmentFiles && post.attachmentFiles.length > 0) {
-        console.log(`[uploadSinglePost] Uploading ${post.attachmentFiles.length} attachments for post ${post.postId}`);
+        console.log(`[uploadSinglePost] Uploading ${post.attachmentFiles.length} local attachments for post ${post.postId}`);
         
         for (const file of post.attachmentFiles) {
           try {
@@ -820,11 +983,31 @@ export const useSocialPostUpload = (
           }
         }
         
-        console.log(`[uploadSinglePost] Successfully uploaded ${mediaUrls.length} attachments to S3`);
+        console.log(`[uploadSinglePost] Successfully uploaded ${mediaUrls.length} local attachments to S3`);
       }
       
-      // If no attachments were uploaded but post has external image URLs, use those
+      // Priority 2: Download external URLs to S3 (aligns with socialFetcher behavior)
+      if (mediaUrls.length === 0 && post.externalImageUrls && post.externalImageUrls.length > 0) {
+        console.log(`[uploadSinglePost] Downloading ${post.externalImageUrls.length} external images for post ${post.postId}`);
+        
+        for (let i = 0; i < post.externalImageUrls.length; i++) {
+          const externalUrl = post.externalImageUrls[i];
+          try {
+            const s3Url = await downloadAndUploadExternalImage(externalUrl, post.postId, socialAccountId, i);
+            mediaUrls.push(s3Url);
+          } catch (downloadError) {
+            console.error(`[uploadSinglePost] Failed to download external image:`, downloadError);
+            // Fall back to original URL (consistent with socialFetcher)
+            mediaUrls.push(externalUrl);
+          }
+        }
+        
+        console.log(`[uploadSinglePost] Processed ${mediaUrls.length} external images`);
+      }
+      
+      // Priority 3: Legacy - use images array as-is (shouldn't happen with new flow)
       if (mediaUrls.length === 0 && post.images && post.images.length > 0) {
+        console.log(`[uploadSinglePost] Using ${post.images.length} legacy image URLs for post ${post.postId}`);
         mediaUrls = post.images;
       }
       
@@ -1025,7 +1208,7 @@ export const useSocialPostUpload = (
         }
         
         const post = postsToUpload[i];
-        const attachmentCount = post.attachmentFiles?.length || 0;
+        const attachmentCount = post.attachmentFiles?.length || post.externalImageUrls?.length || 0;
         
         setUploadProgress({ 
           current: i + 1, 
@@ -1137,7 +1320,7 @@ export const useSocialPostUpload = (
     selectByType,
     selectTournamentResults,
     
-    filterOptions,
+    filterOptions: filterOptionsState,
     setFilterOptions,
     sortOptions,
     setSortOptions,

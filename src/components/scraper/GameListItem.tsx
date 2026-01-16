@@ -1,6 +1,12 @@
 // src/components/scraper/GameListItem.tsx
-// REDESIGNED: Clear pipeline phases (Retrieve → Parse → Save)
+// REDESIGNED: Clear pipeline phases (Retrieve → Parse → Save → Store)
 // Each phase shows: status, source/target, and outcome
+//
+// v2.3.0 - ENHANCED: Pipeline improvements
+//   - RETRIEVE now shows 'S3' or 'Web' instead of 'Fetched'
+//   - NEW 'Store' phase shows if HTML was uploaded to S3 bucket
+//   - Pipeline now shows: Retrieve → Parse → Save → Store
+//   - Store shows 'Stored' for web fetches, 'Skipped' for S3 cache hits
 //
 // v2.2.0 - FIXED: Pipeline display for NOT_FOUND and NOT_PUBLISHED
 //   - RETRIEVE now shows 'success' (page was fetched successfully)
@@ -14,7 +20,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Save, Eye, RefreshCw, XCircle, AlertCircle, Clock, Users, DollarSign, 
   Database, CheckCircle, Loader2, AlertTriangle, ExternalLink,
-  Download, FileText, Globe, HardDrive, Ban, SkipForward
+  Download, FileText, Globe, HardDrive, Ban, SkipForward, Upload
 } from 'lucide-react';
 import type { GameState } from '../../types/game';
 import type { Venue } from '../../API';
@@ -61,11 +67,21 @@ export interface SavePhase {
   message?: string;
 }
 
+/** Store phase details (HTML upload to S3) - NEW v2.3.0 */
+export interface StorePhase {
+  status: PhaseStatus;
+  /** Was HTML stored to S3? */
+  stored?: boolean;
+  /** Human-readable description */
+  message?: string;
+}
+
 /** Complete pipeline state */
 export interface PipelineState {
   retrieve: RetrievePhase;
   parse: ParsePhase;
   save: SavePhase;
+  store: StorePhase;  // NEW v2.3.0
 }
 
 // ===================================================================
@@ -187,6 +203,7 @@ const derivePipelineState = (
     retrieve: { status: 'pending' },
     parse: { status: 'pending' },
     save: { status: 'pending' },
+    store: { status: 'pending' },  // NEW v2.3.0
   };
 
   // FIXED v2.2.0: Detect NOT_FOUND and NOT_PUBLISHED from multiple sources
@@ -209,6 +226,7 @@ const derivePipelineState = (
       pipeline.retrieve = { status: 'pending', message: 'Waiting...' };
       pipeline.parse = { status: 'pending' };
       pipeline.save = { status: 'pending' };
+      pipeline.store = { status: 'pending' };  // NEW v2.3.0
       break;
 
     case 'scraping':
@@ -219,6 +237,7 @@ const derivePipelineState = (
       };
       pipeline.parse = { status: 'pending' };
       pipeline.save = { status: 'pending' };
+      pipeline.store = { status: 'pending' };  // NEW v2.3.0
       break;
 
     case 'saving':
@@ -229,6 +248,12 @@ const derivePipelineState = (
       };
       pipeline.parse = { status: 'success', performed: true, message: 'Parsed successfully' };
       pipeline.save = { status: 'in-progress', message: 'Saving to database...' };
+      // NEW v2.3.0: Store phase - HTML already uploaded if from web
+      pipeline.store = { 
+        status: dataSource === 'web' ? 'success' : 'skipped', 
+        stored: dataSource === 'web',
+        message: dataSource === 'web' ? 'Stored' : 'Cached'
+      };
       break;
 
     case 'review':
@@ -239,6 +264,12 @@ const derivePipelineState = (
       };
       pipeline.parse = { status: 'success', performed: true, message: 'Parsed - awaiting review' };
       pipeline.save = { status: 'pending', message: 'Awaiting confirmation' };
+      // NEW v2.3.0: Store phase - HTML already uploaded if from web
+      pipeline.store = { 
+        status: dataSource === 'web' ? 'success' : 'skipped', 
+        stored: dataSource === 'web',
+        message: dataSource === 'web' ? 'Stored' : 'Cached'
+      };
       break;
 
     case 'success':
@@ -319,7 +350,7 @@ const derivePipelineState = (
           status: 'skipped', 
           saved: false,
           saveType: 'none',
-          message: 'Not saved'
+          message: 'Skipped'
         };
       } else {
         // Scrape-only mode - no save attempted
@@ -329,6 +360,15 @@ const derivePipelineState = (
           saveType: 'none',
           message: 'Scrape only'
         };
+      }
+      
+      // NEW v2.3.0: Store phase - HTML uploaded to S3 if fetched from web
+      if (wasNotRetrieved && !isPlaceholderResult) {
+        pipeline.store = { status: 'skipped', stored: false, message: 'Skipped' };
+      } else if (wasRetrievedFromS3) {
+        pipeline.store = { status: 'skipped', stored: false, message: 'Cached' };
+      } else {
+        pipeline.store = { status: 'success', stored: true, message: 'Stored' };
       }
       break;
     }
@@ -341,10 +381,11 @@ const derivePipelineState = (
       // The "skipped" status refers to the SAVE phase, not the entire process
       if (isNotFound || isNotPublished) {
         // Retrieve phase - SUCCESS (page was fetched)
+        const wasFromS3 = actualDataSource === 's3';
         pipeline.retrieve = { 
           status: 'success', 
-          source: actualDataSource === 's3' ? 's3' : actualDataSource === 'web' ? 'web' : 'web',
-          message: actualDataSource === 's3' ? 'From S3 cache' : 'From live scrape'
+          source: wasFromS3 ? 's3' : 'web',
+          message: wasFromS3 ? 'From S3 cache' : 'From live scrape'
         };
         
         // Parse phase - SUCCESS (we parsed and found the result)
@@ -368,9 +409,16 @@ const derivePipelineState = (
             status: 'skipped', 
             saved: false,
             saveType: 'none',
-            message: 'Not saved'
+            message: 'Skipped'
           };
         }
+        
+        // NEW v2.3.0: Store phase
+        pipeline.store = { 
+          status: wasFromS3 ? 'skipped' : 'success', 
+          stored: !wasFromS3,
+          message: wasFromS3 ? 'Cached' : 'Stored'
+        };
       } else if (isDoNotScrape) {
         // Do Not Scrape - retrieve was skipped
         pipeline.retrieve = { 
@@ -387,23 +435,31 @@ const derivePipelineState = (
           status: 'skipped', 
           saved: false,
           saveType: 'none',
-          message: 'Not saved'
+          message: 'Skipped'
         };
+        pipeline.store = { status: 'skipped', stored: false, message: 'Skipped' };  // NEW v2.3.0
       } else {
         // Generic skip - determine what was skipped based on dataSource
         const wasRetrieved = actualDataSource === 's3' || actualDataSource === 'web';
+        const wasFromS3 = actualDataSource === 's3';
         
         if (wasRetrieved) {
           // Data was retrieved but something else caused the skip
           pipeline.retrieve = { 
             status: 'success', 
-            source: actualDataSource === 's3' ? 's3' : 'web',
-            message: actualDataSource === 's3' ? 'From S3 cache' : 'From live scrape'
+            source: wasFromS3 ? 's3' : 'web',
+            message: wasFromS3 ? 'From S3 cache' : 'From live scrape'
           };
           pipeline.parse = { 
             status: 'skipped', 
             performed: false, 
             message: 'Skipped'
+          };
+          // NEW v2.3.0: Store phase
+          pipeline.store = { 
+            status: wasFromS3 ? 'skipped' : 'success', 
+            stored: !wasFromS3,
+            message: wasFromS3 ? 'Cached' : 'Stored'
           };
         } else {
           // Nothing was retrieved
@@ -417,6 +473,7 @@ const derivePipelineState = (
             performed: false, 
             message: 'N/A'
           };
+          pipeline.store = { status: 'skipped', stored: false, message: 'Skipped' };  // NEW v2.3.0
         }
         
         // Check if something was actually saved despite "skipped" status
@@ -433,7 +490,7 @@ const derivePipelineState = (
             status: 'skipped', 
             saved: false,
             saveType: 'none',
-            message: 'Not saved'
+            message: 'Skipped'
           };
         }
       }
@@ -448,20 +505,24 @@ const derivePipelineState = (
                           errorMsg.toLowerCase().includes('404') ||
                           (errorMsg.toLowerCase().includes('not found') && !isNotFound);
       const isSaveError = errorMsg.toLowerCase().includes('save');
+      const wasFromS3 = actualDataSource === 's3';
       
       if (isSaveError) {
-        pipeline.retrieve = { status: 'success', source: actualDataSource === 's3' ? 's3' : 'web', message: 'Retrieved' };
+        pipeline.retrieve = { status: 'success', source: wasFromS3 ? 's3' : 'web', message: 'Retrieved' };
         pipeline.parse = { status: 'success', performed: true, message: 'Parsed' };
         pipeline.save = { status: 'error', saved: false, message: errorMsg };
+        pipeline.store = { status: wasFromS3 ? 'skipped' : 'success', stored: !wasFromS3, message: wasFromS3 ? 'Cached' : 'Stored' };  // NEW v2.3.0
       } else if (isFetchError) {
         pipeline.retrieve = { status: 'error', source: 'none', message: errorMsg };
         pipeline.parse = { status: 'not-needed', performed: false, message: 'N/A' };
         pipeline.save = { status: 'not-needed', saved: false, message: 'N/A' };
+        pipeline.store = { status: 'not-needed', stored: false, message: 'N/A' };  // NEW v2.3.0
       } else {
         // Generic error - assume parse error
-        pipeline.retrieve = { status: 'success', source: actualDataSource === 's3' ? 's3' : 'web', message: 'Retrieved' };
+        pipeline.retrieve = { status: 'success', source: wasFromS3 ? 's3' : 'web', message: 'Retrieved' };
         pipeline.parse = { status: 'error', performed: false, message: errorMsg };
         pipeline.save = { status: 'not-needed', saved: false, message: 'N/A' };
+        pipeline.store = { status: 'not-needed', stored: false, message: 'N/A' };  // NEW v2.3.0
       }
       break;
     }
@@ -475,7 +536,7 @@ const derivePipelineState = (
 // ===================================================================
 
 interface PhaseBadgeProps {
-  phase: 'retrieve' | 'parse' | 'save';
+  phase: 'retrieve' | 'parse' | 'save' | 'store';  // v2.3.0: Added 'store' phase
   status: PhaseStatus;
   source?: string;
   message?: string;
@@ -493,6 +554,7 @@ const PhaseBadge: React.FC<PhaseBadgeProps> = ({ phase, status, source, message,
     },
     parse: FileText,
     save: Database,
+    store: Upload,  // NEW v2.3.0
   };
 
   // Status colors
@@ -521,16 +583,18 @@ const PhaseBadge: React.FC<PhaseBadgeProps> = ({ phase, status, source, message,
     retrieve: 'Retrieve',
     parse: 'Parse',
     save: 'Save',
+    store: 'Store',  // NEW v2.3.0
   };
 
   // Outcome labels (what happened - short)
+  // v2.3.0: Changed 'Fetched' to 'Web', 'From S3' to 'S3'
   const getOutcomeLabel = (): string => {
     switch (phase) {
       case 'retrieve':
         switch (status) {
           case 'pending': return 'Waiting';
           case 'in-progress': return source === 's3' ? 'Checking S3' : 'Fetching';
-          case 'success': return source === 's3' ? 'From S3' : 'Fetched';
+          case 'success': return source === 's3' ? 'S3' : 'Web';  // v2.3.0: Shortened labels
           case 'skipped': return 'Skipped';
           case 'error': return 'Failed';
           case 'not-needed': return 'N/A';
@@ -553,7 +617,17 @@ const PhaseBadge: React.FC<PhaseBadgeProps> = ({ phase, status, source, message,
           case 'success': return message || 'Saved';
           case 'skipped': return 'Skipped';
           case 'error': return 'Failed';
-          case 'not-needed': return 'Not saved';
+          case 'not-needed': return 'N/A';
+        }
+        break;
+      case 'store':  // NEW v2.3.0
+        switch (status) {
+          case 'pending': return 'Waiting';
+          case 'in-progress': return 'Storing';
+          case 'success': return message || 'Stored';
+          case 'skipped': return message || 'Cached';  // Cached means already in S3
+          case 'error': return 'Failed';
+          case 'not-needed': return 'N/A';
         }
         break;
     }
@@ -617,9 +691,10 @@ interface PipelineStatusRowProps {
   pipeline: PipelineState;
 }
 
+// v2.3.0: Added Store phase to compact pipeline row
 const PipelineStatusRow: React.FC<PipelineStatusRowProps> = ({ pipeline }) => {
   return (
-    <div className="flex items-center gap-1.5 flex-wrap">
+    <div className="flex items-center gap-1 flex-wrap">
       <PhaseBadge 
         phase="retrieve" 
         status={pipeline.retrieve.status} 
@@ -627,18 +702,25 @@ const PipelineStatusRow: React.FC<PipelineStatusRowProps> = ({ pipeline }) => {
         message={pipeline.retrieve.message}
         compact 
       />
-      <span className="text-gray-300">→</span>
+      <span className="text-gray-300 text-sm">→</span>
       <PhaseBadge 
         phase="parse" 
         status={pipeline.parse.status}
         message={pipeline.parse.message}
         compact 
       />
-      <span className="text-gray-300">→</span>
+      <span className="text-gray-300 text-sm">→</span>
       <PhaseBadge 
         phase="save" 
         status={pipeline.save.status}
         message={pipeline.save.message}
+        compact 
+      />
+      <span className="text-gray-300 text-sm">→</span>
+      <PhaseBadge 
+        phase="store" 
+        status={pipeline.store.status}
+        message={pipeline.store.message}
         compact 
       />
     </div>
@@ -1086,26 +1168,32 @@ export const GameListItem: React.FC<GameListItemProps> = ({
           </div>
         </div>
         
-        {/* Pipeline Status Section */}
+        {/* Pipeline Status Section - v2.3.0: Added Store phase */}
         <div className="mt-4 pt-3 border-t border-gray-200">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <PhaseBadge 
               phase="retrieve" 
               status={pipeline.retrieve.status} 
               source={pipeline.retrieve.source}
               message={pipeline.retrieve.message}
             />
-            <div className="text-gray-300 text-xl">→</div>
+            <div className="text-gray-300 text-lg">→</div>
             <PhaseBadge 
               phase="parse" 
               status={pipeline.parse.status}
               message={pipeline.parse.message}
             />
-            <div className="text-gray-300 text-xl">→</div>
+            <div className="text-gray-300 text-lg">→</div>
             <PhaseBadge 
               phase="save" 
               status={pipeline.save.status}
               message={pipeline.save.message}
+            />
+            <div className="text-gray-300 text-lg">→</div>
+            <PhaseBadge 
+              phase="store" 
+              status={pipeline.store.status}
+              message={pipeline.store.message}
             />
           </div>
         </div>

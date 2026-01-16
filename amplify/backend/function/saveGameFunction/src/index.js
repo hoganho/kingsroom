@@ -24,10 +24,17 @@ Amplify Params - DO NOT EDIT */
 
 /**
  * ===================================================================
- * SAVEGAME LAMBDA FUNCTION - PURE WRITER (v4.4.0)
+ * SAVEGAME LAMBDA FUNCTION - PURE WRITER (v4.4.2)
  * ===================================================================
  * 
- * VERSION: 4.4.0
+ * VERSION: 4.4.2
+ * 
+ * CHANGELOG:
+ * v4.4.2 - Expanded GSI null key fix to include all composite query keys
+ *          - venueScheduleKey, venueGameTypeKey, entityQueryKey, etc.
+ * v4.4.1 - Fixed DynamoDB GSI null key error
+ *          - Skip null values for GSI key fields (recurringGameId, tournamentSeriesId, venueId)
+ *          - Prevents: "Type mismatch for Index Key Expected: S Actual: NULL"
  * - Added gameActualStartDateTime field support
  * - Fixed gameEndDateTime not updating on existing games (was missing from fieldMappings)
  * - Duration fields now properly sync to database
@@ -635,6 +642,27 @@ const createGame = async (input) => {
     game.dataChangedAt = now;
     console.log('[SAVE-GAME] New game content hash:', game.contentHash);
 
+    // GSI key fields cannot have null values - remove them before PutCommand
+    // DynamoDB throws: "Type mismatch for Index Key Expected: S Actual: NULL"
+    const gsiKeyFields = [
+        'recurringGameId', 
+        'tournamentSeriesId', 
+        'venueId',
+        // Composite query keys used as GSI keys
+        'venueScheduleKey',
+        'venueGameTypeKey',
+        'entityQueryKey',
+        'entityGameTypeKey',
+        'gameDayOfWeek',
+        'gameYearMonth',
+        'buyInBucket'
+    ];
+    for (const field of gsiKeyFields) {
+        if (game[field] === null || game[field] === undefined) {
+            delete game[field];
+        }
+    }
+
     await ddbDocClient.send(new PutCommand({ TableName: getTableName('Game'), Item: game }));
     console.log(`[SAVE-GAME] ✅ Created game: ${gameId}`);
 
@@ -756,9 +784,32 @@ const updateGame = async (existingGame, input) => {
         lastClassifiedAt: 'lastClassifiedAt'
     };
 
+    // GSI key fields cannot have null values - DynamoDB will throw:
+    // "Type mismatch for Index Key recurringGameId Expected: S Actual: NULL"
+    const gsiKeyFields = new Set([
+        'recurringGameId',
+        'tournamentSeriesId',
+        'venueId',
+        'entityId',
+        // Composite query keys used as GSI keys
+        'venueScheduleKey',
+        'venueGameTypeKey',
+        'entityQueryKey',
+        'entityGameTypeKey',
+        'gameDayOfWeek',
+        'gameYearMonth',
+        'buyInBucket'
+    ]);
+
     for (const [inputField, dbField] of Object.entries(fieldMappings)) {
         const newValue = gameData[inputField];
         const oldValue = existingGame[dbField];
+        
+        // Skip null values for GSI key fields
+        if (gsiKeyFields.has(dbField) && (newValue === null || newValue === undefined)) {
+            continue;
+        }
+        
         if (newValue !== undefined && newValue !== oldValue) {
             updates[dbField] = newValue;
             fieldsUpdated.push(dbField);
@@ -840,7 +891,7 @@ const updateGame = async (existingGame, input) => {
 // ===================================================================
 
 exports.handler = async (event) => {
-    console.log('[SAVE-GAME] v4.4.0 - Pure Writer with Content Hash + Timing Fields');
+    console.log('[SAVE-GAME] v4.4.2 - Pure Writer with Content Hash + GSI Null Fix');
     
     // Handle both direct invocation and GraphQL resolver invocation
     const input = event.arguments?.input || event.input || event;

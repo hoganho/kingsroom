@@ -417,7 +417,7 @@
             "SAVE_GAME_FUNCTION_NAME": {
               "Ref": "saveGameFunctionName"
             },
-            "SCRAPER_API_KEY": {
+            "SCRAPERAPI_KEY": {
               "Ref": "scraperApiKey"
             }
           }
@@ -1432,7 +1432,8 @@
                 "lambda:InvokeFunction"
               ],
               "Resource": [
-                "arn:aws:lambda:ap-southeast-2:*:function:saveGameFunction-*"
+                "arn:aws:lambda:ap-southeast-2:*:function:saveGameFunction-*",
+                "arn:aws:lambda:ap-southeast-2:*:function:gameDataEnricher-*"
               ],
               "Effect": "Allow"
             },

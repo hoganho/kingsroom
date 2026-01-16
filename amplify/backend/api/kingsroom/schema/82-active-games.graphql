@@ -24,6 +24,7 @@ type ActiveGame
   
   entityId: ID!
   @index(name: "byEntityActiveGame", sortKeyFields: ["gameStatus"], queryField: "activeGamesByEntity")
+  @index(name: "byEntityStatus", sortKeyFields: ["gameStartDateTime"], queryField: "activeGamesByEntityStatus")
   entity: Entity @hasOne(fields: ["entityId"]) # FIXED: @belongsTo -> @hasOne
   
   venueId: ID @index(name: "byVenueActiveGame", sortKeyFields: ["gameStartDateTime"], queryField: "activeGamesByVenue")
@@ -100,6 +101,7 @@ type RecentlyFinishedGame
   
   entityId: ID!
   @index(name: "byEntityRecentFinished", sortKeyFields: ["finishedAt"], queryField: "recentlyFinishedByEntity")
+  @index(name: "byEntityFinished", sortKeyFields: ["gameStartDateTime"], queryField: "finishedGamesByEntity")
   entity: Entity @hasOne(fields: ["entityId"]) # FIXED: @belongsTo -> @hasOne
   
   venueId: ID @index(name: "byVenueRecentFinished", sortKeyFields: ["finishedAt"], queryField: "recentlyFinishedByVenue")
@@ -232,6 +234,8 @@ input RefreshRunningGamesInput {
   entityId: ID
   maxGames: Int
   olderThanMinutes: Int
+  forceRefresh: Boolean
+  statuses: [GameStatus]
 }
 
 type SyncActiveGameResult {

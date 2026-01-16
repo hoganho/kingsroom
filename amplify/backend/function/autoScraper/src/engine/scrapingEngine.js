@@ -4,8 +4,34 @@
  * Core scraping logic extracted from index.js for maintainability.
  * Handles bulk scraping, gap processing, and event streaming.
  * 
- * VERSION: 1.13.0
+ * VERSION: 1.16.0
  * 
+ * UPDATED v1.16.0:
+ * - FIX: doNotScrape tournaments now SKIPPED instead of stopping the job
+ *   - When a URL has doNotScrape=true in ScrapeURL table, webScraperFunction
+ *     returns gameStatus='UNKNOWN' with name='Skipped - Do Not Scrape'
+ *   - Previously this triggered STOPPED_ERROR, halting the entire job
+ *   - NEW: isDoNotScrapeResponse() helper to detect these responses
+ *   - doNotScrape is now treated like BOT_BLOCKED: count as skipped, continue
+ *   - This prevents one flagged tournament from blocking gap processing
+ *
+ * UPDATED v1.15.0:
+ * - CRITICAL FIX: BOT_BLOCKED pages no longer stop the job!
+ *   - ScraperAPI can return CAPTCHA/security challenge pages instead of content
+ *   - These pages (SiteGround sgcaptcha, Cloudflare challenges) were being parsed
+ *     as "Unnamed Tournament" with gameStatus=UNKNOWN, causing STOPPED_ERROR
+ *   - html-parser v2.4.0 now detects these and returns scrapeStatus='BOT_BLOCKED'
+ *   - NEW: isBotBlockedResponse() helper to detect BOT_BLOCKED status
+ *   - BOT_BLOCKED is treated as SKIPPED (not ERROR), job continues to next ID
+ *   - This fixes the issue where tournament 819 stopped the entire job
+ *
+ * UPDATED v1.14.0:
+ * - FIX: totalDuration now parsed to Int before sending to GraphQL
+ *   - Scraper returns duration as string ("05:36:28") but schema expects Int
+ *   - GraphQL was rejecting with "Variable 'totalDuration' has an invalid value"
+ *   - NEW: parseDurationToInt() helper parses "HH:MM:SS", "MM:SS", or number to seconds
+ *   - gameDataEnricher's duration-completion.js still handles edge cases downstream
+ *
  * UPDATED v1.13.0:
  * - FIX: Uses direct Lambda invocation instead of AppSync GraphQL for
  *   fetchTournamentData calls. This bypasses AppSync's 30-second resolver
@@ -121,6 +147,63 @@
 
 const { FETCH_TOURNAMENT_DATA, SAVE_TOURNAMENT_DATA } = require('../graphql/queries');
 const { ScrapeURLPrefetchCache } = require('../lib/prefetchCache');
+
+// ===================================================================
+// DURATION PARSING HELPER (NEW v1.14.0)
+// ===================================================================
+
+/**
+ * Parse duration to integer seconds for GraphQL Int field
+ * Handles: "HH:MM:SS", "H:MM:SS", "MM:SS", plain numbers, null/undefined
+ * 
+ * @param {string|number|null} value - Duration value from scraper
+ * @returns {number|undefined} Duration in seconds, or undefined if invalid/missing
+ */
+function parseDurationToInt(value) {
+    if (value == null) return undefined;
+    
+    // Already a number - validate and return
+    if (typeof value === 'number') {
+        return Number.isFinite(value) && value >= 0 ? Math.floor(value) : undefined;
+    }
+    
+    // Parse string formats
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (!trimmed) return undefined;
+        
+        // HH:MM:SS or H:MM:SS format
+        const hhmmss = trimmed.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+        if (hhmmss) {
+            const hours = parseInt(hhmmss[1], 10);
+            const minutes = parseInt(hhmmss[2], 10);
+            const seconds = parseInt(hhmmss[3], 10);
+            if (minutes < 60 && seconds < 60) {
+                return hours * 3600 + minutes * 60 + seconds;
+            }
+            return undefined; // Invalid time values
+        }
+        
+        // MM:SS or M:SS format
+        const mmss = trimmed.match(/^(\d{1,2}):(\d{2})$/);
+        if (mmss) {
+            const minutes = parseInt(mmss[1], 10);
+            const seconds = parseInt(mmss[2], 10);
+            if (seconds < 60) {
+                return minutes * 60 + seconds;
+            }
+            return undefined; // Invalid seconds
+        }
+        
+        // Plain number string
+        const num = parseInt(trimmed, 10);
+        if (Number.isFinite(num) && num >= 0) {
+            return num;
+        }
+    }
+    
+    return undefined;
+}
 
 // ===================================================================
 // DIRECT LAMBDA FETCH HELPER (NEW v1.13.0)
@@ -308,6 +391,54 @@ function isNotFoundResponse(parsedData) {
 function isNotPublishedResponse(parsedData) {
     if (!parsedData) return false;
     return parsedData.gameStatus === 'NOT_PUBLISHED';
+}
+
+/**
+ * NEW v1.15.0: Check if response indicates a bot/CAPTCHA block
+ * 
+ * Bot blocks happen when the target site's security (SiteGround, Cloudflare, etc.)
+ * detects the ScraperAPI request and returns a challenge page instead of content.
+ * 
+ * These should NOT stop the scraping job - they should be skipped and retried later.
+ * The html-parser v2.4.0+ sets scrapeStatus='BOT_BLOCKED' for these.
+ * 
+ * @param {object} parsedData - The parsed data from html-parser
+ * @returns {boolean} True if this is a bot block (should be skipped, not an error)
+ */
+function isBotBlockedResponse(parsedData) {
+    if (!parsedData) return false;
+    return parsedData.scrapeStatus === 'BOT_BLOCKED';
+}
+
+/**
+ * NEW v1.16.0: Check if response indicates a doNotScrape flag
+ * 
+ * When a URL has doNotScrape=true in the ScrapeURL table, webScraperFunction
+ * returns early without fetching, with gameStatus='UNKNOWN' and a message
+ * like "Skipped - Do Not Scrape" in the name or error fields.
+ * 
+ * This should be SKIPPED (not treated as an error), similar to BOT_BLOCKED.
+ * The URL was flagged in a previous scrape and should be retried later.
+ * 
+ * @param {object} parsedData - The parsed data from fetch
+ * @returns {boolean} True if this is a doNotScrape skip (should be skipped, not an error)
+ */
+function isDoNotScrapeResponse(parsedData) {
+    if (!parsedData) return false;
+    
+    // Check for "Do Not Scrape" in various fields
+    const name = parsedData.name || '';
+    const errorMsg = parsedData.errorMessage || parsedData.error || '';
+    const combinedText = `${name} ${errorMsg}`.toLowerCase();
+    
+    // Patterns that indicate doNotScrape was triggered
+    const doNotScrapePatterns = [
+        'do not scrape',
+        'donotscrape',
+        'skipped - do not',
+    ];
+    
+    return doNotScrapePatterns.some(pattern => combinedText.includes(pattern));
 }
 
 /**
@@ -550,7 +681,7 @@ function buildSaveInput(entityId, url, parsedData, venueId) {
             // Results
             prizepoolPaid: parsedData.prizepoolPaid ?? 0,
             prizepoolCalculated: parsedData.prizepoolCalculated ?? 0,
-            totalDuration: parsedData.totalDuration || undefined,
+            totalDuration: parseDurationToInt(parsedData.totalDuration),
             
             // Classification
             tournamentType: parsedData.tournamentType || undefined,
@@ -1177,6 +1308,38 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
             
             if (parsedData.source === 'S3_CACHE' || parsedData.source === 'HTTP_304_CACHE') {
                 results.s3CacheHits++;
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // v1.16.0 FIX: Check for doNotScrape before treating as error
+            // URLs flagged with doNotScrape=true in ScrapeURL table return
+            // gameStatus='UNKNOWN' with "Skipped - Do Not Scrape" message.
+            // These should be SKIPPED, not treated as fatal errors.
+            // ═══════════════════════════════════════════════════════════════
+            if (isDoNotScrapeResponse(parsedData)) {
+                console.log(`[ScrapingEngine] ID ${currentId}: DO_NOT_SCRAPE - SKIPPING (flagged in ScrapeURL)`);
+                
+                // Count as skipped, not as error - don't stop the job
+                results.gamesSkipped++;
+                // Reset consecutive counters since this isn't a "not found" pattern
+                results.consecutiveBlanks = 0;
+                results.consecutiveNotFound = 0;
+                
+                publishGameProcessedEvent(jobId, entityId, currentId, url, {
+                    action: 'SKIPPED',
+                    message: 'Do Not Scrape (flagged in ScrapeURL table)',
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: 'none',
+                    parsedData: { 
+                        scrapeStatus: 'DO_NOT_SCRAPE', 
+                        gameStatus: 'UNKNOWN',
+                        doNotScrape: true
+                    },
+                    saveResult: null,
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
+                currentId++;
+                continue;  // Continue to next ID, don't stop
             }
 
             // ═══════════════════════════════════════════════════════════════
@@ -1868,6 +2031,70 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                 continue;  // Continue to next gap ID, don't stop
             }
             
+            // ═══════════════════════════════════════════════════════════════
+            // v1.15.0 FIX: Check for BOT_BLOCKED before treating as error
+            // Bot blocks (CAPTCHA, SiteGround sgcaptcha, Cloudflare challenges)
+            // should be SKIPPED, not treated as fatal errors that stop the job
+            // These are temporary issues that may resolve on retry
+            // ═══════════════════════════════════════════════════════════════
+            if (isBotBlockedResponse(parsedData)) {
+                const blockType = parsedData.blockType || 'UNKNOWN';
+                console.log(`[ScrapingEngine] Gap ID ${tournamentId}: BOT_BLOCKED (${blockType}) - SKIPPING (not an error)`);
+                
+                // Count as skipped, not as error - don't stop the job
+                results.gamesSkipped++;
+                // Reset consecutive counters since this isn't a "not found" pattern
+                results.consecutiveBlanks = 0;
+                results.consecutiveNotFound = 0;
+                
+                publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
+                    action: 'SKIPPED',
+                    message: `Bot blocked: ${blockType}`,
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: 'none',
+                    parsedData: { 
+                        scrapeStatus: 'BOT_BLOCKED', 
+                        blockType: blockType,
+                        gameStatus: 'UNKNOWN'
+                    },
+                    saveResult: null,
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
+                continue;  // Continue to next gap ID, don't stop
+            }
+            
+            // ═══════════════════════════════════════════════════════════════
+            // v1.16.0 FIX: Check for doNotScrape before treating as error
+            // URLs flagged with doNotScrape=true in ScrapeURL table return
+            // gameStatus='UNKNOWN' with "Skipped - Do Not Scrape" message.
+            // These should be SKIPPED, not treated as fatal errors.
+            // The URL was flagged in a previous scrape - retry later/manually.
+            // ═══════════════════════════════════════════════════════════════
+            if (isDoNotScrapeResponse(parsedData)) {
+                console.log(`[ScrapingEngine] Gap ID ${tournamentId}: DO_NOT_SCRAPE - SKIPPING (flagged in ScrapeURL)`);
+                
+                // Count as skipped, not as error - don't stop the job
+                results.gamesSkipped++;
+                // Reset consecutive counters since this isn't a "not found" pattern
+                results.consecutiveBlanks = 0;
+                results.consecutiveNotFound = 0;
+                
+                publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
+                    action: 'SKIPPED',
+                    message: 'Do Not Scrape (flagged in ScrapeURL table)',
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: 'none',
+                    parsedData: { 
+                        scrapeStatus: 'DO_NOT_SCRAPE', 
+                        gameStatus: 'UNKNOWN',
+                        doNotScrape: true
+                    },
+                    saveResult: null,
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
+                continue;  // Continue to next gap ID, don't stop
+            }
+            
             if (isErrorResponse(parsedData) || isUnknownError) {
                 // Extract error message, including from FETCH_ERROR: prefix
                 let actualErrorMessage = parsedData.errorMessage || parsedData.error;
@@ -2153,6 +2380,8 @@ module.exports = {
     // Export helpers for testing
     isNotFoundResponse,
     isNotPublishedResponse,
+    isBotBlockedResponse,  // NEW v1.15.0
+    isDoNotScrapeResponse,  // NEW v1.16.0
     isUnknownErrorResponse,
     isUnparseableResponse,  // NEW v1.5.1
     isErrorResponse,
@@ -2162,6 +2391,8 @@ module.exports = {
     shouldSkipNotFoundGap,
     extractPlayerData,
     buildSaveInput,
+    // NEW v1.14.0: Duration parsing for GraphQL Int compatibility
+    parseDurationToInt,
     // NEW v1.4.0: Export for testing
     buildProgressStats
 };

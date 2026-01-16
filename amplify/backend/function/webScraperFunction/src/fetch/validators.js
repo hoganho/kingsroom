@@ -1,9 +1,15 @@
 /**
  * ===================================================================
- * Validators
+ * Validators (v1.1.0)
  * ===================================================================
  * 
  * URL and HTML validation utilities.
+ * 
+ * UPDATED v1.1.0:
+ * - ADDED: isCaptchaOrBotBlock() to detect bot protection pages
+ *   - Detects SiteGround sgcaptcha, Cloudflare challenges, etc.
+ *   - Returns true for pages that are CAPTCHA/bot detection redirects
+ *   - These should be treated as temporary fetch failures, not parsed
  * 
  * ===================================================================
  */
@@ -44,6 +50,66 @@ const isValidHtml = (html) => {
     const hasContent = html.length > 500;
     
     return hasContent && (hasHtmlTag || hasBodyTag);
+};
+
+/**
+ * Detect CAPTCHA or bot protection pages
+ * 
+ * These are NOT actual tournament pages - they are security challenge pages
+ * that should be treated as temporary fetch failures.
+ * 
+ * Common patterns:
+ * - SiteGround: meta refresh to /.well-known/sgcaptcha/
+ * - Cloudflare: __cf_chl_opt, cf-browser-verification
+ * - Generic: captcha, challenge, bot detection
+ * 
+ * NEW in v1.1.0
+ * 
+ * @param {string} html - HTML content to check
+ * @returns {object} { isBlocked: boolean, blockType: string|null }
+ */
+const isCaptchaOrBotBlock = (html) => {
+    if (!html || typeof html !== 'string') {
+        return { isBlocked: false, blockType: null };
+    }
+    
+    const htmlLower = html.toLowerCase();
+    
+    // SiteGround CAPTCHA/bot protection
+    // Pattern: <meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/...">
+    if (htmlLower.includes('/.well-known/sgcaptcha/') || 
+        htmlLower.includes('sgcaptcha')) {
+        return { isBlocked: true, blockType: 'SITEGROUND_CAPTCHA' };
+    }
+    
+    // Cloudflare challenge
+    if (htmlLower.includes('__cf_chl_opt') || 
+        htmlLower.includes('cf-browser-verification') ||
+        htmlLower.includes('cloudflare') && htmlLower.includes('challenge')) {
+        return { isBlocked: true, blockType: 'CLOUDFLARE_CHALLENGE' };
+    }
+    
+    // Generic CAPTCHA detection
+    if ((htmlLower.includes('captcha') && htmlLower.includes('verify')) ||
+        htmlLower.includes('bot detection') ||
+        htmlLower.includes('are you human') ||
+        htmlLower.includes('prove you are human')) {
+        return { isBlocked: true, blockType: 'GENERIC_CAPTCHA' };
+    }
+    
+    // Meta refresh to challenge URL (generic pattern)
+    const metaRefreshMatch = html.match(/<meta[^>]*http-equiv=["']?refresh["']?[^>]*content=["']?[^"']*(?:captcha|challenge|verify|blocked)[^"']*["']?/i);
+    if (metaRefreshMatch) {
+        return { isBlocked: true, blockType: 'REDIRECT_CHALLENGE' };
+    }
+    
+    // Very short HTML with just a redirect (suspicious - likely a challenge)
+    // Normal pages have body content; challenge pages often don't
+    if (html.length < 500 && !/<body/i.test(html) && /<meta[^>]*refresh/i.test(html)) {
+        return { isBlocked: true, blockType: 'SUSPICIOUS_REDIRECT' };
+    }
+    
+    return { isBlocked: false, blockType: null };
 };
 
 /**
@@ -138,6 +204,7 @@ const validateFetchOptions = (options) => {
 module.exports = {
     isValidUrl,
     isValidHtml,
+    isCaptchaOrBotBlock,  // NEW v1.1.0
     isTournamentNotFound,
     isNotPublished,
     isNotInUse,

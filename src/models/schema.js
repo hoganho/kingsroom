@@ -2548,6 +2548,17 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "byEntityStatus",
+                        "queryField": "gamesByEntityStatus",
+                        "fields": [
+                            "entityId",
+                            "gameStatus"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "byRecurringGame",
                         "fields": [
                             "recurringGameId",
@@ -12896,6 +12907,17 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "byEntityStatus",
+                        "queryField": "activeGamesByEntityStatus",
+                        "fields": [
+                            "entityId",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "byVenueActiveGame",
                         "queryField": "activeGamesByVenue",
                         "fields": [
@@ -13236,6 +13258,17 @@ export const schema = {
                         "fields": [
                             "entityId",
                             "finishedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityFinished",
+                        "queryField": "finishedGamesByEntity",
+                        "fields": [
+                            "entityId",
+                            "gameStartDateTime"
                         ]
                     }
                 },

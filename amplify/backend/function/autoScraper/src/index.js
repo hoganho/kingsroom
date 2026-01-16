@@ -785,6 +785,7 @@ function buildScrapingContext(jobId = null, entityId = null, options = {}) {
                 startId: options.startId,
                 endId: options.endId || endId,
                 bulkCount: options.bulkCount,
+                gapIds: accumulatedResults.remainingGapIds || options.gapIds,
             };
             
             await lambdaClient.send(new InvokeCommand({
@@ -908,7 +909,7 @@ async function executeJob(event) {
             startId: isContinuation ? continueFromId : job.startId,
             endId: isContinuation ? originalEndId : job.endId,
             maxId: job.maxId,
-            gapIds: job.gapIds,
+            gapIds: event.gapIds || job.gapIds,
             forceRefresh: job.forceRefresh,
             skipNotPublished: job.skipNotPublished,
             skipNotFoundGaps: job.skipNotFoundGaps,
