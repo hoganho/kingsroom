@@ -84,7 +84,8 @@
           "s3Key": "amplify-builds/socialFetcher-71736f6a464a72595559-build.zip",
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "socialPostProcessorFunction": "socialPostProcessor-dev",
-          "appsyncEndpoint": "https://ht3nugt6lvddpeeuwj3x6mkite.appsync-api.ap-southeast-2.amazonaws.com/graphql"
+          "appsyncEndpoint": "https://ht3nugt6lvddpeeuwj3x6mkite.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+          "socialMediaBucket": "pokerpro-scraper-storage"
         },
         "socialPostProcessor": {
           "deploymentBucketName": "amplify-kingsroom-dev-13051-deployment",
@@ -245,7 +246,8 @@
           "s3Key": "amplify-builds/socialFetcher-71736f6a464a72595559-build.zip",
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "socialPostProcessorFunction": "socialPostProcessor-prod",
-          "appsyncEndpoint": "https://ynuahifnznb5zddz727oiqnicy.appsync-api.ap-southeast-2.amazonaws.com/graphql"
+          "appsyncEndpoint": "https://ynuahifnznb5zddz727oiqnicy.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+          "socialMediaBucket": "kingsroom-storage-prod"
         },
         "socialPostProcessor": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
