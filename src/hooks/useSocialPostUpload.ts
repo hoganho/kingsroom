@@ -272,14 +272,10 @@ async function downloadAndUploadExternalImage(
     
     // Determine content type and filename
     let contentType = blob.type || 'image/jpeg';
-    let fileExtension = 'jpg';
     
-    if (contentType.includes('png')) fileExtension = 'png';
-    else if (contentType.includes('gif')) fileExtension = 'gif';
-    else if (contentType.includes('webp')) fileExtension = 'webp';
-    else if (imageUrl.includes('.png')) { fileExtension = 'png'; contentType = 'image/png'; }
-    else if (imageUrl.includes('.gif')) { fileExtension = 'gif'; contentType = 'image/gif'; }
-    else if (imageUrl.includes('.webp')) { fileExtension = 'webp'; contentType = 'image/webp'; }
+    if (imageUrl.includes('.png')) contentType = 'image/png';
+    else if (imageUrl.includes('.gif')) contentType = 'image/gif';
+    else if (imageUrl.includes('.webp')) contentType = 'image/webp';
     
     // Extract filename from URL or generate one
     let filename = 'image';
