@@ -292,6 +292,12 @@
         "recurringGameAdmin": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
           "s3Key": "amplify-builds/recurringGameAdmin-5447383269314f465277-build.zip"
+        },
+        "sesNotification": {
+          "senderEmail": "notifications@kingsroom.pokerprolive.com",
+          "recipientEmail": "hogan.ho@gmail.com",
+          "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
+          "s3Key": "amplify-builds/sesNotification-5868526c646f77447170-build.zip"
         }
       },
       "api": {

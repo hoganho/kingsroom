@@ -1,0 +1,9 @@
+{
+  "name": "ses-notification",
+  "version": "1.0.0",
+  "description": "SES notification Lambda for scraper success/failure alerts",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.700.0"
+  }
+}

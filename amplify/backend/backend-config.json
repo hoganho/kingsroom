@@ -386,6 +386,12 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "sesNotification": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "socialDataAggregator": {
       "build": true,
       "providerPlugin": "awscloudformation",
@@ -839,6 +845,38 @@
         {
           "category": "function",
           "resourceName": "scraperManagement"
+        }
+      ]
+    },
+    "AMPLIFY_function_sesNotification_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "sesNotification"
+        }
+      ]
+    },
+    "AMPLIFY_function_sesNotification_recipientEmail": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "sesNotification"
+        }
+      ]
+    },
+    "AMPLIFY_function_sesNotification_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "sesNotification"
+        }
+      ]
+    },
+    "AMPLIFY_function_sesNotification_senderEmail": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "sesNotification"
         }
       ]
     },
