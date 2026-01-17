@@ -62,6 +62,7 @@ const {
 
 const client = new DynamoDBClient({ region: "ap-southeast-2" });
 const docClient = DynamoDBDocumentClient.from(client);
+const { sendNotification, isEventBridgeTrigger } = require('./ses-notification');
 
 // ============================================
 // CONFIGURATION & CONSTANTS
@@ -467,14 +468,56 @@ exports.handler = async (event) => {
       : `Metrics refresh complete. Updated ${result.entityMetricsUpdated} entity, ${result.venueMetricsUpdated} venue, ${result.recurringGameMetricsUpdated} recurring game, ${result.tournamentSeriesMetricsUpdated} tournament series metrics.`;
 
     console.log('[METRICS] Refresh complete:', result);
-    return result;
 
+    // === NOTIFICATION CODE START ===
+    // Send notification for EventBridge-triggered runs
+    if (isEventBridgeTrigger) {
+      await sendNotification({
+        lambdaName: 'refreshAllMetrics',
+        status: result.success ? 'success' : 'failure',
+        triggerSource: 'EVENTBRIDGE',
+        durationMs: result.executionTimeMs,
+        summary: {
+          entitiesProcessed: result.entitiesProcessed,
+          entityMetricsUpdated: result.entityMetricsUpdated,
+          venueMetricsUpdated: result.venueMetricsUpdated,
+          recurringGameMetricsUpdated: result.recurringGameMetricsUpdated,
+          tournamentSeriesMetricsUpdated: result.tournamentSeriesMetricsUpdated,
+          snapshotsAnalyzed: result.snapshotsAnalyzed,
+          executionTime: `${Math.round(result.executionTimeMs / 1000)}s`,
+        },
+        error: result.errors.length > 0 ? result.errors.join(', ') : null,
+      });
+    }
+    // === NOTIFICATION CODE END ===
+
+    return result;
+    
   } catch (error) {
     console.error('[METRICS] Fatal error:', error);
     result.success = false;
     result.message = error.message;
     result.errors.push(error.message);
     result.executionTimeMs = Date.now() - startTime;
+
+    // === NOTIFICATION CODE START ===
+    // Send failure notification for EventBridge-triggered runs
+    if (isEventBridgeTrigger) {
+      await sendNotification({
+        lambdaName: 'refreshAllMetrics',
+        status: 'failure',
+        triggerSource: 'EVENTBRIDGE',
+        durationMs: result.executionTimeMs,
+        summary: {
+          entitiesProcessed: result.entitiesProcessed,
+          entityMetricsUpdated: result.entityMetricsUpdated,
+          executionTime: `${Math.round(result.executionTimeMs / 1000)}s`,
+        },
+        error: error.message,
+      });
+    }
+    // === NOTIFICATION CODE END ===
+
     return result;
   }
 };

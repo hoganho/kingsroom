@@ -508,6 +508,16 @@
           "Version": "2012-10-17",
           "Statement": [
             {
+              "Action": [
+                "ses:SendEmail",
+                "ses:SendRawEmail"
+              ],
+              "Resource": [
+                "arn:aws:ses:ap-southeast-2:*:identity/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
               "Effect": "Allow",
               "Action": [
                 "dynamodb:Query",

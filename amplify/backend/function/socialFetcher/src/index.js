@@ -47,6 +47,7 @@ const { SignatureV4 } = require('@aws-sdk/signature-v4');
 const { Sha256 } = require('@aws-crypto/sha256-js');
 const { defaultProvider } = require('@aws-sdk/credential-provider-node');
 const https = require('https');
+const { sendNotification, isEventBridgeTrigger } = require('./ses-notification');
 
 // Initialize clients
 const ddbClient = new DynamoDBClient({ region: process.env.REGION || 'ap-southeast-2' });
@@ -436,6 +437,7 @@ async function handleGraphQLRequest(event, context) {
  */
 async function handleScheduledScrape(context) {
   console.log('Running scheduled scrape');
+  const startTime = Date.now();
 
   const accountsDue = await getAccountsDueForScrape();
   console.log(`Found ${accountsDue.length} accounts due for scraping`);
@@ -446,6 +448,7 @@ async function handleScheduledScrape(context) {
     failed: 0,
     totalNewPosts: 0,
     totalPostsProcessed: 0,
+    accountResults: [], // Track per-account results for notification
   };
 
   for (const account of accountsDue) {
@@ -453,20 +456,74 @@ async function handleScheduledScrape(context) {
       const result = await scrapeAccount(account, { fetchAllHistory: false }, context);
       results.processed++;
 
+      const accountResult = {
+        accountName: account.accountName || account.id,
+        platform: account.platform,
+        newPosts: result.newPostsAdded || 0,
+        postsFound: result.postsFound || 0,
+        success: result.success,
+      };
+
       if (result.success) {
         results.success++;
         results.totalNewPosts += result.newPostsAdded;
         results.totalPostsProcessed += result.postsProcessed || 0;
       } else {
         results.failed++;
+        accountResult.error = result.message;
       }
+
+      results.accountResults.push(accountResult);
     } catch (error) {
       console.error(`Error scraping account ${account.id}:`, error);
       results.failed++;
+      results.accountResults.push({
+        accountName: account.accountName || account.id,
+        platform: account.platform,
+        newPosts: 0,
+        postsFound: 0,
+        success: false,
+        error: error.message,
+      });
     }
   }
 
+  const durationMs = Date.now() - startTime;
   console.log('Scheduled scrape completed:', results);
+
+  // === NOTIFICATION CODE START ===
+  // Build per-account summary for notification
+  const accountSummaries = results.accountResults.map(ar => {
+    if (ar.success) {
+      return `✅ ${ar.accountName}: ${ar.newPosts} new posts (${ar.postsFound} scanned)`;
+    } else {
+      return `❌ ${ar.accountName}: Failed - ${ar.error || 'Unknown error'}`;
+    }
+  });
+
+  await sendNotification({
+    lambdaName: 'socialFetcher',
+    status: results.failed === 0 ? 'success' : (results.success > 0 ? 'success' : 'failure'),
+    triggerSource: 'EVENTBRIDGE',
+    durationMs,
+    summary: {
+      accountsProcessed: results.processed,
+      accountsSucceeded: results.success,
+      accountsFailed: results.failed,
+      totalNewPosts: results.totalNewPosts,
+      totalPostsProcessed: results.totalPostsProcessed,
+      executionTime: `${Math.round(durationMs / 1000)}s`,
+      // Per-account breakdown
+      ...(accountSummaries.length > 0 && {
+        accountBreakdown: accountSummaries.join('\n'),
+      }),
+    },
+    error: results.failed > 0 
+      ? `${results.failed} account(s) failed to sync` 
+      : null,
+  });
+  // === NOTIFICATION CODE END ===
+
   return results;
 }
 

@@ -168,7 +168,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/autoScraper-64696172442b3542496f-build.zip"
+          "s3Key": "amplify-builds/autoScraper-616368416e6a43584c79-build.zip"
         },
         "deleteGameFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -209,11 +209,11 @@
         },
         "refreshAllMetrics": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/refreshAllMetrics-515a427a684e46463569-build.zip"
+          "s3Key": "amplify-builds/refreshAllMetrics-75754e58517246732b31-build.zip"
         },
         "refreshRunningGames": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/refreshRunningGames-64613435634c45486b6e-build.zip"
+          "s3Key": "amplify-builds/refreshRunningGames-505532574a6a66577748-build.zip"
         },
         "s3ManagementFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -234,7 +234,7 @@
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/scraperManagement-79704634434b742b5836-build.zip"
+          "s3Key": "amplify-builds/scraperManagement-44387475625052637375-build.zip"
         },
         "socialDataAggregator": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -243,7 +243,7 @@
         },
         "socialFetcher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/socialFetcher-71736f6a464a72595559-build.zip",
+          "s3Key": "amplify-builds/socialFetcher-76644a78353164456d56-build.zip",
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "socialPostProcessorFunction": "socialPostProcessor-prod",
           "appsyncEndpoint": "https://ynuahifnznb5zddz727oiqnicy.appsync-api.ap-southeast-2.amazonaws.com/graphql",
@@ -297,7 +297,7 @@
           "senderEmail": "notifications@kingsroom.pokerprolive.com",
           "recipientEmail": "hogan.ho@gmail.com",
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/sesNotification-5868526c646f77447170-build.zip"
+          "s3Key": "amplify-builds/sesNotification-346252397634427a4634-build.zip"
         }
       },
       "api": {

@@ -70,6 +70,29 @@ const getTableName = (modelName) => {
     return `${modelName}-${apiId}-${env}`;
 };
 
+/**
+ * Get all active entities that should be scraped on schedule
+ */
+async function getActiveEntities() {
+    const tableName = getTableName('Entity');
+    
+    try {
+        const result = await monitoredDdbDocClient.send(new ScanCommand({
+            TableName: tableName,
+            FilterExpression: 'isActive = :active',
+            ExpressionAttributeValues: {
+                ':active': true
+            }
+        }));
+        
+        console.log(`[getActiveEntities] Found ${result.Items?.length || 0} active entities`);
+        return result.Items || [];
+    } catch (error) {
+        console.error('[getActiveEntities] Error:', error);
+        return [];
+    }
+}
+
 function getStartTimeForRange(timeRange, now) {
     const ranges = {
         'LAST_HOUR': 60 * 60 * 1000,
@@ -104,42 +127,47 @@ function extractErrorType(errorMessage) {
 
 exports.handler = async (event, context) => {
     // ===== HANDLE CLOUDWATCH SCHEDULED EVENTS =====
-    // CloudWatch Events have 'detail-type' and 'source' fields, not 'typeName'/'fieldName'
     if (event['detail-type'] === 'Scheduled Event' && event.source === 'aws.events') {
         monitoring.trackOperation('SCHEDULED_EVENT', 'Handler', 'cloudwatch', { 
             ruleArn: event.resources?.[0] || 'unknown'
         });
         
         try {
-            // Option 1: No-op - just acknowledge the event
-            // Uncomment the section below if you want to trigger auto-scraping
-            
-            /* 
-            // Option 2: Trigger auto-scraping for all active entities
-            // Uncomment this section to enable scheduled scraping
+            // Trigger auto-scraping for all active entities
             const activeEntities = await getActiveEntities();
-            for (const entityId of activeEntities) {
-                await startScraperJob({ 
-                    input: { 
-                        entityId, 
-                        mode: 'bulk',
-                        triggerSource: 'SCHEDULED',
-                        triggeredBy: 'cloudwatch-schedule'
-                    }
-                }, event);
+            console.log(`[SCHEDULED] Found ${activeEntities.length} active entities to scrape`);
+            
+            const results = [];
+            for (const entity of activeEntities) {
+                try {
+                    console.log(`[SCHEDULED] Starting scrape job for entity: ${entity.entityName || entity.id}`);
+                    const job = await startScraperJob({ 
+                        input: { 
+                            entityId: entity.id, 
+                            mode: 'bulk',
+                            triggerSource: 'SCHEDULED',
+                            triggeredBy: 'cloudwatch-schedule'
+                        }
+                    }, event);
+                    results.push({ entityId: entity.id, jobId: job.id, status: 'started' });
+                } catch (entityError) {
+                    console.error(`[SCHEDULED] Failed to start job for ${entity.id}:`, entityError.message);
+                    results.push({ entityId: entity.id, status: 'failed', error: entityError.message });
+                }
             }
-            */
             
             return { 
                 statusCode: 200, 
-                body: 'Scheduled event processed',
-                processedAt: new Date().toISOString()
+                body: 'Scheduled scrape jobs started',
+                processedAt: new Date().toISOString(),
+                entitiesProcessed: activeEntities.length,
+                results
             };
         } catch (error) {
             monitoring.trackOperation('SCHEDULED_EVENT_ERROR', 'Handler', 'cloudwatch', { 
                 error: error.message 
             });
-            // Don't throw - just return gracefully for scheduled events
+            console.error('[SCHEDULED] Error:', error);
             return { 
                 statusCode: 500, 
                 body: `Scheduled event failed: ${error.message}` 

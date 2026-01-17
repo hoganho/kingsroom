@@ -1,7 +1,17 @@
 // src/pages/venues/VenueGameDetails.tsx
-// VERSION: 3.9.0 - Income statement style expanded view
+// VERSION: 3.9.2 - Chart trendline + PP-Disc column
 //
 // CHANGELOG:
+// - v3.9.2: Replaced cumulative line with trendline in chart
+//           - Linear regression trendline instead of cumulative P/L
+//           - Single Y-axis (both bars and trendline use same scale)
+//           - Dashed line style for trendline
+//           - Simplified tooltip (no cumulative value)
+// - v3.9.1: Added PP-Disc (Prizepool Discrepancy) column
+//           - New column between PP and GTD in Game History P&L table
+//           - Shows GameFinancialSnapshot.prizepoolPaidDelta value
+//           - Tooltip: "Prizepool discrepancy between calculated for players and advertised"
+//           - Formatted as currency, hidden on smaller screens (lg:table-cell)
 // - v3.9.0: Income statement format for expanded row
 //           - 3-column layout: Revenue | Costs | Summary
 //           - Grouped costs: Staff, Prize/Guarantee, Operating
@@ -259,6 +269,7 @@ const listRecurringGameInstancesQuery = /* GraphQL */ `
             profitPerPlayer
             rakePerEntry
             guaranteeOverlayPerPlayer
+            prizepoolPaidDelta
           }
         }
       }
@@ -465,6 +476,7 @@ interface GameFinancialSnapshotData {
   profitPerPlayer?: number | null;
   rakePerEntry?: number | null;
   guaranteeOverlayPerPlayer?: number | null;
+  prizepoolPaidDelta?: number | null;
 }
 
 interface EnrichedInstance {
@@ -777,10 +789,29 @@ const GameStatusMultiSelect: React.FC<GameStatusMultiSelectProps> = ({
   );
 };
 
-// ---- P/L Chart Component (Bar + Cumulative Line) ----
+// ---- P/L Chart Component (Bar + Trendline) ----
 
 interface PLChartProps {
   instances: EnrichedInstance[];
+}
+
+// Linear regression helper function
+function calculateLinearRegression(data: { x: number; y: number }[]): { slope: number; intercept: number } {
+  const n = data.length;
+  if (n === 0) return { slope: 0, intercept: 0 };
+  
+  const sumX = data.reduce((sum, p) => sum + p.x, 0);
+  const sumY = data.reduce((sum, p) => sum + p.y, 0);
+  const sumXY = data.reduce((sum, p) => sum + p.x * p.y, 0);
+  const sumXX = data.reduce((sum, p) => sum + p.x * p.x, 0);
+  
+  const denominator = n * sumXX - sumX * sumX;
+  if (denominator === 0) return { slope: 0, intercept: sumY / n };
+  
+  const slope = (n * sumXY - sumX * sumY) / denominator;
+  const intercept = (sumY - slope * sumX) / n;
+  
+  return { slope, intercept };
 }
 
 const PLChart: React.FC<PLChartProps> = ({ instances }) => {
@@ -792,13 +823,16 @@ const PLChart: React.FC<PLChartProps> = ({ instances }) => {
       return dateA.localeCompare(dateB);
     });
 
-    let cumulative = 0;
-    return sorted.map(inst => {
+    // First pass: collect profit data points for regression
+    const profitPoints: { x: number; y: number }[] = [];
+    const baseData = sorted.map((inst, index) => {
       const hasData = inst.instance.status === 'CONFIRMED' && inst.game && inst.financialSnapshot;
       const profit = hasData ? (inst.financialSnapshot?.netProfit ?? 0) : 0;
       const isMissing = inst.instance.status !== 'CONFIRMED' || !inst.game;
       
-      cumulative += profit;
+      if (!isMissing) {
+        profitPoints.push({ x: index, y: profit });
+      }
       
       let displayDate = '';
       try {
@@ -814,11 +848,20 @@ const PLChart: React.FC<PLChartProps> = ({ instances }) => {
         date: displayDate,
         fullDate: inst.instance.expectedDate,
         profit: isMissing ? 0 : profit,
-        cumulative,
         isMissing,
         status: inst.instance.status,
+        index,
       };
     });
+
+    // Calculate linear regression
+    const { slope, intercept } = calculateLinearRegression(profitPoints);
+    
+    // Second pass: add trendline values
+    return baseData.map(item => ({
+      ...item,
+      trendline: slope * item.index + intercept,
+    }));
   }, [instances]);
 
   if (chartData.length === 0) {
@@ -839,14 +882,9 @@ const PLChart: React.FC<PLChartProps> = ({ instances }) => {
           {data?.isMissing ? (
             <p className="text-gray-400">No data</p>
           ) : (
-            <>
-              <p className={`${data?.profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                P/L: {formatCurrency(data?.profit)}
-              </p>
-              <p className={`${data?.cumulative >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                Cumulative: {formatCurrency(data?.cumulative)}
-              </p>
-            </>
+            <p className={`${data?.profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+              P/L: {formatCurrency(data?.profit)}
+            </p>
           )}
         </div>
       );
@@ -865,39 +903,30 @@ const PLChart: React.FC<PLChartProps> = ({ instances }) => {
           interval="preserveStartEnd"
         />
         <YAxis 
-          yAxisId="left"
           tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
           tick={{ fontSize: 11 }} 
           stroke="#9ca3af"
         />
-        <YAxis 
-          yAxisId="right"
-          orientation="right"
-          tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-          tick={{ fontSize: 11 }} 
-          stroke="#10b981"
-        />
         <Tooltip content={<CustomTooltip />} />
-        <ReferenceLine yAxisId="left" y={0} stroke="#9ca3af" strokeDasharray="3 3" />
+        <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" />
         
         {/* Bar for per-game P/L */}
         <Bar 
-          yAxisId="left"
           dataKey="profit" 
           fill="#6366f1"
           radius={[2, 2, 0, 0]}
           maxBarSize={20}
         />
         
-        {/* Line for cumulative P/L */}
+        {/* Trendline */}
         <Line 
-          yAxisId="right"
-          type="monotone" 
-          dataKey="cumulative" 
+          type="linear" 
+          dataKey="trendline" 
           stroke="#10b981" 
           strokeWidth={2}
-          dot={{ r: 3, fill: '#10b981' }}
-          activeDot={{ r: 5 }}
+          strokeDasharray="5 5"
+          dot={false}
+          activeDot={false}
         />
       </ComposedChart>
     </ResponsiveContainer>
@@ -1046,6 +1075,13 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick }) => {
           {hasData && game?.prizepoolPaid ? formatCurrency(game.prizepoolPaid) : '-'}
         </td>
 
+        {/* Prizepool Delta */}
+        <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden lg:table-cell">
+          {hasFinancials && financialSnapshot?.prizepoolPaidDelta != null 
+            ? formatCurrency(financialSnapshot.prizepoolPaidDelta) 
+            : '-'}
+        </td>
+
         {/* Guarantee */}
         <td className="px-1 py-1 text-xs text-right text-gray-700 whitespace-nowrap hidden xl:table-cell pr-2">
           {hasData && game?.hasGuarantee && game?.guaranteeAmount
@@ -1057,7 +1093,7 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick }) => {
       {/* Expanded Details Row - Income Statement Format */}
       {isExpanded && hasData && (
         <tr className="bg-slate-50/80 border-b border-gray-200">
-          <td colSpan={10} className="px-3 py-3">
+          <td colSpan={11} className="px-3 py-3">
             {/* Header: Game Info */}
             <div className="flex items-start justify-between mb-3 pb-2 border-b border-gray-200">
               <div>
@@ -2067,8 +2103,8 @@ export const VenueGameDetails: React.FC = () => {
                 <span>Per-game P/L</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-1 bg-emerald-500 rounded" />
-                <span>Cumulative</span>
+                <div className="w-4 h-0.5 bg-emerald-500 rounded" style={{ borderTop: '2px dashed #10b981' }} />
+                <span>Trendline</span>
               </div>
             </div>
           </div>
@@ -2099,6 +2135,7 @@ export const VenueGameDetails: React.FC = () => {
                 <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Costs</th>
                 <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell">Buy-In</th>
                 <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell">PP</th>
+                <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell" title="Prizepool discrepancy between calculated for players and advertised">PP-Disc</th>
                 <th className="px-1 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden xl:table-cell pr-2">GTD</th>
               </tr>
             </thead>
@@ -2112,7 +2149,7 @@ export const VenueGameDetails: React.FC = () => {
               ))}
               {enrichedInstances.length === 0 && (
                 <tr>
-                  <td className="px-2 py-4 text-center text-xs text-gray-500" colSpan={10}>
+                  <td className="px-2 py-4 text-center text-xs text-gray-500" colSpan={11}>
                     No game instances found for this recurring game.
                   </td>
                 </tr>
@@ -2146,6 +2183,7 @@ export const VenueGameDetails: React.FC = () => {
                   <td className="px-1 py-1.5 text-xs text-right text-red-600 whitespace-nowrap hidden sm:table-cell">
                     {formatCurrency(summaryStats.totalCost)}
                   </td>
+                  <td className="px-1 py-1.5 hidden lg:table-cell"></td>
                   <td className="px-1 py-1.5 hidden lg:table-cell"></td>
                   <td className="px-1 py-1.5 hidden lg:table-cell"></td>
                   <td className="px-1 py-1.5 hidden xl:table-cell pr-2"></td>

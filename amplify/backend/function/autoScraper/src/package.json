@@ -10,6 +10,7 @@
   "dependencies": {
     "uuid": "^8.3.2",
     "node-fetch": "^2.7.0",
-    "aws4": "^1.12.0"
+    "aws4": "^1.12.0",
+    "@aws-sdk/client-ses": "^3.700.0"
   }
 }

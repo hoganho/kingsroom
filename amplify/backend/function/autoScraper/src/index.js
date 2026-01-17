@@ -55,7 +55,8 @@ const {
     DynamoDBDocumentClient,
     GetCommand,
     PutCommand,
-    UpdateCommand
+    UpdateCommand,
+    ScanCommand
 } = require("@aws-sdk/lib-dynamodb");
 const { LambdaClient, InvokeCommand } = require("@aws-sdk/client-lambda");
 const { v4: uuidv4 } = require('uuid');
@@ -76,6 +77,7 @@ const lambdaClient = new LambdaClient({});
 
 // Lambda Monitoring
 const { LambdaMonitoring } = require('./lambda-monitoring'); 
+const { sendNotification, isEventBridgeTrigger } = require('./ses-notification');
 
 // ===================================================================
 // CONFIGURATION
@@ -799,6 +801,38 @@ function buildScrapingContext(jobId = null, entityId = null, options = {}) {
     };
 }
 
+/**
+ * Query games that were created or updated during this job
+ * Used for notification summaries
+ */
+async function getRecentlyUpdatedGames(entityId, jobStartTime) {
+  const gameTable = process.env.API_KINGSROOM_GAMETABLE_NAME;
+  if (!gameTable) {
+    console.warn('[NOTIFICATION] Game table not configured');
+    return [];
+  }
+
+  const startTimeISO = new Date(jobStartTime).toISOString();
+  
+  try {
+    // Query games updated after job start time
+    const result = await monitoredDdbDocClient.send(new ScanCommand({
+      TableName: gameTable,
+      FilterExpression: 'entityId = :entityId AND updatedAt >= :startTime',
+      ExpressionAttributeValues: {
+        ':entityId': entityId,
+        ':startTime': startTimeISO,
+      },
+      Limit: 50, // Reasonable limit for notification
+    }));
+
+    return result.Items || [];
+  } catch (error) {
+    console.error('[NOTIFICATION] Error querying recent games:', error);
+    return [];
+  }
+}
+
 // ===================================================================
 // CONTROL OPERATIONS
 // ===================================================================
@@ -1004,6 +1038,52 @@ async function executeJob(event) {
 
         console.log(`[executeJob] Job ${jobId} completed: ${finalStatus}`);
         console.log(`[executeJob] Results:`, JSON.stringify(results, null, 2));
+
+        // === NOTIFICATION CODE START ===
+        // Send notification for EventBridge-triggered jobs (Auto mode)
+        const isScheduledTrigger = job.triggerSource === 'SCHEDULED' || job.triggeredBy === 'eventbridge';
+        
+        if (isScheduledTrigger) {
+          // Query for recently created/updated games to include in summary
+          let gameSummary = [];
+          try {
+            const recentGames = await getRecentlyUpdatedGames(entityId, jobStartTime);
+            gameSummary = recentGames.map(g => ({
+              id: g.id,
+              name: g.name || g.title || 'Unnamed',
+              status: g.status || g.gameStatus,
+              runners: g.runners || g.totalEntries || 0,
+              prizePool: g.prizePool || g.guaranteedPrize || 0,
+            }));
+          } catch (gameQueryErr) {
+            console.warn('[NOTIFICATION] Could not query recent games:', gameQueryErr.message);
+          }
+
+          await sendNotification({
+            lambdaName: 'autoScraper',
+            status: finalStatus === STOP_REASON.COMPLETED ? 'success' : 'failure',
+            triggerSource: 'EVENTBRIDGE',
+            durationMs: durationSeconds * 1000,
+            summary: {
+              jobId,
+              entityId,
+              mode: job.mode,
+              totalURLsProcessed: results.totalProcessed,
+              newGamesScraped: results.newGamesScraped,
+              gamesUpdated: results.gamesUpdated,
+              gamesSkipped: results.gamesSkipped,
+              errors: results.errors,
+              s3CacheHits: results.s3CacheHits,
+              stopReason: finalStatus,
+              // Include game details if available
+              ...(gameSummary.length > 0 && { 
+                recentGames: gameSummary.slice(0, 10) // Limit to 10 for email readability
+              }),
+            },
+            error: results.lastErrorMessage || null,
+          });
+        }
+        // === NOTIFICATION CODE END ===
 
         return {
             success: finalStatus === STOP_REASON.COMPLETED,
