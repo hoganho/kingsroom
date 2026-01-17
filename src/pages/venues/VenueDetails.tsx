@@ -1,7 +1,27 @@
 // src/pages/venues/VenueDetails.tsx
-// VERSION: 3.2.0 - Ad-hoc games expandable table
+// VERSION: 3.5.1 - Fixed game type filter classification logic
 //
 // CHANGELOG:
+// - v3.5.1: Fixed game type filter to use correct field combination
+//           - Uses gameType (TOURNAMENT/CASH_GAME) and tournamentType (SATELLITE)
+//           - Added tournamentType to GraphQL query and interface
+//           - CASH_GAME: gameType === 'CASH_GAME'
+//           - SATELLITE: tournamentType === 'SATELLITE'
+//           - REGULAR: everything else (default)
+// - v3.5.0: Added game type filter dropdown above profit chart
+//           - Filter by Regular, Cash Game, Satellite types
+//           - All types selected by default
+//           - Filter affects chart, trend badge, and recurring game cards
+//           - Grays out types not present in data
+// - v3.4.0: Added trend badges to recurring game ScheduleCards
+//           - Each card shows trend badge based on monthly profit data
+//           - Badges respond to time range filter selection
+//           - Only shows badge when 2+ months of data available
+// - v3.3.0: Added trendline and trend badge to profit chart
+//           - Linear regression trendline on area chart
+//           - TrendBadge component showing trend category
+//           - Categories: At Risk, Softening, Steady, Uplift, Breakout
+//           - Uses shared TrendBadge component from components/ui/TrendBadge
 // - v3.2.0: Ad-hoc games section now uses expandable P/L table
 //           - Same format as VenueGameDetails recurring games table
 //           - STATUS column replaced with GAME NAME column (ad-hoc games have no status)
@@ -11,7 +31,7 @@
 // - v3.0.0: BREAKING - Groups by recurringGameId instead of venueGameTypeKey
 // - v2.4.0: Non-SUPER_ADMIN users now properly locked to REGULAR game stats only
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, Grid, Text, Metric } from '@tremor/react';
 import {
@@ -26,6 +46,8 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   ArrowTopRightOnSquareIcon,
+  FunnelIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline';
 import {
   XAxis,
@@ -36,7 +58,7 @@ import {
   LineChart,
   Line,
   Area,
-  AreaChart,
+  ComposedChart,
 } from 'recharts';
 import { format, parseISO, startOfMonth } from 'date-fns';
 
@@ -49,6 +71,13 @@ import { MetricCard } from '../../components/ui/MetricCard';
 import { TimeRangeToggle } from '../../components/ui/TimeRangeToggle';
 import { DataTable } from '../../components/ui/DataTable';
 import type { ColumnDef } from '@tanstack/react-table';
+import { 
+  TrendBadge, 
+  TrendChartLegend, 
+  TrendInfo, 
+  calculateTrendInfo, 
+  calculateLinearRegression 
+} from '../../components/ui/TrendBadge';
 
 // ============================================
 // TYPES
@@ -56,6 +85,15 @@ import type { ColumnDef } from '@tanstack/react-table';
 
 export type TimeRangeKey = 'ALL' | '12M' | '6M' | '3M' | '1M';
 type SeriesTypeKey = 'ALL' | 'REGULAR' | 'SERIES';
+
+// Game type filter options
+type GameTypeKey = 'REGULAR' | 'CASH_GAME' | 'SATELLITE';
+
+const GAME_TYPE_OPTIONS: { key: GameTypeKey; label: string; color: string }[] = [
+  { key: 'REGULAR', label: 'Regular', color: 'blue' },
+  { key: 'CASH_GAME', label: 'Cash Game', color: 'green' },
+  { key: 'SATELLITE', label: 'Satellite', color: 'purple' },
+];
 
 const SERIES_TYPE_OPTIONS: { key: SeriesTypeKey; label: string; icon: React.ReactNode; color: string }[] = [
   { key: 'ALL', label: 'All Games', icon: <Squares2X2Icon className="w-4 h-4" />, color: 'indigo' },
@@ -112,6 +150,7 @@ interface GameFinancialSnapshotWithGame {
   netProfit?: number | null;
   profitMargin?: number | null;
   gameType?: string | null;
+  tournamentType?: string | null;
   isSeries?: boolean | null;
   game?: {
     id: string;
@@ -123,6 +162,7 @@ interface GameFinancialSnapshotWithGame {
     venueGameTypeKey?: string | null;
     buyIn?: number | null;
     gameType?: string | null;
+    tournamentType?: string | null;
     gameVariant?: string | null;
     tournamentId?: string | null;
     // NEW: recurringGameId for proper grouping
@@ -133,6 +173,28 @@ interface GameFinancialSnapshotWithGame {
       dayOfWeek?: string | null;
     } | null;
   } | null;
+}
+
+// Map gameType and tournamentType fields to our filter keys
+// gameType: TOURNAMENT | CASH_GAME
+// tournamentType: SATELLITE | others (only relevant for TOURNAMENT)
+function getGameTypeKey(snapshot: GameFinancialSnapshotWithGame): GameTypeKey {
+  // Get gameType and tournamentType from snapshot or nested game
+  const gameType = (snapshot.gameType || snapshot.game?.gameType || '').toUpperCase();
+  const tournamentType = (snapshot.tournamentType || snapshot.game?.tournamentType || '').toUpperCase();
+  
+  // Cash games
+  if (gameType === 'CASH_GAME' || gameType === 'CASH') {
+    return 'CASH_GAME';
+  }
+  
+  // Satellites (tournaments with tournamentType = SATELLITE)
+  if (tournamentType === 'SATELLITE') {
+    return 'SATELLITE';
+  }
+  
+  // Regular tournaments (default)
+  return 'REGULAR';
 }
 
 interface VenueInfo {
@@ -294,6 +356,7 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
         netProfit
         profitMargin
         gameType
+        tournamentType
         isSeries
         game {
           id
@@ -305,6 +368,7 @@ const listGameFinancialSnapshotsWithGame = /* GraphQL */ `
           venueGameTypeKey
           buyIn
           gameType
+          tournamentType
           gameVariant
           tournamentId
           recurringGameId
@@ -669,6 +733,86 @@ const SeriesTypeSelector: React.FC<SeriesTypeSelectorProps> = ({ value, onChange
   );
 };
 
+// ---- Game Type Filter Dropdown ----
+
+interface GameTypeFilterProps {
+  selectedTypes: Set<GameTypeKey>;
+  onToggle: (type: GameTypeKey) => void;
+  availableTypes: Set<GameTypeKey>;
+}
+
+const GameTypeFilter: React.FC<GameTypeFilterProps> = ({ selectedTypes, onToggle, availableTypes }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedCount = selectedTypes.size;
+  const allSelected = selectedCount === availableTypes.size;
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+      >
+        <FunnelIcon className="w-4 h-4 text-gray-500" />
+        <span className="text-gray-700">
+          Game Type
+          {!allSelected && (
+            <span className="ml-1 text-indigo-600">({selectedCount})</span>
+          )}
+        </span>
+        <ChevronDownIcon className={`w-3.5 h-3.5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+          {GAME_TYPE_OPTIONS.map((option) => {
+            const isSelected = selectedTypes.has(option.key);
+            const isAvailable = availableTypes.has(option.key);
+            
+            return (
+              <button
+                key={option.key}
+                onClick={() => onToggle(option.key)}
+                disabled={!isAvailable}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${
+                  isAvailable 
+                    ? 'hover:bg-gray-50 text-gray-700' 
+                    : 'text-gray-300 cursor-not-allowed'
+                }`}
+              >
+                <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+                  isSelected && isAvailable
+                    ? 'bg-indigo-600 border-indigo-600' 
+                    : isAvailable
+                    ? 'border-gray-300'
+                    : 'border-gray-200 bg-gray-50'
+                }`}>
+                  {isSelected && isAvailable && (
+                    <CheckIcon className="w-3 h-3 text-white" />
+                  )}
+                </div>
+                <span>{option.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // UPDATED: ScheduleCard now uses recurringGameId
 interface ScheduleCardProps {
   schedule: ScheduleGroupStats;
@@ -678,19 +822,29 @@ interface ScheduleCardProps {
 const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onClick }) => {
   const avgEntries = schedule.totalGames > 0 ? schedule.totalEntries / schedule.totalGames : 0;
 
+  // Calculate trend from trendData (monthly profit data)
+  const trendInfo = useMemo(() => {
+    if (!schedule.trendData || schedule.trendData.length < 2) {
+      return null;
+    }
+    const points = schedule.trendData.map((d, index) => ({ x: index, y: d.profit }));
+    return calculateTrendInfo(points);
+  }, [schedule.trendData]);
+
   return (
     <div 
       className="flex-shrink-0 rounded-2xl shadow-sm border border-blue-200 overflow-hidden cursor-pointer hover:shadow-md hover:border-blue-300 transition-all bg-white"
       onClick={onClick}
     >
       {/* Card Header */}
-      <div className="p-4 flex items-center gap-3 border-b border-blue-100 bg-blue-50/30">
+      <div className="p-4 flex items-center gap-2 border-b border-blue-100 bg-blue-50/30">
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-gray-900 truncate" title={schedule.displayName}>
             {schedule.displayName}
           </h3>
         </div>
-        <span className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+        {trendInfo && <TrendBadge trendInfo={trendInfo} />}
+        <span className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full whitespace-nowrap">
           {schedule.totalGames} games
         </span>
       </div>
@@ -723,8 +877,44 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onClick }) => {
   );
 };
 
-const ProfitTrendChart: React.FC<{ data: { date: string; profit: number }[] }> = ({ data }) => {
-  if (data.length === 0) {
+// ---- Profit Trend Chart with Trendline ----
+
+interface ProfitTrendChartProps {
+  data: { date: string; profit: number }[];
+  onTrendCalculated?: (trendInfo: TrendInfo) => void;
+}
+
+const ProfitTrendChart: React.FC<ProfitTrendChartProps> = ({ data, onTrendCalculated }) => {
+  // Calculate trendline and trend info
+  const { chartData, trendInfo } = useMemo(() => {
+    if (data.length === 0) {
+      return { chartData: [], trendInfo: calculateTrendInfo([]) };
+    }
+
+    // Prepare data points for regression
+    const profitPoints = data.map((d, index) => ({ x: index, y: d.profit }));
+    const trendInfo = calculateTrendInfo(profitPoints);
+    
+    // Calculate linear regression
+    const { slope, intercept } = calculateLinearRegression(profitPoints);
+    
+    // Add trendline values to data
+    const chartData = data.map((d, index) => ({
+      ...d,
+      trendline: slope * index + intercept,
+    }));
+
+    return { chartData, trendInfo };
+  }, [data]);
+
+  // Notify parent of trend calculation
+  useEffect(() => {
+    if (onTrendCalculated) {
+      onTrendCalculated(trendInfo);
+    }
+  }, [trendInfo, onTrendCalculated]);
+
+  if (chartData.length === 0) {
     return (
       <div className="flex items-center justify-center h-48 text-gray-400">
         No trend data available
@@ -734,7 +924,7 @@ const ProfitTrendChart: React.FC<{ data: { date: string; profit: number }[] }> =
 
   return (
     <ResponsiveContainer width="100%" height={200}>
-      <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
@@ -760,7 +950,10 @@ const ProfitTrendChart: React.FC<{ data: { date: string; profit: number }[] }> =
           stroke="#9ca3af"
         />
         <Tooltip
-          formatter={(value: number) => [formatCurrency(value), 'Profit']}
+          formatter={(value: number, name: string) => {
+            if (name === 'trendline') return [formatCurrency(value), 'Trend'];
+            return [formatCurrency(value), 'Profit'];
+          }}
           labelFormatter={(label) => {
             try {
               return format(parseISO(label + '-01'), 'MMMM yyyy');
@@ -782,8 +975,58 @@ const ProfitTrendChart: React.FC<{ data: { date: string; profit: number }[] }> =
           strokeWidth={2}
           fill="url(#profitGradient)"
         />
-      </AreaChart>
+        <Line 
+          type="linear" 
+          dataKey="trendline" 
+          stroke="#10b981" 
+          strokeWidth={2}
+          strokeDasharray="5 5"
+          dot={false}
+          activeDot={false}
+        />
+      </ComposedChart>
     </ResponsiveContainer>
+  );
+};
+
+// ---- Profit Trend Chart Section with Badge ----
+
+interface ProfitTrendChartSectionProps {
+  data: { date: string; profit: number }[];
+  selectedGameTypes: Set<GameTypeKey>;
+  onGameTypeToggle: (type: GameTypeKey) => void;
+  availableGameTypes: Set<GameTypeKey>;
+}
+
+const ProfitTrendChartSection: React.FC<ProfitTrendChartSectionProps> = ({ 
+  data, 
+  selectedGameTypes, 
+  onGameTypeToggle,
+  availableGameTypes 
+}) => {
+  const [trendInfo, setTrendInfo] = useState<TrendInfo | null>(null);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+            <ChartBarIcon className="h-5 w-5 mr-2 text-gray-400" />
+            Profit Trend (All Games)
+          </h3>
+          {trendInfo && <TrendBadge trendInfo={trendInfo} />}
+          <GameTypeFilter 
+            selectedTypes={selectedGameTypes}
+            onToggle={onGameTypeToggle}
+            availableTypes={availableGameTypes}
+          />
+        </div>
+        <TrendChartLegend />
+      </div>
+      <Card>
+        <ProfitTrendChart data={data} onTrendCalculated={setTrendInfo} />
+      </Card>
+    </div>
   );
 };
 
@@ -1179,6 +1422,25 @@ export const VenueDetails: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'games' | 'analytics'>('overview');
   const [gameHistoryFilter, setGameHistoryFilter] = useState<'all' | 'recurring' | 'adhoc'>('all');
+  const [selectedGameTypes, setSelectedGameTypes] = useState<Set<GameTypeKey>>(
+    new Set(['REGULAR', 'CASH_GAME', 'SATELLITE'])
+  );
+
+  // Toggle game type filter
+  const handleGameTypeToggle = (type: GameTypeKey) => {
+    setSelectedGameTypes(prev => {
+      const next = new Set(prev);
+      if (next.has(type)) {
+        // Don't allow deselecting all types
+        if (next.size > 1) {
+          next.delete(type);
+        }
+      } else {
+        next.add(type);
+      }
+      return next;
+    });
+  };
 
   // Ensure seriesType is always REGULAR for non-SUPER_ADMIN users
   useEffect(() => {
@@ -1315,13 +1577,31 @@ export const VenueDetails: React.FC = () => {
     void load();
   }, [venueId, entityId, timeRange, seriesType, venueMetricsId]);
 
+  // Compute available game types from data
+  const availableGameTypes = useMemo(() => {
+    const types = new Set<GameTypeKey>();
+    allSnapshots.forEach(snap => {
+      types.add(getGameTypeKey(snap));
+    });
+    return types;
+  }, [allSnapshots]);
+
+  // Filter snapshots by selected game types
+  const filteredAllSnapshots = useMemo(() => {
+    return allSnapshots.filter(snap => selectedGameTypes.has(getGameTypeKey(snap)));
+  }, [allSnapshots, selectedGameTypes]);
+
+  const filteredRecurringSnapshots = useMemo(() => {
+    return recurringSnapshots.filter(snap => selectedGameTypes.has(getGameTypeKey(snap)));
+  }, [recurringSnapshots, selectedGameTypes]);
+
   // Compute stats - NOW GROUPED BY recurringGameId
   const { scheduleStats, globalStats: tableGlobalStats } = useMemo(
-    () => buildScheduleGroupStats(recurringSnapshots),
-    [recurringSnapshots]
+    () => buildScheduleGroupStats(filteredRecurringSnapshots),
+    [filteredRecurringSnapshots]
   );
 
-  const trendData = useMemo(() => buildOverallTrendData(allSnapshots), [allSnapshots]);
+  const trendData = useMemo(() => buildOverallTrendData(filteredAllSnapshots), [filteredAllSnapshots]);
 
   // Group recurring games by day of week
   const scheduleStatsByDay = useMemo(() => {
@@ -1648,21 +1928,18 @@ export const VenueDetails: React.FC = () => {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Profit Trend Chart */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                <ChartBarIcon className="h-5 w-5 mr-2 text-gray-400" />
-                Profit Trend (All Games)
-              </h3>
-              <Card>
-                <ProfitTrendChart data={trendData} />
-              </Card>
-            </div>
+            <ProfitTrendChartSection 
+              data={trendData}
+              selectedGameTypes={selectedGameTypes}
+              onGameTypeToggle={handleGameTypeToggle}
+              availableGameTypes={availableGameTypes}
+            />
 
             {/* Recurring Games Section - GROUPED BY DAY OF WEEK */}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <Text className="text-xs font-semibold uppercase text-gray-500">
-                  Recurring Games ({scheduleStats.length} templates, {recurringSnapshots.length} games)
+                  Recurring Games ({scheduleStats.length} templates, {filteredRecurringSnapshots.length} games)
                 </Text>
                 <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
                   {formatCurrency(tableGlobalStats.totalProfit)} profit

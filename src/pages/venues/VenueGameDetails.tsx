@@ -1,7 +1,27 @@
 // src/pages/venues/VenueGameDetails.tsx
-// VERSION: 3.9.2 - Chart trendline + PP-Disc column
+// VERSION: 3.12.0 - Navigate to GameDetails page instead of edit modal
 //
 // CHANGELOG:
+// - v3.12.0: Launch icon now navigates to GameDetails page
+//           - Removed edit modal from this page
+//           - Click launch icon to open /games/details/:gameId
+//           - Cleaned up unused imports, queries, and interfaces
+// - v3.11.1: Fixed game type filter to use correct field combination
+//           - Uses gameType (TOURNAMENT/CASH_GAME) and tournamentType (SATELLITE)
+//           - CASH_GAME: gameType === 'CASH_GAME'
+//           - SATELLITE: tournamentType === 'SATELLITE'
+//           - REGULAR: everything else (default)
+// - v3.11.0: Added game type filter dropdown above profit chart
+//           - Filter by Regular, Cash Game, Satellite types
+//           - All types selected by default
+//           - Filter affects chart, trend badge, and P&L table
+//           - Uses isSatellite flag and gameType field for classification
+// - v3.10.0: Changed chart to area chart with trend badge
+//           - Replaced bar chart with area chart (matching VenueDetails style)
+//           - Added TrendBadge component showing trend category
+//           - Trend categories: At Risk, Softening, Steady, Uplift, Breakout
+//           - Based on linear regression percentage change
+//           - Uses shared TrendBadge component from components/ui/TrendBadge
 // - v3.9.2: Replaced cumulative line with trendline in chart
 //           - Linear regression trendline instead of cumulative P/L
 //           - Single Y-axis (both bars and trendline use same scale)
@@ -39,7 +59,7 @@
 // - v3.1.0: Optimized single-query loading via nested relationships
 // - v3.0.0: BREAKING - Now queries RecurringGameInstance table
 
-import React, { useState, useEffect, useMemo, Fragment, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, Grid, Text } from '@tremor/react';
 import {
@@ -48,7 +68,6 @@ import {
   TrophyIcon,
   UserGroupIcon,
   BanknotesIcon,
-  XMarkIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   ExclamationTriangleIcon,
@@ -57,10 +76,9 @@ import {
   FunnelIcon,
 } from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns';
-import { Dialog, Transition } from '@headlessui/react';
 import {
   ComposedChart,
-  Bar,
+  Area,
   Line,
   XAxis,
   YAxis,
@@ -76,10 +94,26 @@ import { useEntity } from '../../contexts/EntityContext';
 import { getClient } from '../../utils/apiClient';
 import { MetricCard } from '../../components/ui/MetricCard';
 import { TimeRangeToggle } from '../../components/ui/TimeRangeToggle';
+import { 
+  TrendBadge, 
+  TrendChartLegend, 
+  TrendInfo, 
+  calculateTrendInfo, 
+  calculateLinearRegression 
+} from '../../components/ui/TrendBadge';
 
 // ---- Time range utilities ----
 
 export type TimeRangeKey = 'ALL' | '12M' | '6M' | '3M' | '1M';
+
+// Game type filter options
+type GameTypeKey = 'REGULAR' | 'CASH_GAME' | 'SATELLITE';
+
+const GAME_TYPE_OPTIONS: { key: GameTypeKey; label: string; color: string }[] = [
+  { key: 'REGULAR', label: 'Regular', color: 'blue' },
+  { key: 'CASH_GAME', label: 'Cash Game', color: 'green' },
+  { key: 'SATELLITE', label: 'Satellite', color: 'purple' },
+];
 
 function getTimeRangeBounds(range: TimeRangeKey): { from: string | null; to: string | null } {
   const to = new Date();
@@ -129,8 +163,6 @@ const GameStatusBadge: React.FC<{ status: string | null | undefined }> = ({ stat
     </span>
   );
 };
-
-const TOURNAMENT_TYPE_OPTIONS = ['FREEZEOUT', 'REBUY', 'SATELLITE', 'DEEPSTACK'];
 
 // Instance status types (matches RecurringGameInstanceStatus enum)
 type InstanceStatus = 'CONFIRMED' | 'CANCELLED' | 'SKIPPED' | 'REPLACED' | 'UNKNOWN' | 'NO_SHOW';
@@ -278,102 +310,6 @@ const listRecurringGameInstancesQuery = /* GraphQL */ `
   }
 `;
 
-// Query for Game (for edit modal)
-const getGameQuery = /* GraphQL */ `
-  query GetGame($id: ID!) {
-    getGame(id: $id) {
-      id
-      name
-      gameType
-      gameVariant
-      gameStatus
-      gameStartDateTime
-      gameEndDateTime
-      registrationStatus
-      totalDuration
-      gameFrequency
-      buyIn
-      rake
-      venueFee
-      startingStack
-      hasGuarantee
-      guaranteeAmount
-      prizepoolPaid
-      prizepoolCalculated
-      totalUniquePlayers
-      totalRebuys
-      totalAddons
-      totalInitialEntries
-      totalEntries
-      totalBuyInsCollected
-      rakeRevenue
-      prizepoolPlayerContributions
-      prizepoolAddedValue
-      prizepoolSurplus
-      guaranteeOverlayCost
-      gameProfit
-      playersRemaining
-      tournamentType
-      isRegular
-      isSatellite
-      gameTags
-      dealerDealt
-      isSeries
-      seriesName
-      isMainEvent
-      eventNumber
-      dayNumber
-      flightLetter
-      finalDay
-      consolidationType
-      consolidationKey
-      isPartialData
-      missingFlightCount
-      expectedTotalEntries
-      venueScheduleKey
-      venueGameTypeKey
-      wasEdited
-      lastEditedAt
-      lastEditedBy
-      updatedAt
-      hasJackpotContributions
-      jackpotContributionAmount
-      hasAccumulatorTickets
-      accumulatorTicketValue
-      numberOfAccumulatorTicketsPaid
-      tournamentId
-      venueId
-      entityId
-      recurringGameId
-    }
-  }
-`;
-
-const updateGameMutation = /* GraphQL */ `
-  mutation UpdateGame($input: UpdateGameInput!) {
-    updateGame(input: $input) {
-      id
-      name
-      gameStatus
-      buyIn
-      rake
-      venueFee
-      hasGuarantee
-      guaranteeAmount
-      prizepoolPaid
-      totalEntries
-      totalUniquePlayers
-      totalRebuys
-      totalAddons
-      tournamentType
-      gameType
-      gameVariant
-      wasEdited
-      lastEditedAt
-    }
-  }
-`;
-
 // ---- Types ----
 
 interface RecurringGameInstance {
@@ -485,6 +421,30 @@ interface EnrichedInstance {
   financialSnapshot?: GameFinancialSnapshotData | null;
 }
 
+// Map gameType and tournamentType fields to our filter keys
+// gameType: TOURNAMENT | CASH_GAME
+// tournamentType: SATELLITE | others (only relevant for TOURNAMENT)
+function getGameTypeKeyFromInstance(instance: EnrichedInstance): GameTypeKey {
+  const game = instance.game;
+  
+  // Get gameType from game object
+  const gameType = (game?.gameType || '').toUpperCase();
+  const tournamentType = (game?.tournamentType || '').toUpperCase();
+  
+  // Cash games
+  if (gameType === 'CASH_GAME' || gameType === 'CASH') {
+    return 'CASH_GAME';
+  }
+  
+  // Satellites (tournaments with tournamentType = SATELLITE)
+  if (tournamentType === 'SATELLITE') {
+    return 'SATELLITE';
+  }
+  
+  // Regular tournaments (default)
+  return 'REGULAR';
+}
+
 interface VenueInfo {
   id: string;
   name: string;
@@ -504,57 +464,6 @@ interface RecurringGameInfo {
   typicalGuarantee?: number | null;
   startTime?: string | null;
   typicalRake?: number | null;
-}
-
-interface GameDetails {
-  id: string;
-  name: string;
-  gameType: string;
-  gameVariant: string;
-  gameStatus: string;
-  gameStartDateTime: string;
-  gameEndDateTime?: string | null;
-  registrationStatus?: string | null;
-  totalDuration?: number | null;
-  gameFrequency?: string | null;
-  buyIn?: number | null;
-  rake?: number | null;
-  venueFee?: number | null;
-  startingStack?: number | null;
-  hasGuarantee?: boolean | null;
-  guaranteeAmount?: number | null;
-  prizepoolPaid?: number | null;
-  prizepoolCalculated?: number | null;
-  totalUniquePlayers?: number | null;
-  totalRebuys?: number | null;
-  totalAddons?: number | null;
-  totalInitialEntries?: number | null;
-  totalEntries?: number | null;
-  totalBuyInsCollected?: number | null;
-  rakeRevenue?: number | null;
-  prizepoolPlayerContributions?: number | null;
-  prizepoolAddedValue?: number | null;
-  prizepoolSurplus?: number | null;
-  guaranteeOverlayCost?: number | null;
-  gameProfit?: number | null;
-  playersRemaining?: number | null;
-  tournamentType?: string | null;
-  isRegular?: boolean | null;
-  isSatellite?: boolean | null;
-  gameTags?: string[] | null;
-  dealerDealt?: boolean | null;
-  isSeries?: boolean | null;
-  seriesName?: string | null;
-  isMainEvent?: boolean | null;
-  eventNumber?: number | null;
-  dayNumber?: number | null;
-  flightLetter?: string | null;
-  finalDay?: boolean | null;
-  consolidationType?: string | null;
-  consolidationKey?: string | null;
-  isPartialData?: boolean | null;
-  missingFlightCount?: number | null;
-  expectedTotalEntries?: number | null;
 }
 
 interface SummaryStats {
@@ -789,34 +698,16 @@ const GameStatusMultiSelect: React.FC<GameStatusMultiSelectProps> = ({
   );
 };
 
-// ---- P/L Chart Component (Bar + Trendline) ----
+// ---- P/L Chart Component (Area + Trendline) ----
 
 interface PLChartProps {
   instances: EnrichedInstance[];
+  onTrendCalculated?: (trendInfo: TrendInfo) => void;
 }
 
-// Linear regression helper function
-function calculateLinearRegression(data: { x: number; y: number }[]): { slope: number; intercept: number } {
-  const n = data.length;
-  if (n === 0) return { slope: 0, intercept: 0 };
-  
-  const sumX = data.reduce((sum, p) => sum + p.x, 0);
-  const sumY = data.reduce((sum, p) => sum + p.y, 0);
-  const sumXY = data.reduce((sum, p) => sum + p.x * p.y, 0);
-  const sumXX = data.reduce((sum, p) => sum + p.x * p.x, 0);
-  
-  const denominator = n * sumXX - sumX * sumX;
-  if (denominator === 0) return { slope: 0, intercept: sumY / n };
-  
-  const slope = (n * sumXY - sumX * sumY) / denominator;
-  const intercept = (sumY - slope * sumX) / n;
-  
-  return { slope, intercept };
-}
-
-const PLChart: React.FC<PLChartProps> = ({ instances }) => {
+const PLChart: React.FC<PLChartProps> = ({ instances, onTrendCalculated }) => {
   // Sort by date (oldest first for left-to-right timeline)
-  const chartData = useMemo(() => {
+  const { chartData, trendInfo } = useMemo(() => {
     const sorted = [...instances].sort((a, b) => {
       const dateA = a.instance.expectedDate || '';
       const dateB = b.instance.expectedDate || '';
@@ -847,22 +738,32 @@ const PLChart: React.FC<PLChartProps> = ({ instances }) => {
         id: inst.instance.id,
         date: displayDate,
         fullDate: inst.instance.expectedDate,
-        profit: isMissing ? 0 : profit,
+        profit: isMissing ? null : profit,
         isMissing,
         status: inst.instance.status,
         index,
       };
     });
 
-    // Calculate linear regression
+    // Calculate linear regression and trend info
     const { slope, intercept } = calculateLinearRegression(profitPoints);
+    const trendInfo = calculateTrendInfo(profitPoints);
     
     // Second pass: add trendline values
-    return baseData.map(item => ({
+    const chartData = baseData.map(item => ({
       ...item,
       trendline: slope * item.index + intercept,
     }));
+
+    return { chartData, trendInfo };
   }, [instances]);
+
+  // Notify parent of trend calculation
+  useEffect(() => {
+    if (onTrendCalculated) {
+      onTrendCalculated(trendInfo);
+    }
+  }, [trendInfo, onTrendCalculated]);
 
   if (chartData.length === 0) {
     return (
@@ -895,6 +796,12 @@ const PLChart: React.FC<PLChartProps> = ({ instances }) => {
   return (
     <ResponsiveContainer width="100%" height={200}>
       <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id="profitGradientGameDetails" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+          </linearGradient>
+        </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
         <XAxis 
           dataKey="date" 
@@ -910,12 +817,14 @@ const PLChart: React.FC<PLChartProps> = ({ instances }) => {
         <Tooltip content={<CustomTooltip />} />
         <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" />
         
-        {/* Bar for per-game P/L */}
-        <Bar 
-          dataKey="profit" 
-          fill="#6366f1"
-          radius={[2, 2, 0, 0]}
-          maxBarSize={20}
+        {/* Area for profit */}
+        <Area
+          type="monotone"
+          dataKey="profit"
+          stroke="#6366f1"
+          strokeWidth={2}
+          fill="url(#profitGradientGameDetails)"
+          connectNulls={false}
         />
         
         {/* Trendline */}
@@ -933,14 +842,130 @@ const PLChart: React.FC<PLChartProps> = ({ instances }) => {
   );
 };
 
+// ---- Game Type Filter Dropdown ----
+
+interface GameTypeFilterProps {
+  selectedTypes: Set<GameTypeKey>;
+  onToggle: (type: GameTypeKey) => void;
+  availableTypes: Set<GameTypeKey>;
+}
+
+const GameTypeFilter: React.FC<GameTypeFilterProps> = ({ selectedTypes, onToggle, availableTypes }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedCount = selectedTypes.size;
+  const allSelected = selectedCount === availableTypes.size;
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+      >
+        <FunnelIcon className="w-4 h-4 text-gray-500" />
+        <span className="text-gray-700">
+          Game Type
+          {!allSelected && (
+            <span className="ml-1 text-indigo-600">({selectedCount})</span>
+          )}
+        </span>
+        <ChevronDownIcon className={`w-3.5 h-3.5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+          {GAME_TYPE_OPTIONS.map((option) => {
+            const isSelected = selectedTypes.has(option.key);
+            const isAvailable = availableTypes.has(option.key);
+            
+            return (
+              <button
+                key={option.key}
+                onClick={() => onToggle(option.key)}
+                disabled={!isAvailable}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${
+                  isAvailable 
+                    ? 'hover:bg-gray-50 text-gray-700' 
+                    : 'text-gray-300 cursor-not-allowed'
+                }`}
+              >
+                <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+                  isSelected && isAvailable
+                    ? 'bg-indigo-600 border-indigo-600' 
+                    : isAvailable
+                    ? 'border-gray-300'
+                    : 'border-gray-200 bg-gray-50'
+                }`}>
+                  {isSelected && isAvailable && (
+                    <CheckIcon className="w-3 h-3 text-white" />
+                  )}
+                </div>
+                <span>{option.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ---- Profit Trend Chart Section with Badge ----
+
+interface ProfitTrendChartSectionProps {
+  instances: EnrichedInstance[];
+  selectedGameTypes: Set<GameTypeKey>;
+  onGameTypeToggle: (type: GameTypeKey) => void;
+  availableGameTypes: Set<GameTypeKey>;
+}
+
+const ProfitTrendChartSection: React.FC<ProfitTrendChartSectionProps> = ({ 
+  instances,
+  selectedGameTypes,
+  onGameTypeToggle,
+  availableGameTypes
+}) => {
+  const [trendInfo, setTrendInfo] = useState<TrendInfo | null>(null);
+
+  return (
+    <Card className="mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <Text className="text-sm font-semibold">Profit Trend</Text>
+          {trendInfo && <TrendBadge trendInfo={trendInfo} />}
+          <GameTypeFilter 
+            selectedTypes={selectedGameTypes}
+            onToggle={onGameTypeToggle}
+            availableTypes={availableGameTypes}
+          />
+        </div>
+        <TrendChartLegend />
+      </div>
+      <PLChart instances={instances} onTrendCalculated={setTrendInfo} />
+    </Card>
+  );
+};
+
 // ---- Expandable P&L Row Component ----
 
 interface PLRowProps {
   enrichedInstance: EnrichedInstance;
-  onRowClick: (gameId: string) => void;
+  onNavigateToGame: (gameId: string) => void;
 }
 
-const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick }) => {
+const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onNavigateToGame }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { instance, game, financialSnapshot } = enrichedInstance;
   
@@ -960,7 +985,7 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick }) => {
   const handleNavigateToGame = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (game?.id) {
-      onRowClick(game.id);
+      onNavigateToGame(game.id);
     }
   };
 
@@ -1102,7 +1127,7 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick }) => {
                   <button
                     onClick={handleNavigateToGame}
                     className="p-0.5 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded"
-                    title="Edit game"
+                    title="View game details"
                   >
                     <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
                   </button>
@@ -1406,322 +1431,6 @@ const PLRow: React.FC<PLRowProps> = ({ enrichedInstance, onRowClick }) => {
   );
 };
 
-// ---- Game Edit Modal Component ----
-
-interface GameEditModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  gameId: string | null;
-  onSaveSuccess: () => void;
-}
-
-const GameEditModal: React.FC<GameEditModalProps> = ({
-  isOpen,
-  onClose,
-  gameId,
-  onSaveSuccess,
-}) => {
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
-  const [formData, setFormData] = useState<Partial<GameDetails>>({});
-
-  useEffect(() => {
-    if (isOpen && gameId) {
-      loadGameDetails();
-    } else {
-      setGameDetails(null);
-      setFormData({});
-      setError(null);
-    }
-  }, [isOpen, gameId]);
-
-  const loadGameDetails = async () => {
-    if (!gameId) return;
-    
-    setLoading(true);
-    setError(null);
-
-    try {
-      const client = getClient();
-      const res = await client.graphql({
-        query: getGameQuery,
-        variables: { id: gameId },
-      }) as any;
-
-      const game = res?.data?.getGame;
-      if (game) {
-        setGameDetails(game);
-        setFormData(game);
-      } else {
-        setError('Game not found');
-      }
-    } catch (err: any) {
-      console.error('Error loading game:', err);
-      setError(err?.message ?? 'Failed to load game');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!gameId || !formData) return;
-
-    setSaving(true);
-    setError(null);
-
-    try {
-      const client = getClient();
-
-      const input = {
-        id: gameId,
-        gameStatus: formData.gameStatus,
-        tournamentType: formData.tournamentType,
-        buyIn: formData.buyIn,
-        rake: formData.rake,
-        venueFee: formData.venueFee,
-        hasGuarantee: formData.hasGuarantee,
-        guaranteeAmount: formData.guaranteeAmount,
-        prizepoolPaid: formData.prizepoolPaid,
-        totalEntries: formData.totalEntries,
-        totalUniquePlayers: formData.totalUniquePlayers,
-        totalRebuys: formData.totalRebuys,
-        totalAddons: formData.totalAddons,
-        wasEdited: true,
-        lastEditedAt: new Date().toISOString(),
-      };
-
-      await client.graphql({
-        query: updateGameMutation,
-        variables: { input },
-      });
-
-      onSaveSuccess();
-      onClose();
-    } catch (err: any) {
-      console.error('Error saving game:', err);
-      setError(err?.message ?? 'Failed to save game');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleFieldChange = (field: keyof GameDetails, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all">
-                <div className="flex items-center justify-between mb-4">
-                  <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
-                    Edit Game
-                  </Dialog.Title>
-                  <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
-                    <XMarkIcon className="h-5 w-5" />
-                  </button>
-                </div>
-
-                {loading ? (
-                  <div className="py-8 text-center text-gray-500">Loading game details...</div>
-                ) : error ? (
-                  <div className="py-8 text-center text-red-600">{error}</div>
-                ) : gameDetails ? (
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <Text className="text-xs text-gray-500">Game</Text>
-                      <Text className="font-medium">{gameDetails.name}</Text>
-                      <Text className="text-xs text-gray-400 mt-1">
-                        {gameDetails.gameStartDateTime && 
-                          format(parseISO(gameDetails.gameStartDateTime), 'dd MMM yyyy HH:mm')}
-                      </Text>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                        <select
-                          value={formData.gameStatus || ''}
-                          onChange={(e) => handleFieldChange('gameStatus', e.target.value)}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        >
-                          {GAME_STATUS_OPTIONS.map(opt => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Tournament Type</label>
-                        <select
-                          value={formData.tournamentType || ''}
-                          onChange={(e) => handleFieldChange('tournamentType', e.target.value || null)}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        >
-                          <option value="">None</option>
-                          {TOURNAMENT_TYPE_OPTIONS.map(opt => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Financial Fields */}
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Buy-in ($)</label>
-                        <input
-                          type="number"
-                          value={formData.buyIn ?? ''}
-                          onChange={(e) => handleFieldChange('buyIn', e.target.value ? parseFloat(e.target.value) : null)}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Rake ($)</label>
-                        <input
-                          type="number"
-                          value={formData.rake ?? ''}
-                          onChange={(e) => handleFieldChange('rake', e.target.value ? parseFloat(e.target.value) : null)}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Venue Fee ($)</label>
-                        <input
-                          type="number"
-                          value={formData.venueFee ?? ''}
-                          onChange={(e) => handleFieldChange('venueFee', e.target.value ? parseFloat(e.target.value) : null)}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="hasGuarantee"
-                          checked={formData.hasGuarantee ?? false}
-                          onChange={(e) => handleFieldChange('hasGuarantee', e.target.checked)}
-                          className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <label htmlFor="hasGuarantee" className="text-sm text-gray-700">Has Guarantee</label>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Guarantee Amount ($)</label>
-                        <input
-                          type="number"
-                          value={formData.guaranteeAmount ?? ''}
-                          onChange={(e) => handleFieldChange('guaranteeAmount', e.target.value ? parseFloat(e.target.value) : null)}
-                          disabled={!formData.hasGuarantee}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm disabled:bg-gray-100"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Entry Fields */}
-                    <div className="grid grid-cols-4 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Total Entries</label>
-                        <input
-                          type="number"
-                          value={formData.totalEntries ?? ''}
-                          onChange={(e) => handleFieldChange('totalEntries', e.target.value ? parseInt(e.target.value) : null)}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Unique Players</label>
-                        <input
-                          type="number"
-                          value={formData.totalUniquePlayers ?? ''}
-                          onChange={(e) => handleFieldChange('totalUniquePlayers', e.target.value ? parseInt(e.target.value) : null)}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Rebuys</label>
-                        <input
-                          type="number"
-                          value={formData.totalRebuys ?? ''}
-                          onChange={(e) => handleFieldChange('totalRebuys', e.target.value ? parseInt(e.target.value) : null)}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Add-ons</label>
-                        <input
-                          type="number"
-                          value={formData.totalAddons ?? ''}
-                          onChange={(e) => handleFieldChange('totalAddons', e.target.value ? parseInt(e.target.value) : null)}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Prizepool Paid ($)</label>
-                      <input
-                        type="number"
-                        value={formData.prizepoolPaid ?? ''}
-                        onChange={(e) => handleFieldChange('prizepoolPaid', e.target.value ? parseFloat(e.target.value) : null)}
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                      />
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="flex justify-end gap-3 pt-4 border-t">
-                      <button
-                        onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                      >
-                        {saving ? 'Saving...' : 'Save Changes'}
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </div>
-      </Dialog>
-    </Transition>
-  );
-};
-
 // ---- Main Component ----
 
 export const VenueGameDetails: React.FC = () => {
@@ -1750,9 +1459,42 @@ export const VenueGameDetails: React.FC = () => {
   const [selectedGameStatuses, setSelectedGameStatuses] = useState<Set<string>>(new Set());
   const [hasInitializedFilter, setHasInitializedFilter] = useState(false);
 
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
+  // Navigate to game details page
+  const handleNavigateToGame = (gameId: string) => {
+    navigate(`/games/details/${gameId}`);
+  };
+  
+  // Game type filter state
+  const [selectedGameTypes, setSelectedGameTypes] = useState<Set<GameTypeKey>>(
+    new Set(['REGULAR', 'CASH_GAME', 'SATELLITE'])
+  );
+
+  // Toggle game type filter
+  const handleGameTypeToggle = (type: GameTypeKey) => {
+    setSelectedGameTypes(prev => {
+      const next = new Set(prev);
+      if (next.has(type)) {
+        // Don't allow deselecting all types
+        if (next.size > 1) {
+          next.delete(type);
+        }
+      } else {
+        next.add(type);
+      }
+      return next;
+    });
+  };
+
+  // Compute available game types from data
+  const availableGameTypes = useMemo(() => {
+    const types = new Set<GameTypeKey>();
+    allEnrichedInstances.forEach(inst => {
+      if (inst.game) {
+        types.add(getGameTypeKeyFromInstance(inst));
+      }
+    });
+    return types;
+  }, [allEnrichedInstances]);
 
   // Compute available game statuses and their counts from the data
   const { availableStatuses, statusCounts } = useMemo(() => {
@@ -1784,19 +1526,28 @@ export const VenueGameDetails: React.FC = () => {
     setHasInitializedFilter(false);
   }, [timeRange]);
 
-  // Filter enriched instances based on selected game statuses
+  // Filter enriched instances based on selected game statuses and game types
   const enrichedInstances = useMemo(() => {
-    // If no filter selected, show all (including instances without game data)
-    if (selectedGameStatuses.size === 0) {
-      return allEnrichedInstances;
-    }
-    
     return allEnrichedInstances.filter(e => {
-      // Always include instances without game data (they'll show as no data)
-      if (!e.game?.gameStatus) return true;
-      return selectedGameStatuses.has(e.game.gameStatus);
+      // Filter by game status (if statuses are selected)
+      if (selectedGameStatuses.size > 0) {
+        // Always include instances without game data (they'll show as no data)
+        if (e.game?.gameStatus && !selectedGameStatuses.has(e.game.gameStatus)) {
+          return false;
+        }
+      }
+      
+      // Filter by game type
+      if (e.game) {
+        const gameTypeKey = getGameTypeKeyFromInstance(e);
+        if (!selectedGameTypes.has(gameTypeKey)) {
+          return false;
+        }
+      }
+      
+      return true;
     });
-  }, [allEnrichedInstances, selectedGameStatuses]);
+  }, [allEnrichedInstances, selectedGameStatuses, selectedGameTypes]);
 
   const fetchData = async () => {
     if (!venueId || !recurringGameId) {
@@ -1926,21 +1677,6 @@ export const VenueGameDetails: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, [venueId, recurringGameId, entityId, timeRange]);
-
-  // Row click handlers
-  const handleRowClick = (gameId: string) => {
-    setSelectedGameId(gameId);
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedGameId(null);
-  };
-
-  const handleSaveSuccess = () => {
-    fetchData();
-  };
 
   const summaryStats = useMemo(() => buildSummaryStats(enrichedInstances), [enrichedInstances]);
 
@@ -2094,22 +1830,12 @@ export const VenueGameDetails: React.FC = () => {
 
       {/* P/L Timeline Chart */}
       {enrichedInstances.length > 0 && (
-        <Card className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <Text className="text-sm font-semibold">Profit Trend</Text>
-            <div className="flex items-center gap-4 text-xs text-gray-500">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-indigo-500 rounded" />
-                <span>Per-game P/L</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-4 h-0.5 bg-emerald-500 rounded" style={{ borderTop: '2px dashed #10b981' }} />
-                <span>Trendline</span>
-              </div>
-            </div>
-          </div>
-          <PLChart instances={enrichedInstances} />
-        </Card>
+        <ProfitTrendChartSection 
+          instances={enrichedInstances}
+          selectedGameTypes={selectedGameTypes}
+          onGameTypeToggle={handleGameTypeToggle}
+          availableGameTypes={availableGameTypes}
+        />
       )}
 
       {/* P&L Table */}
@@ -2144,7 +1870,7 @@ export const VenueGameDetails: React.FC = () => {
                 <PLRow
                   key={enrichedInstance.instance.id}
                   enrichedInstance={enrichedInstance}
-                  onRowClick={handleRowClick}
+                  onNavigateToGame={handleNavigateToGame}
                 />
               ))}
               {enrichedInstances.length === 0 && (
@@ -2193,14 +1919,6 @@ export const VenueGameDetails: React.FC = () => {
           </table>
         </div>
       </Card>
-
-      {/* Game Edit Modal */}
-      <GameEditModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        gameId={selectedGameId}
-        onSaveSuccess={handleSaveSuccess}
-      />
     </PageWrapper>
   );
 };

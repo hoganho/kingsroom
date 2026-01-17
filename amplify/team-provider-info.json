@@ -209,7 +209,7 @@
         },
         "refreshAllMetrics": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/refreshAllMetrics-75754e58517246732b31-build.zip"
+          "s3Key": "amplify-builds/refreshAllMetrics-45666443637275417364-build.zip"
         },
         "refreshRunningGames": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
