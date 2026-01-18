@@ -250,6 +250,283 @@ export const parseFacebookTimestamp = (timestamp: string | number): Date | null 
   }
 };
 
+// ===================================================================
+// PERIOD UTILITIES (for AI Insights reporting)
+// ===================================================================
+// Week Definition: Monday 00:00:00 AEST to Sunday 23:59:59 AEST
+// Week Key Format: YYYY-Www (e.g., "2026-W03")
+// Month Key Format: YYYY-MM (e.g., "2026-01")
+// ===================================================================
+
+export interface PeriodBounds {
+  start: Date;      // UTC Date representing start of period in AEST
+  end: Date;        // UTC Date representing end of period in AEST
+  key: string;      // Period key (e.g., "2026-W03" or "2026-01")
+  label: string;    // Human-readable label
+}
+
+/**
+ * Get ISO week number for a date in AEST
+ */
+export const getISOWeekNumberAEST = (date: Date | string): number => {
+  const aest = toAEST(date);
+  
+  // Create a date in UTC that represents the AEST date
+  const d = new Date(Date.UTC(aest.year, aest.month, aest.day));
+  const dayNum = d.getUTCDay() || 7; // Sunday = 7
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+};
+
+/**
+ * Get ISO week year (may differ from calendar year at year boundaries)
+ */
+export const getISOWeekYearAEST = (date: Date | string): number => {
+  const aest = toAEST(date);
+  const d = new Date(Date.UTC(aest.year, aest.month, aest.day));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  return d.getUTCFullYear();
+};
+
+/**
+ * Get week bounds for a given date in AEST.
+ * Week runs Monday 00:00:00 AEST to Sunday 23:59:59 AEST.
+ */
+export const getWeekBoundsAEST = (date: Date | string): PeriodBounds => {
+  const aest = toAEST(date);
+  
+  // Calculate days since Monday (Monday = 0, Sunday = 6)
+  const daysSinceMonday = aest.dayOfWeek === 0 ? 6 : aest.dayOfWeek - 1;
+  
+  // Get Monday of this week in AEST
+  const mondayDay = aest.day - daysSinceMonday;
+  
+  // Start: Monday 00:00:00 AEST
+  const start = fromAEST(aest.year, aest.month, mondayDay, 0, 0);
+  
+  // End: Sunday 23:59:59 AEST (6 days after Monday)
+  const end = fromAEST(aest.year, aest.month, mondayDay + 6, 23, 59);
+  
+  // Get week number and year from the Monday
+  const weekNum = getISOWeekNumberAEST(start);
+  const weekYear = getISOWeekYearAEST(start);
+  const key = `${weekYear}-W${String(weekNum).padStart(2, '0')}`;
+  
+  // Generate label
+  const startAEST = toAEST(start);
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const label = `Week ${weekNum}, ${monthNames[startAEST.month]} ${startAEST.year}`;
+  
+  return { start, end, key, label };
+};
+
+/**
+ * Get month bounds for a given date in AEST.
+ */
+export const getMonthBoundsAEST = (date: Date | string): PeriodBounds => {
+  const aest = toAEST(date);
+  
+  // Start: 1st of month 00:00:00 AEST
+  const start = fromAEST(aest.year, aest.month, 1, 0, 0);
+  
+  // End: Last day of month 23:59:59 AEST
+  // Get last day by going to day 0 of next month
+  const lastDay = new Date(Date.UTC(aest.year, aest.month + 1, 0)).getUTCDate();
+  const end = fromAEST(aest.year, aest.month, lastDay, 23, 59);
+  
+  const key = `${aest.year}-${String(aest.month + 1).padStart(2, '0')}`;
+  
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+  const label = `${monthNames[aest.month]} ${aest.year}`;
+  
+  return { start, end, key, label };
+};
+
+/**
+ * Get quarter bounds for a given date in AEST.
+ */
+export const getQuarterBoundsAEST = (date: Date | string): PeriodBounds => {
+  const aest = toAEST(date);
+  const quarter = Math.floor(aest.month / 3);
+  const quarterStartMonth = quarter * 3;
+  
+  // Start: 1st of quarter's first month 00:00:00 AEST
+  const start = fromAEST(aest.year, quarterStartMonth, 1, 0, 0);
+  
+  // End: Last day of quarter's last month 23:59:59 AEST
+  const quarterEndMonth = quarterStartMonth + 2;
+  const lastDay = new Date(Date.UTC(aest.year, quarterEndMonth + 1, 0)).getUTCDate();
+  const end = fromAEST(aest.year, quarterEndMonth, lastDay, 23, 59);
+  
+  const key = `${aest.year}-Q${quarter + 1}`;
+  const label = `Q${quarter + 1} ${aest.year}`;
+  
+  return { start, end, key, label };
+};
+
+/**
+ * Parse a week key (e.g., "2026-W03") to get the Monday of that week
+ */
+export const parseWeekKey = (weekKey: string): Date => {
+  const match = weekKey.match(/^(\d{4})-W(\d{2})$/);
+  if (!match) throw new Error(`Invalid week key: ${weekKey}`);
+  
+  const year = parseInt(match[1]);
+  const week = parseInt(match[2]);
+  
+  // Find January 4th of the year (always in week 1)
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const jan4Day = jan4.getUTCDay() || 7; // Sunday = 7
+  
+  // Find the Monday of week 1
+  const week1Monday = new Date(jan4);
+  week1Monday.setUTCDate(jan4.getUTCDate() - (jan4Day - 1));
+  
+  // Add weeks to get target Monday
+  const targetMonday = new Date(week1Monday);
+  targetMonday.setUTCDate(week1Monday.getUTCDate() + (week - 1) * 7);
+  
+  // Convert to AEST Monday 00:00
+  const aestMonday = toAEST(targetMonday);
+  return fromAEST(aestMonday.year, aestMonday.month, aestMonday.day, 0, 0);
+};
+
+/**
+ * Parse a month key (e.g., "2026-01") to get the bounds
+ */
+export const parseMonthKey = (monthKey: string): PeriodBounds => {
+  const match = monthKey.match(/^(\d{4})-(\d{2})$/);
+  if (!match) throw new Error(`Invalid month key: ${monthKey}`);
+  
+  const year = parseInt(match[1]);
+  const month = parseInt(match[2]) - 1; // 0-indexed
+  
+  // Create a date in that month and get bounds
+  const dateInMonth = fromAEST(year, month, 15, 12, 0);
+  return getMonthBoundsAEST(dateInMonth);
+};
+
+/**
+ * Get the previous period bounds
+ */
+export const getPreviousPeriodAEST = (
+  currentPeriod: PeriodBounds,
+  periodType: 'week' | 'month' | 'quarter'
+): PeriodBounds => {
+  // Go back from the start of current period
+  const beforeStart = new Date(currentPeriod.start.getTime() - 24 * 60 * 60 * 1000);
+  
+  switch (periodType) {
+    case 'week':
+      return getWeekBoundsAEST(beforeStart);
+    case 'month':
+      return getMonthBoundsAEST(beforeStart);
+    case 'quarter':
+      return getQuarterBoundsAEST(beforeStart);
+  }
+};
+
+/**
+ * Get the next period bounds
+ */
+export const getNextPeriodAEST = (
+  currentPeriod: PeriodBounds,
+  periodType: 'week' | 'month' | 'quarter'
+): PeriodBounds => {
+  // Go forward from the end of current period
+  const afterEnd = new Date(currentPeriod.end.getTime() + 24 * 60 * 60 * 1000);
+  
+  switch (periodType) {
+    case 'week':
+      return getWeekBoundsAEST(afterEnd);
+    case 'month':
+      return getMonthBoundsAEST(afterEnd);
+    case 'quarter':
+      return getQuarterBoundsAEST(afterEnd);
+  }
+};
+
+/**
+ * Get current period key for a given period type
+ */
+export const getCurrentPeriodKeyAEST = (periodType: 'week' | 'month' | 'quarter'): string => {
+  const now = new Date();
+  
+  switch (periodType) {
+    case 'week':
+      return getWeekBoundsAEST(now).key;
+    case 'month':
+      return getMonthBoundsAEST(now).key;
+    case 'quarter':
+      return getQuarterBoundsAEST(now).key;
+  }
+};
+
+/**
+ * Check if a date falls within a period
+ */
+export const isInPeriodAEST = (date: Date | string, period: PeriodBounds): boolean => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.getTime() >= period.start.getTime() && d.getTime() <= period.end.getTime();
+};
+
+/**
+ * Get list of period keys between two dates
+ */
+export const getPeriodKeysBetweenAEST = (
+  periodType: 'week' | 'month',
+  startDate: Date | string,
+  endDate: Date | string
+): string[] => {
+  const keys: string[] = [];
+  const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
+  const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
+  
+  let current = periodType === 'week' 
+    ? getWeekBoundsAEST(start) 
+    : getMonthBoundsAEST(start);
+  
+  while (current.start.getTime() <= end.getTime()) {
+    keys.push(current.key);
+    current = getNextPeriodAEST(current, periodType);
+  }
+  
+  return keys;
+};
+
+/**
+ * Format a period key for display
+ */
+export const formatPeriodKey = (periodKey: string): string => {
+  // Week key: "2026-W03" -> "Week 3, Jan 2026"
+  const weekMatch = periodKey.match(/^(\d{4})-W(\d{2})$/);
+  if (weekMatch) {
+    const monday = parseWeekKey(periodKey);
+    const aest = toAEST(monday);
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `Week ${parseInt(weekMatch[2])}, ${monthNames[aest.month]} ${aest.year}`;
+  }
+  
+  // Month key: "2026-01" -> "January 2026"
+  const monthMatch = periodKey.match(/^(\d{4})-(\d{2})$/);
+  if (monthMatch) {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${monthNames[parseInt(monthMatch[2]) - 1]} ${monthMatch[1]}`;
+  }
+  
+  // Quarter key: "2026-Q1" -> "Q1 2026"
+  const quarterMatch = periodKey.match(/^(\d{4})-Q(\d)$/);
+  if (quarterMatch) {
+    return `Q${quarterMatch[2]} ${quarterMatch[1]}`;
+  }
+  
+  return periodKey;
+};
+
 export default {
   toAEST,
   fromAEST,
@@ -262,4 +539,18 @@ export default {
   isSameDayAEST,
   getDaysDifferenceAEST,
   parseFacebookTimestamp,
+  // Period utilities
+  getISOWeekNumberAEST,
+  getISOWeekYearAEST,
+  getWeekBoundsAEST,
+  getMonthBoundsAEST,
+  getQuarterBoundsAEST,
+  parseWeekKey,
+  parseMonthKey,
+  getPreviousPeriodAEST,
+  getNextPeriodAEST,
+  getCurrentPeriodKeyAEST,
+  isInPeriodAEST,
+  getPeriodKeysBetweenAEST,
+  formatPeriodKey,
 };

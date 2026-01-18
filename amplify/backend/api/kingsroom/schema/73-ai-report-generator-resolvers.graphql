@@ -1,0 +1,26 @@
+# 73-ai-report-generator-resolvers.graphql
+# ===================================================================
+# AI REPORT GENERATOR - Resolvers only (types defined in 72)
+# ===================================================================
+# Deploy this AFTER the aiReportGenerator function is created
+# 
+# NOTE: getDirectorReport and listDirectorReports are auto-generated
+# by Amplify's @model directive on DirectorReport, so we don't need
+# to define them here.
+# ===================================================================
+
+# ===================================================================
+# EXTEND MUTATIONS - aiReportGenerator
+# ===================================================================
+
+extend type Mutation {
+  generateDirectorReport(input: GenerateDirectorReportInput!): GenerateDirectorReportResult
+    @function(name: "aiReportGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  regenerateDirectorReport(input: RegenerateDirectorReportInput!): GenerateDirectorReportResult
+    @function(name: "aiReportGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+}

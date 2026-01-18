@@ -1,0 +1,22 @@
+[
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:BatchGetItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*/index/*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/MetricsPack-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/MetricsPack-*/index/*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/AlertThresholdConfig-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/SocialPost-*"
+    ]
+  }
+]

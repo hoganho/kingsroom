@@ -752,6 +752,63 @@ export enum InstanceDeviationType {
   MULTIPLE = "MULTIPLE"
 }
 
+export enum ReportType {
+  WEEKLY_OPS = "WEEKLY_OPS",
+  MONTHLY_BOARD = "MONTHLY_BOARD",
+  SERIES_PRE = "SERIES_PRE",
+  SERIES_MID = "SERIES_MID",
+  SERIES_POST = "SERIES_POST"
+}
+
+export enum ReportHealthStatus {
+  EXCELLENT = "EXCELLENT",
+  GOOD = "GOOD",
+  NEEDS_ATTENTION = "NEEDS_ATTENTION",
+  CRITICAL = "CRITICAL"
+}
+
+export enum AlertSeverity {
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW"
+}
+
+export enum AlertType {
+  LOSS_MAKING_GAME = "LOSS_MAKING_GAME",
+  LOSS_MAKING_VENUE = "LOSS_MAKING_VENUE",
+  LOW_GUARANTEE_COVERAGE = "LOW_GUARANTEE_COVERAGE",
+  NEGATIVE_TREND = "NEGATIVE_TREND",
+  SOFTENING_TREND = "SOFTENING_TREND",
+  HIGH_OVERLAY = "HIGH_OVERLAY",
+  LOW_FILL_RATE = "LOW_FILL_RATE",
+  PRIZEPOOL_DISCREPANCY = "PRIZEPOOL_DISCREPANCY",
+  CANCELLED_PATTERN = "CANCELLED_PATTERN",
+  COST_ANOMALY = "COST_ANOMALY",
+  REVENUE_ANOMALY = "REVENUE_ANOMALY",
+  PLAYER_CHURN = "PLAYER_CHURN"
+}
+
+export enum VenueTrendCategory {
+  AT_RISK = "AT_RISK",
+  SOFTENING = "SOFTENING",
+  STEADY = "STEADY",
+  UPLIFT = "UPLIFT",
+  BREAKOUT = "BREAKOUT"
+}
+
+export enum CalloutType {
+  TOP_PERFORMER = "TOP_PERFORMER",
+  NEEDS_ATTENTION = "NEEDS_ATTENTION",
+  TREND_CHANGE = "TREND_CHANGE",
+  MILESTONE = "MILESTONE"
+}
+
+export enum ThreatLevel {
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH"
+}
+
 export enum GameProcessedAction {
   CREATED = "CREATED",
   UPDATED = "UPDATED",
@@ -3414,6 +3471,94 @@ type LazyTrendAnalysis = {
 export declare type TrendAnalysis = LazyLoading extends LazyLoadingDisabled ? EagerTrendAnalysis : LazyTrendAnalysis
 
 export declare const TrendAnalysis: (new (init: ModelInit<TrendAnalysis>) => TrendAnalysis)
+
+type EagerGenerateMetricsPackResult = {
+  readonly success: boolean;
+  readonly metricsPackId?: string | null;
+  readonly metricsPack?: MetricsPack | null;
+  readonly wasExisting?: boolean | null;
+  readonly generationDurationMs?: number | null;
+  readonly error?: string | null;
+  readonly warnings?: (string | null)[] | null;
+}
+
+type LazyGenerateMetricsPackResult = {
+  readonly success: boolean;
+  readonly metricsPackId?: string | null;
+  readonly metricsPack: AsyncItem<MetricsPack | undefined>;
+  readonly wasExisting?: boolean | null;
+  readonly generationDurationMs?: number | null;
+  readonly error?: string | null;
+  readonly warnings?: (string | null)[] | null;
+}
+
+export declare type GenerateMetricsPackResult = LazyLoading extends LazyLoadingDisabled ? EagerGenerateMetricsPackResult : LazyGenerateMetricsPackResult
+
+export declare const GenerateMetricsPackResult: (new (init: ModelInit<GenerateMetricsPackResult>) => GenerateMetricsPackResult)
+
+type EagerGenerateDirectorReportResult = {
+  readonly success: boolean;
+  readonly directorReportId?: string | null;
+  readonly directorReport?: DirectorReport | null;
+  readonly wasRegenerated?: boolean | null;
+  readonly generationDurationMs?: number | null;
+  readonly tokenUsage?: TokenUsage | null;
+  readonly error?: string | null;
+}
+
+type LazyGenerateDirectorReportResult = {
+  readonly success: boolean;
+  readonly directorReportId?: string | null;
+  readonly directorReport: AsyncItem<DirectorReport | undefined>;
+  readonly wasRegenerated?: boolean | null;
+  readonly generationDurationMs?: number | null;
+  readonly tokenUsage?: TokenUsage | null;
+  readonly error?: string | null;
+}
+
+export declare type GenerateDirectorReportResult = LazyLoading extends LazyLoadingDisabled ? EagerGenerateDirectorReportResult : LazyGenerateDirectorReportResult
+
+export declare const GenerateDirectorReportResult: (new (init: ModelInit<GenerateDirectorReportResult>) => GenerateDirectorReportResult)
+
+type EagerTokenUsage = {
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly totalCost: number;
+}
+
+type LazyTokenUsage = {
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly totalCost: number;
+}
+
+export declare type TokenUsage = LazyLoading extends LazyLoadingDisabled ? EagerTokenUsage : LazyTokenUsage
+
+export declare const TokenUsage: (new (init: ModelInit<TokenUsage>) => TokenUsage)
+
+type EagerBatchGenerateReportsResult = {
+  readonly success: boolean;
+  readonly totalRequested: number;
+  readonly totalGenerated: number;
+  readonly totalFailed: number;
+  readonly results: GenerateDirectorReportResult[];
+  readonly totalDurationMs?: number | null;
+  readonly totalCost?: number | null;
+}
+
+type LazyBatchGenerateReportsResult = {
+  readonly success: boolean;
+  readonly totalRequested: number;
+  readonly totalGenerated: number;
+  readonly totalFailed: number;
+  readonly results: GenerateDirectorReportResult[];
+  readonly totalDurationMs?: number | null;
+  readonly totalCost?: number | null;
+}
+
+export declare type BatchGenerateReportsResult = LazyLoading extends LazyLoadingDisabled ? EagerBatchGenerateReportsResult : LazyBatchGenerateReportsResult
+
+export declare const BatchGenerateReportsResult: (new (init: ModelInit<BatchGenerateReportsResult>) => BatchGenerateReportsResult)
 
 type EagerScraperControlResponse = {
   readonly success: boolean;
@@ -8057,6 +8202,264 @@ export declare type TournamentSeriesMetrics = LazyLoading extends LazyLoadingDis
 
 export declare const TournamentSeriesMetrics: (new (init: ModelInit<TournamentSeriesMetrics>) => TournamentSeriesMetrics) & {
   copyOf(source: TournamentSeriesMetrics, mutator: (draft: MutableModel<TournamentSeriesMetrics>) => MutableModel<TournamentSeriesMetrics> | void): TournamentSeriesMetrics;
+}
+
+type EagerMetricsPack = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<MetricsPack, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly reportType: ReportType | keyof typeof ReportType;
+  readonly periodKey: string;
+  readonly periodStart: string;
+  readonly periodEnd: string;
+  readonly periodLabel: string;
+  readonly comparisonPeriodKey?: string | null;
+  readonly comparisonPeriodStart?: string | null;
+  readonly comparisonPeriodEnd?: string | null;
+  readonly comparisonPeriodLabel?: string | null;
+  readonly packData: string;
+  readonly socialPulseData?: string | null;
+  readonly generatedAt: string;
+  readonly generatedBy: string;
+  readonly generationDurationMs?: number | null;
+  readonly version: number;
+  readonly snapshotsIncluded: number;
+  readonly gamesIncluded: number;
+  readonly venuesIncluded: number;
+  readonly dataCompleteness?: number | null;
+  readonly warnings?: (string | null)[] | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyMetricsPack = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<MetricsPack, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly reportType: ReportType | keyof typeof ReportType;
+  readonly periodKey: string;
+  readonly periodStart: string;
+  readonly periodEnd: string;
+  readonly periodLabel: string;
+  readonly comparisonPeriodKey?: string | null;
+  readonly comparisonPeriodStart?: string | null;
+  readonly comparisonPeriodEnd?: string | null;
+  readonly comparisonPeriodLabel?: string | null;
+  readonly packData: string;
+  readonly socialPulseData?: string | null;
+  readonly generatedAt: string;
+  readonly generatedBy: string;
+  readonly generationDurationMs?: number | null;
+  readonly version: number;
+  readonly snapshotsIncluded: number;
+  readonly gamesIncluded: number;
+  readonly venuesIncluded: number;
+  readonly dataCompleteness?: number | null;
+  readonly warnings?: (string | null)[] | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type MetricsPack = LazyLoading extends LazyLoadingDisabled ? EagerMetricsPack : LazyMetricsPack
+
+export declare const MetricsPack: (new (init: ModelInit<MetricsPack>) => MetricsPack) & {
+  copyOf(source: MetricsPack, mutator: (draft: MutableModel<MetricsPack>) => MutableModel<MetricsPack> | void): MetricsPack;
+}
+
+type EagerDirectorReport = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<DirectorReport, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly reportType: ReportType | keyof typeof ReportType;
+  readonly periodKey: string;
+  readonly metricsPackId: string;
+  readonly reportData: string;
+  readonly status: string;
+  readonly generatedAt: string;
+  readonly generatedBy: string;
+  readonly modelProvider: string;
+  readonly modelName: string;
+  readonly modelVersion?: string | null;
+  readonly promptVersion: string;
+  readonly inputTokens?: number | null;
+  readonly outputTokens?: number | null;
+  readonly totalCost?: number | null;
+  readonly generationDurationMs?: number | null;
+  readonly reportVersion: number;
+  readonly regeneratedAt?: string | null;
+  readonly regeneratedBy?: string | null;
+  readonly regenerationReason?: string | null;
+  readonly previousReportId?: string | null;
+  readonly viewedAt?: string | null;
+  readonly viewedBy?: string | null;
+  readonly exportedAt?: string | null;
+  readonly exportFormat?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyDirectorReport = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<DirectorReport, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly reportType: ReportType | keyof typeof ReportType;
+  readonly periodKey: string;
+  readonly metricsPackId: string;
+  readonly reportData: string;
+  readonly status: string;
+  readonly generatedAt: string;
+  readonly generatedBy: string;
+  readonly modelProvider: string;
+  readonly modelName: string;
+  readonly modelVersion?: string | null;
+  readonly promptVersion: string;
+  readonly inputTokens?: number | null;
+  readonly outputTokens?: number | null;
+  readonly totalCost?: number | null;
+  readonly generationDurationMs?: number | null;
+  readonly reportVersion: number;
+  readonly regeneratedAt?: string | null;
+  readonly regeneratedBy?: string | null;
+  readonly regenerationReason?: string | null;
+  readonly previousReportId?: string | null;
+  readonly viewedAt?: string | null;
+  readonly viewedBy?: string | null;
+  readonly exportedAt?: string | null;
+  readonly exportFormat?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type DirectorReport = LazyLoading extends LazyLoadingDisabled ? EagerDirectorReport : LazyDirectorReport
+
+export declare const DirectorReport: (new (init: ModelInit<DirectorReport>) => DirectorReport) & {
+  copyOf(source: DirectorReport, mutator: (draft: MutableModel<DirectorReport>) => MutableModel<DirectorReport> | void): DirectorReport;
+}
+
+type EagerSocialPulseDigest = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialPulseDigest, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly periodKey: string;
+  readonly periodStart: string;
+  readonly periodEnd: string;
+  readonly ourPostCount: number;
+  readonly ourEngagement: number;
+  readonly ourTopPost?: string | null;
+  readonly ourVenueBreakdown?: string | null;
+  readonly competitorDigest?: string | null;
+  readonly totalCompetitorPosts?: number | null;
+  readonly totalCompetitorEngagement?: number | null;
+  readonly eventAnnouncements?: string | null;
+  readonly guaranteeChanges?: string | null;
+  readonly scheduleChanges?: string | null;
+  readonly promotions?: string | null;
+  readonly shareOfVoice?: number | null;
+  readonly engagementRank?: number | null;
+  readonly marketPostVolume?: number | null;
+  readonly generatedAt: string;
+  readonly generatedBy: string;
+  readonly postsAnalyzed: number;
+  readonly accountsAnalyzed: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazySocialPulseDigest = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<SocialPulseDigest, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly periodKey: string;
+  readonly periodStart: string;
+  readonly periodEnd: string;
+  readonly ourPostCount: number;
+  readonly ourEngagement: number;
+  readonly ourTopPost?: string | null;
+  readonly ourVenueBreakdown?: string | null;
+  readonly competitorDigest?: string | null;
+  readonly totalCompetitorPosts?: number | null;
+  readonly totalCompetitorEngagement?: number | null;
+  readonly eventAnnouncements?: string | null;
+  readonly guaranteeChanges?: string | null;
+  readonly scheduleChanges?: string | null;
+  readonly promotions?: string | null;
+  readonly shareOfVoice?: number | null;
+  readonly engagementRank?: number | null;
+  readonly marketPostVolume?: number | null;
+  readonly generatedAt: string;
+  readonly generatedBy: string;
+  readonly postsAnalyzed: number;
+  readonly accountsAnalyzed: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type SocialPulseDigest = LazyLoading extends LazyLoadingDisabled ? EagerSocialPulseDigest : LazySocialPulseDigest
+
+export declare const SocialPulseDigest: (new (init: ModelInit<SocialPulseDigest>) => SocialPulseDigest) & {
+  copyOf(source: SocialPulseDigest, mutator: (draft: MutableModel<SocialPulseDigest>) => MutableModel<SocialPulseDigest> | void): SocialPulseDigest;
+}
+
+type EagerAlertThresholdConfig = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<AlertThresholdConfig, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId?: string | null;
+  readonly lossThreshold?: number | null;
+  readonly lowMarginThreshold?: number | null;
+  readonly highOverlayThreshold?: number | null;
+  readonly guaranteeCoverageThreshold?: number | null;
+  readonly lowFillRatePercent?: number | null;
+  readonly cancelledPatternCount?: number | null;
+  readonly staffCostAnomalyPercent?: number | null;
+  readonly negativeTrendPercent?: number | null;
+  readonly softeningTrendPercent?: number | null;
+  readonly isActive: boolean;
+  readonly lastUpdatedAt?: string | null;
+  readonly lastUpdatedBy?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyAlertThresholdConfig = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<AlertThresholdConfig, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId?: string | null;
+  readonly lossThreshold?: number | null;
+  readonly lowMarginThreshold?: number | null;
+  readonly highOverlayThreshold?: number | null;
+  readonly guaranteeCoverageThreshold?: number | null;
+  readonly lowFillRatePercent?: number | null;
+  readonly cancelledPatternCount?: number | null;
+  readonly staffCostAnomalyPercent?: number | null;
+  readonly negativeTrendPercent?: number | null;
+  readonly softeningTrendPercent?: number | null;
+  readonly isActive: boolean;
+  readonly lastUpdatedAt?: string | null;
+  readonly lastUpdatedBy?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type AlertThresholdConfig = LazyLoading extends LazyLoadingDisabled ? EagerAlertThresholdConfig : LazyAlertThresholdConfig
+
+export declare const AlertThresholdConfig: (new (init: ModelInit<AlertThresholdConfig>) => AlertThresholdConfig) & {
+  copyOf(source: AlertThresholdConfig, mutator: (draft: MutableModel<AlertThresholdConfig>) => MutableModel<AlertThresholdConfig> | void): AlertThresholdConfig;
 }
 
 type EagerScraperJob = {

@@ -10371,6 +10371,860 @@ export const schema = {
                 }
             ]
         },
+        "MetricsPack": {
+            "name": "MetricsPack",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "reportType": {
+                    "name": "reportType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ReportType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodKey": {
+                    "name": "periodKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodStart": {
+                    "name": "periodStart",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodEnd": {
+                    "name": "periodEnd",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodLabel": {
+                    "name": "periodLabel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "comparisonPeriodKey": {
+                    "name": "comparisonPeriodKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "comparisonPeriodStart": {
+                    "name": "comparisonPeriodStart",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "comparisonPeriodEnd": {
+                    "name": "comparisonPeriodEnd",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "comparisonPeriodLabel": {
+                    "name": "comparisonPeriodLabel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "packData": {
+                    "name": "packData",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "socialPulseData": {
+                    "name": "socialPulseData",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "generatedAt": {
+                    "name": "generatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "generatedBy": {
+                    "name": "generatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "generationDurationMs": {
+                    "name": "generationDurationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "version": {
+                    "name": "version",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "snapshotsIncluded": {
+                    "name": "snapshotsIncluded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesIncluded": {
+                    "name": "gamesIncluded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venuesIncluded": {
+                    "name": "venuesIncluded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dataCompleteness": {
+                    "name": "dataCompleteness",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "warnings": {
+                    "name": "warnings",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "MetricsPacks",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityMetricsPack",
+                        "queryField": "metricsPacksByEntity",
+                        "fields": [
+                            "entityId",
+                            "periodKey"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byReportType",
+                        "queryField": "metricsPacksByReportType",
+                        "fields": [
+                            "reportType",
+                            "periodKey"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "DirectorReport": {
+            "name": "DirectorReport",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "reportType": {
+                    "name": "reportType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ReportType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodKey": {
+                    "name": "periodKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "metricsPackId": {
+                    "name": "metricsPackId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "reportData": {
+                    "name": "reportData",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "generatedAt": {
+                    "name": "generatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "generatedBy": {
+                    "name": "generatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "modelProvider": {
+                    "name": "modelProvider",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "modelName": {
+                    "name": "modelName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "modelVersion": {
+                    "name": "modelVersion",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "promptVersion": {
+                    "name": "promptVersion",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "inputTokens": {
+                    "name": "inputTokens",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "outputTokens": {
+                    "name": "outputTokens",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "generationDurationMs": {
+                    "name": "generationDurationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reportVersion": {
+                    "name": "reportVersion",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "regeneratedAt": {
+                    "name": "regeneratedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "regeneratedBy": {
+                    "name": "regeneratedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "regenerationReason": {
+                    "name": "regenerationReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "previousReportId": {
+                    "name": "previousReportId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "viewedAt": {
+                    "name": "viewedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "viewedBy": {
+                    "name": "viewedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "exportedAt": {
+                    "name": "exportedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "exportFormat": {
+                    "name": "exportFormat",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "DirectorReports",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityDirectorReport",
+                        "queryField": "directorReportsByEntity",
+                        "fields": [
+                            "entityId",
+                            "periodKey"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byDirectorReportType",
+                        "queryField": "directorReportsByType",
+                        "fields": [
+                            "reportType",
+                            "periodKey"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byMetricsPack",
+                        "fields": [
+                            "metricsPackId",
+                            "generatedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "SocialPulseDigest": {
+            "name": "SocialPulseDigest",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodKey": {
+                    "name": "periodKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodStart": {
+                    "name": "periodStart",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodEnd": {
+                    "name": "periodEnd",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ourPostCount": {
+                    "name": "ourPostCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ourEngagement": {
+                    "name": "ourEngagement",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ourTopPost": {
+                    "name": "ourTopPost",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ourVenueBreakdown": {
+                    "name": "ourVenueBreakdown",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "competitorDigest": {
+                    "name": "competitorDigest",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCompetitorPosts": {
+                    "name": "totalCompetitorPosts",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCompetitorEngagement": {
+                    "name": "totalCompetitorEngagement",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "eventAnnouncements": {
+                    "name": "eventAnnouncements",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeChanges": {
+                    "name": "guaranteeChanges",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scheduleChanges": {
+                    "name": "scheduleChanges",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "promotions": {
+                    "name": "promotions",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "shareOfVoice": {
+                    "name": "shareOfVoice",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "engagementRank": {
+                    "name": "engagementRank",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "marketPostVolume": {
+                    "name": "marketPostVolume",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "generatedAt": {
+                    "name": "generatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "generatedBy": {
+                    "name": "generatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "postsAnalyzed": {
+                    "name": "postsAnalyzed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "accountsAnalyzed": {
+                    "name": "accountsAnalyzed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "SocialPulseDigests",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntitySocialPulse",
+                        "queryField": "socialPulseDigestsByEntity",
+                        "fields": [
+                            "entityId",
+                            "periodKey"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "AlertThresholdConfig": {
+            "name": "AlertThresholdConfig",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lossThreshold": {
+                    "name": "lossThreshold",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lowMarginThreshold": {
+                    "name": "lowMarginThreshold",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "highOverlayThreshold": {
+                    "name": "highOverlayThreshold",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeCoverageThreshold": {
+                    "name": "guaranteeCoverageThreshold",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lowFillRatePercent": {
+                    "name": "lowFillRatePercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "cancelledPatternCount": {
+                    "name": "cancelledPatternCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "staffCostAnomalyPercent": {
+                    "name": "staffCostAnomalyPercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "negativeTrendPercent": {
+                    "name": "negativeTrendPercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "softeningTrendPercent": {
+                    "name": "softeningTrendPercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isActive": {
+                    "name": "isActive",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastUpdatedAt": {
+                    "name": "lastUpdatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastUpdatedBy": {
+                    "name": "lastUpdatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "AlertThresholdConfigs",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityAlertConfig",
+                        "fields": [
+                            "entityId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "ScraperJob": {
             "name": "ScraperJob",
             "fields": {
@@ -17931,6 +18785,77 @@ export const schema = {
                 "MULTIPLE"
             ]
         },
+        "ReportType": {
+            "name": "ReportType",
+            "values": [
+                "WEEKLY_OPS",
+                "MONTHLY_BOARD",
+                "SERIES_PRE",
+                "SERIES_MID",
+                "SERIES_POST"
+            ]
+        },
+        "ReportHealthStatus": {
+            "name": "ReportHealthStatus",
+            "values": [
+                "EXCELLENT",
+                "GOOD",
+                "NEEDS_ATTENTION",
+                "CRITICAL"
+            ]
+        },
+        "AlertSeverity": {
+            "name": "AlertSeverity",
+            "values": [
+                "HIGH",
+                "MEDIUM",
+                "LOW"
+            ]
+        },
+        "AlertType": {
+            "name": "AlertType",
+            "values": [
+                "LOSS_MAKING_GAME",
+                "LOSS_MAKING_VENUE",
+                "LOW_GUARANTEE_COVERAGE",
+                "NEGATIVE_TREND",
+                "SOFTENING_TREND",
+                "HIGH_OVERLAY",
+                "LOW_FILL_RATE",
+                "PRIZEPOOL_DISCREPANCY",
+                "CANCELLED_PATTERN",
+                "COST_ANOMALY",
+                "REVENUE_ANOMALY",
+                "PLAYER_CHURN"
+            ]
+        },
+        "VenueTrendCategory": {
+            "name": "VenueTrendCategory",
+            "values": [
+                "AT_RISK",
+                "SOFTENING",
+                "STEADY",
+                "UPLIFT",
+                "BREAKOUT"
+            ]
+        },
+        "CalloutType": {
+            "name": "CalloutType",
+            "values": [
+                "TOP_PERFORMER",
+                "NEEDS_ATTENTION",
+                "TREND_CHANGE",
+                "MILESTONE"
+            ]
+        },
+        "ThreatLevel": {
+            "name": "ThreatLevel",
+            "values": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+            ]
+        },
         "GameProcessedAction": {
             "name": "GameProcessedAction",
             "values": [
@@ -24798,6 +25723,204 @@ export const schema = {
                 }
             }
         },
+        "GenerateMetricsPackResult": {
+            "name": "GenerateMetricsPackResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "metricsPackId": {
+                    "name": "metricsPackId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metricsPack": {
+                    "name": "metricsPack",
+                    "isArray": false,
+                    "type": {
+                        "model": "MetricsPack"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "wasExisting": {
+                    "name": "wasExisting",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "generationDurationMs": {
+                    "name": "generationDurationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "warnings": {
+                    "name": "warnings",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "GenerateDirectorReportResult": {
+            "name": "GenerateDirectorReportResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "directorReportId": {
+                    "name": "directorReportId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "directorReport": {
+                    "name": "directorReport",
+                    "isArray": false,
+                    "type": {
+                        "model": "DirectorReport"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "wasRegenerated": {
+                    "name": "wasRegenerated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "generationDurationMs": {
+                    "name": "generationDurationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tokenUsage": {
+                    "name": "tokenUsage",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "TokenUsage"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "TokenUsage": {
+            "name": "TokenUsage",
+            "fields": {
+                "inputTokens": {
+                    "name": "inputTokens",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "outputTokens": {
+                    "name": "outputTokens",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "BatchGenerateReportsResult": {
+            "name": "BatchGenerateReportsResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalRequested": {
+                    "name": "totalRequested",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalGenerated": {
+                    "name": "totalGenerated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalFailed": {
+                    "name": "totalFailed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "results": {
+                    "name": "results",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "GenerateDirectorReportResult"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "totalDurationMs": {
+                    "name": "totalDurationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "ScraperControlResponse": {
             "name": "ScraperControlResponse",
             "fields": {
@@ -29471,5 +30594,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "280dd385a3c93765b5b3012ca5bb9106"
+    "version": "da3d5e41bb917444095fe4ac698635b6"
 };

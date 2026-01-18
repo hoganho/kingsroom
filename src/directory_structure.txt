@@ -38,7 +38,8 @@
 │   │       ├── .DS_Store
 │   │       ├── BulkProcessingResultsTable.tsx
 │   │       ├── RecurringGameAdmin.tsx
-│   │       └── RecurringGameForm.tsx
+│   │       ├── RecurringGameForm.tsx
+│   │       └── RecurringGameInstanceEditModal.tsx
 │   ├── layout
 │   │   ├── .DS_Store
 │   │   ├── CollapsibleSection.tsx
@@ -134,7 +135,8 @@
 │   │   ├── Select.tsx
 │   │   ├── StatsGrid.tsx
 │   │   ├── timeRange.ts
-│   │   └── TimeRangeToggle.tsx
+│   │   ├── TimeRangeToggle.tsx
+│   │   └── TrendBadge.tsx
 │   ├── users
 │   │   ├── EntityPermissionsModal.tsx
 │   │   ├── PagePermissionsModal.tsx
@@ -315,6 +317,6 @@
     ├── socialPostParser.ts
     └── statusNormalization.ts
 
-44 directories, 272 files
+44 directories, 274 files
 
 Function List:

@@ -1,0 +1,230 @@
+# 71-ai-insights.graphql
+# ===================================================================
+# AI INSIGHTS - MetricsPack, DirectorReport, SocialPulseDigest
+# ===================================================================
+# STEP 1: Deploy this schema first to create the tables
+# STEP 2: Then deploy the metricsPackGenerator function
+# STEP 3: Then uncomment the Mutation/Query extensions at the bottom
+# ===================================================================
+
+# ===================================================================
+# ENUMS
+# ===================================================================
+
+enum ReportType {
+  WEEKLY_OPS
+  MONTHLY_BOARD
+  SERIES_PRE
+  SERIES_MID
+  SERIES_POST
+}
+
+enum ReportHealthStatus {
+  EXCELLENT
+  GOOD
+  NEEDS_ATTENTION
+  CRITICAL
+}
+
+enum AlertSeverity {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum AlertType {
+  LOSS_MAKING_GAME
+  LOSS_MAKING_VENUE
+  LOW_GUARANTEE_COVERAGE
+  NEGATIVE_TREND
+  SOFTENING_TREND
+  HIGH_OVERLAY
+  LOW_FILL_RATE
+  PRIZEPOOL_DISCREPANCY
+  CANCELLED_PATTERN
+  COST_ANOMALY
+  REVENUE_ANOMALY
+  PLAYER_CHURN
+}
+
+enum VenueTrendCategory {
+  AT_RISK
+  SOFTENING
+  STEADY
+  UPLIFT
+  BREAKOUT
+}
+
+enum CalloutType {
+  TOP_PERFORMER
+  NEEDS_ATTENTION
+  TREND_CHANGE
+  MILESTONE
+}
+
+enum ThreatLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+# ===================================================================
+# METRICS PACK - Deterministic KPI aggregations
+# ===================================================================
+
+type MetricsPack
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  entityId: ID! @index(name: "byEntityMetricsPack", sortKeyFields: ["periodKey"], queryField: "metricsPacksByEntity")
+  reportType: ReportType! @index(name: "byReportType", sortKeyFields: ["periodKey"], queryField: "metricsPacksByReportType")
+  periodKey: String!
+  
+  periodStart: AWSDateTime!
+  periodEnd: AWSDateTime!
+  periodLabel: String!
+  
+  comparisonPeriodKey: String
+  comparisonPeriodStart: AWSDateTime
+  comparisonPeriodEnd: AWSDateTime
+  comparisonPeriodLabel: String
+  
+  packData: AWSJSON!
+  socialPulseData: AWSJSON
+  
+  generatedAt: AWSDateTime!
+  generatedBy: String!
+  generationDurationMs: Int
+  version: Int! @default(value: "1")
+  
+  snapshotsIncluded: Int!
+  gamesIncluded: Int!
+  venuesIncluded: Int!
+  dataCompleteness: Float
+  warnings: [String]
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# DIRECTOR REPORT - AI-generated structured report
+# ===================================================================
+
+type DirectorReport
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  entityId: ID! @index(name: "byEntityDirectorReport", sortKeyFields: ["periodKey"], queryField: "directorReportsByEntity")
+  reportType: ReportType! @index(name: "byDirectorReportType", sortKeyFields: ["periodKey"], queryField: "directorReportsByType")
+  periodKey: String!
+  
+  metricsPackId: ID! @index(name: "byMetricsPack", sortKeyFields: ["generatedAt"])
+  reportData: AWSJSON!
+  
+  status: String! @default(value: "GENERATED")
+  
+  generatedAt: AWSDateTime!
+  generatedBy: String!
+  modelProvider: String!
+  modelName: String!
+  modelVersion: String
+  promptVersion: String!
+  
+  inputTokens: Int
+  outputTokens: Int
+  totalCost: Float
+  generationDurationMs: Int
+  
+  reportVersion: Int! @default(value: "1")
+  regeneratedAt: AWSDateTime
+  regeneratedBy: String
+  regenerationReason: String
+  previousReportId: ID
+  
+  viewedAt: AWSDateTime
+  viewedBy: String
+  exportedAt: AWSDateTime
+  exportFormat: String
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# SOCIAL PULSE DIGEST
+# ===================================================================
+
+type SocialPulseDigest
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  entityId: ID! @index(name: "byEntitySocialPulse", sortKeyFields: ["periodKey"], queryField: "socialPulseDigestsByEntity")
+  periodKey: String!
+  periodStart: AWSDateTime!
+  periodEnd: AWSDateTime!
+  
+  ourPostCount: Int!
+  ourEngagement: Int!
+  ourTopPost: AWSJSON
+  ourVenueBreakdown: AWSJSON
+  
+  competitorDigest: AWSJSON
+  totalCompetitorPosts: Int
+  totalCompetitorEngagement: Int
+  
+  eventAnnouncements: AWSJSON
+  guaranteeChanges: AWSJSON
+  scheduleChanges: AWSJSON
+  promotions: AWSJSON
+  
+  shareOfVoice: Float
+  engagementRank: Int
+  marketPostVolume: Int
+  
+  generatedAt: AWSDateTime!
+  generatedBy: String!
+  postsAnalyzed: Int!
+  accountsAnalyzed: Int!
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# ALERT CONFIGURATION
+# ===================================================================
+
+type AlertThresholdConfig
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  id: ID!
+  entityId: ID @index(name: "byEntityAlertConfig")
+  
+  lossThreshold: Float @default(value: "0")
+  lowMarginThreshold: Float @default(value: "20")
+  highOverlayThreshold: Float @default(value: "500")
+  guaranteeCoverageThreshold: Float @default(value: "80")
+  lowFillRatePercent: Float @default(value: "50")
+  cancelledPatternCount: Int @default(value: "2")
+  staffCostAnomalyPercent: Float @default(value: "150")
+  negativeTrendPercent: Float @default(value: "-15")
+  softeningTrendPercent: Float @default(value: "-5")
+  
+  isActive: Boolean! @default(value: "true")
+  lastUpdatedAt: AWSDateTime
+  lastUpdatedBy: String
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# NOTE: After deploying the metricsPackGenerator function,
+# create a new file 72-ai-insights-resolvers.graphql with the
+# mutations and queries that use @function directives.
+# ===================================================================

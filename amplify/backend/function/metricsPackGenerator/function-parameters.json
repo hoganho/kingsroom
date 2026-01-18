@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "storage": {
+      "Entity:@model(appsync)": [
+        "read"
+      ],
+      "Venue:@model(appsync)": [
+        "read"
+      ],
+      "GameFinancialSnapshot:@model(appsync)": [
+        "read"
+      ],
+      "MetricsPack:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "AlertThresholdConfig:@model(appsync)": [
+        "read"
+      ],
+      "SocialPost:@model(appsync)": [
+        "read"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

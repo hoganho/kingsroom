@@ -19,6 +19,13 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "function": {
+    "aiReportGenerator": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "autoScraper": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
@@ -69,6 +76,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Region": "string"
     },
     "getModelCount": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
+    "metricsPackGenerator": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",

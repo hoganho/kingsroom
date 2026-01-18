@@ -10768,6 +10768,187 @@ export const refreshTournamentSeriesMetrics = /* GraphQL */ `mutation RefreshTou
   APITypes.RefreshTournamentSeriesMetricsMutationVariables,
   APITypes.RefreshTournamentSeriesMetricsMutation
 >;
+export const generateMetricsPack = /* GraphQL */ `mutation GenerateMetricsPack($input: GenerateMetricsPackInput!) {
+  generateMetricsPack(input: $input) {
+    success
+    metricsPackId
+    metricsPack {
+      id
+      entityId
+      reportType
+      periodKey
+      periodStart
+      periodEnd
+      periodLabel
+      comparisonPeriodKey
+      comparisonPeriodStart
+      comparisonPeriodEnd
+      comparisonPeriodLabel
+      packData
+      socialPulseData
+      generatedAt
+      generatedBy
+      generationDurationMs
+      version
+      snapshotsIncluded
+      gamesIncluded
+      venuesIncluded
+      dataCompleteness
+      warnings
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    wasExisting
+    generationDurationMs
+    error
+    warnings
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.GenerateMetricsPackMutationVariables,
+  APITypes.GenerateMetricsPackMutation
+>;
+export const updateAlertThresholds = /* GraphQL */ `mutation UpdateAlertThresholds($input: UpdateAlertThresholdsInput!) {
+  updateAlertThresholds(input: $input) {
+    id
+    entityId
+    lossThreshold
+    lowMarginThreshold
+    highOverlayThreshold
+    guaranteeCoverageThreshold
+    lowFillRatePercent
+    cancelledPatternCount
+    staffCostAnomalyPercent
+    negativeTrendPercent
+    softeningTrendPercent
+    isActive
+    lastUpdatedAt
+    lastUpdatedBy
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAlertThresholdsMutationVariables,
+  APITypes.UpdateAlertThresholdsMutation
+>;
+export const generateDirectorReport = /* GraphQL */ `mutation GenerateDirectorReport($input: GenerateDirectorReportInput!) {
+  generateDirectorReport(input: $input) {
+    success
+    directorReportId
+    directorReport {
+      id
+      entityId
+      reportType
+      periodKey
+      metricsPackId
+      reportData
+      status
+      generatedAt
+      generatedBy
+      modelProvider
+      modelName
+      modelVersion
+      promptVersion
+      inputTokens
+      outputTokens
+      totalCost
+      generationDurationMs
+      reportVersion
+      regeneratedAt
+      regeneratedBy
+      regenerationReason
+      previousReportId
+      viewedAt
+      viewedBy
+      exportedAt
+      exportFormat
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    wasRegenerated
+    generationDurationMs
+    tokenUsage {
+      inputTokens
+      outputTokens
+      totalCost
+      __typename
+    }
+    error
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.GenerateDirectorReportMutationVariables,
+  APITypes.GenerateDirectorReportMutation
+>;
+export const regenerateDirectorReport = /* GraphQL */ `mutation RegenerateDirectorReport($input: RegenerateDirectorReportInput!) {
+  regenerateDirectorReport(input: $input) {
+    success
+    directorReportId
+    directorReport {
+      id
+      entityId
+      reportType
+      periodKey
+      metricsPackId
+      reportData
+      status
+      generatedAt
+      generatedBy
+      modelProvider
+      modelName
+      modelVersion
+      promptVersion
+      inputTokens
+      outputTokens
+      totalCost
+      generationDurationMs
+      reportVersion
+      regeneratedAt
+      regeneratedBy
+      regenerationReason
+      previousReportId
+      viewedAt
+      viewedBy
+      exportedAt
+      exportFormat
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    wasRegenerated
+    generationDurationMs
+    tokenUsage {
+      inputTokens
+      outputTokens
+      totalCost
+      __typename
+    }
+    error
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.RegenerateDirectorReportMutationVariables,
+  APITypes.RegenerateDirectorReportMutation
+>;
 export const syncActiveGame = /* GraphQL */ `mutation SyncActiveGame($input: SyncActiveGameInput!) {
   syncActiveGame(input: $input) {
     success
@@ -601707,6 +601888,465 @@ export const deleteTournamentSeriesMetrics = /* GraphQL */ `mutation DeleteTourn
 ` as GeneratedMutation<
   APITypes.DeleteTournamentSeriesMetricsMutationVariables,
   APITypes.DeleteTournamentSeriesMetricsMutation
+>;
+export const createMetricsPack = /* GraphQL */ `mutation CreateMetricsPack(
+  $input: CreateMetricsPackInput!
+  $condition: ModelMetricsPackConditionInput
+) {
+  createMetricsPack(input: $input, condition: $condition) {
+    id
+    entityId
+    reportType
+    periodKey
+    periodStart
+    periodEnd
+    periodLabel
+    comparisonPeriodKey
+    comparisonPeriodStart
+    comparisonPeriodEnd
+    comparisonPeriodLabel
+    packData
+    socialPulseData
+    generatedAt
+    generatedBy
+    generationDurationMs
+    version
+    snapshotsIncluded
+    gamesIncluded
+    venuesIncluded
+    dataCompleteness
+    warnings
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateMetricsPackMutationVariables,
+  APITypes.CreateMetricsPackMutation
+>;
+export const updateMetricsPack = /* GraphQL */ `mutation UpdateMetricsPack(
+  $input: UpdateMetricsPackInput!
+  $condition: ModelMetricsPackConditionInput
+) {
+  updateMetricsPack(input: $input, condition: $condition) {
+    id
+    entityId
+    reportType
+    periodKey
+    periodStart
+    periodEnd
+    periodLabel
+    comparisonPeriodKey
+    comparisonPeriodStart
+    comparisonPeriodEnd
+    comparisonPeriodLabel
+    packData
+    socialPulseData
+    generatedAt
+    generatedBy
+    generationDurationMs
+    version
+    snapshotsIncluded
+    gamesIncluded
+    venuesIncluded
+    dataCompleteness
+    warnings
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateMetricsPackMutationVariables,
+  APITypes.UpdateMetricsPackMutation
+>;
+export const deleteMetricsPack = /* GraphQL */ `mutation DeleteMetricsPack(
+  $input: DeleteMetricsPackInput!
+  $condition: ModelMetricsPackConditionInput
+) {
+  deleteMetricsPack(input: $input, condition: $condition) {
+    id
+    entityId
+    reportType
+    periodKey
+    periodStart
+    periodEnd
+    periodLabel
+    comparisonPeriodKey
+    comparisonPeriodStart
+    comparisonPeriodEnd
+    comparisonPeriodLabel
+    packData
+    socialPulseData
+    generatedAt
+    generatedBy
+    generationDurationMs
+    version
+    snapshotsIncluded
+    gamesIncluded
+    venuesIncluded
+    dataCompleteness
+    warnings
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteMetricsPackMutationVariables,
+  APITypes.DeleteMetricsPackMutation
+>;
+export const createDirectorReport = /* GraphQL */ `mutation CreateDirectorReport(
+  $input: CreateDirectorReportInput!
+  $condition: ModelDirectorReportConditionInput
+) {
+  createDirectorReport(input: $input, condition: $condition) {
+    id
+    entityId
+    reportType
+    periodKey
+    metricsPackId
+    reportData
+    status
+    generatedAt
+    generatedBy
+    modelProvider
+    modelName
+    modelVersion
+    promptVersion
+    inputTokens
+    outputTokens
+    totalCost
+    generationDurationMs
+    reportVersion
+    regeneratedAt
+    regeneratedBy
+    regenerationReason
+    previousReportId
+    viewedAt
+    viewedBy
+    exportedAt
+    exportFormat
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDirectorReportMutationVariables,
+  APITypes.CreateDirectorReportMutation
+>;
+export const updateDirectorReport = /* GraphQL */ `mutation UpdateDirectorReport(
+  $input: UpdateDirectorReportInput!
+  $condition: ModelDirectorReportConditionInput
+) {
+  updateDirectorReport(input: $input, condition: $condition) {
+    id
+    entityId
+    reportType
+    periodKey
+    metricsPackId
+    reportData
+    status
+    generatedAt
+    generatedBy
+    modelProvider
+    modelName
+    modelVersion
+    promptVersion
+    inputTokens
+    outputTokens
+    totalCost
+    generationDurationMs
+    reportVersion
+    regeneratedAt
+    regeneratedBy
+    regenerationReason
+    previousReportId
+    viewedAt
+    viewedBy
+    exportedAt
+    exportFormat
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDirectorReportMutationVariables,
+  APITypes.UpdateDirectorReportMutation
+>;
+export const deleteDirectorReport = /* GraphQL */ `mutation DeleteDirectorReport(
+  $input: DeleteDirectorReportInput!
+  $condition: ModelDirectorReportConditionInput
+) {
+  deleteDirectorReport(input: $input, condition: $condition) {
+    id
+    entityId
+    reportType
+    periodKey
+    metricsPackId
+    reportData
+    status
+    generatedAt
+    generatedBy
+    modelProvider
+    modelName
+    modelVersion
+    promptVersion
+    inputTokens
+    outputTokens
+    totalCost
+    generationDurationMs
+    reportVersion
+    regeneratedAt
+    regeneratedBy
+    regenerationReason
+    previousReportId
+    viewedAt
+    viewedBy
+    exportedAt
+    exportFormat
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDirectorReportMutationVariables,
+  APITypes.DeleteDirectorReportMutation
+>;
+export const createSocialPulseDigest = /* GraphQL */ `mutation CreateSocialPulseDigest(
+  $input: CreateSocialPulseDigestInput!
+  $condition: ModelSocialPulseDigestConditionInput
+) {
+  createSocialPulseDigest(input: $input, condition: $condition) {
+    id
+    entityId
+    periodKey
+    periodStart
+    periodEnd
+    ourPostCount
+    ourEngagement
+    ourTopPost
+    ourVenueBreakdown
+    competitorDigest
+    totalCompetitorPosts
+    totalCompetitorEngagement
+    eventAnnouncements
+    guaranteeChanges
+    scheduleChanges
+    promotions
+    shareOfVoice
+    engagementRank
+    marketPostVolume
+    generatedAt
+    generatedBy
+    postsAnalyzed
+    accountsAnalyzed
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateSocialPulseDigestMutationVariables,
+  APITypes.CreateSocialPulseDigestMutation
+>;
+export const updateSocialPulseDigest = /* GraphQL */ `mutation UpdateSocialPulseDigest(
+  $input: UpdateSocialPulseDigestInput!
+  $condition: ModelSocialPulseDigestConditionInput
+) {
+  updateSocialPulseDigest(input: $input, condition: $condition) {
+    id
+    entityId
+    periodKey
+    periodStart
+    periodEnd
+    ourPostCount
+    ourEngagement
+    ourTopPost
+    ourVenueBreakdown
+    competitorDigest
+    totalCompetitorPosts
+    totalCompetitorEngagement
+    eventAnnouncements
+    guaranteeChanges
+    scheduleChanges
+    promotions
+    shareOfVoice
+    engagementRank
+    marketPostVolume
+    generatedAt
+    generatedBy
+    postsAnalyzed
+    accountsAnalyzed
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateSocialPulseDigestMutationVariables,
+  APITypes.UpdateSocialPulseDigestMutation
+>;
+export const deleteSocialPulseDigest = /* GraphQL */ `mutation DeleteSocialPulseDigest(
+  $input: DeleteSocialPulseDigestInput!
+  $condition: ModelSocialPulseDigestConditionInput
+) {
+  deleteSocialPulseDigest(input: $input, condition: $condition) {
+    id
+    entityId
+    periodKey
+    periodStart
+    periodEnd
+    ourPostCount
+    ourEngagement
+    ourTopPost
+    ourVenueBreakdown
+    competitorDigest
+    totalCompetitorPosts
+    totalCompetitorEngagement
+    eventAnnouncements
+    guaranteeChanges
+    scheduleChanges
+    promotions
+    shareOfVoice
+    engagementRank
+    marketPostVolume
+    generatedAt
+    generatedBy
+    postsAnalyzed
+    accountsAnalyzed
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteSocialPulseDigestMutationVariables,
+  APITypes.DeleteSocialPulseDigestMutation
+>;
+export const createAlertThresholdConfig = /* GraphQL */ `mutation CreateAlertThresholdConfig(
+  $input: CreateAlertThresholdConfigInput!
+  $condition: ModelAlertThresholdConfigConditionInput
+) {
+  createAlertThresholdConfig(input: $input, condition: $condition) {
+    id
+    entityId
+    lossThreshold
+    lowMarginThreshold
+    highOverlayThreshold
+    guaranteeCoverageThreshold
+    lowFillRatePercent
+    cancelledPatternCount
+    staffCostAnomalyPercent
+    negativeTrendPercent
+    softeningTrendPercent
+    isActive
+    lastUpdatedAt
+    lastUpdatedBy
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAlertThresholdConfigMutationVariables,
+  APITypes.CreateAlertThresholdConfigMutation
+>;
+export const updateAlertThresholdConfig = /* GraphQL */ `mutation UpdateAlertThresholdConfig(
+  $input: UpdateAlertThresholdConfigInput!
+  $condition: ModelAlertThresholdConfigConditionInput
+) {
+  updateAlertThresholdConfig(input: $input, condition: $condition) {
+    id
+    entityId
+    lossThreshold
+    lowMarginThreshold
+    highOverlayThreshold
+    guaranteeCoverageThreshold
+    lowFillRatePercent
+    cancelledPatternCount
+    staffCostAnomalyPercent
+    negativeTrendPercent
+    softeningTrendPercent
+    isActive
+    lastUpdatedAt
+    lastUpdatedBy
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAlertThresholdConfigMutationVariables,
+  APITypes.UpdateAlertThresholdConfigMutation
+>;
+export const deleteAlertThresholdConfig = /* GraphQL */ `mutation DeleteAlertThresholdConfig(
+  $input: DeleteAlertThresholdConfigInput!
+  $condition: ModelAlertThresholdConfigConditionInput
+) {
+  deleteAlertThresholdConfig(input: $input, condition: $condition) {
+    id
+    entityId
+    lossThreshold
+    lowMarginThreshold
+    highOverlayThreshold
+    guaranteeCoverageThreshold
+    lowFillRatePercent
+    cancelledPatternCount
+    staffCostAnomalyPercent
+    negativeTrendPercent
+    softeningTrendPercent
+    isActive
+    lastUpdatedAt
+    lastUpdatedBy
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAlertThresholdConfigMutationVariables,
+  APITypes.DeleteAlertThresholdConfigMutation
 >;
 export const createScraperJob = /* GraphQL */ `mutation CreateScraperJob(
   $input: CreateScraperJobInput!

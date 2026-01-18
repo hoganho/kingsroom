@@ -1,0 +1,33 @@
+[
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query",
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/MetricsPack-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/MetricsPack-*/index/*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/DirectorReport-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/DirectorReport-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "ssm:GetParameter"
+    ],
+    "Resource": [
+      "arn:aws:ssm:ap-southeast-2:*:parameter/pokerpro/*"
+    ]
+  },
+  {
+    "Action": [
+      "kms:Decrypt"
+    ],
+    "Resource": [
+      "*"
+    ]
+  }
+]

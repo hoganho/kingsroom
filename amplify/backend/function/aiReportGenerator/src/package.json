@@ -1,0 +1,19 @@
+{
+  "name": "ai-report-generator",
+  "version": "1.0.0",
+  "description": "AI Report Generator Lambda - Transforms MetricsPacks into DirectorReports using LLM",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.400.0",
+    "@aws-sdk/lib-dynamodb": "^3.400.0",
+    "@aws-sdk/client-ssm": "^3.400.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "PokerPro",
+  "license": "UNLICENSED"
+}

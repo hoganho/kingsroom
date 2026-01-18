@@ -64,6 +64,22 @@
     }
   },
   "function": {
+    "aiReportGenerator": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "autoScraper": {
       "build": true,
       "dependsOn": [
@@ -201,6 +217,22 @@
         {
           "attributes": [
             "GraphQLAPIIdOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "metricsPackGenerator": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
           ],
           "category": "api",
           "resourceName": "kingsroom"
@@ -544,6 +576,22 @@
     }
   },
   "parameters": {
+    "AMPLIFY_function_aiReportGenerator_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "aiReportGenerator"
+        }
+      ]
+    },
+    "AMPLIFY_function_aiReportGenerator_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "aiReportGenerator"
+        }
+      ]
+    },
     "AMPLIFY_function_autoScraper_deploymentBucketName": {
       "usedBy": [
         {
@@ -669,6 +717,22 @@
         {
           "category": "function",
           "resourceName": "getModelCount"
+        }
+      ]
+    },
+    "AMPLIFY_function_metricsPackGenerator_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "metricsPackGenerator"
+        }
+      ]
+    },
+    "AMPLIFY_function_metricsPackGenerator_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "metricsPackGenerator"
         }
       ]
     },

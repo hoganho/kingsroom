@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "storage": {
+      "MetricsPack:@model(appsync)": [
+        "read"
+      ],
+      "DirectorReport:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

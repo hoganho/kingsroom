@@ -1,0 +1,136 @@
+# 72-ai-insights-resolvers.graphql
+# ===================================================================
+# AI INSIGHTS - Custom Mutations & Queries with @function directives
+# ===================================================================
+# Deploy this AFTER the metricsPackGenerator function is created
+# ===================================================================
+
+# ===================================================================
+# INPUT TYPES
+# ===================================================================
+
+input GenerateMetricsPackInput {
+  entityId: ID!
+  reportType: ReportType!
+  periodKey: String
+  forceRegenerate: Boolean
+}
+
+input GenerateDirectorReportInput {
+  entityId: ID!
+  reportType: ReportType!
+  periodKey: String
+  metricsPackId: ID
+  forceRegenerate: Boolean
+  regenerationReason: String
+  provider: String
+  model: String
+}
+
+input RegenerateDirectorReportInput {
+  directorReportId: ID!
+  reason: String
+  provider: String
+  model: String
+}
+
+input BatchGenerateReportsInput {
+  entityIds: [ID!]
+  reportType: ReportType!
+  periodKey: String
+}
+
+input UpdateAlertThresholdsInput {
+  entityId: ID
+  lossThreshold: Float
+  lowMarginThreshold: Float
+  highOverlayThreshold: Float
+  guaranteeCoverageThreshold: Float
+  lowFillRatePercent: Float
+  cancelledPatternCount: Int
+  staffCostAnomalyPercent: Float
+  negativeTrendPercent: Float
+  softeningTrendPercent: Float
+}
+
+# ===================================================================
+# RESULT TYPES
+# ===================================================================
+
+type GenerateMetricsPackResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  metricsPackId: ID
+  metricsPack: MetricsPack
+  wasExisting: Boolean
+  generationDurationMs: Int
+  error: String
+  warnings: [String]
+}
+
+type GenerateDirectorReportResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  directorReportId: ID
+  directorReport: DirectorReport
+  wasRegenerated: Boolean
+  generationDurationMs: Int
+  tokenUsage: TokenUsage
+  error: String
+}
+
+type TokenUsage @aws_iam @aws_cognito_user_pools {
+  inputTokens: Int!
+  outputTokens: Int!
+  totalCost: Float!
+}
+
+type BatchGenerateReportsResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  totalRequested: Int!
+  totalGenerated: Int!
+  totalFailed: Int!
+  results: [GenerateDirectorReportResult!]!
+  totalDurationMs: Int
+  totalCost: Float
+}
+
+# ===================================================================
+# EXTEND MUTATIONS - metricsPackGenerator
+# ===================================================================
+
+extend type Mutation {
+  generateMetricsPack(input: GenerateMetricsPackInput!): GenerateMetricsPackResult
+    @function(name: "metricsPackGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  updateAlertThresholds(input: UpdateAlertThresholdsInput!): AlertThresholdConfig
+    @function(name: "metricsPackGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+}
+
+# ===================================================================
+# EXTEND QUERIES - metricsPackGenerator
+# ===================================================================
+
+extend type Query {
+  getLatestMetricsPack(entityId: ID!, reportType: ReportType!): MetricsPack
+    @function(name: "metricsPackGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  listAvailablePeriods(entityId: ID!, reportType: ReportType!, limit: Int): [String!]!
+    @function(name: "metricsPackGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  getAlertThresholds(entityId: ID): AlertThresholdConfig
+    @function(name: "metricsPackGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  previewAlerts(entityId: ID!, reportType: ReportType!): [AWSJSON!]
+    @function(name: "metricsPackGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+}

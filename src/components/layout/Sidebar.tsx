@@ -19,6 +19,7 @@ import {
   ChartBarIcon,
   MegaphoneIcon,
   BugAntIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline"
 import { Link, useLocation } from "react-router-dom"
 import { useState, useEffect, useMemo } from "react"
@@ -108,6 +109,7 @@ const settingsNavigation: NavItem[] = [
   { name: "Social Accounts", href: "/settings/social-accounts", icon: HashtagIcon, requiredPaths: ["/settings/social-accounts"] },
   { name: "User Management", href: "/settings/user-management", icon: UsersIcon, requiredPaths: ["/settings/user-management"] },
   { name: 'Metrics Management', href: '/settings/metrics-management', icon: ChartBarIcon, requiredPaths: ["/settings/metrics-management"] },
+  { name: "AI Insights", href: "settings/insights", icon: SparklesIcon, requiredPaths: ["/insights"],},
 ]
 
 const scraperNavigation: NavItem[] = [

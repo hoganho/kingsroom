@@ -79,6 +79,8 @@ import { SocialDebug } from './pages/debug/SocialDebug';
 import { DatabaseMonitorPage } from './pages/debug/DatabaseMonitor';
 // REMOVED: import { getMonitoring } from './utils/enhanced-monitoring';
 
+import { AIInsightsDashboard } from './pages/insights/AIInsightsDashboard';
+
 // Configure Amplify
 Amplify.configure(awsExports);
 
@@ -436,6 +438,7 @@ const AuthenticatedRoutes = () => {
             <Route path="/settings/metrics-management" element={<MetricsManagement />} />
             <Route path="/settings/social-accounts" element={<SocialAccountManagement />} />
             <Route path="/settings/user-management" element={<UserManagement />} />
+            <Route path="/settings/insights" element={<AIInsightsDashboard />} />
 
             {/* Scraper Management (SuperAdmin) */}
             <Route path="/scraper/admin" element={<ScraperAdminPage />} />
