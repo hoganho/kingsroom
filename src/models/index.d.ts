@@ -9623,6 +9623,7 @@ type EagerSocialAccount = {
   readonly lastScrapedAt?: string | null;
   readonly lastSuccessfulScrapeAt?: string | null;
   readonly nextScheduledScrapeAt?: string | null;
+  readonly preferredScrapeHourUTC?: number | null;
   readonly consecutiveFailures?: number | null;
   readonly lastErrorMessage?: string | null;
   readonly hasPostAccess?: boolean | null;
@@ -9668,6 +9669,7 @@ type LazySocialAccount = {
   readonly lastScrapedAt?: string | null;
   readonly lastSuccessfulScrapeAt?: string | null;
   readonly nextScheduledScrapeAt?: string | null;
+  readonly preferredScrapeHourUTC?: number | null;
   readonly consecutiveFailures?: number | null;
   readonly lastErrorMessage?: string | null;
   readonly hasPostAccess?: boolean | null;

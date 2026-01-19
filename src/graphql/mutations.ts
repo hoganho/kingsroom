@@ -2370,6 +2370,7 @@ export const startScraperJob = /* GraphQL */ `mutation StartScraperJob($input: S
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -4590,6 +4591,7 @@ export const cancelScraperJob = /* GraphQL */ `mutation CancelScraperJob($jobId:
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -6794,6 +6796,7 @@ export const modifyScrapeURLStatus = /* GraphQL */ `mutation ModifyScrapeURLStat
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -9015,6 +9018,7 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -12939,6 +12943,7 @@ export const refreshDashboardCache = /* GraphQL */ `mutation RefreshDashboardCac
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -14978,6 +14983,7 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -17342,6 +17348,7 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -19908,6 +19915,7 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
         lastScrapedAt
         lastSuccessfulScrapeAt
         nextScheduledScrapeAt
+        preferredScrapeHourUTC
         consecutiveFailures
         lastErrorMessage
         hasPostAccess
@@ -21307,6 +21315,7 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -23671,6 +23680,7 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -26237,6 +26247,7 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
         lastScrapedAt
         lastSuccessfulScrapeAt
         nextScheduledScrapeAt
+        preferredScrapeHourUTC
         consecutiveFailures
         lastErrorMessage
         hasPostAccess
@@ -27636,6 +27647,7 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -30000,6 +30012,7 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -32566,6 +32579,7 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
         lastScrapedAt
         lastSuccessfulScrapeAt
         nextScheduledScrapeAt
+        preferredScrapeHourUTC
         consecutiveFailures
         lastErrorMessage
         hasPostAccess
@@ -33575,6 +33589,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -36163,6 +36178,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -38837,6 +38853,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         lastScrapedAt
         lastSuccessfulScrapeAt
         nextScheduledScrapeAt
+        preferredScrapeHourUTC
         consecutiveFailures
         lastErrorMessage
         hasPostAccess
@@ -41011,6 +41028,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -41699,6 +41717,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -44287,6 +44306,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -46961,6 +46981,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         lastScrapedAt
         lastSuccessfulScrapeAt
         nextScheduledScrapeAt
+        preferredScrapeHourUTC
         consecutiveFailures
         lastErrorMessage
         hasPostAccess
@@ -49135,6 +49156,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -49823,6 +49845,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -52411,6 +52434,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -55085,6 +55109,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         lastScrapedAt
         lastSuccessfulScrapeAt
         nextScheduledScrapeAt
+        preferredScrapeHourUTC
         consecutiveFailures
         lastErrorMessage
         hasPostAccess
@@ -57259,6 +57284,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -59024,6 +59050,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -59880,6 +59907,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -61595,6 +61623,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -62451,6 +62480,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -64166,6 +64196,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -65022,6 +65053,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -67429,6 +67461,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -69005,6 +69038,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -72675,6 +72709,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -73618,6 +73653,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -74699,6 +74735,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -77502,6 +77539,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -79507,6 +79545,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -80363,6 +80402,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -81182,6 +81222,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -81829,6 +81870,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -84983,6 +85025,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -89167,6 +89210,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -91823,6 +91867,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -93862,6 +93907,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -96280,6 +96326,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -96762,6 +96809,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         lastScrapedAt
         lastSuccessfulScrapeAt
         nextScheduledScrapeAt
+        preferredScrapeHourUTC
         consecutiveFailures
         lastErrorMessage
         hasPostAccess
@@ -99787,6 +99835,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -100657,6 +100706,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -101252,6 +101302,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -104885,6 +104936,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -106461,6 +106513,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -110131,6 +110184,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -111074,6 +111128,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -112155,6 +112210,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -114958,6 +115014,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -116963,6 +117020,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -117819,6 +117877,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -118638,6 +118697,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -119285,6 +119345,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -122439,6 +122500,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -126623,6 +126685,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -129279,6 +129342,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -131318,6 +131382,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -133736,6 +133801,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -134218,6 +134284,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         lastScrapedAt
         lastSuccessfulScrapeAt
         nextScheduledScrapeAt
+        preferredScrapeHourUTC
         consecutiveFailures
         lastErrorMessage
         hasPostAccess
@@ -137243,6 +137310,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -138113,6 +138181,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -138708,6 +138777,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -142341,6 +142411,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -143917,6 +143988,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -147587,6 +147659,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -148530,6 +148603,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -149611,6 +149685,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -152414,6 +152489,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -154419,6 +154495,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -155275,6 +155352,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -156094,6 +156172,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -156741,6 +156820,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -159895,6 +159975,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -164079,6 +164160,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -166735,6 +166817,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -168774,6 +168857,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -171192,6 +171276,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -171674,6 +171759,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         lastScrapedAt
         lastSuccessfulScrapeAt
         nextScheduledScrapeAt
+        preferredScrapeHourUTC
         consecutiveFailures
         lastErrorMessage
         hasPostAccess
@@ -174699,6 +174785,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -175569,6 +175656,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -176164,6 +176252,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -179757,6 +179846,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -181333,6 +181423,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -185003,6 +185094,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -185946,6 +186038,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -187027,6 +187120,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -189917,6 +190011,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -191493,6 +191588,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -195163,6 +195259,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -196106,6 +196203,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -197187,6 +197285,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -200077,6 +200176,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -201653,6 +201753,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -205323,6 +205424,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -206266,6 +206368,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -207347,6 +207450,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -210434,6 +210538,7 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -212010,6 +212115,7 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -215680,6 +215786,7 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -216623,6 +216730,7 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -217704,6 +217812,7 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -220654,6 +220763,7 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -222230,6 +222340,7 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -225900,6 +226011,7 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -226843,6 +226955,7 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -227924,6 +228037,7 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -230874,6 +230988,7 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -232450,6 +232565,7 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -236120,6 +236236,7 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -237063,6 +237180,7 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -238144,6 +238262,7 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -241094,6 +241213,7 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -242670,6 +242790,7 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -246340,6 +246461,7 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -247283,6 +247405,7 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -248364,6 +248487,7 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -251516,6 +251640,7 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -253092,6 +253217,7 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -256762,6 +256888,7 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -257705,6 +257832,7 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -258786,6 +258914,7 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -261938,6 +262067,7 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -263514,6 +263644,7 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -267184,6 +267315,7 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -268127,6 +268259,7 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -269208,6 +269341,7 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -272307,6 +272441,7 @@ export const createGameCostLineItem = /* GraphQL */ `mutation CreateGameCostLine
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -275099,6 +275234,7 @@ export const updateGameCostLineItem = /* GraphQL */ `mutation UpdateGameCostLine
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -277891,6 +278027,7 @@ export const deleteGameCostLineItem = /* GraphQL */ `mutation DeleteGameCostLine
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -281111,6 +281248,7 @@ export const createRecurringGame = /* GraphQL */ `mutation CreateRecurringGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -282850,6 +282988,7 @@ export const createRecurringGame = /* GraphQL */ `mutation CreateRecurringGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -283706,6 +283845,7 @@ export const createRecurringGame = /* GraphQL */ `mutation CreateRecurringGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -286027,6 +286167,7 @@ export const createRecurringGame = /* GraphQL */ `mutation CreateRecurringGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -289411,6 +289552,7 @@ export const updateRecurringGame = /* GraphQL */ `mutation UpdateRecurringGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -291150,6 +291292,7 @@ export const updateRecurringGame = /* GraphQL */ `mutation UpdateRecurringGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -292006,6 +292149,7 @@ export const updateRecurringGame = /* GraphQL */ `mutation UpdateRecurringGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -294327,6 +294471,7 @@ export const updateRecurringGame = /* GraphQL */ `mutation UpdateRecurringGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -297711,6 +297856,7 @@ export const deleteRecurringGame = /* GraphQL */ `mutation DeleteRecurringGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -299450,6 +299596,7 @@ export const deleteRecurringGame = /* GraphQL */ `mutation DeleteRecurringGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -300306,6 +300453,7 @@ export const deleteRecurringGame = /* GraphQL */ `mutation DeleteRecurringGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -302627,6 +302775,7 @@ export const deleteRecurringGame = /* GraphQL */ `mutation DeleteRecurringGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -304926,6 +305075,7 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -305521,6 +305671,7 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -309077,6 +309228,7 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -310653,6 +310805,7 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -314323,6 +314476,7 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -315266,6 +315420,7 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -316347,6 +316502,7 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -317722,6 +317878,7 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -318317,6 +318474,7 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -321873,6 +322031,7 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -323449,6 +323608,7 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -327119,6 +327279,7 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -328062,6 +328223,7 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -329143,6 +329305,7 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -330518,6 +330681,7 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -331113,6 +331277,7 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -334669,6 +334834,7 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -336245,6 +336411,7 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -339915,6 +340082,7 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -340858,6 +341026,7 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -341939,6 +342108,7 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -345830,6 +346000,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -347690,6 +347861,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -348546,6 +348718,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -350826,6 +350999,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -353242,6 +353416,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -355102,6 +355277,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -355958,6 +356134,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -358238,6 +358415,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -360654,6 +360832,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -362514,6 +362693,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -363370,6 +363550,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -365650,6 +365831,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -372199,6 +372381,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -373055,6 +373238,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -379110,6 +379294,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -379966,6 +380151,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -386021,6 +386207,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -386877,6 +387064,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -388729,6 +388917,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -390681,6 +390870,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -392633,6 +392823,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -394591,6 +394782,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -397013,6 +397205,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -398589,6 +398782,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -402259,6 +402453,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -403202,6 +403397,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -404283,6 +404479,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -406668,6 +406865,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -409090,6 +409288,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -410666,6 +410865,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -414336,6 +414536,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -415279,6 +415480,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -416360,6 +416562,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -418745,6 +418948,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -421167,6 +421371,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -422743,6 +422948,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -426413,6 +426619,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -427356,6 +427563,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -428437,6 +428645,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -430818,6 +431027,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -433241,6 +433451,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -434817,6 +435028,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -438487,6 +438699,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -439430,6 +439643,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -440511,6 +440725,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -442897,6 +443112,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -445320,6 +445536,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -446896,6 +447113,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -450566,6 +450784,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -451509,6 +451728,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -452590,6 +452810,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -454976,6 +455197,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -457399,6 +457621,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -458975,6 +459198,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -462645,6 +462869,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -463588,6 +463813,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -464669,6 +464895,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -467048,6 +467275,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -468825,6 +469053,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -469681,6 +469910,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -471539,6 +471769,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -473316,6 +473547,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -474172,6 +474404,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -476030,6 +476263,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -477807,6 +478041,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -478663,6 +478898,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -480527,6 +480763,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -482470,6 +482707,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -484413,6 +484651,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -486356,6 +486595,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -488298,6 +488538,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -490240,6 +490481,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -492182,6 +492424,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -494124,6 +494367,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -496066,6 +496310,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -498005,6 +498250,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -499942,6 +500188,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -501879,6 +502126,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -506417,6 +506665,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -509074,6 +509323,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -510650,6 +510900,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -514320,6 +514571,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -515263,6 +515515,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -516344,6 +516597,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -518725,6 +518979,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -521382,6 +521637,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -522958,6 +523214,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -526628,6 +526885,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -527571,6 +527829,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -528652,6 +528911,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -531033,6 +531293,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -533690,6 +533951,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -535266,6 +535528,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -538936,6 +539199,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -539879,6 +540143,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -540960,6 +541225,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -543529,6 +543795,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -545465,6 +545732,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -547401,6 +547669,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -549406,6 +549675,7 @@ export const createEntityMetrics = /* GraphQL */ `mutation CreateEntityMetrics(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -551430,6 +551700,7 @@ export const updateEntityMetrics = /* GraphQL */ `mutation UpdateEntityMetrics(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -553454,6 +553725,7 @@ export const deleteEntityMetrics = /* GraphQL */ `mutation DeleteEntityMetrics(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -555333,6 +555605,7 @@ export const createVenueMetrics = /* GraphQL */ `mutation CreateVenueMetrics(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -556189,6 +556462,7 @@ export const createVenueMetrics = /* GraphQL */ `mutation CreateVenueMetrics(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -558088,6 +558362,7 @@ export const createVenueMetrics = /* GraphQL */ `mutation CreateVenueMetrics(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -559910,6 +560185,7 @@ export const updateVenueMetrics = /* GraphQL */ `mutation UpdateVenueMetrics(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -560766,6 +561042,7 @@ export const updateVenueMetrics = /* GraphQL */ `mutation UpdateVenueMetrics(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -562665,6 +562942,7 @@ export const updateVenueMetrics = /* GraphQL */ `mutation UpdateVenueMetrics(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -564487,6 +564765,7 @@ export const deleteVenueMetrics = /* GraphQL */ `mutation DeleteVenueMetrics(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -565343,6 +565622,7 @@ export const deleteVenueMetrics = /* GraphQL */ `mutation DeleteVenueMetrics(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -567242,6 +567522,7 @@ export const deleteVenueMetrics = /* GraphQL */ `mutation DeleteVenueMetrics(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -568130,6 +568411,7 @@ export const createRecurringGameMetrics = /* GraphQL */ `mutation CreateRecurrin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -568725,6 +569007,7 @@ export const createRecurringGameMetrics = /* GraphQL */ `mutation CreateRecurrin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -571695,6 +571978,7 @@ export const createRecurringGameMetrics = /* GraphQL */ `mutation CreateRecurrin
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -572551,6 +572835,7 @@ export const createRecurringGameMetrics = /* GraphQL */ `mutation CreateRecurrin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -574450,6 +574735,7 @@ export const createRecurringGameMetrics = /* GraphQL */ `mutation CreateRecurrin
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -575338,6 +575624,7 @@ export const updateRecurringGameMetrics = /* GraphQL */ `mutation UpdateRecurrin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -575933,6 +576220,7 @@ export const updateRecurringGameMetrics = /* GraphQL */ `mutation UpdateRecurrin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -578903,6 +579191,7 @@ export const updateRecurringGameMetrics = /* GraphQL */ `mutation UpdateRecurrin
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -579759,6 +580048,7 @@ export const updateRecurringGameMetrics = /* GraphQL */ `mutation UpdateRecurrin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -581658,6 +581948,7 @@ export const updateRecurringGameMetrics = /* GraphQL */ `mutation UpdateRecurrin
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -582546,6 +582837,7 @@ export const deleteRecurringGameMetrics = /* GraphQL */ `mutation DeleteRecurrin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -583141,6 +583433,7 @@ export const deleteRecurringGameMetrics = /* GraphQL */ `mutation DeleteRecurrin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -586111,6 +586404,7 @@ export const deleteRecurringGameMetrics = /* GraphQL */ `mutation DeleteRecurrin
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -586967,6 +587261,7 @@ export const deleteRecurringGameMetrics = /* GraphQL */ `mutation DeleteRecurrin
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -588866,6 +589161,7 @@ export const deleteRecurringGameMetrics = /* GraphQL */ `mutation DeleteRecurrin
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -589753,6 +590049,7 @@ export const createTournamentSeriesMetrics = /* GraphQL */ `mutation CreateTourn
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -590400,6 +590697,7 @@ export const createTournamentSeriesMetrics = /* GraphQL */ `mutation CreateTourn
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -593206,6 +593504,7 @@ export const createTournamentSeriesMetrics = /* GraphQL */ `mutation CreateTourn
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -594093,6 +594392,7 @@ export const updateTournamentSeriesMetrics = /* GraphQL */ `mutation UpdateTourn
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -594740,6 +595040,7 @@ export const updateTournamentSeriesMetrics = /* GraphQL */ `mutation UpdateTourn
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -597546,6 +597847,7 @@ export const updateTournamentSeriesMetrics = /* GraphQL */ `mutation UpdateTourn
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -598433,6 +598735,7 @@ export const deleteTournamentSeriesMetrics = /* GraphQL */ `mutation DeleteTourn
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -599080,6 +599383,7 @@ export const deleteTournamentSeriesMetrics = /* GraphQL */ `mutation DeleteTourn
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -601886,6 +602190,7 @@ export const deleteTournamentSeriesMetrics = /* GraphQL */ `mutation DeleteTourn
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -604604,6 +604909,7 @@ export const createScraperJob = /* GraphQL */ `mutation CreateScraperJob(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -606827,6 +607133,7 @@ export const updateScraperJob = /* GraphQL */ `mutation UpdateScraperJob(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -609050,6 +609357,7 @@ export const deleteScraperJob = /* GraphQL */ `mutation DeleteScraperJob(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -611253,6 +611561,7 @@ export const createScrapeURL = /* GraphQL */ `mutation CreateScrapeURL(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -613469,6 +613778,7 @@ export const updateScrapeURL = /* GraphQL */ `mutation UpdateScrapeURL(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -615685,6 +615995,7 @@ export const deleteScrapeURL = /* GraphQL */ `mutation DeleteScrapeURL(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -616778,6 +617089,7 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -617767,6 +618079,7 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -618829,6 +619142,7 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -619818,6 +620132,7 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -620880,6 +621195,7 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -621869,6 +622185,7 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -623844,6 +624161,7 @@ export const createScraperState = /* GraphQL */ `mutation CreateScraperState(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -625837,6 +626155,7 @@ export const updateScraperState = /* GraphQL */ `mutation UpdateScraperState(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -627830,6 +628149,7 @@ export const deleteScraperState = /* GraphQL */ `mutation DeleteScraperState(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -630632,6 +630952,7 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -632208,6 +632529,7 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -635878,6 +636200,7 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -636821,6 +637144,7 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -637902,6 +638226,7 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -640325,6 +640650,7 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -642064,6 +642390,7 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -642920,6 +643247,7 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -645316,6 +645644,7 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -646892,6 +647221,7 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -650562,6 +650892,7 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -651505,6 +651836,7 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -652586,6 +652918,7 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -655009,6 +655342,7 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -656748,6 +657082,7 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -657604,6 +657939,7 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -660000,6 +660336,7 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -661576,6 +661913,7 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -665246,6 +665584,7 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -666189,6 +666528,7 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -667270,6 +667610,7 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -669693,6 +670034,7 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -671432,6 +671774,7 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -672288,6 +672631,7 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -674684,6 +675028,7 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -676260,6 +676605,7 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -679930,6 +680276,7 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -680873,6 +681220,7 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -681954,6 +682302,7 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -684377,6 +684726,7 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -686116,6 +686466,7 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -686972,6 +687323,7 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -689348,6 +689700,7 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -690924,6 +691277,7 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -694594,6 +694948,7 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -695537,6 +695892,7 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -696618,6 +696974,7 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -699041,6 +699398,7 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -700780,6 +701138,7 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -701636,6 +701995,7 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -704012,6 +704372,7 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -705588,6 +705949,7 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -709258,6 +709620,7 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -710201,6 +710564,7 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -711282,6 +711646,7 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -713705,6 +714070,7 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -715444,6 +715810,7 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -716300,6 +716667,7 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -718676,6 +719044,7 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -720252,6 +720621,7 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -723922,6 +724292,7 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -724865,6 +725236,7 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -725946,6 +726318,7 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -728369,6 +728742,7 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -730108,6 +730482,7 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -730964,6 +731339,7 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -733337,6 +733713,7 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -734913,6 +735290,7 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -738583,6 +738961,7 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -739526,6 +739905,7 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -740607,6 +740987,7 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -743030,6 +743411,7 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -744769,6 +745151,7 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -745625,6 +746008,7 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -747998,6 +748382,7 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -749574,6 +749959,7 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -753244,6 +753630,7 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -754187,6 +754574,7 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -755268,6 +755656,7 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -757691,6 +758080,7 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -759430,6 +759820,7 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -760286,6 +760677,7 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -762223,6 +762615,7 @@ export const createDashboardCache = /* GraphQL */ `mutation CreateDashboardCache
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -764210,6 +764603,7 @@ export const updateDashboardCache = /* GraphQL */ `mutation UpdateDashboardCache
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -766197,6 +766591,7 @@ export const deleteDashboardCache = /* GraphQL */ `mutation DeleteDashboardCache
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -766340,6 +766735,7 @@ export const createSocialAccount = /* GraphQL */ `mutation CreateSocialAccount(
     lastScrapedAt
     lastSuccessfulScrapeAt
     nextScheduledScrapeAt
+    preferredScrapeHourUTC
     consecutiveFailures
     lastErrorMessage
     hasPostAccess
@@ -768213,6 +768609,7 @@ export const createSocialAccount = /* GraphQL */ `mutation CreateSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -769952,6 +770349,7 @@ export const createSocialAccount = /* GraphQL */ `mutation CreateSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -770808,6 +771206,7 @@ export const createSocialAccount = /* GraphQL */ `mutation CreateSocialAccount(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -771708,6 +772107,7 @@ export const createSocialAccount = /* GraphQL */ `mutation CreateSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -771836,6 +772236,7 @@ export const createSocialAccount = /* GraphQL */ `mutation CreateSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -771962,6 +772363,7 @@ export const updateSocialAccount = /* GraphQL */ `mutation UpdateSocialAccount(
     lastScrapedAt
     lastSuccessfulScrapeAt
     nextScheduledScrapeAt
+    preferredScrapeHourUTC
     consecutiveFailures
     lastErrorMessage
     hasPostAccess
@@ -773835,6 +774237,7 @@ export const updateSocialAccount = /* GraphQL */ `mutation UpdateSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -775574,6 +775977,7 @@ export const updateSocialAccount = /* GraphQL */ `mutation UpdateSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -776430,6 +776834,7 @@ export const updateSocialAccount = /* GraphQL */ `mutation UpdateSocialAccount(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -777330,6 +777735,7 @@ export const updateSocialAccount = /* GraphQL */ `mutation UpdateSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -777458,6 +777864,7 @@ export const updateSocialAccount = /* GraphQL */ `mutation UpdateSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -777584,6 +777991,7 @@ export const deleteSocialAccount = /* GraphQL */ `mutation DeleteSocialAccount(
     lastScrapedAt
     lastSuccessfulScrapeAt
     nextScheduledScrapeAt
+    preferredScrapeHourUTC
     consecutiveFailures
     lastErrorMessage
     hasPostAccess
@@ -779457,6 +779865,7 @@ export const deleteSocialAccount = /* GraphQL */ `mutation DeleteSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -781196,6 +781605,7 @@ export const deleteSocialAccount = /* GraphQL */ `mutation DeleteSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -782052,6 +782462,7 @@ export const deleteSocialAccount = /* GraphQL */ `mutation DeleteSocialAccount(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -782952,6 +783363,7 @@ export const deleteSocialAccount = /* GraphQL */ `mutation DeleteSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -783080,6 +783492,7 @@ export const deleteSocialAccount = /* GraphQL */ `mutation DeleteSocialAccount(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -785521,6 +785934,7 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -787097,6 +787511,7 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -790767,6 +791182,7 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -791710,6 +792126,7 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -792791,6 +793208,7 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -793548,6 +793966,7 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
       lastScrapedAt
       lastSuccessfulScrapeAt
       nextScheduledScrapeAt
+      preferredScrapeHourUTC
       consecutiveFailures
       lastErrorMessage
       hasPostAccess
@@ -794333,6 +794752,7 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -794928,6 +795348,7 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -795353,6 +795774,7 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -795424,6 +795846,7 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -797817,6 +798240,7 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -799393,6 +799817,7 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -803063,6 +803488,7 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -804006,6 +804432,7 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -805087,6 +805514,7 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -805844,6 +806272,7 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
       lastScrapedAt
       lastSuccessfulScrapeAt
       nextScheduledScrapeAt
+      preferredScrapeHourUTC
       consecutiveFailures
       lastErrorMessage
       hasPostAccess
@@ -806629,6 +807058,7 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -807224,6 +807654,7 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -807649,6 +808080,7 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -807720,6 +808152,7 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -810113,6 +810546,7 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -811689,6 +812123,7 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -815359,6 +815794,7 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -816302,6 +816738,7 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -817383,6 +817820,7 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -818140,6 +818578,7 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
       lastScrapedAt
       lastSuccessfulScrapeAt
       nextScheduledScrapeAt
+      preferredScrapeHourUTC
       consecutiveFailures
       lastErrorMessage
       hasPostAccess
@@ -818925,6 +819364,7 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -819520,6 +819960,7 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -819945,6 +820386,7 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -820016,6 +820458,7 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -820110,6 +820553,7 @@ export const createSocialScrapeAttempt = /* GraphQL */ `mutation CreateSocialScr
       lastScrapedAt
       lastSuccessfulScrapeAt
       nextScheduledScrapeAt
+      preferredScrapeHourUTC
       consecutiveFailures
       lastErrorMessage
       hasPostAccess
@@ -820895,6 +821339,7 @@ export const createSocialScrapeAttempt = /* GraphQL */ `mutation CreateSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -821490,6 +821935,7 @@ export const createSocialScrapeAttempt = /* GraphQL */ `mutation CreateSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -821915,6 +822361,7 @@ export const createSocialScrapeAttempt = /* GraphQL */ `mutation CreateSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -821986,6 +822433,7 @@ export const createSocialScrapeAttempt = /* GraphQL */ `mutation CreateSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -822078,6 +822526,7 @@ export const updateSocialScrapeAttempt = /* GraphQL */ `mutation UpdateSocialScr
       lastScrapedAt
       lastSuccessfulScrapeAt
       nextScheduledScrapeAt
+      preferredScrapeHourUTC
       consecutiveFailures
       lastErrorMessage
       hasPostAccess
@@ -822863,6 +823312,7 @@ export const updateSocialScrapeAttempt = /* GraphQL */ `mutation UpdateSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -823458,6 +823908,7 @@ export const updateSocialScrapeAttempt = /* GraphQL */ `mutation UpdateSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -823883,6 +824334,7 @@ export const updateSocialScrapeAttempt = /* GraphQL */ `mutation UpdateSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -823954,6 +824406,7 @@ export const updateSocialScrapeAttempt = /* GraphQL */ `mutation UpdateSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -824046,6 +824499,7 @@ export const deleteSocialScrapeAttempt = /* GraphQL */ `mutation DeleteSocialScr
       lastScrapedAt
       lastSuccessfulScrapeAt
       nextScheduledScrapeAt
+      preferredScrapeHourUTC
       consecutiveFailures
       lastErrorMessage
       hasPostAccess
@@ -824831,6 +825285,7 @@ export const deleteSocialScrapeAttempt = /* GraphQL */ `mutation DeleteSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -825426,6 +825881,7 @@ export const deleteSocialScrapeAttempt = /* GraphQL */ `mutation DeleteSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -825851,6 +826307,7 @@ export const deleteSocialScrapeAttempt = /* GraphQL */ `mutation DeleteSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -825922,6 +826379,7 @@ export const deleteSocialScrapeAttempt = /* GraphQL */ `mutation DeleteSocialScr
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -829203,6 +829661,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -830059,6 +830518,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -831959,6 +832419,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -833721,6 +834182,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -834577,6 +835039,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -836477,6 +836940,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -838239,6 +838703,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -839095,6 +839560,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -840995,6 +841461,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess

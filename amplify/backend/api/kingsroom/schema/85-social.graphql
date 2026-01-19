@@ -33,6 +33,7 @@ type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]
   lastScrapedAt: AWSDateTime
   lastSuccessfulScrapeAt: AWSDateTime
   nextScheduledScrapeAt: AWSDateTime
+  preferredScrapeHourUTC: Int
   consecutiveFailures: Int @default(value: "0")
   lastErrorMessage: String
   hasPostAccess: Boolean @default(value: "false")
@@ -263,6 +264,7 @@ input UpdateSocialAccountInput {
   accountHandle: String
   isScrapingEnabled: Boolean
   scrapeFrequencyMinutes: Int
+  preferredScrapeHourUTC: Int
   status: SocialAccountStatus
   entityId: ID
   venueId: ID

@@ -161,13 +161,29 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
         variables: { input },
       });
 
+      // Handle partial responses - GraphQL can return both data AND errors
+      // This happens when nested relations have null values for non-nullable fields
+      // (e.g., entity.games[0].gameCost._version)
       if (hasGraphQLData<{ updateSocialAccount: SocialAccount }>(response) && response.data?.updateSocialAccount) {
+        // Log warnings if there are errors, but don't fail
+        if ('errors' in response && Array.isArray((response as any).errors) && (response as any).errors.length > 0) {
+          console.warn(`[useSocialAccounts] Update succeeded with ${(response as any).errors.length} field warnings (nested relations with missing data)`);
+        }
         // Force refresh after update
         await fetchAccounts(currentEntity?.id, true);
         return response.data.updateSocialAccount;
       }
       return null;
-    } catch (err) {
+    } catch (err: any) {
+      // Amplify may throw an error even when the mutation succeeded but had field-level errors
+      // Check if the error contains data - if so, the mutation actually worked
+      if (err?.data?.updateSocialAccount) {
+        console.warn(`[useSocialAccounts] Update succeeded despite errors (${err?.errors?.length || 0} field warnings)`);
+        // Force refresh after update
+        await fetchAccounts(currentEntity?.id, true);
+        return err.data.updateSocialAccount;
+      }
+      
       console.error('Error updating social account:', err);
       throw new Error('Failed to update social account. Please try again.');
     }

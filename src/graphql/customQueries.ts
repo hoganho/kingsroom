@@ -280,6 +280,7 @@ export const listSocialAccountsSimple = /* GraphQL */ `
         lastScrapedAt
         lastSuccessfulScrapeAt
         scrapeFrequencyMinutes
+        preferredScrapeHourUTC
         consecutiveFailures
         hasFullHistory
         fullSyncOldestPostDate
@@ -315,6 +316,7 @@ export const getSocialAccountSimple = /* GraphQL */ `
       lastScrapedAt
       lastSuccessfulScrapeAt
       scrapeFrequencyMinutes
+      preferredScrapeHourUTC
       consecutiveFailures
       hasFullHistory
       fullSyncOldestPostDate

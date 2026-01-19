@@ -2135,6 +2135,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -4335,6 +4336,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -6850,6 +6852,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -8426,6 +8429,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -12096,6 +12100,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -13039,6 +13044,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -14120,6 +14126,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -16543,6 +16550,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -18282,6 +18290,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -19138,6 +19147,7 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -21095,6 +21105,7 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -23517,6 +23528,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -25093,6 +25105,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -28763,6 +28776,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -29706,6 +29720,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -30787,6 +30802,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -33210,6 +33226,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -34949,6 +34966,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -35805,6 +35823,7 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -38200,6 +38219,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -39776,6 +39796,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -43446,6 +43467,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -44389,6 +44411,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -45470,6 +45493,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -47893,6 +47917,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -49632,6 +49657,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -50488,6 +50514,7 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -52883,6 +52910,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -54459,6 +54487,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -58129,6 +58158,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -59072,6 +59102,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -60153,6 +60184,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -62576,6 +62608,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -64315,6 +64348,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -65171,6 +65205,7 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             lastScrapedAt
             lastSuccessfulScrapeAt
             nextScheduledScrapeAt
+            preferredScrapeHourUTC
             consecutiveFailures
             lastErrorMessage
             hasPostAccess
@@ -67130,6 +67165,7 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -69116,6 +69152,7 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -71102,6 +71139,7 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -73344,6 +73382,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -75566,6 +75605,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -77788,6 +77828,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -79988,6 +80029,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -82201,6 +82243,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess
@@ -84414,6 +84457,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           lastScrapedAt
           lastSuccessfulScrapeAt
           nextScheduledScrapeAt
+          preferredScrapeHourUTC
           consecutiveFailures
           lastErrorMessage
           hasPostAccess

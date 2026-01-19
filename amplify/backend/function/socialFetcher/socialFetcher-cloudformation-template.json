@@ -4,8 +4,8 @@
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
-      "Default": "NONE",
-      "Description": " Schedule Expression"
+      "Default": "cron(0 * * * ? *)",
+      "Description": "Schedule Expression - Default: Every hour. Accounts will be scraped based on their individual scrapeFrequencyMinutes setting. Set to NONE to disable."
     },
     "deploymentBucketName": {
       "Type": "String"
@@ -42,6 +42,18 @@
           "Ref": "env"
         },
         "NONE"
+      ]
+    },
+    "CloudWatchRuleEnabled": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "CloudWatchRule"
+            },
+            "NONE"
+          ]
+        }
       ]
     }
   },
@@ -220,6 +232,48 @@
         "Timeout": 300
       }
     },
+    "CloudWatchEvent": {
+      "Type": "AWS::Events::Rule",
+      "Condition": "CloudWatchRuleEnabled",
+      "Properties": {
+        "Description": "Scheduled rule for socialFetcher Lambda - runs hourly, accounts scraped based on their individual scrapeFrequencyMinutes",
+        "ScheduleExpression": {
+          "Ref": "CloudWatchRule"
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaFunction",
+                "Arn"
+              ]
+            },
+            "Id": {
+              "Ref": "LambdaFunction"
+            },
+            "Input": "{\"source\":\"aws.events\",\"triggerType\":\"SCHEDULED\"}"
+          }
+        ]
+      }
+    },
+    "PermissionForEventsToInvokeLambda": {
+      "Type": "AWS::Lambda::Permission",
+      "Condition": "CloudWatchRuleEnabled",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "CloudWatchEvent",
+            "Arn"
+          ]
+        }
+      }
+    },
     "LambdaExecutionRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -297,7 +351,26 @@
                   }
                 ]
               }
-            },
+            }
+          ]
+        }
+      }
+    },
+    "AmplifyResourcesPolicy": {
+      "DependsOn": [
+        "LambdaExecutionRole"
+      ],
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "amplify-lambda-execution-policy",
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
             {
               "Effect": "Allow",
               "Action": [
@@ -677,6 +750,12 @@
           "LambdaExecutionRole",
           "Arn"
         ]
+      }
+    },
+    "CloudWatchEventRule": {
+      "Condition": "CloudWatchRuleEnabled",
+      "Value": {
+        "Ref": "CloudWatchEvent"
       }
     }
   }

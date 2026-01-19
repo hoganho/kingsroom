@@ -562,7 +562,7 @@ export const VenuesDashboard = () => {
   const [seriesTypeMap, setSeriesTypeMap] = useState<Record<string, SeriesTypeKey>>({})
   
   // Global series type for KPI cards (SUPER_ADMIN only) - defaults to ALL for admins
-  const [globalSeriesType, setGlobalSeriesType] = useState<SeriesTypeKey>('ALL')
+  const [globalSeriesType, setGlobalSeriesType] = useState<SeriesTypeKey>('REGULAR')
   
   // Table filter state
   const [hideEmptyInTable, setHideEmptyInTable] = useState<boolean>(true)

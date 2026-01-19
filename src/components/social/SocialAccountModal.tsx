@@ -1,5 +1,5 @@
 // src/components/social/SocialAccountModal.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, 
   Facebook, 
@@ -8,7 +8,12 @@ import {
   Linkedin,
   Loader2,
   AlertCircle,
-  Link2
+  Link2,
+  Clock,
+  Calendar,
+  RefreshCw,
+  Power,
+  Trash2
 } from 'lucide-react';
 import { SocialAccount, CreateSocialAccountInput, UpdateSocialAccountInput } from '../../hooks/useSocialAccounts';
 
@@ -26,12 +31,14 @@ interface SocialAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: CreateSocialAccountInput | UpdateSocialAccountInput) => Promise<void>;
+  onDelete?: (id: string, version?: number) => Promise<void>;
   account?: SocialAccount | null;
   entities: Entity[];
   venues: Venue[];
 }
 
 type Platform = 'FACEBOOK' | 'INSTAGRAM' | 'TWITTER' | 'LINKEDIN';
+type ScheduleMode = 'disabled' | 'frequency' | 'daily';
 
 const PLATFORM_CONFIG: Record<Platform, { 
   name: string; 
@@ -70,10 +77,42 @@ const PLATFORM_CONFIG: Record<Platform, {
   },
 };
 
+/**
+ * Convert AEST hour (0-23) to UTC hour
+ * AEST is UTC+10 (AEDT is UTC+11 during daylight saving)
+ * For simplicity, we use UTC+10 (standard time)
+ */
+function aestHourToUTC(aestHour: number): number {
+  const offset = 10; // AEST offset (use 11 for AEDT)
+  let utcHour = aestHour - offset;
+  if (utcHour < 0) utcHour += 24;
+  return utcHour;
+}
+
+/**
+ * Convert UTC hour (0-23) to AEST hour
+ */
+function utcHourToAEST(utcHour: number): number {
+  const offset = 10; // AEST offset
+  let aestHour = utcHour + offset;
+  if (aestHour >= 24) aestHour -= 24;
+  return aestHour;
+}
+
+/**
+ * Format hour for display (e.g., "6:00 AM")
+ */
+function formatHour(hour: number): string {
+  const period = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  return `${displayHour}:00 ${period}`;
+}
+
 export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   account,
   entities,
   venues,
@@ -86,10 +125,24 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
   const [venueId, setVenueId] = useState('');
   const [scrapeFrequency, setScrapeFrequency] = useState(60);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [urlError, setUrlError] = useState<string | null>(null);
+  
+  // New scheduling state
+  const [scheduleMode, setScheduleMode] = useState<ScheduleMode>('frequency');
+  const [preferredHourAEST, setPreferredHourAEST] = useState(6); // Default 6 AM AEST
 
   const isEditing = !!account;
+
+  // Generate hour options for the dropdown
+  const hourOptions = useMemo(() => {
+    return Array.from({ length: 24 }, (_, i) => ({
+      value: i,
+      label: formatHour(i),
+    }));
+  }, []);
 
   // Reset form when modal opens/closes or account changes
   useEffect(() => {
@@ -102,7 +155,18 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
         setEntityId(account.entityId || '');
         setVenueId(account.venueId || '');
         setScrapeFrequency(account.scrapeFrequencyMinutes || 60);
+        
+        // Determine schedule mode from account data
+        if (!account.isScrapingEnabled) {
+          setScheduleMode('disabled');
+        } else if (account.preferredScrapeHourUTC !== null && account.preferredScrapeHourUTC !== undefined) {
+          setScheduleMode('daily');
+          setPreferredHourAEST(utcHourToAEST(account.preferredScrapeHourUTC));
+        } else {
+          setScheduleMode('frequency');
+        }
       } else {
+        // Reset to defaults for new account
         setPlatform('FACEBOOK');
         setAccountUrl('');
         setAccountName('');
@@ -110,9 +174,13 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
         setEntityId('');
         setVenueId('');
         setScrapeFrequency(60);
+        setScheduleMode('frequency');
+        setPreferredHourAEST(6);
       }
       setError(null);
       setUrlError(null);
+      setShowDeleteConfirm(false);
+      setIsDeleting(false);
     }
   }, [isOpen, account]);
 
@@ -172,6 +240,14 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
     setIsLoading(true);
 
     try {
+      // Determine scraping settings based on schedule mode
+      const isScrapingEnabled = scheduleMode !== 'disabled';
+      
+      // Only include preferredScrapeHourUTC if using daily mode, otherwise null to clear it
+      const preferredScrapeHourUTC = scheduleMode === 'daily' 
+        ? aestHourToUTC(preferredHourAEST) 
+        : null;
+
       if (isEditing && account) {
         await onSave({
           id: account.id,
@@ -180,6 +256,8 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
           entityId: entityId || undefined,
           venueId: venueId || undefined,
           scrapeFrequencyMinutes: scrapeFrequency,
+          isScrapingEnabled,
+          preferredScrapeHourUTC,
           _version: account._version,
         } as UpdateSocialAccountInput);
       } else {
@@ -191,6 +269,8 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
           entityId: entityId || undefined,
           venueId: venueId || undefined,
           scrapeFrequencyMinutes: scrapeFrequency,
+          isScrapingEnabled,
+          preferredScrapeHourUTC,
         } as CreateSocialAccountInput);
       }
       onClose();
@@ -198,6 +278,23 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
       setError(err instanceof Error ? err.message : 'Failed to save account');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!account || !onDelete) return;
+    
+    setIsDeleting(true);
+    setError(null);
+    
+    try {
+      await onDelete(account.id, account._version);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete account');
+      setShowDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -375,31 +472,144 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
             </select>
           </div>
 
-          {/* Scrape Frequency */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Check for new posts every
+          {/* ============================================ */}
+          {/* SCRAPING SCHEDULE SECTION */}
+          {/* ============================================ */}
+          <div className="border-t pt-5">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Scraping Schedule
             </label>
-            <select
-              value={scrapeFrequency}
-              onChange={(e) => setScrapeFrequency(Number(e.target.value))}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-            >
-              <option value={15}>15 minutes</option>
-              <option value={30}>30 minutes</option>
-              <option value={60}>1 hour</option>
-              <option value={120}>2 hours</option>
-              <option value={360}>6 hours</option>
-              <option value={720}>12 hours</option>
-              <option value={1440}>24 hours</option>
-            </select>
-            <p className="mt-1.5 text-xs text-gray-500">
-              Posts will be fetched automatically at this interval when enabled.
+            
+            <div className="space-y-3">
+              {/* Disabled */}
+              <label 
+                className={`flex items-start gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all ${
+                  scheduleMode === 'disabled' 
+                    ? 'border-gray-400 bg-gray-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="scheduleMode"
+                  checked={scheduleMode === 'disabled'}
+                  onChange={() => setScheduleMode('disabled')}
+                  className="mt-0.5 w-4 h-4 text-gray-600"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <Power className="w-4 h-4 text-gray-500" />
+                    <span className="font-medium text-gray-700">Disabled</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">Don't automatically scrape this account</p>
+                </div>
+              </label>
+
+              {/* Frequency-based */}
+              <label 
+                className={`flex items-start gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all ${
+                  scheduleMode === 'frequency' 
+                    ? 'border-indigo-500 bg-indigo-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="scheduleMode"
+                  checked={scheduleMode === 'frequency'}
+                  onChange={() => setScheduleMode('frequency')}
+                  className="mt-0.5 w-4 h-4 text-indigo-600"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4 text-indigo-600" />
+                    <span className="font-medium text-gray-700">Check periodically</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">Scrape at regular intervals throughout the day</p>
+                  
+                  {scheduleMode === 'frequency' && (
+                    <select
+                      value={scrapeFrequency}
+                      onChange={(e) => setScrapeFrequency(Number(e.target.value))}
+                      className="mt-2 w-full px-3 py-2 rounded-lg border border-indigo-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <option value={60}>Every hour</option>
+                      <option value={120}>Every 2 hours</option>
+                      <option value={360}>Every 6 hours</option>
+                      <option value={720}>Every 12 hours</option>
+                      <option value={1440}>Every 24 hours</option>
+                    </select>
+                  )}
+                </div>
+              </label>
+
+              {/* Daily at specific time */}
+              <label 
+                className={`flex items-start gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all ${
+                  scheduleMode === 'daily' 
+                    ? 'border-purple-500 bg-purple-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="scheduleMode"
+                  checked={scheduleMode === 'daily'}
+                  onChange={() => setScheduleMode('daily')}
+                  className="mt-0.5 w-4 h-4 text-purple-600"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-purple-600" />
+                    <span className="font-medium text-gray-700">Daily at specific time</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">Scrape once per day at a set hour (AEST)</p>
+                  
+                  {scheduleMode === 'daily' && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-purple-500" />
+                      <select
+                        value={preferredHourAEST}
+                        onChange={(e) => setPreferredHourAEST(Number(e.target.value))}
+                        className="flex-1 px-3 py-2 rounded-lg border border-purple-200 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {hourOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label} AEST
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </label>
+            </div>
+
+            {/* Schedule explanation */}
+            <p className="mt-3 text-xs text-gray-500">
+              {scheduleMode === 'disabled' && 'You can still trigger manual scrapes from the account details.'}
+              {scheduleMode === 'frequency' && `Posts will be fetched automatically every ${scrapeFrequency >= 60 ? `${scrapeFrequency / 60} hour${scrapeFrequency > 60 ? 's' : ''}` : `${scrapeFrequency} minutes`}.`}
+              {scheduleMode === 'daily' && `Posts will be fetched once daily at ${formatHour(preferredHourAEST)} AEST.`}
             </p>
           </div>
 
           {/* Actions */}
           <div className="flex gap-3 pt-2">
+            {/* Delete button - only shown when editing */}
+            {isEditing && onDelete && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isLoading || isDeleting}
+                className="p-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-all disabled:opacity-50"
+                title="Delete account"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            )}
+            
             <button
               type="button"
               onClick={onClose}
@@ -409,7 +619,7 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isLoading || !!urlError}
+              disabled={isLoading || isDeleting || !!urlError}
               className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
@@ -422,6 +632,43 @@ export const SocialAccountModal: React.FC<SocialAccountModalProps> = ({
               )}
             </button>
           </div>
+
+          {/* Delete Confirmation */}
+          {showDeleteConfirm && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-sm text-red-800 font-medium mb-3">
+                Are you sure you want to delete this account? This will also delete all associated posts.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isDeleting}
+                  className="flex-1 py-2 px-3 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-white transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex-1 py-2 px-3 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Delete Account
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>

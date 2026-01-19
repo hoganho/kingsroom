@@ -14971,6 +14971,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "preferredScrapeHourUTC": {
+                    "name": "preferredScrapeHourUTC",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "consecutiveFailures": {
                     "name": "consecutiveFailures",
                     "isArray": false,
@@ -31077,5 +31084,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "2979bad01c54f01c177a49350ea13e21"
+    "version": "721d8201dfa2f5b7c038e2bd6a9a4476"
 };
