@@ -1,6 +1,6 @@
 /**
  * ===================================================================
- * HTTP Client
+ * HTTP Client (v1.2.0)
  * ===================================================================
  * 
  * HTTP fetching utilities including ScraperAPI integration.
@@ -10,6 +10,21 @@
  * - ScraperAPI proxy support
  * - Retry logic with exponential backoff
  * - HTTP 304 cache validation
+ * 
+ * UPDATED v1.2.0:
+ * - SECURITY: API key now fetched from SSM Parameter Store
+ *   - Uses getScraperApiKey() from config/secrets.js
+ *   - Falls back to environment variable for local dev
+ *   - Key is cached in memory for Lambda container lifetime
+ * 
+ * UPDATED v1.1.0:
+ * - CRITICAL FIX: Properly handle 4xx responses as errors
+ *   - Previously, 403/429 responses returned success=true with error text as "html"
+ *   - Now correctly returns success=false with proper error message
+ * - ADDED: detectScraperApiError() to catch API errors in response body
+ *   - ScraperAPI sometimes returns 200 OK with error text (bad API design)
+ *   - Detects credit exhaustion, rate limits, auth errors, billing issues
+ * - ADDED: isValidHtmlResponse() to validate response looks like HTML
  * 
  * ===================================================================
  */
@@ -24,32 +39,171 @@ const {
     RETRY_DELAY,
     REQUEST_TIMEOUT,
     HEAD_TIMEOUT,
-    SCRAPERAPI_KEY,
+    SCRAPERAPI_KEY,  // Fallback only - prefer SSM
     SCRAPERAPI_URL
 } = require('../config/constants');
+
+// Import secure secret retrieval
+const { getScraperApiKey } = require('../config/secrets');
+
+// ===================================================================
+// SCRAPER API ERROR DETECTION (NEW v1.1.0)
+// ===================================================================
+
+/**
+ * Detect ScraperAPI error responses in the body
+ * 
+ * ScraperAPI sometimes returns 200 OK with error text instead of proper
+ * HTTP error codes. This function detects those error messages.
+ * 
+ * @param {string} responseBody - Response body to check
+ * @returns {object} { isError: boolean, errorType: string|null, errorMessage: string|null }
+ */
+const detectScraperApiError = (responseBody) => {
+    if (!responseBody || typeof responseBody !== 'string') {
+        return { isError: false, errorType: null, errorMessage: null };
+    }
+    
+    const textLower = responseBody.toLowerCase();
+    
+    // Credit exhaustion: "You have exhausted the API Credits available in this monthly cycle"
+    if (textLower.includes('exhausted') && textLower.includes('api credits')) {
+        return { 
+            isError: true, 
+            errorType: 'CREDITS_EXHAUSTED',
+            errorMessage: 'ScraperAPI credits exhausted for this billing cycle'
+        };
+    }
+    
+    // Billing/subscription issues
+    if (textLower.includes('scraperapi') && 
+        (textLower.includes('subscription') || textLower.includes('billing') || textLower.includes('upgrade'))) {
+        return { 
+            isError: true, 
+            errorType: 'BILLING_ERROR',
+            errorMessage: 'ScraperAPI billing or subscription issue'
+        };
+    }
+    
+    // Rate limiting (in case it comes as 200)
+    if (textLower.includes('rate limit') && textLower.includes('exceeded')) {
+        return { 
+            isError: true, 
+            errorType: 'RATE_LIMITED',
+            errorMessage: 'ScraperAPI rate limit exceeded'
+        };
+    }
+    
+    // Authentication errors
+    if (textLower.includes('invalid api key') || 
+        textLower.includes('api key is required') ||
+        (textLower.includes('unauthorized') && textLower.includes('api'))) {
+        return { 
+            isError: true, 
+            errorType: 'AUTH_ERROR',
+            errorMessage: 'ScraperAPI authentication failed - invalid or missing API key'
+        };
+    }
+    
+    // Generic short non-HTML response with API error keywords
+    // Real HTML pages are typically > 1000 bytes and contain <html> or <!DOCTYPE>
+    if (responseBody.length < 1000 && 
+        !/<html/i.test(responseBody) && 
+        !/<!DOCTYPE/i.test(responseBody) &&
+        (textLower.includes('api') || textLower.includes('credits') || textLower.includes('quota')) &&
+        (textLower.includes('error') || textLower.includes('exceeded') || textLower.includes('exhausted') || textLower.includes('limit'))) {
+        return { 
+            isError: true, 
+            errorType: 'API_ERROR',
+            errorMessage: responseBody.substring(0, 200).trim()
+        };
+    }
+    
+    return { isError: false, errorType: null, errorMessage: null };
+};
+
+/**
+ * Check if response looks like valid HTML (not an error message)
+ * 
+ * @param {string} responseBody - Response body to check
+ * @returns {boolean} True if response appears to be HTML
+ */
+const isValidHtmlResponse = (responseBody) => {
+    if (!responseBody || typeof responseBody !== 'string') return false;
+    
+    // Very short responses are suspicious
+    if (responseBody.length < 500) return false;
+    
+    // Check for HTML structure
+    const hasHtmlIndicators = 
+        /<html/i.test(responseBody) || 
+        /<!DOCTYPE/i.test(responseBody) ||
+        /<head/i.test(responseBody) ||
+        /<body/i.test(responseBody);
+    
+    return hasHtmlIndicators;
+};
+
+/**
+ * Get human-readable error message for HTTP status codes
+ * 
+ * @param {number} statusCode - HTTP status code
+ * @returns {string} Error description
+ */
+const getHttpStatusMessage = (statusCode) => {
+    const messages = {
+        400: 'Bad Request',
+        401: 'Unauthorized - Check API key',
+        403: 'Forbidden - API credits exhausted or access denied',
+        404: 'Not Found',
+        429: 'Rate Limited - Too many requests',
+        500: 'ScraperAPI Internal Server Error',
+        502: 'Bad Gateway',
+        503: 'Service Unavailable',
+        504: 'Gateway Timeout'
+    };
+    return messages[statusCode] || `HTTP Error ${statusCode}`;
+};
 
 /**
  * Fetch HTML from live website using ScraperAPI
  * 
  * @param {string} url - URL to fetch
- * @param {string} scraperApiKey - Optional API key override
- * @returns {object} Fetch result { success, html, headers, error }
+ * @param {string} scraperApiKey - Optional API key override (for testing/migration)
+ * @returns {object} Fetch result { success, html, headers, error, errorType }
  */
 const fetchFromLiveSite = async (url, scraperApiKey = null) => {
-    // Use provided API key or fall back to environment/constant
-    const apiKey = scraperApiKey || process.env.SCRAPERAPI_KEY || SCRAPERAPI_KEY;
+    let apiKey;
+    
+    try {
+        // Priority: 1) Parameter override, 2) SSM Parameter Store, 3) Environment fallback
+        if (scraperApiKey) {
+            apiKey = scraperApiKey;
+            console.log(`[HttpClient] Using API key from parameter`);
+        } else {
+            // getScraperApiKey() handles SSM lookup with env var fallback
+            apiKey = await getScraperApiKey();
+        }
+    } catch (keyError) {
+        console.error('[HttpClient] Failed to retrieve ScraperAPI key:', keyError.message);
+        return { 
+            success: false, 
+            error: keyError.message,
+            errorType: 'CONFIG_ERROR'
+        };
+    }
     
     if (!apiKey) {
         console.error('[HttpClient] ScraperAPI key not configured');
         return { 
             success: false, 
-            error: 'ScraperAPI key is not configured.' 
+            error: 'ScraperAPI key is not configured.',
+            errorType: 'CONFIG_ERROR'
         };
     }
 
     console.log(`[HttpClient] Fetching via ScraperAPI:`, {
         url: url.substring(0, 80) + '...',
-        keySource: scraperApiKey ? 'parameter' : (process.env.SCRAPERAPI_KEY ? 'environment' : 'constant'),
         keyPreview: `${apiKey.substring(0, 8)}...`
     });
 
@@ -61,36 +215,101 @@ const fetchFromLiveSite = async (url, scraperApiKey = null) => {
         const response = await axios.get(scraperApiUrl, {
             timeout: REQUEST_TIMEOUT,
             maxRedirects: 5,
-            validateStatus: (status) => status < 500 // Accept 4xx as valid responses
+            validateStatus: (status) => status < 500 // Accept 4xx to handle them explicitly
         });
 
+        const statusCode = response.status;
+        const responseBody = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // v1.1.0 FIX: Check for HTTP 4xx errors FIRST
+        // These indicate API-level problems that should not be treated as success
+        // ═══════════════════════════════════════════════════════════════════════
+        if (statusCode >= 400 && statusCode < 500) {
+            const errorMsg = getHttpStatusMessage(statusCode);
+            console.error(`[HttpClient] 🚨 ScraperAPI returned ${statusCode}: ${errorMsg}`);
+            console.error(`[HttpClient] Response body: ${responseBody.substring(0, 200)}`);
+            
+            // Determine specific error type from status code
+            let errorType = 'HTTP_ERROR';
+            if (statusCode === 401) errorType = 'AUTH_ERROR';
+            if (statusCode === 403) errorType = 'CREDITS_EXHAUSTED';  // Often means credits exhausted
+            if (statusCode === 429) errorType = 'RATE_LIMITED';
+            
+            return {
+                success: false,
+                error: `ScraperAPI Error ${statusCode}: ${errorMsg}. ${responseBody.substring(0, 100)}`,
+                errorType,
+                statusCode
+            };
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // v1.1.0 FIX: Check for API errors in response body
+        // ScraperAPI sometimes returns 200 OK with error text (bad API design)
+        // ═══════════════════════════════════════════════════════════════════════
+        const apiErrorCheck = detectScraperApiError(responseBody);
+        if (apiErrorCheck.isError) {
+            console.error(`[HttpClient] 🚨 ScraperAPI error in response body: ${apiErrorCheck.errorType}`);
+            console.error(`[HttpClient] ${apiErrorCheck.errorMessage}`);
+            
+            return {
+                success: false,
+                error: apiErrorCheck.errorMessage,
+                errorType: apiErrorCheck.errorType,
+                statusCode: statusCode  // Will be 200, but it's still an error
+            };
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // v1.1.0: Validate response looks like HTML
+        // Warn if response is suspiciously short or doesn't look like HTML
+        // ═══════════════════════════════════════════════════════════════════════
+        if (!isValidHtmlResponse(responseBody)) {
+            console.warn(`[HttpClient] ⚠️ Response doesn't look like valid HTML`, {
+                length: responseBody.length,
+                preview: responseBody.substring(0, 100)
+            });
+            // Don't fail here - let the parser handle it (might be a valid short page)
+            // But log a warning for debugging
+        }
+        
+        // Success - return the HTML
         return {
             success: true,
-            html: response.data,
+            html: responseBody,
             headers: response.headers,
-            statusCode: response.status,
+            statusCode: statusCode,
             contentLength: response.headers['content-length']
         };
 
     } catch (error) {
         let errorMessage = 'ScraperAPI request failed';
         let errorCode = 500;
+        let errorType = 'NETWORK_ERROR';
 
         if (error.response) {
+            // Server responded with error status >= 500
             errorMessage = `ScraperAPI Error ${error.response.status}: ${error.response.data}`;
             errorCode = error.response.status;
+            errorType = 'SERVER_ERROR';
         } else if (error.request) {
+            // No response received
             errorMessage = `ScraperAPI No Response: ${error.message}`;
             errorCode = 504;
+            errorType = 'TIMEOUT';
         } else {
+            // Request setup error
             errorMessage = `Axios Error: ${error.message}`;
+            errorType = 'REQUEST_ERROR';
         }
 
-        console.error(`[HttpClient] Fetch failed:`, { errorMessage, errorCode, url });
+        console.error(`[HttpClient] Fetch failed:`, { errorMessage, errorCode, errorType, url });
 
         return {
             success: false,
             error: errorMessage,
+            errorType,
             statusCode: errorCode
         };
     }
@@ -100,14 +319,28 @@ const fetchFromLiveSite = async (url, scraperApiKey = null) => {
  * Fetch HTML from live website with retry logic
  * Uses exponential backoff between retries
  * 
+ * UPDATED v1.1.0:
+ * - Added errorType field in return value
+ * - Don't retry on API service errors (credits exhausted, billing, auth)
+ *   These are not transient and will fail on every retry
+ * 
  * @param {string} url - URL to fetch
  * @param {number} maxRetries - Maximum retry attempts
  * @param {string} scraperApiKey - Optional API key override
- * @returns {object} Fetch result { success, html, headers, error, attempts }
+ * @returns {object} Fetch result { success, html, headers, error, errorType, attempts }
  */
 const fetchFromLiveSiteWithRetries = async (url, maxRetries = MAX_RETRIES, scraperApiKey = null) => {
     let lastError = null;
+    let lastErrorType = null;
     let attempts = 0;
+    
+    // Error types that should NOT be retried (not transient)
+    const noRetryErrorTypes = [
+        'CREDITS_EXHAUSTED',  // Won't recover without payment
+        'BILLING_ERROR',      // Won't recover without account fix
+        'AUTH_ERROR',         // Won't recover without valid API key
+        'CONFIG_ERROR'        // Won't recover without config change
+    ];
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         attempts = attempt;
@@ -123,6 +356,13 @@ const fetchFromLiveSiteWithRetries = async (url, maxRetries = MAX_RETRIES, scrap
             }
             
             lastError = result.error;
+            lastErrorType = result.errorType;
+            
+            // v1.1.0: Don't retry on non-transient API errors
+            if (noRetryErrorTypes.includes(result.errorType)) {
+                console.error(`[HttpClient] 🚨 Not retrying - ${result.errorType} is not transient`);
+                break;
+            }
             
             // Don't retry on 4xx errors (client errors)
             if (result.statusCode >= 400 && result.statusCode < 500) {
@@ -132,6 +372,7 @@ const fetchFromLiveSiteWithRetries = async (url, maxRetries = MAX_RETRIES, scrap
             
         } catch (error) {
             lastError = error.message;
+            lastErrorType = 'EXCEPTION';
         }
         
         if (attempt < maxRetries) {
@@ -145,6 +386,7 @@ const fetchFromLiveSiteWithRetries = async (url, maxRetries = MAX_RETRIES, scrap
     return {
         success: false,
         error: lastError || 'All retries exhausted',
+        errorType: lastErrorType || 'UNKNOWN',
         attempts
     };
 };
@@ -266,5 +508,9 @@ module.exports = {
     fetchFromLiveSiteWithRetries,
     checkHTTPHeaders,
     fetchDirect,
-    sleep
+    sleep,
+    // NEW v1.1.0: Error detection helpers
+    detectScraperApiError,
+    isValidHtmlResponse,
+    getHttpStatusMessage
 };

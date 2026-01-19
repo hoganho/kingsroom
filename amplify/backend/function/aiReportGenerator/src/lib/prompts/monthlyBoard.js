@@ -1,6 +1,15 @@
 /**
  * Monthly Board Report Prompt Template
  * Generates strategic insights for executives and board members
+ * 
+ * VERSION: 2.0.0 - Updated for MetricsPack v4
+ * 
+ * Now uses:
+ * - scheduleCompliance (operational execution)
+ * - recurringGameTrends (portfolio health, brand strength)
+ * - opportunities (strategic growth opportunities)
+ * - competitorAnalysis (market position, threats)
+ * - seriesLifecycle (tournament series performance)
  */
 
 /**
@@ -17,170 +26,491 @@ function build(metricsPack, options = {}) {
 }
 
 function buildSystemPrompt() {
-  return `You are an expert poker tournament business analyst generating monthly board reports for executives and investors. Your reports should be:
+  return `You are a senior poker tournament business analyst creating a monthly board report for executives. Be strategic, data-driven, and forward-looking.
 
-1. STRATEGIC - Focus on high-level trends and business health
-2. COMPARATIVE - Emphasize month-over-month and year-over-year changes
-3. FORWARD-LOOKING - Include projections and strategic recommendations
-4. EXECUTIVE-FRIENDLY - Avoid operational minutiae; focus on what matters at board level
+OUTPUT FORMAT: Valid JSON only. No markdown, no explanation outside JSON.
 
-You will receive a MetricsPack containing:
-- Strategic KPIs with deltas vs prior period
-- Venue-level performance aggregated for the month
-- Alerts and risk indicators
-- Market/competitive intelligence from social pulse
+STRATEGIC ANALYSIS PRIORITIES:
+1. PROFITABILITY - P&L analysis, margin trends, cost drivers
+2. GUARANTEE MANAGEMENT - Overlay is often the #1 profit killer
+3. PORTFOLIO HEALTH - Which recurring games are assets vs liabilities
+4. SCHEDULE EXECUTION - Compliance rate impacts brand reliability
+5. COMPETITIVE POSITION - Market pressure, share of voice, clashes
+6. GROWTH OPPORTUNITIES - Data-driven expansion recommendations
+7. SERIES PERFORMANCE - Tournament series ROI and learnings
+8. PLAYER BASE - Retention, acquisition, lifetime value trends
 
-Your response MUST be valid JSON matching the exact structure specified. Do not include any text outside the JSON object.
+BOARD-LEVEL STANDARDS:
+- Lead with the bottom line (profit/loss) and trend direction
+- Every insight needs supporting data
+- Recommendations must include expected ROI/impact
+- Flag material risks with quantified exposure
+- Compare to prior period AND identify trajectory
+- Strategic recommendations should span 30-90 days
 
-TONE: Formal and professional. Suitable for board presentation. Use precise language and avoid jargon unless industry-standard.
-
-IMPORTANT RULES:
-1. Lead with the most significant insights
-2. Frame challenges as risks with mitigation strategies
-3. Quantify impact wherever possible ($, %, player counts)
-4. Include strategic recommendations, not just operational tasks
-5. Consider competitive positioning and market trends`;
+CRITICAL RULES:
+- Use ONLY numbers from the data - never invent figures
+- All currency in AUD ($X,XXX format)
+- Name specific venues and games - boards hate vagueness
+- If data sections show "hasXxxData: false", note the gap
+- Distinguish between one-off issues and systemic problems`;
 }
 
 function buildUserPrompt(metricsPack, options = {}) {
-  const { packData, periodLabel, periodStart, periodEnd, comparisonPeriodLabel } = metricsPack;
+  const { 
+    packData, 
+    periodLabel, 
+    periodStart, 
+    periodEnd, 
+    comparisonPeriodLabel,
+    comparisonPeriodStart,
+    comparisonPeriodEnd,
+    dataCompleteness,
+    warnings,
+    version
+  } = metricsPack;
   
   // Parse packData if it's a string
   const data = typeof packData === 'string' ? JSON.parse(packData) : packData;
   
-  return `Generate a Monthly Board Report for: ${periodLabel}
+  // Extract all sections
+  const s = data.strategic || {};
+  const venues = data.venues || [];
+  const alerts = data.alerts || [];
+  const alertSummary = data.alertSummary || {};
+  const rankings = data.rankings || {};
+  const playerInsights = data.playerInsights || {};
+  const scheduleCompliance = data.scheduleCompliance || {};
+  const recurringGameTrends = data.recurringGameTrends || {};
+  const competitorAnalysis = data.competitorAnalysis || {};
+  const opportunities = data.opportunities || {};
+  const seriesLifecycle = data.seriesLifecycle || {};
+  
+  // Pre-calculate key ratios
+  const overlayImpact = s.netProfit < 0 && s.overlayCost > 0 
+    ? Math.round((s.overlayCost / Math.abs(s.netProfit)) * 100) 
+    : 0;
+  const costPerEntry = s.totalEntries > 0 ? (s.totalCost / s.totalEntries).toFixed(2) : 0;
+  const revenuePerEntry = s.totalEntries > 0 ? (s.totalRevenue / s.totalEntries).toFixed(2) : 0;
+  
+  return `Create a Monthly Board Report for: ${periodLabel}
 Period: ${periodStart} to ${periodEnd}
-${comparisonPeriodLabel ? `Compared to: ${comparisonPeriodLabel}` : ''}
+Comparison: ${comparisonPeriodLabel || 'Prior Period'} (${comparisonPeriodStart || 'N/A'} to ${comparisonPeriodEnd || 'N/A'})
+Data Quality: ${dataCompleteness || 100}% complete | Pack Version: ${version || 'unknown'}
+${warnings?.length ? `⚠️ Data Warnings: ${warnings.join(', ')}` : ''}
 
-=== METRICS PACK DATA ===
+════════════════════════════════════════════════════════════════════════════════
+SECTION 1: EXECUTIVE FINANCIAL SUMMARY
+════════════════════════════════════════════════════════════════════════════════
+REVENUE:     $${(s.totalRevenue || 0).toLocaleString()}  (${s.revenueGrowthPercent >= 0 ? '+' : ''}${(s.revenueGrowthPercent || 0).toFixed(1)}% | ${s.revenueGrowth >= 0 ? '+' : ''}$${(s.revenueGrowth || 0).toLocaleString()})
+COSTS:       $${(s.totalCost || 0).toLocaleString()}
+NET PROFIT:  $${(s.netProfit || 0).toLocaleString()}  (${s.profitGrowthPercent >= 0 ? '+' : ''}${(s.profitGrowthPercent || 0).toFixed(1)}% | ${s.profitGrowth >= 0 ? '+' : ''}$${(s.profitGrowth || 0).toLocaleString()})
+MARGIN:      ${(s.profitMargin || 0).toFixed(1)}%  (${s.marginChange >= 0 ? '+' : ''}${(s.marginChange || 0).toFixed(1)}pp change)
 
-${JSON.stringify(data, null, 2)}
+Revenue Breakdown:
+- Rake Revenue: $${(s.rakeRevenue || 0).toLocaleString()}
+- Venue Fees: $${(s.venueFeeRevenue || 0).toLocaleString()}
+- Other Revenue: $${(s.otherRevenue || 0).toLocaleString()}
 
-=== END METRICS PACK DATA ===
+Cost Breakdown:
+- Staff/Dealer: $${(s.staffCost || 0).toLocaleString()} + $${(s.dealerCost || 0).toLocaleString()}
+- Venue Rental: $${(s.venueRentalCost || 0).toLocaleString()}
+- Marketing: $${(s.marketingCost || 0).toLocaleString()}
+- OVERLAY: $${(s.overlayCost || 0).toLocaleString()} ${overlayImpact > 0 ? `⚠️ (${overlayImpact}% of losses)` : ''}
+- Other: $${(s.otherCost || 0).toLocaleString()}
 
-Generate a JSON response with this EXACT structure:
+Unit Economics:
+- Revenue per Entry: $${revenuePerEntry}
+- Cost per Entry: $${costPerEntry}
+- Profit per Entry: $${(s.profitPerEntry || 0).toFixed(2)}
+- Avg Profit per Game: $${(s.avgProfitPerGame || 0).toLocaleString()}
 
+════════════════════════════════════════════════════════════════════════════════
+SECTION 2: VOLUME & PLAYER METRICS
+════════════════════════════════════════════════════════════════════════════════
+Games Run: ${s.totalGamesRun || 0} (${s.gamesGrowthPercent >= 0 ? '+' : ''}${(s.gamesGrowthPercent || 0).toFixed(1)}%)
+Total Entries: ${s.totalEntries || 0} (${s.entriesGrowthPercent >= 0 ? '+' : ''}${(s.entriesGrowthPercent || 0).toFixed(1)}%)
+Rebuys: ${s.rebuys || 0} | Add-ons: ${s.addons || 0}
+Unique Players: ${s.totalUniquePlayers || 0} (${s.playerGrowthPercent >= 0 ? '+' : ''}${(s.playerGrowthPercent || 0).toFixed(1)}%)
+
+Avg Entries per Game: ${(s.avgEntriesPerGame || 0).toFixed(1)}
+Entries per Player: ${(s.entriesPerPlayer || 0).toFixed(2)}
+Revenue per Player: $${(s.revenuePerPlayer || 0).toLocaleString()}
+Profit per Player: $${(s.profitPerPlayer || 0).toLocaleString()}
+
+PLAYER INSIGHTS:
+${JSON.stringify(playerInsights, null, 2)}
+
+════════════════════════════════════════════════════════════════════════════════
+SECTION 3: GUARANTEE & OVERLAY ANALYSIS (Critical)
+════════════════════════════════════════════════════════════════════════════════
+Games with Guarantees: ${s.gamesWithGuarantee || 0}
+Games that Overlaid: ${s.gamesWithOverlay || 0}
+Overlay Rate: ${s.gamesWithGuarantee > 0 ? ((s.gamesWithOverlay / s.gamesWithGuarantee) * 100).toFixed(0) : 0}%
+Total Guarantee Exposure: $${(s.totalGuaranteeExposure || 0).toLocaleString()}
+Total Overlay Cost: $${(s.totalOverlayCost || 0).toLocaleString()}
+Guarantee Exposure Rate: ${(s.guaranteeExposureRate || 0).toFixed(1)}%
+Average Coverage Rate: ${(s.avgGuaranteeCoverageRate || 0).toFixed(1)}%
+
+Prizepool Metrics:
+- Total Prizepool Generated: $${(s.totalPrizepool || 0).toLocaleString()}
+- Average Prizepool: $${(s.avgPrizepool || 0).toLocaleString()}
+- Prizepool Surplus: $${(s.prizepoolSurplus || 0).toLocaleString()}
+
+════════════════════════════════════════════════════════════════════════════════
+SECTION 4: SCHEDULE COMPLIANCE & EXECUTION
+════════════════════════════════════════════════════════════════════════════════
+${scheduleCompliance.hasScheduleData ? `
+COMPLIANCE RATE: ${scheduleCompliance.summary?.complianceRate || 0}%
+Cancellation Rate: ${scheduleCompliance.summary?.cancellationRate || 0}%
+Expected Games: ${scheduleCompliance.summary?.totalExpected || 0}
+Confirmed (Ran): ${scheduleCompliance.summary?.confirmed || 0}
+Cancelled: ${scheduleCompliance.summary?.cancelled || 0}
+Needs Review: ${scheduleCompliance.summary?.needsReviewCount || 0}
+
+AT-RISK RECURRING GAMES (high cancellation):
+${JSON.stringify(scheduleCompliance.atRiskRecurringGames || [], null, 2)}
+
+CANCELLATION BREAKDOWN BY VENUE:
+${JSON.stringify(scheduleCompliance.byVenue || {}, null, 2)}
+
+RECENT CANCELLATIONS:
+${JSON.stringify(scheduleCompliance.recentCancellations?.slice(0, 10) || [], null, 2)}
+` : '⚠️ Schedule compliance data not available for this period.'}
+
+════════════════════════════════════════════════════════════════════════════════
+SECTION 5: RECURRING GAME PORTFOLIO HEALTH
+════════════════════════════════════════════════════════════════════════════════
+${recurringGameTrends.hasRecurringGameData ? `
+PORTFOLIO SUMMARY:
+- Total Recurring Games: ${recurringGameTrends.summary?.totalRecurringGames || 0}
+- Excellent Health: ${recurringGameTrends.summary?.excellent || 0}
+- Good Health: ${recurringGameTrends.summary?.good || 0}
+- Needs Attention: ${recurringGameTrends.summary?.needsAttention || 0}
+- Critical: ${recurringGameTrends.summary?.critical || 0}
+- Growing: ${recurringGameTrends.summary?.growingCount || 0}
+- Declining: ${recurringGameTrends.summary?.decliningCount || 0}
+
+TOP PERFORMERS (by profit):
+${JSON.stringify(recurringGameTrends.topPerformers?.slice(0, 10) || [], null, 2)}
+
+GROWING GAMES (positive attendance trend):
+${JSON.stringify(recurringGameTrends.growingGames || [], null, 2)}
+
+DECLINING GAMES (negative attendance trend):
+${JSON.stringify(recurringGameTrends.decliningGames || [], null, 2)}
+
+NEEDS ATTENTION (intervention required):
+${JSON.stringify(recurringGameTrends.needsAttention?.slice(0, 10) || [], null, 2)}
+
+STRONG BRANDS (reliable performers):
+${JSON.stringify(recurringGameTrends.strongBrands || [], null, 2)}
+` : '⚠️ Recurring game trend data not available.'}
+
+════════════════════════════════════════════════════════════════════════════════
+SECTION 6: COMPETITIVE LANDSCAPE
+════════════════════════════════════════════════════════════════════════════════
+${competitorAnalysis.hasCompetitorData ? `
+COMPETITIVE PRESSURE: ${competitorAnalysis.pressure?.level || 'UNKNOWN'} (Score: ${competitorAnalysis.pressure?.score || 0}/10)
+${competitorAnalysis.pressure?.description || ''}
+
+Market Activity:
+- Competitor Accounts Tracked: ${competitorAnalysis.summary?.competitorAccounts || 0}
+- Competitor Posts This Period: ${competitorAnalysis.summary?.competitorPosts || 0}
+- Posts with Event Data: ${competitorAnalysis.summary?.postsWithExtractedData || 0}
+- Events Detected: ${competitorAnalysis.summary?.eventsDetected || 0}
+- Activity Trend: ${competitorAnalysis.trends?.trend || 'UNKNOWN'}
+- Posts per Week: ${competitorAnalysis.trends?.postsPerWeek || 0}
+
+Schedule Clashes:
+- Direct Competition Clashes: ${competitorAnalysis.summary?.directCompetitionClashes || 0}
+- Same-Day Clashes: ${competitorAnalysis.summary?.sameDayClashes || 0}
+
+HIGH-SEVERITY CLASHES (Direct Competition):
+${JSON.stringify(competitorAnalysis.clashes?.high || [], null, 2)}
+
+TOP COMPETITORS BY ACTIVITY:
+${JSON.stringify(competitorAnalysis.topCompetitors || [], null, 2)}
+
+HIGH GUARANTEE COMPETITOR EVENTS:
+${JSON.stringify(competitorAnalysis.highGuaranteeEvents || [], null, 2)}
+
+RECENT COMPETITOR EVENTS:
+${JSON.stringify(competitorAnalysis.recentCompetitorEvents?.slice(0, 10) || [], null, 2)}
+` : '⚠️ Competitor analysis not available for this location.'}
+
+════════════════════════════════════════════════════════════════════════════════
+SECTION 7: TOURNAMENT SERIES STATUS
+════════════════════════════════════════════════════════════════════════════════
+${seriesLifecycle.hasSeriesData ? `
+Total Series: ${seriesLifecycle.summary?.totalSeries || 0}
+Active Series: ${seriesLifecycle.summary?.activeSeries || 0}
+Upcoming (60 days): ${seriesLifecycle.summary?.upcomingSeries || 0}
+Recently Completed: ${seriesLifecycle.summary?.recentlyCompleted || 0}
+
+ACTIVE SERIES:
+${JSON.stringify(seriesLifecycle.active || [], null, 2)}
+
+UPCOMING SERIES:
+${JSON.stringify(seriesLifecycle.upcoming || [], null, 2)}
+
+RECENTLY COMPLETED:
+${JSON.stringify(seriesLifecycle.recentlyCompleted || [], null, 2)}
+` : 'No tournament series data available.'}
+
+════════════════════════════════════════════════════════════════════════════════
+SECTION 8: GROWTH OPPORTUNITIES
+════════════════════════════════════════════════════════════════════════════════
+${opportunities.hasOpportunities ? `
+OPPORTUNITY SUMMARY:
+- Total Opportunities: ${opportunities.summary?.totalOpportunities || 0}
+- High Priority: ${opportunities.summary?.highPriority || 0}
+- Medium Priority: ${opportunities.summary?.mediumPriority || 0}
+- Low Priority: ${opportunities.summary?.lowPriority || 0}
+
+By Type:
+- Schedule Gaps: ${opportunities.summary?.byType?.scheduleGaps || 0}
+- Buy-in Gaps: ${opportunities.summary?.byType?.buyInGaps || 0}
+- Expansion Opportunities: ${opportunities.summary?.byType?.expansion || 0}
+- Venue Capacity: ${opportunities.summary?.byType?.venueCapacity || 0}
+- Market Opportunities: ${opportunities.summary?.byType?.market || 0}
+
+TOP OPPORTUNITIES:
+${JSON.stringify(opportunities.topOpportunities || [], null, 2)}
+
+SCHEDULE GAPS (profitable venues with missing days):
+${JSON.stringify(opportunities.byType?.scheduleGaps || [], null, 2)}
+
+EXPANSION OPPORTUNITIES (strong games to grow):
+${JSON.stringify(opportunities.byType?.expansionOpportunities || [], null, 2)}
+
+VENUE CAPACITY (underutilized venues):
+${JSON.stringify(opportunities.byType?.venueCapacity || [], null, 2)}
+` : 'No growth opportunities detected this period.'}
+
+════════════════════════════════════════════════════════════════════════════════
+SECTION 9: VENUE PERFORMANCE DETAIL
+════════════════════════════════════════════════════════════════════════════════
+${JSON.stringify(venues.map(v => ({
+  venueName: v.venueName,
+  venueId: v.venueId,
+  totalRevenue: v.totalRevenue,
+  totalCost: v.totalCost,
+  totalProfit: v.totalProfit,
+  profitMargin: v.profitMargin,
+  totalGames: v.totalGames,
+  totalEntries: v.totalEntries,
+  avgProfitPerGame: v.avgProfitPerGame,
+  avgEntriesPerGame: v.avgEntriesPerGame,
+  overallHealth: v.overallHealth,
+  profitability: v.profitability,
+  trendCategory: v.trendCategory,
+  profitTrendPercent: v.profitTrendPercent,
+  revenueTrendPercent: v.revenueTrendPercent,
+  priorPeriodProfit: v.priorPeriodProfit,
+  totalOverlayCost: v.totalOverlayCost,
+  avgCoverageRate: v.avgCoverageRate,
+  gameTypeBreakdown: v.gameTypeBreakdown,
+  dayBreakdown: v.dayBreakdown,
+  topGames: v.topGames,
+  bottomGames: v.bottomGames
+})), null, 2)}
+
+════════════════════════════════════════════════════════════════════════════════
+SECTION 10: ALERTS & RANKINGS
+════════════════════════════════════════════════════════════════════════════════
+ALERT SUMMARY: ${alertSummary.total || 0} total
+- HIGH: ${alertSummary.bySeverity?.HIGH || 0}
+- MEDIUM: ${alertSummary.bySeverity?.MEDIUM || 0}
+- LOW: ${alertSummary.bySeverity?.LOW || 0}
+
+By Type: ${JSON.stringify(alertSummary.byType || {}, null, 2)}
+
+ALL ALERTS:
+${JSON.stringify(alerts, null, 2)}
+
+RANKINGS:
+${JSON.stringify(rankings, null, 2)}
+
+════════════════════════════════════════════════════════════════════════════════
+REQUIRED JSON OUTPUT
+════════════════════════════════════════════════════════════════════════════════
 {
   "executiveSummary": {
-    "headline": "Board-level summary in one impactful sentence",
-    "performanceRating": "EXCEEDING_TARGETS | ON_TRACK | BELOW_TARGETS | REQUIRES_INTERVENTION",
-    "keyHighlights": ["3-5 most significant achievements or milestones"],
-    "keyRisks": ["2-3 most significant risks or concerns"],
-    "strategicOutlook": "2-3 sentences on trajectory and strategic position"
+    "headline": "One sentence: profit/loss with trend direction and primary driver",
+    "overallHealth": "CRITICAL | NEEDS_ATTENTION | STABLE | GOOD | EXCELLENT",
+    "healthRationale": "Data-backed justification for rating",
+    "profitStatement": "Clear P&L statement: '$X profit/loss, Y% margin, Z% vs prior period'",
+    "keyHighlights": ["3-5 most material findings with numbers"],
+    "keyRisks": ["Top 2-3 risks with quantified exposure"],
+    "trajectory": "IMPROVING | STABLE | DECLINING"
   },
   
   "financialPerformance": {
     "revenue": {
       "actual": <number>,
       "priorPeriod": <number>,
-      "variance": <number>,
-      "variancePercent": <number>,
-      "ytdActual": <number if available or null>,
-      "ytdTarget": <number if available or null>,
-      "commentary": "Brief analysis of revenue performance"
+      "change": <number>,
+      "changePercent": <number>,
+      "drivers": ["What drove revenue up/down"]
+    },
+    "costs": {
+      "total": <number>,
+      "breakdown": {
+        "staff": <number>,
+        "venue": <number>,
+        "marketing": <number>,
+        "overlay": <number>,
+        "other": <number>
+      },
+      "biggestDriver": "Which cost category had most impact",
+      "costPerEntry": <number>
     },
     "profit": {
       "actual": <number>,
       "priorPeriod": <number>,
-      "variance": <number>,
-      "variancePercent": <number>,
+      "change": <number>,
+      "changePercent": <number>,
       "margin": <number>,
-      "marginTrend": "IMPROVING | STABLE | DECLINING",
-      "commentary": "Brief analysis of profitability"
-    },
-    "costAnalysis": {
-      "totalCosts": <number>,
-      "costBreakdown": {
-        "staffCosts": <number>,
-        "guaranteeOverlay": <number>,
-        "otherCosts": <number>
-      },
-      "costTrend": "IMPROVING | STABLE | CONCERNING",
-      "commentary": "Analysis of cost structure"
+      "marginChange": <number>,
+      "analysis": "What drove profit performance"
     }
   },
   
-  "operationalMetrics": {
-    "volume": {
-      "totalEntries": <number>,
-      "totalGames": <number>,
-      "runRate": <number>,
-      "avgEntriesPerGame": <number>,
-      "commentary": "Volume analysis"
-    },
-    "playerMetrics": {
-      "uniquePlayers": <number>,
-      "newPlayers": <number>,
-      "returningPlayerRate": <number>,
-      "revenuePerPlayer": <number>,
-      "commentary": "Player base health analysis"
-    },
-    "venuePerformance": {
-      "topPerformers": [
-        {
-          "venueName": "Name",
-          "highlight": "Key achievement",
-          "metrics": "Supporting numbers"
-        }
-      ],
-      "underperformers": [
-        {
-          "venueName": "Name",
-          "concern": "Key issue",
-          "recommendation": "Suggested action"
-        }
-      ]
-    }
+  "guaranteeAnalysis": {
+    "summary": "Overall assessment of guarantee strategy",
+    "totalExposure": <number>,
+    "totalOverlayCost": <number>,
+    "overlayRate": <number>,
+    "avgCoverageRate": <number>,
+    "overlayAsPercentOfLoss": <number or null>,
+    "problemGuarantees": [
+      { "gameName": "Name", "venueName": "Venue", "overlay": <number>, "coverageRate": <number>, "recommendation": "Action" }
+    ],
+    "strategicRecommendation": "Guarantee strategy adjustment"
   },
   
-  "riskAssessment": {
-    "overallRiskLevel": "LOW | MODERATE | ELEVATED | HIGH",
-    "risks": [
-      {
-        "category": "FINANCIAL | OPERATIONAL | COMPETITIVE | REGULATORY | REPUTATIONAL",
-        "description": "Risk description",
-        "likelihood": "LOW | MEDIUM | HIGH",
-        "impact": "LOW | MEDIUM | HIGH",
-        "mitigationStrategy": "How to address",
-        "owner": "Suggested responsible party"
-      }
-    ]
+  "scheduleExecution": {
+    "complianceRate": <number or null>,
+    "cancellationRate": <number or null>,
+    "assessment": "Schedule reliability assessment",
+    "atRiskGames": [
+      { "gameName": "Name", "cancellationRate": <number>, "recommendation": "Keep/Remove/Reposition" }
+    ],
+    "recommendation": "Schedule reliability action"
   },
   
-  "competitivePosition": {
-    "marketShare": "Assessment of market position",
-    "competitorActivity": "Summary of competitor movements",
-    "threats": ["Key competitive threats"],
-    "opportunities": ["Competitive opportunities to pursue"],
-    "recommendedActions": ["Strategic actions to maintain/improve position"]
+  "portfolioHealth": {
+    "summary": "Overall recurring game portfolio assessment",
+    "healthDistribution": { "excellent": <number>, "good": <number>, "needsAttention": <number>, "critical": <number> },
+    "growthOpportunities": [
+      { "gameName": "Name", "trend": "+X%", "brandStrength": "STRONG/GROWING", "recommendation": "Expansion action" }
+    ],
+    "interventionRequired": [
+      { "gameName": "Name", "trend": "-X%", "issue": "What's wrong", "recommendation": "Fix/Cut/Reposition" }
+    ],
+    "portfolioActions": ["Strategic actions for game lineup"]
   },
   
-  "strategicRecommendations": [
+  "venuePerformance": [
     {
-      "recommendation": "Strategic recommendation",
-      "rationale": "Why this matters based on the data",
-      "expectedImpact": "Quantified expected benefit",
-      "investmentRequired": "LOW | MEDIUM | HIGH",
-      "timeframe": "SHORT_TERM | MEDIUM_TERM | LONG_TERM",
-      "priority": "CRITICAL | HIGH | MEDIUM | LOW"
+      "venueName": "Name",
+      "profit": <number>,
+      "profitChange": <number>,
+      "profitChangePercent": <number>,
+      "margin": <number>,
+      "games": <number>,
+      "health": "EXCELLENT | GOOD | NEEDS_ATTENTION | CRITICAL",
+      "trend": "UPLIFT | STEADY | SOFTENING | AT_RISK",
+      "keyDrivers": ["What's driving performance"],
+      "risks": ["Venue-specific risks"],
+      "recommendation": "Strategic action for this venue"
     }
   ],
   
-  "nextMonthOutlook": {
-    "projectedRevenue": <number or null>,
-    "keyInitiatives": ["Planned initiatives for next month"],
-    "expectedChallenges": ["Anticipated challenges"],
-    "successMetrics": ["What success looks like"]
+  "competitivePosition": {
+    "pressureLevel": "HIGH | MEDIUM | LOW | MINIMAL",
+    "pressureScore": <number>,
+    "marketAssessment": "Our competitive position",
+    "activityTrend": "INCREASING | STABLE | DECREASING",
+    "directThreats": [
+      { "competitor": "Name", "threat": "What they're doing", "ourResponse": "How to respond" }
+    ],
+    "clashImpact": {
+      "directClashes": <number>,
+      "estimatedRevenueImpact": "Estimated impact",
+      "affectedGames": ["Games affected"]
+    },
+    "strategicResponse": "Competitive strategy recommendation"
   },
   
-  "appendix": {
-    "dataQuality": "Assessment of data completeness",
-    "assumptions": ["Key assumptions made in this report"],
-    "limitedDataAreas": ["Areas where data was insufficient"]
+  "seriesPerformance": {
+    "activeSeries": [
+      { "name": "Name", "progress": "X%", "status": "AHEAD | ON_TRACK | BEHIND", "action": "What's needed" }
+    ],
+    "upcomingSeries": [
+      { "name": "Name", "startDate": "Date", "readiness": "Assessment" }
+    ],
+    "completedLearnings": ["Key learnings from completed series"]
+  },
+  
+  "growthOpportunities": {
+    "summary": "Overall opportunity landscape",
+    "totalOpportunities": <number>,
+    "topOpportunities": [
+      {
+        "opportunity": "Description",
+        "type": "SCHEDULE_GAP | EXPANSION | VENUE_CAPACITY | MARKET",
+        "potentialImpact": "$X/period",
+        "investment": "What's required",
+        "timeline": "SHORT_TERM | MEDIUM_TERM | LONG_TERM",
+        "priority": "HIGH | MEDIUM | LOW"
+      }
+    ],
+    "quickWins": ["Opportunities actionable within 30 days"]
+  },
+  
+  "alerts": [
+    {
+      "severity": "CRITICAL | HIGH | MEDIUM | LOW",
+      "type": "Alert type",
+      "title": "Short title",
+      "description": "What's happening",
+      "evidence": "Supporting data",
+      "financialImpact": "$X impact or exposure",
+      "recommendation": "Action to take",
+      "owner": "Who should handle",
+      "deadline": "When"
+    }
+  ],
+  
+  "strategicRecommendations": [
+    {
+      "priority": 1,
+      "recommendation": "Specific strategic action",
+      "rationale": "Data-backed justification",
+      "expectedImpact": "$ or % improvement",
+      "investment": "Resources/cost required",
+      "timeline": "This month | Next quarter | 6 months",
+      "owner": "Operations | Marketing | Executive",
+      "successMetrics": "How to measure success"
+    }
+  ],
+  
+  "outlook": {
+    "trajectory": "IMPROVING | STABLE | DECLINING",
+    "confidence": "HIGH | MEDIUM | LOW",
+    "nextPeriodFocus": "Primary strategic focus",
+    "keyRisksToMonitor": ["Risks requiring attention"],
+    "targetMetrics": {
+      "revenue": "Target or direction",
+      "profit": "Target or direction",
+      "margin": "Target or direction",
+      "compliance": "Target or direction"
+    },
+    "catalysts": ["Events that could change trajectory"]
   }
-}
-
-Focus on strategic insights suitable for board-level discussion. Use actual numbers from the data - do not fabricate or estimate figures that aren't provided.`;
+}`;
 }
 
 /**
@@ -189,30 +519,24 @@ Focus on strategic insights suitable for board-level discussion. Use actual numb
  */
 function getSchema() {
   return {
-    name: 'monthly_board_report',
-    strict: true,
+    name: 'monthly_board_report_v2',
+    strict: false,
     schema: {
       type: 'object',
-      required: ['executiveSummary', 'financialPerformance', 'operationalMetrics', 'riskAssessment', 'strategicRecommendations'],
+      required: ['executiveSummary', 'financialPerformance', 'guaranteeAnalysis', 'alerts', 'strategicRecommendations', 'outlook'],
       properties: {
-        executiveSummary: {
-          type: 'object',
-          required: ['headline', 'performanceRating', 'keyHighlights', 'keyRisks'],
-          properties: {
-            headline: { type: 'string' },
-            performanceRating: { type: 'string', enum: ['EXCEEDING_TARGETS', 'ON_TRACK', 'BELOW_TARGETS', 'REQUIRES_INTERVENTION'] },
-            keyHighlights: { type: 'array', items: { type: 'string' } },
-            keyRisks: { type: 'array', items: { type: 'string' } },
-            strategicOutlook: { type: 'string' },
-          },
-        },
+        executiveSummary: { type: 'object' },
         financialPerformance: { type: 'object' },
-        operationalMetrics: { type: 'object' },
-        riskAssessment: { type: 'object' },
+        guaranteeAnalysis: { type: 'object' },
+        scheduleExecution: { type: 'object' },
+        portfolioHealth: { type: 'object' },
+        venuePerformance: { type: 'array' },
         competitivePosition: { type: 'object' },
+        seriesPerformance: { type: 'object' },
+        growthOpportunities: { type: 'object' },
+        alerts: { type: 'array' },
         strategicRecommendations: { type: 'array' },
-        nextMonthOutlook: { type: 'object' },
-        appendix: { type: 'object' },
+        outlook: { type: 'object' },
       },
     },
   };

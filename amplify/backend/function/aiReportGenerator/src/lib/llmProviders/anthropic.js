@@ -1,19 +1,70 @@
 /**
  * Anthropic Provider Implementation
- * Supports Claude Sonnet, Opus, and Haiku models
+ * Supports Claude 4 Sonnet, Opus, and Haiku models
+ * UPDATED: January 2025 - Added Claude 4 models with current pricing
  */
 
 const https = require('https');
 
-// Pricing per 1M tokens (as of Jan 2026)
+// Pricing per 1M tokens (as of January 2025)
 const MODEL_PRICING = {
-  'claude-opus-4-20250514': { input: 15.00, output: 75.00 },
-  'claude-sonnet-4-20250514': { input: 3.00, output: 15.00 },
-  'claude-haiku-4-20250514': { input: 0.25, output: 1.25 },
-  // Legacy models
-  'claude-3-opus-20240229': { input: 15.00, output: 75.00 },
-  'claude-3-sonnet-20240229': { input: 3.00, output: 15.00 },
-  'claude-3-haiku-20240307': { input: 0.25, output: 1.25 },
+  // Claude 4 models (current)
+  'claude-opus-4-20250514': { input: 15.00, output: 75.00, contextWindow: 200000, maxOutput: 32768 },
+  'claude-sonnet-4-20250514': { input: 3.00, output: 15.00, contextWindow: 200000, maxOutput: 64000 },
+  'claude-haiku-4-20250514': { input: 0.25, output: 1.25, contextWindow: 200000, maxOutput: 64000 },
+  
+  // Model aliases for convenience
+  'claude-4-opus': { input: 15.00, output: 75.00, contextWindow: 200000, maxOutput: 32768 },
+  'claude-4-sonnet': { input: 3.00, output: 15.00, contextWindow: 200000, maxOutput: 64000 },
+  'claude-4-haiku': { input: 0.25, output: 1.25, contextWindow: 200000, maxOutput: 64000 },
+  
+  // Legacy Claude 3.5 models
+  'claude-3-5-sonnet-20241022': { input: 3.00, output: 15.00, contextWindow: 200000, maxOutput: 8192 },
+  'claude-3-5-haiku-20241022': { input: 0.80, output: 4.00, contextWindow: 200000, maxOutput: 8192 },
+  
+  // Legacy Claude 3 models (still available)
+  'claude-3-opus-20240229': { input: 15.00, output: 75.00, contextWindow: 200000, maxOutput: 4096 },
+  'claude-3-sonnet-20240229': { input: 3.00, output: 15.00, contextWindow: 200000, maxOutput: 4096 },
+  'claude-3-haiku-20240307': { input: 0.25, output: 1.25, contextWindow: 200000, maxOutput: 4096 },
+};
+
+// Model metadata for UI display
+const MODEL_METADATA = {
+  'claude-opus-4-20250514': {
+    displayName: 'Claude 4 Opus',
+    description: 'Most capable, best for complex analysis',
+    tier: 'premium',
+    recommended: false,
+    alias: 'claude-opus',
+  },
+  'claude-sonnet-4-20250514': {
+    displayName: 'Claude 4 Sonnet',
+    description: 'Balanced quality and cost - RECOMMENDED',
+    tier: 'standard',
+    recommended: true,
+    alias: 'claude-sonnet',
+  },
+  'claude-haiku-4-20250514': {
+    displayName: 'Claude 4 Haiku',
+    description: 'Fast and cheap, good for simpler tasks',
+    tier: 'economy',
+    recommended: false,
+    alias: 'claude-haiku',
+  },
+  'claude-3-5-sonnet-20241022': {
+    displayName: 'Claude 3.5 Sonnet',
+    description: 'Previous generation, still very capable',
+    tier: 'standard',
+    recommended: false,
+    alias: 'claude-3.5-sonnet',
+  },
+  'claude-3-5-haiku-20241022': {
+    displayName: 'Claude 3.5 Haiku',
+    description: 'Previous generation mini model',
+    tier: 'economy',
+    recommended: false,
+    alias: 'claude-3.5-haiku',
+  },
 };
 
 class AnthropicProvider {
@@ -21,8 +72,61 @@ class AnthropicProvider {
     this.apiKey = config.apiKey;
     this.baseUrl = config.baseUrl || 'api.anthropic.com';
     this.defaultModel = config.model || 'claude-sonnet-4-20250514';
-    this.timeout = config.timeout || 60000;
+    this.timeout = config.timeout || 120000; // 2 minutes
     this.apiVersion = config.apiVersion || '2023-06-01';
+  }
+
+  /**
+   * Get estimated cost for a request before making it
+   * @param {string} model - Model name
+   * @param {number} inputTokens - Estimated input tokens
+   * @param {number} outputTokens - Expected output tokens
+   * @returns {{ inputCost: number, outputCost: number, totalCost: number }}
+   */
+  static estimateCost(model, inputTokens, outputTokens = 4096) {
+    const pricing = MODEL_PRICING[model] || MODEL_PRICING['claude-sonnet-4-20250514'];
+    const inputCost = (inputTokens / 1_000_000) * pricing.input;
+    const outputCost = (outputTokens / 1_000_000) * pricing.output;
+    return {
+      inputCost: Math.round(inputCost * 10000) / 10000,
+      outputCost: Math.round(outputCost * 10000) / 10000,
+      totalCost: Math.round((inputCost + outputCost) * 10000) / 10000,
+    };
+  }
+
+  /**
+   * Get model info including pricing
+   * @param {string} model 
+   * @returns {object}
+   */
+  static getModelInfo(model) {
+    const pricing = MODEL_PRICING[model] || MODEL_PRICING['claude-sonnet-4-20250514'];
+    const metadata = MODEL_METADATA[model] || {
+      displayName: model,
+      description: 'Unknown model',
+      tier: 'standard',
+      recommended: false,
+    };
+    return { ...pricing, ...metadata };
+  }
+
+  /**
+   * Get all available models with their info
+   * @returns {object[]}
+   */
+  static getAvailableModels() {
+    // Only return main Claude 4 models for simplicity
+    const mainModels = [
+      'claude-sonnet-4-20250514',
+      'claude-haiku-4-20250514',
+      'claude-opus-4-20250514',
+    ];
+    
+    return mainModels.map(id => ({
+      id,
+      ...MODEL_PRICING[id],
+      ...(MODEL_METADATA[id] || { displayName: id, description: '', tier: 'standard', recommended: false }),
+    }));
   }
 
   /**
@@ -212,3 +316,5 @@ IMPORTANT: You MUST respond with valid JSON only. No markdown code blocks, no ex
 }
 
 module.exports = AnthropicProvider;
+module.exports.MODEL_PRICING = MODEL_PRICING;
+module.exports.MODEL_METADATA = MODEL_METADATA;

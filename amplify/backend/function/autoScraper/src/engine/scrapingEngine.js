@@ -4,8 +4,18 @@
  * Core scraping logic extracted from index.js for maintainability.
  * Handles bulk scraping, gap processing, and event streaming.
  * 
- * VERSION: 1.16.0
+ * VERSION: 1.17.0
  * 
+ * UPDATED v1.17.0:
+ * - CRITICAL FIX: Added ScraperAPI/proxy service error detection
+ *   - Detects credit exhaustion ("You have exhausted the API Credits")
+ *   - Detects billing/subscription issues, rate limits, auth errors
+ *   - NEW: isApiErrorResponse() helper to detect API_ERROR scrapeStatus
+ *   - NEW: getApiErrorDetails() helper for clear error logging
+ *   - API errors STOP job immediately with clear, actionable message
+ *   - Prevents confusing "Unnamed Tournament" errors when API quota exhausted
+ *   - Works with html-parser v2.5.0+ which sets scrapeStatus='API_ERROR'
+ *
  * UPDATED v1.16.0:
  * - FIX: doNotScrape tournaments now SKIPPED instead of stopping the job
  *   - When a URL has doNotScrape=true in ScrapeURL table, webScraperFunction
@@ -408,6 +418,40 @@ function isNotPublishedResponse(parsedData) {
 function isBotBlockedResponse(parsedData) {
     if (!parsedData) return false;
     return parsedData.scrapeStatus === 'BOT_BLOCKED';
+}
+
+/**
+ * NEW v1.17.0: Check if response indicates a ScraperAPI/proxy service error
+ * 
+ * These are CRITICAL errors from the scraping service itself:
+ * - Credit exhaustion (monthly quota used up)
+ * - Billing/subscription issues
+ * - Rate limiting
+ * - Authentication failures
+ * 
+ * These should STOP the job immediately because all subsequent requests
+ * will fail with the same error until the issue is resolved.
+ * 
+ * @param {object} parsedData - The parsed data from html-parser
+ * @returns {boolean} True if this is an API service error (should stop job immediately)
+ */
+function isApiErrorResponse(parsedData) {
+    if (!parsedData) return false;
+    return parsedData.scrapeStatus === 'API_ERROR';
+}
+
+/**
+ * NEW v1.17.0: Get API error details for logging
+ * 
+ * @param {object} parsedData - The parsed data from html-parser
+ * @returns {object} { errorType: string, errorMessage: string }
+ */
+function getApiErrorDetails(parsedData) {
+    if (!parsedData) return { errorType: 'UNKNOWN', errorMessage: 'No data' };
+    return {
+        errorType: parsedData.errorType || 'UNKNOWN_API_ERROR',
+        errorMessage: parsedData.errorMessage || parsedData.error || parsedData.name || 'Unknown API error'
+    };
 }
 
 /**
@@ -2095,6 +2139,43 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                 continue;  // Continue to next gap ID, don't stop
             }
             
+            // ═══════════════════════════════════════════════════════════════
+            // v1.17.0 FIX: Check for ScraperAPI/proxy service errors
+            // These are CRITICAL errors (credit exhaustion, billing, auth, etc.)
+            // that will affect ALL subsequent requests - STOP IMMEDIATELY
+            // with a clear, actionable error message
+            // ═══════════════════════════════════════════════════════════════
+            if (isApiErrorResponse(parsedData)) {
+                const apiError = getApiErrorDetails(parsedData);
+                console.error(`[ScrapingEngine] 🚨 Gap ID ${tournamentId}: API SERVICE ERROR - ${apiError.errorType}`);
+                console.error(`[ScrapingEngine] 🚨 ${apiError.errorMessage}`);
+                console.error(`[ScrapingEngine] 🚨 STOPPING JOB - All subsequent requests will fail with the same error`);
+                
+                results.errors++;
+                results.consecutiveBlanks = 0;
+                results.consecutiveNotFound = 0;
+                results.lastErrorMessage = `[${apiError.errorType}] ${apiError.errorMessage}`;
+                
+                publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
+                    action: 'ERROR',
+                    message: `API Error: ${apiError.errorType}`,
+                    errorMessage: apiError.errorMessage,
+                    durationMs: Date.now() - gameStartTime,
+                    dataSource: 'none',
+                    parsedData: { 
+                        scrapeStatus: 'API_ERROR',
+                        gameStatus: 'UNKNOWN',
+                        errorType: apiError.errorType,
+                        error: apiError.errorMessage
+                    },
+                    saveResult: null,
+                }).catch(err => console.warn(`[ScrapingEngine] Event publish failed:`, err.message));
+                
+                // CRITICAL: Stop immediately - no point continuing
+                results.stopReason = STOP_REASON.ERROR;
+                break;
+            }
+            
             if (isErrorResponse(parsedData) || isUnknownError) {
                 // Extract error message, including from FETCH_ERROR: prefix
                 let actualErrorMessage = parsedData.errorMessage || parsedData.error;
@@ -2381,6 +2462,8 @@ module.exports = {
     isNotFoundResponse,
     isNotPublishedResponse,
     isBotBlockedResponse,  // NEW v1.15.0
+    isApiErrorResponse,    // NEW v1.17.0
+    getApiErrorDetails,    // NEW v1.17.0
     isDoNotScrapeResponse,  // NEW v1.16.0
     isUnknownErrorResponse,
     isUnparseableResponse,  // NEW v1.5.1

@@ -10531,6 +10531,14 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "enhancedModulesIncluded": {
+                    "name": "enhancedModulesIncluded",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -10628,6 +10636,27 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "periodLabel": {
+                    "name": "periodLabel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "periodStart": {
+                    "name": "periodStart",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "periodEnd": {
+                    "name": "periodEnd",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "metricsPackId": {
                     "name": "metricsPackId",
                     "isArray": false,
@@ -10635,46 +10664,83 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "metricsPackVersion": {
+                    "name": "metricsPackVersion",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "reportData": {
                     "name": "reportData",
                     "isArray": false,
                     "type": "AWSJSON",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "status": {
                     "name": "status",
                     "isArray": false,
-                    "type": "String",
+                    "type": {
+                        "enum": "ReportGenerationStatus"
+                    },
                     "isRequired": true,
+                    "attributes": []
+                },
+                "statusMessage": {
+                    "name": "statusMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "requestedAt": {
+                    "name": "requestedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "requestedModel": {
+                    "name": "requestedModel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "requestedProvider": {
+                    "name": "requestedProvider",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "generatedAt": {
                     "name": "generatedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "generatedBy": {
                     "name": "generatedBy",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "modelProvider": {
                     "name": "modelProvider",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "modelName": {
                     "name": "modelName",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "modelVersion": {
@@ -10688,7 +10754,7 @@ export const schema = {
                     "name": "promptVersion",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "inputTokens": {
@@ -10716,6 +10782,21 @@ export const schema = {
                     "name": "generationDurationMs",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "enhancedModulesUsed": {
+                    "name": "enhancedModulesUsed",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "dataCompleteness": {
+                    "name": "dataCompleteness",
+                    "isArray": false,
+                    "type": "Float",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -10751,6 +10832,13 @@ export const schema = {
                     "name": "previousReportId",
                     "isArray": false,
                     "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "previousReportVersion": {
+                    "name": "previousReportVersion",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -18856,6 +18944,42 @@ export const schema = {
                 "HIGH"
             ]
         },
+        "ReportGenerationStatus": {
+            "name": "ReportGenerationStatus",
+            "values": [
+                "PENDING",
+                "GENERATING",
+                "COMPLETED",
+                "FAILED"
+            ]
+        },
+        "PeriodType": {
+            "name": "PeriodType",
+            "values": [
+                "CUSTOM",
+                "ISO_WEEK",
+                "MONTH",
+                "QUARTER",
+                "YEAR",
+                "RELATIVE"
+            ]
+        },
+        "RelativePeriod": {
+            "name": "RelativePeriod",
+            "values": [
+                "CURRENT_WEEK",
+                "LAST_WEEK",
+                "CURRENT_MONTH",
+                "LAST_MONTH",
+                "CURRENT_QUARTER",
+                "LAST_QUARTER",
+                "CURRENT_YEAR",
+                "LAST_YEAR",
+                "LAST_7_DAYS",
+                "LAST_30_DAYS",
+                "LAST_90_DAYS"
+            ]
+        },
         "GameProcessedAction": {
             "name": "GameProcessedAction",
             "values": [
@@ -25723,6 +25847,166 @@ export const schema = {
                 }
             }
         },
+        "ResolvedPeriod": {
+            "name": "ResolvedPeriod",
+            "fields": {
+                "periodKey": {
+                    "name": "periodKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodLabel": {
+                    "name": "periodLabel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "startDate": {
+                    "name": "startDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "endDate": {
+                    "name": "endDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "comparisonPeriodKey": {
+                    "name": "comparisonPeriodKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "comparisonPeriodLabel": {
+                    "name": "comparisonPeriodLabel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "comparisonStartDate": {
+                    "name": "comparisonStartDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "comparisonEndDate": {
+                    "name": "comparisonEndDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "AvailablePeriodOption": {
+            "name": "AvailablePeriodOption",
+            "fields": {
+                "periodKey": {
+                    "name": "periodKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodLabel": {
+                    "name": "periodLabel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "periodType": {
+                    "name": "periodType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "PeriodType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "startDate": {
+                    "name": "startDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "endDate": {
+                    "name": "endDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "hasData": {
+                    "name": "hasData",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "DataRangeInfo": {
+            "name": "DataRangeInfo",
+            "fields": {
+                "earliestDate": {
+                    "name": "earliestDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "latestDate": {
+                    "name": "latestDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalSnapshots": {
+                    "name": "totalSnapshots",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "ListAvailablePeriodOptionsResult": {
+            "name": "ListAvailablePeriodOptionsResult",
+            "fields": {
+                "periods": {
+                    "name": "periods",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "AvailablePeriodOption"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "dataRange": {
+                    "name": "dataRange",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "DataRangeInfo"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
         "GenerateMetricsPackResult": {
             "name": "GenerateMetricsPackResult",
             "fields": {
@@ -25745,6 +26029,15 @@ export const schema = {
                     "isArray": false,
                     "type": {
                         "model": "MetricsPack"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "resolvedPeriod": {
+                    "name": "resolvedPeriod",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "ResolvedPeriod"
                     },
                     "isRequired": false,
                     "attributes": []
@@ -25806,6 +26099,31 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "resolvedPeriod": {
+                    "name": "resolvedPeriod",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "ResolvedPeriod"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ReportGenerationStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "statusMessage": {
+                    "name": "statusMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "wasRegenerated": {
                     "name": "wasRegenerated",
                     "isArray": false,
@@ -25828,6 +26146,23 @@ export const schema = {
                     },
                     "isRequired": false,
                     "attributes": []
+                },
+                "packValidation": {
+                    "name": "packValidation",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "PackValidation"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "enhancedModulesUsed": {
+                    "name": "enhancedModulesUsed",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
                 },
                 "error": {
                     "name": "error",
@@ -25860,6 +26195,82 @@ export const schema = {
                     "isArray": false,
                     "type": "Float",
                     "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "PackValidation": {
+            "name": "PackValidation",
+            "fields": {
+                "isValid": {
+                    "name": "isValid",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "issues": {
+                    "name": "issues",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "enhancedModulesAvailable": {
+                    "name": "enhancedModulesAvailable",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "EnhancedModulesFlags"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "enhancedModuleCount": {
+                    "name": "enhancedModuleCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "EnhancedModulesFlags": {
+            "name": "EnhancedModulesFlags",
+            "fields": {
+                "scheduleCompliance": {
+                    "name": "scheduleCompliance",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recurringGameTrends": {
+                    "name": "recurringGameTrends",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "competitorAnalysis": {
+                    "name": "competitorAnalysis",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "opportunities": {
+                    "name": "opportunities",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesLifecycle": {
+                    "name": "seriesLifecycle",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
                     "attributes": []
                 }
             }
@@ -25916,6 +26327,78 @@ export const schema = {
                     "name": "totalCost",
                     "isArray": false,
                     "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "DirectorReportStatusResult": {
+            "name": "DirectorReportStatusResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ReportGenerationStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "statusMessage": {
+                    "name": "statusMessage",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "requestedAt": {
+                    "name": "requestedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "generatedAt": {
+                    "name": "generatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "generationDurationMs": {
+                    "name": "generationDurationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "directorReport": {
+                    "name": "directorReport",
+                    "isArray": false,
+                    "type": {
+                        "model": "DirectorReport"
+                    },
                     "isRequired": false,
                     "attributes": []
                 }
@@ -30594,5 +31077,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "da3d5e41bb917444095fe4ac698635b6"
+    "version": "2979bad01c54f01c177a49350ea13e21"
 };

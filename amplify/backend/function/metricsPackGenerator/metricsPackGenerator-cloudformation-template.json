@@ -768,22 +768,44 @@
           "Statement": [
             {
               "Action": [
-                "dynamodb:GetItem",
-                "dynamodb:PutItem",
-                "dynamodb:UpdateItem",
                 "dynamodb:Query",
                 "dynamodb:Scan",
+                "dynamodb:GetItem",
                 "dynamodb:BatchGetItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/GameFinancialSnapshot-*/index/*",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/MetricsPack-*",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/MetricsPack-*/index/*",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/AlertThresholdConfig-*",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*",
-                "arn:aws:dynamodb:ap-southeast-2:*:table/SocialPost-*"
+                "arn:aws:dynamodb:*:*:table/VenueMetrics-*",
+                "arn:aws:dynamodb:*:*:table/VenueMetrics-*/index/*",
+                "arn:aws:dynamodb:*:*:table/PlayerEntry-*",
+                "arn:aws:dynamodb:*:*:table/PlayerEntry-*/index/*",
+                "arn:aws:dynamodb:*:*:table/PlayerResult-*",
+                "arn:aws:dynamodb:*:*:table/PlayerResult-*/index/*",
+                "arn:aws:dynamodb:*:*:table/SocialAccount-*",
+                "arn:aws:dynamodb:*:*:table/SocialAccount-*/index/*",
+                "arn:aws:dynamodb:*:*:table/SocialPost-*",
+                "arn:aws:dynamodb:*:*:table/SocialPost-*/index/*",
+                "arn:aws:dynamodb:*:*:table/GameFinancialSnapshot-*",
+                "arn:aws:dynamodb:*:*:table/GameFinancialSnapshot-*/index/*",
+                "arn:aws:dynamodb:*:*:table/MetricsPack-*",
+                "arn:aws:dynamodb:*:*:table/MetricsPack-*/index/*",
+                "arn:aws:dynamodb:*:*:table/DirectorReport-*",
+                "arn:aws:dynamodb:*:*:table/DirectorReport-*/index/*",
+                "arn:aws:dynamodb:*:*:table/AlertThresholdConfig-*",
+                "arn:aws:dynamodb:*:*:table/AlertThresholdConfig-*/index/*",
+                "arn:aws:dynamodb:*:*:table/Entity-*",
+                "arn:aws:dynamodb:*:*:table/Entity-*/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:*:*:table/MetricsPack-*",
+                "arn:aws:dynamodb:*:*:table/DirectorReport-*",
+                "arn:aws:dynamodb:*:*:table/AlertThresholdConfig-*"
               ],
               "Effect": "Allow"
             }

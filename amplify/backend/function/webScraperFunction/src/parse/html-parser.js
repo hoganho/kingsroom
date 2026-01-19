@@ -8,7 +8,17 @@
  * 
  * Extracted from: scraperStrategies.js
  * 
- * UPDATED: v2.4.0
+ * UPDATED: v2.5.0
+ * - CRITICAL FIX: Added ScraperAPI error detection
+ *   - Detects credit exhaustion ("You have exhausted the API Credits")
+ *   - Detects billing/subscription issues
+ *   - Detects rate limiting errors
+ *   - Detects authentication failures
+ *   - Returns scrapeStatus='API_ERROR' with specific errorType and errorMessage
+ *   - These are FATAL errors that should stop the job immediately
+ *   - Prevents parsing API errors as "Unnamed Tournament"
+ * 
+ * v2.4.0:
  * - CRITICAL FIX: Added CAPTCHA/bot block detection
  *   - ScraperAPI can return security challenge pages instead of actual content
  *   - Detects SiteGround sgcaptcha, Cloudflare challenges, and similar
@@ -96,6 +106,85 @@ const detectBotBlock = (html) => {
     }
     
     return { isBlocked: false, blockType: null };
+};
+
+// ===================================================================
+// SCRAPER API ERROR DETECTION (NEW v2.5.0)
+// ===================================================================
+
+/**
+ * Detect ScraperAPI or proxy service error responses
+ * 
+ * These are NOT tournament pages - they are API error messages that indicate
+ * a problem with the scraping service itself (credits exhausted, rate limits, etc.)
+ * 
+ * These errors are CRITICAL and should stop the job immediately since all
+ * subsequent requests will fail with the same error.
+ * 
+ * @param {string} html - HTML/text content to check
+ * @returns {object} { isApiError: boolean, errorType: string|null, errorMessage: string|null }
+ */
+const detectScraperApiError = (html) => {
+    if (!html || typeof html !== 'string') {
+        return { isApiError: false, errorType: null, errorMessage: null };
+    }
+    
+    const textLower = html.toLowerCase();
+    
+    // ScraperAPI credit exhaustion
+    // "You have exhausted the API Credits available in this monthly cycle"
+    if (textLower.includes('exhausted') && textLower.includes('api credits')) {
+        return { 
+            isApiError: true, 
+            errorType: 'SCRAPER_API_CREDITS_EXHAUSTED',
+            errorMessage: 'ScraperAPI credits exhausted for this billing cycle'
+        };
+    }
+    
+    // ScraperAPI subscription/billing issues
+    if (textLower.includes('scraperapi') && 
+        (textLower.includes('subscription') || textLower.includes('billing') || textLower.includes('upgrade'))) {
+        return { 
+            isApiError: true, 
+            errorType: 'SCRAPER_API_BILLING_ERROR',
+            errorMessage: 'ScraperAPI billing or subscription issue'
+        };
+    }
+    
+    // ScraperAPI rate limiting
+    if (textLower.includes('rate limit') && textLower.includes('exceeded')) {
+        return { 
+            isApiError: true, 
+            errorType: 'SCRAPER_API_RATE_LIMITED',
+            errorMessage: 'ScraperAPI rate limit exceeded'
+        };
+    }
+    
+    // ScraperAPI authentication errors
+    if (textLower.includes('invalid api key') || 
+        textLower.includes('api key is required') ||
+        (textLower.includes('unauthorized') && textLower.includes('api'))) {
+        return { 
+            isApiError: true, 
+            errorType: 'SCRAPER_API_AUTH_ERROR',
+            errorMessage: 'ScraperAPI authentication failed - check API key'
+        };
+    }
+    
+    // Generic API error patterns (for other proxy services)
+    // Short response without HTML structure + API/credit/quota keywords + error keywords
+    if (html.length < 1000 && 
+        !/<html/i.test(html) && 
+        (textLower.includes('api') || textLower.includes('credits') || textLower.includes('quota')) &&
+        (textLower.includes('error') || textLower.includes('exceeded') || textLower.includes('exhausted') || textLower.includes('limit'))) {
+        return { 
+            isApiError: true, 
+            errorType: 'PROXY_API_ERROR',
+            errorMessage: html.substring(0, 200).trim()  // Use first 200 chars as message
+        };
+    }
+    
+    return { isApiError: false, errorType: null, errorMessage: null };
 };
 
 // ===================================================================
@@ -275,6 +364,12 @@ const defaultStrategy = {
     /**
      * Detect page state (not found, not published, etc.)
      * 
+     * UPDATED v2.5.0:
+     * - CRITICAL: Added ScraperAPI error detection
+     *   - Detects credit exhaustion, billing issues, rate limits, auth errors
+     *   - Returns scrapeStatus='API_ERROR' with specific errorType
+     *   - These are FATAL errors that should stop the job immediately
+     * 
      * UPDATED v2.4.0:
      * - CRITICAL: Added CAPTCHA/bot block detection FIRST
      *   - Security challenges (sgcaptcha, Cloudflare) return minimal HTML
@@ -320,6 +415,37 @@ const defaultStrategy = {
             
             ctx.abortScrape = true;
             console.log(`[HtmlParser] Aborting scrape - BOT_BLOCKED (${botBlockCheck.blockType})`);
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // v2.5.0 CRITICAL: Check for ScraperAPI/proxy service errors
+        // These are FATAL errors - credits exhausted, billing issues, etc.
+        // All subsequent requests will fail with the same error
+        // ═══════════════════════════════════════════════════════════════════════
+        const apiErrorCheck = detectScraperApiError(rawHtml);
+        
+        if (apiErrorCheck.isApiError) {
+            console.error(`[HtmlParser] 🚨 SCRAPER API ERROR: ${apiErrorCheck.errorType}`);
+            console.error(`[HtmlParser] Error message: ${apiErrorCheck.errorMessage}`);
+            
+            ctx.add('tournamentId', tournamentId);
+            ctx.add('scrapeStatus', 'API_ERROR');
+            ctx.add('gameStatus', 'UNKNOWN');  // GraphQL-valid status
+            ctx.add('name', `API Error: ${apiErrorCheck.errorType}`);
+            ctx.add('errorType', apiErrorCheck.errorType);
+            ctx.add('errorMessage', apiErrorCheck.errorMessage);
+            ctx.add('error', apiErrorCheck.errorMessage);  // For isErrorResponse() detection
+            ctx.add('doNotScrape', false);  // Not a page issue - retry when API is fixed
+            ctx.add('hasGuarantee', false);
+            ctx.add('s3Key', '');
+            ctx.add('registrationStatus', 'N_A');
+            
+            // Don't save API error responses to S3
+            ctx.add('skipS3Save', true);
+            
+            ctx.abortScrape = true;
+            console.error(`[HtmlParser] Aborting scrape - API_ERROR (${apiErrorCheck.errorType})`);
             return;
         }
         
@@ -1421,6 +1547,7 @@ module.exports = {
     formatSecondsToHHMMSS,
     parseHHMMSSToSeconds,
     getStatusAndReg,
-    detectBotBlock,  // NEW v2.4.0
+    detectBotBlock,          // NEW v2.4.0
+    detectScraperApiError,   // NEW v2.5.0
     VARIANT_MAPPING
 };

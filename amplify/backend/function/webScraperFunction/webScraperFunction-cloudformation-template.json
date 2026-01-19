@@ -1445,6 +1445,32 @@
                 "*"
               ],
               "Effect": "Allow"
+            },
+            {
+              "Sid": "SSMParameterStoreAccess",
+              "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters"
+              ],
+              "Resource": [
+                "arn:aws:ssm:ap-southeast-2:*:parameter/pokerpro/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "KMSDecryptForSecureString",
+              "Action": [
+                "kms:Decrypt"
+              ],
+              "Resource": [
+                "*"
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "ssm.ap-southeast-2.amazonaws.com"
+                }
+              },
+              "Effect": "Allow"
             }
           ]
         },

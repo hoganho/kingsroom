@@ -914,9 +914,22 @@
           "Statement": [
             {
               "Action": [
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:GetItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
                 "dynamodb:Query",
                 "dynamodb:Scan",
                 "dynamodb:GetItem",
+                "dynamodb:PutItem",
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
@@ -927,12 +940,14 @@
             },
             {
               "Action": [
+                "dynamodb:Query",
                 "dynamodb:Scan",
                 "dynamodb:GetItem",
                 "dynamodb:UpdateItem"
               ],
               "Resource": [
-                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*"
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*/index/*"
               ],
               "Effect": "Allow"
             },
@@ -952,6 +967,28 @@
               ],
               "Resource": [
                 "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:GetItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:GetItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*",
+                "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*/index/*"
               ],
               "Effect": "Allow"
             },

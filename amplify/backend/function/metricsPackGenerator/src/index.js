@@ -1,39 +1,62 @@
 /**
- * metricsPackGenerator Lambda Function (Amplify Gen 1)
- * =====================================================
+ * metricsPackGenerator Lambda Function (Improved v2)
+ * ===================================================
  * Generates deterministic MetricsPacks from GameFinancialSnapshot data.
  * 
- * @version 1.0.0
+ * KEY IMPROVEMENTS (v4.0.0):
+ * 1. Name Resolution - Venues and games are resolved to human-readable names
+ * 2. Schedule Compliance - Includes cancelled/missed game analysis
+ * 3. Recurring Game Trends - Per-game trending with brand strength
+ * 4. Series Lifecycle - Active/upcoming/completed series with progress
+ * 5. Competitor Analysis - Schedule clashes, market pressure
+ * 6. Opportunity Detection - Growth opportunities from data patterns
+ * 
+ * @version 4.0.0
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, QueryCommand, PutCommand, GetCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 
+// Import modules
 const { calculateStrategicKPIs } = require('./lib/kpiCalculator');
-const { generateAlerts } = require('./lib/alertGenerator');
+const { generateAlerts, generateAlertSummary } = require('./lib/alertGenerator');
 const { calculateVenueBreakdown } = require('./lib/venueCalculator');
 const { calculateRankings } = require('./lib/rankingsCalculator');
 const { calculatePlayerInsights } = require('./lib/playerInsightsCalculator');
 const { generateSocialPulseDigest } = require('./lib/socialPulseDigest');
-const { getWeekBounds, getMonthBounds, getDateFromWeekKey, getDateFromMonthKey } = require('./lib/periodUtils');
+const { buildOpportunityData } = require('./lib/opportunityDetector');
+const { 
+  getWeekBounds, 
+  getMonthBounds, 
+  getDateFromWeekKey, 
+  getDateFromMonthKey,
+  resolvePeriodSelection,
+  parsePeriodKey,
+  getDefaultPeriodForReportType
+} = require('./lib/periodUtils');
 const { DEFAULT_THRESHOLDS, getAlertThresholds } = require('./lib/thresholds');
-const { fetchSnapshotsForPeriod, fetchVenueMetrics, fetchPlayerData, fetchSocialData } = require('./lib/dataFetcher');
+const { 
+  fetchSnapshotsForPeriod, 
+  fetchVenueMetrics, 
+  fetchPlayerData, 
+  fetchSocialData,
+  fetchAllPackData 
+} = require('./lib/dataFetcher');
+const { buildVenueLookupFromSnapshots } = require('./lib/nameResolver');
 
 // Initialize DynamoDB client
 const ddbClient = new DynamoDBClient({ region: process.env.REGION });
 const docClient = DynamoDBDocumentClient.from(ddbClient);
 
-// Helper to construct table name: {TableName}-{apiId}-{env}
+// Helper to construct table name
 const getTableName = (baseName) => {
   const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
   const env = process.env.ENV;
   return `${baseName}-${apiId}-${env}`;
 };
 
-// Table names - use env var if set by CloudFormation, otherwise construct dynamically
+// Table names
 const METRICS_PACK_TABLE = process.env.API_KINGSROOM_METRICSPACKTABLE_NAME || getTableName('MetricsPack');
-const DIRECTOR_REPORT_TABLE = process.env.API_KINGSROOM_DIRECTORREPORTTABLE_NAME || getTableName('DirectorReport');
-const ALERT_THRESHOLD_TABLE = process.env.API_KINGSROOM_ALERTTHRESHOLDCONFIGTABLE_NAME || getTableName('AlertThresholdConfig');
 const ENTITY_TABLE = getTableName('Entity');
 
 /**
@@ -45,8 +68,7 @@ exports.handler = async (event) => {
     ENV: process.env.ENV,
     REGION: process.env.REGION,
     API_ID: process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT,
-    METRICS_PACK_TABLE,
-    ENTITY_TABLE
+    METRICS_PACK_TABLE
   });
   
   // Handle AppSync GraphQL resolver
@@ -87,11 +109,11 @@ async function handleAppSyncResolver(event) {
       case 'listAvailablePeriods':
         return await handleListAvailablePeriods(args.entityId, args.reportType, args.limit);
       
+      case 'resolvePeriod':
+        return await handleResolvePeriod(args.periodSelection);
+      
       case 'getAlertThresholds':
         return await handleGetAlertThresholds(args.entityId);
-      
-      case 'updateAlertThresholds':
-        return await handleUpdateAlertThresholds(args.input);
       
       case 'previewAlerts':
         return await handlePreviewAlerts(args.entityId, args.reportType);
@@ -114,7 +136,6 @@ async function handleScheduledEvent(event) {
   const reportType = event.detail?.reportType || event.reportType || 'WEEKLY_OPS';
   const entityIds = event.detail?.entityIds || event.entityIds;
   
-  // Get all entities if not specified
   let entities;
   if (entityIds && entityIds.length > 0) {
     entities = await Promise.all(entityIds.map(id => fetchEntity(id)));
@@ -166,34 +187,75 @@ async function handleDirectInvocation(event) {
 }
 
 // ===================================================================
-// GENERATE METRICS PACK
+// GENERATE METRICS PACK (IMPROVED with name resolution)
 // ===================================================================
 
 async function handleGenerateMetricsPack(input) {
   const startTime = Date.now();
   const warnings = [];
   
-  const { entityId, reportType, periodKey, forceRegenerate } = input;
+  const { 
+    entityId, 
+    reportType, 
+    periodKey,
+    periodSelection,
+    includeComparison = true,
+    includeScheduleCompliance = true,
+    includeRecurringGameTrends = true,
+    includeSeriesLifecycle = true,
+    includeCompetitorAnalysis = true,
+    includeOpportunities = true,
+    forceRegenerate 
+  } = input;
   
-  console.log(`Generating MetricsPack for entity=${entityId}, type=${reportType}, period=${periodKey || 'current'}`);
+  console.log(`=== Generating MetricsPack ===`);
+  console.log(`Entity: ${entityId}, Type: ${reportType}`);
   
-  // Determine period bounds
-  const now = new Date();
-  let period, comparisonPeriod;
+  // ===================================================================
+  // RESOLVE PERIOD
+  // ===================================================================
+  let resolved;
   
-  if (reportType === 'WEEKLY_OPS') {
-    period = periodKey ? getWeekBounds(getDateFromWeekKey(periodKey)) : getWeekBounds(now);
-    comparisonPeriod = getWeekBounds(new Date(period.start.getTime() - 7 * 24 * 60 * 60 * 1000));
-  } else if (reportType === 'MONTHLY_BOARD') {
-    period = periodKey ? getMonthBounds(getDateFromMonthKey(periodKey)) : getMonthBounds(now);
-    const prevMonth = new Date(period.start);
-    prevMonth.setMonth(prevMonth.getMonth() - 1);
-    comparisonPeriod = getMonthBounds(prevMonth);
+  if (periodSelection && periodSelection.periodType) {
+    try {
+      resolved = resolvePeriodSelection(periodSelection);
+    } catch (err) {
+      throw new Error(`Invalid period selection: ${err.message}`);
+    }
+  } else if (periodKey) {
+    const parsed = parsePeriodKey(periodKey);
+    if (parsed) {
+      resolved = resolvePeriodSelection(parsed);
+    } else {
+      resolved = resolveLegacyPeriod(periodKey, reportType);
+    }
   } else {
-    throw new Error(`Report type ${reportType} not yet implemented`);
+    const defaultPeriod = getDefaultPeriodForReportType(reportType);
+    resolved = resolvePeriodSelection(defaultPeriod);
   }
   
-  // Check if pack already exists
+  const period = {
+    start: resolved.startDate,
+    end: resolved.endDate,
+    key: resolved.periodKey,
+    label: resolved.periodLabel
+  };
+  
+  const comparisonPeriod = includeComparison && resolved.comparisonStartDate ? {
+    start: resolved.comparisonStartDate,
+    end: resolved.comparisonEndDate,
+    key: resolved.comparisonPeriodKey,
+    label: resolved.comparisonPeriodLabel
+  } : null;
+  
+  console.log(`Period: ${period.label} (${period.key})`);
+  if (comparisonPeriod) {
+    console.log(`Comparison: ${comparisonPeriod.label} (${comparisonPeriod.key})`);
+  }
+  
+  // ===================================================================
+  // CHECK FOR EXISTING PACK
+  // ===================================================================
   const packId = `${entityId}_${reportType}_${period.key}`;
   
   if (!forceRegenerate) {
@@ -210,33 +272,64 @@ async function handleGenerateMetricsPack(input) {
     }
   }
   
-  // Fetch entity info
+  // ===================================================================
+  // FETCH ENTITY
+  // ===================================================================
   const entity = await fetchEntity(entityId);
   if (!entity) {
     throw new Error(`Entity not found: ${entityId}`);
   }
   
-  // Fetch all required data
-  console.log('Fetching snapshots...');
-  const snapshots = await fetchSnapshotsForPeriod(entityId, period.start, period.end);
-  const compSnapshots = await fetchSnapshotsForPeriod(entityId, comparisonPeriod.start, comparisonPeriod.end);
+  // ===================================================================
+  // FETCH DATA (with automatic name resolution and enhanced modules!)
+  // ===================================================================
+  console.log('Fetching data with name resolution and enhanced modules...');
   
-  console.log(`Found ${snapshots.length} snapshots for current period, ${compSnapshots.length} for comparison`);
+  const packData = await fetchAllPackData(
+    entityId, 
+    period.start, 
+    period.end,
+    comparisonPeriod?.start,
+    comparisonPeriod?.end,
+    {
+      includeScheduleCompliance,
+      includeRecurringGameTrends,
+      includeSeriesLifecycle,
+      includeCompetitorAnalysis,
+      businessLocation: entity.businessLocation || null
+    }
+  );
+  
+  const { 
+    snapshots, 
+    compSnapshots, 
+    venueMetrics, 
+    playerData, 
+    socialData, 
+    venueLookup, 
+    meta,
+    // New enhanced data modules
+    scheduleCompliance,
+    recurringGameTrends,
+    seriesLifecycle,
+    competitorAnalysis
+  } = packData;
+  
+  console.log(`Data fetched in ${meta.fetchDurationMs}ms`);
+  console.log(`Snapshots: ${meta.snapshotCount} current, ${meta.compSnapshotCount} comparison`);
   
   if (snapshots.length === 0) {
     warnings.push('No game data found for this period');
   }
   
-  // Fetch additional data
-  const venueMetrics = await fetchVenueMetrics(entityId);
-  const playerData = await fetchPlayerData(entityId, period.start, period.end);
-  const socialData = await fetchSocialData(entityId, period.start, period.end);
-  
   // Get alert thresholds
   const thresholds = await getAlertThresholds(entityId);
   
-  // Calculate KPIs
+  // ===================================================================
+  // CALCULATE METRICS
+  // ===================================================================
   console.log('Calculating KPIs...');
+  
   const strategic = calculateStrategicKPIs({
     snapshots,
     comparisonSnapshots: compSnapshots,
@@ -244,22 +337,54 @@ async function handleGenerateMetricsPack(input) {
     playerResults: playerData.results
   });
   
-  // Calculate venue breakdown
+  // Calculate venue breakdown (snapshots already have names)
   const venues = await calculateVenueBreakdown(entityId, snapshots, venueMetrics, compSnapshots);
   
-  // Generate alerts
-  const alerts = generateAlerts(snapshots, venues, thresholds);
+  // Generate alerts (with real names!)
+  const allAlerts = generateAlerts(snapshots, venues, thresholds);
+  
+  // Limit alerts in pack to avoid bloat (keep top 20)
+  const alerts = allAlerts.slice(0, 20);
+  const alertSummary = generateAlertSummary(allAlerts);
   
   // Calculate rankings
   const rankings = calculateRankings(snapshots, venues);
   
   // Calculate player insights
-  const playerInsights = calculatePlayerInsights(playerData.entries, playerData.results);
+  const playerInsights = calculatePlayerInsights(playerData);
   
   // Generate social pulse digest
-  const socialPulse = generateSocialPulseDigest(socialData);
+  const socialPulse = generateSocialPulseDigest(entityId, socialData, period);
   
-  // Build the pack
+  // ===================================================================
+  // BUILD OPPORTUNITY DATA (uses all available data)
+  // ===================================================================
+  let opportunities = null;
+  if (includeOpportunities) {
+    try {
+      opportunities = buildOpportunityData({
+        snapshots,
+        venueData: venues,
+        recurringGameData: recurringGameTrends,
+        competitorData: competitorAnalysis,
+        entityAverages: {
+          avgGamesPerVenue: strategic.totalGames / Math.max(venues.length, 1),
+          avgProfitPerGame: strategic.avgProfitPerGame
+        }
+      });
+      console.log(`Opportunities: ${opportunities.summary?.totalOpportunities || 0} detected`);
+    } catch (error) {
+      console.warn('Opportunity detection failed:', error.message);
+      opportunities = { hasOpportunities: false, error: error.message };
+    }
+  }
+  
+  // Log enhanced data status
+  console.log(`Enhanced data: schedule=${scheduleCompliance?.hasScheduleData}, trends=${recurringGameTrends?.hasRecurringGameData}, series=${seriesLifecycle?.hasSeriesData}, competitor=${competitorAnalysis?.hasCompetitorData}`);
+  
+  // ===================================================================
+  // BUILD AND STORE PACK
+  // ===================================================================
   const pack = {
     id: packId,
     entityId,
@@ -268,36 +393,57 @@ async function handleGenerateMetricsPack(input) {
     periodStart: period.start.toISOString(),
     periodEnd: period.end.toISOString(),
     periodLabel: period.label,
-    comparisonPeriodKey: comparisonPeriod.key,
-    comparisonPeriodStart: comparisonPeriod.start.toISOString(),
-    comparisonPeriodEnd: comparisonPeriod.end.toISOString(),
-    comparisonPeriodLabel: comparisonPeriod.label,
+    comparisonPeriodKey: comparisonPeriod?.key || null,
+    comparisonPeriodStart: comparisonPeriod?.start?.toISOString() || null,
+    comparisonPeriodEnd: comparisonPeriod?.end?.toISOString() || null,
+    comparisonPeriodLabel: comparisonPeriod?.label || null,
+    
+    // Main pack data - now with real names and enhanced analytics!
     packData: JSON.stringify({
       strategic,
       venues,
       alerts,
+      alertSummary,
       rankings,
-      playerInsights
+      playerInsights,
+      // Enhanced data modules
+      scheduleCompliance: scheduleCompliance || null,
+      recurringGameTrends: recurringGameTrends || null,
+      seriesLifecycle: seriesLifecycle || null,
+      competitorAnalysis: competitorAnalysis || null,
+      opportunities: opportunities || null
     }),
+    
     socialPulseData: JSON.stringify(socialPulse),
+    
+    // Metadata
     generatedAt: new Date().toISOString(),
     generatedBy: 'LAMBDA',
     generationDurationMs: Date.now() - startTime,
-    version: 1,
+    version: 4, // Bumped version for enhanced format
     snapshotsIncluded: snapshots.length,
     gamesIncluded: snapshots.length,
     venuesIncluded: venues.length,
     dataCompleteness: calculateDataCompleteness(snapshots, venues),
+    enhancedModulesIncluded: meta.enhancedModules || [],
     warnings: warnings.length > 0 ? warnings : null,
+    
+    // Amplify/AppSync fields
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    __typename: 'MetricsPack'
+    __typename: 'MetricsPack',
+    _version: 1,
+    _lastChangedAt: Date.now(),
+    _deleted: null
   };
   
-  // Store the pack
+  // Track pack size
+  const packJson = JSON.stringify(pack);
+  console.log(`Pack size: ${(packJson.length / 1024).toFixed(1)} KB`);
+  
   await storePack(pack);
   
-  console.log(`Pack generated successfully: ${packId} in ${Date.now() - startTime}ms`);
+  console.log(`=== Pack generated: ${packId} in ${Date.now() - startTime}ms ===`);
   
   return {
     success: true,
@@ -306,6 +452,70 @@ async function handleGenerateMetricsPack(input) {
     wasExisting: false,
     generationDurationMs: Date.now() - startTime,
     warnings: warnings.length > 0 ? warnings : null
+  };
+}
+
+/**
+ * Legacy period resolution for backward compatibility
+ */
+function resolveLegacyPeriod(periodKey, reportType) {
+  const now = new Date();
+  
+  // Try week key
+  if (periodKey.includes('-W')) {
+    try {
+      const monday = getDateFromWeekKey(periodKey);
+      const bounds = getWeekBounds(monday);
+      const prevWeek = new Date(monday);
+      prevWeek.setDate(prevWeek.getDate() - 7);
+      const compBounds = getWeekBounds(prevWeek);
+      
+      return {
+        periodKey: bounds.key,
+        periodLabel: bounds.label,
+        startDate: bounds.start,
+        endDate: bounds.end,
+        comparisonPeriodKey: compBounds.key,
+        comparisonPeriodLabel: compBounds.label,
+        comparisonStartDate: compBounds.start,
+        comparisonEndDate: compBounds.end
+      };
+    } catch (e) {
+      console.warn(`Failed to parse week key: ${periodKey}`);
+    }
+  }
+  
+  // Try month key
+  if (periodKey.match(/^\d{4}-\d{2}$/)) {
+    try {
+      const date = getDateFromMonthKey(periodKey);
+      const bounds = getMonthBounds(date);
+      const prevMonth = new Date(date);
+      prevMonth.setMonth(prevMonth.getMonth() - 1);
+      const compBounds = getMonthBounds(prevMonth);
+      
+      return {
+        periodKey: bounds.key,
+        periodLabel: bounds.label,
+        startDate: bounds.start,
+        endDate: bounds.end,
+        comparisonPeriodKey: compBounds.key,
+        comparisonPeriodLabel: compBounds.label,
+        comparisonStartDate: compBounds.start,
+        comparisonEndDate: compBounds.end
+      };
+    } catch (e) {
+      console.warn(`Failed to parse month key: ${periodKey}`);
+    }
+  }
+  
+  // Default to current week/month
+  const bounds = reportType === 'WEEKLY_OPS' ? getWeekBounds(now) : getMonthBounds(now);
+  return {
+    periodKey: bounds.key,
+    periodLabel: bounds.label,
+    startDate: bounds.start,
+    endDate: bounds.end
   };
 }
 
@@ -348,41 +558,21 @@ async function handleListAvailablePeriods(entityId, reportType, limit = 12) {
   return (result.Items || []).map(item => item.periodKey);
 }
 
-async function handleGetAlertThresholds(entityId) {
-  return getAlertThresholds(entityId);
+async function handleResolvePeriod(periodSelection) {
+  return resolvePeriodSelection(periodSelection);
 }
 
-async function handleUpdateAlertThresholds(input) {
-  const { entityId, ...thresholds } = input;
-  const id = entityId || 'GLOBAL';
-  const now = new Date().toISOString();
-  
-  const item = {
-    id,
-    entityId: entityId || null,
-    ...DEFAULT_THRESHOLDS,
-    ...thresholds,
-    isActive: true,
-    lastUpdatedAt: now,
-    updatedAt: now,
-    __typename: 'AlertThresholdConfig'
-  };
-  
-  await docClient.send(new PutCommand({
-    TableName: ALERT_THRESHOLD_TABLE,
-    Item: item
-  }));
-  
-  return item;
+async function handleGetAlertThresholds(entityId) {
+  return getAlertThresholds(entityId);
 }
 
 async function handlePreviewAlerts(entityId, reportType) {
   const now = new Date();
   const period = reportType === 'WEEKLY_OPS' ? getWeekBounds(now) : getMonthBounds(now);
   
-  const snapshots = await fetchSnapshotsForPeriod(entityId, period.start, period.end);
-  const venueMetrics = await fetchVenueMetrics(entityId);
-  const venues = await calculateVenueBreakdown(entityId, snapshots, venueMetrics, []);
+  // Fetch with name resolution
+  const snapshots = await fetchSnapshotsForPeriod(entityId, period.start, period.end, true);
+  const venues = await calculateVenueBreakdown(entityId, snapshots, [], []);
   const thresholds = await getAlertThresholds(entityId);
   
   return generateAlerts(snapshots, venues, thresholds);
@@ -430,18 +620,19 @@ function calculateDataCompleteness(snapshots, venues) {
   let total = 0;
   
   for (const snapshot of snapshots) {
-    total += 5;
+    total += 6;
     if (snapshot.totalRevenue != null) score++;
     if (snapshot.totalCost != null) score++;
     if (snapshot.netProfit != null) score++;
     if (snapshot.totalEntries != null) score++;
     if (snapshot.totalUniquePlayers != null) score++;
+    if (snapshot.venueName && !snapshot.venueName.includes('Unknown')) score++;
   }
   
   for (const venue of venues) {
     total += 2;
     if (venue.totalProfit != null) score++;
-    if (venue.totalGames > 0) score++;
+    if (venue.venueName && !venue.venueName.includes('Unknown')) score++;
   }
   
   return total > 0 ? Math.round((score / total) * 100) : 0;

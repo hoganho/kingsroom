@@ -1,9 +1,21 @@
 [
   {
     "Action": [
+      "dynamodb:Scan",
+      "dynamodb:Query",
+      "dynamodb:GetItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Entity-*/index/*"
+    ]
+  },
+  {
+    "Action": [
       "dynamodb:Query",
       "dynamodb:Scan",
       "dynamodb:GetItem",
+      "dynamodb:PutItem",
       "dynamodb:UpdateItem"
     ],
     "Resource": [
@@ -13,12 +25,14 @@
   },
   {
     "Action": [
+      "dynamodb:Query",
       "dynamodb:Scan",
       "dynamodb:GetItem",
       "dynamodb:UpdateItem"
     ],
     "Resource": [
-      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*"
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/ScrapeURL-*/index/*"
     ]
   },
   {
@@ -36,6 +50,26 @@
     ],
     "Resource": [
       "arn:aws:dynamodb:ap-southeast-2:*:table/ScraperState-*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:GetItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Game-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "dynamodb:Query",
+      "dynamodb:GetItem"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*",
+      "arn:aws:dynamodb:ap-southeast-2:*:table/Venue-*/index/*"
     ]
   },
   {

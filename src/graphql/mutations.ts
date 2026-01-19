@@ -10795,11 +10795,23 @@ export const generateMetricsPack = /* GraphQL */ `mutation GenerateMetricsPack($
       venuesIncluded
       dataCompleteness
       warnings
+      enhancedModulesIncluded
       createdAt
       updatedAt
       _version
       _deleted
       _lastChangedAt
+      __typename
+    }
+    resolvedPeriod {
+      periodKey
+      periodLabel
+      startDate
+      endDate
+      comparisonPeriodKey
+      comparisonPeriodLabel
+      comparisonStartDate
+      comparisonEndDate
       __typename
     }
     wasExisting
@@ -10850,9 +10862,17 @@ export const generateDirectorReport = /* GraphQL */ `mutation GenerateDirectorRe
       entityId
       reportType
       periodKey
+      periodLabel
+      periodStart
+      periodEnd
       metricsPackId
+      metricsPackVersion
       reportData
       status
+      statusMessage
+      requestedAt
+      requestedModel
+      requestedProvider
       generatedAt
       generatedBy
       modelProvider
@@ -10863,11 +10883,14 @@ export const generateDirectorReport = /* GraphQL */ `mutation GenerateDirectorRe
       outputTokens
       totalCost
       generationDurationMs
+      enhancedModulesUsed
+      dataCompleteness
       reportVersion
       regeneratedAt
       regeneratedBy
       regenerationReason
       previousReportId
+      previousReportVersion
       viewedAt
       viewedBy
       exportedAt
@@ -10879,6 +10902,19 @@ export const generateDirectorReport = /* GraphQL */ `mutation GenerateDirectorRe
       _lastChangedAt
       __typename
     }
+    resolvedPeriod {
+      periodKey
+      periodLabel
+      startDate
+      endDate
+      comparisonPeriodKey
+      comparisonPeriodLabel
+      comparisonStartDate
+      comparisonEndDate
+      __typename
+    }
+    status
+    statusMessage
     wasRegenerated
     generationDurationMs
     tokenUsage {
@@ -10887,6 +10923,21 @@ export const generateDirectorReport = /* GraphQL */ `mutation GenerateDirectorRe
       totalCost
       __typename
     }
+    packValidation {
+      isValid
+      issues
+      enhancedModulesAvailable {
+        scheduleCompliance
+        recurringGameTrends
+        competitorAnalysis
+        opportunities
+        seriesLifecycle
+        __typename
+      }
+      enhancedModuleCount
+      __typename
+    }
+    enhancedModulesUsed
     error
     __typename
   }
@@ -10904,9 +10955,17 @@ export const regenerateDirectorReport = /* GraphQL */ `mutation RegenerateDirect
       entityId
       reportType
       periodKey
+      periodLabel
+      periodStart
+      periodEnd
       metricsPackId
+      metricsPackVersion
       reportData
       status
+      statusMessage
+      requestedAt
+      requestedModel
+      requestedProvider
       generatedAt
       generatedBy
       modelProvider
@@ -10917,11 +10976,14 @@ export const regenerateDirectorReport = /* GraphQL */ `mutation RegenerateDirect
       outputTokens
       totalCost
       generationDurationMs
+      enhancedModulesUsed
+      dataCompleteness
       reportVersion
       regeneratedAt
       regeneratedBy
       regenerationReason
       previousReportId
+      previousReportVersion
       viewedAt
       viewedBy
       exportedAt
@@ -10933,6 +10995,19 @@ export const regenerateDirectorReport = /* GraphQL */ `mutation RegenerateDirect
       _lastChangedAt
       __typename
     }
+    resolvedPeriod {
+      periodKey
+      periodLabel
+      startDate
+      endDate
+      comparisonPeriodKey
+      comparisonPeriodLabel
+      comparisonStartDate
+      comparisonEndDate
+      __typename
+    }
+    status
+    statusMessage
     wasRegenerated
     generationDurationMs
     tokenUsage {
@@ -10941,6 +11016,21 @@ export const regenerateDirectorReport = /* GraphQL */ `mutation RegenerateDirect
       totalCost
       __typename
     }
+    packValidation {
+      isValid
+      issues
+      enhancedModulesAvailable {
+        scheduleCompliance
+        recurringGameTrends
+        competitorAnalysis
+        opportunities
+        seriesLifecycle
+        __typename
+      }
+      enhancedModuleCount
+      __typename
+    }
+    enhancedModulesUsed
     error
     __typename
   }
@@ -601916,6 +602006,7 @@ export const createMetricsPack = /* GraphQL */ `mutation CreateMetricsPack(
     venuesIncluded
     dataCompleteness
     warnings
+    enhancedModulesIncluded
     createdAt
     updatedAt
     _version
@@ -601955,6 +602046,7 @@ export const updateMetricsPack = /* GraphQL */ `mutation UpdateMetricsPack(
     venuesIncluded
     dataCompleteness
     warnings
+    enhancedModulesIncluded
     createdAt
     updatedAt
     _version
@@ -601994,6 +602086,7 @@ export const deleteMetricsPack = /* GraphQL */ `mutation DeleteMetricsPack(
     venuesIncluded
     dataCompleteness
     warnings
+    enhancedModulesIncluded
     createdAt
     updatedAt
     _version
@@ -602015,9 +602108,17 @@ export const createDirectorReport = /* GraphQL */ `mutation CreateDirectorReport
     entityId
     reportType
     periodKey
+    periodLabel
+    periodStart
+    periodEnd
     metricsPackId
+    metricsPackVersion
     reportData
     status
+    statusMessage
+    requestedAt
+    requestedModel
+    requestedProvider
     generatedAt
     generatedBy
     modelProvider
@@ -602028,11 +602129,14 @@ export const createDirectorReport = /* GraphQL */ `mutation CreateDirectorReport
     outputTokens
     totalCost
     generationDurationMs
+    enhancedModulesUsed
+    dataCompleteness
     reportVersion
     regeneratedAt
     regeneratedBy
     regenerationReason
     previousReportId
+    previousReportVersion
     viewedAt
     viewedBy
     exportedAt
@@ -602058,9 +602162,17 @@ export const updateDirectorReport = /* GraphQL */ `mutation UpdateDirectorReport
     entityId
     reportType
     periodKey
+    periodLabel
+    periodStart
+    periodEnd
     metricsPackId
+    metricsPackVersion
     reportData
     status
+    statusMessage
+    requestedAt
+    requestedModel
+    requestedProvider
     generatedAt
     generatedBy
     modelProvider
@@ -602071,11 +602183,14 @@ export const updateDirectorReport = /* GraphQL */ `mutation UpdateDirectorReport
     outputTokens
     totalCost
     generationDurationMs
+    enhancedModulesUsed
+    dataCompleteness
     reportVersion
     regeneratedAt
     regeneratedBy
     regenerationReason
     previousReportId
+    previousReportVersion
     viewedAt
     viewedBy
     exportedAt
@@ -602101,9 +602216,17 @@ export const deleteDirectorReport = /* GraphQL */ `mutation DeleteDirectorReport
     entityId
     reportType
     periodKey
+    periodLabel
+    periodStart
+    periodEnd
     metricsPackId
+    metricsPackVersion
     reportData
     status
+    statusMessage
+    requestedAt
+    requestedModel
+    requestedProvider
     generatedAt
     generatedBy
     modelProvider
@@ -602114,11 +602237,14 @@ export const deleteDirectorReport = /* GraphQL */ `mutation DeleteDirectorReport
     outputTokens
     totalCost
     generationDurationMs
+    enhancedModulesUsed
+    dataCompleteness
     reportVersion
     regeneratedAt
     regeneratedBy
     regenerationReason
     previousReportId
+    previousReportVersion
     viewedAt
     viewedBy
     exportedAt

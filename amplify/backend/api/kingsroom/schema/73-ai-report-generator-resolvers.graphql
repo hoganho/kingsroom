@@ -1,12 +1,14 @@
 # 73-ai-report-generator-resolvers.graphql
 # ===================================================================
-# AI REPORT GENERATOR - Resolvers only (types defined in 72)
+# AI REPORT GENERATOR - Resolvers only (types defined in 71, 72)
 # ===================================================================
 # Deploy this AFTER the aiReportGenerator function is created
 # 
 # NOTE: getDirectorReport and listDirectorReports are auto-generated
 # by Amplify's @model directive on DirectorReport, so we don't need
 # to define them here.
+#
+# VERSION: 2.0.0 - Added async generation with status polling
 # ===================================================================
 
 # ===================================================================
@@ -23,4 +25,37 @@ extend type Mutation {
     @function(name: "aiReportGenerator-${env}")
     @aws_iam
     @aws_cognito_user_pools
+}
+
+# ===================================================================
+# EXTEND QUERIES - Status polling for async generation
+# ===================================================================
+
+extend type Query {
+  # Poll for report generation status (async pattern)
+  # Returns current status and full report when completed
+  getDirectorReportStatus(id: ID!): DirectorReportStatusResult
+    @function(name: "aiReportGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+}
+
+# ===================================================================
+# TYPES FOR ASYNC GENERATION STATUS POLLING
+# ===================================================================
+# NOTE: ReportGenerationStatus enum is defined in 71-ai-insights.graphql
+# ===================================================================
+
+# Response type for status polling
+type DirectorReportStatusResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  id: ID
+  status: ReportGenerationStatus!
+  statusMessage: String
+  error: String
+  requestedAt: AWSDateTime
+  generatedAt: AWSDateTime
+  generationDurationMs: Int
+  # Full report included when status is COMPLETED
+  directorReport: DirectorReport
 }

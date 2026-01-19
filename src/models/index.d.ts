@@ -809,6 +809,36 @@ export enum ThreatLevel {
   HIGH = "HIGH"
 }
 
+export enum ReportGenerationStatus {
+  PENDING = "PENDING",
+  GENERATING = "GENERATING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED"
+}
+
+export enum PeriodType {
+  CUSTOM = "CUSTOM",
+  ISO_WEEK = "ISO_WEEK",
+  MONTH = "MONTH",
+  QUARTER = "QUARTER",
+  YEAR = "YEAR",
+  RELATIVE = "RELATIVE"
+}
+
+export enum RelativePeriod {
+  CURRENT_WEEK = "CURRENT_WEEK",
+  LAST_WEEK = "LAST_WEEK",
+  CURRENT_MONTH = "CURRENT_MONTH",
+  LAST_MONTH = "LAST_MONTH",
+  CURRENT_QUARTER = "CURRENT_QUARTER",
+  LAST_QUARTER = "LAST_QUARTER",
+  CURRENT_YEAR = "CURRENT_YEAR",
+  LAST_YEAR = "LAST_YEAR",
+  LAST_7_DAYS = "LAST_7_DAYS",
+  LAST_30_DAYS = "LAST_30_DAYS",
+  LAST_90_DAYS = "LAST_90_DAYS"
+}
+
 export enum GameProcessedAction {
   CREATED = "CREATED",
   UPDATED = "UPDATED",
@@ -3472,10 +3502,89 @@ export declare type TrendAnalysis = LazyLoading extends LazyLoadingDisabled ? Ea
 
 export declare const TrendAnalysis: (new (init: ModelInit<TrendAnalysis>) => TrendAnalysis)
 
+type EagerResolvedPeriod = {
+  readonly periodKey: string;
+  readonly periodLabel: string;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly comparisonPeriodKey?: string | null;
+  readonly comparisonPeriodLabel?: string | null;
+  readonly comparisonStartDate?: string | null;
+  readonly comparisonEndDate?: string | null;
+}
+
+type LazyResolvedPeriod = {
+  readonly periodKey: string;
+  readonly periodLabel: string;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly comparisonPeriodKey?: string | null;
+  readonly comparisonPeriodLabel?: string | null;
+  readonly comparisonStartDate?: string | null;
+  readonly comparisonEndDate?: string | null;
+}
+
+export declare type ResolvedPeriod = LazyLoading extends LazyLoadingDisabled ? EagerResolvedPeriod : LazyResolvedPeriod
+
+export declare const ResolvedPeriod: (new (init: ModelInit<ResolvedPeriod>) => ResolvedPeriod)
+
+type EagerAvailablePeriodOption = {
+  readonly periodKey: string;
+  readonly periodLabel: string;
+  readonly periodType: PeriodType | keyof typeof PeriodType;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly hasData: boolean;
+}
+
+type LazyAvailablePeriodOption = {
+  readonly periodKey: string;
+  readonly periodLabel: string;
+  readonly periodType: PeriodType | keyof typeof PeriodType;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly hasData: boolean;
+}
+
+export declare type AvailablePeriodOption = LazyLoading extends LazyLoadingDisabled ? EagerAvailablePeriodOption : LazyAvailablePeriodOption
+
+export declare const AvailablePeriodOption: (new (init: ModelInit<AvailablePeriodOption>) => AvailablePeriodOption)
+
+type EagerDataRangeInfo = {
+  readonly earliestDate?: string | null;
+  readonly latestDate?: string | null;
+  readonly totalSnapshots: number;
+}
+
+type LazyDataRangeInfo = {
+  readonly earliestDate?: string | null;
+  readonly latestDate?: string | null;
+  readonly totalSnapshots: number;
+}
+
+export declare type DataRangeInfo = LazyLoading extends LazyLoadingDisabled ? EagerDataRangeInfo : LazyDataRangeInfo
+
+export declare const DataRangeInfo: (new (init: ModelInit<DataRangeInfo>) => DataRangeInfo)
+
+type EagerListAvailablePeriodOptionsResult = {
+  readonly periods: AvailablePeriodOption[];
+  readonly dataRange: DataRangeInfo;
+}
+
+type LazyListAvailablePeriodOptionsResult = {
+  readonly periods: AvailablePeriodOption[];
+  readonly dataRange: DataRangeInfo;
+}
+
+export declare type ListAvailablePeriodOptionsResult = LazyLoading extends LazyLoadingDisabled ? EagerListAvailablePeriodOptionsResult : LazyListAvailablePeriodOptionsResult
+
+export declare const ListAvailablePeriodOptionsResult: (new (init: ModelInit<ListAvailablePeriodOptionsResult>) => ListAvailablePeriodOptionsResult)
+
 type EagerGenerateMetricsPackResult = {
   readonly success: boolean;
   readonly metricsPackId?: string | null;
   readonly metricsPack?: MetricsPack | null;
+  readonly resolvedPeriod?: ResolvedPeriod | null;
   readonly wasExisting?: boolean | null;
   readonly generationDurationMs?: number | null;
   readonly error?: string | null;
@@ -3486,6 +3595,7 @@ type LazyGenerateMetricsPackResult = {
   readonly success: boolean;
   readonly metricsPackId?: string | null;
   readonly metricsPack: AsyncItem<MetricsPack | undefined>;
+  readonly resolvedPeriod?: ResolvedPeriod | null;
   readonly wasExisting?: boolean | null;
   readonly generationDurationMs?: number | null;
   readonly error?: string | null;
@@ -3500,9 +3610,14 @@ type EagerGenerateDirectorReportResult = {
   readonly success: boolean;
   readonly directorReportId?: string | null;
   readonly directorReport?: DirectorReport | null;
+  readonly resolvedPeriod?: ResolvedPeriod | null;
+  readonly status?: ReportGenerationStatus | keyof typeof ReportGenerationStatus | null;
+  readonly statusMessage?: string | null;
   readonly wasRegenerated?: boolean | null;
   readonly generationDurationMs?: number | null;
   readonly tokenUsage?: TokenUsage | null;
+  readonly packValidation?: PackValidation | null;
+  readonly enhancedModulesUsed?: (string | null)[] | null;
   readonly error?: string | null;
 }
 
@@ -3510,9 +3625,14 @@ type LazyGenerateDirectorReportResult = {
   readonly success: boolean;
   readonly directorReportId?: string | null;
   readonly directorReport: AsyncItem<DirectorReport | undefined>;
+  readonly resolvedPeriod?: ResolvedPeriod | null;
+  readonly status?: ReportGenerationStatus | keyof typeof ReportGenerationStatus | null;
+  readonly statusMessage?: string | null;
   readonly wasRegenerated?: boolean | null;
   readonly generationDurationMs?: number | null;
   readonly tokenUsage?: TokenUsage | null;
+  readonly packValidation?: PackValidation | null;
+  readonly enhancedModulesUsed?: (string | null)[] | null;
   readonly error?: string | null;
 }
 
@@ -3535,6 +3655,44 @@ type LazyTokenUsage = {
 export declare type TokenUsage = LazyLoading extends LazyLoadingDisabled ? EagerTokenUsage : LazyTokenUsage
 
 export declare const TokenUsage: (new (init: ModelInit<TokenUsage>) => TokenUsage)
+
+type EagerPackValidation = {
+  readonly isValid: boolean;
+  readonly issues?: (string | null)[] | null;
+  readonly enhancedModulesAvailable?: EnhancedModulesFlags | null;
+  readonly enhancedModuleCount?: number | null;
+}
+
+type LazyPackValidation = {
+  readonly isValid: boolean;
+  readonly issues?: (string | null)[] | null;
+  readonly enhancedModulesAvailable?: EnhancedModulesFlags | null;
+  readonly enhancedModuleCount?: number | null;
+}
+
+export declare type PackValidation = LazyLoading extends LazyLoadingDisabled ? EagerPackValidation : LazyPackValidation
+
+export declare const PackValidation: (new (init: ModelInit<PackValidation>) => PackValidation)
+
+type EagerEnhancedModulesFlags = {
+  readonly scheduleCompliance?: boolean | null;
+  readonly recurringGameTrends?: boolean | null;
+  readonly competitorAnalysis?: boolean | null;
+  readonly opportunities?: boolean | null;
+  readonly seriesLifecycle?: boolean | null;
+}
+
+type LazyEnhancedModulesFlags = {
+  readonly scheduleCompliance?: boolean | null;
+  readonly recurringGameTrends?: boolean | null;
+  readonly competitorAnalysis?: boolean | null;
+  readonly opportunities?: boolean | null;
+  readonly seriesLifecycle?: boolean | null;
+}
+
+export declare type EnhancedModulesFlags = LazyLoading extends LazyLoadingDisabled ? EagerEnhancedModulesFlags : LazyEnhancedModulesFlags
+
+export declare const EnhancedModulesFlags: (new (init: ModelInit<EnhancedModulesFlags>) => EnhancedModulesFlags)
 
 type EagerBatchGenerateReportsResult = {
   readonly success: boolean;
@@ -3559,6 +3717,34 @@ type LazyBatchGenerateReportsResult = {
 export declare type BatchGenerateReportsResult = LazyLoading extends LazyLoadingDisabled ? EagerBatchGenerateReportsResult : LazyBatchGenerateReportsResult
 
 export declare const BatchGenerateReportsResult: (new (init: ModelInit<BatchGenerateReportsResult>) => BatchGenerateReportsResult)
+
+type EagerDirectorReportStatusResult = {
+  readonly success: boolean;
+  readonly id?: string | null;
+  readonly status: ReportGenerationStatus | keyof typeof ReportGenerationStatus;
+  readonly statusMessage?: string | null;
+  readonly error?: string | null;
+  readonly requestedAt?: string | null;
+  readonly generatedAt?: string | null;
+  readonly generationDurationMs?: number | null;
+  readonly directorReport?: DirectorReport | null;
+}
+
+type LazyDirectorReportStatusResult = {
+  readonly success: boolean;
+  readonly id?: string | null;
+  readonly status: ReportGenerationStatus | keyof typeof ReportGenerationStatus;
+  readonly statusMessage?: string | null;
+  readonly error?: string | null;
+  readonly requestedAt?: string | null;
+  readonly generatedAt?: string | null;
+  readonly generationDurationMs?: number | null;
+  readonly directorReport: AsyncItem<DirectorReport | undefined>;
+}
+
+export declare type DirectorReportStatusResult = LazyLoading extends LazyLoadingDisabled ? EagerDirectorReportStatusResult : LazyDirectorReportStatusResult
+
+export declare const DirectorReportStatusResult: (new (init: ModelInit<DirectorReportStatusResult>) => DirectorReportStatusResult)
 
 type EagerScraperControlResponse = {
   readonly success: boolean;
@@ -8230,6 +8416,7 @@ type EagerMetricsPack = {
   readonly venuesIncluded: number;
   readonly dataCompleteness?: number | null;
   readonly warnings?: (string | null)[] | null;
+  readonly enhancedModulesIncluded?: (string | null)[] | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -8260,6 +8447,7 @@ type LazyMetricsPack = {
   readonly venuesIncluded: number;
   readonly dataCompleteness?: number | null;
   readonly warnings?: (string | null)[] | null;
+  readonly enhancedModulesIncluded?: (string | null)[] | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -8278,24 +8466,35 @@ type EagerDirectorReport = {
   readonly entityId: string;
   readonly reportType: ReportType | keyof typeof ReportType;
   readonly periodKey: string;
+  readonly periodLabel?: string | null;
+  readonly periodStart?: string | null;
+  readonly periodEnd?: string | null;
   readonly metricsPackId: string;
-  readonly reportData: string;
-  readonly status: string;
-  readonly generatedAt: string;
-  readonly generatedBy: string;
-  readonly modelProvider: string;
-  readonly modelName: string;
+  readonly metricsPackVersion?: number | null;
+  readonly reportData?: string | null;
+  readonly status: ReportGenerationStatus | keyof typeof ReportGenerationStatus;
+  readonly statusMessage?: string | null;
+  readonly requestedAt?: string | null;
+  readonly requestedModel?: string | null;
+  readonly requestedProvider?: string | null;
+  readonly generatedAt?: string | null;
+  readonly generatedBy?: string | null;
+  readonly modelProvider?: string | null;
+  readonly modelName?: string | null;
   readonly modelVersion?: string | null;
-  readonly promptVersion: string;
+  readonly promptVersion?: string | null;
   readonly inputTokens?: number | null;
   readonly outputTokens?: number | null;
   readonly totalCost?: number | null;
   readonly generationDurationMs?: number | null;
+  readonly enhancedModulesUsed?: (string | null)[] | null;
+  readonly dataCompleteness?: number | null;
   readonly reportVersion: number;
   readonly regeneratedAt?: string | null;
   readonly regeneratedBy?: string | null;
   readonly regenerationReason?: string | null;
   readonly previousReportId?: string | null;
+  readonly previousReportVersion?: number | null;
   readonly viewedAt?: string | null;
   readonly viewedBy?: string | null;
   readonly exportedAt?: string | null;
@@ -8312,24 +8511,35 @@ type LazyDirectorReport = {
   readonly entityId: string;
   readonly reportType: ReportType | keyof typeof ReportType;
   readonly periodKey: string;
+  readonly periodLabel?: string | null;
+  readonly periodStart?: string | null;
+  readonly periodEnd?: string | null;
   readonly metricsPackId: string;
-  readonly reportData: string;
-  readonly status: string;
-  readonly generatedAt: string;
-  readonly generatedBy: string;
-  readonly modelProvider: string;
-  readonly modelName: string;
+  readonly metricsPackVersion?: number | null;
+  readonly reportData?: string | null;
+  readonly status: ReportGenerationStatus | keyof typeof ReportGenerationStatus;
+  readonly statusMessage?: string | null;
+  readonly requestedAt?: string | null;
+  readonly requestedModel?: string | null;
+  readonly requestedProvider?: string | null;
+  readonly generatedAt?: string | null;
+  readonly generatedBy?: string | null;
+  readonly modelProvider?: string | null;
+  readonly modelName?: string | null;
   readonly modelVersion?: string | null;
-  readonly promptVersion: string;
+  readonly promptVersion?: string | null;
   readonly inputTokens?: number | null;
   readonly outputTokens?: number | null;
   readonly totalCost?: number | null;
   readonly generationDurationMs?: number | null;
+  readonly enhancedModulesUsed?: (string | null)[] | null;
+  readonly dataCompleteness?: number | null;
   readonly reportVersion: number;
   readonly regeneratedAt?: string | null;
   readonly regeneratedBy?: string | null;
   readonly regenerationReason?: string | null;
   readonly previousReportId?: string | null;
+  readonly previousReportVersion?: number | null;
   readonly viewedAt?: string | null;
   readonly viewedBy?: string | null;
   readonly exportedAt?: string | null;

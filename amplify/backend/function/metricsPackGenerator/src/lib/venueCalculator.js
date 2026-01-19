@@ -1,7 +1,10 @@
 /**
- * Venue Calculator
- * ================
+ * Venue Calculator (Improved)
+ * ===========================
  * Calculates venue-level metrics and breakdowns.
+ * 
+ * IMPORTANT: This expects snapshots to already have venueName and gameName
+ * populated by the nameResolver. If names are missing, they were not resolved.
  */
 
 const { sumField, round, calculateGrowthPercent } = require('./kpiCalculator');
@@ -40,7 +43,13 @@ function getProfitability(profitMargin, totalProfit) {
 }
 
 /**
- * Calculate venue breakdown from snapshots
+ * Calculate venue breakdown from enriched snapshots.
+ * 
+ * @param {string} entityId 
+ * @param {Object[]} snapshots - Enriched snapshots with venueName/gameName
+ * @param {Object[]} venueMetrics - Optional VenueMetrics records
+ * @param {Object[]} compSnapshots - Comparison period snapshots (also enriched)
+ * @returns {Object[]} Array of venue summaries
  */
 async function calculateVenueBreakdown(entityId, snapshots, venueMetrics = [], compSnapshots = []) {
   // Group snapshots by venue
@@ -63,6 +72,10 @@ async function calculateVenueBreakdown(entityId, snapshots, venueMetrics = [], c
   
   for (const [venueId, venueSnapshots] of Object.entries(byVenue)) {
     const compVenueSnapshots = compByVenue[venueId] || [];
+    
+    // Get venue name from first snapshot (already resolved by nameResolver)
+    // Note: No more "Unknown Venue" fallback - if name is missing, it wasn't resolved
+    const venueName = venueSnapshots[0]?.venueName || `Venue ${venueId.slice(0, 8)}`;
     
     // Volume metrics
     const totalGames = venueSnapshots.length;
@@ -112,26 +125,65 @@ async function calculateVenueBreakdown(entityId, snapshots, venueMetrics = [], c
     const overallHealth = getOverallHealth(profitMargin, profitTrendPercent, totalProfit);
     const profitability = getProfitability(profitMargin, totalProfit);
     
-    // Top games by profit
+    // Top games by profit (with names from enriched snapshots)
     const sortedByProfit = [...venueSnapshots].sort((a, b) => 
       (b.netProfit || 0) - (a.netProfit || 0)
     );
+    
     const topGames = sortedByProfit.slice(0, 3).map(g => ({
       gameId: g.gameId || g.id,
-      gameName: g.gameName || g.gameTitle,
+      gameName: g.gameName || g.gameTitle || 'Game',
+      recurringGameId: g.recurringGameId,
       profit: round(g.netProfit || 0),
-      entries: g.totalEntries || 0
+      revenue: round(g.totalRevenue || 0),
+      entries: g.totalEntries || 0,
+      date: g.gameStartDateTime
     }));
-    const bottomGames = sortedByProfit.slice(-3).reverse().map(g => ({
-      gameId: g.gameId || g.id,
-      gameName: g.gameName || g.gameTitle,
-      profit: round(g.netProfit || 0),
-      entries: g.totalEntries || 0
-    }));
+    
+    const bottomGames = sortedByProfit
+      .filter(g => (g.netProfit || 0) < 0) // Only loss-making games
+      .slice(-3)
+      .reverse()
+      .map(g => ({
+        gameId: g.gameId || g.id,
+        gameName: g.gameName || g.gameTitle || 'Game',
+        recurringGameId: g.recurringGameId,
+        profit: round(g.netProfit || 0),
+        revenue: round(g.totalRevenue || 0),
+        entries: g.totalEntries || 0,
+        overlay: round(g.totalGuaranteeOverlayCost || 0),
+        date: g.gameStartDateTime
+      }));
+    
+    // Game type breakdown
+    const gameTypeBreakdown = {};
+    for (const s of venueSnapshots) {
+      const gt = s.gameType || 'UNKNOWN';
+      if (!gameTypeBreakdown[gt]) {
+        gameTypeBreakdown[gt] = { count: 0, revenue: 0, profit: 0 };
+      }
+      gameTypeBreakdown[gt].count++;
+      gameTypeBreakdown[gt].revenue += (s.totalRevenue || 0);
+      gameTypeBreakdown[gt].profit += (s.netProfit || 0);
+    }
+    
+    // Day of week breakdown
+    const dayBreakdown = {};
+    for (const s of venueSnapshots) {
+      const date = new Date(s.gameStartDateTime);
+      const dayNum = date.getDay();
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const day = days[dayNum];
+      if (!dayBreakdown[day]) {
+        dayBreakdown[day] = { count: 0, profit: 0 };
+      }
+      dayBreakdown[day].count++;
+      dayBreakdown[day].profit += (s.netProfit || 0);
+    }
     
     venues.push({
       venueId,
-      venueName: venueSnapshots[0]?.venueName || 'Unknown Venue',
+      venueName,
       entityId: venueSnapshots[0]?.entityId || entityId,
       
       // Volume
@@ -170,7 +222,11 @@ async function calculateVenueBreakdown(entityId, snapshots, venueMetrics = [], c
       overallHealth,
       profitability,
       
-      // Top/Bottom games
+      // Breakdowns
+      gameTypeBreakdown,
+      dayBreakdown,
+      
+      // Top/Bottom games (now with real names!)
       topGames,
       bottomGames
     });

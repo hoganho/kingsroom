@@ -4,22 +4,133 @@
 # ===================================================================
 # Deploy this AFTER the metricsPackGenerator function is created
 # ===================================================================
+# UPDATED: Added flexible period selection support (PeriodSelectionInput)
+# VERSION: 2.0.0 - Added async generation status support
+# ===================================================================
 
 # ===================================================================
-# INPUT TYPES
+# PERIOD SELECTION ENUMS (NEW)
+# ===================================================================
+
+enum PeriodType {
+  CUSTOM      # Custom date range
+  ISO_WEEK    # Specific ISO week (e.g., 2025-W03)
+  MONTH       # Specific month (e.g., 2025-01)
+  QUARTER     # Specific quarter (e.g., 2025-Q1)
+  YEAR        # Specific year (e.g., 2025)
+  RELATIVE    # Relative period preset
+}
+
+enum RelativePeriod {
+  CURRENT_WEEK
+  LAST_WEEK
+  CURRENT_MONTH
+  LAST_MONTH
+  CURRENT_QUARTER
+  LAST_QUARTER
+  CURRENT_YEAR
+  LAST_YEAR
+  LAST_7_DAYS
+  LAST_30_DAYS
+  LAST_90_DAYS
+}
+
+# ===================================================================
+# PERIOD SELECTION INPUT (NEW)
+# ===================================================================
+
+input PeriodSelectionInput {
+  periodType: PeriodType!
+  
+  # For CUSTOM period type
+  customStartDate: AWSDate    # YYYY-MM-DD
+  customEndDate: AWSDate      # YYYY-MM-DD
+  
+  # For ISO_WEEK period type
+  isoYear: Int
+  isoWeek: Int                # 1-53
+  
+  # For MONTH period type
+  monthYear: Int
+  month: Int                  # 1-12
+  
+  # For QUARTER period type
+  quarterYear: Int
+  quarter: Int                # 1-4
+  
+  # For YEAR period type
+  year: Int
+  
+  # For RELATIVE period type
+  relativePeriod: RelativePeriod
+  
+  # Optional: reference date for relative calculations (defaults to now)
+  referenceDate: AWSDateTime
+}
+
+# ===================================================================
+# RESOLVED PERIOD OUTPUT (NEW)
+# ===================================================================
+
+type ResolvedPeriod @aws_iam @aws_cognito_user_pools {
+  periodKey: String!
+  periodLabel: String!
+  startDate: AWSDateTime!
+  endDate: AWSDateTime!
+  comparisonPeriodKey: String
+  comparisonPeriodLabel: String
+  comparisonStartDate: AWSDateTime
+  comparisonEndDate: AWSDateTime
+}
+
+# ===================================================================
+# AVAILABLE PERIOD OPTIONS (NEW)
+# ===================================================================
+
+type AvailablePeriodOption @aws_iam @aws_cognito_user_pools {
+  periodKey: String!
+  periodLabel: String!
+  periodType: PeriodType!
+  startDate: AWSDateTime!
+  endDate: AWSDateTime!
+  hasData: Boolean!
+}
+
+type DataRangeInfo @aws_iam @aws_cognito_user_pools {
+  earliestDate: AWSDateTime
+  latestDate: AWSDateTime
+  totalSnapshots: Int!
+}
+
+type ListAvailablePeriodOptionsResult @aws_iam @aws_cognito_user_pools {
+  periods: [AvailablePeriodOption!]!
+  dataRange: DataRangeInfo!
+}
+
+input ListAvailablePeriodOptionsInput {
+  entityId: ID!
+  periodTypes: [PeriodType]    # Filter by type (optional)
+  limit: Int                   # Max options to return (default: 20)
+}
+
+# ===================================================================
+# INPUT TYPES (UPDATED)
 # ===================================================================
 
 input GenerateMetricsPackInput {
   entityId: ID!
   reportType: ReportType!
-  periodKey: String
+  periodKey: String                        # LEGACY: Keep for backward compatibility
+  periodSelection: PeriodSelectionInput    # NEW: Flexible period selection (takes precedence)
+  includeComparison: Boolean               # NEW: Whether to include comparison period (default: true)
   forceRegenerate: Boolean
 }
 
 input GenerateDirectorReportInput {
   entityId: ID!
   reportType: ReportType!
-  periodKey: String
+  periodKey: String                        # LEGACY: Keep for backward compatibility
+  periodSelection: PeriodSelectionInput    # NEW: Flexible period selection
   metricsPackId: ID
   forceRegenerate: Boolean
   regenerationReason: String
@@ -37,7 +148,8 @@ input RegenerateDirectorReportInput {
 input BatchGenerateReportsInput {
   entityIds: [ID!]
   reportType: ReportType!
-  periodKey: String
+  periodKey: String                        # LEGACY
+  periodSelection: PeriodSelectionInput    # NEW
 }
 
 input UpdateAlertThresholdsInput {
@@ -54,13 +166,14 @@ input UpdateAlertThresholdsInput {
 }
 
 # ===================================================================
-# RESULT TYPES
+# RESULT TYPES (UPDATED)
 # ===================================================================
 
 type GenerateMetricsPackResult @aws_iam @aws_cognito_user_pools {
   success: Boolean!
   metricsPackId: ID
   metricsPack: MetricsPack
+  resolvedPeriod: ResolvedPeriod           # NEW: Shows how period was resolved
   wasExisting: Boolean
   generationDurationMs: Int
   error: String
@@ -71,9 +184,17 @@ type GenerateDirectorReportResult @aws_iam @aws_cognito_user_pools {
   success: Boolean!
   directorReportId: ID
   directorReport: DirectorReport
+  resolvedPeriod: ResolvedPeriod           # Shows how period was resolved
+  
+  # Async generation status (NEW)
+  status: ReportGenerationStatus           # PENDING, GENERATING, COMPLETED, FAILED
+  statusMessage: String                    # Human-readable status message
+  
   wasRegenerated: Boolean
   generationDurationMs: Int
   tokenUsage: TokenUsage
+  packValidation: PackValidation
+  enhancedModulesUsed: [String]
   error: String
 }
 
@@ -81,6 +202,21 @@ type TokenUsage @aws_iam @aws_cognito_user_pools {
   inputTokens: Int!
   outputTokens: Int!
   totalCost: Float!
+}
+
+type PackValidation @aws_iam @aws_cognito_user_pools {
+  isValid: Boolean!
+  issues: [String]
+  enhancedModulesAvailable: EnhancedModulesFlags
+  enhancedModuleCount: Int
+}
+
+type EnhancedModulesFlags @aws_iam @aws_cognito_user_pools {
+  scheduleCompliance: Boolean
+  recurringGameTrends: Boolean
+  competitorAnalysis: Boolean
+  opportunities: Boolean
+  seriesLifecycle: Boolean
 }
 
 type BatchGenerateReportsResult @aws_iam @aws_cognito_user_pools {
@@ -110,7 +246,7 @@ extend type Mutation {
 }
 
 # ===================================================================
-# EXTEND QUERIES - metricsPackGenerator
+# EXTEND QUERIES - metricsPackGenerator (UPDATED)
 # ===================================================================
 
 extend type Query {
@@ -120,6 +256,18 @@ extend type Query {
     @aws_cognito_user_pools
   
   listAvailablePeriods(entityId: ID!, reportType: ReportType!, limit: Int): [String!]!
+    @function(name: "metricsPackGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # NEW: Preview period resolution without generating a pack
+  resolvePeriod(periodSelection: PeriodSelectionInput!): ResolvedPeriod!
+    @function(name: "metricsPackGenerator-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # NEW: List available period options with data availability info
+  listAvailablePeriodOptions(input: ListAvailablePeriodOptionsInput!): ListAvailablePeriodOptionsResult!
     @function(name: "metricsPackGenerator-${env}")
     @aws_iam
     @aws_cognito_user_pools

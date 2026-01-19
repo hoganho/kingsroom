@@ -5,6 +5,16 @@
  */
 
 function generateSocialPulseDigest(entityId, socialData, period) {
+  // Handle undefined or null socialData
+  if (!socialData) {
+    return {
+      ourActivity: { postCount: 0, engagement: 0, topPost: null, venueBreakdown: {} },
+      competitorDigest: {},
+      marketSignals: { eventAnnouncements: [], guaranteeChanges: [], scheduleChanges: [], promotions: [] },
+      summary: { shareOfVoice: 0, engagementRank: 0, marketPostVolume: 0 }
+    };
+  }
+  
   const { ourAccounts = [], ourPosts = [], competitorAccounts = [], competitorPosts = [] } = socialData;
   
   // Our activity summary

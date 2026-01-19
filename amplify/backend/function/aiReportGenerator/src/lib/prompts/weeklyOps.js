@@ -1,6 +1,14 @@
 /**
  * Weekly Operations Report Prompt Template
  * Generates tactical insights for venue managers
+ * 
+ * VERSION: 2.0.0 - Updated for MetricsPack v4
+ * 
+ * Now uses:
+ * - scheduleCompliance (cancellation analysis)
+ * - recurringGameTrends (game health, brand strength)
+ * - opportunities (schedule gaps, expansion)
+ * - competitorAnalysis (clashes, market pressure)
  */
 
 /**
@@ -17,167 +25,355 @@ function build(metricsPack, options = {}) {
 }
 
 function buildSystemPrompt() {
-  return `You are an expert poker tournament business analyst generating weekly operations reports for poker room directors. Your reports should be:
+  return `You are a poker operations analyst creating a weekly report for floor managers. Be practical, specific, and action-oriented.
 
-1. ACTIONABLE - Focus on specific actions the director can take this week
-2. DATA-DRIVEN - All insights must be backed by the metrics provided
-3. CONCISE - Directors are busy; get to the point quickly
-4. BALANCED - Highlight both successes and areas needing attention
+OUTPUT FORMAT: Valid JSON only. No markdown, no text outside JSON.
 
-You will receive a MetricsPack containing:
-- Strategic KPIs (revenue, profit, entries, etc.) with period-over-period deltas
-- Venue-level breakdowns with trend categories
-- Alerts for threshold breaches
-- Rankings and leaderboards
-- Player insights
+ANALYSIS PRIORITIES:
+1. THIS WEEK'S NUMBERS - What happened and why
+2. PROBLEM GAMES - Which games lost money and what to do
+3. OVERLAY COSTS - The biggest controllable cost - analyze every overlay
+4. SCHEDULE COMPLIANCE - Cancelled games cost money and reputation
+5. RECURRING GAME HEALTH - Which regular games are growing vs declining
+6. COMPETITOR ACTIVITY - Schedule clashes and market pressure
+7. QUICK WINS - Opportunities that can be actioned THIS WEEK
 
-Your response MUST be valid JSON matching the exact structure specified. Do not include any text outside the JSON object.
+TONE: Direct and operational. Managers need actions, not strategy.
 
-TONE: Professional but approachable. Speak as a trusted advisor, not a robot. Use specific numbers to support observations.
-
-IMPORTANT RULES:
-1. Never invent data - only reference metrics explicitly provided
-2. For percentage changes, always specify the comparison period
-3. When something is missing data, acknowledge it don't guess
-4. Focus alerts on the most impactful items (max 5 priority alerts)
-5. Recommendations should be specific and achievable within a week`;
+CRITICAL RULES:
+- Only use numbers from the data provided - NEVER invent figures
+- Currency in AUD ($X,XXX format)
+- Name specific games and venues when discussing issues
+- Use the ACTUAL venue names and game names provided (not "Unknown")
+- Recommendations must be achievable within 1 week
+- Prioritize by profit impact
+- If a data section shows "hasXxxData: false", acknowledge the gap`;
 }
 
 function buildUserPrompt(metricsPack, options = {}) {
-  const { packData, periodLabel, periodStart, periodEnd, comparisonPeriodLabel } = metricsPack;
+  const { 
+    packData, 
+    periodLabel, 
+    periodStart, 
+    periodEnd, 
+    comparisonPeriodLabel,
+    dataCompleteness,
+    warnings
+  } = metricsPack;
   
   // Parse packData if it's a string
   const data = typeof packData === 'string' ? JSON.parse(packData) : packData;
   
-  return `Generate a Weekly Operations Report for the period: ${periodLabel}
+  // Extract all sections with safe defaults
+  const s = data.strategic || {};
+  const venues = data.venues || [];
+  const alerts = data.alerts || [];
+  const alertSummary = data.alertSummary || {};
+  const rankings = data.rankings || {};
+  const playerInsights = data.playerInsights || {};
+  const scheduleCompliance = data.scheduleCompliance || {};
+  const recurringGameTrends = data.recurringGameTrends || {};
+  const competitorAnalysis = data.competitorAnalysis || {};
+  const opportunities = data.opportunities || {};
+  
+  // Pre-calculate key metrics for clarity
+  const overlayImpact = s.netProfit < 0 && s.overlayCost > 0 
+    ? Math.round((s.overlayCost / Math.abs(s.netProfit)) * 100) 
+    : 0;
+  
+  return `Create a Weekly Operations Report for: ${periodLabel}
 Period: ${periodStart} to ${periodEnd}
 ${comparisonPeriodLabel ? `Compared to: ${comparisonPeriodLabel}` : ''}
+Data Quality: ${dataCompleteness || 100}% complete
+${warnings?.length ? `⚠️ Data Warnings: ${warnings.join(', ')}` : ''}
 
-=== METRICS PACK DATA ===
+══════════════════════════════════════════════════════════════
+SECTION 1: HEADLINE NUMBERS
+══════════════════════════════════════════════════════════════
+Revenue: $${(s.totalRevenue || 0).toLocaleString()} (${s.revenueGrowthPercent >= 0 ? '+' : ''}${(s.revenueGrowthPercent || 0).toFixed(1)}% vs prior)
+Profit: $${(s.netProfit || 0).toLocaleString()} (${s.profitGrowthPercent >= 0 ? '+' : ''}${(s.profitGrowthPercent || 0).toFixed(1)}% vs prior)
+Margin: ${(s.profitMargin || 0).toFixed(1)}% (${s.marginChange >= 0 ? '+' : ''}${(s.marginChange || 0).toFixed(1)}pp change)
 
-${JSON.stringify(data, null, 2)}
+Games Run: ${s.totalGamesRun || 0} (${s.gamesGrowth >= 0 ? '+' : ''}${s.gamesGrowth || 0})
+Total Entries: ${s.totalEntries || 0} (${s.entriesGrowthPercent >= 0 ? '+' : ''}${(s.entriesGrowthPercent || 0).toFixed(1)}%)
+Unique Players: ${s.totalUniquePlayers || 0} (${s.playerGrowth >= 0 ? '+' : ''}${s.playerGrowth || 0})
+Avg Entries/Game: ${(s.avgEntriesPerGame || 0).toFixed(1)}
 
-=== END METRICS PACK DATA ===
+══════════════════════════════════════════════════════════════
+SECTION 2: COST BREAKDOWN
+══════════════════════════════════════════════════════════════
+Staff Cost: $${(s.staffCost || 0).toLocaleString()}
+Dealer Cost: $${(s.dealerCost || 0).toLocaleString()}
+Venue Rental: $${(s.venueRentalCost || 0).toLocaleString()}
+Marketing: $${(s.marketingCost || 0).toLocaleString()}
+OVERLAY COST: $${(s.overlayCost || 0).toLocaleString()} ⚠️ ${overlayImpact > 50 ? 'MAJOR PROFIT DRAIN' : overlayImpact > 0 ? 'Contributing to losses' : ''}
+Other: $${(s.otherCost || 0).toLocaleString()}
+TOTAL COST: $${(s.totalCost || 0).toLocaleString()}
 
-Generate a JSON response with this EXACT structure:
+══════════════════════════════════════════════════════════════
+SECTION 3: GUARANTEE ANALYSIS (Critical for Profitability)
+══════════════════════════════════════════════════════════════
+Games with Guarantees: ${s.gamesWithGuarantee || 0}
+Games that Overlaid: ${s.gamesWithOverlay || 0} (${s.gamesWithGuarantee > 0 ? ((s.gamesWithOverlay / s.gamesWithGuarantee) * 100).toFixed(0) : 0}% overlay rate)
+Total Guarantee Exposure: $${(s.totalGuaranteeExposure || 0).toLocaleString()}
+Total Overlay Cost: $${(s.totalOverlayCost || 0).toLocaleString()}
+Average Coverage Rate: ${(s.avgGuaranteeCoverageRate || 0).toFixed(1)}%
+${overlayImpact > 0 ? `⚠️ Overlay represents ${overlayImpact}% of total losses` : ''}
 
+══════════════════════════════════════════════════════════════
+SECTION 4: SCHEDULE COMPLIANCE
+══════════════════════════════════════════════════════════════
+${scheduleCompliance.hasScheduleData ? `
+Schedule Compliance Rate: ${scheduleCompliance.summary?.complianceRate || 'N/A'}%
+Cancellation Rate: ${scheduleCompliance.summary?.cancellationRate || 0}%
+Games Expected: ${scheduleCompliance.summary?.totalExpected || 0}
+Games Confirmed (ran): ${scheduleCompliance.summary?.confirmed || 0}
+Games Cancelled: ${scheduleCompliance.summary?.cancelled || 0}
+Needs Review: ${scheduleCompliance.summary?.needsReviewCount || 0}
+
+AT-RISK RECURRING GAMES (high cancellation rate):
+${JSON.stringify(scheduleCompliance.atRiskRecurringGames?.slice(0, 5) || [], null, 2)}
+
+RECENT CANCELLATIONS:
+${JSON.stringify(scheduleCompliance.recentCancellations?.slice(0, 5) || [], null, 2)}
+` : 'Schedule compliance data not available for this period.'}
+
+══════════════════════════════════════════════════════════════
+SECTION 5: RECURRING GAME HEALTH
+══════════════════════════════════════════════════════════════
+${recurringGameTrends.hasRecurringGameData ? `
+Total Recurring Games Tracked: ${recurringGameTrends.summary?.totalRecurringGames || 0}
+Excellent Health: ${recurringGameTrends.summary?.excellent || 0}
+Good Health: ${recurringGameTrends.summary?.good || 0}
+Needs Attention: ${recurringGameTrends.summary?.needsAttention || 0}
+Critical: ${recurringGameTrends.summary?.critical || 0}
+
+GROWING GAMES (attendance trending up):
+${JSON.stringify(recurringGameTrends.growingGames?.slice(0, 5) || [], null, 2)}
+
+DECLINING GAMES (need intervention):
+${JSON.stringify(recurringGameTrends.decliningGames?.slice(0, 5) || [], null, 2)}
+
+STRONG BRANDS (reliable performers):
+${JSON.stringify(recurringGameTrends.strongBrands?.slice(0, 3) || [], null, 2)}
+
+HIGH CANCELLATION GAMES:
+${JSON.stringify(recurringGameTrends.highCancellation?.slice(0, 3) || [], null, 2)}
+` : 'Recurring game trend data not available.'}
+
+══════════════════════════════════════════════════════════════
+SECTION 6: COMPETITOR ANALYSIS
+══════════════════════════════════════════════════════════════
+${competitorAnalysis.hasCompetitorData ? `
+COMPETITIVE PRESSURE: ${competitorAnalysis.pressure?.level || 'UNKNOWN'} (score: ${competitorAnalysis.pressure?.score || 0}/10)
+${competitorAnalysis.pressure?.description || ''}
+
+Activity Trend: ${competitorAnalysis.trends?.trend || 'UNKNOWN'}
+Competitor Posts This Period: ${competitorAnalysis.summary?.competitorPosts || 0}
+Posts with Event Data: ${competitorAnalysis.summary?.postsWithExtractedData || 0}
+
+DIRECT COMPETITION CLASHES (same day + similar buy-in):
+${JSON.stringify(competitorAnalysis.clashes?.high?.slice(0, 5) || [], null, 2)}
+
+SAME-DAY EVENTS (awareness):
+${JSON.stringify(competitorAnalysis.clashes?.medium?.slice(0, 5) || [], null, 2)}
+
+TOP COMPETITORS BY ACTIVITY:
+${JSON.stringify(competitorAnalysis.topCompetitors?.slice(0, 5) || [], null, 2)}
+
+HIGH GUARANTEE COMPETITOR EVENTS:
+${JSON.stringify(competitorAnalysis.highGuaranteeEvents?.slice(0, 3) || [], null, 2)}
+` : 'Competitor analysis data not available for this location.'}
+
+══════════════════════════════════════════════════════════════
+SECTION 7: OPPORTUNITIES DETECTED
+══════════════════════════════════════════════════════════════
+${opportunities.hasOpportunities ? `
+Total Opportunities: ${opportunities.summary?.totalOpportunities || 0}
+High Priority: ${opportunities.summary?.highPriority || 0}
+Medium Priority: ${opportunities.summary?.mediumPriority || 0}
+
+TOP OPPORTUNITIES:
+${JSON.stringify(opportunities.topOpportunities?.slice(0, 5) || [], null, 2)}
+
+SCHEDULE GAPS (days without games at profitable venues):
+${JSON.stringify(opportunities.byType?.scheduleGaps?.slice(0, 3) || [], null, 2)}
+
+EXPANSION OPPORTUNITIES (strong games to grow):
+${JSON.stringify(opportunities.byType?.expansionOpportunities?.slice(0, 3) || [], null, 2)}
+` : 'No opportunities detected this period.'}
+
+══════════════════════════════════════════════════════════════
+SECTION 8: VENUE PERFORMANCE
+══════════════════════════════════════════════════════════════
+${JSON.stringify(venues.map(v => ({
+  venueName: v.venueName,
+  totalProfit: v.totalProfit,
+  totalRevenue: v.totalRevenue,
+  totalGames: v.totalGames,
+  avgProfitPerGame: v.avgProfitPerGame,
+  profitMargin: v.profitMargin,
+  overallHealth: v.overallHealth,
+  trendCategory: v.trendCategory,
+  profitTrendPercent: v.profitTrendPercent,
+  totalOverlayCost: v.totalOverlayCost,
+  topGames: v.topGames?.slice(0, 2),
+  bottomGames: v.bottomGames?.slice(0, 2)
+})), null, 2)}
+
+══════════════════════════════════════════════════════════════
+SECTION 9: ALERTS
+══════════════════════════════════════════════════════════════
+Alert Summary: ${alertSummary.total || 0} total (HIGH: ${alertSummary.bySeverity?.HIGH || 0}, MEDIUM: ${alertSummary.bySeverity?.MEDIUM || 0}, LOW: ${alertSummary.bySeverity?.LOW || 0})
+
+TOP ALERTS:
+${JSON.stringify(alerts.slice(0, 10), null, 2)}
+
+══════════════════════════════════════════════════════════════
+SECTION 10: RANKINGS
+══════════════════════════════════════════════════════════════
+Top Games by Profit: ${JSON.stringify(rankings.games?.topByProfit?.slice(0, 5) || [], null, 2)}
+Loss-Making Games: ${JSON.stringify(rankings.games?.losses?.slice(0, 5) || [], null, 2)}
+Day of Week Performance: ${JSON.stringify(rankings.dayOfWeek || [], null, 2)}
+Game Type Performance: ${JSON.stringify(rankings.gameTypes || [], null, 2)}
+
+══════════════════════════════════════════════════════════════
+REQUIRED JSON OUTPUT
+══════════════════════════════════════════════════════════════
 {
-  "executiveSummary": {
-    "headline": "One sentence capturing the week's performance (include key number)",
-    "keyTakeaways": ["3-4 bullet points of most important insights"],
-    "overallHealth": "EXCELLENT | GOOD | NEEDS_ATTENTION | CRITICAL",
-    "healthRationale": "Brief explanation of health assessment"
+  "weekSummary": {
+    "headline": "One sentence: profit/loss amount + primary driver",
+    "health": "EXCELLENT | GOOD | OK | CONCERNING | CRITICAL",
+    "healthRationale": "Why this rating",
+    "topWin": "Best thing this week with specific numbers",
+    "topProblem": "Biggest issue with specific numbers",
+    "vsLastWeek": "Better/Worse/Same with key difference"
   },
   
-  "keyMetrics": {
-    "revenue": {
-      "value": <number>,
-      "delta": <number>,
-      "deltaPercent": <number>,
-      "trend": "UP | DOWN | FLAT",
-      "insight": "Brief insight about this metric"
-    },
-    "profit": {
-      "value": <number>,
-      "delta": <number>,
-      "deltaPercent": <number>,
-      "trend": "UP | DOWN | FLAT",
-      "insight": "Brief insight about this metric"
-    },
-    "entries": {
-      "value": <number>,
-      "delta": <number>,
-      "deltaPercent": <number>,
-      "trend": "UP | DOWN | FLAT",
-      "insight": "Brief insight about this metric"
-    },
-    "profitMargin": {
-      "value": <number>,
-      "delta": <number>,
-      "trend": "UP | DOWN | FLAT",
-      "insight": "Brief insight about this metric"
-    },
-    "runRate": {
-      "value": <number>,
-      "delta": <number>,
-      "trend": "UP | DOWN | FLAT",
-      "insight": "Brief insight about this metric"
+  "metrics": {
+    "revenue": { "value": <number>, "change": <number>, "changePercent": <number>, "insight": "What drove this" },
+    "profit": { "value": <number>, "change": <number>, "changePercent": <number>, "insight": "What drove this" },
+    "margin": { "value": <number>, "change": <number>, "insight": "Margin health" },
+    "entries": { "value": <number>, "change": <number>, "changePercent": <number>, "insight": "Player demand signal" },
+    "gamesRun": { "value": <number>, "change": <number>, "insight": "Schedule execution" },
+    "avgEntriesPerGame": { "value": <number>, "insight": "Game health indicator" }
+  },
+  
+  "problemGames": [
+    {
+      "gameName": "Actual game name from data",
+      "venueName": "Actual venue name",
+      "date": "Game date",
+      "profit": <number>,
+      "entries": <number>,
+      "issue": "OVERLAY | LOW_TURNOUT | HIGH_COSTS | CANCELLED",
+      "details": "Specific numbers: overlay amount, expected vs actual entries, etc.",
+      "fix": "Concrete action for next occurrence"
     }
+  ],
+  
+  "winningGames": [
+    {
+      "gameName": "Actual game name",
+      "venueName": "Actual venue name", 
+      "profit": <number>,
+      "entries": <number>,
+      "margin": <number>,
+      "successFactor": "Why it worked - be specific"
+    }
+  ],
+  
+  "overlayReport": {
+    "totalOverlayCost": <number>,
+    "gamesWithOverlay": <number>,
+    "overlayAsPercentOfLoss": <number or null>,
+    "avgCoverageRate": <number>,
+    "worstOverlays": [
+      { "gameName": "Name", "venueName": "Venue", "overlay": <number>, "guarantee": <number>, "entries": <number>, "coverageRate": <number> }
+    ],
+    "guaranteesNeedingReview": ["List specific games where guarantee should be adjusted"],
+    "recommendation": "Specific guarantee adjustment recommendation"
+  },
+  
+  "scheduleHealth": {
+    "complianceRate": <number or null>,
+    "cancellationRate": <number or null>,
+    "gamesCancelled": <number>,
+    "cancellationReasons": ["Top reasons for cancellations"],
+    "atRiskGames": [
+      { "gameName": "Name", "cancellationRate": <number>, "recommendation": "Keep/Remove/Reposition" }
+    ],
+    "recommendation": "Schedule health action"
+  },
+  
+  "recurringGameHealth": {
+    "summary": "Overall health of regular game lineup",
+    "growing": [{ "gameName": "Name", "trend": "+X%", "action": "What to do" }],
+    "declining": [{ "gameName": "Name", "trend": "-X%", "action": "What to do" }],
+    "recommendation": "Game lineup action"
+  },
+  
+  "venueQuickView": [
+    {
+      "venueName": "Actual venue name",
+      "profit": <number>,
+      "games": <number>,
+      "avgProfitPerGame": <number>,
+      "health": "EXCELLENT | GOOD | NEEDS_ATTENTION | CRITICAL",
+      "trend": "UPLIFT | STEADY | SOFTENING | AT_RISK",
+      "keyIssue": "Main issue or success factor",
+      "oneAction": "Single most important action"
+    }
+  ],
+  
+  "competitorWatch": {
+    "pressureLevel": "HIGH | MEDIUM | LOW | MINIMAL",
+    "pressureScore": <number>,
+    "directClashes": <number>,
+    "impactedGames": ["Games affected by competitor clashes"],
+    "competitorHighlights": ["Notable competitor activities"],
+    "defensiveActions": ["How to respond"]
+  },
+  
+  "opportunities": {
+    "quickWins": [
+      { "opportunity": "Description", "potentialImpact": "$X", "action": "Specific step", "deadline": "This week" }
+    ],
+    "scheduleGaps": ["Days/times that could add profitable games"],
+    "expansionCandidates": ["Strong games that could run more often"]
   },
   
   "alerts": [
     {
-      "id": "<unique-id>",
-      "type": "<AlertType from pack>",
-      "severity": "HIGH | MEDIUM | LOW",
-      "title": "Alert title",
-      "description": "What happened and why it matters",
-      "recommendation": "Specific action to address this",
-      "affectedEntity": "Venue or game name if applicable",
-      "metric": "<metric name>",
-      "value": <current value>,
-      "threshold": <threshold breached>
+      "priority": "CRITICAL | URGENT | HIGH | MEDIUM",
+      "type": "Alert type from data",
+      "title": "Short title",
+      "description": "What's happening with numbers",
+      "evidence": "Specific metrics",
+      "action": "What to do",
+      "deadline": "Today | Tomorrow | This week | Before next [game]",
+      "owner": "Who should handle this"
     }
   ],
   
-  "opportunities": [
+  "thisWeekActions": [
     {
-      "title": "Opportunity title",
-      "description": "What the data suggests",
-      "potentialImpact": "Estimated impact if addressed",
-      "effort": "LOW | MEDIUM | HIGH",
-      "timeframe": "This week | Next 2 weeks | This month"
+      "priority": 1,
+      "action": "Specific, actionable task",
+      "rationale": "Why - with supporting data",
+      "expectedImpact": "What it should achieve",
+      "owner": "Operations | Marketing | Management",
+      "deadline": "Specific day or 'Before X game'"
     }
   ],
   
-  "focusActions": [
-    {
-      "action": "Specific action to take",
-      "priority": "HIGH | MEDIUM | LOW",
-      "owner": "Suggested role (e.g., 'Floor Manager', 'Marketing')",
-      "dueBy": "Suggested timeframe",
-      "rationale": "Why this matters based on the data"
-    }
-  ],
-  
-  "venueCallouts": [
-    {
-      "venueId": "<venue-id>",
-      "venueName": "Venue name",
-      "calloutType": "TOP_PERFORMER | NEEDS_ATTENTION | TREND_CHANGE | MILESTONE",
-      "headline": "One-line summary",
-      "details": "2-3 sentences with specific metrics",
-      "trendCategory": "AT_RISK | SOFTENING | STEADY | UPLIFT | BREAKOUT",
-      "recommendation": "Specific action for this venue"
-    }
-  ],
-  
-  "competitorInsights": {
-    "summary": "Overview of competitive landscape this week",
-    "threats": [
-      {
-        "competitor": "Competitor name",
-        "threat": "What they're doing",
-        "threatLevel": "LOW | MEDIUM | HIGH",
-        "suggestedResponse": "How to respond"
-      }
-    ],
-    "opportunities": [
-      {
-        "observation": "What we noticed",
-        "suggestedAction": "How to capitalize"
-      }
-    ]
-  },
-  
-  "weekAheadOutlook": {
-    "keyEvents": ["Notable events or factors for next week"],
-    "watchItems": ["Things to monitor closely"],
-    "suggestedFocus": "Primary focus area for the coming week"
+  "nextWeekWatch": {
+    "gamesAtRisk": [{ "game": "Name", "risk": "What could go wrong", "mitigation": "How to prevent" }],
+    "opportunities": [{ "game": "Name", "opportunity": "Why it could do better", "action": "How to capitalize" }],
+    "competitorEvents": ["Competitor events to monitor"],
+    "focusAreas": ["Top 2-3 things to monitor"]
   }
-}
-
-Ensure all numeric values are actual numbers (not strings). Include at least 3 alerts if data supports it, maximum 5. Include 2-4 focus actions prioritized by impact. Only include venue callouts for venues with notable performance (good or bad).`;
+}`;
 }
 
 /**
@@ -186,29 +382,25 @@ Ensure all numeric values are actual numbers (not strings). Include at least 3 a
  */
 function getSchema() {
   return {
-    name: 'weekly_ops_report',
-    strict: true,
+    name: 'weekly_ops_report_v2',
+    strict: false,
     schema: {
       type: 'object',
-      required: ['executiveSummary', 'keyMetrics', 'alerts', 'focusActions'],
+      required: ['weekSummary', 'metrics', 'problemGames', 'overlayReport', 'alerts', 'thisWeekActions'],
       properties: {
-        executiveSummary: {
-          type: 'object',
-          required: ['headline', 'keyTakeaways', 'overallHealth', 'healthRationale'],
-          properties: {
-            headline: { type: 'string' },
-            keyTakeaways: { type: 'array', items: { type: 'string' } },
-            overallHealth: { type: 'string', enum: ['EXCELLENT', 'GOOD', 'NEEDS_ATTENTION', 'CRITICAL'] },
-            healthRationale: { type: 'string' },
-          },
-        },
-        keyMetrics: { type: 'object' },
+        weekSummary: { type: 'object' },
+        metrics: { type: 'object' },
+        problemGames: { type: 'array' },
+        winningGames: { type: 'array' },
+        overlayReport: { type: 'object' },
+        scheduleHealth: { type: 'object' },
+        recurringGameHealth: { type: 'object' },
+        venueQuickView: { type: 'array' },
+        competitorWatch: { type: 'object' },
+        opportunities: { type: 'object' },
         alerts: { type: 'array' },
-        opportunities: { type: 'array' },
-        focusActions: { type: 'array' },
-        venueCallouts: { type: 'array' },
-        competitorInsights: { type: 'object' },
-        weekAheadOutlook: { type: 'object' },
+        thisWeekActions: { type: 'array' },
+        nextWeekWatch: { type: 'object' },
       },
     },
   };

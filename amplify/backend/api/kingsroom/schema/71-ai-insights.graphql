@@ -5,6 +5,8 @@
 # STEP 1: Deploy this schema first to create the tables
 # STEP 2: Then deploy the metricsPackGenerator function
 # STEP 3: Then uncomment the Mutation/Query extensions at the bottom
+#
+# VERSION: 2.0.0 - Added ReportGenerationStatus for async generation
 # ===================================================================
 
 # ===================================================================
@@ -68,6 +70,14 @@ enum ThreatLevel {
   HIGH
 }
 
+# NEW: Report generation status for async pattern
+enum ReportGenerationStatus {
+  PENDING       # Request received, queued for processing
+  GENERATING    # LLM generation in progress
+  COMPLETED     # Successfully generated (replaces legacy "GENERATED")
+  FAILED        # Generation failed
+}
+
 # ===================================================================
 # METRICS PACK - Deterministic KPI aggregations
 # ===================================================================
@@ -103,6 +113,7 @@ type MetricsPack
   venuesIncluded: Int!
   dataCompleteness: Float
   warnings: [String]
+  enhancedModulesIncluded: [String]
   
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
@@ -121,29 +132,51 @@ type DirectorReport
   reportType: ReportType! @index(name: "byDirectorReportType", sortKeyFields: ["periodKey"], queryField: "directorReportsByType")
   periodKey: String!
   
+  # Period metadata (copied from MetricsPack for convenience)
+  periodLabel: String
+  periodStart: AWSDateTime
+  periodEnd: AWSDateTime
+  
   metricsPackId: ID! @index(name: "byMetricsPack", sortKeyFields: ["generatedAt"])
-  reportData: AWSJSON!
+  metricsPackVersion: Int
+  reportData: AWSJSON
   
-  status: String! @default(value: "GENERATED")
+  # Generation status (UPDATED for async pattern)
+  status: ReportGenerationStatus! @default(value: "PENDING")
+  statusMessage: String
   
-  generatedAt: AWSDateTime!
-  generatedBy: String!
-  modelProvider: String!
-  modelName: String!
+  # Request tracking (NEW for async pattern)
+  requestedAt: AWSDateTime
+  requestedModel: String
+  requestedProvider: String
+  
+  # Generation metadata (populated when COMPLETED)
+  generatedAt: AWSDateTime
+  generatedBy: String
+  modelProvider: String
+  modelName: String
   modelVersion: String
-  promptVersion: String!
+  promptVersion: String
   
+  # Token usage and cost
   inputTokens: Int
   outputTokens: Int
   totalCost: Float
   generationDurationMs: Int
   
+  # Enhanced modules tracking
+  enhancedModulesUsed: [String]
+  dataCompleteness: Float
+  
+  # Versioning and regeneration
   reportVersion: Int! @default(value: "1")
   regeneratedAt: AWSDateTime
   regeneratedBy: String
   regenerationReason: String
   previousReportId: ID
+  previousReportVersion: Int
   
+  # Usage tracking
   viewedAt: AWSDateTime
   viewedBy: String
   exportedAt: AWSDateTime
