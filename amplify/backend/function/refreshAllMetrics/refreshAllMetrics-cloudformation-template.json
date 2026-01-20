@@ -4,7 +4,7 @@
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
-      "Default": "cron(5 20 * * ? *)",
+      "Default": "cron(10 20 * * ? *)",
       "Description": "Schedule Expression - Default: 20:05 UTC daily (5 mins after scraperManagement). Set to NONE to disable."
     },
     "deploymentBucketName": {

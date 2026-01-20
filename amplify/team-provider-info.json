@@ -119,7 +119,7 @@
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "scraperS3Bucket": "pokerpro-scraper-storage",
           "saveGameFunctionName": "saveGameFunction-dev",
-          "scraperApiKey": "9f5d97eec40a2e6b98d74ec14f21315a"
+          "scraperApiKey": "36d459477ec3e6fc8d8fb67851cae225"
         },
         "kingsroom": {},
         "kingsroomauth": {},
@@ -299,7 +299,7 @@
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue-prod.fifo",
           "scraperS3Bucket": "kingsroom-storage-prod",
           "saveGameFunctionName": "saveGameFunction-prod",
-          "scraperApiKey": "9f5d97eec40a2e6b98d74ec14f21315a"
+          "scraperApiKey": "36d459477ec3e6fc8d8fb67851cae225"
         },
         "kingsroom": {},
         "kingsroomauth": {},

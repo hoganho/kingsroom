@@ -40,6 +40,24 @@
 │   │       ├── RecurringGameAdmin.tsx
 │   │       ├── RecurringGameForm.tsx
 │   │       └── RecurringGameInstanceEditModal.tsx
+│   ├── insights
+│   │   ├── AlertsPanel.tsx
+│   │   ├── CompetitorWatchPanel.tsx
+│   │   ├── FocusActionsPanel.tsx
+│   │   ├── index.ts
+│   │   ├── MonthlyBoardReport.tsx
+│   │   ├── NextWeekWatchPanel.tsx
+│   │   ├── OpportunitiesPanel.tsx
+│   │   ├── OverlayReportPanel.tsx
+│   │   ├── ProblemGamesPanel.tsx
+│   │   ├── RecurringGameHealthPanel.tsx
+│   │   ├── ReportDownloadButton.tsx
+│   │   ├── ScheduleHealthPanel.tsx
+│   │   ├── VenueQuickViewPanel.tsx
+│   │   ├── WeeklyMetricsGrid.tsx
+│   │   ├── WeeklyOpsReport.tsx
+│   │   ├── WeekSummaryCard.tsx
+│   │   └── WinningGamesPanel.tsx
 │   ├── layout
 │   │   ├── .DS_Store
 │   │   ├── CollapsibleSection.tsx
@@ -131,6 +149,7 @@
 │   │   ├── PageHeader.tsx
 │   │   ├── PageShell.tsx
 │   │   ├── PageWrapper.tsx
+│   │   ├── PeriodSelector.tsx
 │   │   ├── SectionHeader.tsx
 │   │   ├── Select.tsx
 │   │   ├── StatsGrid.tsx
@@ -159,6 +178,7 @@
 ├── directory_structure.txt
 ├── graphql
 │   ├── .DS_Store
+│   ├── aiInsightsOperations.ts
 │   ├── customMutations.ts
 │   ├── customQueries.ts
 │   ├── enrichmentOperations.ts
@@ -187,6 +207,7 @@
 │   ├── social
 │   │   └── index.ts
 │   ├── useActivityLogger.tsx
+│   ├── useAIInsights.ts
 │   ├── useBulkGameFetcher.ts
 │   ├── useConsolidationPreview.ts
 │   ├── useGameDataEditor.ts
@@ -243,6 +264,8 @@
 │   │   ├── GameSearch.tsx
 │   │   └── RecurringGamesManager.tsx
 │   ├── HomePage.tsx
+│   ├── insights
+│   │   └── AIInsightsDashboard.tsx
 │   ├── legal
 │   │   ├── PrivacyPolicy.tsx
 │   │   └── TermsOfService.tsx
@@ -297,6 +320,8 @@
 │   ├── entity.ts
 │   ├── game.ts
 │   ├── gameEditor.ts
+│   ├── insights.ts
+│   ├── periodSelection.ts
 │   ├── scraper.ts
 │   ├── series.ts
 │   ├── socialPostUpload.ts
@@ -311,12 +336,13 @@
     ├── gameDataValidation.ts
     ├── generalHelpers.ts
     ├── processingResultUtils.ts
+    ├── reportExport.ts
     ├── scraperAnalytics.ts
     ├── scraperErrorUtils.ts
     ├── scraperLogger.ts
     ├── socialPostParser.ts
     └── statusNormalization.ts
 
-44 directories, 274 files
+46 directories, 298 files
 
 Function List:

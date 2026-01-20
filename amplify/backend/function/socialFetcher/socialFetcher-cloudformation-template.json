@@ -4,8 +4,8 @@
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
-      "Default": "cron(0 * * * ? *)",
-      "Description": "Schedule Expression - Default: Every hour. Accounts will be scraped based on their individual scrapeFrequencyMinutes setting. Set to NONE to disable."
+      "Default": "cron(5 20 * * ? *)",
+      "Description": "Schedule Expression - Default: Daily at 6:05 AM EST (11:10 UTC). Set to NONE to disable."
     },
     "deploymentBucketName": {
       "Type": "String"
@@ -236,7 +236,7 @@
       "Type": "AWS::Events::Rule",
       "Condition": "CloudWatchRuleEnabled",
       "Properties": {
-        "Description": "Scheduled rule for socialFetcher Lambda - runs hourly, accounts scraped based on their individual scrapeFrequencyMinutes",
+        "Description": "Scheduled rule for socialFetcher Lambda - runs daily at 6:10 AM EST (11:10 UTC)",
         "ScheduleExpression": {
           "Ref": "CloudWatchRule"
         },
