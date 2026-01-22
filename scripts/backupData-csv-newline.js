@@ -93,9 +93,18 @@ function sanitizeCell(value) {
   }
 
   let strValue = String(value);
+  
+  // Replace newlines and carriage returns with escaped representations
+  // This prevents data from spreading across multiple CSV rows
+  strValue = strValue.replace(/\r\n/g, '\\n');  // Windows line endings
+  strValue = strValue.replace(/\r/g, '\\n');    // Old Mac line endings
+  strValue = strValue.replace(/\n/g, '\\n');    // Unix line endings
+  
+  // Escape double quotes by doubling them (CSV standard)
   strValue = strValue.replace(/"/g, '""');
 
-  if (strValue.includes(',') || strValue.includes('\n') || strValue.includes('"')) {
+  // Wrap in quotes if contains comma, quote, or other special chars
+  if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\\n')) {
     strValue = `"${strValue}"`;
   }
 

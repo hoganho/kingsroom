@@ -2,8 +2,14 @@
  * operations/processSocialPost.js
  * Main processing logic for a single social post
  * 
+ * VERSION: 1.2.0
+ * 
  * UPDATED: Now sets ALL classification fields including tags
  * This is the single source of truth for classification logic
+ * 
+ * UPDATES v1.2.0:
+ * - Fixed guaranteeAmount field name (was incorrectly "guarantee")
+ * - matchSignals is now an object from gameMatcher, stringify when saving
  */
 
 const { v4: uuidv4 } = require('uuid');
@@ -22,7 +28,7 @@ const { parsePlacements, createPlacementRecords, extractWinnerInfo } = require('
 const { findMatchingGames, getAutoLinkCandidates } = require('../matching/gameMatcher');
 
 // Processing version for tracking
-const PROCESSING_VERSION = '1.1.0'; // Bumped for tag generation
+const PROCESSING_VERSION = '1.2.0'; // Bumped for guaranteeAmount fix
 
 // Default auto-link threshold
 const DEFAULT_AUTO_LINK_THRESHOLD = 80;
@@ -38,6 +44,30 @@ const addDataStoreFields = (record) => {
     _lastChangedAt: Date.now(),
     _deleted: null,
   };
+};
+
+/**
+ * Safely stringify an object for AWSJSON field
+ * Handles already-stringified values to prevent double-stringify
+ */
+const safeStringify = (obj) => {
+  if (!obj) return null;
+  if (typeof obj === 'string') {
+    // Already a string - check if it's valid JSON
+    try {
+      JSON.parse(obj);
+      return obj; // Already valid JSON string
+    } catch (e) {
+      // Not valid JSON, wrap it
+      return JSON.stringify(obj);
+    }
+  }
+  try {
+    return JSON.stringify(obj);
+  } catch (e) {
+    console.error('[PROCESS] Failed to stringify:', e.message);
+    return null;
+  }
 };
 
 // ============================================
@@ -383,6 +413,7 @@ const processSocialPost = async (input) => {
         await updateSocialPostGameData(extractionId, {
           suggestedGameId: matchResult.primaryMatch?.gameId || null,
           matchCandidateCount: matchResult.candidates.length,
+          // UPDATED: matchSignals is now an object, stringify the whole array once
           matchCandidates: JSON.stringify(matchResult.candidates.map(c => ({
             gameId: c.gameId,
             gameName: c.gameName,
@@ -390,10 +421,10 @@ const processSocialPost = async (input) => {
             venueName: c.venueName,
             venueId: c.venueId,
             buyIn: c.buyIn,
-            guarantee: c.guarantee,
+            guaranteeAmount: c.guaranteeAmount,  // FIXED: was "guarantee"
             matchConfidence: c.matchConfidence,
             matchReason: c.matchReason,
-            matchSignals: c.matchSignals,
+            matchSignals: c.matchSignals,  // Now an object, gets stringified with parent
             rank: c.rank,
             wouldAutoLink: c.matchConfidence >= matchThreshold
           })))
@@ -427,7 +458,8 @@ const processSocialPost = async (input) => {
             linkType: 'AUTO_MATCHED',
             matchConfidence: candidate.matchConfidence,
             matchReason: candidate.matchReason,
-            matchSignals: JSON.stringify(candidate.matchSignals),
+            // UPDATED: matchSignals is now an object, stringify it for the link record
+            matchSignals: safeStringify(candidate.matchSignals),
             isPrimaryGame: i === 0,
             mentionOrder: i + 1,
             extractedVenueName: extracted.extractedVenueName,
@@ -741,6 +773,7 @@ module.exports = {
   previewMatch,
   previewContentExtraction,
   addDataStoreFields,  // Export for use in other files
+  safeStringify,       // Export for use in other files
   // Tag generation (for manual uploader to use if invoking processor directly)
   generateClassificationTags,
   buildClassificationFlags,

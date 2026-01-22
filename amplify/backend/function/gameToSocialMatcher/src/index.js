@@ -27,7 +27,7 @@ Amplify Params - DO NOT EDIT */
  * GAME TO SOCIAL MATCHER LAMBDA
  * ===================================================================
  * 
- * VERSION: 2.0.0
+ * VERSION: 2.1.0
  * 
  * PURPOSE:
  * Reverse matching flow - when a game is processed/finalized, find unlinked
@@ -49,6 +49,10 @@ Amplify Params - DO NOT EDIT */
  * - GameFinancialSnapshot only created for valid, processed games
  * - Avoids duplicate invocations from frequent Game table updates
  * - Acts as a "game ready" signal
+ * 
+ * UPDATES v2.1.0:
+ * - Updated safeStringify to handle already-stringified values (prevents double-stringify)
+ * - matchSignals from postFinder is now an object, stringify once here
  * 
  * UPDATES v2.0.0:
  * - Include ticket data in SocialPostGameLink records
@@ -91,6 +95,7 @@ Amplify Params - DO NOT EDIT */
  * - SocialPostGameLink is the join table with match metadata
  * 
  * CHANGELOG:
+ * v2.1.0 - Fixed double-stringify bug in matchSignals
  * v2.0.0 - Added ticket data to links, postDate scoring, reconciliation preview
  * v1.2.0 - Changed to GameFinancialSnapshot stream (sequential after financials)
  * v1.1.0 - Changed to Game table stream (parallel)
@@ -163,9 +168,23 @@ const shouldMatchGame = (game) => {
 
 /**
  * Safely stringify an object for AWSJSON field
+ * UPDATED: Handles already-stringified values to prevent double-stringify bug
  */
 const safeStringify = (obj) => {
   if (!obj) return null;
+  
+  // If it's already a string, check if it's valid JSON
+  if (typeof obj === 'string') {
+    try {
+      JSON.parse(obj); // Validate it's proper JSON
+      return obj;      // Already stringified, return as-is
+    } catch (e) {
+      // Not valid JSON string, wrap it
+      return JSON.stringify(obj);
+    }
+  }
+  
+  // It's an object, stringify it
   try {
     return JSON.stringify(obj);
   } catch (e) {
@@ -319,6 +338,7 @@ const matchGameToSocialPosts = async (game, options = {}) => {
           const now = new Date().toISOString();
           
           // Build link record with ticket data
+          // UPDATED: matchSignals is now an object from postFinder, stringify it here
           const link = addDataStoreFields({
             id: uuidv4(),
             socialPostId: candidate.socialPostId,
@@ -327,7 +347,7 @@ const matchGameToSocialPosts = async (game, options = {}) => {
             linkType: 'AUTO_MATCHED',
             matchConfidence: candidate.matchConfidence,
             matchReason: candidate.matchReason,
-            matchSignals: candidate.matchSignals,
+            matchSignals: safeStringify(candidate.matchSignals),  // Stringify once here
             isPrimaryGame,
             mentionOrder,
             linkedAt: now,
@@ -751,6 +771,7 @@ module.exports = {
   handleStreamEvent,
   matchGameToSocialPosts,
   shouldMatchGame,
+  safeStringify,  // Export for testing
   MATCH_TRIGGER_STATUSES,
   DEFAULT_AUTO_LINK_THRESHOLD
 };

@@ -2,7 +2,7 @@
  * matching/postFinder.js
  * Find candidate social posts for a game
  * 
- * VERSION: 2.0.0
+ * VERSION: 2.1.0
  * 
  * This is the "reverse" of gameMatcher.js:
  * - gameMatcher: post data → find matching games
@@ -13,6 +13,9 @@
  * 2. Venue + Date range → Posts with that venue in date window
  * 3. Date range only → Broader search
  * 4. Score all candidates using scoringEngine
+ * 
+ * UPDATES v2.1.0:
+ * - Use formatSignalsForStorage() for lightweight DB storage (~90% size reduction)
  * 
  * UPDATES v2.0.0:
  * - Include ticket data in candidate results
@@ -32,7 +35,8 @@ const {
   getSocialPost,
   getVenue
 } = require('../utils/graphql');
-const { calculateMatchScore, rankCandidates, formatSignalsForResponse, THRESHOLDS } = require('./scoringEngine');
+// UPDATED: Use formatSignalsForStorage for lightweight DB storage
+const { calculateMatchScore, rankCandidates, formatSignalsForStorage, THRESHOLDS } = require('./scoringEngine');
 const { getPostSearchRange, daysBetween, toAEST } = require('../utils/dateUtils');
 
 // ===================================================================
@@ -221,35 +225,37 @@ const findMatchingPosts = async (game, options = {}) => {
   // Log AEST interpretation of game date
   if (game.gameStartDateTime) {
     const gameAEST = toAEST(game.gameStartDateTime);
-    console.log(`[POST-FINDER] Game date in AEST: ${gameAEST?.isoDate} (${gameAEST?.hours}:${String(gameAEST?.minutes).padStart(2, '0')})`);
+    console.log(`[POST-FINDER] Game date in AEST: ${gameAEST?.isoDate}`);
   }
   
+  // Build exclude set
   const excludeSet = new Set(excludePostIds);
-  let allCandidatePosts = [];
-  let matchMethod = 'none';
   
   // =========================================================================
   // PATH 1: Tournament ID Match (highest confidence)
   // =========================================================================
+  let allCandidatePosts = [];
+  let matchMethod = 'none';
+  
   if (game.tournamentId) {
     console.log(`[POST-FINDER] Searching by tournament ID: ${game.tournamentId}`);
     
     const tournamentPosts = await querySocialPostsByTournamentId(game.tournamentId);
     
     if (tournamentPosts && tournamentPosts.length > 0) {
-      console.log(`[POST-FINDER] Found ${tournamentPosts.length} posts by tournament ID`);
+      console.log(`[POST-FINDER] Found ${tournamentPosts.length} posts with tournament ID`);
       allCandidatePosts.push(...tournamentPosts);
       matchMethod = 'tournament_id';
     }
   }
   
   // =========================================================================
-  // PATH 2: Venue + Date Range (most common)
-  // Uses AEST-aware search range calculation
+  // PATH 2: Venue + Date Range
   // =========================================================================
-  const { searchStart, searchEnd } = getPostSearchRange(game.gameStartDateTime, { daysBefore, daysAfter });
-  
-  console.log(`[POST-FINDER] Search range (AEST-aware): ${searchStart} to ${searchEnd}`);
+  const { searchStart, searchEnd } = getPostSearchRange(game.gameStartDateTime, {
+    daysBefore,
+    daysAfter
+  });
   
   // Log the AEST interpretation of the search range
   const startAEST = toAEST(searchStart);
@@ -394,7 +400,9 @@ const findMatchingPosts = async (game, options = {}) => {
         // Match scoring
         matchConfidence: candidate.score.confidence,
         matchReason: candidate.score.reason,
-        matchSignals: JSON.stringify(formatSignalsForResponse(candidate.score)),
+        // UPDATED: Use lightweight storage format (object, not stringified)
+        // Downstream code will stringify when saving to DynamoDB
+        matchSignals: formatSignalsForStorage(candidate.score),
         rank: index + 1,
         wouldAutoLink: candidate.score.wouldAutoLink
       };

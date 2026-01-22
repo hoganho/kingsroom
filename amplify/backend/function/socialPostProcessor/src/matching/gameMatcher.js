@@ -2,6 +2,8 @@
  * matching/gameMatcher.js
  * Find and rank game matches for social post data
  * 
+ * VERSION: 2.1.0
+ * 
  * IMPORTANT: Social posts do NOT have entityId.
  * A post could reference zero, one, or multiple entities.
  * 
@@ -9,6 +11,9 @@
  * 1. Tournament ID → Direct game lookup (golden signal)
  * 2. Venue from content → Games at that venue in date range
  * 3. Score and rank all candidates
+ * 
+ * UPDATES v2.1.0:
+ * - Use formatSignalsForStorage() for lightweight DB storage (~90% size reduction)
  */
 
 const { 
@@ -18,7 +23,8 @@ const {
   getVenue
 } = require('../utils/graphql');
 const { getGameSearchRange } = require('../utils/dateUtils');
-const { calculateMatchScore, rankCandidates, formatSignalsForResponse, THRESHOLDS } = require('./scoringEngine');
+// UPDATED: Use formatSignalsForStorage for lightweight DB storage
+const { calculateMatchScore, rankCandidates, formatSignalsForStorage, THRESHOLDS } = require('./scoringEngine');
 const { matchVenueFromContent } = require('./venueMatcher');
 
 /**
@@ -49,14 +55,13 @@ const findMatchingGames = async (extracted, post, options = {}) => {
       
       const score = calculateMatchScore(extracted, exactMatch, { contentType });
       
-      // Format signals for API response (same as venue-based matches)
-      const formattedSignals = formatSignalsForResponse(score);
+      // UPDATED: Use lightweight storage format
+      const storageSignals = formatSignalsForStorage(score);
       
       // Log breakdown for debugging
-      console.log(`[MATCHER] Tournament ID match scoring breakdown:`);
-      console.log(`[MATCHER]   Identity: ${formattedSignals.breakdown.identity.score}/${formattedSignals.breakdown.identity.maxPossible}`);
-      console.log(`[MATCHER]   Financial: ${formattedSignals.breakdown.financial.score}/${formattedSignals.breakdown.financial.maxPossible}`);
-      console.log(`[MATCHER]   Final confidence: ${formattedSignals.confidence}%`);
+      console.log(`[MATCHER] Tournament ID match scoring:`);
+      console.log(`[MATCHER]   Confidence: ${score.confidence}%`);
+      console.log(`[MATCHER]   Reason: ${score.reason}`);
       
       let venueName = null;
       if (exactMatch.venueId) {
@@ -77,7 +82,8 @@ const findMatchingGames = async (extracted, post, options = {}) => {
         totalEntries: exactMatch.totalEntries,
         matchConfidence: Math.max(score.confidence, 95),
         matchReason: 'tournament_id_exact',
-        matchSignals: JSON.stringify(formattedSignals),  // FIXED: stringify like other matches
+        // UPDATED: Keep as object, downstream code will stringify when saving to DynamoDB
+        matchSignals: storageSignals,
         rank: 1,
         isPrimaryMatch: true,
         wouldAutoLink: true
@@ -218,17 +224,11 @@ const findMatchingGames = async (extracted, post, options = {}) => {
   const venueName = venue?.name || venueMatchInfo?.venueName || null;
   
   const formattedCandidates = rankedCandidates.map(c => {
-    // Format signals for API response (JSON-serializable with breakdown)
-    const formattedSignals = formatSignalsForResponse(c.score);
+    // UPDATED: Use lightweight storage format
+    const storageSignals = formatSignalsForStorage(c.score);
     
-    // Log detailed breakdown for debugging
-    console.log(`[MATCHER] Game ${c.game.name} scoring breakdown:`);
-    console.log(`[MATCHER]   Identity: ${formattedSignals.breakdown.identity.score}/${formattedSignals.breakdown.identity.maxPossible}`);
-    console.log(`[MATCHER]   Financial: ${formattedSignals.breakdown.financial.score}/${formattedSignals.breakdown.financial.maxPossible}`);
-    console.log(`[MATCHER]   Temporal: ${formattedSignals.breakdown.temporal.score}/${formattedSignals.breakdown.temporal.maxPossible}`);
-    console.log(`[MATCHER]   Venue: ${formattedSignals.breakdown.venue.score}/${formattedSignals.breakdown.venue.maxPossible}`);
-    console.log(`[MATCHER]   Penalties: ${formattedSignals.breakdown.penalties.score}`);
-    console.log(`[MATCHER]   Final confidence: ${formattedSignals.confidence}%`);
+    // Log for debugging
+    console.log(`[MATCHER] Game ${c.game.name}: ${c.score.confidence}% (${c.score.reason})`);
     
     return {
       gameId: c.game.id,
@@ -243,8 +243,8 @@ const findMatchingGames = async (extracted, post, options = {}) => {
       totalEntries: c.game.totalEntries,
       matchConfidence: c.score.confidence,
       matchReason: c.score.reason,
-      // Include both raw signals and formatted breakdown
-      matchSignals: JSON.stringify(formattedSignals),
+      // UPDATED: Keep as object, downstream code will stringify when saving to DynamoDB
+      matchSignals: storageSignals,
       rank: c.rank,
       isPrimaryMatch: c.isPrimaryMatch,
       wouldAutoLink: c.score.wouldAutoLink,

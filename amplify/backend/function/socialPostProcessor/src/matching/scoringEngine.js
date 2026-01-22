@@ -8,6 +8,11 @@
  * - Similar to fieldManifest pattern for game field completeness
  * - AEST-AWARE: All date comparisons now use Australian Eastern timezone
  * - ENHANCED: Uses both extractedDate AND postDate for temporal matching
+ * - NEW: formatSignalsForStorage() for lightweight DB storage (v3.1)
+ * 
+ * IMPORTANT: Two formatting functions exist:
+ * - formatSignalsForResponse(): Full breakdown for API responses (UI display)
+ * - formatSignalsForStorage(): Lightweight version for DynamoDB storage
  */
 
 const { toAEST, getDaysDifference, getDayOfWeek } = require('../utils/dateUtils');
@@ -50,8 +55,8 @@ const SIGNAL_DEFINITIONS = {
   dateExact: { weight: 20, penalty: 0, category: 'temporal', label: 'Extracted Date (Exact)' },
   dateClose: { weight: 10, penalty: 0, category: 'temporal', label: 'Extracted Date (Close)' },
   dateMismatch: { weight: 0, penalty: -15, category: 'temporal', label: 'Date Mismatch' },
-  postedAtExact: { weight: 15, penalty: 0, category: 'temporal', label: 'Posted Date (Exact)' },      // NEW
-  postedAtClose: { weight: 8, penalty: 0, category: 'temporal', label: 'Posted Date (Close)' },       // NEW
+  postedAtExact: { weight: 15, penalty: 0, category: 'temporal', label: 'Posted Date (Exact)' },
+  postedAtClose: { weight: 8, penalty: 0, category: 'temporal', label: 'Posted Date (Close)' },
   dayOfWeekMatch: { weight: 8, penalty: 0, category: 'temporal', label: 'Day of Week' },
   
   // Venue
@@ -75,7 +80,7 @@ const SIGNAL_DEFINITIONS = {
 const CATEGORY_META = {
   identity: { label: 'Identity', icon: '🎯', maxPossible: 115 },
   financial: { label: 'Financial', icon: '💰', maxPossible: 60 },
-  temporal: { label: 'Date/Time', icon: '📅', maxPossible: 61 },    // Updated: +23 for postedAt signals
+  temporal: { label: 'Date/Time', icon: '📅', maxPossible: 61 },
   venue: { label: 'Venue', icon: '📍', maxPossible: 30 },
   structure: { label: 'Structure', icon: '🏗️', maxPossible: 24 },
   attributes: { label: 'Attributes', icon: '📊', maxPossible: 10 },
@@ -761,9 +766,18 @@ const rankCandidates = (scoredCandidates) => {
   }));
 };
 
+// ===================================================================
+// SIGNAL FORMATTING FUNCTIONS
+// ===================================================================
+
 /**
- * Format signals for API response
+ * Format signals for API response (FULL breakdown for UI display)
  * Groups by category and includes all signals
+ * 
+ * Use this when returning data to the frontend for display in the matching UI.
+ * 
+ * @param {Object} score - Score result from calculateMatchScore
+ * @returns {Object} Full breakdown with all signals and categories
  */
 const formatSignalsForResponse = (score) => {
   // Initialize ALL categories upfront (so gameMatcher can access them)
@@ -854,6 +868,145 @@ const formatSignalsForResponse = (score) => {
   };
 };
 
+/**
+ * Format signals for DATABASE STORAGE (lightweight version)
+ * 
+ * Only stores what's needed:
+ * - Core match info (confidence, reason, wouldAutoLink)
+ * - Signals that actually matched (contributed points)
+ * - Penalties that were applied
+ * - Category summary scores (not all the verbose details)
+ * 
+ * This reduces storage from ~2-3KB per candidate to ~200-400 bytes.
+ * 
+ * Use this when saving matchCandidates to SocialPostGameData or SocialPostGameLink.
+ * 
+ * @param {Object} score - Score result from calculateMatchScore
+ * @returns {Object} Lightweight storage-friendly format
+ */
+const formatSignalsForStorage = (score) => {
+  // Only include signals that actually contributed (matched or penalized)
+  const matchedSignals = [];
+  const penalties = [];
+  
+  Object.values(score.signals).forEach(signal => {
+    if (signal.status === 'MATCHED' && signal.contribution > 0) {
+      matchedSignals.push({
+        key: signal.key,
+        pts: signal.contribution,  // abbreviated
+        ext: signal.extractedValue,  // abbreviated
+        game: signal.gameValue
+      });
+    } else if (signal.contribution < 0) {
+      penalties.push({
+        key: signal.key,
+        pts: signal.contribution
+      });
+    }
+  });
+  
+  // Calculate category summaries (just scores, not all the verbose details)
+  const categoryScores = {};
+  Object.keys(CATEGORY_META).forEach(cat => {
+    const catSignals = Object.values(score.signals).filter(s => s.category === cat);
+    const catScore = catSignals.reduce((sum, s) => sum + (s.contribution > 0 ? s.contribution : 0), 0);
+    const catPenalties = catSignals.reduce((sum, s) => sum + (s.contribution < 0 ? s.contribution : 0), 0);
+    
+    // Only include categories that have some activity
+    if (catScore > 0 || catPenalties < 0) {
+      categoryScores[cat] = {
+        score: catScore,
+        penalties: catPenalties
+      };
+    }
+  });
+  
+  return {
+    confidence: score.confidence,
+    reason: score.reason,
+    wouldAutoLink: score.wouldAutoLink,
+    matched: matchedSignals,
+    penalties: penalties.length > 0 ? penalties : undefined,
+    categories: categoryScores
+  };
+};
+
+/**
+ * Expand stored signals back to full format (for UI display)
+ * 
+ * If you need to display the full breakdown in the UI but only have
+ * the lightweight storage format, use this to expand it.
+ * 
+ * Note: This won't have all the original detail (like NOT_EVALUATED signals),
+ * but will show what matched and why.
+ * 
+ * @param {Object} storedSignals - Lightweight format from formatSignalsForStorage
+ * @returns {Object} Expanded format suitable for UI display
+ */
+const expandStoredSignals = (storedSignals) => {
+  if (!storedSignals) return null;
+  
+  // If it's already the full format, return as-is
+  if (storedSignals.breakdown || storedSignals.allSignals) {
+    return storedSignals;
+  }
+  
+  // Build a simplified breakdown from the stored data
+  const breakdown = {};
+  
+  // Initialize categories
+  Object.keys(CATEGORY_META).forEach(cat => {
+    const stored = storedSignals.categories?.[cat];
+    breakdown[cat] = {
+      ...CATEGORY_META[cat],
+      score: stored?.score || 0,
+      penalties: stored?.penalties || 0,
+      signals: []
+    };
+  });
+  
+  // Add matched signals to their categories
+  if (storedSignals.matched) {
+    storedSignals.matched.forEach(sig => {
+      const def = SIGNAL_DEFINITIONS[sig.key];
+      if (def) {
+        breakdown[def.category].signals.push({
+          key: sig.key,
+          label: def.label,
+          status: 'MATCHED',
+          contribution: sig.pts,
+          extractedValue: sig.ext,
+          gameValue: sig.game
+        });
+      }
+    });
+  }
+  
+  // Add penalties
+  if (storedSignals.penalties) {
+    storedSignals.penalties.forEach(sig => {
+      const def = SIGNAL_DEFINITIONS[sig.key];
+      if (def) {
+        breakdown[def.category].signals.push({
+          key: sig.key,
+          label: def.label,
+          status: 'MATCHED',  // Penalties are "matched" in the sense they triggered
+          contribution: sig.pts,
+          extractedValue: null,
+          gameValue: null
+        });
+      }
+    });
+  }
+  
+  return {
+    confidence: storedSignals.confidence,
+    reason: storedSignals.reason,
+    wouldAutoLink: storedSignals.wouldAutoLink,
+    breakdown
+  };
+};
+
 // ===================================================================
 // EXPORTS
 // ===================================================================
@@ -861,7 +1014,13 @@ const formatSignalsForResponse = (score) => {
 module.exports = {
   calculateMatchScore,
   rankCandidates,
-  formatSignalsForResponse,
+  
+  // Formatting functions - use the right one for your context!
+  formatSignalsForResponse,   // Full breakdown for API/UI
+  formatSignalsForStorage,    // Lightweight for DynamoDB
+  expandStoredSignals,        // Convert storage format back to UI format
+  
+  // Constants
   THRESHOLDS,
   SIGNAL_DEFINITIONS,
   CATEGORY_META

@@ -1,4 +1,6 @@
 /* Amplify Params - DO NOT EDIT
+    API_KINGSROOM_ENTITYTABLE_ARN
+    API_KINGSROOM_ENTITYTABLE_NAME
     API_KINGSROOM_GAMETABLE_ARN
     API_KINGSROOM_GAMETABLE_NAME
     API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
@@ -21,10 +23,12 @@ Amplify Params - DO NOT EDIT */
 
 // scraperManagement Lambda Function
 // UPDATED: Async invocation of autoScraper with threshold passthrough
+// UPDATED: Scheduled runs now use dedicated scheduled-handler with proper gap processing
 //
 // Architecture:
 // - scraperManagement: API layer, job CRUD, ScrapeURL management
 // - autoScraper: Execution engine (invoked asynchronously)
+// - scheduled-handler: Handles EventBridge scheduled events with gap detection
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, QueryCommand, ScanCommand, UpdateCommand, GetCommand, PutCommand } = require('@aws-sdk/lib-dynamodb');
@@ -33,6 +37,9 @@ const { randomUUID } = require('crypto');
 
 // --- Lambda Monitoring ---
 const { LambdaMonitoring } = require('./lambda-monitoring');
+
+// --- Scheduled Handler ---
+const { handleScheduledEvent } = require('./scheduled-handler');
 
 const client = new DynamoDBClient({});
 const originalDdbDocClient = DynamoDBDocumentClient.from(client);
@@ -56,7 +63,8 @@ const getTableName = (modelName) => {
         'Game': process.env.API_KINGSROOM_GAMETABLE_NAME,
         'ScraperJob': process.env.API_KINGSROOM_SCRAPERJOBTABLE_NAME,
         'ScrapeURL': process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME,
-        'ScrapeAttempt': process.env.API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME
+        'ScrapeAttempt': process.env.API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME,
+        'Entity': process.env.API_KINGSROOM_ENTITYTABLE_NAME,
     };
     
     if (specialTables[modelName]) return specialTables[modelName];
@@ -127,51 +135,18 @@ function extractErrorType(errorMessage) {
 
 exports.handler = async (event, context) => {
     // ===== HANDLE CLOUDWATCH SCHEDULED EVENTS =====
+    // Delegates to scheduled-handler.js for proper gap processing and auto mode
     if (event['detail-type'] === 'Scheduled Event' && event.source === 'aws.events') {
-        monitoring.trackOperation('SCHEDULED_EVENT', 'Handler', 'cloudwatch', { 
-            ruleArn: event.resources?.[0] || 'unknown'
-        });
-        
         try {
-            // Trigger auto-scraping for all active entities
-            const activeEntities = await getActiveEntities();
-            console.log(`[SCHEDULED] Found ${activeEntities.length} active entities to scrape`);
-            
-            const results = [];
-            for (const entity of activeEntities) {
-                try {
-                    console.log(`[SCHEDULED] Starting scrape job for entity: ${entity.entityName || entity.id}`);
-                    const job = await startScraperJob({ 
-                        input: { 
-                            entityId: entity.id, 
-                            mode: 'bulk',
-                            triggerSource: 'SCHEDULED',
-                            triggeredBy: 'cloudwatch-schedule'
-                        }
-                    }, event);
-                    results.push({ entityId: entity.id, jobId: job.id, status: 'started' });
-                } catch (entityError) {
-                    console.error(`[SCHEDULED] Failed to start job for ${entity.id}:`, entityError.message);
-                    results.push({ entityId: entity.id, status: 'failed', error: entityError.message });
-                }
-            }
-            
-            return { 
-                statusCode: 200, 
-                body: 'Scheduled scrape jobs started',
-                processedAt: new Date().toISOString(),
-                entitiesProcessed: activeEntities.length,
-                results
-            };
-        } catch (error) {
-            monitoring.trackOperation('SCHEDULED_EVENT_ERROR', 'Handler', 'cloudwatch', { 
-                error: error.message 
+            const result = await handleScheduledEvent(event, {
+                ddbDocClient: monitoredDdbDocClient,
+                lambdaClient,
+                monitoring,
+                getTableName,
+                getActiveEntities,
+                startScraperJob,
             });
-            console.error('[SCHEDULED] Error:', error);
-            return { 
-                statusCode: 500, 
-                body: `Scheduled event failed: ${error.message}` 
-            };
+            return result;
         } finally {
             await monitoring.flush();
         }
