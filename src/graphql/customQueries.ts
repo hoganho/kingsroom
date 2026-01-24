@@ -331,6 +331,275 @@ export const getSocialAccountSimple = /* GraphQL */ `
   }
 `;
 
+// ===================================================================
+// SOCIAL POST QUERIES (Lean - NO nested relationships)
+// These avoid fetching socialAccount.scrapeAttempts, linkedGame, etc.
+// ===================================================================
+
+// Primary query for fetching posts by account (used by useSocialPosts hook)
+export const socialPostsBySocialAccountIdSimple = /* GraphQL */ `
+  query LeanSocialPostsByAccountId(
+    $socialAccountId: ID!
+    $postedAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelSocialPostFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    socialPostsBySocialAccountIdAndPostedAt(
+      socialAccountId: $socialAccountId
+      postedAt: $postedAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        platformPostId
+        postUrl
+        postType
+        accountName
+        accountProfileImageUrl
+        platform
+        businessLocation
+        content
+        contentPreview
+        mediaUrls
+        thumbnailUrl
+        videoUrl
+        videoThumbnailUrl
+        likeCount
+        commentCount
+        shareCount
+        viewCount
+        postedAt
+        status
+        isTournamentRelated
+        isTournamentResult
+        isPromotional
+        contentType
+        contentTypeConfidence
+        processingStatus
+        linkedGameId
+        linkedGameCount
+        socialAccountId
+        entityId
+        effectiveGameDate
+        effectiveGameDateSource
+      }
+      nextToken
+    }
+  }
+`;
+
+// Query for fetching posts by entity
+export const socialPostsByEntityIdSimple = /* GraphQL */ `
+  query LeanSocialPostsByEntityId(
+    $entityId: ID!
+    $postedAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelSocialPostFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    socialPostsByEntityIdAndPostedAt(
+      entityId: $entityId
+      postedAt: $postedAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        platformPostId
+        postUrl
+        postType
+        accountName
+        accountProfileImageUrl
+        platform
+        businessLocation
+        content
+        contentPreview
+        mediaUrls
+        thumbnailUrl
+        videoUrl
+        videoThumbnailUrl
+        likeCount
+        commentCount
+        shareCount
+        viewCount
+        postedAt
+        status
+        isTournamentRelated
+        isTournamentResult
+        isPromotional
+        contentType
+        contentTypeConfidence
+        processingStatus
+        linkedGameId
+        linkedGameCount
+        socialAccountId
+        entityId
+        effectiveGameDate
+        effectiveGameDateSource
+      }
+      nextToken
+    }
+  }
+`;
+
+// Query for fetching posts by status (global fallback)
+export const socialPostsByPostStatusSimple = /* GraphQL */ `
+  query LeanSocialPostsByStatus(
+    $status: SocialPostStatus!
+    $postedAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelSocialPostFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    socialPostsByPostStatus(
+      status: $status
+      postedAt: $postedAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        platformPostId
+        postUrl
+        postType
+        accountName
+        accountProfileImageUrl
+        platform
+        businessLocation
+        content
+        contentPreview
+        mediaUrls
+        thumbnailUrl
+        videoUrl
+        videoThumbnailUrl
+        likeCount
+        commentCount
+        shareCount
+        viewCount
+        postedAt
+        status
+        isTournamentRelated
+        isTournamentResult
+        isPromotional
+        contentType
+        contentTypeConfidence
+        processingStatus
+        linkedGameId
+        linkedGameCount
+        socialAccountId
+        entityId
+        effectiveGameDate
+        effectiveGameDateSource
+      }
+      nextToken
+    }
+  }
+`;
+
+// Query for fetching a single post with extracted data (for detail/modal views)
+export const getSocialPostWithExtractedData = /* GraphQL */ `
+  query GetSocialPostWithExtractedData($id: ID!) {
+    getSocialPost(id: $id) {
+      id
+      platformPostId
+      postUrl
+      postType
+      accountName
+      accountProfileImageUrl
+      platform
+      businessLocation
+      content
+      contentPreview
+      mediaUrls
+      thumbnailUrl
+      videoUrl
+      videoThumbnailUrl
+      videoTitle
+      likeCount
+      commentCount
+      shareCount
+      viewCount
+      postedAt
+      isTournamentRelated
+      isTournamentResult
+      isPromotional
+      tags
+      contentType
+      contentTypeConfidence
+      processingStatus
+      linkedGameId
+      linkedGameCount
+      extractedGameDataId
+      effectiveGameDate
+      effectiveGameDateSource
+      extractedGameData {
+        id
+        contentType
+        contentTypeConfidence
+        extractedName
+        extractedVenueName
+        extractedDate
+        extractedDayOfWeek
+        extractedStartTime
+        dateSource
+        effectiveGameDate
+        effectiveGameDateSource
+        extractedBuyIn
+        extractedGuarantee
+        extractedPrizePool
+        extractedFirstPlacePrize
+        extractedTotalEntries
+        extractedTotalUniquePlayers
+        extractedGameType
+        extractedTournamentType
+        extractedSeriesName
+        extractedEventNumber
+        extractedWinnerName
+        extractedWinnerPrize
+        extractedWinnerHasTicket
+        extractedWinnerTicketType
+        extractedWinnerTicketValue
+        placementCount
+        totalTicketsExtracted
+        totalTicketValue
+        extractedAt
+        placements {
+          items {
+            id
+            place
+            playerName
+            cashPrize
+            hasNonCashPrize
+            nonCashPrizes
+            primaryTicketType
+            primaryTicketValue
+            ticketCount
+            totalEstimatedValue
+            wasChop
+          }
+        }
+      }
+      socialAccount {
+        id
+        accountName
+        accountHandle
+        profileImageUrl
+        platform
+      }
+    }
+  }
+`;
 
 export const listScrapeURLsSimple = /* GraphQL */ `
   query ListScrapeURLsSimple(

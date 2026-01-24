@@ -161,7 +161,7 @@ async function scrapeAccount(account, options = {}, context = null) {
     result.message = `Successfully scraped ${result.newPostsAdded} new posts`;
 
     // Complete attempt
-    await db.completeScrapeAttempt(attemptId, 'COMPLETED', {
+    await db.completeScrapeAttempt(attemptId, 'SUCCESS', {
       ...result,
       durationMs: Date.now() - startTime,
     });

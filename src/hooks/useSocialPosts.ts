@@ -3,12 +3,16 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { useEntity } from '../contexts/EntityContext';
 
-// Import generated GraphQL operations
+// ========================================
+// USE CUSTOM LEAN QUERIES (not auto-generated)
+// This avoids fetching nested socialAccount.scrapeAttempts, linkedGame, etc.
+// ========================================
 import { 
-  socialPostsBySocialAccountIdAndPostedAt,
-  socialPostsByEntityIdAndPostedAt,
-  socialPostsByPostStatus 
-} from '../graphql/queries';
+  socialPostsBySocialAccountIdSimple,
+  socialPostsByEntityIdSimple,
+  socialPostsByPostStatusSimple 
+} from '../graphql/customQueries';
+
 import { updateSocialPost } from '../graphql/mutations';
 
 // Import Amplify-generated types
@@ -58,15 +62,6 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
   // ========================================
   // AEST FIX: Calculate date in AEST context
   // ========================================
-  // OLD (wrong - uses browser timezone):
-  // const minDate = useMemo(() => {
-  //   if (!daysBack) return undefined;
-  //   const d = new Date();
-  //   d.setDate(d.getDate() - daysBack);
-  //   return d.toISOString();
-  // }, [daysBack]);
-  
-  // NEW (correct - uses AEST):
   const minDate = useMemo(() => {
     if (!daysBack) return undefined;
     return getDaysAgoAEST(daysBack);
@@ -86,7 +81,7 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
     while (shouldFetch && pageCount < MAX_PAGES) {
       try {
         const response = (await client.graphql({
-          query: socialPostsBySocialAccountIdAndPostedAt,
+          query: socialPostsBySocialAccountIdSimple, // ← Using lean custom query
           variables: { 
             socialAccountId: accountId,
             postedAt: dateCondition,
@@ -98,11 +93,8 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
         })) as any;
 
         // Handle partial success - GraphQL can return both data AND errors
-        // This happens when nested relations have null values for non-nullable fields
-        // (e.g., linkedGame.gameCost._version, linkedGame.gameFinancialSnapshot._lastChangedAt)
         if (response.errors && response.errors.length > 0) {
-          console.warn(`[useSocialPosts] Partial response for account ${accountId}: ${response.errors.length} field errors (nested relations with missing data)`);
-          // Continue processing - the main post data is usually still valid
+          console.warn(`[useSocialPosts] Partial response for account ${accountId}: ${response.errors.length} field errors`);
         }
 
         const data = response.data?.socialPostsBySocialAccountIdAndPostedAt;
@@ -112,28 +104,22 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
         pageCount++;
 
         // === INCREMENTAL UPDATE ===
-        // Update the UI immediately when we get data for this account
         if (newItems.length > 0) {
             setPosts(prev => {
-                // Deduplicate based on ID
                 const existingIds = new Set(prev.map(p => p.id));
                 const uniqueNewItems = newItems.filter((p: SocialPost) => !existingIds.has(p.id));
                 return [...prev, ...uniqueNewItems];
             });
         }
 
-        // Stop if we run out of data
         if (!nextToken) {
             shouldFetch = false;
         }
-        // Stop if we have enough data (if we are just viewing recent posts)
-        // If we are viewing "All History" (minDate is undefined), we might want to keep going
         if (minDate && items.length >= limit) {
             shouldFetch = false;
         }
 
       } catch (e: any) {
-        // True exceptions (network errors, etc.)
         console.error(`[useSocialPosts] Error fetching account ${accountId}:`, e?.message || e);
         shouldFetch = false;
       }
@@ -143,7 +129,6 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
 
 
   const fetchPosts = useCallback(async (loadMore = false, forceRefresh = false, ignoreDateLimit = false) => {
-    // Generate a key to prevent duplicate fetches of the same config
     const accountIdsKey = (options.accountIds || []).sort().join(',');
     const currentFetchKey = `${options.accountId || ''}-${accountIdsKey}-${effectiveEntityId || ''}-${filterByEntity}-${daysBack}-${ignoreDateLimit}`;
     
@@ -153,13 +138,11 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
 
     if (!loadMore) {
       setLoading(true);
-      // Only clear posts if we are doing a hard refresh or configuration change
       if (!loadMore) setPosts([]); 
     }
 
     setError(null);
     const dateCondition = (minDate && !ignoreDateLimit) ? { gt: minDate } : undefined;
-    // We use a smaller per-request limit for parallel fetching to keep individual requests fast
     const currentLimit = 50; 
 
     try {
@@ -175,10 +158,10 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
       else if (options.accountId) {
         await fetchSingleAccount(options.accountId, dateCondition, currentLimit);
       }
-      // STRATEGY 3: Entity Fallback (Legacy / Slow)
+      // STRATEGY 3: Entity Fallback
       else if (effectiveEntityId) {
          const response = (await client.graphql({
-            query: socialPostsByEntityIdAndPostedAt,
+            query: socialPostsByEntityIdSimple, // ← Using lean custom query
             variables: { 
               entityId: effectiveEntityId,
               postedAt: dateCondition,
@@ -191,10 +174,10 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
          const items = response.data?.socialPostsByEntityIdAndPostedAt?.items || [];
          setPosts(items);
       }
-      // STRATEGY 4: Global Fallback (Legacy / Slow)
+      // STRATEGY 4: Global Fallback
       else {
          const response = (await client.graphql({
-            query: socialPostsByPostStatus,
+            query: socialPostsByPostStatusSimple, // ← Using lean custom query
             variables: { 
               status: SocialPostStatus.ACTIVE,
               sortDirection: ModelSortDirection.DESC,
@@ -252,8 +235,7 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
   }, [updatePostFn]);
 
   const loadMore = useCallback(() => {
-    // Parallel fetch doesn't support simple global "load more" yet, 
-    // but we keep the function signature.
+    // Parallel fetch doesn't support simple global "load more" yet
   }, []);
 
   const refresh = useCallback(() => {
@@ -265,7 +247,6 @@ export const useSocialPosts = (options: UseSocialPostsOptions = {}) => {
   }, [fetchPosts]);
 
   useEffect(() => {
-    // Trigger auto-fetch if we have IDs available
     const hasIds = options.accountIds && options.accountIds.length > 0;
     const hasId = !!options.accountId;
     const hasEntity = !!effectiveEntityId;
