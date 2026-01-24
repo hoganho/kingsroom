@@ -7,6 +7,7 @@ import { SocialAccountModal } from '../../components/social/SocialAccountModal';
 import { ManualPostUploadTab } from '../../components/social/ManualPostUploadTab';
 import { UnprocessedPostsTab } from '../../components/social/UnprocessedPostsTab';
 import { SocialPostsTab } from '../../components/social/SocialPostsTab';
+import { ScrapeDiscrepanciesTab } from '../../components/social/ScrapeDiscrepanciesTab';
 import { DeleteConfirmationModal } from '../../components/entities/DeleteConfirmationModal';
 import { useSocialAccounts, SocialAccount, CreateSocialAccountInput, UpdateSocialAccountInput } from '../../hooks/useSocialAccounts';
 
@@ -48,7 +49,7 @@ import {
   ArrowUpTrayIcon,
   PlayIcon,
 } from '@heroicons/react/24/outline';
-import { Loader2, Database, AlertCircle, Facebook } from 'lucide-react';
+import { Loader2, Database, AlertCircle, Facebook, Link2 } from 'lucide-react';
 
 // =====================================================
 // GraphQL Operations
@@ -144,7 +145,7 @@ interface SyncProgressEvent {
   completedAt?: string;
 }
 
-type TabType = 'accounts' | 'upload' | 'unprocessed' | 'posts';
+type TabType = 'accounts' | 'upload' | 'unprocessed' | 'posts' | 'discrepancies';
 
 // Helper to check if response has data
 function hasGraphQLData<T>(response: unknown): response is { data: T } {
@@ -997,6 +998,17 @@ export const SocialAccountManagement: React.FC = () => {
             <ArrowUpTrayIcon className="w-5 h-5" />
             Manual Upload
           </button>
+          <button
+            onClick={() => setActiveTab('discrepancies')}
+            className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'discrepancies'
+                ? 'border-purple-500 text-purple-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <Link2 className="w-5 h-5" />
+            Discrepancies
+          </button>
         </nav>
       </div>
 
@@ -1053,6 +1065,10 @@ export const SocialAccountManagement: React.FC = () => {
           accounts={accounts}
           entities={entities}
         />
+      )}
+
+      {activeTab === 'discrepancies' && (
+        <ScrapeDiscrepanciesTab accounts={accounts} />
       )}
 
       {/* Account Modal */}

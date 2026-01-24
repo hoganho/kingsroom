@@ -309,7 +309,8 @@ const ScraperJobTriggerSource = {
   "API": "API",
   "CONTROL": "CONTROL",
   "BULK": "BULK",
-  "ADMIN": "ADMIN"
+  "ADMIN": "ADMIN",
+  "SOCIAL_DISCREPANCY": "SOCIAL_DISCREPANCY"
 };
 
 const ScraperJobStatus = {
@@ -465,7 +466,10 @@ const SocialPostLinkType = {
   "MANUAL_LINKED": "MANUAL_LINKED",
   "VERIFIED": "VERIFIED",
   "REJECTED": "REJECTED",
-  "TOURNAMENT_ID": "TOURNAMENT_ID"
+  "TOURNAMENT_ID": "TOURNAMENT_ID",
+  "PENDING_SCRAPE": "PENDING_SCRAPE",
+  "RESCRAPE_REQUESTED": "RESCRAPE_REQUESTED",
+  "RESCRAPE_RESOLVED": "RESCRAPE_RESOLVED"
 };
 
 const NonCashPrizeType = {
@@ -492,6 +496,25 @@ const TicketAwardSource = {
   "SCRAPED_DATA": "SCRAPED_DATA",
   "MANUAL_ENTRY": "MANUAL_ENTRY",
   "RECURRING_GAME_DEFAULT": "RECURRING_GAME_DEFAULT"
+};
+
+const ScrapeDiscrepancyType = {
+  "NONE": "NONE",
+  "GAME_NOT_IN_DATABASE": "GAME_NOT_IN_DATABASE",
+  "GAME_STATUS_NOT_FOUND": "GAME_STATUS_NOT_FOUND",
+  "GAME_STATUS_NOT_PUBLISHED": "GAME_STATUS_NOT_PUBLISHED",
+  "STATUS_MISMATCH": "STATUS_MISMATCH",
+  "STALE_DATA": "STALE_DATA"
+};
+
+const ScrapeDiscrepancyResolution = {
+  "UNRESOLVED": "UNRESOLVED",
+  "RESCRAPE_PENDING": "RESCRAPE_PENDING",
+  "RESCRAPE_SUCCESS": "RESCRAPE_SUCCESS",
+  "RESCRAPE_FAILED": "RESCRAPE_FAILED",
+  "MANUALLY_RESOLVED": "MANUALLY_RESOLVED",
+  "IGNORED": "IGNORED",
+  "AUTO_RESOLVED": "AUTO_RESOLVED"
 };
 
 const BackgroundTaskType = {
@@ -848,7 +871,7 @@ const GameProcessedAction = {
   "NOT_PUBLISHED": "NOT_PUBLISHED"
 };
 
-const { Entity, BackgroundTask, Venue, VenueDetails, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, GameFinancialSnapshot, GameCost, GameCostLineItem, GameCostItem, RecurringGame, RecurringGameInstance, TournamentSeriesTitle, TournamentSeries, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, EntityMetrics, VenueMetrics, RecurringGameMetrics, TournamentSeriesMetrics, MetricsPack, DirectorReport, SocialPulseDigest, AlertThresholdConfig, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperState, ScrapeStructure, DataSync, ScraperSettings, S3Storage, ActiveGame, RecentlyFinishedGame, UpcomingGame, DashboardCache, SocialAccount, SocialPost, SocialScrapeAttempt, SocialScheduledPost, SocialPostGameLink, SocialPostGameData, SocialPostPlacement, User, UserPreference, UserAuditLog, Staff, Asset, VenueMetricsResult, VenueMetricsUpdateResult, VenueMetricsPreview, VenueMatch, AllCountsResult, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, SaveVenueAssignmentInfo, VenueMetricsSnapshot, ConsolidationPreviewResult, ConsolidationDetails, ConsolidationSibling, ProjectedConsolidationTotals, ReScrapeResult, EntityScrapingStatus, EntityVenueAssignmentSummary, VenueAssignmentSummary, ReassignGameVenueResult, BulkReassignGameVenuesResult, SaveGameResult, SaveRecurringAssignmentInfo, ProcessedGameDetail, PotentialTemplate, ProcessUnassignedGamesResult, UnassignedGamesStats, PatternSampleGame, CandidatePattern, PreviewPatternsResult, RecurringGameVenueStats, OrphanedRecurringGame, UnassignedGameSample, RecurringGameDistribution, DuplicateEntry, DuplicateGroup, FindDuplicatesResult, MergeDetail, MergeDuplicatesResult, CleanupOrphansResult, MatchDetails, GameActionDetail, ActionSummary, ReResolveGameResult, ReResolveVenueResult, RecurringGameWithStats, RecurringGamePlayerSummary, SearchRecurringGamesResult, EnrichGameDataOutput, EnrichmentValidationResult, EnrichmentValidationError, EnrichmentValidationWarning, EnrichedGameData, EnrichmentMetadata, SeriesResolutionMetadata, RecurringResolutionMetadata, VenueResolutionMetadata, CalculateGameFinancialsOutput, GameCostCalculation, GameFinancialSnapshotCalculation, FinancialsSummary, FinancialsSaveResult, GameDeletionCounts, PlayerStatsUpdateCounts, GameDeletionDetails, ConsolidationCleanupResult, DeleteGameWithCleanupResult, GapInfo, DetectGapsResult, ReconcileInstanceDetail, ReconcileInstancesResult, InstanceSummary, WeekSummary, VenueComplianceReport, RecurringGameInstanceResult, RecordMissedInstanceResult, UpdateInstanceStatusResult, WeekInstancesResult, InstanceNeedingReview, InstancesNeedingReviewResult, AwardTicketResult, BulkAwardTicketsResult, TicketAwardSummary, PlayerTicketConnection, RefreshAllMetricsResult, MetricsBySeriesType, SeriesTypeBreakdown, MetricsUpdateResult, EntityDashboard, VenueDashboard, RecurringGameReport, TournamentSeriesReport, SeriesVsRegularComparison, TrendAnalysis, ResolvedPeriod, AvailablePeriodOption, DataRangeInfo, ListAvailablePeriodOptionsResult, GenerateMetricsPackResult, GenerateDirectorReportResult, TokenUsage, PackValidation, EnhancedModulesFlags, BatchGenerateReportsResult, DirectorReportStatusResult, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, ScraperJobURLResult, ScraperMetrics, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails, ScraperJobsReport, GapRange, GapSummary, S3VersionHistory, CachingStatsResponse, S3ContentResponse, S3StorageHistoryResponse, S3StorageListResponse, S3StorageConnection, ScraperJobConnection, ScrapeURLConnection, GameProcessedEvent, GameProcessedData, GameSaveResult, SyncActiveGameResult, RefreshRunningGamesResult, DashboardData, JobProgressEvent, SocialFeedConnection, SocialPostConnection, SocialAccountConnection, SocialAccountMetrics, SocialScrapeResult, SyncPageInfoResult, SocialSyncEvent, SocialPostNonCashPrize, ProcessSocialPostResult, GameMatchCandidate, ProcessBatchResult, SocialPostMatchingStats, UnlinkedPostsConnection, SocialPostWithMatchInfo, TicketExtractionSummary, TicketTypeCount, PlacementPreview, SocialToGameReconciliation, TicketReconciliationReport, ReconcileResult, GameToSocialMatchResult, SocialPostMatchCandidate, GameToSocialLinkDetail, GameToSocialMatchContext, DateRange, BatchGameToSocialMatchResult, UserManagementResponse, UsersConnection, DetectedMultiDayPattern, ResetPasswordResponse, ErrorMetric, HourlyMetric, EntityScraperMetrics, EntityJobSummary, TournamentIdBounds, CacheActivityLog, TournamentLevel, Break, GamesNeedingVenueResponse, GetReassignmentStatusResult, BackgroundTaskInfo, RefreshResponse, SaveSeriesAssignmentInfo, UnfinishedGamesConnection } = initSchema(schema);
+const { Entity, BackgroundTask, Venue, VenueDetails, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, GameFinancialSnapshot, GameCost, GameCostLineItem, GameCostItem, RecurringGame, RecurringGameInstance, TournamentSeriesTitle, TournamentSeries, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, EntityMetrics, VenueMetrics, RecurringGameMetrics, TournamentSeriesMetrics, MetricsPack, DirectorReport, SocialPulseDigest, AlertThresholdConfig, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperState, ScrapeStructure, DataSync, ScraperSettings, S3Storage, ActiveGame, RecentlyFinishedGame, UpcomingGame, DashboardCache, SocialAccount, SocialPost, SocialScrapeAttempt, SocialScheduledPost, SocialPostGameLink, SocialPostGameData, SocialPostPlacement, User, UserPreference, UserAuditLog, Staff, Asset, VenueMetricsResult, VenueMetricsUpdateResult, VenueMetricsPreview, VenueMatch, AllCountsResult, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, SaveVenueAssignmentInfo, VenueMetricsSnapshot, ConsolidationPreviewResult, ConsolidationDetails, ConsolidationSibling, ProjectedConsolidationTotals, ReScrapeResult, EntityScrapingStatus, EntityVenueAssignmentSummary, VenueAssignmentSummary, ReassignGameVenueResult, BulkReassignGameVenuesResult, SaveGameResult, SaveRecurringAssignmentInfo, ProcessedGameDetail, PotentialTemplate, ProcessUnassignedGamesResult, UnassignedGamesStats, PatternSampleGame, CandidatePattern, PreviewPatternsResult, RecurringGameVenueStats, OrphanedRecurringGame, UnassignedGameSample, RecurringGameDistribution, DuplicateEntry, DuplicateGroup, FindDuplicatesResult, MergeDetail, MergeDuplicatesResult, CleanupOrphansResult, MatchDetails, GameActionDetail, ActionSummary, ReResolveGameResult, ReResolveVenueResult, RecurringGameWithStats, RecurringGamePlayerSummary, SearchRecurringGamesResult, EnrichGameDataOutput, EnrichmentValidationResult, EnrichmentValidationError, EnrichmentValidationWarning, EnrichedGameData, EnrichmentMetadata, SeriesResolutionMetadata, RecurringResolutionMetadata, VenueResolutionMetadata, CalculateGameFinancialsOutput, GameCostCalculation, GameFinancialSnapshotCalculation, FinancialsSummary, FinancialsSaveResult, GameDeletionCounts, PlayerStatsUpdateCounts, GameDeletionDetails, ConsolidationCleanupResult, DeleteGameWithCleanupResult, GapInfo, DetectGapsResult, ReconcileInstanceDetail, ReconcileInstancesResult, InstanceSummary, WeekSummary, VenueComplianceReport, RecurringGameInstanceResult, RecordMissedInstanceResult, UpdateInstanceStatusResult, WeekInstancesResult, InstanceNeedingReview, InstancesNeedingReviewResult, AwardTicketResult, BulkAwardTicketsResult, TicketAwardSummary, PlayerTicketConnection, RefreshAllMetricsResult, MetricsBySeriesType, SeriesTypeBreakdown, MetricsUpdateResult, EntityDashboard, VenueDashboard, RecurringGameReport, TournamentSeriesReport, SeriesVsRegularComparison, TrendAnalysis, ResolvedPeriod, AvailablePeriodOption, DataRangeInfo, ListAvailablePeriodOptionsResult, GenerateMetricsPackResult, GenerateDirectorReportResult, TokenUsage, PackValidation, EnhancedModulesFlags, BatchGenerateReportsResult, DirectorReportStatusResult, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, ScraperJobURLResult, ScraperMetrics, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails, ScraperJobsReport, GapRange, GapSummary, S3VersionHistory, CachingStatsResponse, S3ContentResponse, S3StorageHistoryResponse, S3StorageListResponse, S3StorageConnection, ScraperJobConnection, ScrapeURLConnection, GameProcessedEvent, GameProcessedData, GameSaveResult, SyncActiveGameResult, RefreshRunningGamesResult, DashboardData, JobProgressEvent, SocialFeedConnection, SocialPostConnection, SocialAccountConnection, SocialAccountMetrics, SocialScrapeResult, SyncPageInfoResult, SocialSyncEvent, SocialPostNonCashPrize, ProcessSocialPostResult, GameMatchCandidate, ProcessBatchResult, SocialPostMatchingStats, UnlinkedPostsConnection, SocialPostWithMatchInfo, TicketExtractionSummary, TicketTypeCount, PlacementPreview, SocialToGameReconciliation, TicketReconciliationReport, ReconcileResult, GameToSocialMatchResult, SocialPostMatchCandidate, GameToSocialLinkDetail, GameToSocialMatchContext, DateRange, BatchGameToSocialMatchResult, DiscrepancyResolutionDetail, ScrapeDiscrepancyConnection, ScrapeDiscrepancyInfo, TriggerRescrapeResult, ResolveDiscrepancyResult, ScrapeDiscrepancyStats, ScanForDiscrepanciesResult, UserManagementResponse, UsersConnection, DetectedMultiDayPattern, ResetPasswordResponse, ErrorMetric, HourlyMetric, EntityScraperMetrics, EntityJobSummary, TournamentIdBounds, CacheActivityLog, TournamentLevel, Break, GamesNeedingVenueResponse, GetReassignmentStatusResult, BackgroundTaskInfo, RefreshResponse, SaveSeriesAssignmentInfo, UnfinishedGamesConnection } = initSchema(schema);
 
 export {
   Entity,
@@ -966,6 +989,8 @@ export {
   SocialPostLinkType,
   NonCashPrizeType,
   TicketAwardSource,
+  ScrapeDiscrepancyType,
+  ScrapeDiscrepancyResolution,
   BackgroundTaskType,
   BackgroundTaskStatus,
   SeriesResolutionStatus,
@@ -1167,6 +1192,13 @@ export {
   GameToSocialMatchContext,
   DateRange,
   BatchGameToSocialMatchResult,
+  DiscrepancyResolutionDetail,
+  ScrapeDiscrepancyConnection,
+  ScrapeDiscrepancyInfo,
+  TriggerRescrapeResult,
+  ResolveDiscrepancyResult,
+  ScrapeDiscrepancyStats,
+  ScanForDiscrepanciesResult,
   UserManagementResponse,
   UsersConnection,
   DetectedMultiDayPattern,

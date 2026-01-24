@@ -27,7 +27,7 @@ Amplify Params - DO NOT EDIT */
  * GAME TO SOCIAL MATCHER LAMBDA
  * ===================================================================
  * 
- * VERSION: 2.1.0
+ * VERSION: 3.0.0
  * 
  * PURPOSE:
  * Reverse matching flow - when a game is processed/finalized, find unlinked
@@ -38,6 +38,7 @@ Amplify Params - DO NOT EDIT */
  * - Social posts arrived BEFORE the game was in the system
  * - Posts had low confidence matches initially
  * - Posts mention multiple games (many-to-many relationship)
+ * - NEW: Posts created PENDING_SCRAPE discrepancy links awaiting this game
  * 
  * TRIGGERS:
  * - DynamoDB Stream on GameFinancialSnapshot table (INSERT events) - PRIMARY
@@ -49,6 +50,12 @@ Amplify Params - DO NOT EDIT */
  * - GameFinancialSnapshot only created for valid, processed games
  * - Avoids duplicate invocations from frequent Game table updates
  * - Acts as a "game ready" signal
+ * 
+ * UPDATES v3.0.0:
+ * - Added scrape discrepancy resolution (resolveDiscrepancyLinks)
+ * - Query for PENDING_SCRAPE links by extractedTournamentId
+ * - Resolve discrepancies when game becomes available
+ * - Track discrepancy resolution in link records
  * 
  * UPDATES v2.1.0:
  * - Updated safeStringify to handle already-stringified values (prevents double-stringify)
@@ -64,10 +71,12 @@ Amplify Params - DO NOT EDIT */
  * 1. Game saved → Game table stream → gameFinancialsProcessor
  * 2. gameFinancialsProcessor creates → GameFinancialSnapshot
  * 3. GameFinancialSnapshot stream → gameToSocialMatcher (this Lambda)
- * 4. Find candidate social posts (by date range, venue, status)
- * 5. Score each post against the game using scoringEngine
- * 6. Create SocialPostGameLink for matches above threshold
- * 7. SocialPostGameLink stream → socialDataAggregator → Game enriched
+ * 4. NEW: Check for PENDING_SCRAPE links waiting for this game's tournamentId
+ * 5. NEW: Resolve any discrepancy links found
+ * 6. Find candidate social posts (by date range, venue, status)
+ * 7. Score each post against the game using scoringEngine
+ * 8. Create SocialPostGameLink for matches above threshold
+ * 9. SocialPostGameLink stream → socialDataAggregator → Game enriched
  * 
  * ARCHITECTURE:
  * ┌─────────────────────────────────────────────────────────────────┐
@@ -82,6 +91,10 @@ Amplify Params - DO NOT EDIT */
  * │       ▼                                                          │
  * │  gameToSocialMatcher (this Lambda)                              │
  * │       │                                                          │
+ * │       ├──► Step 1: Resolve PENDING_SCRAPE discrepancy links     │
+ * │       │                                                          │
+ * │       ├──► Step 2: Find candidate posts (fuzzy matching)        │
+ * │       │                                                          │
  * │       ▼                                                          │
  * │  SocialPostGameLink Table (DynamoDB Stream)                     │
  * │       │                                                          │
@@ -95,6 +108,7 @@ Amplify Params - DO NOT EDIT */
  * - SocialPostGameLink is the join table with match metadata
  * 
  * CHANGELOG:
+ * v3.0.0 - Added scrape discrepancy resolution
  * v2.1.0 - Fixed double-stringify bug in matchSignals
  * v2.0.0 - Added ticket data to links, postDate scoring, reconciliation preview
  * v1.2.0 - Changed to GameFinancialSnapshot stream (sequential after financials)
@@ -112,7 +126,11 @@ const {
   getLinksBySocialPost,
   getLinksByGame,
   createSocialPostGameLink,
-  updateSocialPost
+  updateSocialPost,
+  // NEW v3.0.0: Discrepancy resolution functions
+  updateSocialPostGameLink,
+  queryLinksByExtractedTournamentId,
+  updateSocialPostGameData
 } = require('./utils/graphql');
 const { v4: uuidv4 } = require('uuid');
 
@@ -194,6 +212,150 @@ const safeStringify = (obj) => {
 };
 
 // ===================================================================
+// DISCREPANCY RESOLUTION (NEW v3.0.0)
+// ===================================================================
+
+/**
+ * Resolve pending discrepancy links waiting for this game
+ * 
+ * When socialPostProcessor creates a PENDING_SCRAPE link because
+ * a tournament ID wasn't in the database, this function resolves
+ * those links when the game finally gets scraped.
+ * 
+ * @param {Object} game - Game record with tournamentId
+ * @param {Object} options - Resolution options
+ * @returns {Object} Resolution result
+ */
+const resolveDiscrepancyLinks = async (game, options = {}) => {
+  const result = {
+    found: 0,
+    resolved: 0,
+    failed: 0,
+    details: []
+  };
+  
+  // Skip if game has no tournament ID
+  if (!game.tournamentId) {
+    console.log('[GAME-TO-SOCIAL] No tournamentId on game, skipping discrepancy check');
+    return result;
+  }
+  
+  console.log(`[GAME-TO-SOCIAL] Checking for discrepancy links with tournamentId=${game.tournamentId}`);
+  
+  try {
+    // Query for PENDING_SCRAPE links waiting for this tournament ID
+    const pendingLinks = await queryLinksByExtractedTournamentId(game.tournamentId);
+    
+    if (!pendingLinks || pendingLinks.length === 0) {
+      console.log('[GAME-TO-SOCIAL] No pending discrepancy links found');
+      return result;
+    }
+    
+    // Filter to only PENDING_SCRAPE or RESCRAPE_REQUESTED links with unresolved discrepancy
+    // Note: gameId may be "PENDING_SCRAPE" sentinel or a real game ID with problematic status
+    const discrepancyLinks = pendingLinks.filter(link => 
+      link.hasScrapeDiscrepancy === true &&
+      ['PENDING_SCRAPE', 'RESCRAPE_REQUESTED'].includes(link.linkType) &&
+      ['UNRESOLVED', 'RESCRAPE_PENDING'].includes(link.discrepancyResolution)
+    );
+    
+    result.found = discrepancyLinks.length;
+    
+    if (discrepancyLinks.length === 0) {
+      console.log('[GAME-TO-SOCIAL] No unresolved discrepancy links found');
+      return result;
+    }
+    
+    console.log(`[GAME-TO-SOCIAL] Found ${discrepancyLinks.length} discrepancy links to resolve`);
+    
+    const now = new Date().toISOString();
+    
+    for (const link of discrepancyLinks) {
+      try {
+        console.log(`[GAME-TO-SOCIAL] Resolving link ${link.id} for post ${link.socialPostId}`);
+        
+        // Update the link to connect to this game
+        const linkUpdate = {
+          gameId: game.id,
+          linkType: 'AUTO_MATCHED',
+          matchConfidence: 95, // High confidence since tournament ID matched
+          matchReason: 'tournament_id_discrepancy_resolved',
+          
+          // Clear discrepancy flags
+          hasScrapeDiscrepancy: false,
+          discrepancyResolution: 'AUTO_RESOLVED',
+          discrepancyResolvedAt: now,
+          discrepancyResolvedBy: 'GAME_TO_SOCIAL_MATCHER',
+          discrepancyResolutionNotes: `Game ${game.id} scraped with status ${game.gameStatus}`,
+          
+          // Update rescrape result if applicable
+          rescrapeCompletedAt: link.rescrapeRequested ? now : null,
+          rescrapeResult: link.rescrapeRequested ? 'SUCCESS' : null,
+          rescrapeResolvedGameStatus: game.gameStatus,
+          
+          // Set as primary if this is the only link
+          isPrimaryGame: true,
+          
+          updatedAt: now
+        };
+        
+        await updateSocialPostGameLink(link.id, linkUpdate);
+        
+        // Update the SocialPost to mark as linked
+        await updateSocialPost(link.socialPostId, {
+          linkedGameId: game.id,
+          primaryLinkedGameId: game.id,
+          processingStatus: 'LINKED',
+          hasUnverifiedLinks: true
+        });
+        
+        // Update SocialPostGameData if it has discrepancy reference
+        if (link.socialPostGameDataId) {
+          await updateSocialPostGameData(link.socialPostGameDataId, {
+            hasScrapeDiscrepancy: false,
+            suggestedGameId: game.id
+          });
+        }
+        
+        result.resolved++;
+        result.details.push({
+          linkId: link.id,
+          socialPostId: link.socialPostId,
+          extractedTournamentId: link.extractedTournamentId,
+          previousLinkType: link.linkType,
+          previousResolution: link.discrepancyResolution,
+          newLinkType: 'AUTO_MATCHED',
+          newResolution: 'AUTO_RESOLVED',
+          gameId: game.id,
+          status: 'RESOLVED'
+        });
+        
+        console.log(`[GAME-TO-SOCIAL] Successfully resolved link ${link.id}`);
+        
+      } catch (linkError) {
+        console.error(`[GAME-TO-SOCIAL] Failed to resolve link ${link.id}:`, linkError);
+        result.failed++;
+        result.details.push({
+          linkId: link.id,
+          socialPostId: link.socialPostId,
+          status: 'FAILED',
+          error: linkError.message
+        });
+      }
+    }
+    
+    console.log(`[GAME-TO-SOCIAL] Discrepancy resolution complete: ${result.resolved} resolved, ${result.failed} failed`);
+    
+    return result;
+    
+  } catch (error) {
+    console.error('[GAME-TO-SOCIAL] Error resolving discrepancy links:', error);
+    result.error = error.message;
+    return result;
+  }
+};
+
+// ===================================================================
 // MAIN MATCHING FUNCTION
 // ===================================================================
 
@@ -211,13 +373,16 @@ const matchGameToSocialPosts = async (game, options = {}) => {
     maxCandidates = 100,
     includeAlreadyLinked = false,
     includeTicketData = true,
-    includeReconciliationPreview = true
+    includeReconciliationPreview = true,
+    // NEW v3.0.0: Discrepancy resolution option
+    resolveDiscrepancies = true
   } = options;
   
   const startTime = Date.now();
   
   console.log(`[GAME-TO-SOCIAL] Starting match for game: ${game.id}`);
   console.log(`[GAME-TO-SOCIAL] Game: ${game.name} @ ${game.gameStartDateTime}`);
+  console.log(`[GAME-TO-SOCIAL] Tournament ID: ${game.tournamentId || 'none'}`);
   console.log(`[GAME-TO-SOCIAL] Game has accumulator tickets: ${game.hasAccumulatorTickets || false}, count: ${game.numberOfAccumulatorTicketsPaid || 0}`);
   
   const result = {
@@ -232,11 +397,15 @@ const matchGameToSocialPosts = async (game, options = {}) => {
     existingLinks: 0,
     matchedPosts: [],
     linkDetails: [],
+    // NEW v3.0.0: Discrepancy resolution results
+    discrepanciesResolved: 0,
+    discrepancyDetails: [],
     ticketDataSummary: {
       postsWithTicketData: 0,
       totalTicketsFromPosts: 0,
       postsWithReconciliationIssues: 0
     },
+    matchContext: null,  // Will be populated with search context
     processingTimeMs: 0,
     error: null
   };
@@ -251,14 +420,36 @@ const matchGameToSocialPosts = async (game, options = {}) => {
       return result;
     }
     
-    // Get existing links for this game (to avoid duplicates)
+    // =========================================================================
+    // STEP 1: Resolve pending discrepancy links (NEW v3.0.0)
+    // =========================================================================
+    if (resolveDiscrepancies && game.tournamentId) {
+      console.log('[GAME-TO-SOCIAL] Step 1: Resolving discrepancy links...');
+      
+      const discrepancyResult = await resolveDiscrepancyLinks(game, options);
+      
+      result.discrepanciesResolved = discrepancyResult.resolved;
+      result.discrepancyDetails = discrepancyResult.details;
+      
+      if (discrepancyResult.resolved > 0) {
+        console.log(`[GAME-TO-SOCIAL] Resolved ${discrepancyResult.resolved} discrepancy links`);
+      }
+    } else {
+      console.log('[GAME-TO-SOCIAL] Step 1: Skipping discrepancy resolution (no tournamentId or disabled)');
+    }
+    
+    // =========================================================================
+    // STEP 2: Get existing links for this game (to avoid duplicates)
+    // =========================================================================
     const existingGameLinks = await getLinksByGame(game.id);
     const linkedPostIds = new Set(existingGameLinks.map(l => l.socialPostId));
     result.existingLinks = existingGameLinks.length;
     
     console.log(`[GAME-TO-SOCIAL] Game has ${existingGameLinks.length} existing links`);
     
-    // Find candidate posts
+    // =========================================================================
+    // STEP 3: Find candidate posts
+    // =========================================================================
     console.log(`[GAME-TO-SOCIAL] Finding candidate posts...`);
     const matchResult = await findMatchingPosts(game, {
       maxCandidates,
@@ -269,6 +460,23 @@ const matchGameToSocialPosts = async (game, options = {}) => {
     
     result.candidatesFound = matchResult.candidatesFound;
     result.candidatesScored = matchResult.candidates.length;
+    
+    // Build match context for result
+    const searchRange = getPostSearchRange(game);
+    result.matchContext = {
+      matchMethod: game.tournamentId ? 'tournament_id_and_fuzzy' : 'venue_date',
+      venueId: game.venueId,
+      venueName: game.venueName || null,
+      searchRange: {
+        searchStart: searchRange.start,
+        searchEnd: searchRange.end
+      },
+      candidatesScored: result.candidatesScored,
+      candidatesAboveMinimum: matchResult.candidates.filter(c => c.matchConfidence >= autoLinkThreshold).length,
+      // NEW v3.0.0: Discrepancy context
+      pendingDiscrepanciesFound: result.discrepancyDetails.length,
+      discrepanciesResolvedByTournamentId: result.discrepanciesResolved
+    };
     
     console.log(`[GAME-TO-SOCIAL] Found ${matchResult.candidatesFound} candidates, ${matchResult.candidates.length} scored above minimum`);
     
@@ -302,7 +510,9 @@ const matchGameToSocialPosts = async (game, options = {}) => {
     
     console.log(`[GAME-TO-SOCIAL] ${autoLinkCandidates.length} candidates above auto-link threshold (${autoLinkThreshold}%)`);
     
-    // Create links for qualifying candidates
+    // =========================================================================
+    // STEP 4: Create links for qualifying candidates
+    // =========================================================================
     if (!skipLinking && autoLinkCandidates.length > 0) {
       console.log(`[GAME-TO-SOCIAL] Creating links...`);
       
@@ -337,6 +547,11 @@ const matchGameToSocialPosts = async (game, options = {}) => {
           
           const now = new Date().toISOString();
           
+          // Check if this was a discrepancy link that was just resolved
+          const wasDiscrepancyLink = result.discrepancyDetails.some(
+            d => d.socialPostId === candidate.socialPostId && d.status === 'RESOLVED'
+          );
+          
           // Build link record with ticket data
           // UPDATED: matchSignals is now an object from postFinder, stringify it here
           const link = addDataStoreFields({
@@ -352,6 +567,9 @@ const matchGameToSocialPosts = async (game, options = {}) => {
             mentionOrder,
             linkedAt: now,
             linkedBy: 'GAME_TO_SOCIAL_MATCHER',
+            
+            // No scrape discrepancy for successful matches
+            hasScrapeDiscrepancy: false,
             
             // NEW: Ticket data fields
             hasTicketData: candidate.hasTicketData || false,
@@ -394,21 +612,33 @@ const matchGameToSocialPosts = async (game, options = {}) => {
           result.linksCreated++;
           result.matchedPosts.push({
             socialPostId: candidate.socialPostId,
+            postDate: candidate.postDate,
+            contentType: candidate.contentType,
+            extractedBuyIn: candidate.extractedBuyIn,
+            extractedVenueName: candidate.extractedVenueName,
             matchConfidence: candidate.matchConfidence,
             matchReason: candidate.matchReason,
+            matchSignals: candidate.matchSignals,
+            rank: result.matchedPosts.length + 1,
             isPrimaryGame,
             mentionOrder,
+            wouldLink: true,
             hasTicketData: candidate.hasTicketData || false,
-            hasReconciliationDiscrepancy: candidate.reconciliationPreview?.hasDiscrepancy || false
+            hasReconciliationDiscrepancy: candidate.reconciliationPreview?.hasDiscrepancy || false,
+            // NEW v3.0.0
+            wasDiscrepancyLink,
+            discrepancyLinkId: wasDiscrepancyLink ? result.discrepancyDetails.find(d => d.socialPostId === candidate.socialPostId)?.linkId : null
           });
           
           result.linkDetails.push({
             socialPostId: candidate.socialPostId,
             linkId: link.id,
-            status: 'CREATED',
+            status: wasDiscrepancyLink ? 'DISCREPANCY_RESOLVED' : 'CREATED',
+            reason: null,
             matchConfidence: candidate.matchConfidence,
             hasTicketData: candidate.hasTicketData || false,
-            hasReconciliationDiscrepancy: candidate.reconciliationPreview?.hasDiscrepancy || false
+            hasReconciliationDiscrepancy: candidate.reconciliationPreview?.hasDiscrepancy || false,
+            error: null
           });
           
           // Add to our set to prevent duplicate processing
@@ -427,10 +657,18 @@ const matchGameToSocialPosts = async (game, options = {}) => {
       }
     } else if (skipLinking) {
       console.log(`[GAME-TO-SOCIAL] Skipping link creation (preview mode)`);
-      result.matchedPosts = autoLinkCandidates.map(c => ({
+      result.matchedPosts = autoLinkCandidates.map((c, idx) => ({
         socialPostId: c.socialPostId,
+        postDate: c.postDate,
+        contentType: c.contentType,
+        extractedBuyIn: c.extractedBuyIn,
+        extractedVenueName: c.extractedVenueName,
         matchConfidence: c.matchConfidence,
         matchReason: c.matchReason,
+        matchSignals: c.matchSignals,
+        rank: idx + 1,
+        isPrimaryGame: idx === 0,
+        mentionOrder: idx + 1,
         wouldLink: true,
         hasTicketData: c.hasTicketData || false,
         ticketData: c.ticketData || null,
@@ -441,7 +679,7 @@ const matchGameToSocialPosts = async (game, options = {}) => {
     result.success = true;
     result.processingTimeMs = Date.now() - startTime;
     
-    console.log(`[GAME-TO-SOCIAL] Complete: ${result.linksCreated} links created, ${result.linksSkipped} skipped in ${result.processingTimeMs}ms`);
+    console.log(`[GAME-TO-SOCIAL] Complete: ${result.linksCreated} links created, ${result.linksSkipped} skipped, ${result.discrepanciesResolved} discrepancies resolved in ${result.processingTimeMs}ms`);
     
     return result;
     
@@ -473,6 +711,7 @@ const handleStreamEvent = async (event) => {
     skipped: 0,
     errors: 0,
     linksCreated: 0,
+    discrepanciesResolved: 0,  // NEW v3.0.0
     gamesProcessed: new Set(),  // Track unique games (avoid duplicates in batch)
     ticketDataStats: {
       gamesWithTicketMatches: 0,
@@ -539,11 +778,13 @@ const handleStreamEvent = async (event) => {
         autoLinkThreshold: DEFAULT_AUTO_LINK_THRESHOLD,
         skipLinking: false,
         includeTicketData: true,
-        includeReconciliationPreview: true
+        includeReconciliationPreview: true,
+        resolveDiscrepancies: true  // NEW v3.0.0
       });
       
       results.processed++;
       results.linksCreated += matchResult.linksCreated || 0;
+      results.discrepanciesResolved += matchResult.discrepanciesResolved || 0;  // NEW v3.0.0
       results.gamesProcessed.add(gameId);
       
       // Track ticket data stats
@@ -563,6 +804,7 @@ const handleStreamEvent = async (event) => {
         candidatesFound: matchResult.candidatesFound,
         linksCreated: matchResult.linksCreated,
         linksSkipped: matchResult.linksSkipped,
+        discrepanciesResolved: matchResult.discrepanciesResolved,  // NEW v3.0.0
         ticketDataSummary: matchResult.ticketDataSummary,
         success: matchResult.success
       });
@@ -577,7 +819,7 @@ const handleStreamEvent = async (event) => {
     }
   }
   
-  console.log(`[GAME-TO-SOCIAL] Stream complete: ${results.processed} games processed, ${results.linksCreated} links created, ${results.skipped} skipped, ${results.errors} errors`);
+  console.log(`[GAME-TO-SOCIAL] Stream complete: ${results.processed} games processed, ${results.linksCreated} links created, ${results.discrepanciesResolved} discrepancies resolved, ${results.skipped} skipped, ${results.errors} errors`);
   console.log(`[GAME-TO-SOCIAL] Ticket stats: ${results.ticketDataStats.gamesWithTicketMatches} games with ticket matches, ${results.ticketDataStats.reconciliationIssues} reconciliation issues`);
   
   return {
@@ -614,7 +856,8 @@ const handleGraphQLInvocation = async (event) => {
         skipLinking: input.previewOnly === true,
         maxCandidates: input.maxCandidates,
         includeTicketData: input.includeTicketData !== false,
-        includeReconciliationPreview: input.includeReconciliationPreview !== false
+        includeReconciliationPreview: input.includeReconciliationPreview !== false,
+        resolveDiscrepancies: input.resolveDiscrepancies !== false  // NEW v3.0.0
       });
     }
     
@@ -625,7 +868,8 @@ const handleGraphQLInvocation = async (event) => {
         skipLinking: input.previewOnly === true,
         maxCandidates: input.maxCandidates,
         includeTicketData: input.includeTicketData !== false,
-        includeReconciliationPreview: input.includeReconciliationPreview !== false
+        includeReconciliationPreview: input.includeReconciliationPreview !== false,
+        resolveDiscrepancies: input.resolveDiscrepancies !== false  // NEW v3.0.0
       };
       
       const batchResults = [];
@@ -634,6 +878,7 @@ const handleGraphQLInvocation = async (event) => {
         totalTicketsFromPosts: 0,
         reconciliationIssues: 0
       };
+      let totalDiscrepanciesResolved = 0;  // NEW v3.0.0
       
       for (const gameId of gameIds) {
         const game = await getGame(gameId);
@@ -657,6 +902,9 @@ const handleGraphQLInvocation = async (event) => {
           ticketStats.totalTicketsFromPosts += result.ticketDataSummary.totalTicketsFromPosts || 0;
           ticketStats.reconciliationIssues += result.ticketDataSummary.postsWithReconciliationIssues || 0;
         }
+        
+        // NEW v3.0.0
+        totalDiscrepanciesResolved += result.discrepanciesResolved || 0;
       }
       
       return {
@@ -664,6 +912,7 @@ const handleGraphQLInvocation = async (event) => {
         processed: batchResults.filter(r => r.success).length,
         totalLinksCreated: batchResults.reduce((sum, r) => sum + (r.linksCreated || 0), 0),
         totalLinksSkipped: batchResults.reduce((sum, r) => sum + (r.linksSkipped || 0), 0),
+        totalDiscrepanciesResolved,  // NEW v3.0.0
         ticketStats,
         results: batchResults
       };
@@ -685,7 +934,8 @@ const handleGraphQLInvocation = async (event) => {
         skipLinking: true,
         maxCandidates: input.maxCandidates || 50,
         includeTicketData: true,
-        includeReconciliationPreview: true
+        includeReconciliationPreview: true,
+        resolveDiscrepancies: false  // Don't resolve in preview mode
       });
     }
     
@@ -725,7 +975,8 @@ exports.handler = async (event, context) => {
       return await matchGameToSocialPosts(event.game, {
         ...(event.options || {}),
         includeTicketData: true,
-        includeReconciliationPreview: true
+        includeReconciliationPreview: true,
+        resolveDiscrepancies: true
       });
     }
     
@@ -744,7 +995,8 @@ exports.handler = async (event, context) => {
       return await matchGameToSocialPosts(game, {
         ...(event.options || {}),
         includeTicketData: true,
-        includeReconciliationPreview: true
+        includeReconciliationPreview: true,
+        resolveDiscrepancies: true
       });
     }
     
@@ -770,6 +1022,7 @@ module.exports = {
   handler: exports.handler,
   handleStreamEvent,
   matchGameToSocialPosts,
+  resolveDiscrepancyLinks,  // NEW v3.0.0
   shouldMatchGame,
   safeStringify,  // Export for testing
   MATCH_TRIGGER_STATUSES,

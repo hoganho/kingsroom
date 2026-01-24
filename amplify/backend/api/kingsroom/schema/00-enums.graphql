@@ -325,6 +325,7 @@ enum ScraperJobTriggerSource {
   CONTROL
   BULK
   ADMIN
+  SOCIAL_DISCREPANCY
 }
 
 enum ScraperJobStatus {
@@ -494,6 +495,9 @@ enum SocialPostLinkType {
   VERIFIED             # Auto-matched and verified by admin
   REJECTED             # Auto-matched but rejected by admin
   TOURNAMENT_ID        # Matched via explicit tournament ID in URL
+  PENDING_SCRAPE       # Tournament ID found in social post, awaiting game scrape
+  RESCRAPE_REQUESTED   # Re-scrape has been triggered for this tournament ID
+  RESCRAPE_RESOLVED    # Re-scrape completed, link resolved
 }
 
 # Types of non-cash prizes extracted from tournament results
@@ -530,6 +534,32 @@ enum TicketAwardSource {
   SCRAPED_DATA            # From tournament data scraping
   MANUAL_ENTRY            # Manually entered by admin
   RECURRING_GAME_DEFAULT  # Inherited from recurring game template
+}
+
+# ===================================================================
+# SCRAPE DISCREPANCY ENUMS
+# ===================================================================
+# Used to track when social posts reference tournaments that haven't
+# been scraped yet or have problematic scrape status
+
+enum ScrapeDiscrepancyType {
+  NONE                        # No discrepancy (normal match)
+  GAME_NOT_IN_DATABASE        # Tournament ID from social, but no Game record exists
+  GAME_STATUS_NOT_FOUND       # Game exists but has NOT_FOUND status (scrape returned 404)
+  GAME_STATUS_NOT_PUBLISHED   # Game exists but has NOT_PUBLISHED status
+  STATUS_MISMATCH             # Social shows RESULT but Game status is not FINISHED
+  STALE_DATA                  # Game exists but data appears outdated vs social post
+}
+
+# Resolution status for scrape discrepancies
+enum ScrapeDiscrepancyResolution {
+  UNRESOLVED           # Discrepancy detected, awaiting action
+  RESCRAPE_PENDING     # Re-scrape triggered, waiting for completion
+  RESCRAPE_SUCCESS     # Re-scrape completed successfully, game now exists/valid
+  RESCRAPE_FAILED      # Re-scrape attempted but still failed
+  MANUALLY_RESOLVED    # Admin manually resolved (e.g., linked to different game)
+  IGNORED              # Admin chose to ignore this discrepancy
+  AUTO_RESOLVED        # System auto-resolved (e.g., game appeared later)
 }
 
 # ===================================================================

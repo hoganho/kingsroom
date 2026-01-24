@@ -309,7 +309,8 @@ export enum ScraperJobTriggerSource {
   API = "API",
   CONTROL = "CONTROL",
   BULK = "BULK",
-  ADMIN = "ADMIN"
+  ADMIN = "ADMIN",
+  SOCIAL_DISCREPANCY = "SOCIAL_DISCREPANCY"
 }
 
 export enum ScraperJobStatus {
@@ -465,7 +466,10 @@ export enum SocialPostLinkType {
   MANUAL_LINKED = "MANUAL_LINKED",
   VERIFIED = "VERIFIED",
   REJECTED = "REJECTED",
-  TOURNAMENT_ID = "TOURNAMENT_ID"
+  TOURNAMENT_ID = "TOURNAMENT_ID",
+  PENDING_SCRAPE = "PENDING_SCRAPE",
+  RESCRAPE_REQUESTED = "RESCRAPE_REQUESTED",
+  RESCRAPE_RESOLVED = "RESCRAPE_RESOLVED"
 }
 
 export enum NonCashPrizeType {
@@ -492,6 +496,25 @@ export enum TicketAwardSource {
   SCRAPED_DATA = "SCRAPED_DATA",
   MANUAL_ENTRY = "MANUAL_ENTRY",
   RECURRING_GAME_DEFAULT = "RECURRING_GAME_DEFAULT"
+}
+
+export enum ScrapeDiscrepancyType {
+  NONE = "NONE",
+  GAME_NOT_IN_DATABASE = "GAME_NOT_IN_DATABASE",
+  GAME_STATUS_NOT_FOUND = "GAME_STATUS_NOT_FOUND",
+  GAME_STATUS_NOT_PUBLISHED = "GAME_STATUS_NOT_PUBLISHED",
+  STATUS_MISMATCH = "STATUS_MISMATCH",
+  STALE_DATA = "STALE_DATA"
+}
+
+export enum ScrapeDiscrepancyResolution {
+  UNRESOLVED = "UNRESOLVED",
+  RESCRAPE_PENDING = "RESCRAPE_PENDING",
+  RESCRAPE_SUCCESS = "RESCRAPE_SUCCESS",
+  RESCRAPE_FAILED = "RESCRAPE_FAILED",
+  MANUALLY_RESOLVED = "MANUALLY_RESOLVED",
+  IGNORED = "IGNORED",
+  AUTO_RESOLVED = "AUTO_RESOLVED"
 }
 
 export enum BackgroundTaskType {
@@ -4859,6 +4882,11 @@ type EagerProcessSocialPostResult = {
   readonly linksSkipped?: number | null;
   readonly linkDetails?: SocialPostGameLink[] | null;
   readonly reconciliationPreview?: SocialToGameReconciliation | null;
+  readonly scrapeDiscrepancyDetected?: boolean | null;
+  readonly scrapeDiscrepancyType?: ScrapeDiscrepancyType | keyof typeof ScrapeDiscrepancyType | null;
+  readonly scrapeDiscrepancyLink?: SocialPostGameLink | null;
+  readonly rescrapeTriggered?: boolean | null;
+  readonly rescrapeJobId?: string | null;
   readonly processingTimeMs?: number | null;
 }
 
@@ -4877,6 +4905,11 @@ type LazyProcessSocialPostResult = {
   readonly linksSkipped?: number | null;
   readonly linkDetails: AsyncCollection<SocialPostGameLink>;
   readonly reconciliationPreview?: SocialToGameReconciliation | null;
+  readonly scrapeDiscrepancyDetected?: boolean | null;
+  readonly scrapeDiscrepancyType?: ScrapeDiscrepancyType | keyof typeof ScrapeDiscrepancyType | null;
+  readonly scrapeDiscrepancyLink: AsyncItem<SocialPostGameLink | undefined>;
+  readonly rescrapeTriggered?: boolean | null;
+  readonly rescrapeJobId?: string | null;
   readonly processingTimeMs?: number | null;
 }
 
@@ -5232,6 +5265,8 @@ type EagerGameToSocialMatchResult = {
   readonly linksCreated?: number | null;
   readonly linksSkipped?: number | null;
   readonly existingLinks?: number | null;
+  readonly discrepanciesResolved?: number | null;
+  readonly discrepancyDetails?: DiscrepancyResolutionDetail[] | null;
   readonly matchedPosts?: SocialPostMatchCandidate[] | null;
   readonly linkDetails?: GameToSocialLinkDetail[] | null;
   readonly matchContext?: GameToSocialMatchContext | null;
@@ -5249,6 +5284,8 @@ type LazyGameToSocialMatchResult = {
   readonly linksCreated?: number | null;
   readonly linksSkipped?: number | null;
   readonly existingLinks?: number | null;
+  readonly discrepanciesResolved?: number | null;
+  readonly discrepancyDetails?: DiscrepancyResolutionDetail[] | null;
   readonly matchedPosts?: SocialPostMatchCandidate[] | null;
   readonly linkDetails?: GameToSocialLinkDetail[] | null;
   readonly matchContext?: GameToSocialMatchContext | null;
@@ -5357,6 +5394,7 @@ type EagerBatchGameToSocialMatchResult = {
   readonly processed: number;
   readonly totalLinksCreated: number;
   readonly totalLinksSkipped: number;
+  readonly totalDiscrepanciesResolved?: number | null;
   readonly results?: GameToSocialMatchResult[] | null;
 }
 
@@ -5365,12 +5403,229 @@ type LazyBatchGameToSocialMatchResult = {
   readonly processed: number;
   readonly totalLinksCreated: number;
   readonly totalLinksSkipped: number;
+  readonly totalDiscrepanciesResolved?: number | null;
   readonly results?: GameToSocialMatchResult[] | null;
 }
 
 export declare type BatchGameToSocialMatchResult = LazyLoading extends LazyLoadingDisabled ? EagerBatchGameToSocialMatchResult : LazyBatchGameToSocialMatchResult
 
 export declare const BatchGameToSocialMatchResult: (new (init: ModelInit<BatchGameToSocialMatchResult>) => BatchGameToSocialMatchResult)
+
+type EagerDiscrepancyResolutionDetail = {
+  readonly linkId: string;
+  readonly socialPostId: string;
+  readonly extractedTournamentId?: number | null;
+  readonly extractedTournamentUrl?: string | null;
+  readonly previousLinkType?: SocialPostLinkType | keyof typeof SocialPostLinkType | null;
+  readonly newLinkType?: SocialPostLinkType | keyof typeof SocialPostLinkType | null;
+  readonly previousResolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly newResolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly gameId?: string | null;
+}
+
+type LazyDiscrepancyResolutionDetail = {
+  readonly linkId: string;
+  readonly socialPostId: string;
+  readonly extractedTournamentId?: number | null;
+  readonly extractedTournamentUrl?: string | null;
+  readonly previousLinkType?: SocialPostLinkType | keyof typeof SocialPostLinkType | null;
+  readonly newLinkType?: SocialPostLinkType | keyof typeof SocialPostLinkType | null;
+  readonly previousResolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly newResolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly gameId?: string | null;
+}
+
+export declare type DiscrepancyResolutionDetail = LazyLoading extends LazyLoadingDisabled ? EagerDiscrepancyResolutionDetail : LazyDiscrepancyResolutionDetail
+
+export declare const DiscrepancyResolutionDetail: (new (init: ModelInit<DiscrepancyResolutionDetail>) => DiscrepancyResolutionDetail)
+
+type EagerScrapeDiscrepancyConnection = {
+  readonly items: ScrapeDiscrepancyInfo[];
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+  readonly byType?: string | null;
+  readonly byResolution?: string | null;
+}
+
+type LazyScrapeDiscrepancyConnection = {
+  readonly items: ScrapeDiscrepancyInfo[];
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+  readonly byType?: string | null;
+  readonly byResolution?: string | null;
+}
+
+export declare type ScrapeDiscrepancyConnection = LazyLoading extends LazyLoadingDisabled ? EagerScrapeDiscrepancyConnection : LazyScrapeDiscrepancyConnection
+
+export declare const ScrapeDiscrepancyConnection: (new (init: ModelInit<ScrapeDiscrepancyConnection>) => ScrapeDiscrepancyConnection)
+
+type EagerScrapeDiscrepancyInfo = {
+  readonly linkId: string;
+  readonly socialPostId: string;
+  readonly socialPost?: SocialPost | null;
+  readonly extractedTournamentId?: number | null;
+  readonly extractedTournamentUrl?: string | null;
+  readonly scrapeDiscrepancyType: ScrapeDiscrepancyType | keyof typeof ScrapeDiscrepancyType;
+  readonly detectedAt?: string | null;
+  readonly entityId?: string | null;
+  readonly entityName?: string | null;
+  readonly gameId?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly gameName?: string | null;
+  readonly detectedGameEntityId?: string | null;
+  readonly detectedGameEntityName?: string | null;
+  readonly rescrapeRequested?: boolean | null;
+  readonly rescrapeRequestedAt?: string | null;
+  readonly rescrapeJobId?: string | null;
+  readonly rescrapeResult?: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus | null;
+  readonly resolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly resolvedAt?: string | null;
+  readonly resolvedBy?: string | null;
+  readonly resolutionNotes?: string | null;
+}
+
+type LazyScrapeDiscrepancyInfo = {
+  readonly linkId: string;
+  readonly socialPostId: string;
+  readonly socialPost: AsyncItem<SocialPost | undefined>;
+  readonly extractedTournamentId?: number | null;
+  readonly extractedTournamentUrl?: string | null;
+  readonly scrapeDiscrepancyType: ScrapeDiscrepancyType | keyof typeof ScrapeDiscrepancyType;
+  readonly detectedAt?: string | null;
+  readonly entityId?: string | null;
+  readonly entityName?: string | null;
+  readonly gameId?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly gameName?: string | null;
+  readonly detectedGameEntityId?: string | null;
+  readonly detectedGameEntityName?: string | null;
+  readonly rescrapeRequested?: boolean | null;
+  readonly rescrapeRequestedAt?: string | null;
+  readonly rescrapeJobId?: string | null;
+  readonly rescrapeResult?: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus | null;
+  readonly resolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly resolvedAt?: string | null;
+  readonly resolvedBy?: string | null;
+  readonly resolutionNotes?: string | null;
+}
+
+export declare type ScrapeDiscrepancyInfo = LazyLoading extends LazyLoadingDisabled ? EagerScrapeDiscrepancyInfo : LazyScrapeDiscrepancyInfo
+
+export declare const ScrapeDiscrepancyInfo: (new (init: ModelInit<ScrapeDiscrepancyInfo>) => ScrapeDiscrepancyInfo)
+
+type EagerTriggerRescrapeResult = {
+  readonly success: boolean;
+  readonly linkId?: string | null;
+  readonly rescrapeJobId?: string | null;
+  readonly tournamentUrl?: string | null;
+  readonly tournamentId?: number | null;
+  readonly linkCreated?: boolean | null;
+  readonly deduplicated?: boolean | null;
+  readonly message?: string | null;
+  readonly error?: string | null;
+}
+
+type LazyTriggerRescrapeResult = {
+  readonly success: boolean;
+  readonly linkId?: string | null;
+  readonly rescrapeJobId?: string | null;
+  readonly tournamentUrl?: string | null;
+  readonly tournamentId?: number | null;
+  readonly linkCreated?: boolean | null;
+  readonly deduplicated?: boolean | null;
+  readonly message?: string | null;
+  readonly error?: string | null;
+}
+
+export declare type TriggerRescrapeResult = LazyLoading extends LazyLoadingDisabled ? EagerTriggerRescrapeResult : LazyTriggerRescrapeResult
+
+export declare const TriggerRescrapeResult: (new (init: ModelInit<TriggerRescrapeResult>) => TriggerRescrapeResult)
+
+type EagerResolveDiscrepancyResult = {
+  readonly success: boolean;
+  readonly linkId?: string | null;
+  readonly previousResolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly newResolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly gameId?: string | null;
+  readonly message?: string | null;
+  readonly error?: string | null;
+}
+
+type LazyResolveDiscrepancyResult = {
+  readonly success: boolean;
+  readonly linkId?: string | null;
+  readonly previousResolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly newResolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly gameId?: string | null;
+  readonly message?: string | null;
+  readonly error?: string | null;
+}
+
+export declare type ResolveDiscrepancyResult = LazyLoading extends LazyLoadingDisabled ? EagerResolveDiscrepancyResult : LazyResolveDiscrepancyResult
+
+export declare const ResolveDiscrepancyResult: (new (init: ModelInit<ResolveDiscrepancyResult>) => ResolveDiscrepancyResult)
+
+type EagerScrapeDiscrepancyStats = {
+  readonly totalDiscrepancies: number;
+  readonly unresolvedCount: number;
+  readonly resolvingCount: number;
+  readonly resolvedCount: number;
+  readonly gameNotInDatabaseCount?: number | null;
+  readonly gameStatusNotFoundCount?: number | null;
+  readonly gameStatusNotPublishedCount?: number | null;
+  readonly entityMismatchCount?: number | null;
+  readonly statusMismatchCount?: number | null;
+  readonly pendingRescrapes?: number | null;
+  readonly byEntity?: string | null;
+}
+
+type LazyScrapeDiscrepancyStats = {
+  readonly totalDiscrepancies: number;
+  readonly unresolvedCount: number;
+  readonly resolvingCount: number;
+  readonly resolvedCount: number;
+  readonly gameNotInDatabaseCount?: number | null;
+  readonly gameStatusNotFoundCount?: number | null;
+  readonly gameStatusNotPublishedCount?: number | null;
+  readonly entityMismatchCount?: number | null;
+  readonly statusMismatchCount?: number | null;
+  readonly pendingRescrapes?: number | null;
+  readonly byEntity?: string | null;
+}
+
+export declare type ScrapeDiscrepancyStats = LazyLoading extends LazyLoadingDisabled ? EagerScrapeDiscrepancyStats : LazyScrapeDiscrepancyStats
+
+export declare const ScrapeDiscrepancyStats: (new (init: ModelInit<ScrapeDiscrepancyStats>) => ScrapeDiscrepancyStats)
+
+type EagerScanForDiscrepanciesResult = {
+  readonly success: boolean;
+  readonly extractionsScanned: number;
+  readonly uniqueUrlsChecked: number;
+  readonly discrepanciesFound: number;
+  readonly linksCreated: number;
+  readonly rescrapesTriggered: number;
+  readonly byType?: string | null;
+  readonly discrepancies?: ScrapeDiscrepancyInfo[] | null;
+  readonly error?: string | null;
+  readonly processingTimeMs?: number | null;
+}
+
+type LazyScanForDiscrepanciesResult = {
+  readonly success: boolean;
+  readonly extractionsScanned: number;
+  readonly uniqueUrlsChecked: number;
+  readonly discrepanciesFound: number;
+  readonly linksCreated: number;
+  readonly rescrapesTriggered: number;
+  readonly byType?: string | null;
+  readonly discrepancies?: ScrapeDiscrepancyInfo[] | null;
+  readonly error?: string | null;
+  readonly processingTimeMs?: number | null;
+}
+
+export declare type ScanForDiscrepanciesResult = LazyLoading extends LazyLoadingDisabled ? EagerScanForDiscrepanciesResult : LazyScanForDiscrepanciesResult
+
+export declare const ScanForDiscrepanciesResult: (new (init: ModelInit<ScanForDiscrepanciesResult>) => ScanForDiscrepanciesResult)
 
 type EagerUserManagementResponse = {
   readonly success: boolean;
@@ -9959,6 +10214,27 @@ type EagerSocialPostGameLink = {
   readonly extractedTotalEntries?: number | null;
   readonly placementCount?: number | null;
   readonly contentType?: SocialPostContentType | keyof typeof SocialPostContentType | null;
+  readonly extractedTournamentUrl?: string | null;
+  readonly extractedTournamentId?: number | null;
+  readonly entityId?: string | null;
+  readonly hasScrapeDiscrepancy?: boolean | null;
+  readonly scrapeDiscrepancyType?: ScrapeDiscrepancyType | keyof typeof ScrapeDiscrepancyType | null;
+  readonly scrapeDiscrepancyDetectedAt?: string | null;
+  readonly detectedGameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly detectedScrapeURLStatus?: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus | null;
+  readonly detectedGameEntityId?: string | null;
+  readonly rescrapeRequested?: boolean | null;
+  readonly rescrapeRequestedAt?: string | null;
+  readonly rescrapeRequestedBy?: string | null;
+  readonly rescrapeJobId?: string | null;
+  readonly rescrapeAttemptId?: string | null;
+  readonly rescrapeCompletedAt?: string | null;
+  readonly rescrapeResult?: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus | null;
+  readonly rescrapeResolvedGameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly discrepancyResolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly discrepancyResolvedAt?: string | null;
+  readonly discrepancyResolvedBy?: string | null;
+  readonly discrepancyResolutionNotes?: string | null;
   readonly linkedAt: string;
   readonly linkedBy?: string | null;
   readonly verifiedAt?: string | null;
@@ -9999,6 +10275,27 @@ type LazySocialPostGameLink = {
   readonly extractedTotalEntries?: number | null;
   readonly placementCount?: number | null;
   readonly contentType?: SocialPostContentType | keyof typeof SocialPostContentType | null;
+  readonly extractedTournamentUrl?: string | null;
+  readonly extractedTournamentId?: number | null;
+  readonly entityId?: string | null;
+  readonly hasScrapeDiscrepancy?: boolean | null;
+  readonly scrapeDiscrepancyType?: ScrapeDiscrepancyType | keyof typeof ScrapeDiscrepancyType | null;
+  readonly scrapeDiscrepancyDetectedAt?: string | null;
+  readonly detectedGameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly detectedScrapeURLStatus?: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus | null;
+  readonly detectedGameEntityId?: string | null;
+  readonly rescrapeRequested?: boolean | null;
+  readonly rescrapeRequestedAt?: string | null;
+  readonly rescrapeRequestedBy?: string | null;
+  readonly rescrapeJobId?: string | null;
+  readonly rescrapeAttemptId?: string | null;
+  readonly rescrapeCompletedAt?: string | null;
+  readonly rescrapeResult?: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus | null;
+  readonly rescrapeResolvedGameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly discrepancyResolution?: ScrapeDiscrepancyResolution | keyof typeof ScrapeDiscrepancyResolution | null;
+  readonly discrepancyResolvedAt?: string | null;
+  readonly discrepancyResolvedBy?: string | null;
+  readonly discrepancyResolutionNotes?: string | null;
   readonly linkedAt: string;
   readonly linkedBy?: string | null;
   readonly verifiedAt?: string | null;
@@ -10086,6 +10383,10 @@ type EagerSocialPostGameData = {
   readonly hasReconciliationDiscrepancy?: boolean | null;
   readonly reconciliationNotes?: string | null;
   readonly reconciliationCheckedAt?: string | null;
+  readonly hasScrapeDiscrepancy?: boolean | null;
+  readonly scrapeDiscrepancyType?: ScrapeDiscrepancyType | keyof typeof ScrapeDiscrepancyType | null;
+  readonly scrapeDiscrepancyLinkId?: string | null;
+  readonly scrapeDiscrepancyDetectedAt?: string | null;
   readonly suggestedGameId?: string | null;
   readonly matchCandidateCount?: number | null;
   readonly matchCandidates?: string | null;
@@ -10169,6 +10470,10 @@ type LazySocialPostGameData = {
   readonly hasReconciliationDiscrepancy?: boolean | null;
   readonly reconciliationNotes?: string | null;
   readonly reconciliationCheckedAt?: string | null;
+  readonly hasScrapeDiscrepancy?: boolean | null;
+  readonly scrapeDiscrepancyType?: ScrapeDiscrepancyType | keyof typeof ScrapeDiscrepancyType | null;
+  readonly scrapeDiscrepancyLinkId?: string | null;
+  readonly scrapeDiscrepancyDetectedAt?: string | null;
   readonly suggestedGameId?: string | null;
   readonly matchCandidateCount?: number | null;
   readonly matchCandidates?: string | null;

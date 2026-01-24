@@ -2,12 +2,18 @@
  * utils/graphql.js
  * GraphQL/DynamoDB utilities for gameToSocialMatcher
  * 
+ * VERSION: 3.0.0
+ * 
  * Provides data access functions for:
  * - Games
  * - Social Posts
  * - Social Post Game Data (extractions)
  * - Social Post Game Links
  * - Venues
+ * 
+ * UPDATES v3.0.0:
+ * - Added queryLinksByExtractedTournamentId for discrepancy resolution
+ * - Added updateSocialPostGameData for clearing discrepancy flags
  * 
  * TIMEZONE NOTE:
  * Year-month calculations use AEST to ensure correct GSI partition queries
@@ -363,6 +369,42 @@ const getExtractionBySocialPost = async (socialPostId) => {
   return null;
 };
 
+/**
+ * Update extraction data record
+ * Used to clear discrepancy flags when resolved
+ * 
+ * NEW in v3.0.0
+ * 
+ * @param {string} id - SocialPostGameData ID
+ * @param {Object} updates - Fields to update
+ * @returns {Object} Updated record
+ */
+const updateSocialPostGameData = async (id, updates) => {
+  const now = new Date().toISOString();
+  
+  const updateKeys = Object.keys(updates);
+  const updateExpression = 'SET ' + updateKeys.map(k => `#${k} = :${k}`).join(', ') + ', #updatedAt = :updatedAt';
+  const expressionAttributeNames = {
+    ...Object.fromEntries(updateKeys.map(k => [`#${k}`, k])),
+    '#updatedAt': 'updatedAt'
+  };
+  const expressionAttributeValues = {
+    ...Object.fromEntries(updateKeys.map(k => [`:${k}`, updates[k]])),
+    ':updatedAt': now
+  };
+  
+  const result = await ddbDocClient.send(new UpdateCommand({
+    TableName: getTableName('SocialPostGameData'),
+    Key: { id },
+    UpdateExpression: updateExpression,
+    ExpressionAttributeNames: expressionAttributeNames,
+    ExpressionAttributeValues: expressionAttributeValues,
+    ReturnValues: 'ALL_NEW'
+  }));
+  
+  return result.Attributes;
+};
+
 // ===================================================================
 // SOCIAL POST GAME LINK OPERATIONS
 // ===================================================================
@@ -565,6 +607,43 @@ const updateSocialPostGameLink = async (linkId, updates) => {
 };
 
 // ===================================================================
+// DISCREPANCY RESOLUTION OPERATIONS (NEW v3.0.0)
+// ===================================================================
+
+/**
+ * Query links by extracted tournament ID
+ * Used to find PENDING_SCRAPE links waiting for a specific tournament
+ * 
+ * Uses GSI: byExtractedTournamentId (extractedTournamentId partition, linkedAt sort)
+ * 
+ * @param {number} tournamentId - Tournament ID to search for
+ * @returns {Array} Links with this extracted tournament ID
+ */
+const queryLinksByExtractedTournamentId = async (tournamentId) => {
+  const tid = typeof tournamentId === 'string' ? parseInt(tournamentId, 10) : tournamentId;
+  
+  try {
+    const result = await ddbDocClient.send(new QueryCommand({
+      TableName: getTableName('SocialPostGameLink'),
+      IndexName: 'byExtractedTournamentId',
+      KeyConditionExpression: 'extractedTournamentId = :tid',
+      ExpressionAttributeValues: {
+        ':tid': tid
+      }
+    }));
+    
+    return result.Items || [];
+  } catch (error) {
+    if (error.name === 'ValidationException' && error.message.includes('specified index')) {
+      console.log('[GRAPHQL] byExtractedTournamentId GSI not found - discrepancy resolution will be skipped');
+      return [];
+    }
+    console.error('[GRAPHQL] Error querying byExtractedTournamentId:', error);
+    throw error;
+  }
+};
+
+// ===================================================================
 // HELPER FUNCTIONS
 // ===================================================================
 
@@ -598,6 +677,7 @@ module.exports = {
   
   // Extractions
   getExtractionBySocialPost,
+  updateSocialPostGameData,  // NEW v3.0.0
   
   // Links
   getLinksBySocialPost,
@@ -605,6 +685,9 @@ module.exports = {
   getSocialPostGameLink,
   createSocialPostGameLink,
   updateSocialPostGameLink,
+  
+  // Discrepancy Resolution (NEW v3.0.0)
+  queryLinksByExtractedTournamentId,
   
   // Helpers
   getTableName,

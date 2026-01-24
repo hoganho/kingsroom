@@ -2,7 +2,10 @@
 # ===================================================================
 # SOCIAL POST PROCESSOR - Models, Types, and API
 # ===================================================================
-# UPDATED: Added comprehensive ticket tracking for reconciliation
+# VERSION: 3.0.0
+# UPDATED: Enhanced scrape discrepancy management with URL-based lookup
+# UPDATED: Added ENTITY_MISMATCH detection
+# UPDATED: Added scanForDiscrepancies mutation
 # 
 # This file contains:
 # 1. New models for social post processing (junction table, extraction data, placements)
@@ -10,11 +13,13 @@
 # 3. Input/output types for the processor API
 # 4. Mutations and queries for the socialPostProcessor Lambda
 # 5. Mutations and queries for the gameToSocialMatcher Lambda (reverse matching)
-# 6. NEW: Ticket aggregation and reconciliation types
+# 6. Ticket aggregation and reconciliation types
+# 7. Scrape discrepancy management types and operations
 #
 # DEPENDENCIES:
 # - 00-enums.graphql: SocialPostContentType, SocialPostProcessingStatus, 
-#                     SocialPostLinkType, NonCashPrizeType, GameStatus, etc.
+#                     SocialPostLinkType, NonCashPrizeType, GameStatus,
+#                     ScrapeDiscrepancyType, ScrapeDiscrepancyResolution, etc.
 # - 85-social.graphql: SocialPost model (extended)
 # - 30-games.graphql: Game model (extended)
 # ===================================================================
@@ -56,7 +61,7 @@ type SocialPostGameLink
   extractedGuarantee: Float
   effectiveGameDate: AWSDateTime           # Copied from SocialPostGameData
 
-  # === TICKET DATA (NEW - for gameToSocialMatcher) ===
+  # === TICKET DATA (for gameToSocialMatcher) ===
   socialPostGameDataId: ID
   hasTicketData: Boolean @default(value: "false")
   ticketData: AWSJSON
@@ -70,6 +75,47 @@ type SocialPostGameLink
   extractedTotalEntries: Int
   placementCount: Int
   contentType: SocialPostContentType
+  
+  # ===================================================================
+  # SCRAPE DISCREPANCY TRACKING
+  # ===================================================================
+  # Tournament URL extracted from social post (for Game.sourceUrl lookup - UNIQUE)
+  extractedTournamentUrl: AWSURL
+    @index(name: "byExtractedTournamentUrl", sortKeyFields: ["linkedAt"])
+  # Tournament ID from URL (NOT unique across entities - reference only)
+  extractedTournamentId: Int 
+    @index(name: "byExtractedTournamentId", sortKeyFields: ["linkedAt"])
+  
+  # Entity context for discrepancy matching
+  entityId: ID @index(name: "byDiscrepancyEntity", sortKeyFields: ["scrapeDiscrepancyDetectedAt"])
+  
+  # Discrepancy classification
+  hasScrapeDiscrepancy: Boolean @default(value: "false")
+  scrapeDiscrepancyType: ScrapeDiscrepancyType
+    @index(name: "byScrapeDiscrepancyType", sortKeyFields: ["scrapeDiscrepancyDetectedAt"])
+  scrapeDiscrepancyDetectedAt: AWSDateTime
+  
+  # Snapshot of Game/ScrapeURL status at time of detection
+  detectedGameStatus: GameStatus
+  detectedScrapeURLStatus: ScrapeAttemptStatus
+  # For ENTITY_MISMATCH: entity of the existing game that didn't match
+  detectedGameEntityId: ID
+  
+  # Re-scrape tracking
+  rescrapeRequested: Boolean @default(value: "false")
+  rescrapeRequestedAt: AWSDateTime
+  rescrapeRequestedBy: String
+  rescrapeJobId: ID @index(name: "byRescrapeJob")
+  rescrapeAttemptId: ID
+  rescrapeCompletedAt: AWSDateTime
+  rescrapeResult: ScrapeAttemptStatus
+  rescrapeResolvedGameStatus: GameStatus
+  
+  # Discrepancy resolution
+  discrepancyResolution: ScrapeDiscrepancyResolution
+  discrepancyResolvedAt: AWSDateTime
+  discrepancyResolvedBy: String
+  discrepancyResolutionNotes: String
   
   # === AUDIT TRAIL ===
   linkedAt: AWSDateTime!
@@ -111,8 +157,10 @@ type SocialPostGameData
   
   # === EXTRACTED TOURNAMENT IDENTITY ===
   extractedName: String
+  # Full tournament URL - use for Game.sourceUrl lookup (UNIQUE)
   extractedTournamentUrl: AWSURL
-  # Tournament ID with GSI for reverse matching (game -> posts)
+    @index(name: "byExtractedUrl", sortKeyFields: ["extractedAt"])
+  # Tournament ID from URL - NOT unique across entities, for reference only
   extractedTournamentId: Int @index(name: "byTournamentId")
   
   # === EXTRACTED VENUE ===
@@ -176,7 +224,7 @@ type SocialPostGameData
   placementCount: Int                    # Number of placements extracted
   
   # ===================================================================
-  # TICKET AGGREGATION (NEW - For Reconciliation)
+  # TICKET AGGREGATION (For Reconciliation)
   # Totals across ALL placements for matching with Game financials
   # ===================================================================
   
@@ -195,7 +243,7 @@ type SocialPostGameData
   totalTicketOnlyPrizes: Int             # Count of placements with ONLY tickets (no cash)
   
   # ===================================================================
-  # PROMOTIONAL POST TICKET INFO (NEW)
+  # PROMOTIONAL POST TICKET INFO
   # For posts advertising tickets as prizes (not result posts)
   # ===================================================================
   
@@ -207,7 +255,7 @@ type SocialPostGameData
   advertisedTickets: AWSJSON             # Full array of advertised ticket objects
   
   # ===================================================================
-  # RECONCILIATION FIELDS (NEW)
+  # RECONCILIATION FIELDS
   # These map directly to Game model fields for comparison
   # ===================================================================
   
@@ -224,6 +272,14 @@ type SocialPostGameData
   hasReconciliationDiscrepancy: Boolean @default(value: "false")
   reconciliationNotes: String
   reconciliationCheckedAt: AWSDateTime
+  
+  # ===================================================================
+  # SCRAPE DISCREPANCY TRACKING
+  # ===================================================================
+  hasScrapeDiscrepancy: Boolean @default(value: "false")
+  scrapeDiscrepancyType: ScrapeDiscrepancyType
+  scrapeDiscrepancyLinkId: ID
+  scrapeDiscrepancyDetectedAt: AWSDateTime
   
   # === MATCHING HINTS ===
   suggestedGameId: ID                    # Best match game ID
@@ -347,6 +403,8 @@ input ProcessSocialPostInput {
   skipMatching: Boolean                  # Only extract, don't match
   skipLinking: Boolean                   # Extract and match, don't create links
   matchThreshold: Float                  # Override default match threshold (0-100)
+  createDiscrepancyLinks: Boolean        # Create links for unmatched tournament IDs (default: true)
+  triggerRescrapeOnDiscrepancy: Boolean  # Auto-trigger re-scrape (default: false)
 }
 
 input ProcessSocialPostBatchInput {
@@ -428,6 +486,7 @@ input MatchGameToSocialPostsInput {
   autoLinkThreshold: Int                 # Override default (80)
   maxCandidates: Int                     # Max posts to evaluate (default 100)
   previewOnly: Boolean                   # If true, don't create links
+  resolveDiscrepancies: Boolean          # Also resolve pending discrepancy links (default: true)
 }
 
 input BatchMatchGamesToSocialPostsInput {
@@ -435,6 +494,7 @@ input BatchMatchGamesToSocialPostsInput {
   autoLinkThreshold: Int
   maxCandidates: Int
   previewOnly: Boolean
+  resolveDiscrepancies: Boolean
 }
 
 input PreviewGameToSocialMatchInput {
@@ -463,6 +523,80 @@ input ReconcileSocialToGameInput {
   gameId: ID!
   applyToGame: Boolean                   # If true, update Game with extracted values
   notes: String
+}
+
+# ===================================================================
+# 5d. INPUT TYPES - SCRAPE DISCREPANCY MANAGEMENT
+# ===================================================================
+
+input GetScrapeDiscrepanciesInput {
+  entityId: ID
+  scrapeDiscrepancyType: ScrapeDiscrepancyType
+  rescrapeRequested: Boolean
+  discrepancyResolution: ScrapeDiscrepancyResolution
+  detectedAfter: AWSDateTime
+  detectedBefore: AWSDateTime
+  limit: Int
+  nextToken: String
+}
+
+"""
+Input for triggering a re-scrape for a discrepancy.
+Supports two modes:
+1. Existing link: Provide linkId
+2. New discrepancy: Provide tournamentUrl + socialPostId (+ optional entityId)
+
+The tournamentUrl is used to look up Game.sourceUrl which is unique.
+"""
+input TriggerDiscrepancyRescrapeInput {
+  # === MODE 1: Existing link ===
+  linkId: ID
+  
+  # === MODE 2: New discrepancy (no existing link) ===
+  "Full tournament URL (matches Game.sourceUrl) - UNIQUE identifier"
+  tournamentUrl: AWSURL
+  "Tournament ID from URL - NOT unique, for reference/logging only"
+  tournamentId: Int
+  "Social post that detected this discrepancy"
+  socialPostId: ID
+  "Entity context for the discrepancy (from SocialAccount)"
+  entityId: ID
+  
+  # === OPTIONS ===
+  "Force re-scrape even if recently attempted"
+  forceRefresh: Boolean
+  "Scrape priority (1-10, higher = more urgent)"
+  priority: Int
+  "Notes about why rescrape was triggered"
+  notes: String
+}
+
+input ResolveDiscrepancyInput {
+  linkId: ID!
+  resolution: ScrapeDiscrepancyResolution!
+  gameId: ID
+  notes: String
+}
+
+"""
+Input for scanning posts to find new discrepancies.
+Used by the UI to trigger a full scan operation.
+"""
+input ScanForDiscrepanciesInput {
+  "Entity to scan (optional, scans all if not specified)"
+  entityId: ID
+  "Social account to scan (optional)"
+  socialAccountId: ID
+  "Only scan posts after this date"
+  postedAfter: AWSDateTime
+  "Only scan posts before this date"
+  postedBefore: AWSDateTime
+  "Maximum extractions to check"
+  limit: Int
+  "Create PENDING_SCRAPE links for new discrepancies"
+  createLinks: Boolean
+  "Trigger re-scrapes automatically"
+  autoTriggerRescrape: Boolean
 }
 
 # ===================================================================
@@ -496,6 +630,13 @@ type ProcessSocialPostResult @aws_iam @aws_cognito_user_pools {
   
   # Reconciliation preview (if game was matched)
   reconciliationPreview: SocialToGameReconciliation
+  
+  # Scrape discrepancy results
+  scrapeDiscrepancyDetected: Boolean
+  scrapeDiscrepancyType: ScrapeDiscrepancyType
+  scrapeDiscrepancyLink: SocialPostGameLink
+  rescrapeTriggered: Boolean
+  rescrapeJobId: ID
   
   # Metadata
   processingTimeMs: Int
@@ -723,6 +864,10 @@ type GameToSocialMatchResult @aws_iam @aws_cognito_user_pools {
   linksSkipped: Int                      # Already linked or duplicate
   existingLinks: Int                     # Links that existed before
   
+  # Discrepancy resolution results
+  discrepanciesResolved: Int
+  discrepancyDetails: [DiscrepancyResolutionDetail!]
+  
   # Matched posts details
   matchedPosts: [SocialPostMatchCandidate!]
   linkDetails: [GameToSocialLinkDetail!]
@@ -782,7 +927,121 @@ type BatchGameToSocialMatchResult @aws_iam @aws_cognito_user_pools {
   processed: Int!
   totalLinksCreated: Int!
   totalLinksSkipped: Int!
+  totalDiscrepanciesResolved: Int
   results: [GameToSocialMatchResult!]
+}
+
+# ===================================================================
+# 6e. OUTPUT TYPES - SCRAPE DISCREPANCY
+# ===================================================================
+
+type DiscrepancyResolutionDetail @aws_iam @aws_cognito_user_pools {
+  linkId: ID!
+  socialPostId: ID!
+  extractedTournamentId: Int
+  extractedTournamentUrl: AWSURL
+  previousLinkType: SocialPostLinkType
+  newLinkType: SocialPostLinkType
+  previousResolution: ScrapeDiscrepancyResolution
+  newResolution: ScrapeDiscrepancyResolution
+  gameId: ID
+}
+
+type ScrapeDiscrepancyConnection @aws_iam @aws_cognito_user_pools {
+  items: [ScrapeDiscrepancyInfo!]!
+  nextToken: String
+  totalCount: Int
+  byType: AWSJSON
+  byResolution: AWSJSON
+}
+
+type ScrapeDiscrepancyInfo @aws_iam @aws_cognito_user_pools {
+  linkId: ID!
+  socialPostId: ID!
+  socialPost: SocialPost
+  extractedTournamentId: Int
+  extractedTournamentUrl: AWSURL
+  scrapeDiscrepancyType: ScrapeDiscrepancyType!
+  detectedAt: AWSDateTime
+  entityId: ID
+  entityName: String
+  gameId: ID
+  gameStatus: GameStatus
+  gameName: String
+  "For ENTITY_MISMATCH: entity of the existing game"
+  detectedGameEntityId: ID
+  detectedGameEntityName: String
+  rescrapeRequested: Boolean
+  rescrapeRequestedAt: AWSDateTime
+  rescrapeJobId: ID
+  rescrapeResult: ScrapeAttemptStatus
+  resolution: ScrapeDiscrepancyResolution
+  resolvedAt: AWSDateTime
+  resolvedBy: String
+  resolutionNotes: String
+}
+
+type TriggerRescrapeResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  linkId: ID
+  rescrapeJobId: ID
+  "Tournament URL that was requested for rescrape"
+  tournamentUrl: AWSURL
+  tournamentId: Int
+  "Whether a new link was created vs updating existing"
+  linkCreated: Boolean
+  "Whether the rescrape was deduplicated (already pending)"
+  deduplicated: Boolean
+  message: String
+  error: String
+}
+
+type ResolveDiscrepancyResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  linkId: ID
+  previousResolution: ScrapeDiscrepancyResolution
+  newResolution: ScrapeDiscrepancyResolution
+  gameId: ID
+  message: String
+  error: String
+}
+
+type ScrapeDiscrepancyStats @aws_iam @aws_cognito_user_pools {
+  totalDiscrepancies: Int!
+  unresolvedCount: Int!
+  resolvingCount: Int!
+  resolvedCount: Int!
+  gameNotInDatabaseCount: Int
+  gameStatusNotFoundCount: Int
+  gameStatusNotPublishedCount: Int
+  entityMismatchCount: Int
+  statusMismatchCount: Int
+  pendingRescrapes: Int
+  # By entity breakdown
+  byEntity: AWSJSON
+}
+
+"""
+Result of scanning for new discrepancies
+"""
+type ScanForDiscrepanciesResult @aws_iam @aws_cognito_user_pools {
+  success: Boolean!
+  "Total extractions scanned"
+  extractionsScanned: Int!
+  "Unique tournament URLs checked"
+  uniqueUrlsChecked: Int!
+  "New discrepancies found"
+  discrepanciesFound: Int!
+  "Links created for new discrepancies"
+  linksCreated: Int!
+  "Rescrapes triggered"
+  rescrapesTriggered: Int!
+  "Breakdown by discrepancy type"
+  byType: AWSJSON
+  "Individual discrepancy details"
+  discrepancies: [ScrapeDiscrepancyInfo!]
+  error: String
+  processingTimeMs: Int
 }
 
 # ===================================================================
@@ -846,6 +1105,38 @@ extend type Mutation {
   
   # Apply social post extracted data to Game record
   reconcileSocialToGame(input: ReconcileSocialToGameInput!): ReconcileResult
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # =========================================================
+  # SCRAPE DISCREPANCY MANAGEMENT
+  # =========================================================
+  
+  """
+  Trigger re-scrape for a discrepancy.
+  Supports two modes:
+  1. Existing link: Provide linkId
+  2. New discrepancy: Provide tournamentUrl + socialPostId
+  
+  Uses tournamentUrl to match Game.sourceUrl (unique across all entities).
+  """
+  triggerDiscrepancyRescrape(input: TriggerDiscrepancyRescrapeInput!): TriggerRescrapeResult
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Manually resolve a discrepancy
+  resolveDiscrepancy(input: ResolveDiscrepancyInput!): ResolveDiscrepancyResult
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  """
+  Scan posts to find new discrepancies.
+  Checks extractedTournamentUrl against Game.sourceUrl.
+  """
+  scanForDiscrepancies(input: ScanForDiscrepanciesInput): ScanForDiscrepanciesResult
     @function(name: "socialPostProcessor-${env}")
     @aws_iam
     @aws_cognito_user_pools
@@ -915,6 +1206,28 @@ extend type Query {
   
   # Preview reconciliation for a single post/game pair
   previewReconciliation(socialPostGameDataId: ID!, gameId: ID!): SocialToGameReconciliation
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # =========================================================
+  # SCRAPE DISCREPANCY QUERIES
+  # =========================================================
+  
+  # Get all scrape discrepancies (paginated, filtered)
+  getScrapeDiscrepancies(input: GetScrapeDiscrepanciesInput): ScrapeDiscrepancyConnection
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Get a single discrepancy by link ID
+  getScrapeDiscrepancy(linkId: ID!): ScrapeDiscrepancyInfo
+    @function(name: "socialPostProcessor-${env}")
+    @aws_iam
+    @aws_cognito_user_pools
+  
+  # Get discrepancy statistics
+  getScrapeDiscrepancyStats(entityId: ID): ScrapeDiscrepancyStats
     @function(name: "socialPostProcessor-${env}")
     @aws_iam
     @aws_cognito_user_pools

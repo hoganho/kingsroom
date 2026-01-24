@@ -13131,6 +13131,10 @@ export const processSocialPost = /* GraphQL */ `mutation ProcessSocialPost($inpu
       hasReconciliationDiscrepancy
       reconciliationNotes
       reconciliationCheckedAt
+      hasScrapeDiscrepancy
+      scrapeDiscrepancyType
+      scrapeDiscrepancyLinkId
+      scrapeDiscrepancyDetectedAt
       suggestedGameId
       matchCandidateCount
       matchCandidates
@@ -13278,6 +13282,27 @@ export const processSocialPost = /* GraphQL */ `mutation ProcessSocialPost($inpu
       extractedTotalEntries
       placementCount
       contentType
+      extractedTournamentUrl
+      extractedTournamentId
+      entityId
+      hasScrapeDiscrepancy
+      scrapeDiscrepancyType
+      scrapeDiscrepancyDetectedAt
+      detectedGameStatus
+      detectedScrapeURLStatus
+      detectedGameEntityId
+      rescrapeRequested
+      rescrapeRequestedAt
+      rescrapeRequestedBy
+      rescrapeJobId
+      rescrapeAttemptId
+      rescrapeCompletedAt
+      rescrapeResult
+      rescrapeResolvedGameStatus
+      discrepancyResolution
+      discrepancyResolvedAt
+      discrepancyResolvedBy
+      discrepancyResolutionNotes
       linkedAt
       linkedBy
       verifiedAt
@@ -13321,6 +13346,71 @@ export const processSocialPost = /* GraphQL */ `mutation ProcessSocialPost($inpu
       reconciledBy
       __typename
     }
+    scrapeDiscrepancyDetected
+    scrapeDiscrepancyType
+    scrapeDiscrepancyLink {
+      id
+      socialPostId
+      gameId
+      linkType
+      matchConfidence
+      matchReason
+      matchSignals
+      isPrimaryGame
+      mentionOrder
+      extractedVenueName
+      extractedDate
+      extractedBuyIn
+      extractedGuarantee
+      effectiveGameDate
+      socialPostGameDataId
+      hasTicketData
+      ticketData
+      reconciliationPreview
+      hasReconciliationDiscrepancy
+      reconciliationDiscrepancySeverity
+      extractedWinnerName
+      extractedWinnerPrize
+      extractedTotalEntries
+      placementCount
+      contentType
+      extractedTournamentUrl
+      extractedTournamentId
+      entityId
+      hasScrapeDiscrepancy
+      scrapeDiscrepancyType
+      scrapeDiscrepancyDetectedAt
+      detectedGameStatus
+      detectedScrapeURLStatus
+      detectedGameEntityId
+      rescrapeRequested
+      rescrapeRequestedAt
+      rescrapeRequestedBy
+      rescrapeJobId
+      rescrapeAttemptId
+      rescrapeCompletedAt
+      rescrapeResult
+      rescrapeResolvedGameStatus
+      discrepancyResolution
+      discrepancyResolvedAt
+      discrepancyResolvedBy
+      discrepancyResolutionNotes
+      linkedAt
+      linkedBy
+      verifiedAt
+      verifiedBy
+      rejectedAt
+      rejectedBy
+      rejectionReason
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    rescrapeTriggered
+    rescrapeJobId
     processingTimeMs
     __typename
   }
@@ -13409,6 +13499,10 @@ export const processSocialPostBatch = /* GraphQL */ `mutation ProcessSocialPostB
         hasReconciliationDiscrepancy
         reconciliationNotes
         reconciliationCheckedAt
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyLinkId
+        scrapeDiscrepancyDetectedAt
         suggestedGameId
         matchCandidateCount
         matchCandidates
@@ -13556,6 +13650,27 @@ export const processSocialPostBatch = /* GraphQL */ `mutation ProcessSocialPostB
         extractedTotalEntries
         placementCount
         contentType
+        extractedTournamentUrl
+        extractedTournamentId
+        entityId
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyDetectedAt
+        detectedGameStatus
+        detectedScrapeURLStatus
+        detectedGameEntityId
+        rescrapeRequested
+        rescrapeRequestedAt
+        rescrapeRequestedBy
+        rescrapeJobId
+        rescrapeAttemptId
+        rescrapeCompletedAt
+        rescrapeResult
+        rescrapeResolvedGameStatus
+        discrepancyResolution
+        discrepancyResolvedAt
+        discrepancyResolvedBy
+        discrepancyResolutionNotes
         linkedAt
         linkedBy
         verifiedAt
@@ -13599,6 +13714,71 @@ export const processSocialPostBatch = /* GraphQL */ `mutation ProcessSocialPostB
         reconciledBy
         __typename
       }
+      scrapeDiscrepancyDetected
+      scrapeDiscrepancyType
+      scrapeDiscrepancyLink {
+        id
+        socialPostId
+        gameId
+        linkType
+        matchConfidence
+        matchReason
+        matchSignals
+        isPrimaryGame
+        mentionOrder
+        extractedVenueName
+        extractedDate
+        extractedBuyIn
+        extractedGuarantee
+        effectiveGameDate
+        socialPostGameDataId
+        hasTicketData
+        ticketData
+        reconciliationPreview
+        hasReconciliationDiscrepancy
+        reconciliationDiscrepancySeverity
+        extractedWinnerName
+        extractedWinnerPrize
+        extractedTotalEntries
+        placementCount
+        contentType
+        extractedTournamentUrl
+        extractedTournamentId
+        entityId
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyDetectedAt
+        detectedGameStatus
+        detectedScrapeURLStatus
+        detectedGameEntityId
+        rescrapeRequested
+        rescrapeRequestedAt
+        rescrapeRequestedBy
+        rescrapeJobId
+        rescrapeAttemptId
+        rescrapeCompletedAt
+        rescrapeResult
+        rescrapeResolvedGameStatus
+        discrepancyResolution
+        discrepancyResolvedAt
+        discrepancyResolvedBy
+        discrepancyResolutionNotes
+        linkedAt
+        linkedBy
+        verifiedAt
+        verifiedBy
+        rejectedAt
+        rejectedBy
+        rejectionReason
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      rescrapeTriggered
+      rescrapeJobId
       processingTimeMs
       __typename
     }
@@ -13642,6 +13822,27 @@ export const linkSocialPostToGame = /* GraphQL */ `mutation LinkSocialPostToGame
     extractedTotalEntries
     placementCount
     contentType
+    extractedTournamentUrl
+    extractedTournamentId
+    entityId
+    hasScrapeDiscrepancy
+    scrapeDiscrepancyType
+    scrapeDiscrepancyDetectedAt
+    detectedGameStatus
+    detectedScrapeURLStatus
+    detectedGameEntityId
+    rescrapeRequested
+    rescrapeRequestedAt
+    rescrapeRequestedBy
+    rescrapeJobId
+    rescrapeAttemptId
+    rescrapeCompletedAt
+    rescrapeResult
+    rescrapeResolvedGameStatus
+    discrepancyResolution
+    discrepancyResolvedAt
+    discrepancyResolvedBy
+    discrepancyResolutionNotes
     linkedAt
     linkedBy
     verifiedAt
@@ -13695,6 +13896,27 @@ export const verifySocialPostLink = /* GraphQL */ `mutation VerifySocialPostLink
     extractedTotalEntries
     placementCount
     contentType
+    extractedTournamentUrl
+    extractedTournamentId
+    entityId
+    hasScrapeDiscrepancy
+    scrapeDiscrepancyType
+    scrapeDiscrepancyDetectedAt
+    detectedGameStatus
+    detectedScrapeURLStatus
+    detectedGameEntityId
+    rescrapeRequested
+    rescrapeRequestedAt
+    rescrapeRequestedBy
+    rescrapeJobId
+    rescrapeAttemptId
+    rescrapeCompletedAt
+    rescrapeResult
+    rescrapeResolvedGameStatus
+    discrepancyResolution
+    discrepancyResolvedAt
+    discrepancyResolvedBy
+    discrepancyResolutionNotes
     linkedAt
     linkedBy
     verifiedAt
@@ -13741,6 +13963,27 @@ export const rejectSocialPostLink = /* GraphQL */ `mutation RejectSocialPostLink
     extractedTotalEntries
     placementCount
     contentType
+    extractedTournamentUrl
+    extractedTournamentId
+    entityId
+    hasScrapeDiscrepancy
+    scrapeDiscrepancyType
+    scrapeDiscrepancyDetectedAt
+    detectedGameStatus
+    detectedScrapeURLStatus
+    detectedGameEntityId
+    rescrapeRequested
+    rescrapeRequestedAt
+    rescrapeRequestedBy
+    rescrapeJobId
+    rescrapeAttemptId
+    rescrapeCompletedAt
+    rescrapeResult
+    rescrapeResolvedGameStatus
+    discrepancyResolution
+    discrepancyResolvedAt
+    discrepancyResolvedBy
+    discrepancyResolutionNotes
     linkedAt
     linkedBy
     verifiedAt
@@ -13771,6 +14014,19 @@ export const matchGameToSocialPosts = /* GraphQL */ `mutation MatchGameToSocialP
     linksCreated
     linksSkipped
     existingLinks
+    discrepanciesResolved
+    discrepancyDetails {
+      linkId
+      socialPostId
+      extractedTournamentId
+      extractedTournamentUrl
+      previousLinkType
+      newLinkType
+      previousResolution
+      newResolution
+      gameId
+      __typename
+    }
     matchedPosts {
       socialPostId
       postDate
@@ -13825,6 +14081,7 @@ export const batchMatchGamesToSocialPosts = /* GraphQL */ `mutation BatchMatchGa
     processed
     totalLinksCreated
     totalLinksSkipped
+    totalDiscrepanciesResolved
     results {
       success
       gameId
@@ -13835,6 +14092,19 @@ export const batchMatchGamesToSocialPosts = /* GraphQL */ `mutation BatchMatchGa
       linksCreated
       linksSkipped
       existingLinks
+      discrepanciesResolved
+      discrepancyDetails {
+        linkId
+        socialPostId
+        extractedTournamentId
+        extractedTournamentUrl
+        previousLinkType
+        newLinkType
+        previousResolution
+        newResolution
+        gameId
+        __typename
+      }
       matchedPosts {
         socialPostId
         postDate
@@ -13899,6 +14169,1056 @@ export const reconcileSocialToGame = /* GraphQL */ `mutation ReconcileSocialToGa
 ` as GeneratedMutation<
   APITypes.ReconcileSocialToGameMutationVariables,
   APITypes.ReconcileSocialToGameMutation
+>;
+export const triggerDiscrepancyRescrape = /* GraphQL */ `mutation TriggerDiscrepancyRescrape($input: TriggerDiscrepancyRescrapeInput!) {
+  triggerDiscrepancyRescrape(input: $input) {
+    success
+    linkId
+    rescrapeJobId
+    tournamentUrl
+    tournamentId
+    linkCreated
+    deduplicated
+    message
+    error
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.TriggerDiscrepancyRescrapeMutationVariables,
+  APITypes.TriggerDiscrepancyRescrapeMutation
+>;
+export const resolveDiscrepancy = /* GraphQL */ `mutation ResolveDiscrepancy($input: ResolveDiscrepancyInput!) {
+  resolveDiscrepancy(input: $input) {
+    success
+    linkId
+    previousResolution
+    newResolution
+    gameId
+    message
+    error
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.ResolveDiscrepancyMutationVariables,
+  APITypes.ResolveDiscrepancyMutation
+>;
+export const scanForDiscrepancies = /* GraphQL */ `mutation ScanForDiscrepancies($input: ScanForDiscrepanciesInput) {
+  scanForDiscrepancies(input: $input) {
+    success
+    extractionsScanned
+    uniqueUrlsChecked
+    discrepanciesFound
+    linksCreated
+    rescrapesTriggered
+    byType
+    discrepancies {
+      linkId
+      socialPostId
+      socialPost {
+        id
+        platformPostId
+        postUrl
+        postType
+        accountName
+        accountProfileImageUrl
+        platform
+        businessLocation
+        content
+        contentPreview
+        rawContent
+        mediaUrls
+        thumbnailUrl
+        mediaType
+        videoUrl
+        videoThumbnailUrl
+        videoWidth
+        videoHeight
+        videoTitle
+        videoDescription
+        likeCount
+        commentCount
+        shareCount
+        reactionCount
+        viewCount
+        postedAt
+        scrapedAt
+        lastUpdatedAt
+        status
+        isPromotional
+        isPinned
+        isTournamentResult
+        isTournamentRelated
+        tags
+        sentiment
+        contentCategory
+        linkedGameId
+        linkedGame {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          isStatusDataStale
+          statusDataStaleAt
+          statusDataStaleReason
+          gameStartDateTime
+          gameActualStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          venueFee
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepoolPaid
+          prizepoolCalculated
+          totalUniquePlayers
+          totalRebuys
+          totalAddons
+          totalInitialEntries
+          totalEntries
+          totalBuyInsCollected
+          rakeRevenue
+          prizepoolPlayerContributions
+          prizepoolAddedValue
+          prizepoolSurplus
+          guaranteeOverlayCost
+          gameProfit
+          hasJackpotContributions
+          jackpotContributionAmount
+          hasAccumulatorTickets
+          accumulatorTicketValue
+          numberOfAccumulatorTicketsPaid
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSatellite
+          gameTags
+          dealerDealt
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
+          parentGameId
+          parentGame {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            isStatusDataStale
+            statusDataStaleAt
+            statusDataStaleReason
+            gameStartDateTime
+            gameActualStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            venueFee
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepoolPaid
+            prizepoolCalculated
+            totalUniquePlayers
+            totalRebuys
+            totalAddons
+            totalInitialEntries
+            totalEntries
+            totalBuyInsCollected
+            rakeRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolSurplus
+            guaranteeOverlayCost
+            gameProfit
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            numberOfAccumulatorTicketsPaid
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSatellite
+            gameTags
+            dealerDealt
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
+            parentGameId
+            consolidationType
+            consolidationKey
+            isPartialData
+            missingFlightCount
+            expectedTotalEntries
+            needsReview
+            notes
+            gameDayOfWeek
+            gameYearMonth
+            buyInBucket
+            venueScheduleKey
+            venueGameTypeKey
+            entityQueryKey
+            entityGameTypeKey
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
+            contentHash
+            dataChangedAt
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
+            sessionMode
+            variant
+            bettingStructure
+            speedType
+            tableSize
+            maxPlayers
+            dealType
+            buyInTier
+            entryStructure
+            bountyType
+            bountyAmount
+            bountyPercentage
+            tournamentPurpose
+            stackDepth
+            lateRegistration
+            payoutStructure
+            scheduleType
+            isShootout
+            isSurvivor
+            isFlipAndGo
+            isWinTheButton
+            isAnteOnly
+            isBigBlindAnte
+            cashGameType
+            cashRakeType
+            hasBombPots
+            hasRunItTwice
+            hasStraddle
+            mixedGameRotation
+            classificationSource
+            classificationConfidence
+            lastClassifiedAt
+            venueId
+            tournamentSeriesId
+            gameCostId
+            gameFinancialSnapshotId
+            linkedSocialPostCount
+            hasLinkedSocialPosts
+            primaryResultPostId
+            socialDataAggregation
+            socialDataAggregatedAt
+            ticketsAwardedCount
+            ticketProgramName
+            entityId
+            createdAt
+            updatedAt
+            recurringGameId
+            recurringGameAssignmentConfidence
+            recurringGameAssignmentStatus
+            wasScheduledInstance
+            deviationNotes
+            instanceNumber
+            isReplacementInstance
+            replacementReason
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          childGames {
+            nextToken
+            startedAt
+            __typename
+          }
+          consolidationType
+          consolidationKey
+          isPartialData
+          missingFlightCount
+          expectedTotalEntries
+          needsReview
+          notes
+          gameDayOfWeek
+          gameYearMonth
+          buyInBucket
+          venueScheduleKey
+          venueGameTypeKey
+          entityQueryKey
+          entityGameTypeKey
+          sourceUrl
+          tournamentId
+          originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
+          contentHash
+          dataChangedAt
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
+          sessionMode
+          variant
+          bettingStructure
+          speedType
+          tableSize
+          maxPlayers
+          dealType
+          buyInTier
+          entryStructure
+          bountyType
+          bountyAmount
+          bountyPercentage
+          tournamentPurpose
+          stackDepth
+          lateRegistration
+          payoutStructure
+          scheduleType
+          isShootout
+          isSurvivor
+          isFlipAndGo
+          isWinTheButton
+          isAnteOnly
+          isBigBlindAnte
+          cashGameType
+          cashRakeType
+          hasBombPots
+          hasRunItTwice
+          hasStraddle
+          mixedGameRotation
+          classificationSource
+          classificationConfidence
+          lastClassifiedAt
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            quarter
+            month
+            entityId
+            seriesCategory
+            holidayType
+            status
+            startDate
+            endDate
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          gameCostId
+          gameCost {
+            id
+            gameId
+            totalDealerCost
+            totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
+            totalPrizeContribution
+            totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
+            totalPromotionCost
+            totalOtherCost
+            totalStaffCost
+            totalDirectGameCost
+            totalOperationsCost
+            totalComplianceCost
+            totalCost
+            entityId
+            venueId
+            gameDate
+            notes
+            isEstimate
+            costStatus
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameFinancialSnapshotId
+          gameFinancialSnapshot {
+            id
+            gameId
+            gameCostId
+            entityId
+            venueId
+            gameStartDateTime
+            totalBuyInsCollected
+            rakeRevenue
+            venueFee
+            totalRevenue
+            prizepoolPlayerContributions
+            prizepoolAddedValue
+            prizepoolTotal
+            prizepoolSurplus
+            prizepoolPaidDelta
+            prizepoolJackpotContributions
+            prizepoolAccumulatorTicketPayoutEstimate
+            prizepoolAccumulatorTicketPayoutActual
+            totalDealerCost
+            totalTournamentDirectorCost
+            totalFloorStaffCost
+            totalSecurityCost
+            totalStaffCost
+            totalPrizeContribution
+            totalJackpotContribution
+            totalGuaranteeOverlayCost
+            totalAddedValueCost
+            totalBountyCost
+            totalDirectGameCost
+            totalVenueRentalCost
+            totalEquipmentRentalCost
+            totalFoodBeverageCost
+            totalMarketingCost
+            totalStreamingCost
+            totalOperationsCost
+            totalInsuranceCost
+            totalLicensingCost
+            totalComplianceCost
+            totalStaffTravelCost
+            totalPlayerAccommodationCost
+            totalPromotionCost
+            totalOtherCost
+            totalCost
+            gameProfit
+            netProfit
+            profitMargin
+            revenuePerPlayer
+            costPerPlayer
+            profitPerPlayer
+            rakePerEntry
+            dealerCostPerHour
+            staffCostPerPlayer
+            guaranteeOverlayPerPlayer
+            promoSpendPerPlayer
+            guaranteeCoverageRate
+            guaranteeMet
+            totalUniquePlayers
+            totalEntries
+            guaranteeAmount
+            gameDurationMinutes
+            gameType
+            tournamentType
+            isSeries
+            isSeriesParent
+            parentGameId
+            tournamentSeriesId
+            seriesName
+            recurringGameId
+            entitySeriesKey
+            venueSeriesKey
+            notes
+            snapshotType
+            isReconciled
+            reconciledAt
+            reconciledBy
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          linkedSocialPosts {
+            nextToken
+            startedAt
+            __typename
+          }
+          socialPostLinks {
+            nextToken
+            startedAt
+            __typename
+          }
+          linkedSocialPostCount
+          hasLinkedSocialPosts
+          primaryResultPostId
+          primaryResultPost {
+            id
+            platformPostId
+            postUrl
+            postType
+            accountName
+            accountProfileImageUrl
+            platform
+            businessLocation
+            content
+            contentPreview
+            rawContent
+            mediaUrls
+            thumbnailUrl
+            mediaType
+            videoUrl
+            videoThumbnailUrl
+            videoWidth
+            videoHeight
+            videoTitle
+            videoDescription
+            likeCount
+            commentCount
+            shareCount
+            reactionCount
+            viewCount
+            postedAt
+            scrapedAt
+            lastUpdatedAt
+            status
+            isPromotional
+            isPinned
+            isTournamentResult
+            isTournamentRelated
+            tags
+            sentiment
+            contentCategory
+            linkedGameId
+            processingStatus
+            processedAt
+            processingError
+            processingVersion
+            contentType
+            contentTypeConfidence
+            extractedGameDataId
+            primaryLinkedGameId
+            linkedGameCount
+            hasUnverifiedLinks
+            postYearMonth
+            effectiveGameDate
+            effectiveGameDateSource
+            socialAccountId
+            entityId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          socialDataAggregation
+          socialDataAggregatedAt
+          ticketsAwarded {
+            nextToken
+            startedAt
+            __typename
+          }
+          ticketsAwardedCount
+          ticketProgramName
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          recurringGameId
+          recurringGame {
+            id
+            name
+            displayName
+            description
+            aliases
+            entityId
+            venueId
+            dayOfWeek
+            startTime
+            endTime
+            frequency
+            gameType
+            gameVariant
+            tournamentType
+            sessionMode
+            typicalBuyIn
+            typicalRake
+            typicalStartingStack
+            typicalGuarantee
+            typicalDuration
+            hasJackpotContributions
+            jackpotContributionAmount
+            hasAccumulatorTickets
+            accumulatorTicketValue
+            isActive
+            isPaused
+            pausedReason
+            firstGameDate
+            lastGameDate
+            nextScheduledDate
+            expectedInstanceCount
+            isSignature
+            isBeginnerFriendly
+            isBounty
+            tags
+            marketingDescription
+            imageUrl
+            socialMediaHashtags
+            autoDetectionConfidence
+            wasManuallyCreated
+            requiresReview
+            reviewReason
+            totalInstancesRun
+            totalInstancesCancelled
+            avgAttendance
+            lastMonthAttendance
+            lastConfirmedDate
+            lastCancelledDate
+            notes
+            adminNotes
+            createdAt
+            updatedAt
+            createdBy
+            lastEditedBy
+            lastEditedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          recurringGameAssignmentConfidence
+          recurringGameAssignmentStatus
+          wasScheduledInstance
+          deviationNotes
+          instanceNumber
+          isReplacementInstance
+          replacementReason
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        processingStatus
+        processedAt
+        processingError
+        processingVersion
+        contentType
+        contentTypeConfidence
+        extractedGameDataId
+        extractedGameData {
+          id
+          socialPostId
+          contentType
+          contentTypeConfidence
+          resultScore
+          promoScore
+          extractedName
+          extractedTournamentUrl
+          extractedTournamentId
+          extractedVenueName
+          extractedVenueId
+          suggestedVenueId
+          venueMatchConfidence
+          venueMatchReason
+          venueMatchSource
+          extractedDate
+          extractedDayOfWeek
+          extractedStartTime
+          dateSource
+          effectiveGameDate
+          effectiveGameDateSource
+          extractedBuyIn
+          extractedGuarantee
+          extractedPrizePool
+          extractedFirstPlacePrize
+          extractedTotalPrizesPaid
+          extractedRake
+          extractedTotalEntries
+          extractedTotalUniquePlayers
+          extractedGameType
+          extractedTournamentType
+          extractedGameVariant
+          extractedGameTypes
+          extractedRecurringGameName
+          extractedSeriesName
+          extractedEventNumber
+          extractedDayNumber
+          extractedFlightLetter
+          isSeriesEvent
+          extractedWinnerName
+          extractedWinnerPrize
+          extractedWinnerHasTicket
+          extractedWinnerTicketType
+          extractedWinnerTicketValue
+          extractedWinnerTotalValue
+          placementCount
+          totalTicketsExtracted
+          totalTicketValue
+          ticketCountByType
+          ticketValueByType
+          totalCashPaid
+          totalPrizesWithTickets
+          totalTicketOnlyPrizes
+          hasAdvertisedTickets
+          advertisedTicketCount
+          advertisedTicketType
+          advertisedTicketValue
+          advertisedTicketDescription
+          advertisedTickets
+          reconciliation_accumulatorTicketCount
+          reconciliation_accumulatorTicketValue
+          reconciliation_totalPrizepoolPaid
+          reconciliation_cashPlusTotalTicketValue
+          hasReconciliationDiscrepancy
+          reconciliationNotes
+          reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
+          suggestedGameId
+          matchCandidateCount
+          matchCandidates
+          patternMatches
+          extractedPrizes
+          extractedAt
+          extractionVersion
+          extractionDurationMs
+          createdAt
+          updatedAt
+          placements {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        gameLinks {
+          items {
+            id
+            socialPostId
+            gameId
+            linkType
+            matchConfidence
+            matchReason
+            matchSignals
+            isPrimaryGame
+            mentionOrder
+            extractedVenueName
+            extractedDate
+            extractedBuyIn
+            extractedGuarantee
+            effectiveGameDate
+            socialPostGameDataId
+            hasTicketData
+            ticketData
+            reconciliationPreview
+            hasReconciliationDiscrepancy
+            reconciliationDiscrepancySeverity
+            extractedWinnerName
+            extractedWinnerPrize
+            extractedTotalEntries
+            placementCount
+            contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
+            linkedAt
+            linkedBy
+            verifiedAt
+            verifiedBy
+            rejectedAt
+            rejectedBy
+            rejectionReason
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        primaryLinkedGameId
+        linkedGameCount
+        hasUnverifiedLinks
+        postYearMonth
+        effectiveGameDate
+        effectiveGameDateSource
+        socialAccountId
+        socialAccount {
+          id
+          platform
+          platformAccountId
+          accountName
+          accountHandle
+          accountUrl
+          businessLocation
+          tags
+          profileImageUrl
+          coverImageUrl
+          bio
+          followerCount
+          followingCount
+          postCount
+          hasFullHistory
+          fullSyncOldestPostDate
+          pageDescription
+          category
+          website
+          status
+          isScrapingEnabled
+          scrapeFrequencyMinutes
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          nextScheduledScrapeAt
+          preferredScrapeHourUTC
+          consecutiveFailures
+          lastErrorMessage
+          hasPostAccess
+          accessTokenExpiry
+          permissionsGranted
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          posts {
+            nextToken
+            startedAt
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          createdBy
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        entityId
+        venueId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedTournamentId
+      extractedTournamentUrl
+      scrapeDiscrepancyType
+      detectedAt
+      entityId
+      entityName
+      gameId
+      gameStatus
+      gameName
+      detectedGameEntityId
+      detectedGameEntityName
+      rescrapeRequested
+      rescrapeRequestedAt
+      rescrapeJobId
+      rescrapeResult
+      resolution
+      resolvedAt
+      resolvedBy
+      resolutionNotes
+      __typename
+    }
+    error
+    processingTimeMs
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.ScanForDiscrepanciesMutationVariables,
+  APITypes.ScanForDiscrepanciesMutation
 >;
 export const createEntity = /* GraphQL */ `mutation CreateEntity(
   $input: CreateEntityInput!
@@ -17015,6 +18335,27 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -17295,6 +18636,10 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -23347,6 +24692,27 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -23627,6 +24993,10 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -29679,6 +31049,27 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -29959,6 +31350,10 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -35845,6 +37240,27 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -36125,6 +37541,10 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -43973,6 +45393,27 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -44253,6 +45694,10 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -52101,6 +53546,27 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -52381,6 +53847,10 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -67128,6 +68598,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -67408,6 +68899,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -72656,6 +74151,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -72765,6 +74264,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -73555,6 +75075,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -73602,6 +75126,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -77206,6 +78751,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -77486,6 +79052,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -84692,6 +86262,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -84972,6 +86563,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -88877,6 +90472,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -89157,6 +90773,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -91534,6 +93154,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -91814,6 +93455,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -93809,6 +95454,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -93856,6 +95505,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -94020,6 +95690,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         extractedTotalEntries
         placementCount
         contentType
+        extractedTournamentUrl
+        extractedTournamentId
+        entityId
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyDetectedAt
+        detectedGameStatus
+        detectedScrapeURLStatus
+        detectedGameEntityId
+        rescrapeRequested
+        rescrapeRequestedAt
+        rescrapeRequestedBy
+        rescrapeJobId
+        rescrapeAttemptId
+        rescrapeCompletedAt
+        rescrapeResult
+        rescrapeResolvedGameStatus
+        discrepancyResolution
+        discrepancyResolvedAt
+        discrepancyResolvedBy
+        discrepancyResolutionNotes
         linkedAt
         linkedBy
         verifiedAt
@@ -95993,6 +97684,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -96273,6 +97985,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -96681,6 +98397,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         hasReconciliationDiscrepancy
         reconciliationNotes
         reconciliationCheckedAt
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyLinkId
+        scrapeDiscrepancyDetectedAt
         suggestedGameId
         matchCandidateCount
         matchCandidates
@@ -96758,6 +98478,27 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -104603,6 +106344,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -104883,6 +106645,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -110131,6 +111897,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -110240,6 +112010,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -111030,6 +112821,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -111077,6 +112872,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -114681,6 +116497,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -114961,6 +116798,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -122167,6 +124008,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -122447,6 +124309,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -126352,6 +128218,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -126632,6 +128519,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -129009,6 +130900,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -129289,6 +131201,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -131284,6 +133200,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -131331,6 +133251,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -131495,6 +133436,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         extractedTotalEntries
         placementCount
         contentType
+        extractedTournamentUrl
+        extractedTournamentId
+        entityId
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyDetectedAt
+        detectedGameStatus
+        detectedScrapeURLStatus
+        detectedGameEntityId
+        rescrapeRequested
+        rescrapeRequestedAt
+        rescrapeRequestedBy
+        rescrapeJobId
+        rescrapeAttemptId
+        rescrapeCompletedAt
+        rescrapeResult
+        rescrapeResolvedGameStatus
+        discrepancyResolution
+        discrepancyResolvedAt
+        discrepancyResolvedBy
+        discrepancyResolutionNotes
         linkedAt
         linkedBy
         verifiedAt
@@ -133468,6 +135430,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -133748,6 +135731,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -134156,6 +136143,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         hasReconciliationDiscrepancy
         reconciliationNotes
         reconciliationCheckedAt
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyLinkId
+        scrapeDiscrepancyDetectedAt
         suggestedGameId
         matchCandidateCount
         matchCandidates
@@ -134233,6 +136224,27 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -142078,6 +144090,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -142358,6 +144391,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -147606,6 +149643,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -147715,6 +149756,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -148505,6 +150567,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -148552,6 +150618,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -152156,6 +154243,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -152436,6 +154544,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -159642,6 +161754,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -159922,6 +162055,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -163827,6 +165964,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -164107,6 +166265,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -166484,6 +168646,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -166764,6 +168947,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -168759,6 +170946,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -168806,6 +170997,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -168970,6 +171182,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         extractedTotalEntries
         placementCount
         contentType
+        extractedTournamentUrl
+        extractedTournamentId
+        entityId
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyDetectedAt
+        detectedGameStatus
+        detectedScrapeURLStatus
+        detectedGameEntityId
+        rescrapeRequested
+        rescrapeRequestedAt
+        rescrapeRequestedBy
+        rescrapeJobId
+        rescrapeAttemptId
+        rescrapeCompletedAt
+        rescrapeResult
+        rescrapeResolvedGameStatus
+        discrepancyResolution
+        discrepancyResolvedAt
+        discrepancyResolvedBy
+        discrepancyResolutionNotes
         linkedAt
         linkedBy
         verifiedAt
@@ -170943,6 +173176,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -171223,6 +173477,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -171631,6 +173889,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         hasReconciliationDiscrepancy
         reconciliationNotes
         reconciliationCheckedAt
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyLinkId
+        scrapeDiscrepancyDetectedAt
         suggestedGameId
         matchCandidateCount
         matchCandidates
@@ -171708,6 +173970,27 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -179513,6 +181796,27 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -179793,6 +182097,10 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -185041,6 +187349,10 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -185150,6 +187462,27 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -185940,6 +188273,10 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -185987,6 +188324,27 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -189678,6 +192036,27 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -189958,6 +192337,10 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -195206,6 +197589,10 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -195315,6 +197702,27 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -196105,6 +198513,10 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -196152,6 +198564,27 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -199843,6 +202276,27 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -200123,6 +202577,10 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -205371,6 +207829,10 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -205480,6 +207942,27 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -206270,6 +208753,10 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -206317,6 +208804,27 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -210205,6 +212713,27 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -210485,6 +213014,10 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -215733,6 +218266,10 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -215842,6 +218379,27 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -216632,6 +219190,10 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -216679,6 +219241,27 @@ export const createGameFinancialSnapshot = /* GraphQL */ `mutation CreateGameFin
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -220430,6 +223013,27 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -220710,6 +223314,10 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -225958,6 +228566,10 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -226067,6 +228679,27 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -226857,6 +229490,10 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -226904,6 +229541,27 @@ export const updateGameFinancialSnapshot = /* GraphQL */ `mutation UpdateGameFin
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -230655,6 +233313,27 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -230935,6 +233614,10 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -236183,6 +238866,10 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -236292,6 +238979,27 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -237082,6 +239790,10 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -237129,6 +239841,27 @@ export const deleteGameFinancialSnapshot = /* GraphQL */ `mutation DeleteGameFin
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -240880,6 +243613,27 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -241160,6 +243914,10 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -246408,6 +249166,10 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -246517,6 +249279,27 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -247307,6 +250090,10 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -247354,6 +250141,27 @@ export const createGameCost = /* GraphQL */ `mutation CreateGameCost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -251307,6 +254115,27 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -251587,6 +254416,10 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -256835,6 +259668,10 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -256944,6 +259781,27 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -257734,6 +260592,10 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -257781,6 +260643,27 @@ export const updateGameCost = /* GraphQL */ `mutation UpdateGameCost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -261734,6 +264617,27 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -262014,6 +264918,10 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -267262,6 +270170,10 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -267371,6 +270283,27 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -268161,6 +271094,10 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -268208,6 +271145,27 @@ export const deleteGameCost = /* GraphQL */ `mutation DeleteGameCost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -272108,6 +275066,27 @@ export const createGameCostLineItem = /* GraphQL */ `mutation CreateGameCostLine
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -272388,6 +275367,10 @@ export const createGameCostLineItem = /* GraphQL */ `mutation CreateGameCostLine
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -274901,6 +277884,27 @@ export const updateGameCostLineItem = /* GraphQL */ `mutation UpdateGameCostLine
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -275181,6 +278185,10 @@ export const updateGameCostLineItem = /* GraphQL */ `mutation UpdateGameCostLine
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -277694,6 +280702,27 @@ export const deleteGameCostLineItem = /* GraphQL */ `mutation DeleteGameCostLine
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -277974,6 +281003,10 @@ export const deleteGameCostLineItem = /* GraphQL */ `mutation DeleteGameCostLine
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -285834,6 +288867,27 @@ export const createRecurringGame = /* GraphQL */ `mutation CreateRecurringGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -286114,6 +289168,10 @@ export const createRecurringGame = /* GraphQL */ `mutation CreateRecurringGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -294138,6 +297196,27 @@ export const updateRecurringGame = /* GraphQL */ `mutation UpdateRecurringGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -294418,6 +297497,10 @@ export const updateRecurringGame = /* GraphQL */ `mutation UpdateRecurringGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -302442,6 +305525,27 @@ export const deleteRecurringGame = /* GraphQL */ `mutation DeleteRecurringGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -302722,6 +305826,10 @@ export const deleteRecurringGame = /* GraphQL */ `mutation DeleteRecurringGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -308895,6 +312003,27 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -309175,6 +312304,10 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -314423,6 +317556,10 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -314532,6 +317669,27 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -315322,6 +318480,10 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -315369,6 +318531,27 @@ export const createRecurringGameInstance = /* GraphQL */ `mutation CreateRecurri
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -321698,6 +324881,27 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -321978,6 +325182,10 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -327226,6 +330434,10 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -327335,6 +330547,27 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -328125,6 +331358,10 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -328172,6 +331409,27 @@ export const updateRecurringGameInstance = /* GraphQL */ `mutation UpdateRecurri
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -334501,6 +337759,27 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -334781,6 +338060,10 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -340029,6 +343312,10 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -340138,6 +343425,27 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -340928,6 +344236,10 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -340975,6 +344287,27 @@ export const deleteRecurringGameInstance = /* GraphQL */ `mutation DeleteRecurri
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -350666,6 +353999,27 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -350946,6 +354300,10 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -358082,6 +361440,27 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -358362,6 +361741,10 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -365498,6 +368881,27 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -365778,6 +369182,10 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -396872,6 +400280,27 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -397152,6 +400581,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -402400,6 +405833,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -402509,6 +405946,27 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -403299,6 +406757,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -403346,6 +406808,27 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -408955,6 +412438,27 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -409235,6 +412739,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -414483,6 +417991,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -414592,6 +418104,27 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -415382,6 +418915,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -415429,6 +418966,27 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -421038,6 +424596,27 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -421318,6 +424897,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -426566,6 +430149,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -426675,6 +430262,27 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -427465,6 +431073,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -427512,6 +431124,27 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -433118,6 +436751,27 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -433398,6 +437052,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -438646,6 +442304,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -438755,6 +442417,27 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -439545,6 +443228,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -439592,6 +443279,27 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -445203,6 +448911,27 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -445483,6 +449212,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -450731,6 +454464,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -450840,6 +454577,27 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -451630,6 +455388,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -451677,6 +455439,27 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -457288,6 +461071,27 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -457568,6 +461372,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -462816,6 +466624,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -462925,6 +466737,27 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -463715,6 +467548,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -463762,6 +467599,27 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -508990,6 +512848,27 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -509270,6 +513149,10 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -514518,6 +518401,10 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -514627,6 +518514,27 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -515417,6 +519325,10 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -515464,6 +519376,27 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -521304,6 +525237,27 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -521584,6 +525538,10 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -526832,6 +530790,10 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -526941,6 +530903,27 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -527731,6 +531714,10 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -527778,6 +531765,27 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -533618,6 +537626,27 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -533898,6 +537927,10 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -539146,6 +543179,10 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -539255,6 +543292,27 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -540045,6 +544103,10 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -540092,6 +544154,27 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -630619,6 +634702,27 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -630899,6 +635003,10 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -636147,6 +640255,10 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -636256,6 +640368,27 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -637046,6 +641179,10 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -637093,6 +641230,27 @@ export const createActiveGame = /* GraphQL */ `mutation CreateActiveGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -645311,6 +649469,27 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -645591,6 +649770,10 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -650839,6 +655022,10 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -650948,6 +655135,27 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -651738,6 +655946,10 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -651785,6 +655997,27 @@ export const updateActiveGame = /* GraphQL */ `mutation UpdateActiveGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -660003,6 +664236,27 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -660283,6 +664537,10 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -665531,6 +669789,10 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -665640,6 +669902,27 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -666430,6 +670713,10 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -666477,6 +670764,27 @@ export const deleteActiveGame = /* GraphQL */ `mutation DeleteActiveGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -674695,6 +679003,27 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -674975,6 +679304,10 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -680223,6 +684556,10 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -680332,6 +684669,27 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -681122,6 +685480,10 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -681169,6 +685531,27 @@ export const createRecentlyFinishedGame = /* GraphQL */ `mutation CreateRecently
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -689367,6 +693750,27 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -689647,6 +694051,10 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -694895,6 +699303,10 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -695004,6 +699416,27 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -695794,6 +700227,10 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -695841,6 +700278,27 @@ export const updateRecentlyFinishedGame = /* GraphQL */ `mutation UpdateRecently
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -704039,6 +708497,27 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -704319,6 +708798,10 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -709567,6 +714050,10 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -709676,6 +714163,27 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -710466,6 +714974,10 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -710513,6 +715025,27 @@ export const deleteRecentlyFinishedGame = /* GraphQL */ `mutation DeleteRecently
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -718711,6 +723244,27 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -718991,6 +723545,10 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -724239,6 +728797,10 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -724348,6 +728910,27 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -725138,6 +729721,10 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -725185,6 +729772,27 @@ export const createUpcomingGame = /* GraphQL */ `mutation CreateUpcomingGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -733380,6 +737988,27 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -733660,6 +738289,10 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -738908,6 +743541,10 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -739017,6 +743654,27 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -739807,6 +744465,10 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -739854,6 +744516,27 @@ export const updateUpcomingGame = /* GraphQL */ `mutation UpdateUpcomingGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -748049,6 +752732,27 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -748329,6 +753033,10 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -753577,6 +758285,10 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -753686,6 +758398,27 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -754476,6 +759209,10 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -754523,6 +759260,27 @@ export const deleteUpcomingGame = /* GraphQL */ `mutation DeleteUpcomingGame(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -772009,6 +776767,10 @@ export const createSocialAccount = /* GraphQL */ `mutation CreateSocialAccount(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -772056,6 +776818,27 @@ export const createSocialAccount = /* GraphQL */ `mutation CreateSocialAccount(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -777637,6 +782420,10 @@ export const updateSocialAccount = /* GraphQL */ `mutation UpdateSocialAccount(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -777684,6 +782471,27 @@ export const updateSocialAccount = /* GraphQL */ `mutation UpdateSocialAccount(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -783265,6 +788073,10 @@ export const deleteSocialAccount = /* GraphQL */ `mutation DeleteSocialAccount(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -783312,6 +788124,27 @@ export const deleteSocialAccount = /* GraphQL */ `mutation DeleteSocialAccount(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -785601,6 +790434,27 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -785881,6 +790735,10 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -791129,6 +795987,10 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -791238,6 +796100,27 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -792028,6 +796911,10 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -792075,6 +796962,27 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -793838,6 +798746,10 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
       hasReconciliationDiscrepancy
       reconciliationNotes
       reconciliationCheckedAt
+      hasScrapeDiscrepancy
+      scrapeDiscrepancyType
+      scrapeDiscrepancyLinkId
+      scrapeDiscrepancyDetectedAt
       suggestedGameId
       matchCandidateCount
       matchCandidates
@@ -793915,6 +798827,27 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
         extractedTotalEntries
         placementCount
         contentType
+        extractedTournamentUrl
+        extractedTournamentId
+        entityId
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyDetectedAt
+        detectedGameStatus
+        detectedScrapeURLStatus
+        detectedGameEntityId
+        rescrapeRequested
+        rescrapeRequestedAt
+        rescrapeRequestedBy
+        rescrapeJobId
+        rescrapeAttemptId
+        rescrapeCompletedAt
+        rescrapeResult
+        rescrapeResolvedGameStatus
+        discrepancyResolution
+        discrepancyResolvedAt
+        discrepancyResolvedBy
+        discrepancyResolutionNotes
         linkedAt
         linkedBy
         verifiedAt
@@ -795721,6 +800654,10 @@ export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -797907,6 +802844,27 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -798187,6 +803145,10 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -803435,6 +808397,10 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -803544,6 +808510,27 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -804334,6 +809321,10 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -804381,6 +809372,27 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -806144,6 +811156,10 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
       hasReconciliationDiscrepancy
       reconciliationNotes
       reconciliationCheckedAt
+      hasScrapeDiscrepancy
+      scrapeDiscrepancyType
+      scrapeDiscrepancyLinkId
+      scrapeDiscrepancyDetectedAt
       suggestedGameId
       matchCandidateCount
       matchCandidates
@@ -806221,6 +811237,27 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
         extractedTotalEntries
         placementCount
         contentType
+        extractedTournamentUrl
+        extractedTournamentId
+        entityId
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyDetectedAt
+        detectedGameStatus
+        detectedScrapeURLStatus
+        detectedGameEntityId
+        rescrapeRequested
+        rescrapeRequestedAt
+        rescrapeRequestedBy
+        rescrapeJobId
+        rescrapeAttemptId
+        rescrapeCompletedAt
+        rescrapeResult
+        rescrapeResolvedGameStatus
+        discrepancyResolution
+        discrepancyResolvedAt
+        discrepancyResolvedBy
+        discrepancyResolutionNotes
         linkedAt
         linkedBy
         verifiedAt
@@ -808027,6 +813064,10 @@ export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -810213,6 +815254,27 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -810493,6 +815555,10 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -815741,6 +820807,10 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -815850,6 +820920,27 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -816640,6 +821731,10 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -816687,6 +821782,27 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -818450,6 +823566,10 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
       hasReconciliationDiscrepancy
       reconciliationNotes
       reconciliationCheckedAt
+      hasScrapeDiscrepancy
+      scrapeDiscrepancyType
+      scrapeDiscrepancyLinkId
+      scrapeDiscrepancyDetectedAt
       suggestedGameId
       matchCandidateCount
       matchCandidates
@@ -818527,6 +823647,27 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
         extractedTotalEntries
         placementCount
         contentType
+        extractedTournamentUrl
+        extractedTournamentId
+        entityId
+        hasScrapeDiscrepancy
+        scrapeDiscrepancyType
+        scrapeDiscrepancyDetectedAt
+        detectedGameStatus
+        detectedScrapeURLStatus
+        detectedGameEntityId
+        rescrapeRequested
+        rescrapeRequestedAt
+        rescrapeRequestedBy
+        rescrapeJobId
+        rescrapeAttemptId
+        rescrapeCompletedAt
+        rescrapeResult
+        rescrapeResolvedGameStatus
+        discrepancyResolution
+        discrepancyResolvedAt
+        discrepancyResolvedBy
+        discrepancyResolutionNotes
         linkedAt
         linkedBy
         verifiedAt
@@ -820333,6 +825474,10 @@ export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -822308,6 +827453,10 @@ export const createSocialScrapeAttempt = /* GraphQL */ `mutation CreateSocialScr
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -824281,6 +829430,10 @@ export const updateSocialScrapeAttempt = /* GraphQL */ `mutation UpdateSocialScr
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -826254,6 +831407,10 @@ export const deleteSocialScrapeAttempt = /* GraphQL */ `mutation DeleteSocialScr
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -826543,6 +831700,27 @@ export const createSocialPostGameLink = /* GraphQL */ `mutation CreateSocialPost
     extractedTotalEntries
     placementCount
     contentType
+    extractedTournamentUrl
+    extractedTournamentId
+    entityId
+    hasScrapeDiscrepancy
+    scrapeDiscrepancyType
+    scrapeDiscrepancyDetectedAt
+    detectedGameStatus
+    detectedScrapeURLStatus
+    detectedGameEntityId
+    rescrapeRequested
+    rescrapeRequestedAt
+    rescrapeRequestedBy
+    rescrapeJobId
+    rescrapeAttemptId
+    rescrapeCompletedAt
+    rescrapeResult
+    rescrapeResolvedGameStatus
+    discrepancyResolution
+    discrepancyResolvedAt
+    discrepancyResolvedBy
+    discrepancyResolutionNotes
     linkedAt
     linkedBy
     verifiedAt
@@ -826592,6 +831770,27 @@ export const updateSocialPostGameLink = /* GraphQL */ `mutation UpdateSocialPost
     extractedTotalEntries
     placementCount
     contentType
+    extractedTournamentUrl
+    extractedTournamentId
+    entityId
+    hasScrapeDiscrepancy
+    scrapeDiscrepancyType
+    scrapeDiscrepancyDetectedAt
+    detectedGameStatus
+    detectedScrapeURLStatus
+    detectedGameEntityId
+    rescrapeRequested
+    rescrapeRequestedAt
+    rescrapeRequestedBy
+    rescrapeJobId
+    rescrapeAttemptId
+    rescrapeCompletedAt
+    rescrapeResult
+    rescrapeResolvedGameStatus
+    discrepancyResolution
+    discrepancyResolvedAt
+    discrepancyResolvedBy
+    discrepancyResolutionNotes
     linkedAt
     linkedBy
     verifiedAt
@@ -826641,6 +831840,27 @@ export const deleteSocialPostGameLink = /* GraphQL */ `mutation DeleteSocialPost
     extractedTotalEntries
     placementCount
     contentType
+    extractedTournamentUrl
+    extractedTournamentId
+    entityId
+    hasScrapeDiscrepancy
+    scrapeDiscrepancyType
+    scrapeDiscrepancyDetectedAt
+    detectedGameStatus
+    detectedScrapeURLStatus
+    detectedGameEntityId
+    rescrapeRequested
+    rescrapeRequestedAt
+    rescrapeRequestedBy
+    rescrapeJobId
+    rescrapeAttemptId
+    rescrapeCompletedAt
+    rescrapeResult
+    rescrapeResolvedGameStatus
+    discrepancyResolution
+    discrepancyResolvedAt
+    discrepancyResolvedBy
+    discrepancyResolutionNotes
     linkedAt
     linkedBy
     verifiedAt
@@ -826731,6 +831951,10 @@ export const createSocialPostGameData = /* GraphQL */ `mutation CreateSocialPost
     hasReconciliationDiscrepancy
     reconciliationNotes
     reconciliationCheckedAt
+    hasScrapeDiscrepancy
+    scrapeDiscrepancyType
+    scrapeDiscrepancyLinkId
+    scrapeDiscrepancyDetectedAt
     suggestedGameId
     matchCandidateCount
     matchCandidates
@@ -826857,6 +832081,10 @@ export const updateSocialPostGameData = /* GraphQL */ `mutation UpdateSocialPost
     hasReconciliationDiscrepancy
     reconciliationNotes
     reconciliationCheckedAt
+    hasScrapeDiscrepancy
+    scrapeDiscrepancyType
+    scrapeDiscrepancyLinkId
+    scrapeDiscrepancyDetectedAt
     suggestedGameId
     matchCandidateCount
     matchCandidates
@@ -826983,6 +832211,10 @@ export const deleteSocialPostGameData = /* GraphQL */ `mutation DeleteSocialPost
     hasReconciliationDiscrepancy
     reconciliationNotes
     reconciliationCheckedAt
+    hasScrapeDiscrepancy
+    scrapeDiscrepancyType
+    scrapeDiscrepancyLinkId
+    scrapeDiscrepancyDetectedAt
     suggestedGameId
     matchCandidateCount
     matchCandidates

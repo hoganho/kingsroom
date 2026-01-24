@@ -16310,6 +16310,165 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "extractedTournamentUrl": {
+                    "name": "extractedTournamentUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedTournamentId": {
+                    "name": "extractedTournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasScrapeDiscrepancy": {
+                    "name": "hasScrapeDiscrepancy",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapeDiscrepancyType": {
+                    "name": "scrapeDiscrepancyType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeDiscrepancyType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapeDiscrepancyDetectedAt": {
+                    "name": "scrapeDiscrepancyDetectedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "detectedGameStatus": {
+                    "name": "detectedGameStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "detectedScrapeURLStatus": {
+                    "name": "detectedScrapeURLStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeAttemptStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "detectedGameEntityId": {
+                    "name": "detectedGameEntityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeRequested": {
+                    "name": "rescrapeRequested",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeRequestedAt": {
+                    "name": "rescrapeRequestedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeRequestedBy": {
+                    "name": "rescrapeRequestedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeJobId": {
+                    "name": "rescrapeJobId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeAttemptId": {
+                    "name": "rescrapeAttemptId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeCompletedAt": {
+                    "name": "rescrapeCompletedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeResult": {
+                    "name": "rescrapeResult",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeAttemptStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeResolvedGameStatus": {
+                    "name": "rescrapeResolvedGameStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "discrepancyResolution": {
+                    "name": "discrepancyResolution",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeDiscrepancyResolution"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "discrepancyResolvedAt": {
+                    "name": "discrepancyResolvedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "discrepancyResolvedBy": {
+                    "name": "discrepancyResolvedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "discrepancyResolutionNotes": {
+                    "name": "discrepancyResolutionNotes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "linkedAt": {
                     "name": "linkedAt",
                     "isArray": false,
@@ -16400,6 +16559,55 @@ export const schema = {
                         "fields": [
                             "gameId",
                             "linkedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byExtractedTournamentUrl",
+                        "fields": [
+                            "extractedTournamentUrl",
+                            "linkedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byExtractedTournamentId",
+                        "fields": [
+                            "extractedTournamentId",
+                            "linkedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byDiscrepancyEntity",
+                        "fields": [
+                            "entityId",
+                            "scrapeDiscrepancyDetectedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byScrapeDiscrepancyType",
+                        "fields": [
+                            "scrapeDiscrepancyType",
+                            "scrapeDiscrepancyDetectedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byRescrapeJob",
+                        "fields": [
+                            "rescrapeJobId"
                         ]
                     }
                 },
@@ -16899,6 +17107,36 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "hasScrapeDiscrepancy": {
+                    "name": "hasScrapeDiscrepancy",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapeDiscrepancyType": {
+                    "name": "scrapeDiscrepancyType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeDiscrepancyType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapeDiscrepancyLinkId": {
+                    "name": "scrapeDiscrepancyLinkId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapeDiscrepancyDetectedAt": {
+                    "name": "scrapeDiscrepancyDetectedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "suggestedGameId": {
                     "name": "suggestedGameId",
                     "isArray": false,
@@ -17001,6 +17239,16 @@ export const schema = {
                         "name": "bySocialPostExtraction",
                         "fields": [
                             "socialPostId",
+                            "extractedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byExtractedUrl",
+                        "fields": [
+                            "extractedTournamentUrl",
                             "extractedAt"
                         ]
                     }
@@ -18353,7 +18601,8 @@ export const schema = {
                 "API",
                 "CONTROL",
                 "BULK",
-                "ADMIN"
+                "ADMIN",
+                "SOCIAL_DISCREPANCY"
             ]
         },
         "ScraperJobStatus": {
@@ -18541,7 +18790,10 @@ export const schema = {
                 "MANUAL_LINKED",
                 "VERIFIED",
                 "REJECTED",
-                "TOURNAMENT_ID"
+                "TOURNAMENT_ID",
+                "PENDING_SCRAPE",
+                "RESCRAPE_REQUESTED",
+                "RESCRAPE_RESOLVED"
             ]
         },
         "NonCashPrizeType": {
@@ -18572,6 +18824,29 @@ export const schema = {
                 "SCRAPED_DATA",
                 "MANUAL_ENTRY",
                 "RECURRING_GAME_DEFAULT"
+            ]
+        },
+        "ScrapeDiscrepancyType": {
+            "name": "ScrapeDiscrepancyType",
+            "values": [
+                "NONE",
+                "GAME_NOT_IN_DATABASE",
+                "GAME_STATUS_NOT_FOUND",
+                "GAME_STATUS_NOT_PUBLISHED",
+                "STATUS_MISMATCH",
+                "STALE_DATA"
+            ]
+        },
+        "ScrapeDiscrepancyResolution": {
+            "name": "ScrapeDiscrepancyResolution",
+            "values": [
+                "UNRESOLVED",
+                "RESCRAPE_PENDING",
+                "RESCRAPE_SUCCESS",
+                "RESCRAPE_FAILED",
+                "MANUALLY_RESOLVED",
+                "IGNORED",
+                "AUTO_RESOLVED"
             ]
         },
         "BackgroundTaskType": {
@@ -29181,6 +29456,45 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "scrapeDiscrepancyDetected": {
+                    "name": "scrapeDiscrepancyDetected",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapeDiscrepancyType": {
+                    "name": "scrapeDiscrepancyType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeDiscrepancyType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapeDiscrepancyLink": {
+                    "name": "scrapeDiscrepancyLink",
+                    "isArray": false,
+                    "type": {
+                        "model": "SocialPostGameLink"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeTriggered": {
+                    "name": "rescrapeTriggered",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeJobId": {
+                    "name": "rescrapeJobId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "processingTimeMs": {
                     "name": "processingTimeMs",
                     "isArray": false,
@@ -30139,6 +30453,23 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "discrepanciesResolved": {
+                    "name": "discrepanciesResolved",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "discrepancyDetails": {
+                    "name": "discrepancyDetails",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "DiscrepancyResolutionDetail"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
                 "matchedPosts": {
                     "name": "matchedPosts",
                     "isArray": true,
@@ -30421,6 +30752,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "totalDiscrepanciesResolved": {
+                    "name": "totalDiscrepanciesResolved",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "results": {
                     "name": "results",
                     "isArray": true,
@@ -30430,6 +30768,580 @@ export const schema = {
                     "isRequired": true,
                     "attributes": [],
                     "isArrayNullable": true
+                }
+            }
+        },
+        "DiscrepancyResolutionDetail": {
+            "name": "DiscrepancyResolutionDetail",
+            "fields": {
+                "linkId": {
+                    "name": "linkId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "socialPostId": {
+                    "name": "socialPostId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "extractedTournamentId": {
+                    "name": "extractedTournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedTournamentUrl": {
+                    "name": "extractedTournamentUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "previousLinkType": {
+                    "name": "previousLinkType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SocialPostLinkType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newLinkType": {
+                    "name": "newLinkType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SocialPostLinkType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "previousResolution": {
+                    "name": "previousResolution",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeDiscrepancyResolution"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newResolution": {
+                    "name": "newResolution",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeDiscrepancyResolution"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ScrapeDiscrepancyConnection": {
+            "name": "ScrapeDiscrepancyConnection",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapeDiscrepancyInfo"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "byType": {
+                    "name": "byType",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "byResolution": {
+                    "name": "byResolution",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ScrapeDiscrepancyInfo": {
+            "name": "ScrapeDiscrepancyInfo",
+            "fields": {
+                "linkId": {
+                    "name": "linkId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "socialPostId": {
+                    "name": "socialPostId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "socialPost": {
+                    "name": "socialPost",
+                    "isArray": false,
+                    "type": {
+                        "model": "SocialPost"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedTournamentId": {
+                    "name": "extractedTournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedTournamentUrl": {
+                    "name": "extractedTournamentUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapeDiscrepancyType": {
+                    "name": "scrapeDiscrepancyType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeDiscrepancyType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "detectedAt": {
+                    "name": "detectedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityName": {
+                    "name": "entityName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStatus": {
+                    "name": "gameStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameName": {
+                    "name": "gameName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "detectedGameEntityId": {
+                    "name": "detectedGameEntityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "detectedGameEntityName": {
+                    "name": "detectedGameEntityName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeRequested": {
+                    "name": "rescrapeRequested",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeRequestedAt": {
+                    "name": "rescrapeRequestedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeJobId": {
+                    "name": "rescrapeJobId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeResult": {
+                    "name": "rescrapeResult",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeAttemptStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "resolution": {
+                    "name": "resolution",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeDiscrepancyResolution"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "resolvedAt": {
+                    "name": "resolvedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "resolvedBy": {
+                    "name": "resolvedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "resolutionNotes": {
+                    "name": "resolutionNotes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "TriggerRescrapeResult": {
+            "name": "TriggerRescrapeResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "linkId": {
+                    "name": "linkId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeJobId": {
+                    "name": "rescrapeJobId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentUrl": {
+                    "name": "tournamentUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentId": {
+                    "name": "tournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "linkCreated": {
+                    "name": "linkCreated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "deduplicated": {
+                    "name": "deduplicated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ResolveDiscrepancyResult": {
+            "name": "ResolveDiscrepancyResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "linkId": {
+                    "name": "linkId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "previousResolution": {
+                    "name": "previousResolution",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeDiscrepancyResolution"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newResolution": {
+                    "name": "newResolution",
+                    "isArray": false,
+                    "type": {
+                        "enum": "ScrapeDiscrepancyResolution"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ScrapeDiscrepancyStats": {
+            "name": "ScrapeDiscrepancyStats",
+            "fields": {
+                "totalDiscrepancies": {
+                    "name": "totalDiscrepancies",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "unresolvedCount": {
+                    "name": "unresolvedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "resolvingCount": {
+                    "name": "resolvingCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "resolvedCount": {
+                    "name": "resolvedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameNotInDatabaseCount": {
+                    "name": "gameNotInDatabaseCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStatusNotFoundCount": {
+                    "name": "gameStatusNotFoundCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStatusNotPublishedCount": {
+                    "name": "gameStatusNotPublishedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityMismatchCount": {
+                    "name": "entityMismatchCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "statusMismatchCount": {
+                    "name": "statusMismatchCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "pendingRescrapes": {
+                    "name": "pendingRescrapes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "byEntity": {
+                    "name": "byEntity",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ScanForDiscrepanciesResult": {
+            "name": "ScanForDiscrepanciesResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "extractionsScanned": {
+                    "name": "extractionsScanned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "uniqueUrlsChecked": {
+                    "name": "uniqueUrlsChecked",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "discrepanciesFound": {
+                    "name": "discrepanciesFound",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "linksCreated": {
+                    "name": "linksCreated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "rescrapesTriggered": {
+                    "name": "rescrapesTriggered",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "byType": {
+                    "name": "byType",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "discrepancies": {
+                    "name": "discrepancies",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapeDiscrepancyInfo"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "processingTimeMs": {
+                    "name": "processingTimeMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -31084,5 +31996,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "721d8201dfa2f5b7c038e2bd6a9a4476"
+    "version": "8a3034ecfe0560c99af784a155e25473"
 };

@@ -18,17 +18,21 @@ Amplify Params - DO NOT EDIT */
 
 /**
  * Social Post Processor Lambda
+ * Version: 3.0.0
  * 
  * Processes social posts to:
  * 1. Classify content type (RESULT, PROMOTIONAL, GENERAL)
  * 2. Extract game data (buy-in, guarantee, venue, placements, etc.)
  * 3. Match to existing games in the database
  * 4. Create automatic links for high-confidence matches
+ * 5. Detect and manage scrape discrepancies
+ * 6. Handle ticket reconciliation
  * 
  * Triggered by:
  * - socialFetcher Lambda (after saving new posts) - async invocation
  * - GraphQL mutations (processSocialPost, processSocialPostBatch)
  * - Manual invocation for reprocessing
+ * - UI for discrepancy management
  */
 
 const { processSocialPost, previewMatch, previewContentExtraction } = require('./operations/processSocialPost');
@@ -40,6 +44,25 @@ const {
   rejectSocialPostLink 
 } = require('./operations/linkOperations');
 const { getUnlinkedSocialPosts, getSocialPostMatchingStats } = require('./operations/queries');
+
+// Scrape discrepancy operations
+const {
+  triggerDiscrepancyRescrape,
+  resolveDiscrepancy,
+  scanForDiscrepancies,
+  getScrapeDiscrepancies,
+  getScrapeDiscrepancy,
+  getScrapeDiscrepancyStats
+} = require('./operations/discrepancyOperations');
+
+// Reconciliation operations
+const {
+  reconcileSocialToGame,
+  getSocialPostTicketsForGame,
+  getSocialPostPlacements,
+  getTicketReconciliationReport,
+  previewReconciliation
+} = require('./operations/reconciliationOperations');
 
 /**
  * Extract arguments from event - handles multiple AppSync/Lambda event formats
@@ -122,7 +145,9 @@ exports.handler = async (event) => {
         forceReprocess: args.forceReprocess || false,
         skipMatching: args.skipMatching || false,
         skipLinking: args.skipLinking || false,
-        matchThreshold: args.matchThreshold
+        matchThreshold: args.matchThreshold,
+        createDiscrepancyLinks: args.createDiscrepancyLinks,
+        triggerRescrapeOnDiscrepancy: args.triggerRescrapeOnDiscrepancy
       });
     }
     
@@ -197,7 +222,9 @@ async function handleGraphQLRequest(fieldName, args) {
         forceReprocess: args.forceReprocess || false,
         skipMatching: args.skipMatching || false,
         skipLinking: args.skipLinking || false,
-        matchThreshold: args.matchThreshold
+        matchThreshold: args.matchThreshold,
+        createDiscrepancyLinks: args.createDiscrepancyLinks,
+        triggerRescrapeOnDiscrepancy: args.triggerRescrapeOnDiscrepancy
       });
     }
     
@@ -306,6 +333,127 @@ async function handleGraphQLRequest(fieldName, args) {
         dateFrom: args.dateFrom,
         dateTo: args.dateTo
       });
+    
+    // =========================================================================
+    // Scrape Discrepancy Operations
+    // =========================================================================
+    
+    case 'triggerDiscrepancyRescrape': {
+      // Validate: Either linkId OR (tournamentUrl + socialPostId) required
+      if (!args.linkId && !args.tournamentUrl) {
+        throw new Error('Missing required argument: either linkId or tournamentUrl must be provided');
+      }
+      if (args.tournamentUrl && !args.socialPostId) {
+        throw new Error('When using tournamentUrl, socialPostId is also required');
+      }
+      return triggerDiscrepancyRescrape({
+        linkId: args.linkId,
+        tournamentUrl: args.tournamentUrl,
+        tournamentId: args.tournamentId,
+        socialPostId: args.socialPostId,
+        entityId: args.entityId,
+        forceRefresh: args.forceRefresh || false,
+        priority: args.priority,
+        notes: args.notes
+      });
+    }
+    
+    case 'resolveDiscrepancy': {
+      if (!args.linkId) {
+        throw new Error('Missing required argument: linkId');
+      }
+      if (!args.resolution) {
+        throw new Error('Missing required argument: resolution');
+      }
+      return resolveDiscrepancy({
+        linkId: args.linkId,
+        resolution: args.resolution,
+        gameId: args.gameId,
+        notes: args.notes
+      });
+    }
+    
+    case 'scanForDiscrepancies':
+      return scanForDiscrepancies({
+        entityId: args.entityId,
+        socialAccountId: args.socialAccountId,
+        postedAfter: args.postedAfter,
+        postedBefore: args.postedBefore,
+        limit: args.limit,
+        createLinks: args.createLinks,
+        autoTriggerRescrape: args.autoTriggerRescrape
+      });
+    
+    case 'getScrapeDiscrepancies':
+      return getScrapeDiscrepancies({
+        entityId: args.entityId,
+        scrapeDiscrepancyType: args.scrapeDiscrepancyType,
+        rescrapeRequested: args.rescrapeRequested,
+        discrepancyResolution: args.discrepancyResolution,
+        detectedAfter: args.detectedAfter,
+        detectedBefore: args.detectedBefore,
+        limit: args.limit,
+        nextToken: args.nextToken
+      });
+    
+    case 'getScrapeDiscrepancy': {
+      if (!args.linkId) {
+        throw new Error('Missing required argument: linkId');
+      }
+      return getScrapeDiscrepancy(args.linkId);
+    }
+    
+    case 'getScrapeDiscrepancyStats':
+      return getScrapeDiscrepancyStats(args.entityId);
+    
+    // =========================================================================
+    // Reconciliation Operations
+    // =========================================================================
+    
+    case 'reconcileSocialToGame': {
+      if (!args.socialPostGameDataId || !args.gameId) {
+        throw new Error('Missing required arguments: socialPostGameDataId and gameId');
+      }
+      return reconcileSocialToGame({
+        socialPostGameDataId: args.socialPostGameDataId,
+        gameId: args.gameId,
+        applyToGame: args.applyToGame || false,
+        notes: args.notes
+      });
+    }
+    
+    case 'getSocialPostTicketsForGame': {
+      if (!args.gameId) {
+        throw new Error('Missing required argument: gameId');
+      }
+      return getSocialPostTicketsForGame(args.gameId);
+    }
+    
+    case 'getSocialPostPlacements': {
+      if (!args.socialPostId) {
+        throw new Error('Missing required argument: socialPostId');
+      }
+      return getSocialPostPlacements(args.socialPostId);
+    }
+    
+    case 'getTicketReconciliationReport':
+      return getTicketReconciliationReport({
+        gameId: args.gameId,
+        entityId: args.entityId,
+        venueId: args.venueId,
+        dateFrom: args.dateFrom,
+        dateTo: args.dateTo,
+        onlyDiscrepancies: args.onlyDiscrepancies,
+        limit: args.limit,
+        nextToken: args.nextToken
+      });
+    
+    case 'previewReconciliation': {
+      if (!args.socialPostGameDataId || !args.gameId) {
+        throw new Error('Missing required arguments: socialPostGameDataId and gameId');
+      }
+      return previewReconciliation(args.socialPostGameDataId, args.gameId);
+    }
     
     default:
       throw new Error(`Unknown field: ${fieldName}`);

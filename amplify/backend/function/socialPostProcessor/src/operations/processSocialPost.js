@@ -2,10 +2,16 @@
  * operations/processSocialPost.js
  * Main processing logic for a single social post
  * 
- * VERSION: 1.2.0
+ * VERSION: 3.0.0
  * 
  * UPDATED: Now sets ALL classification fields including tags
  * This is the single source of truth for classification logic
+ * 
+ * UPDATES v3.0.0:
+ * - Added scrape discrepancy detection and link creation
+ * - When tournament ID found but no valid game, creates PENDING_SCRAPE link
+ * - Optionally triggers re-scrape for discrepancies
+ * - Tracks discrepancy resolution in SocialPostGameLink
  * 
  * UPDATES v1.2.0:
  * - Fixed guaranteeAmount field name (was incorrectly "guarantee")
@@ -20,7 +26,9 @@ const {
   updateSocialPostGameData,
   createSocialPostPlacement,
   createSocialPostGameLink,
-  getExtractionBySocialPost
+  updateSocialPostGameLink,
+  getExtractionBySocialPost,
+  getLinksBySocialPost
 } = require('../utils/graphql');
 const { classifyContent, shouldSkipPost } = require('../extraction/contentClassifier');
 const { extractGameData } = require('../extraction/dataExtractor');
@@ -28,7 +36,7 @@ const { parsePlacements, createPlacementRecords, extractWinnerInfo } = require('
 const { findMatchingGames, getAutoLinkCandidates } = require('../matching/gameMatcher');
 
 // Processing version for tracking
-const PROCESSING_VERSION = '1.2.0'; // Bumped for guaranteeAmount fix
+const PROCESSING_VERSION = '3.0.0';
 
 // Default auto-link threshold
 const DEFAULT_AUTO_LINK_THRESHOLD = 80;
@@ -67,6 +75,20 @@ const safeStringify = (obj) => {
   } catch (e) {
     console.error('[PROCESS] Failed to stringify:', e.message);
     return null;
+  }
+};
+
+/**
+ * Debug helper to find NaN/Infinity values in objects
+ */
+const findNaN = (obj, path = '') => {
+  for (const [k, v] of Object.entries(obj)) {
+    const p = path ? `${path}.${k}` : k;
+    if (typeof v === 'number' && !Number.isFinite(v)) {
+      console.error(`[DEBUG] ❌ NaN/Infinity at: ${p} = ${v}`);
+    } else if (v && typeof v === 'object' && !Array.isArray(v) && !(v instanceof Date)) {
+      findNaN(v, p);
+    }
   }
 };
 
@@ -178,6 +200,53 @@ const buildClassificationFlags = (classification) => {
   };
 };
 
+// ============================================
+// RESCRAPE TRIGGER (NEW in v3.0.0)
+// ============================================
+
+/**
+ * Trigger a re-scrape for a tournament ID found in a social post
+ * 
+ * @param {string} linkId - SocialPostGameLink ID
+ * @param {number} tournamentId - Tournament ID to scrape
+ * @param {string} entityId - Entity ID for scraper context
+ * @returns {Object} Result with jobId or error
+ */
+const triggerRescrapeForDiscrepancy = async (linkId, tournamentId, entityId) => {
+  console.log(`[PROCESS] Triggering re-scrape: tournamentId=${tournamentId}, entityId=${entityId}`);
+  
+  try {
+    // Import scraper invoker dynamically to avoid circular deps
+    const { invokeScraper } = require('../utils/scraperInvoker');
+    
+    const result = await invokeScraper({
+      mode: 'single',
+      startId: tournamentId,
+      endId: tournamentId,
+      entityId,
+      triggerSource: 'SOCIAL_DISCREPANCY',
+      forceRefresh: true,
+      saveToDatabase: true,
+      metadata: {
+        triggerLinkId: linkId,
+        triggerType: 'scrape_discrepancy'
+      }
+    });
+    
+    return {
+      success: true,
+      jobId: result.jobId,
+      attemptId: result.attemptId
+    };
+  } catch (error) {
+    console.error('[PROCESS] Re-scrape invocation failed:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
 /**
  * Process a single social post
  * 
@@ -191,10 +260,14 @@ const processSocialPost = async (input) => {
     forceReprocess = false,
     skipMatching = false,
     skipLinking = false,
-    matchThreshold = DEFAULT_AUTO_LINK_THRESHOLD
+    matchThreshold = DEFAULT_AUTO_LINK_THRESHOLD,
+    // NEW v3.0.0: Discrepancy options
+    createDiscrepancyLinks = true,
+    triggerRescrapeOnDiscrepancy = false
   } = input;
   
   console.log(`[PROCESS] Starting processing for post: ${socialPostId}`);
+  console.log(`[PROCESS] Options:`, { forceReprocess, skipMatching, skipLinking, matchThreshold, createDiscrepancyLinks });
   
   const result = {
     success: false,
@@ -209,6 +282,13 @@ const processSocialPost = async (input) => {
     linksCreated: 0,
     linksSkipped: 0,
     linkDetails: [],
+    // NEW v3.0.0: Discrepancy results
+    scrapeDiscrepancyDetected: false,
+    scrapeDiscrepancyType: null,
+    scrapeDiscrepancyLink: null,
+    rescrapeTriggered: false,
+    rescrapeJobId: null,
+    reconciliationPreview: null,
     processingTimeMs: 0
   };
   
@@ -251,7 +331,7 @@ const processSocialPost = async (input) => {
     
     console.log(`[PROCESS] Classification: ${classification.contentType} (${classification.confidence})`);
     
-    // Skip non-relevant content
+    // Skip non-relevant content (GENERAL or COMMENT)
     if (classification.contentType === 'GENERAL' || classification.contentType === 'COMMENT') {
       console.log('[PROCESS] Content is GENERAL/COMMENT, marking as skipped');
       
@@ -338,16 +418,7 @@ const processSocialPost = async (input) => {
       delete extractionRecord.extractedTournamentId;
     }
 
-    const findNaN = (obj, path = '') => {
-        for (const [k, v] of Object.entries(obj)) {
-            const p = path ? `${path}.${k}` : k;
-            if (typeof v === 'number' && !Number.isFinite(v)) {
-            console.error(`[DEBUG] ❌ NaN/Infinity at: ${p} = ${v}`);
-            } else if (v && typeof v === 'object' && !Array.isArray(v) && !(v instanceof Date)) {
-            findNaN(v, p);
-            }
-        }
-    };
+    // Debug: Check for NaN/Infinity values
     findNaN(extractionRecord);
 
     await createSocialPostGameData(extractionRecord);
@@ -407,13 +478,135 @@ const processSocialPost = async (input) => {
         console.log(`[PROCESS] Primary match: ${matchResult.primaryMatch.gameId} (${matchResult.primaryMatch.matchConfidence}%)`);
       }
       
+      // =========================================================================
+      // STEP 7b: Handle scrape discrepancy (NEW v3.0.0)
+      // =========================================================================
+      // If we have a tournament ID but no valid game match, this is a discrepancy
+      if (matchResult.scrapeDiscrepancy && createDiscrepancyLinks) {
+        console.log(`[PROCESS] SCRAPE DISCREPANCY DETECTED: ${matchResult.scrapeDiscrepancy.discrepancyType}`);
+        
+        const discrepancy = matchResult.scrapeDiscrepancy;
+        
+        result.scrapeDiscrepancyDetected = true;
+        result.scrapeDiscrepancyType = discrepancy.discrepancyType;
+        
+        // Create a discrepancy link
+        const linkId = uuidv4();
+        
+        const discrepancyLink = addDataStoreFields({
+          id: linkId,
+          socialPostId,
+          socialPostGameDataId: extractionId,
+          // IMPORTANT: gameId must be non-null for DynamoDB GSI. Use sentinel value.
+          // "PENDING_SCRAPE" indicates this link is awaiting game creation.
+          gameId: discrepancy.gameId || 'PENDING_SCRAPE',
+          
+          linkType: 'PENDING_SCRAPE',
+          matchConfidence: 0,
+          matchReason: 'discrepancy_pending',
+          matchSignals: safeStringify({ discrepancyType: discrepancy.discrepancyType }),
+          
+          isPrimaryGame: false,
+          mentionOrder: 1,
+          
+          // Extracted data snapshot
+          extractedVenueName: extracted.extractedVenueName,
+          extractedDate: extracted.extractedDate,
+          extractedBuyIn: extracted.extractedBuyIn,
+          extractedGuarantee: extracted.extractedGuarantee,
+          effectiveGameDate: extracted.effectiveGameDate,
+          
+          // Discrepancy tracking fields
+          extractedTournamentId: discrepancy.extractedTournamentId,
+          extractedTournamentUrl: discrepancy.extractedTournamentUrl,
+          hasScrapeDiscrepancy: true,
+          scrapeDiscrepancyType: discrepancy.discrepancyType,
+          scrapeDiscrepancyDetectedAt: now,
+          detectedGameStatus: discrepancy.detectedGameStatus,
+          detectedScrapeURLStatus: discrepancy.detectedScrapeURLStatus,
+          discrepancyResolution: 'UNRESOLVED',
+          
+          // Content info
+          contentType: extracted.contentType,
+          extractedWinnerName: extracted.extractedWinnerName,
+          extractedWinnerPrize: extracted.extractedWinnerPrize,
+          extractedTotalEntries: extracted.extractedTotalEntries,
+          placementCount: placements.length,
+          
+          linkedAt: now,
+          linkedBy: 'SYSTEM',
+          createdAt: now,
+          updatedAt: now
+        });
+        
+        await createSocialPostGameLink(discrepancyLink);
+        
+        result.scrapeDiscrepancyLink = discrepancyLink;
+        result.linkDetails.push(discrepancyLink);
+        
+        console.log(`[PROCESS] Created discrepancy link: ${linkId}`);
+        
+        // Update SocialPostGameData with discrepancy reference
+        await updateSocialPostGameData(extractionId, {
+          hasScrapeDiscrepancy: true,
+          scrapeDiscrepancyType: discrepancy.discrepancyType,
+          scrapeDiscrepancyLinkId: linkId,
+          scrapeDiscrepancyDetectedAt: now
+        });
+        
+        // Optionally trigger re-scrape
+        if (triggerRescrapeOnDiscrepancy && discrepancy.extractedTournamentId) {
+          console.log(`[PROCESS] Triggering re-scrape for tournament ID ${discrepancy.extractedTournamentId}...`);
+          
+          try {
+            const rescrapeResult = await triggerRescrapeForDiscrepancy(
+              linkId,
+              discrepancy.extractedTournamentId,
+              post.entityId
+            );
+            
+            if (rescrapeResult.success) {
+              result.rescrapeTriggered = true;
+              result.rescrapeJobId = rescrapeResult.jobId;
+              
+              // Update link with rescrape info
+              await updateSocialPostGameLink(linkId, {
+                rescrapeRequested: true,
+                rescrapeRequestedAt: now,
+                rescrapeRequestedBy: 'SYSTEM',
+                rescrapeJobId: rescrapeResult.jobId,
+                discrepancyResolution: 'RESCRAPE_PENDING',
+                linkType: 'RESCRAPE_REQUESTED'
+              });
+              
+              console.log(`[PROCESS] Re-scrape triggered: job ${rescrapeResult.jobId}`);
+            }
+          } catch (rescrapeError) {
+            console.error('[PROCESS] Failed to trigger re-scrape:', rescrapeError);
+            result.warnings.push(`Failed to trigger re-scrape: ${rescrapeError.message}`);
+          }
+        }
+        
+        // Update post status to indicate manual review needed
+        await updateSocialPost(socialPostId, {
+          processingStatus: 'MANUAL_REVIEW',
+          processedAt: now
+        });
+        
+        result.processingStatus = 'MANUAL_REVIEW';
+        result.success = true;
+        result.processingTimeMs = Date.now() - startTime;
+        
+        return result;
+      }
+      
       // Save match candidates to extraction record for manual review
       if (matchResult.candidates.length > 0) {
         console.log('[PROCESS] Saving match candidates to extraction record...');
         await updateSocialPostGameData(extractionId, {
           suggestedGameId: matchResult.primaryMatch?.gameId || null,
           matchCandidateCount: matchResult.candidates.length,
-          // UPDATED: matchSignals is now an object, stringify the whole array once
+          // matchSignals is now an object, stringify the whole array once
           matchCandidates: JSON.stringify(matchResult.candidates.map(c => ({
             gameId: c.gameId,
             gameName: c.gameName,
@@ -421,10 +614,10 @@ const processSocialPost = async (input) => {
             venueName: c.venueName,
             venueId: c.venueId,
             buyIn: c.buyIn,
-            guaranteeAmount: c.guaranteeAmount,  // FIXED: was "guarantee"
+            guaranteeAmount: c.guaranteeAmount,
             matchConfidence: c.matchConfidence,
             matchReason: c.matchReason,
-            matchSignals: c.matchSignals,  // Now an object, gets stringified with parent
+            matchSignals: c.matchSignals,
             rank: c.rank,
             wouldAutoLink: c.matchConfidence >= matchThreshold
           })))
@@ -442,30 +635,56 @@ const processSocialPost = async (input) => {
       if (!skipLinking && matchResult.candidates.length > 0) {
         console.log('[PROCESS] Creating links...');
         
+        // Get existing links to avoid duplicates
+        const existingLinks = await getLinksBySocialPost(socialPostId);
+        const linkedGameIds = new Set(existingLinks.map(l => l.gameId));
+        
         const autoLinkCandidates = getAutoLinkCandidates(matchResult.candidates, matchThreshold);
         
         console.log(`[PROCESS] ${autoLinkCandidates.length} candidates above auto-link threshold (${matchThreshold})`);
         
         for (let i = 0; i < autoLinkCandidates.length; i++) {
           const candidate = autoLinkCandidates[i];
+          
+          // Skip if already linked
+          if (linkedGameIds.has(candidate.gameId)) {
+            console.log(`[PROCESS] Skipping duplicate link to game ${candidate.gameId}`);
+            result.linksSkipped++;
+            continue;
+          }
+          
           const linkNow = new Date().toISOString();
+          const mentionOrder = existingLinks.length + result.linksCreated + 1;
+          const isPrimaryGame = mentionOrder === 1;
           
           // Build link with DataStore fields
           const link = addDataStoreFields({
             id: uuidv4(),
             socialPostId,
+            socialPostGameDataId: extractionId,
             gameId: candidate.gameId,
             linkType: 'AUTO_MATCHED',
             matchConfidence: candidate.matchConfidence,
             matchReason: candidate.matchReason,
-            // UPDATED: matchSignals is now an object, stringify it for the link record
             matchSignals: safeStringify(candidate.matchSignals),
-            isPrimaryGame: i === 0,
-            mentionOrder: i + 1,
+            isPrimaryGame,
+            mentionOrder,
             extractedVenueName: extracted.extractedVenueName,
             extractedDate: extracted.extractedDate,
             extractedBuyIn: extracted.extractedBuyIn,
             extractedGuarantee: extracted.extractedGuarantee,
+            effectiveGameDate: extracted.effectiveGameDate,
+            
+            // No discrepancy for successful matches
+            hasScrapeDiscrepancy: false,
+            
+            // Content info
+            contentType: extracted.contentType,
+            extractedWinnerName: extracted.extractedWinnerName,
+            extractedWinnerPrize: extracted.extractedWinnerPrize,
+            extractedTotalEntries: extracted.extractedTotalEntries,
+            placementCount: placements.length,
+            
             linkedAt: linkNow,
             linkedBy: 'SYSTEM',
             createdAt: linkNow,
@@ -475,19 +694,20 @@ const processSocialPost = async (input) => {
           await createSocialPostGameLink(link);
           result.linkDetails.push(link);
           result.linksCreated++;
+          linkedGameIds.add(candidate.gameId);
         }
         
-        // Count skipped
-        result.linksSkipped = matchResult.candidates.length - autoLinkCandidates.length;
+        // Count skipped (not including duplicates)
+        result.linksSkipped += matchResult.candidates.length - autoLinkCandidates.length;
         
         // Update post status and counts
-        if (autoLinkCandidates.length > 0) {
-          const primaryLink = autoLinkCandidates[0];
+        if (result.linksCreated > 0) {
+          const primaryLink = result.linkDetails.find(l => l.isPrimaryGame);
           await updateSocialPost(socialPostId, {
             processingStatus: 'LINKED',
-            linkedGameId: primaryLink.gameId,
-            primaryLinkedGameId: primaryLink.gameId,
-            linkedGameCount: autoLinkCandidates.length,
+            linkedGameId: primaryLink?.gameId,
+            primaryLinkedGameId: primaryLink?.gameId,
+            linkedGameCount: existingLinks.length + result.linksCreated,
             hasUnverifiedLinks: true,
             processedAt: new Date().toISOString()
           });
@@ -555,6 +775,9 @@ const previewMatch = async (socialPostId) => {
     linksCreated: 0,
     linksSkipped: 0,
     linkDetails: [],
+    // NEW v3.0.0
+    scrapeDiscrepancyDetected: false,
+    scrapeDiscrepancyType: null,
     processingTimeMs: 0
   };
   
@@ -593,6 +816,12 @@ const previewMatch = async (socialPostId) => {
     const matchResult = await findMatchingGames(extracted, post);
     result.matchCandidates = matchResult.candidates;
     result.primaryMatch = matchResult.primaryMatch;
+    
+    // NEW v3.0.0: Include discrepancy info in preview
+    if (matchResult.scrapeDiscrepancy) {
+      result.scrapeDiscrepancyDetected = true;
+      result.scrapeDiscrepancyType = matchResult.scrapeDiscrepancy.discrepancyType;
+    }
     
     result.success = true;
     result.processingStatus = 'PREVIEW';
@@ -647,6 +876,9 @@ const previewContentExtraction = async (input) => {
     linksCreated: 0,
     linksSkipped: 0,
     linkDetails: [],
+    // NEW v3.0.0
+    scrapeDiscrepancyDetected: false,
+    scrapeDiscrepancyType: null,
     processingTimeMs: 0
   };
   
@@ -743,6 +975,13 @@ const previewContentExtraction = async (input) => {
       result.matchCandidates = matchResult.candidates;
       result.primaryMatch = matchResult.primaryMatch;
       
+      // NEW v3.0.0: Include discrepancy info in preview
+      if (matchResult.scrapeDiscrepancy) {
+        result.scrapeDiscrepancyDetected = true;
+        result.scrapeDiscrepancyType = matchResult.scrapeDiscrepancy.discrepancyType;
+        result.warnings.push(`Scrape discrepancy detected: ${matchResult.scrapeDiscrepancy.discrepancyType}`);
+      }
+      
       console.log(`[PREVIEW] Found ${matchResult.matchCount} match candidates`);
     } else {
       result.warnings.push(`Content classified as ${classification.contentType} - no game matching performed`);
@@ -772,12 +1011,14 @@ module.exports = {
   processSocialPost,
   previewMatch,
   previewContentExtraction,
+  triggerRescrapeForDiscrepancy,
   addDataStoreFields,  // Export for use in other files
   safeStringify,       // Export for use in other files
   // Tag generation (for manual uploader to use if invoking processor directly)
   generateClassificationTags,
   buildClassificationFlags,
   extractHashtags,
+  findNaN,             // Debug helper
   PROCESSING_VERSION,
   DEFAULT_AUTO_LINK_THRESHOLD
 };

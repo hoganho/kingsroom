@@ -6519,6 +6519,27 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -6799,6 +6820,10 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -12047,6 +12072,10 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -12156,6 +12185,27 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -12946,6 +12996,10 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -12993,6 +13047,27 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -23195,6 +23270,27 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -23475,6 +23571,10 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -28723,6 +28823,10 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -28832,6 +28936,27 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -29622,6 +29747,10 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -29669,6 +29798,27 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -37886,6 +38036,27 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -38166,6 +38337,10 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -43414,6 +43589,10 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -43523,6 +43702,27 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -44313,6 +44513,10 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -44360,6 +44564,27 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -52577,6 +52802,27 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
@@ -52857,6 +53103,10 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -58105,6 +58355,10 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             hasReconciliationDiscrepancy
             reconciliationNotes
             reconciliationCheckedAt
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyLinkId
+            scrapeDiscrepancyDetectedAt
             suggestedGameId
             matchCandidateCount
             matchCandidates
@@ -58214,6 +58468,27 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           extractedTotalEntries
           placementCount
           contentType
+          extractedTournamentUrl
+          extractedTournamentId
+          entityId
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyDetectedAt
+          detectedGameStatus
+          detectedScrapeURLStatus
+          detectedGameEntityId
+          rescrapeRequested
+          rescrapeRequestedAt
+          rescrapeRequestedBy
+          rescrapeJobId
+          rescrapeAttemptId
+          rescrapeCompletedAt
+          rescrapeResult
+          rescrapeResolvedGameStatus
+          discrepancyResolution
+          discrepancyResolvedAt
+          discrepancyResolvedBy
+          discrepancyResolutionNotes
           linkedAt
           linkedBy
           verifiedAt
@@ -59004,6 +59279,10 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           hasReconciliationDiscrepancy
           reconciliationNotes
           reconciliationCheckedAt
+          hasScrapeDiscrepancy
+          scrapeDiscrepancyType
+          scrapeDiscrepancyLinkId
+          scrapeDiscrepancyDetectedAt
           suggestedGameId
           matchCandidateCount
           matchCandidates
@@ -59051,6 +59330,27 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             extractedTotalEntries
             placementCount
             contentType
+            extractedTournamentUrl
+            extractedTournamentId
+            entityId
+            hasScrapeDiscrepancy
+            scrapeDiscrepancyType
+            scrapeDiscrepancyDetectedAt
+            detectedGameStatus
+            detectedScrapeURLStatus
+            detectedGameEntityId
+            rescrapeRequested
+            rescrapeRequestedAt
+            rescrapeRequestedBy
+            rescrapeJobId
+            rescrapeAttemptId
+            rescrapeCompletedAt
+            rescrapeResult
+            rescrapeResolvedGameStatus
+            discrepancyResolution
+            discrepancyResolvedAt
+            discrepancyResolvedBy
+            discrepancyResolutionNotes
             linkedAt
             linkedBy
             verifiedAt
