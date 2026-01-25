@@ -886,7 +886,7 @@ async function createRecentlyFinishedGame(game, input, ddbDocClient) {
         sourceUrl: game.sourceUrl || input?.source?.sourceId || null,
         
         // TTL for auto-cleanup
-        ttl: ttlTimestamp,
+        _ttl: ttlTimestamp,
         
         // Metadata
         createdAt: now,

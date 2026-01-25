@@ -3,9 +3,14 @@
  * REFRESH RUNNING GAMES - Scheduled Lambda
  * ===================================================================
  * 
- * VERSION: 3.1.0 - Optimized refresh logic
+ * VERSION: 3.2.0 - Added RecentlyFinishedGame sync
  * 
  * CHANGELOG:
+ * - v3.2.0: NEW - RecentlyFinishedGame sync step
+ *           - Queries Game table for FINISHED games in last 7 days
+ *           - Creates missing RecentlyFinishedGame records
+ *           - Deletes expired RecentlyFinishedGame records (>7 days old)
+ *           - New option: syncFinished (default: true)
  * - v3.1.0: OPTIMIZATION - More efficient refresh logic
  *           - RUNNING/CLOCK_STOPPED: Refresh every 1 hour (was 30 mins)
  *           - Pre-start games: Only refresh when gameStartDateTime has PASSED
@@ -24,12 +29,13 @@
  * - statuses: ['RUNNING', ...] - override which statuses to check (backward compat)
  * - checkRunning: boolean - enable/disable RUNNING/CLOCK_STOPPED check
  * - checkPreStart: boolean - enable/disable pre-start games check
+ * - syncFinished: boolean - enable/disable RecentlyFinishedGame sync (default: true)
  * 
  * ===================================================================
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, QueryCommand, ScanCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, QueryCommand, ScanCommand, GetCommand, PutCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
 const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 
 // Initialize clients
@@ -56,6 +62,10 @@ const BATCH_SIZE = 10;
 const RUNNING_STATUSES = ['RUNNING', 'CLOCK_STOPPED'];
 const PRE_START_STATUSES = ['REGISTERING', 'INITIATING', 'SCHEDULED'];
 const ALL_ACTIVE_STATUSES = [...RUNNING_STATUSES, ...PRE_START_STATUSES];
+
+// v3.2.0: RecentlyFinishedGame configuration
+const RECENTLY_FINISHED_TTL_DAYS = 7;
+const FINISHED_STATUSES = ['FINISHED', 'COMPLETED'];
 
 // ===================================================================
 // TABLE NAME HELPERS
@@ -92,6 +102,29 @@ const getScrapeURLTableName = () => {
     }
     
     return `ScrapeURL-${apiId}-${env}`;
+};
+
+// v3.2.0: New table name helpers
+const getRecentlyFinishedGameTableName = () => {
+    const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
+    const env = process.env.ENV;
+    
+    if (process.env.API_KINGSROOM_RECENTLYFINISHEDGAMETABLE_NAME) {
+        return process.env.API_KINGSROOM_RECENTLYFINISHEDGAMETABLE_NAME;
+    }
+    
+    return `RecentlyFinishedGame-${apiId}-${env}`;
+};
+
+const getVenueTableName = () => {
+    const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
+    const env = process.env.ENV;
+    
+    if (process.env.API_KINGSROOM_VENUETABLE_NAME) {
+        return process.env.API_KINGSROOM_VENUETABLE_NAME;
+    }
+    
+    return `Venue-${apiId}-${env}`;
 };
 
 const getScraperFunctionName = () => {
@@ -435,14 +468,339 @@ async function processBatch(games, results, doNotScrapeUrls) {
 }
 
 // ===================================================================
+// v3.2.0: RECENTLY FINISHED GAME SYNC
+// ===================================================================
+
+/**
+ * Fetch venue details for RecentlyFinishedGame record
+ */
+async function fetchVenueDetails(venueId) {
+    if (!venueId) return { name: null, logo: null };
+    
+    try {
+        const result = await docClient.send(new GetCommand({
+            TableName: getVenueTableName(),
+            Key: { id: venueId },
+            ProjectionExpression: '#name, logo',
+            ExpressionAttributeNames: { '#name': 'name' }
+        }));
+        
+        if (result.Item) {
+            return {
+                name: result.Item.name || null,
+                logo: result.Item.logo || null
+            };
+        }
+    } catch (err) {
+        console.warn(`[SYNC-FINISHED] Error fetching venue ${venueId}:`, err.message);
+    }
+    
+    return { name: null, logo: null };
+}
+
+/**
+ * Query FINISHED games from Game table within the last N days
+ */
+async function queryFinishedGames(daysBack = 7) {
+    const finishedGames = [];
+    const gameTableName = getGameTableName();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+    const cutoffIso = cutoffDate.toISOString();
+    
+    console.log(`[SYNC-FINISHED] Querying FINISHED games since ${cutoffIso}`);
+    
+    for (const status of FINISHED_STATUSES) {
+        try {
+            let lastEvaluatedKey = null;
+            
+            do {
+                const params = {
+                    TableName: gameTableName,
+                    IndexName: 'byStatus',
+                    KeyConditionExpression: 'gameStatus = :status',
+                    FilterExpression: 'gameStartDateTime >= :cutoff',
+                    ExpressionAttributeValues: {
+                        ':status': status,
+                        ':cutoff': cutoffIso
+                    },
+                    Limit: 100
+                };
+                
+                if (lastEvaluatedKey) {
+                    params.ExclusiveStartKey = lastEvaluatedKey;
+                }
+                
+                const result = await docClient.send(new QueryCommand(params));
+                
+                if (result.Items) {
+                    finishedGames.push(...result.Items);
+                }
+                
+                lastEvaluatedKey = result.LastEvaluatedKey;
+                
+            } while (lastEvaluatedKey);
+            
+        } catch (error) {
+            console.error(`[SYNC-FINISHED] Error querying ${status} games:`, error.message);
+        }
+    }
+    
+    console.log(`[SYNC-FINISHED] Found ${finishedGames.length} finished games in last ${daysBack} days`);
+    return finishedGames;
+}
+
+/**
+ * Get existing RecentlyFinishedGame IDs for comparison
+ */
+async function getExistingRecentlyFinishedGameIds() {
+    const existingIds = new Set();
+    const tableName = getRecentlyFinishedGameTableName();
+    
+    let lastEvaluatedKey = null;
+    
+    do {
+        const params = {
+            TableName: tableName,
+            ProjectionExpression: 'id, gameId',
+            Limit: 500
+        };
+        
+        if (lastEvaluatedKey) {
+            params.ExclusiveStartKey = lastEvaluatedKey;
+        }
+        
+        const result = await docClient.send(new ScanCommand(params));
+        
+        if (result.Items) {
+            result.Items.forEach(item => {
+                existingIds.add(item.gameId || item.id);
+            });
+        }
+        
+        lastEvaluatedKey = result.LastEvaluatedKey;
+        
+    } while (lastEvaluatedKey);
+    
+    console.log(`[SYNC-FINISHED] Found ${existingIds.size} existing RecentlyFinishedGame records`);
+    return existingIds;
+}
+
+/**
+ * Create a RecentlyFinishedGame record from a Game record
+ */
+async function createRecentlyFinishedGameRecord(game) {
+    const tableName = getRecentlyFinishedGameTableName();
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+    
+    // Fetch venue details
+    const venueDetails = await fetchVenueDetails(game.venueId);
+    
+    // Calculate TTL (7 days from game start date)
+    const gameStartMs = game.gameStartDateTime 
+        ? new Date(game.gameStartDateTime).getTime() 
+        : timestamp;
+    const ttlTimestamp = Math.floor(gameStartMs / 1000) + (RECENTLY_FINISHED_TTL_DAYS * 24 * 60 * 60);
+    
+    // Calculate duration if we have start and end times
+    let totalDuration = null;
+    if (game.gameStartDateTime && game.gameEndDateTime) {
+        const start = new Date(game.gameStartDateTime).getTime();
+        const end = new Date(game.gameEndDateTime).getTime();
+        totalDuration = Math.floor((end - start) / 1000);
+    }
+    
+    const record = {
+        id: game.id,
+        gameId: game.id,
+        entityId: game.entityId,
+        venueId: game.venueId || null,
+        tournamentId: game.tournamentId || null,
+        
+        // Denormalized display fields
+        name: game.name,
+        venueName: venueDetails.name || game.venueName || null,
+        venueLogoCached: venueDetails.logo || null,
+        entityName: game.entityName || null,
+        
+        gameStartDateTime: game.gameStartDateTime,
+        finishedAt: game.gameEndDateTime || now,
+        totalDuration: totalDuration,
+        
+        // Final results
+        totalEntries: game.totalEntries || 0,
+        totalUniquePlayers: game.totalUniquePlayers || 0,
+        prizepoolPaid: game.prizepoolPaid || null,
+        prizepoolCalculated: game.prizepoolCalculated || null,
+        buyIn: game.buyIn || 0,
+        
+        // Classification
+        gameType: game.gameType || null,
+        isSeries: game.isSeries || false,
+        seriesName: game.seriesName || null,
+        isMainEvent: game.isMainEvent || false,
+        
+        // Badges
+        isSatellite: game.isSatellite || false,
+        isRecurring: !!game.recurringGameId,
+        recurringGameName: game.recurringGameName || null,
+        
+        sourceUrl: game.sourceUrl || null,
+        
+        // TTL for auto-cleanup - IMPORTANT: Use _ttl to match DynamoDB config
+        _ttl: ttlTimestamp,
+        
+        // Metadata
+        createdAt: now,
+        updatedAt: now,
+        _version: 1,
+        _lastChangedAt: timestamp,
+        __typename: 'RecentlyFinishedGame'
+    };
+    
+    await docClient.send(new PutCommand({
+        TableName: tableName,
+        Item: record,
+        ConditionExpression: 'attribute_not_exists(id)'
+    }));
+    
+    return record;
+}
+
+/**
+ * Delete expired RecentlyFinishedGame records (backup cleanup if TTL fails)
+ */
+async function deleteExpiredRecentlyFinishedGames() {
+    const tableName = getRecentlyFinishedGameTableName();
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    let deletedCount = 0;
+    
+    let lastEvaluatedKey = null;
+    
+    do {
+        const params = {
+            TableName: tableName,
+            ProjectionExpression: 'id, #ttl, gameStartDateTime',
+            ExpressionAttributeNames: { '#ttl': '_ttl' },
+            Limit: 100
+        };
+        
+        if (lastEvaluatedKey) {
+            params.ExclusiveStartKey = lastEvaluatedKey;
+        }
+        
+        const result = await docClient.send(new ScanCommand(params));
+        
+        if (result.Items) {
+            for (const item of result.Items) {
+                // Check both _ttl and calculate from gameStartDateTime
+                const ttl = item._ttl;
+                let shouldDelete = false;
+                
+                if (ttl && ttl < nowSeconds) {
+                    shouldDelete = true;
+                } else if (item.gameStartDateTime) {
+                    // Fallback: calculate if game is older than 7 days
+                    const gameStartMs = new Date(item.gameStartDateTime).getTime();
+                    const maxAgeMs = RECENTLY_FINISHED_TTL_DAYS * 24 * 60 * 60 * 1000;
+                    if (Date.now() - gameStartMs > maxAgeMs) {
+                        shouldDelete = true;
+                    }
+                }
+                
+                if (shouldDelete) {
+                    try {
+                        await docClient.send(new DeleteCommand({
+                            TableName: tableName,
+                            Key: { id: item.id }
+                        }));
+                        deletedCount++;
+                    } catch (delErr) {
+                        console.warn(`[SYNC-FINISHED] Failed to delete expired record ${item.id}:`, delErr.message);
+                    }
+                }
+            }
+        }
+        
+        lastEvaluatedKey = result.LastEvaluatedKey;
+        
+    } while (lastEvaluatedKey);
+    
+    return deletedCount;
+}
+
+/**
+ * Main sync function for RecentlyFinishedGame table
+ */
+async function syncRecentlyFinishedGames() {
+    console.log('[SYNC-FINISHED] ========================================');
+    console.log('[SYNC-FINISHED] Starting RecentlyFinishedGame sync v3.2.0');
+    
+    const results = {
+        finishedGamesFound: 0,
+        alreadyExists: 0,
+        created: 0,
+        createFailed: 0,
+        expiredDeleted: 0,
+        errors: []
+    };
+    
+    try {
+        // Step 1: Get existing RecentlyFinishedGame IDs
+        const existingIds = await getExistingRecentlyFinishedGameIds();
+        
+        // Step 2: Query finished games from Game table
+        const finishedGames = await queryFinishedGames(RECENTLY_FINISHED_TTL_DAYS);
+        results.finishedGamesFound = finishedGames.length;
+        
+        // Step 3: Create missing records
+        for (const game of finishedGames) {
+            if (existingIds.has(game.id)) {
+                results.alreadyExists++;
+                continue;
+            }
+            
+            try {
+                await createRecentlyFinishedGameRecord(game);
+                results.created++;
+                console.log(`[SYNC-FINISHED] ✅ Created RecentlyFinishedGame for: ${game.name}`);
+            } catch (err) {
+                if (err.name === 'ConditionalCheckFailedException') {
+                    // Record already exists (race condition)
+                    results.alreadyExists++;
+                } else {
+                    results.createFailed++;
+                    results.errors.push(`${game.name || game.id}: ${err.message}`);
+                    console.error(`[SYNC-FINISHED] ❌ Failed to create for ${game.id}:`, err.message);
+                }
+            }
+        }
+        
+        // Step 4: Delete expired records (backup cleanup)
+        results.expiredDeleted = await deleteExpiredRecentlyFinishedGames();
+        
+        console.log('[SYNC-FINISHED] ========================================');
+        console.log('[SYNC-FINISHED] Sync completed:', results);
+        
+        return results;
+        
+    } catch (error) {
+        console.error('[SYNC-FINISHED] Fatal error:', error);
+        results.errors.push(`Fatal: ${error.message}`);
+        return results;
+    }
+}
+
+// ===================================================================
 // MAIN HANDLER
 // ===================================================================
 
 exports.handler = async (event) => {
     const startTime = Date.now();
     console.log('[REFRESH] ========================================');
-    console.log('[REFRESH] Starting scheduled refresh check v3.1.0');
-    console.log('[REFRESH] Optimization: RUNNING every 1h, pre-start only when gameStartDateTime passed');
+    console.log('[REFRESH] Starting scheduled refresh check v3.2.0');
+    console.log('[REFRESH] Includes: Running game refresh + RecentlyFinishedGame sync');
     
     const input = event?.arguments?.input || event || {};
     
@@ -451,16 +809,14 @@ exports.handler = async (event) => {
     // ================================================================
     // PARSE OPTIONS - Support both old and new formats
     // ================================================================
-    // Old format (backward compat): { statuses: ['RUNNING', ...] }
-    // New format: { checkRunning: true, checkPreStart: false }
     const options = {
         forceRefresh: input?.forceRefresh === true,
         maxGames: input?.maxGames || MAX_REFRESH_PER_RUN,
-        // Backward compatibility: if statuses is provided, use it
         statuses: input?.statuses || null,
-        // New options (ignored if statuses is provided)
         checkRunning: input?.checkRunning !== false,
-        checkPreStart: input?.checkPreStart !== false
+        checkPreStart: input?.checkPreStart !== false,
+        // v3.2.0: New option for finished game sync
+        syncFinished: input?.syncFinished !== false
     };
     
     console.log('[REFRESH] Options:', options);
@@ -507,12 +863,10 @@ exports.handler = async (event) => {
     let preStartStatusesToCheck = [];
     
     if (options.statuses) {
-        // Backward compatibility: use provided statuses array
         console.log('[REFRESH] Using provided statuses array (backward compat mode)');
         runningStatusesToCheck = options.statuses.filter(s => RUNNING_STATUSES.includes(s));
         preStartStatusesToCheck = options.statuses.filter(s => PRE_START_STATUSES.includes(s));
     } else {
-        // New mode: use checkRunning/checkPreStart flags
         if (options.checkRunning) {
             runningStatusesToCheck = RUNNING_STATUSES;
         }
@@ -527,6 +881,7 @@ exports.handler = async (event) => {
         maxGames: options.maxGames,
         runningStatuses: runningStatusesToCheck,
         preStartStatuses: preStartStatusesToCheck,
+        syncFinished: options.syncFinished,
         thresholds: {
             'RUNNING/CLOCK_STOPPED': `${thresholds.RUNNING} mins`
         }
@@ -543,7 +898,9 @@ exports.handler = async (event) => {
         skippedNoUrl: 0,
         skippedLimit: 0,
         byStatus: {},
-        byCategory: {}
+        byCategory: {},
+        // v3.2.0: RecentlyFinishedGame sync results
+        finishedSync: null
     };
     
     const gamesToRefresh = [];
@@ -614,62 +971,60 @@ exports.handler = async (event) => {
         // ================================================================
         // STEP 3: Check doNotScrape URLs
         // ================================================================
-        if (gamesToRefresh.length === 0) {
-            console.log('[REFRESH] No games need refresh, exiting');
-            return { 
-                success: true, 
-                gamesRefreshed: 0,
-                gamesUpdated: 0,
-                gamesFailed: 0,
-                errors: [],
-                checked: results.checked.total,
-                executionTimeMs: Date.now() - startTime 
-            };
-        }
-        
-        const doNotScrapeUrls = await batchCheckDoNotScrape(gamesToRefresh);
-        
-        // ================================================================
-        // STEP 4: Sort by priority and limit
-        // ================================================================
-        gamesToRefresh.sort((a, b) => {
-            // First by priority (1 = RUNNING, 2 = pre-start)
-            if (a.priority !== b.priority) {
-                return a.priority - b.priority;
+        if (gamesToRefresh.length > 0) {
+            const doNotScrapeUrls = await batchCheckDoNotScrape(gamesToRefresh);
+            
+            // ================================================================
+            // STEP 4: Sort by priority and limit
+            // ================================================================
+            gamesToRefresh.sort((a, b) => {
+                if (a.priority !== b.priority) {
+                    return a.priority - b.priority;
+                }
+                return (b.minutesSinceUpdate || 0) - (a.minutesSinceUpdate || 0);
+            });
+            
+            const limitedGames = gamesToRefresh.slice(0, options.maxGames);
+            
+            if (gamesToRefresh.length > options.maxGames) {
+                results.skippedLimit = gamesToRefresh.length - options.maxGames;
+                console.log(`[REFRESH] Limiting to ${options.maxGames} games, skipping ${results.skippedLimit}`);
             }
-            // Then by staleness (for running) or how far past start time
-            return (b.minutesSinceUpdate || 0) - (a.minutesSinceUpdate || 0);
-        });
-        
-        const limitedGames = gamesToRefresh.slice(0, options.maxGames);
-        
-        if (gamesToRefresh.length > options.maxGames) {
-            results.skippedLimit = gamesToRefresh.length - options.maxGames;
-            console.log(`[REFRESH] Limiting to ${options.maxGames} games, skipping ${results.skippedLimit}`);
-        }
-        
-        // ================================================================
-        // STEP 5: Process in batches
-        // ================================================================
-        console.log(`[REFRESH] Processing ${limitedGames.length} games in batches of ${BATCH_SIZE}`);
-        
-        for (let i = 0; i < limitedGames.length; i += BATCH_SIZE) {
-            const batch = limitedGames.slice(i, i + BATCH_SIZE);
-            console.log(`[REFRESH] Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(limitedGames.length / BATCH_SIZE)}`);
-            await processBatch(batch, results, doNotScrapeUrls);
-        }
-        
-        // Update status counters for refreshed games
-        for (const game of limitedGames) {
-            if (!results.errors.find(e => e.includes(game.gameId))) {
-                if (results.byStatus[game.gameStatus]) {
-                    results.byStatus[game.gameStatus].refreshed++;
+            
+            // ================================================================
+            // STEP 5: Process in batches
+            // ================================================================
+            console.log(`[REFRESH] Processing ${limitedGames.length} games in batches of ${BATCH_SIZE}`);
+            
+            for (let i = 0; i < limitedGames.length; i += BATCH_SIZE) {
+                const batch = limitedGames.slice(i, i + BATCH_SIZE);
+                console.log(`[REFRESH] Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(limitedGames.length / BATCH_SIZE)}`);
+                await processBatch(batch, results, doNotScrapeUrls);
+            }
+            
+            // Update status counters for refreshed games
+            for (const game of limitedGames) {
+                if (!results.errors.find(e => e.includes(game.gameId))) {
+                    if (results.byStatus[game.gameStatus]) {
+                        results.byStatus[game.gameStatus].refreshed++;
+                    }
                 }
             }
+        } else {
+            console.log('[REFRESH] No games need refresh');
         }
         
         // ================================================================
-        // STEP 6: Summary
+        // STEP 6: v3.2.0 - Sync RecentlyFinishedGame table
+        // ================================================================
+        if (options.syncFinished) {
+            results.finishedSync = await syncRecentlyFinishedGames();
+        } else {
+            console.log('[REFRESH] Skipping RecentlyFinishedGame sync (disabled)');
+        }
+        
+        // ================================================================
+        // STEP 7: Summary
         // ================================================================
         const duration = Date.now() - startTime;
         console.log('[REFRESH] ========================================');
@@ -682,7 +1037,11 @@ exports.handler = async (event) => {
             gamesFailed: results.gamesFailed,
             skippedDoNotScrape: results.skippedDoNotScrape,
             skippedNoUrl: results.skippedNoUrl,
-            skippedLimit: results.skippedLimit
+            skippedLimit: results.skippedLimit,
+            finishedSync: results.finishedSync ? {
+                created: results.finishedSync.created,
+                expiredDeleted: results.finishedSync.expiredDeleted
+            } : 'disabled'
         });
         console.log('[REFRESH] By status:', results.byStatus);
         console.log('[REFRESH] By category:', results.byCategory);
@@ -698,6 +1057,7 @@ exports.handler = async (event) => {
             gamesFailed: results.gamesFailed,
             errors: results.errors,
             checked: results.checked.total,
+            finishedSync: results.finishedSync,
             executionTimeMs: duration
         };
         

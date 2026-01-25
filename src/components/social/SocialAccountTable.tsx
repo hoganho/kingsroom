@@ -76,6 +76,95 @@ const PlatformIcon: React.FC<{ platform: string }> = ({ platform }) => {
   }
 };
 
+// Extracted ActionButtons component for reuse
+const ActionButtons: React.FC<{
+  account: SocialAccount;
+  isCurrentlyScraping: boolean;
+  hasIncompleteSync: boolean;
+  onToggleScraping: (account: SocialAccount) => void;
+  onTriggerScrape: (account: SocialAccount) => void;
+  onFullSync?: (account: SocialAccount) => void;
+  onEdit: (account: SocialAccount) => void;
+}> = ({
+  account,
+  isCurrentlyScraping,
+  hasIncompleteSync,
+  onToggleScraping,
+  onTriggerScrape,
+  onFullSync,
+  onEdit,
+}) => (
+  <div className="flex items-center gap-1">
+    {/* Scraping Toggle */}
+    <button
+      onClick={() => onToggleScraping(account)}
+      className={`p-1.5 rounded-lg transition-colors ${
+        account.isScrapingEnabled
+          ? 'bg-green-100 text-green-600 hover:bg-green-200'
+          : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+      }`}
+      title={account.isScrapingEnabled ? 'Auto-scraping enabled' : 'Auto-scraping paused'}
+    >
+      {account.isScrapingEnabled ? (
+        <PlayIcon className="w-4 h-4" />
+      ) : (
+        <PauseIcon className="w-4 h-4" />
+      )}
+    </button>
+
+    {/* Fetch Posts */}
+    <button
+      onClick={() => onTriggerScrape(account)}
+      disabled={isCurrentlyScraping || !account.isScrapingEnabled}
+      className="p-1.5 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      title="Fetch new posts"
+    >
+      {isCurrentlyScraping ? (
+        <Loader2 className="w-4 h-4 animate-spin" />
+      ) : (
+        <ArrowPathIcon className="w-4 h-4" />
+      )}
+    </button>
+
+    {/* Full Sync */}
+    {onFullSync && (
+      <button
+        onClick={() => onFullSync(account)}
+        disabled={isCurrentlyScraping || !account.isScrapingEnabled}
+        className={`p-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+          hasIncompleteSync
+            ? 'text-green-600 bg-green-50 hover:bg-green-100'
+            : account.hasFullHistory
+              ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
+              : 'text-blue-600 bg-blue-50 hover:bg-blue-100'
+        }`}
+        title={
+          hasIncompleteSync 
+            ? `Resume sync from ${new Date((account as any).fullSyncOldestPostDate).toLocaleDateString()}`
+            : account.hasFullHistory 
+              ? 'Re-sync full history' 
+              : 'Fetch all historical posts'
+        }
+      >
+        {hasIncompleteSync ? (
+          <PlayIcon className="w-4 h-4" />
+        ) : (
+          <ArrowDownTrayIcon className="w-4 h-4" />
+        )}
+      </button>
+    )}
+
+    {/* Edit */}
+    <button
+      onClick={() => onEdit(account)}
+      className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+      title="Edit account"
+    >
+      <PencilIcon className="w-4 h-4" />
+    </button>
+  </div>
+);
+
 export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
   accounts,
   loading,
@@ -151,7 +240,97 @@ export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
+      {/* Mobile Card Layout */}
+      <div className="sm:hidden divide-y divide-gray-200">
+        {accounts.map((account) => {
+          const isCurrentlyScraping = scrapingAccountId === account.id;
+          const hasIncompleteSync = !!(account as any).fullSyncOldestPostDate && !account.hasFullHistory;
+
+          return (
+            <div key={account.id} className="p-4 hover:bg-gray-50">
+              {/* Top row: Avatar, Account Info, Status */}
+              <div className="flex items-start gap-3">
+                {/* Avatar */}
+                <div className="flex-shrink-0 h-10 w-10 relative">
+                  {account.profileImageUrl ? (
+                    <img
+                      src={account.profileImageUrl}
+                      alt={account.accountName}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white text-sm font-medium">
+                      {account.accountName.charAt(0)}
+                    </div>
+                  )}
+                  <div className="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5">
+                    <PlatformIcon platform={account.platform} />
+                  </div>
+                </div>
+
+                {/* Account Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-medium text-gray-900 truncate">
+                      {account.accountName}
+                    </span>
+                    {account.hasFullHistory && (
+                      <span 
+                        className="flex-shrink-0 inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700"
+                        title="Full history synced"
+                      >
+                        <Database className="w-3 h-3" />
+                      </span>
+                    )}
+                    {hasIncompleteSync && (
+                      <span 
+                        className="flex-shrink-0 inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700"
+                        title={`Sync incomplete - stopped at ${new Date((account as any).fullSyncOldestPostDate).toLocaleDateString()}`}
+                      >
+                        <ClockIcon className="w-3 h-3" />
+                      </span>
+                    )}
+                  </div>
+                  {account.accountHandle && (
+                    <div className="text-xs text-gray-500 truncate">
+                      @{account.accountHandle}
+                    </div>
+                  )}
+                </div>
+
+                {/* Status Icon */}
+                <StatusIcon status={account.status} />
+              </div>
+
+              {/* Stats row */}
+              <div className="mt-2 flex items-center gap-4 text-xs text-gray-500 ml-13">
+                <span>{formatNumber(account.followerCount)} followers</span>
+                <span>{formatNumber(account.postCount)} posts</span>
+                <span>Last: {formatDate(account.lastScrapedAt)}</span>
+              </div>
+
+              {/* Actions row */}
+              <div className="mt-3 flex items-center justify-between">
+                <div className="text-xs text-gray-500">
+                  {formatSchedule(account)}
+                </div>
+                <ActionButtons
+                  account={account}
+                  isCurrentlyScraping={isCurrentlyScraping}
+                  hasIncompleteSync={hasIncompleteSync}
+                  onToggleScraping={onToggleScraping}
+                  onTriggerScrape={onTriggerScrape}
+                  onFullSync={onFullSync}
+                  onEdit={onEdit}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <table className="hidden sm:table min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
             <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -160,7 +339,7 @@ export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
             <th scope="col" className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
               Status
             </th>
-            <th scope="col" className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+            <th scope="col" className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
               Stats
             </th>
             <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
@@ -238,8 +417,8 @@ export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
                   <StatusIcon status={account.status} />
                 </td>
 
-                {/* Stats - Hidden on mobile */}
-                <td className="px-3 py-3 text-right hidden sm:table-cell">
+                {/* Stats */}
+                <td className="px-3 py-3 text-right">
                   <div className="text-sm text-gray-900">
                     {formatNumber(account.followerCount)}
                   </div>
@@ -248,7 +427,7 @@ export const SocialAccountTable: React.FC<SocialAccountTableProps> = ({
                   </div>
                 </td>
 
-                {/* Last Fetched - Hidden on mobile/tablet */}
+                {/* Last Fetched - Hidden on smaller tablets */}
                 <td className="px-3 py-3 hidden md:table-cell">
                   <div className="text-sm text-gray-900">
                     {formatDate(account.lastScrapedAt)}
