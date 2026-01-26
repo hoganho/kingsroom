@@ -26,19 +26,18 @@ Amplify Params - DO NOT EDIT */
  * Lambda: refreshPlayerMetrics
  * Region: ap-southeast-2
  * 
- * VERSION: 1.1.0 - Added cross-venue/entity distribution metrics
+ * VERSION: 1.2.0 - Fixed AWSJSON double-encoding, added SES notifications
+ * 
+ * CHANGELOG:
+ * - v1.2.0: Fixed double-stringify on AWSJSON fields (now stores raw objects)
+ *           Added SES email notification on scheduled runs
+ * - v1.1.0: Added cross-venue/entity distribution metrics
  * 
  * PURPOSE:
  * Pre-calculates and stores player statistics at multiple levels:
  * - GlobalPlayerMetrics: Aggregate across all entities
  * - EntityPlayerMetrics: Per-entity player stats
  * - VenuePlayerMetrics: Per-venue player stats
- * 
- * NEW IN 1.1.0:
- * - venuePlayDistribution: How many players played at 1, 2, 3, etc. venues
- * - entityPlayDistribution: How many players played at 1, 2, 3+ entities
- * - playersMultiVenue/playersMultiEntity: Quick counts
- * - topPlayersByVenueCount: Players who play at the most venues
  * 
  * INVOCATION SOURCES:
  * 1. GraphQL Mutation: event.arguments.input
@@ -56,6 +55,7 @@ const {
   PutCommand,
   BatchGetCommand
 } = require("@aws-sdk/lib-dynamodb");
+const { sendNotification } = require('./ses-notification');
 
 const client = new DynamoDBClient({ region: "ap-southeast-2" });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -143,7 +143,7 @@ const VENUE_PLAYER_METRICS_TABLE = getTableName('VenuePlayerMetrics');
 // ============================================
 
 exports.handler = async (event) => {
-  console.log('[PLAYER-METRICS] Starting player metrics refresh v1.1.0', JSON.stringify(event, null, 2));
+  console.log('[PLAYER-METRICS] Starting player metrics refresh v1.2.0', JSON.stringify(event, null, 2));
   
   const startTime = Date.now();
   
@@ -411,6 +411,30 @@ exports.handler = async (event) => {
       : `Player metrics refresh complete. Updated ${result.globalMetricsUpdated} global, ${result.entityMetricsUpdated} entity, ${result.venueMetricsUpdated} venue metrics.`;
     
     console.log('[PLAYER-METRICS] Refresh complete:', result);
+
+    // === NOTIFICATION CODE START ===
+    // Send notification for EventBridge-triggered runs
+    if (isEventBridgeTrigger && !dryRun) {
+      await sendNotification({
+        lambdaName: 'refreshPlayerMetrics',
+        status: result.success ? 'success' : 'failure',
+        triggerSource: 'EVENTBRIDGE',
+        durationMs: result.executionTimeMs,
+        summary: {
+          totalPlayersScanned: result.totalPlayersScanned,
+          totalPlayerVenuesScanned: result.totalPlayerVenuesScanned,
+          globalMetricsUpdated: result.globalMetricsUpdated,
+          entityMetricsUpdated: result.entityMetricsUpdated,
+          venueMetricsUpdated: result.venueMetricsUpdated,
+          entitiesProcessed: result.entitiesProcessed,
+          venuesProcessed: result.venuesProcessed,
+          executionTime: `${Math.round(result.executionTimeMs / 1000)}s`,
+        },
+        error: result.errors.length > 0 ? result.errors.join(', ') : null,
+      });
+    }
+    // === NOTIFICATION CODE END ===
+
     return result;
     
   } catch (error) {
@@ -419,6 +443,24 @@ exports.handler = async (event) => {
     result.message = error.message;
     result.errors.push(error.message);
     result.executionTimeMs = Date.now() - startTime;
+
+    // === NOTIFICATION CODE START ===
+    // Send failure notification for EventBridge-triggered runs
+    if (isEventBridgeTrigger) {
+      await sendNotification({
+        lambdaName: 'refreshPlayerMetrics',
+        status: 'failure',
+        triggerSource: 'EVENTBRIDGE',
+        durationMs: result.executionTimeMs,
+        summary: {
+          totalPlayersScanned: result.totalPlayersScanned,
+          executionTime: `${Math.round(result.executionTimeMs / 1000)}s`,
+        },
+        error: error.message,
+      });
+    }
+    // === NOTIFICATION CODE END ===
+
     return result;
   }
 };
@@ -782,17 +824,28 @@ function calculateGlobalMetrics(players, playerVenues, entities, venues, timeRan
   const avgEntitiesPerPlayer = playersWithVenueData > 0 ? totalEntitiesPlayed / playersWithVenueData : 0;
   
   // Top players by venue count
+  // Also build a map of total games per player from PlayerVenue records
+  const playerGamesMap = new Map();
+  for (const pv of playerVenues) {
+    const current = playerGamesMap.get(pv.playerId) || 0;
+    playerGamesMap.set(pv.playerId, current + (pv.totalGamesPlayed || 0));
+  }
+  
   const playerVenueCounts = [];
   for (const [playerId, venueSet] of playerVenueMap) {
     const entitySet = playerEntityMap.get(playerId) || new Set();
     const player = players.find(p => p.id === playerId);
     if (player) {
+      // Use games from PlayerVenue records, fallback to summary
+      const gamesFromPV = playerGamesMap.get(playerId) || 0;
+      const gamesFromSummary = player.summary?.gamesPlayedAllTime || 0;
+      
       playerVenueCounts.push({
         playerId,
         name: `${player.firstName} ${player.lastName}`,
         venueCount: venueSet.size,
         entityCount: entitySet.size,
-        gamesPlayed: player.summary?.gamesPlayedAllTime || 0
+        gamesPlayed: gamesFromPV > 0 ? gamesFromPV : gamesFromSummary
       });
     }
   }
@@ -928,9 +981,9 @@ function calculateGlobalMetrics(players, playerVenues, entities, venues, timeRan
     churned181to360Count: targetingCounts[TARGETING.CHURNED_181_360] || 0,
     churned361PlusCount: targetingCounts[TARGETING.CHURNED_361] || 0,
     
-    // Cross-venue/entity distribution
-    venuePlayDistribution: JSON.stringify(venuePlayDistribution),
-    entityPlayDistribution: JSON.stringify(entityPlayDistribution),
+    // Cross-venue/entity distribution - raw objects for AWSJSON
+    venuePlayDistribution,
+    entityPlayDistribution,
     playersMultiVenue,
     playersMultiEntity,
     playersSingleVenue,
@@ -955,10 +1008,11 @@ function calculateGlobalMetrics(players, playerVenues, entities, venues, timeRan
     totalCreditBalance: round(totalCredits),
     totalPointsBalance: round(totalPoints),
     
-    topEntitiesByPlayers: JSON.stringify(topEntitiesByPlayers),
-    topVenuesByRegistrations: JSON.stringify(topVenuesByRegistrations),
-    topPlayersByNetBalance: JSON.stringify(topPlayersByNetBalance),
-    topPlayersByVenueCount: JSON.stringify(topPlayersByVenueCount),
+    // Top lists - raw arrays for AWSJSON
+    topEntitiesByPlayers,
+    topVenuesByRegistrations,
+    topPlayersByNetBalance,
+    topPlayersByVenueCount,
     
     calculatedAt: nowIso,
     calculatedBy: 'SCHEDULED_LAMBDA',
@@ -1049,15 +1103,26 @@ function calculateEntityMetrics(entity, players, playerVenues, venues, playersRe
   }
   
   // Top players by venue count within this entity
+  // Build a map of total games per player from this entity's PlayerVenue records
+  const entityPlayerGamesMap = new Map();
+  for (const pv of playerVenues) {
+    const current = entityPlayerGamesMap.get(pv.playerId) || 0;
+    entityPlayerGamesMap.set(pv.playerId, current + (pv.totalGamesPlayed || 0));
+  }
+  
   const playerVenueCounts = [];
   for (const [playerId, venueSet] of entityPlayerVenueMap) {
     const player = players.find(p => p.id === playerId);
     if (player) {
+      // Use games from PlayerVenue records, fallback to summary
+      const gamesFromPV = entityPlayerGamesMap.get(playerId) || 0;
+      const gamesFromSummary = player.summary?.gamesPlayedAllTime || 0;
+      
       playerVenueCounts.push({
         playerId,
         name: `${player.firstName} ${player.lastName}`,
         venueCount: venueSet.size,
-        gamesPlayed: player.summary?.gamesPlayedAllTime || 0
+        gamesPlayed: gamesFromPV > 0 ? gamesFromPV : gamesFromSummary
       });
     }
   }
@@ -1184,8 +1249,8 @@ function calculateEntityMetrics(entity, players, playerVenues, venues, playersRe
     churned181to360Count: targetingCounts[TARGETING.CHURNED_181_360] || 0,
     churned361PlusCount: targetingCounts[TARGETING.CHURNED_361] || 0,
     
-    // Cross-venue distribution
-    venuePlayDistribution: JSON.stringify(venuePlayDistribution),
+    // Cross-venue distribution - raw object for AWSJSON
+    venuePlayDistribution,
     playersMultiVenue,
     playersSingleVenue,
     avgVenuesPerPlayer: round(avgVenuesPerPlayer),
@@ -1208,16 +1273,15 @@ function calculateEntityMetrics(entity, players, playerVenues, venues, playersRe
     totalCreditBalance: round(totalCredits),
     totalPointsBalance: round(totalPoints),
     
-    venueBreakdown: JSON.stringify(venueBreakdown),
-    topVenuesByPlayers: JSON.stringify(venueBreakdown.slice(0, 5)),
-    topVenuesByRegistrations: JSON.stringify(
-      venueBreakdown
-        .sort((a, b) => b.registrationCount - a.registrationCount)
-        .slice(0, 5)
-    ),
-    topPlayersByNetBalance: JSON.stringify(topPlayersByNetBalance),
-    topPlayersByGamesPlayed: JSON.stringify(topPlayersByGamesPlayed),
-    topPlayersByVenueCount: JSON.stringify(topPlayersByVenueCount),
+    // Top lists - raw arrays for AWSJSON
+    venueBreakdown,
+    topVenuesByPlayers: venueBreakdown.slice(0, 5),
+    topVenuesByRegistrations: venueBreakdown
+      .sort((a, b) => b.registrationCount - a.registrationCount)
+      .slice(0, 5),
+    topPlayersByNetBalance,
+    topPlayersByGamesPlayed,
+    topPlayersByVenueCount,
     
     calculatedAt: nowIso,
     calculatedBy: 'SCHEDULED_LAMBDA',
@@ -1411,9 +1475,10 @@ function calculateVenueMetrics(venue, players, playerVenues, playersRegisteredHe
     totalPlayerWinnings: round(totalWinnings),
     totalPlayerBuyIns: round(totalBuyIns),
     
-    topPlayersByGamesPlayed: JSON.stringify(topPlayersByGamesPlayed),
-    topPlayersByNetBalance: JSON.stringify(topPlayersByNetBalance),
-    regularPlayers: JSON.stringify(regularPlayers),
+    // Top lists - raw arrays for AWSJSON
+    topPlayersByGamesPlayed,
+    topPlayersByNetBalance,
+    regularPlayers,
     
     calculatedAt: nowIso,
     calculatedBy: 'SCHEDULED_LAMBDA',

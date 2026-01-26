@@ -63,28 +63,77 @@ export const hasErrorInput = [
 // NUMBER FORMATTERS (AU Locale)
 // ============================================
 
+export interface FormatNumberOptions {
+  decimals?: number;
+  fallback?: string;
+}
+
+export interface FormatCurrencyOptions {
+  decimals?: number;
+  showSign?: boolean;
+  fallback?: string;
+}
+
 /**
  * Format number with Australian locale
+ * Handles null/undefined gracefully
  */
-export const formatNumber = (number: number, decimals = 0): string => {
-  if (!Number.isFinite(number)) return "0"
+export const formatNumber = (
+  value: number | null | undefined,
+  options: FormatNumberOptions | number = {}
+): string => {
+  // Support legacy signature: formatNumber(123, 2)
+  const opts: FormatNumberOptions = typeof options === 'number' 
+    ? { decimals: options } 
+    : options;
+  
+  const { decimals = 0, fallback = '0' } = opts;
+  
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return fallback;
+  }
+  
   return new Intl.NumberFormat("en-AU", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  }).format(number)
+  }).format(value);
 }
 
 /**
  * Format as Australian currency (AUD)
+ * Handles null/undefined gracefully
+ * Supports showSign option for +/- prefix
  */
-export const formatCurrency = (number: number, decimals = 0): string => {
-  if (!Number.isFinite(number)) return "$0"
-  return new Intl.NumberFormat("en-AU", {
+export const formatCurrency = (
+  value: number | null | undefined,
+  options: FormatCurrencyOptions | number = {}
+): string => {
+  // Support legacy signature: formatCurrency(123, 2)
+  const opts: FormatCurrencyOptions = typeof options === 'number' 
+    ? { decimals: options } 
+    : options;
+  
+  const { decimals = 0, showSign = false, fallback = '$0' } = opts;
+  
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return fallback;
+  }
+  
+  const formatted = new Intl.NumberFormat("en-AU", {
     style: "currency",
     currency: "AUD",
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  }).format(number)
+  }).format(Math.abs(value));
+  
+  if (showSign) {
+    if (value > 0) return `+${formatted}`;
+    if (value < 0) return `-${formatted}`;
+  } else if (value < 0) {
+    return `-${formatted}`;
+  }
+  
+  return formatted;
 }
 
 /**

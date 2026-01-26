@@ -1,5 +1,13 @@
 /**
- * PLAYER CONSOLIDATION LOGIC MODULE
+ * PLAYER CONSOLIDATION LOGIC MODULE - FIXED VERSION
+ * 
+ * VERSION: 1.1.0 - IDEMPOTENT ADJUSTMENTS FIX
+ * 
+ * CRITICAL FIX (v1.1.0):
+ * - Made stat adjustments IDEMPOTENT to prevent cumulative negative values
+ * - Each consolidation key is tracked in PlayerSummary.appliedConsolidations
+ * - Adjustments only apply ONCE per consolidation key per player
+ * - Fixes the bug where sessionsPlayed/tournamentsPlayed went negative
  * 
  * Handles player data consolidation for multi-day tournaments.
  * Works alongside tournament consolidation to prevent double-counting
@@ -12,7 +20,7 @@
  * - Direct Buy-in: Player enters on Day 2+ without playing Day 1 (costs money)
  * 
  * INTEGRATION POINT:
- * Call `consolidatePlayerDataForTournament(parentId, children)` 
+ * Call `consolidatePlayerDataForTournament(parentId, children, consolidationKey)` 
  * after recalculateParentTotals() in the tournament consolidator.
  */
 
@@ -505,53 +513,116 @@ const generateStatAdjustments = (playerJourneys) => {
     return adjustments;
 };
 
+// ===================================================================
+// IDEMPOTENT ADJUSTMENT FUNCTIONS (FIXED v1.1.0)
+// ===================================================================
+
 /**
- * Applies stat adjustments to PlayerSummary
+ * Applies stat adjustments to PlayerSummary - IDEMPOTENT VERSION
+ * 
+ * CRITICAL FIX: This function now tracks which consolidation keys have been
+ * applied to each PlayerSummary record. Adjustments are only applied ONCE
+ * per consolidation key, preventing cumulative negative values.
+ * 
+ * @param {Object} ddbDocClient - DynamoDB Document Client
+ * @param {string} playerSummaryTable - PlayerSummary table name
+ * @param {Array} adjustments - Array of adjustment objects
+ * @param {string} consolidationKey - Unique key for this consolidation (e.g., parentGameId or consolidationKey)
+ * @returns {number} Number of adjustments applied
  */
-const applyPlayerSummaryAdjustments = async (ddbDocClient, playerSummaryTable, adjustments) => {
+const applyPlayerSummaryAdjustments = async (ddbDocClient, playerSummaryTable, adjustments, consolidationKey) => {
     const now = new Date().toISOString();
     let applied = 0;
+    let skipped = 0;
+    
+    if (!consolidationKey) {
+        console.error('[PlayerConsolidation] CRITICAL: consolidationKey is required for idempotent adjustments');
+        throw new Error('consolidationKey is required for applyPlayerSummaryAdjustments');
+    }
     
     for (const adj of adjustments) {
         try {
             // Build dynamic update expression
             const updates = [];
             const values = {};
+            const names = {};
             
             for (const [field, value] of Object.entries(adj.summaryAdjustments)) {
                 if (value !== 0) {
-                    updates.push(`${field} = ${field} + :adj_${field}`);
-                    values[`:adj_${field}`] = value;
+                    // Use expression attribute names to handle reserved words
+                    const nameKey = `#field_${field}`;
+                    const valueKey = `:adj_${field}`;
+                    names[nameKey] = field;
+                    updates.push(`${nameKey} = ${nameKey} + ${valueKey}`);
+                    values[valueKey] = value;
                 }
             }
             
             if (updates.length === 0) continue;
             
             values[':now'] = now;
+            values[':consolidationKey'] = consolidationKey;
+            values[':emptyList'] = [];
+            values[':newConsolidation'] = [consolidationKey];
             
+            // CRITICAL: Use condition expression to ensure idempotency
+            // Only apply if this consolidation key hasn't been applied before
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerSummaryTable,
                 Key: { id: adj.playerId },
-                UpdateExpression: `SET ${updates.join(', ')}, updatedAt = :now, lastConsolidationAt = :now`,
+                UpdateExpression: `
+                    SET ${updates.join(', ')}, 
+                        updatedAt = :now, 
+                        lastConsolidationAt = :now,
+                        lastConsolidationKey = :consolidationKey,
+                        appliedConsolidations = list_append(if_not_exists(appliedConsolidations, :emptyList), :newConsolidation)
+                `,
+                ExpressionAttributeNames: names,
                 ExpressionAttributeValues: values,
-                ConditionExpression: 'attribute_exists(id)'
+                // IDEMPOTENCY CONDITION: Only apply if:
+                // 1. Record exists
+                // 2. This consolidation key hasn't been applied yet
+                ConditionExpression: `
+                    attribute_exists(id) AND 
+                    (
+                        attribute_not_exists(appliedConsolidations) OR
+                        NOT contains(appliedConsolidations, :consolidationKey)
+                    )
+                `
             }));
             
             applied++;
+            console.log(`[PlayerConsolidation] Applied adjustment to ${adj.playerId} for consolidation ${consolidationKey}`);
+            
         } catch (error) {
-            console.warn(`[PlayerConsolidation] Failed to adjust summary for ${adj.playerId}:`, error.message);
+            if (error.name === 'ConditionalCheckFailedException') {
+                // This consolidation was already applied - this is expected and OK
+                skipped++;
+                console.log(`[PlayerConsolidation] Skipped ${adj.playerId} - consolidation ${consolidationKey} already applied`);
+            } else {
+                console.warn(`[PlayerConsolidation] Failed to adjust summary for ${adj.playerId}:`, error.message);
+            }
         }
     }
     
+    console.log(`[PlayerConsolidation] Summary adjustments: ${applied} applied, ${skipped} skipped (already applied)`);
     return applied;
 };
 
 /**
- * Applies stat adjustments to PlayerVenue records
+ * Applies stat adjustments to PlayerVenue records - IDEMPOTENT VERSION
+ * 
+ * Similar to PlayerSummary, tracks applied consolidations to prevent duplicates.
  */
-const applyPlayerVenueAdjustments = async (ddbDocClient, playerVenueTable, adjustments, venueId, entityId) => {
+const applyPlayerVenueAdjustments = async (ddbDocClient, playerVenueTable, adjustments, venueId, entityId, consolidationKey) => {
     const now = new Date().toISOString();
     let applied = 0;
+    let skipped = 0;
+    
+    if (!consolidationKey) {
+        console.error('[PlayerConsolidation] CRITICAL: consolidationKey is required for idempotent adjustments');
+        throw new Error('consolidationKey is required for applyPlayerVenueAdjustments');
+    }
     
     for (const adj of adjustments) {
         // Find the PlayerVenue record for this player at this venue
@@ -583,20 +654,40 @@ const applyPlayerVenueAdjustments = async (ddbDocClient, playerVenueTable, adjus
             if (updates.length === 0) continue;
             
             values[':now'] = now;
+            values[':consolidationKey'] = consolidationKey;
+            values[':emptyList'] = [];
+            values[':newConsolidation'] = [consolidationKey];
             
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerVenueTable,
                 Key: { id: playerVenue.id },
-                UpdateExpression: `SET ${updates.join(', ')}, updatedAt = :now`,
-                ExpressionAttributeValues: values
+                UpdateExpression: `
+                    SET ${updates.join(', ')}, 
+                        updatedAt = :now,
+                        appliedConsolidations = list_append(if_not_exists(appliedConsolidations, :emptyList), :newConsolidation)
+                `,
+                ExpressionAttributeValues: values,
+                // IDEMPOTENCY CONDITION
+                ConditionExpression: `
+                    attribute_exists(id) AND 
+                    (
+                        attribute_not_exists(appliedConsolidations) OR
+                        NOT contains(appliedConsolidations, :consolidationKey)
+                    )
+                `
             }));
             
             applied++;
         } catch (error) {
-            console.warn(`[PlayerConsolidation] Failed to adjust PlayerVenue for ${adj.playerId}:`, error.message);
+            if (error.name === 'ConditionalCheckFailedException') {
+                skipped++;
+            } else {
+                console.warn(`[PlayerConsolidation] Failed to adjust PlayerVenue for ${adj.playerId}:`, error.message);
+            }
         }
     }
     
+    console.log(`[PlayerConsolidation] Venue adjustments: ${applied} applied, ${skipped} skipped (already applied)`);
     return applied;
 };
 
@@ -607,12 +698,15 @@ const applyPlayerVenueAdjustments = async (ddbDocClient, playerVenueTable, adjus
 /**
  * Main function to consolidate player data for a multi-day tournament
  * 
+ * IMPORTANT: consolidationKey is now REQUIRED to ensure idempotent adjustments.
+ * 
  * @param {Object} ddbDocClient - DynamoDB Document Client
  * @param {Object} tableNames - Object containing table names
  * @param {string} parentGameId - The parent game ID
  * @param {Object} parentGame - The parent game record
  * @param {Array} children - Child game records
  * @param {Object} options - Optional configuration
+ * @param {string} options.consolidationKey - REQUIRED: Unique key for this consolidation
  * @returns {Object} Consolidation results
  */
 const consolidatePlayerDataForTournament = async (
@@ -629,8 +723,18 @@ const consolidatePlayerDataForTournament = async (
         applyAdjustments = true,      // Apply stat adjustments to Summary/Venue
         createAggregates = true,       // Create aggregate entries on parent
         consolidateResults = true,     // Create consolidated results on parent
-        dryRun = false                 // If true, calculate but don't write
+        dryRun = false,                // If true, calculate but don't write
+        consolidationKey = null        // REQUIRED for idempotent adjustments
     } = options;
+    
+    // Derive consolidationKey from parentGame if not provided
+    const effectiveConsolidationKey = consolidationKey || parentGame.consolidationKey || parentGameId;
+    
+    if (!effectiveConsolidationKey) {
+        throw new Error('[PlayerConsolidation] consolidationKey is required for idempotent adjustments');
+    }
+    
+    console.log(`[PlayerConsolidation] Using consolidationKey: ${effectiveConsolidationKey}`);
     
     const {
         PlayerEntry: playerEntryTable,
@@ -659,6 +763,7 @@ const consolidatePlayerDataForTournament = async (
     // Build result object
     const result = {
         parentGameId,
+        consolidationKey: effectiveConsolidationKey,
         childCount: children.length,
         uniquePlayers: playerJourneys.size,
         adjustmentsGenerated: adjustments.length,
@@ -710,16 +815,16 @@ const consolidatePlayerDataForTournament = async (
         );
     }
     
-    // Step 7: Apply stat adjustments
+    // Step 7: Apply stat adjustments (NOW IDEMPOTENT)
     if (applyAdjustments && adjustments.length > 0) {
-        console.log(`[PlayerConsolidation] Applying PlayerSummary adjustments...`);
+        console.log(`[PlayerConsolidation] Applying PlayerSummary adjustments (idempotent)...`);
         result.actions.summariesAdjusted = await applyPlayerSummaryAdjustments(
-            ddbDocClient, playerSummaryTable, adjustments
+            ddbDocClient, playerSummaryTable, adjustments, effectiveConsolidationKey
         );
         
-        console.log(`[PlayerConsolidation] Applying PlayerVenue adjustments...`);
+        console.log(`[PlayerConsolidation] Applying PlayerVenue adjustments (idempotent)...`);
         result.actions.venuesAdjusted = await applyPlayerVenueAdjustments(
-            ddbDocClient, playerVenueTable, adjustments, parentGame.venueId, parentGame.entityId
+            ddbDocClient, playerVenueTable, adjustments, parentGame.venueId, parentGame.entityId, effectiveConsolidationKey
         );
     }
     

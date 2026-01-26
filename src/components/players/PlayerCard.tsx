@@ -18,11 +18,14 @@ import {
   formatStatus,
   formatCategory,
   formatDate,
-  formatCurrency,
-  formatNumber,
   getPrimaryVenue,
   getNetBalanceColor,
 } from '../../utils/playerHelpers';
+
+import {
+  formatCurrency,
+  formatNumber,
+} from '../../lib/utils';
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({
   player,

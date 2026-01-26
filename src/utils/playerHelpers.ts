@@ -81,61 +81,6 @@ export const formatDateWithRelative = (dateString?: string | null): string => {
 };
 
 // ============================================================================
-// Currency & Number Formatting
-// ============================================================================
-
-export const formatCurrency = (
-  amount?: number | null,
-  options: { currency?: string; showSign?: boolean; compact?: boolean } = {}
-): string => {
-  const { currency = 'GBP', showSign = false, compact = false } = options;
-  
-  if (amount === null || amount === undefined) return '-';
-  
-  const absAmount = Math.abs(amount);
-  const isNegative = amount < 0;
-  
-  let formatted: string;
-  
-  if (compact && absAmount >= 1000) {
-    if (absAmount >= 1000000) {
-      formatted = `${(absAmount / 1000000).toFixed(1)}M`;
-    } else if (absAmount >= 1000) {
-      formatted = `${(absAmount / 1000).toFixed(1)}K`;
-    } else {
-      formatted = absAmount.toFixed(0);
-    }
-    formatted = currency === 'GBP' ? `£${formatted}` : `$${formatted}`;
-  } else {
-    formatted = new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(absAmount);
-  }
-  
-  if (showSign) {
-    return isNegative ? `-${formatted}` : `+${formatted}`;
-  }
-  
-  return isNegative ? `-${formatted}` : formatted;
-};
-
-export const formatNumber = (value?: number | null, decimals = 0): string => {
-  if (value === null || value === undefined) return '-';
-  return value.toLocaleString('en-GB', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  });
-};
-
-export const formatPercentage = (value?: number | null, decimals = 1): string => {
-  if (value === null || value === undefined) return '-';
-  return `${value.toFixed(decimals)}%`;
-};
-
-// ============================================================================
 // Status Formatting
 // ============================================================================
 

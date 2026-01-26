@@ -33,8 +33,6 @@ import {
   formatPlayerInitials,
   formatDate,
   formatDateTime,
-  formatCurrency,
-  formatNumber,
   formatStatus,
   formatCategory,
   formatTargetingClassification,
@@ -50,6 +48,10 @@ import {
   calculatePerformanceStats,
 } from '../../utils/playerHelpers';
 
+import {
+  formatCurrency,
+  formatNumber,
+} from '../../lib/utils';
 // ============================================================================
 // Tab Types
 // ============================================================================

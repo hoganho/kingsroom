@@ -28,7 +28,7 @@ import { PageWrapper } from '../../components/layout/PageWrapper';
 import {
   formatCurrency,
   formatNumber,
-} from '../../utils/playerHelpers';
+} from '../../lib/utils';
 
 const client = generateClient();
 
@@ -235,27 +235,38 @@ function usePlayerMetrics(timeRange: string = 'ALL') {
     
     try {
       // Fetch global metrics
+      const globalId = `global_${timeRange}`;
+      console.log('[PlayersDashboard] Fetching global metrics with id:', globalId);
+      
       const globalResponse = await client.graphql({
         query: GET_GLOBAL_PLAYER_METRICS,
-        variables: { id: `global_${timeRange}` }
+        variables: { id: globalId }
       }) as { data: { getGlobalPlayerMetrics: GlobalPlayerMetrics } };
+      
+      console.log('[PlayersDashboard] Global metrics response:', globalResponse.data?.getGlobalPlayerMetrics);
       
       if (globalResponse.data?.getGlobalPlayerMetrics) {
         setGlobalMetrics(globalResponse.data.getGlobalPlayerMetrics);
         setLastRefresh(new Date(globalResponse.data.getGlobalPlayerMetrics.calculatedAt));
+      } else {
+        console.warn('[PlayersDashboard] No global metrics found for id:', globalId);
       }
 
       // Fetch entity metrics
+      console.log('[PlayersDashboard] Fetching entity metrics for timeRange:', timeRange);
+      
       const entityResponse = await client.graphql({
         query: LIST_ENTITY_PLAYER_METRICS,
         variables: { filter: { timeRange: { eq: timeRange } } }
       }) as { data: { listEntityPlayerMetrics: { items: EntityPlayerMetrics[] } } };
       
+      console.log('[PlayersDashboard] Entity metrics response:', entityResponse.data?.listEntityPlayerMetrics?.items?.length, 'items');
+      
       if (entityResponse.data?.listEntityPlayerMetrics?.items) {
         setEntityMetrics(entityResponse.data.listEntityPlayerMetrics.items);
       }
     } catch (err) {
-      console.error('Error fetching player metrics:', err);
+      console.error('[PlayersDashboard] Error fetching player metrics:', err);
       setError('Failed to load player metrics. Please try again.');
     } finally {
       setLoading(false);
@@ -281,46 +292,47 @@ export const PlayersDashboard: React.FC = () => {
   const { globalMetrics, entityMetrics, loading, error, lastRefresh, refetch } = usePlayerMetrics(timeRange);
 
   // Parse JSON fields
-  const venueDistribution = useMemo(() => {
-    if (!globalMetrics?.venuePlayDistribution) return null;
+  // Helper to parse potentially double-encoded JSON
+  const parseJsonField = <T,>(value: string | null | undefined): T | null => {
+    if (!value) return null;
     try {
-      return JSON.parse(globalMetrics.venuePlayDistribution) as Record<string, number>;
-    } catch { return null; }
+      let parsed = JSON.parse(value);
+      // If the result is still a string, parse again (double-encoded)
+      if (typeof parsed === 'string') {
+        parsed = JSON.parse(parsed);
+      }
+      return parsed as T;
+    } catch {
+      return null;
+    }
+  };
+
+  const venueDistribution = useMemo(() => {
+    return parseJsonField<Record<string, number>>(globalMetrics?.venuePlayDistribution);
   }, [globalMetrics?.venuePlayDistribution]);
 
   const entityDistribution = useMemo(() => {
-    if (!globalMetrics?.entityPlayDistribution) return null;
-    try {
-      return JSON.parse(globalMetrics.entityPlayDistribution) as Record<string, number>;
-    } catch { return null; }
+    return parseJsonField<Record<string, number>>(globalMetrics?.entityPlayDistribution);
   }, [globalMetrics?.entityPlayDistribution]);
 
   const topEntities = useMemo(() => {
-    if (!globalMetrics?.topEntitiesByPlayers) return [];
-    try {
-      return JSON.parse(globalMetrics.topEntitiesByPlayers) as TopEntityItem[];
-    } catch { return []; }
+    const parsed = parseJsonField<TopEntityItem[]>(globalMetrics?.topEntitiesByPlayers);
+    return Array.isArray(parsed) ? parsed : [];
   }, [globalMetrics?.topEntitiesByPlayers]);
 
   const topVenues = useMemo(() => {
-    if (!globalMetrics?.topVenuesByRegistrations) return [];
-    try {
-      return JSON.parse(globalMetrics.topVenuesByRegistrations) as TopVenueItem[];
-    } catch { return []; }
+    const parsed = parseJsonField<TopVenueItem[]>(globalMetrics?.topVenuesByRegistrations);
+    return Array.isArray(parsed) ? parsed : [];
   }, [globalMetrics?.topVenuesByRegistrations]);
 
   const topPlayersByBalance = useMemo(() => {
-    if (!globalMetrics?.topPlayersByNetBalance) return [];
-    try {
-      return JSON.parse(globalMetrics.topPlayersByNetBalance) as TopPlayerItem[];
-    } catch { return []; }
+    const parsed = parseJsonField<TopPlayerItem[]>(globalMetrics?.topPlayersByNetBalance);
+    return Array.isArray(parsed) ? parsed : [];
   }, [globalMetrics?.topPlayersByNetBalance]);
 
   const topPlayersByVenues = useMemo(() => {
-    if (!globalMetrics?.topPlayersByVenueCount) return [];
-    try {
-      return JSON.parse(globalMetrics.topPlayersByVenueCount) as TopPlayerItem[];
-    } catch { return []; }
+    const parsed = parseJsonField<TopPlayerItem[]>(globalMetrics?.topPlayersByVenueCount);
+    return Array.isArray(parsed) ? parsed : [];
   }, [globalMetrics?.topPlayersByVenueCount]);
 
   // Calculate derived stats
@@ -732,7 +744,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
           <p className="text-sm text-gray-500">By net balance</p>
         </div>
         <div className="divide-y divide-gray-100">
-          {topPlayersByBalance.slice(0, 5).map((player, index) => (
+          {(topPlayersByBalance || []).slice(0, 5).map((player, index) => (
             <div
               key={player.playerId}
               onClick={() => navigate(`/players/profile/${player.playerId}`)}
@@ -767,7 +779,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
           <p className="text-sm text-gray-500">Players at most venues</p>
         </div>
         <div className="divide-y divide-gray-100">
-          {topPlayersByVenues.slice(0, 5).map((player, index) => (
+          {(topPlayersByVenues || []).slice(0, 5).map((player, index) => (
             <div
               key={player.playerId}
               onClick={() => navigate(`/players/profile/${player.playerId}`)}
@@ -800,7 +812,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
           <p className="text-sm text-gray-500">By player count</p>
         </div>
         <div className="divide-y divide-gray-100">
-          {topEntities.slice(0, 5).map((entity, index) => (
+          {(topEntities || []).slice(0, 5).map((entity, index) => (
             <div key={entity.entityId} className="px-6 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-bold">
@@ -823,7 +835,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
           </h3>
         </div>
         <div className="divide-y divide-gray-100">
-          {topVenues.slice(0, 5).map((venue, index) => (
+          {(topVenues || []).slice(0, 5).map((venue, index) => (
             <div key={venue.venueId} className="px-6 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
@@ -1003,7 +1015,7 @@ const DistributionTab: React.FC<DistributionTabProps> = ({
       <p className="text-sm text-gray-500 mb-6">Players who have played at the most venues across all entities</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {topPlayersByVenues.slice(0, 10).map((player, index) => (
+        {(topPlayersByVenues || []).slice(0, 10).map((player, index) => (
           <div
             key={player.playerId}
             onClick={() => navigate(`/players/profile/${player.playerId}`)}
@@ -1053,9 +1065,15 @@ const EntitiesTab: React.FC<EntitiesTabProps> = ({
     {/* Entity Cards */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {entityMetrics.map((entity) => {
-        const venueBreakdown = entity.venueBreakdown 
-          ? JSON.parse(entity.venueBreakdown) as VenueBreakdownItem[]
-          : [];
+        let venueBreakdown: VenueBreakdownItem[] = [];
+        try {
+          if (entity.venueBreakdown) {
+            const parsed = JSON.parse(entity.venueBreakdown);
+            venueBreakdown = Array.isArray(parsed) ? parsed : [];
+          }
+        } catch {
+          venueBreakdown = [];
+        }
         
         return (
           <div key={entity.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

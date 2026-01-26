@@ -693,7 +693,8 @@ const recalculateParentTotals = async (parentId, currentParentRecord) => {
             { 
                 applyAdjustments: true,
                 createAggregates: true,
-                consolidateResults: true
+                consolidateResults: true,
+                consolidationKey: currentParentRecord.consolidationKey || parentId
             }
         );
         
