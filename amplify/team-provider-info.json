@@ -182,7 +182,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/autoScraper-3943496474574b313430-build.zip"
+          "s3Key": "amplify-builds/autoScraper-366259663141582b4545-build.zip"
         },
         "deleteGameFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -194,7 +194,7 @@
         },
         "gameDataEnricher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/gameDataEnricher-51337a36347258677a75-build.zip"
+          "s3Key": "amplify-builds/gameDataEnricher-42486345776658616862-build.zip"
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -206,7 +206,7 @@
         },
         "gameToSocialMatcher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/gameToSocialMatcher-51534d41466f4f797445-build.zip"
+          "s3Key": "amplify-builds/gameToSocialMatcher-38552b73547543336773-build.zip"
         },
         "getModelCount": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -223,7 +223,7 @@
         },
         "refreshAllMetrics": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/refreshAllMetrics-75737656625144495a79-build.zip"
+          "s3Key": "amplify-builds/refreshAllMetrics-68714c4c336f6e65457a-build.zip"
         },
         "refreshRunningGames": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -231,7 +231,7 @@
         },
         "s3ManagementFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/s3ManagementFunction-5058594e4b644b4f4166-build.zip"
+          "s3Key": "amplify-builds/s3ManagementFunction-3936774f5a7a446a7369-build.zip"
         },
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue-prod.fifo",
@@ -257,7 +257,7 @@
         },
         "socialFetcher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/socialFetcher-3441473156566a4a3565-build.zip",
+          "s3Key": "amplify-builds/socialFetcher-4a624e582b4a37436275-build.zip",
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "socialPostProcessorFunction": "socialPostProcessor-prod",
           "appsyncEndpoint": "https://ynuahifnznb5zddz727oiqnicy.appsync-api.ap-southeast-2.amazonaws.com/graphql",
@@ -265,7 +265,7 @@
         },
         "socialPostProcessor": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/socialPostProcessor-6f6579726f433168556d-build.zip"
+          "s3Key": "amplify-builds/socialPostProcessor-70486e614934686c6138-build.zip"
         },
         "socialPostStreamHandler": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -295,7 +295,7 @@
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-48556f7967396c6d7234-build.zip",
+          "s3Key": "amplify-builds/webScraperFunction-4a36686b2b4e63395575-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue-prod.fifo",
           "scraperS3Bucket": "kingsroom-storage-prod",
           "saveGameFunctionName": "saveGameFunction-prod",
@@ -315,11 +315,15 @@
         },
         "aiReportGenerator": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/aiReportGenerator-32646f56345842366738-build.zip"
+          "s3Key": "amplify-builds/aiReportGenerator-62744762453567645663-build.zip"
         },
         "metricsPackGenerator": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
           "s3Key": "amplify-builds/metricsPackGenerator-31786c764b4a42536d44-build.zip"
+        },
+        "refreshPlayerMetrics": {
+          "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
+          "s3Key": "amplify-builds/refreshPlayerMetrics-41675779755a45617646-build.zip"
         }
       },
       "api": {

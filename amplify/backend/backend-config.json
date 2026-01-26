@@ -304,6 +304,22 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "refreshPlayerMetrics": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "refreshRunningGames": {
       "build": true,
       "dependsOn": [
@@ -805,6 +821,22 @@
         {
           "category": "function",
           "resourceName": "refreshAllMetrics"
+        }
+      ]
+    },
+    "AMPLIFY_function_refreshPlayerMetrics_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "refreshPlayerMetrics"
+        }
+      ]
+    },
+    "AMPLIFY_function_refreshPlayerMetrics_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "refreshPlayerMetrics"
         }
       ]
     },

@@ -117,6 +117,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
+    "refreshPlayerMetrics": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "refreshRunningGames": {
       "Arn": "string",
       "LambdaExecutionRole": "string",

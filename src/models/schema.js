@@ -300,6 +300,22 @@ export const schema = {
                         ]
                     }
                 },
+                "playerMetrics": {
+                    "name": "playerMetrics",
+                    "isArray": true,
+                    "type": {
+                        "model": "EntityPlayerMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "entity"
+                        ]
+                    }
+                },
                 "socialAccounts": {
                     "name": "socialAccounts",
                     "isArray": true,
@@ -778,6 +794,22 @@ export const schema = {
                     "isArray": true,
                     "type": {
                         "model": "RecurringGameMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "venue"
+                        ]
+                    }
+                },
+                "playerMetrics": {
+                    "name": "playerMetrics",
+                    "isArray": true,
+                    "type": {
+                        "model": "VenuePlayerMetrics"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -8216,6 +8248,1406 @@ export const schema = {
                         "name": "byPlayer",
                         "fields": [
                             "playerId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "GlobalPlayerMetrics": {
+            "name": "GlobalPlayerMetrics",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "timeRange": {
+                    "name": "timeRange",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPlayers": {
+                    "name": "totalPlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalEntities": {
+                    "name": "totalEntities",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalVenues": {
+                    "name": "totalVenues",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "activePlayerCount": {
+                    "name": "activePlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "suspendedPlayerCount": {
+                    "name": "suspendedPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "pendingVerificationPlayerCount": {
+                    "name": "pendingVerificationPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "newPlayerCount": {
+                    "name": "newPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recreationalPlayerCount": {
+                    "name": "recreationalPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "regularPlayerCount": {
+                    "name": "regularPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "vipPlayerCount": {
+                    "name": "vipPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lapsedPlayerCount": {
+                    "name": "lapsedPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "notPlayedCount": {
+                    "name": "notPlayedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "activeELCount": {
+                    "name": "activeELCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "activeCount": {
+                    "name": "activeCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "retain31to60Count": {
+                    "name": "retain31to60Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "retain61to90Count": {
+                    "name": "retain61to90Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned91to120Count": {
+                    "name": "churned91to120Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned121to180Count": {
+                    "name": "churned121to180Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned181to360Count": {
+                    "name": "churned181to360Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned361PlusCount": {
+                    "name": "churned361PlusCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venuePlayDistribution": {
+                    "name": "venuePlayDistribution",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityPlayDistribution": {
+                    "name": "entityPlayDistribution",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersMultiVenue": {
+                    "name": "playersMultiVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersMultiEntity": {
+                    "name": "playersMultiEntity",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersSingleVenue": {
+                    "name": "playersSingleVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersSingleEntity": {
+                    "name": "playersSingleEntity",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "avgVenuesPerPlayer": {
+                    "name": "avgVenuesPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgEntitiesPerPlayer": {
+                    "name": "avgEntitiesPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "maxVenuesPlayed": {
+                    "name": "maxVenuesPlayed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "maxEntitiesPlayed": {
+                    "name": "maxEntitiesPlayed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersRegisteredLast30Days": {
+                    "name": "playersRegisteredLast30Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersRegisteredLast90Days": {
+                    "name": "playersRegisteredLast90Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersRegisteredLast365Days": {
+                    "name": "playersRegisteredLast365Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersActiveLast30Days": {
+                    "name": "playersActiveLast30Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersActiveLast90Days": {
+                    "name": "playersActiveLast90Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "avgGamesPerPlayer": {
+                    "name": "avgGamesPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgNetBalancePerPlayer": {
+                    "name": "avgNetBalancePerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPlayerNetBalance": {
+                    "name": "totalPlayerNetBalance",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPlayerWinnings": {
+                    "name": "totalPlayerWinnings",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPlayerBuyIns": {
+                    "name": "totalPlayerBuyIns",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalCreditBalance": {
+                    "name": "totalCreditBalance",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPointsBalance": {
+                    "name": "totalPointsBalance",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "topEntitiesByPlayers": {
+                    "name": "topEntitiesByPlayers",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topVenuesByRegistrations": {
+                    "name": "topVenuesByRegistrations",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topPlayersByNetBalance": {
+                    "name": "topPlayersByNetBalance",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topPlayersByVenueCount": {
+                    "name": "topPlayersByVenueCount",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "calculatedAt": {
+                    "name": "calculatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "calculatedBy": {
+                    "name": "calculatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "calculationDurationMs": {
+                    "name": "calculationDurationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersScanned": {
+                    "name": "playersScanned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerVenuesScanned": {
+                    "name": "playerVenuesScanned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entitiesIncluded": {
+                    "name": "entitiesIncluded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venuesIncluded": {
+                    "name": "venuesIncluded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dateRangeStart": {
+                    "name": "dateRangeStart",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dateRangeEnd": {
+                    "name": "dateRangeEnd",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "GlobalPlayerMetrics",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byTimeRangeGlobal",
+                        "fields": [
+                            "timeRange"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "EntityPlayerMetrics": {
+            "name": "EntityPlayerMetrics",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
+                "entityName": {
+                    "name": "entityName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "timeRange": {
+                    "name": "timeRange",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPlayers": {
+                    "name": "totalPlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalVenues": {
+                    "name": "totalVenues",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "activePlayerCount": {
+                    "name": "activePlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "suspendedPlayerCount": {
+                    "name": "suspendedPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "pendingVerificationPlayerCount": {
+                    "name": "pendingVerificationPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "newPlayerCount": {
+                    "name": "newPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recreationalPlayerCount": {
+                    "name": "recreationalPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "regularPlayerCount": {
+                    "name": "regularPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "vipPlayerCount": {
+                    "name": "vipPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lapsedPlayerCount": {
+                    "name": "lapsedPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "notPlayedCount": {
+                    "name": "notPlayedCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "activeELCount": {
+                    "name": "activeELCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "activeCount": {
+                    "name": "activeCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "retain31to60Count": {
+                    "name": "retain31to60Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "retain61to90Count": {
+                    "name": "retain61to90Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned91to120Count": {
+                    "name": "churned91to120Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned121to180Count": {
+                    "name": "churned121to180Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned181to360Count": {
+                    "name": "churned181to360Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned361PlusCount": {
+                    "name": "churned361PlusCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venuePlayDistribution": {
+                    "name": "venuePlayDistribution",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersMultiVenue": {
+                    "name": "playersMultiVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersSingleVenue": {
+                    "name": "playersSingleVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "avgVenuesPerPlayer": {
+                    "name": "avgVenuesPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersSharedWithOtherEntities": {
+                    "name": "playersSharedWithOtherEntities",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersExclusiveToEntity": {
+                    "name": "playersExclusiveToEntity",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersRegisteredAllTime": {
+                    "name": "playersRegisteredAllTime",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersRegisteredLast30Days": {
+                    "name": "playersRegisteredLast30Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersRegisteredLast90Days": {
+                    "name": "playersRegisteredLast90Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersActiveLast30Days": {
+                    "name": "playersActiveLast30Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersActiveLast90Days": {
+                    "name": "playersActiveLast90Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalGamesPlayed": {
+                    "name": "totalGamesPlayed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "avgGamesPerPlayer": {
+                    "name": "avgGamesPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgNetBalancePerPlayer": {
+                    "name": "avgNetBalancePerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPlayerNetBalance": {
+                    "name": "totalPlayerNetBalance",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPlayerWinnings": {
+                    "name": "totalPlayerWinnings",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPlayerBuyIns": {
+                    "name": "totalPlayerBuyIns",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalCreditBalance": {
+                    "name": "totalCreditBalance",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPointsBalance": {
+                    "name": "totalPointsBalance",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueBreakdown": {
+                    "name": "venueBreakdown",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topVenuesByPlayers": {
+                    "name": "topVenuesByPlayers",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topVenuesByRegistrations": {
+                    "name": "topVenuesByRegistrations",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topPlayersByNetBalance": {
+                    "name": "topPlayersByNetBalance",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topPlayersByGamesPlayed": {
+                    "name": "topPlayersByGamesPlayed",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topPlayersByVenueCount": {
+                    "name": "topPlayersByVenueCount",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerGrowthTrend": {
+                    "name": "playerGrowthTrend",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerGrowthPercent": {
+                    "name": "playerGrowthPercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "activePlayerTrend": {
+                    "name": "activePlayerTrend",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "activePlayerPercent": {
+                    "name": "activePlayerPercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "calculatedAt": {
+                    "name": "calculatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "calculatedBy": {
+                    "name": "calculatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "calculationDurationMs": {
+                    "name": "calculationDurationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersScanned": {
+                    "name": "playersScanned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venuesIncluded": {
+                    "name": "venuesIncluded",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerVenuesScanned": {
+                    "name": "playerVenuesScanned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dateRangeStart": {
+                    "name": "dateRangeStart",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dateRangeEnd": {
+                    "name": "dateRangeEnd",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "EntityPlayerMetrics",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityPlayerMetrics",
+                        "fields": [
+                            "entityId",
+                            "timeRange"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byTimeRangeEntityPlayer",
+                        "fields": [
+                            "timeRange",
+                            "entityId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "VenuePlayerMetrics": {
+            "name": "VenuePlayerMetrics",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venue": {
+                    "name": "venue",
+                    "isArray": false,
+                    "type": {
+                        "model": "Venue"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "venueId"
+                        ]
+                    }
+                },
+                "venueName": {
+                    "name": "venueName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "timeRange": {
+                    "name": "timeRange",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPlayers": {
+                    "name": "totalPlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "registeredPlayers": {
+                    "name": "registeredPlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "activePlayerCount": {
+                    "name": "activePlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "suspendedPlayerCount": {
+                    "name": "suspendedPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "pendingVerificationPlayerCount": {
+                    "name": "pendingVerificationPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "newPlayerCount": {
+                    "name": "newPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recreationalPlayerCount": {
+                    "name": "recreationalPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "regularPlayerCount": {
+                    "name": "regularPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "vipPlayerCount": {
+                    "name": "vipPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lapsedPlayerCount": {
+                    "name": "lapsedPlayerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "activeELCount": {
+                    "name": "activeELCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "activeCount": {
+                    "name": "activeCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "retain31to60Count": {
+                    "name": "retain31to60Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "retain61to90Count": {
+                    "name": "retain61to90Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned91to120Count": {
+                    "name": "churned91to120Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned121to180Count": {
+                    "name": "churned121to180Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned181to360Count": {
+                    "name": "churned181to360Count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "churned361PlusCount": {
+                    "name": "churned361PlusCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersExclusiveToVenue": {
+                    "name": "playersExclusiveToVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersSharedWithOtherVenues": {
+                    "name": "playersSharedWithOtherVenues",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "avgOtherVenuesPerPlayer": {
+                    "name": "avgOtherVenuesPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "registrationsAllTime": {
+                    "name": "registrationsAllTime",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "registrationsLast30Days": {
+                    "name": "registrationsLast30Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "registrationsLast90Days": {
+                    "name": "registrationsLast90Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersActiveLast30Days": {
+                    "name": "playersActiveLast30Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playersActiveLast90Days": {
+                    "name": "playersActiveLast90Days",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalGamesAtVenue": {
+                    "name": "totalGamesAtVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "avgGamesPerPlayer": {
+                    "name": "avgGamesPerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "avgNetBalancePerPlayer": {
+                    "name": "avgNetBalancePerPlayer",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPlayerNetBalance": {
+                    "name": "totalPlayerNetBalance",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPlayerWinnings": {
+                    "name": "totalPlayerWinnings",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalPlayerBuyIns": {
+                    "name": "totalPlayerBuyIns",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "topPlayersByGamesPlayed": {
+                    "name": "topPlayersByGamesPlayed",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "topPlayersByNetBalance": {
+                    "name": "topPlayersByNetBalance",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "regularPlayers": {
+                    "name": "regularPlayers",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerGrowthTrend": {
+                    "name": "playerGrowthTrend",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerGrowthPercent": {
+                    "name": "playerGrowthPercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "registrationTrend": {
+                    "name": "registrationTrend",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "registrationTrendPercent": {
+                    "name": "registrationTrendPercent",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "calculatedAt": {
+                    "name": "calculatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "calculatedBy": {
+                    "name": "calculatedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "calculationDurationMs": {
+                    "name": "calculationDurationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersScanned": {
+                    "name": "playersScanned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerVenuesScanned": {
+                    "name": "playerVenuesScanned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dateRangeStart": {
+                    "name": "dateRangeStart",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dateRangeEnd": {
+                    "name": "dateRangeEnd",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "VenuePlayerMetrics",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {
+                        "subscriptions": null
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityVenuePlayerMetrics",
+                        "fields": [
+                            "entityId",
+                            "venueName"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenuePlayerMetrics",
+                        "fields": [
+                            "venueId",
+                            "timeRange"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byTimeRangeVenuePlayer",
+                        "fields": [
+                            "timeRange",
+                            "venueId"
                         ]
                     }
                 },
@@ -25296,6 +26728,298 @@ export const schema = {
                 }
             }
         },
+        "RefreshPlayerMetricsResult": {
+            "name": "RefreshPlayerMetricsResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "globalMetricsUpdated": {
+                    "name": "globalMetricsUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityMetricsUpdated": {
+                    "name": "entityMetricsUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueMetricsUpdated": {
+                    "name": "venueMetricsUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPlayersScanned": {
+                    "name": "totalPlayersScanned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPlayerVenuesScanned": {
+                    "name": "totalPlayerVenuesScanned",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entitiesProcessed": {
+                    "name": "entitiesProcessed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venuesProcessed": {
+                    "name": "venuesProcessed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "executionTimeMs": {
+                    "name": "executionTimeMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "peakMemoryMB": {
+                    "name": "peakMemoryMB",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "globalResults": {
+                    "name": "globalResults",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "PlayerMetricsUpdateResult"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "entityResults": {
+                    "name": "entityResults",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "PlayerMetricsUpdateResult"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "venueResults": {
+                    "name": "venueResults",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "PlayerMetricsUpdateResult"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "errors": {
+                    "name": "errors",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "warnings": {
+                    "name": "warnings",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "refreshedAt": {
+                    "name": "refreshedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "refreshedBy": {
+                    "name": "refreshedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "PlayerMetricsUpdateResult": {
+            "name": "PlayerMetricsUpdateResult",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "type": {
+                    "name": "type",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "timeRange": {
+                    "name": "timeRange",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerCount": {
+                    "name": "playerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "durationMs": {
+                    "name": "durationMs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "PlayerMetricsDashboard": {
+            "name": "PlayerMetricsDashboard",
+            "fields": {
+                "globalMetrics": {
+                    "name": "globalMetrics",
+                    "isArray": false,
+                    "type": {
+                        "model": "GlobalPlayerMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityMetrics": {
+                    "name": "entityMetrics",
+                    "isArray": false,
+                    "type": {
+                        "model": "EntityPlayerMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueMetrics": {
+                    "name": "venueMetrics",
+                    "isArray": true,
+                    "type": {
+                        "model": "VenuePlayerMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "totalPlayers": {
+                    "name": "totalPlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "activePlayers": {
+                    "name": "activePlayers",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "newPlayersThisMonth": {
+                    "name": "newPlayersThisMonth",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "churnedPlayersThisMonth": {
+                    "name": "churnedPlayersThisMonth",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersMultiVenue": {
+                    "name": "playersMultiVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersMultiEntity": {
+                    "name": "playersMultiEntity",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerGrowthTrend": {
+                    "name": "playerGrowthTrend",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "churnRate": {
+                    "name": "churnRate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "RefreshAllMetricsResult": {
             "name": "RefreshAllMetricsResult",
             "fields": {
@@ -31996,5 +33720,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "8a3034ecfe0560c99af784a155e25473"
+    "version": "dcc59694ad8f9e0f3dbddb594ae8e27d"
 };

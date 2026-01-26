@@ -1,0 +1,491 @@
+# 51-player-metrics.graphql
+# ===================================================================
+# PLAYER METRICS - Pre-calculated Player Analytics
+# ===================================================================
+# Provides fast dashboard loading for player statistics:
+# 1. GlobalPlayerMetrics - Aggregate across all entities
+# 2. EntityPlayerMetrics - Aggregate per entity
+# 3. VenuePlayerMetrics - Aggregate per venue
+#
+# Updated nightly by Lambda or on-demand via mutation
+# ID Formats:
+#   - GlobalPlayerMetrics: "global_{timeRange}" e.g., "global_ALL"
+#   - EntityPlayerMetrics: "{entityId}_{timeRange}" e.g., "abc123_ALL"
+#   - VenuePlayerMetrics: "{venueId}_{timeRange}" e.g., "xyz789_ALL"
+#
+# VERSION: 1.1.0 - Added cross-venue/entity distribution metrics
+# ===================================================================
+
+# ===================================================================
+# GLOBAL PLAYER METRICS (Aggregate across ALL entities)
+# ===================================================================
+# ID Format: global_{timeRange}
+# Example: "global_ALL", "global_12M", "global_1M"
+# ===================================================================
+
+type GlobalPlayerMetrics
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  # === PRIMARY KEY ===
+  id: ID!  # Format: "global_{timeRange}"
+  
+  # === DIMENSION ===
+  timeRange: String! @index(name: "byTimeRangeGlobal")  # "ALL", "12M", "6M", "3M", "1M"
+  
+  # === TOTAL COUNTS ===
+  totalPlayers: Int! @default(value: "0")
+  totalEntities: Int! @default(value: "0")
+  totalVenues: Int! @default(value: "0")
+  
+  # === BY STATUS ===
+  activePlayerCount: Int! @default(value: "0")
+  suspendedPlayerCount: Int! @default(value: "0")
+  pendingVerificationPlayerCount: Int! @default(value: "0")
+  
+  # === BY CATEGORY ===
+  newPlayerCount: Int! @default(value: "0")
+  recreationalPlayerCount: Int! @default(value: "0")
+  regularPlayerCount: Int! @default(value: "0")
+  vipPlayerCount: Int! @default(value: "0")
+  lapsedPlayerCount: Int! @default(value: "0")
+  
+  # === BY TARGETING CLASSIFICATION ===
+  notPlayedCount: Int! @default(value: "0")
+  activeELCount: Int! @default(value: "0")
+  activeCount: Int! @default(value: "0")
+  retain31to60Count: Int! @default(value: "0")
+  retain61to90Count: Int! @default(value: "0")
+  churned91to120Count: Int! @default(value: "0")
+  churned121to180Count: Int! @default(value: "0")
+  churned181to360Count: Int! @default(value: "0")
+  churned361PlusCount: Int! @default(value: "0")
+  
+  # === CROSS-VENUE/ENTITY DISTRIBUTION ===
+  # How many players have played at X venues
+  venuePlayDistribution: AWSJSON
+  # { "1": 450, "2": 120, "3": 45, "4": 12, "5+": 8 }
+  # Represents: 450 players played at exactly 1 venue, 120 at exactly 2 venues, etc.
+  
+  # How many players have played across X entities
+  entityPlayDistribution: AWSJSON
+  # { "1": 580, "2": 45, "3+": 10 }
+  # Represents: 580 players played at exactly 1 entity, 45 at exactly 2 entities, etc.
+  
+  # Quick aggregates for cross-venue/entity activity
+  playersMultiVenue: Int! @default(value: "0")    # Players who played at 2+ venues
+  playersMultiEntity: Int! @default(value: "0")   # Players who played at 2+ entities
+  playersSingleVenue: Int! @default(value: "0")   # Players who played at exactly 1 venue
+  playersSingleEntity: Int! @default(value: "0")  # Players who played at exactly 1 entity
+  avgVenuesPerPlayer: Float                        # Average number of venues played per player
+  avgEntitiesPerPlayer: Float                      # Average number of entities played per player
+  maxVenuesPlayed: Int                             # Most venues any single player has played at
+  maxEntitiesPlayed: Int                           # Most entities any single player has played at
+  
+  # === REGISTRATION TRENDS ===
+  playersRegisteredLast30Days: Int! @default(value: "0")
+  playersRegisteredLast90Days: Int! @default(value: "0")
+  playersRegisteredLast365Days: Int! @default(value: "0")
+  
+  # === ACTIVITY METRICS ===
+  playersActiveLast30Days: Int! @default(value: "0")
+  playersActiveLast90Days: Int! @default(value: "0")
+  avgGamesPerPlayer: Float
+  avgNetBalancePerPlayer: Float
+  
+  # === FINANCIAL AGGREGATES ===
+  totalPlayerNetBalance: Float! @default(value: "0")
+  totalPlayerWinnings: Float! @default(value: "0")
+  totalPlayerBuyIns: Float! @default(value: "0")
+  totalCreditBalance: Float! @default(value: "0")
+  totalPointsBalance: Float! @default(value: "0")
+  
+  # === TOP LISTS (as JSON) ===
+  topEntitiesByPlayers: AWSJSON
+  # [{ entityId, entityName, playerCount, activeCount }, ...]
+  
+  topVenuesByRegistrations: AWSJSON
+  # [{ venueId, venueName, entityId, registrationCount }, ...]
+  
+  topPlayersByNetBalance: AWSJSON
+  # [{ playerId, name, netBalance, gamesPlayed }, ...]
+  
+  topPlayersByVenueCount: AWSJSON
+  # [{ playerId, name, venueCount, entityCount, gamesPlayed }, ...]
+  # Players who have played at the most venues
+  
+  # === METADATA ===
+  calculatedAt: AWSDateTime!
+  calculatedBy: String! @default(value: "SCHEDULED_LAMBDA")
+  calculationDurationMs: Int
+  
+  playersScanned: Int
+  playerVenuesScanned: Int
+  entitiesIncluded: Int
+  venuesIncluded: Int
+  
+  dateRangeStart: AWSDateTime
+  dateRangeEnd: AWSDateTime
+  
+  # === AUDIT ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# ENTITY PLAYER METRICS (Per-entity player statistics)
+# ===================================================================
+# ID Format: {entityId}_{timeRange}
+# Example: "abc123_ALL", "abc123_12M"
+# ===================================================================
+
+type EntityPlayerMetrics
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  # === PRIMARY KEY ===
+  id: ID!  # Format: "{entityId}_{timeRange}"
+  
+  # === COMPOSITE KEYS ===
+  entityId: ID! @index(name: "byEntityPlayerMetrics", sortKeyFields: ["timeRange"])
+  entity: Entity @belongsTo(fields: ["entityId"])
+  
+  entityName: String!  # Denormalized for display
+  
+  # === DIMENSION ===
+  timeRange: String! @index(name: "byTimeRangeEntityPlayer", sortKeyFields: ["entityId"])
+  
+  # === TOTAL COUNTS ===
+  totalPlayers: Int! @default(value: "0")
+  totalVenues: Int! @default(value: "0")
+  
+  # === BY STATUS ===
+  activePlayerCount: Int! @default(value: "0")
+  suspendedPlayerCount: Int! @default(value: "0")
+  pendingVerificationPlayerCount: Int! @default(value: "0")
+  
+  # === BY CATEGORY ===
+  newPlayerCount: Int! @default(value: "0")
+  recreationalPlayerCount: Int! @default(value: "0")
+  regularPlayerCount: Int! @default(value: "0")
+  vipPlayerCount: Int! @default(value: "0")
+  lapsedPlayerCount: Int! @default(value: "0")
+  
+  # === BY TARGETING CLASSIFICATION ===
+  notPlayedCount: Int! @default(value: "0")
+  activeELCount: Int! @default(value: "0")
+  activeCount: Int! @default(value: "0")
+  retain31to60Count: Int! @default(value: "0")
+  retain61to90Count: Int! @default(value: "0")
+  churned91to120Count: Int! @default(value: "0")
+  churned121to180Count: Int! @default(value: "0")
+  churned181to360Count: Int! @default(value: "0")
+  churned361PlusCount: Int! @default(value: "0")
+  
+  # === CROSS-VENUE DISTRIBUTION (within this entity) ===
+  venuePlayDistribution: AWSJSON
+  # { "1": 200, "2": 50, "3": 15, "4+": 5 }
+  # Players who played at X venues within THIS entity
+  
+  playersMultiVenue: Int! @default(value: "0")    # Players who played at 2+ venues in this entity
+  playersSingleVenue: Int! @default(value: "0")   # Players who played at exactly 1 venue in this entity
+  avgVenuesPerPlayer: Float                        # Average venues per player within this entity
+  
+  # How many of this entity's players also play at other entities
+  playersSharedWithOtherEntities: Int! @default(value: "0")
+  playersExclusiveToEntity: Int! @default(value: "0")  # Only play at this entity
+  
+  # === REGISTRATION METRICS ===
+  playersRegisteredAllTime: Int! @default(value: "0")
+  playersRegisteredLast30Days: Int! @default(value: "0")
+  playersRegisteredLast90Days: Int! @default(value: "0")
+  
+  # === ACTIVITY METRICS ===
+  playersActiveLast30Days: Int! @default(value: "0")
+  playersActiveLast90Days: Int! @default(value: "0")
+  totalGamesPlayed: Int! @default(value: "0")
+  avgGamesPerPlayer: Float
+  avgNetBalancePerPlayer: Float
+  
+  # === FINANCIAL AGGREGATES ===
+  totalPlayerNetBalance: Float! @default(value: "0")
+  totalPlayerWinnings: Float! @default(value: "0")
+  totalPlayerBuyIns: Float! @default(value: "0")
+  totalCreditBalance: Float! @default(value: "0")
+  totalPointsBalance: Float! @default(value: "0")
+  
+  # === VENUE BREAKDOWN (as JSON) ===
+  venueBreakdown: AWSJSON
+  # [{ venueId, venueName, playerCount, activeCount, registrationCount }, ...]
+  
+  topVenuesByPlayers: AWSJSON
+  # [{ venueId, venueName, totalPlayers, activePlayers }, ...]
+  
+  topVenuesByRegistrations: AWSJSON
+  # [{ venueId, venueName, registrationCount }, ...]
+  
+  topPlayersByNetBalance: AWSJSON
+  # [{ playerId, name, netBalance, gamesPlayed }, ...]
+  
+  topPlayersByGamesPlayed: AWSJSON
+  # [{ playerId, name, gamesPlayed, netBalance }, ...]
+  
+  topPlayersByVenueCount: AWSJSON
+  # [{ playerId, name, venueCount, gamesPlayed }, ...]
+  # Players who have played at the most venues within this entity
+  
+  # === TRENDS ===
+  playerGrowthTrend: String  # "up", "down", "stable"
+  playerGrowthPercent: Float
+  activePlayerTrend: String
+  activePlayerPercent: Float
+  
+  # === METADATA ===
+  calculatedAt: AWSDateTime!
+  calculatedBy: String! @default(value: "SCHEDULED_LAMBDA")
+  calculationDurationMs: Int
+  
+  playersScanned: Int
+  venuesIncluded: Int
+  playerVenuesScanned: Int
+  
+  dateRangeStart: AWSDateTime
+  dateRangeEnd: AWSDateTime
+  
+  # === AUDIT ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# VENUE PLAYER METRICS (Per-venue player statistics)
+# ===================================================================
+# ID Format: {venueId}_{timeRange}
+# Example: "xyz789_ALL", "xyz789_12M"
+# ===================================================================
+
+type VenuePlayerMetrics
+  @model(subscriptions: null)
+  @auth(rules: [{ allow: private }]) {
+  
+  # === PRIMARY KEY ===
+  id: ID!  # Format: "{venueId}_{timeRange}"
+  
+  # === COMPOSITE KEYS ===
+  entityId: ID! @index(name: "byEntityVenuePlayerMetrics", sortKeyFields: ["venueName"])
+  
+  venueId: ID! @index(name: "byVenuePlayerMetrics", sortKeyFields: ["timeRange"])
+  venue: Venue @belongsTo(fields: ["venueId"])
+  
+  venueName: String!  # Denormalized for display
+  
+  # === DIMENSION ===
+  timeRange: String! @index(name: "byTimeRangeVenuePlayer", sortKeyFields: ["venueId"])
+  
+  # === TOTAL COUNTS ===
+  totalPlayers: Int! @default(value: "0")  # Players who have played here
+  registeredPlayers: Int! @default(value: "0")  # Players who registered here
+  
+  # === BY STATUS ===
+  activePlayerCount: Int! @default(value: "0")
+  suspendedPlayerCount: Int! @default(value: "0")
+  pendingVerificationPlayerCount: Int! @default(value: "0")
+  
+  # === BY CATEGORY ===
+  newPlayerCount: Int! @default(value: "0")
+  recreationalPlayerCount: Int! @default(value: "0")
+  regularPlayerCount: Int! @default(value: "0")
+  vipPlayerCount: Int! @default(value: "0")
+  lapsedPlayerCount: Int! @default(value: "0")
+  
+  # === BY TARGETING CLASSIFICATION (venue-specific) ===
+  activeELCount: Int! @default(value: "0")
+  activeCount: Int! @default(value: "0")
+  retain31to60Count: Int! @default(value: "0")
+  retain61to90Count: Int! @default(value: "0")
+  churned91to120Count: Int! @default(value: "0")
+  churned121to180Count: Int! @default(value: "0")
+  churned181to360Count: Int! @default(value: "0")
+  churned361PlusCount: Int! @default(value: "0")
+  
+  # === CROSS-VENUE METRICS (for players at THIS venue) ===
+  # Of the players who play here, how many also play elsewhere?
+  playersExclusiveToVenue: Int! @default(value: "0")   # Only play at this venue
+  playersSharedWithOtherVenues: Int! @default(value: "0")  # Also play at other venues
+  avgOtherVenuesPerPlayer: Float  # For players here, avg number of OTHER venues they play at
+  
+  # === REGISTRATION METRICS ===
+  registrationsAllTime: Int! @default(value: "0")
+  registrationsLast30Days: Int! @default(value: "0")
+  registrationsLast90Days: Int! @default(value: "0")
+  
+  # === ACTIVITY METRICS ===
+  playersActiveLast30Days: Int! @default(value: "0")
+  playersActiveLast90Days: Int! @default(value: "0")
+  totalGamesAtVenue: Int! @default(value: "0")
+  avgGamesPerPlayer: Float
+  avgNetBalancePerPlayer: Float
+  
+  # === FINANCIAL AGGREGATES ===
+  totalPlayerNetBalance: Float! @default(value: "0")
+  totalPlayerWinnings: Float! @default(value: "0")
+  totalPlayerBuyIns: Float! @default(value: "0")
+  
+  # === TOP LISTS (as JSON) ===
+  topPlayersByGamesPlayed: AWSJSON
+  # [{ playerId, name, gamesPlayed, netBalance }, ...]
+  
+  topPlayersByNetBalance: AWSJSON
+  # [{ playerId, name, netBalance, gamesPlayed }, ...]
+  
+  regularPlayers: AWSJSON
+  # [{ playerId, name, lastPlayed, totalGames }, ...]
+  
+  # === TRENDS ===
+  playerGrowthTrend: String
+  playerGrowthPercent: Float
+  registrationTrend: String
+  registrationTrendPercent: Float
+  
+  # === METADATA ===
+  calculatedAt: AWSDateTime!
+  calculatedBy: String! @default(value: "SCHEDULED_LAMBDA")
+  calculationDurationMs: Int
+  
+  playersScanned: Int
+  playerVenuesScanned: Int
+  
+  dateRangeStart: AWSDateTime
+  dateRangeEnd: AWSDateTime
+  
+  # === AUDIT ===
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ===================================================================
+# MUTATION INPUTS
+# ===================================================================
+
+input RefreshPlayerMetricsInput {
+  # Scope - leave all null for full global refresh
+  entityId: ID
+  venueId: ID
+  
+  # Time ranges to refresh (default: ALL, 12M, 6M, 3M, 1M)
+  timeRanges: [String]
+  
+  # Which metrics to calculate
+  includeGlobalMetrics: Boolean
+  includeEntityMetrics: Boolean
+  includeVenueMetrics: Boolean
+  
+  # Performance options
+  dryRun: Boolean
+  verbose: Boolean
+}
+
+# ===================================================================
+# MUTATION RESULTS
+# ===================================================================
+
+type RefreshPlayerMetricsResult {
+  success: Boolean!
+  message: String
+  
+  # Summary counts
+  globalMetricsUpdated: Int
+  entityMetricsUpdated: Int
+  venueMetricsUpdated: Int
+  
+  # Processing counts
+  totalPlayersScanned: Int
+  totalPlayerVenuesScanned: Int
+  entitiesProcessed: Int
+  venuesProcessed: Int
+  
+  # Performance
+  executionTimeMs: Int
+  peakMemoryMB: Float
+  
+  # Results breakdown
+  globalResults: [PlayerMetricsUpdateResult]
+  entityResults: [PlayerMetricsUpdateResult]
+  venueResults: [PlayerMetricsUpdateResult]
+  
+  # Errors
+  errors: [String]
+  warnings: [String]
+  
+  # Metadata
+  refreshedAt: AWSDateTime
+  refreshedBy: String
+}
+
+type PlayerMetricsUpdateResult {
+  id: ID
+  name: String
+  type: String  # "global", "entity", "venue"
+  timeRange: String
+  success: Boolean
+  playerCount: Int
+  error: String
+  durationMs: Int
+}
+
+# ===================================================================
+# CUSTOM MUTATIONS
+# ===================================================================
+
+extend type Mutation {
+  # Refresh all player metrics (or subset)
+  refreshPlayerMetrics(input: RefreshPlayerMetricsInput!): RefreshPlayerMetricsResult
+    @function(name: "refreshPlayerMetrics-${env}")
+  
+  # Quick refresh for single entity
+  refreshEntityPlayerMetrics(entityId: ID!, timeRanges: [String]): RefreshPlayerMetricsResult
+    @function(name: "refreshPlayerMetrics-${env}")
+  
+  # Quick refresh for single venue
+  refreshVenuePlayerMetrics(venueId: ID!, timeRanges: [String]): RefreshPlayerMetricsResult
+    @function(name: "refreshPlayerMetrics-${env}")
+}
+
+# ===================================================================
+# QUERY HELPERS
+# ===================================================================
+
+extend type Query {
+  # Get player metrics dashboard data
+  getPlayerMetricsDashboard(entityId: ID, timeRange: String): PlayerMetricsDashboard
+    @function(name: "refreshPlayerMetrics-${env}")
+}
+
+# ===================================================================
+# QUERY RESULT TYPES
+# ===================================================================
+
+type PlayerMetricsDashboard {
+  # Global overview (if no entityId specified)
+  globalMetrics: GlobalPlayerMetrics
+  
+  # Entity-specific metrics
+  entityMetrics: EntityPlayerMetrics
+  
+  # Venue breakdown for the entity
+  venueMetrics: [VenuePlayerMetrics]
+  
+  # Quick stats
+  totalPlayers: Int
+  activePlayers: Int
+  newPlayersThisMonth: Int
+  churnedPlayersThisMonth: Int
+  
+  # Cross-venue quick stats
+  playersMultiVenue: Int
+  playersMultiEntity: Int
+  
+  # Trends
+  playerGrowthTrend: String
+  churnRate: Float
+}

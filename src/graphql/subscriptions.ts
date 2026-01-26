@@ -596,6 +596,11 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -2097,6 +2102,100 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -2797,6 +2896,11 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -4298,6 +4402,100 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -5608,6 +5806,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -7005,6 +7208,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             __typename
           }
           tournamentSeriesMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -8427,6 +8635,70 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           startedAt
           __typename
         }
+        playerMetrics {
+          items {
+            id
+            entityId
+            venueId
+            venueName
+            timeRange
+            totalPlayers
+            registeredPlayers
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            playersExclusiveToVenue
+            playersSharedWithOtherVenues
+            avgOtherVenuesPerPlayer
+            registrationsAllTime
+            registrationsLast30Days
+            registrationsLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesAtVenue
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            topPlayersByGamesPlayed
+            topPlayersByNetBalance
+            regularPlayers
+            playerGrowthTrend
+            playerGrowthPercent
+            registrationTrend
+            registrationTrendPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            playerVenuesScanned
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         socialAccounts {
           items {
             id
@@ -8549,6 +8821,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -8645,6 +8922,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             __typename
           }
           tournamentSeriesMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -8757,6 +9039,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -14174,6 +14461,79 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           startedAt
           __typename
         }
+        playerMetrics {
+          items {
+            id
+            entityId
+            entityName
+            timeRange
+            totalPlayers
+            totalVenues
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            notPlayedCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            venuePlayDistribution
+            playersMultiVenue
+            playersSingleVenue
+            avgVenuesPerPlayer
+            playersSharedWithOtherEntities
+            playersExclusiveToEntity
+            playersRegisteredAllTime
+            playersRegisteredLast30Days
+            playersRegisteredLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesPlayed
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            totalCreditBalance
+            totalPointsBalance
+            venueBreakdown
+            topVenuesByPlayers
+            topVenuesByRegistrations
+            topPlayersByNetBalance
+            topPlayersByGamesPlayed
+            topPlayersByVenueCount
+            playerGrowthTrend
+            playerGrowthPercent
+            activePlayerTrend
+            activePlayerPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            venuesIncluded
+            playerVenuesScanned
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         socialAccounts {
           items {
             id
@@ -14310,6 +14670,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -14391,6 +14756,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -15082,6 +15452,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -16598,6 +16973,100 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         startedAt
         __typename
       }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       socialAccounts {
         items {
           id
@@ -16798,6 +17267,11 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -18338,6 +18812,96 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
         startedAt
         __typename
       }
+      playerMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          venueName
+          timeRange
+          totalPlayers
+          registeredPlayers
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          playersExclusiveToVenue
+          playersSharedWithOtherVenues
+          avgOtherVenuesPerPlayer
+          registrationsAllTime
+          registrationsLast30Days
+          registrationsLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesAtVenue
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          topPlayersByGamesPlayed
+          topPlayersByNetBalance
+          regularPlayers
+          playerGrowthTrend
+          playerGrowthPercent
+          registrationTrend
+          registrationTrendPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       socialAccounts {
         items {
           id
@@ -19195,6 +19759,79 @@ export const onActiveGameChange = /* GraphQL */ `subscription OnActiveGameChange
           startedAt
           __typename
         }
+        playerMetrics {
+          items {
+            id
+            entityId
+            entityName
+            timeRange
+            totalPlayers
+            totalVenues
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            notPlayedCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            venuePlayDistribution
+            playersMultiVenue
+            playersSingleVenue
+            avgVenuesPerPlayer
+            playersSharedWithOtherEntities
+            playersExclusiveToEntity
+            playersRegisteredAllTime
+            playersRegisteredLast30Days
+            playersRegisteredLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesPlayed
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            totalCreditBalance
+            totalPointsBalance
+            venueBreakdown
+            topVenuesByPlayers
+            topVenuesByRegistrations
+            topPlayersByNetBalance
+            topPlayersByGamesPlayed
+            topPlayersByVenueCount
+            playerGrowthTrend
+            playerGrowthPercent
+            activePlayerTrend
+            activePlayerPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            venuesIncluded
+            playerVenuesScanned
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         socialAccounts {
           items {
             id
@@ -19637,6 +20274,11 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -21142,6 +21784,100 @@ export const onDashboardCacheUpdate = /* GraphQL */ `subscription OnDashboardCac
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -22359,6 +23095,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -23756,6 +24497,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             __typename
           }
           tournamentSeriesMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -25178,6 +25924,70 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           startedAt
           __typename
         }
+        playerMetrics {
+          items {
+            id
+            entityId
+            venueId
+            venueName
+            timeRange
+            totalPlayers
+            registeredPlayers
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            playersExclusiveToVenue
+            playersSharedWithOtherVenues
+            avgOtherVenuesPerPlayer
+            registrationsAllTime
+            registrationsLast30Days
+            registrationsLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesAtVenue
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            topPlayersByGamesPlayed
+            topPlayersByNetBalance
+            regularPlayers
+            playerGrowthTrend
+            playerGrowthPercent
+            registrationTrend
+            registrationTrendPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            playerVenuesScanned
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         socialAccounts {
           items {
             id
@@ -25300,6 +26110,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -25396,6 +26211,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             __typename
           }
           tournamentSeriesMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -25508,6 +26328,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -30925,6 +31750,79 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
           startedAt
           __typename
         }
+        playerMetrics {
+          items {
+            id
+            entityId
+            entityName
+            timeRange
+            totalPlayers
+            totalVenues
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            notPlayedCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            venuePlayDistribution
+            playersMultiVenue
+            playersSingleVenue
+            avgVenuesPerPlayer
+            playersSharedWithOtherEntities
+            playersExclusiveToEntity
+            playersRegisteredAllTime
+            playersRegisteredLast30Days
+            playersRegisteredLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesPlayed
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            totalCreditBalance
+            totalPointsBalance
+            venueBreakdown
+            topVenuesByPlayers
+            topVenuesByRegistrations
+            topPlayersByNetBalance
+            topPlayersByGamesPlayed
+            topPlayersByVenueCount
+            playerGrowthTrend
+            playerGrowthPercent
+            activePlayerTrend
+            activePlayerPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            venuesIncluded
+            playerVenuesScanned
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         socialAccounts {
           items {
             id
@@ -31061,6 +31959,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -31142,6 +32045,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -31833,6 +32741,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -33349,6 +34262,100 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         startedAt
         __typename
       }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       socialAccounts {
         items {
           id
@@ -33549,6 +34556,11 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -35089,6 +36101,96 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
         startedAt
         __typename
       }
+      playerMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          venueName
+          timeRange
+          totalPlayers
+          registeredPlayers
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          playersExclusiveToVenue
+          playersSharedWithOtherVenues
+          avgOtherVenuesPerPlayer
+          registrationsAllTime
+          registrationsLast30Days
+          registrationsLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesAtVenue
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          topPlayersByGamesPlayed
+          topPlayersByNetBalance
+          regularPlayers
+          playerGrowthTrend
+          playerGrowthPercent
+          registrationTrend
+          registrationTrendPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       socialAccounts {
         items {
           id
@@ -35933,6 +37035,79 @@ export const onCreateActiveGame = /* GraphQL */ `subscription OnCreateActiveGame
             calculationDurationMs
             snapshotsIncluded
             parentSnapshotsIncluded
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMetrics {
+          items {
+            id
+            entityId
+            entityName
+            timeRange
+            totalPlayers
+            totalVenues
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            notPlayedCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            venuePlayDistribution
+            playersMultiVenue
+            playersSingleVenue
+            avgVenuesPerPlayer
+            playersSharedWithOtherEntities
+            playersExclusiveToEntity
+            playersRegisteredAllTime
+            playersRegisteredLast30Days
+            playersRegisteredLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesPlayed
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            totalCreditBalance
+            totalPointsBalance
+            venueBreakdown
+            topVenuesByPlayers
+            topVenuesByRegistrations
+            topPlayersByNetBalance
+            topPlayersByGamesPlayed
+            topPlayersByVenueCount
+            playerGrowthTrend
+            playerGrowthPercent
+            activePlayerTrend
+            activePlayerPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            venuesIncluded
+            playerVenuesScanned
             dateRangeStart
             dateRangeEnd
             createdAt
@@ -37125,6 +38300,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -38522,6 +39702,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             __typename
           }
           tournamentSeriesMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -39944,6 +41129,70 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           startedAt
           __typename
         }
+        playerMetrics {
+          items {
+            id
+            entityId
+            venueId
+            venueName
+            timeRange
+            totalPlayers
+            registeredPlayers
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            playersExclusiveToVenue
+            playersSharedWithOtherVenues
+            avgOtherVenuesPerPlayer
+            registrationsAllTime
+            registrationsLast30Days
+            registrationsLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesAtVenue
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            topPlayersByGamesPlayed
+            topPlayersByNetBalance
+            regularPlayers
+            playerGrowthTrend
+            playerGrowthPercent
+            registrationTrend
+            registrationTrendPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            playerVenuesScanned
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         socialAccounts {
           items {
             id
@@ -40066,6 +41315,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -40162,6 +41416,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             __typename
           }
           tournamentSeriesMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -40274,6 +41533,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -45691,6 +46955,79 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
           startedAt
           __typename
         }
+        playerMetrics {
+          items {
+            id
+            entityId
+            entityName
+            timeRange
+            totalPlayers
+            totalVenues
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            notPlayedCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            venuePlayDistribution
+            playersMultiVenue
+            playersSingleVenue
+            avgVenuesPerPlayer
+            playersSharedWithOtherEntities
+            playersExclusiveToEntity
+            playersRegisteredAllTime
+            playersRegisteredLast30Days
+            playersRegisteredLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesPlayed
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            totalCreditBalance
+            totalPointsBalance
+            venueBreakdown
+            topVenuesByPlayers
+            topVenuesByRegistrations
+            topPlayersByNetBalance
+            topPlayersByGamesPlayed
+            topPlayersByVenueCount
+            playerGrowthTrend
+            playerGrowthPercent
+            activePlayerTrend
+            activePlayerPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            venuesIncluded
+            playerVenuesScanned
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         socialAccounts {
           items {
             id
@@ -45827,6 +47164,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -45908,6 +47250,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -46599,6 +47946,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -48115,6 +49467,100 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         startedAt
         __typename
       }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       socialAccounts {
         items {
           id
@@ -48315,6 +49761,11 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -49855,6 +51306,96 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
         startedAt
         __typename
       }
+      playerMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          venueName
+          timeRange
+          totalPlayers
+          registeredPlayers
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          playersExclusiveToVenue
+          playersSharedWithOtherVenues
+          avgOtherVenuesPerPlayer
+          registrationsAllTime
+          registrationsLast30Days
+          registrationsLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesAtVenue
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          topPlayersByGamesPlayed
+          topPlayersByNetBalance
+          regularPlayers
+          playerGrowthTrend
+          playerGrowthPercent
+          registrationTrend
+          registrationTrendPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       socialAccounts {
         items {
           id
@@ -50699,6 +52240,79 @@ export const onUpdateActiveGame = /* GraphQL */ `subscription OnUpdateActiveGame
             calculationDurationMs
             snapshotsIncluded
             parentSnapshotsIncluded
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMetrics {
+          items {
+            id
+            entityId
+            entityName
+            timeRange
+            totalPlayers
+            totalVenues
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            notPlayedCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            venuePlayDistribution
+            playersMultiVenue
+            playersSingleVenue
+            avgVenuesPerPlayer
+            playersSharedWithOtherEntities
+            playersExclusiveToEntity
+            playersRegisteredAllTime
+            playersRegisteredLast30Days
+            playersRegisteredLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesPlayed
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            totalCreditBalance
+            totalPointsBalance
+            venueBreakdown
+            topVenuesByPlayers
+            topVenuesByRegistrations
+            topPlayersByNetBalance
+            topPlayersByGamesPlayed
+            topPlayersByVenueCount
+            playerGrowthTrend
+            playerGrowthPercent
+            activePlayerTrend
+            activePlayerPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            venuesIncluded
+            playerVenuesScanned
             dateRangeStart
             dateRangeEnd
             createdAt
@@ -51891,6 +53505,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -53288,6 +54907,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             __typename
           }
           tournamentSeriesMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -54710,6 +56334,70 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           startedAt
           __typename
         }
+        playerMetrics {
+          items {
+            id
+            entityId
+            venueId
+            venueName
+            timeRange
+            totalPlayers
+            registeredPlayers
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            playersExclusiveToVenue
+            playersSharedWithOtherVenues
+            avgOtherVenuesPerPlayer
+            registrationsAllTime
+            registrationsLast30Days
+            registrationsLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesAtVenue
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            topPlayersByGamesPlayed
+            topPlayersByNetBalance
+            regularPlayers
+            playerGrowthTrend
+            playerGrowthPercent
+            registrationTrend
+            registrationTrendPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            playerVenuesScanned
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         socialAccounts {
           items {
             id
@@ -54832,6 +56520,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -54928,6 +56621,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             __typename
           }
           tournamentSeriesMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -55040,6 +56738,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -60457,6 +62160,79 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           startedAt
           __typename
         }
+        playerMetrics {
+          items {
+            id
+            entityId
+            entityName
+            timeRange
+            totalPlayers
+            totalVenues
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            notPlayedCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            venuePlayDistribution
+            playersMultiVenue
+            playersSingleVenue
+            avgVenuesPerPlayer
+            playersSharedWithOtherEntities
+            playersExclusiveToEntity
+            playersRegisteredAllTime
+            playersRegisteredLast30Days
+            playersRegisteredLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesPlayed
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            totalCreditBalance
+            totalPointsBalance
+            venueBreakdown
+            topVenuesByPlayers
+            topVenuesByRegistrations
+            topPlayersByNetBalance
+            topPlayersByGamesPlayed
+            topPlayersByVenueCount
+            playerGrowthTrend
+            playerGrowthPercent
+            activePlayerTrend
+            activePlayerPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            venuesIncluded
+            playerVenuesScanned
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         socialAccounts {
           items {
             id
@@ -60593,6 +62369,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -60674,6 +62455,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -61365,6 +63151,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -62881,6 +64672,100 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         startedAt
         __typename
       }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       socialAccounts {
         items {
           id
@@ -63081,6 +64966,11 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -64621,6 +66511,96 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
         startedAt
         __typename
       }
+      playerMetrics {
+        items {
+          id
+          entityId
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            fee
+            isSpecial
+            logo
+            gameCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            canonicalVenueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          venueName
+          timeRange
+          totalPlayers
+          registeredPlayers
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          playersExclusiveToVenue
+          playersSharedWithOtherVenues
+          avgOtherVenuesPerPlayer
+          registrationsAllTime
+          registrationsLast30Days
+          registrationsLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesAtVenue
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          topPlayersByGamesPlayed
+          topPlayersByNetBalance
+          regularPlayers
+          playerGrowthTrend
+          playerGrowthPercent
+          registrationTrend
+          registrationTrendPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       socialAccounts {
         items {
           id
@@ -65478,6 +67458,79 @@ export const onDeleteActiveGame = /* GraphQL */ `subscription OnDeleteActiveGame
           startedAt
           __typename
         }
+        playerMetrics {
+          items {
+            id
+            entityId
+            entityName
+            timeRange
+            totalPlayers
+            totalVenues
+            activePlayerCount
+            suspendedPlayerCount
+            pendingVerificationPlayerCount
+            newPlayerCount
+            recreationalPlayerCount
+            regularPlayerCount
+            vipPlayerCount
+            lapsedPlayerCount
+            notPlayedCount
+            activeELCount
+            activeCount
+            retain31to60Count
+            retain61to90Count
+            churned91to120Count
+            churned121to180Count
+            churned181to360Count
+            churned361PlusCount
+            venuePlayDistribution
+            playersMultiVenue
+            playersSingleVenue
+            avgVenuesPerPlayer
+            playersSharedWithOtherEntities
+            playersExclusiveToEntity
+            playersRegisteredAllTime
+            playersRegisteredLast30Days
+            playersRegisteredLast90Days
+            playersActiveLast30Days
+            playersActiveLast90Days
+            totalGamesPlayed
+            avgGamesPerPlayer
+            avgNetBalancePerPlayer
+            totalPlayerNetBalance
+            totalPlayerWinnings
+            totalPlayerBuyIns
+            totalCreditBalance
+            totalPointsBalance
+            venueBreakdown
+            topVenuesByPlayers
+            topVenuesByRegistrations
+            topPlayersByNetBalance
+            topPlayersByGamesPlayed
+            topPlayersByVenueCount
+            playerGrowthTrend
+            playerGrowthPercent
+            activePlayerTrend
+            activePlayerPercent
+            calculatedAt
+            calculatedBy
+            calculationDurationMs
+            playersScanned
+            venuesIncluded
+            playerVenuesScanned
+            dateRangeStart
+            dateRangeEnd
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         socialAccounts {
           items {
             id
@@ -65922,6 +67975,11 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             __typename
           }
           recurringGameMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMetrics {
             nextToken
             startedAt
             __typename
@@ -67427,6 +69485,100 @@ export const onCreateDashboardCache = /* GraphQL */ `subscription OnCreateDashbo
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -67913,6 +70065,11 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -69414,6 +71571,100 @@ export const onUpdateDashboardCache = /* GraphQL */ `subscription OnUpdateDashbo
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -69900,6 +72151,11 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -71401,6 +73657,100 @@ export const onDeleteDashboardCache = /* GraphQL */ `subscription OnDeleteDashbo
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -72143,6 +74493,11 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -73644,6 +75999,100 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -74366,6 +76815,11 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -75867,6 +78321,100 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -76589,6 +79137,11 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -78090,6 +80643,100 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -78790,6 +81437,11 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -80291,6 +82943,100 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -81004,6 +83750,11 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -82505,6 +85256,100 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version
@@ -83218,6 +86063,11 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             startedAt
             __typename
           }
+          playerMetrics {
+            nextToken
+            startedAt
+            __typename
+          }
           socialAccounts {
             nextToken
             startedAt
@@ -84719,6 +87569,100 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             _lastChangedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMetrics {
+        items {
+          id
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            defaultVenueId
+            createdAt
+            updatedAt
+            gameCount
+            venueCount
+            lastGameAddedAt
+            lastDataRefreshedAt
+            seriesGameCount
+            lastSeriesGameAddedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          entityName
+          timeRange
+          totalPlayers
+          totalVenues
+          activePlayerCount
+          suspendedPlayerCount
+          pendingVerificationPlayerCount
+          newPlayerCount
+          recreationalPlayerCount
+          regularPlayerCount
+          vipPlayerCount
+          lapsedPlayerCount
+          notPlayedCount
+          activeELCount
+          activeCount
+          retain31to60Count
+          retain61to90Count
+          churned91to120Count
+          churned121to180Count
+          churned181to360Count
+          churned361PlusCount
+          venuePlayDistribution
+          playersMultiVenue
+          playersSingleVenue
+          avgVenuesPerPlayer
+          playersSharedWithOtherEntities
+          playersExclusiveToEntity
+          playersRegisteredAllTime
+          playersRegisteredLast30Days
+          playersRegisteredLast90Days
+          playersActiveLast30Days
+          playersActiveLast90Days
+          totalGamesPlayed
+          avgGamesPerPlayer
+          avgNetBalancePerPlayer
+          totalPlayerNetBalance
+          totalPlayerWinnings
+          totalPlayerBuyIns
+          totalCreditBalance
+          totalPointsBalance
+          venueBreakdown
+          topVenuesByPlayers
+          topVenuesByRegistrations
+          topPlayersByNetBalance
+          topPlayersByGamesPlayed
+          topPlayersByVenueCount
+          playerGrowthTrend
+          playerGrowthPercent
+          activePlayerTrend
+          activePlayerPercent
+          calculatedAt
+          calculatedBy
+          calculationDurationMs
+          playersScanned
+          venuesIncluded
+          playerVenuesScanned
+          dateRangeStart
+          dateRangeEnd
           createdAt
           updatedAt
           _version

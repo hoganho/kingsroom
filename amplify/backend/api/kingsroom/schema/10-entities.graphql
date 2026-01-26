@@ -37,6 +37,7 @@ type Entity @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   venueMetrics: [VenueMetrics] @hasMany(indexName: "byEntityVenueMetrics", fields: ["id"])
   recurringGameMetrics: [RecurringGameMetrics] @hasMany(indexName: "byEntityRecurringGameMetrics", fields: ["id"])
   tournamentSeriesMetrics: [TournamentSeriesMetrics] @hasMany(indexName: "byEntityTournamentSeriesMetrics", fields: ["id"])
+  playerMetrics: [EntityPlayerMetrics] @hasMany(indexName: "byEntityPlayerMetrics", fields: ["id"])
 
   # Social Pulse Relationships
   socialAccounts: [SocialAccount] @hasMany(indexName: "bySocialAccountEntity", fields: ["id"])

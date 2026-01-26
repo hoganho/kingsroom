@@ -41,6 +41,7 @@ type Venue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   # Metrics relationships
   venueMetrics: [VenueMetrics] @hasMany(indexName: "byVenueMetrics", fields: ["id"])
   recurringGameMetrics: [RecurringGameMetrics] @hasMany(indexName: "byVenueRecurringGameMetrics", fields: ["id"])
+  playerMetrics: [VenuePlayerMetrics] @hasMany(indexName: "byVenuePlayerMetrics", fields: ["id"])
 
   # Social Pulse Relationships
   socialAccounts: [SocialAccount] @hasMany(indexName: "bySocialAccountVenue", fields: ["id"])

@@ -3233,6 +3233,110 @@ export declare type PlayerTicketConnection = LazyLoading extends LazyLoadingDisa
 
 export declare const PlayerTicketConnection: (new (init: ModelInit<PlayerTicketConnection>) => PlayerTicketConnection)
 
+type EagerRefreshPlayerMetricsResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly globalMetricsUpdated?: number | null;
+  readonly entityMetricsUpdated?: number | null;
+  readonly venueMetricsUpdated?: number | null;
+  readonly totalPlayersScanned?: number | null;
+  readonly totalPlayerVenuesScanned?: number | null;
+  readonly entitiesProcessed?: number | null;
+  readonly venuesProcessed?: number | null;
+  readonly executionTimeMs?: number | null;
+  readonly peakMemoryMB?: number | null;
+  readonly globalResults?: (PlayerMetricsUpdateResult | null)[] | null;
+  readonly entityResults?: (PlayerMetricsUpdateResult | null)[] | null;
+  readonly venueResults?: (PlayerMetricsUpdateResult | null)[] | null;
+  readonly errors?: (string | null)[] | null;
+  readonly warnings?: (string | null)[] | null;
+  readonly refreshedAt?: string | null;
+  readonly refreshedBy?: string | null;
+}
+
+type LazyRefreshPlayerMetricsResult = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly globalMetricsUpdated?: number | null;
+  readonly entityMetricsUpdated?: number | null;
+  readonly venueMetricsUpdated?: number | null;
+  readonly totalPlayersScanned?: number | null;
+  readonly totalPlayerVenuesScanned?: number | null;
+  readonly entitiesProcessed?: number | null;
+  readonly venuesProcessed?: number | null;
+  readonly executionTimeMs?: number | null;
+  readonly peakMemoryMB?: number | null;
+  readonly globalResults?: (PlayerMetricsUpdateResult | null)[] | null;
+  readonly entityResults?: (PlayerMetricsUpdateResult | null)[] | null;
+  readonly venueResults?: (PlayerMetricsUpdateResult | null)[] | null;
+  readonly errors?: (string | null)[] | null;
+  readonly warnings?: (string | null)[] | null;
+  readonly refreshedAt?: string | null;
+  readonly refreshedBy?: string | null;
+}
+
+export declare type RefreshPlayerMetricsResult = LazyLoading extends LazyLoadingDisabled ? EagerRefreshPlayerMetricsResult : LazyRefreshPlayerMetricsResult
+
+export declare const RefreshPlayerMetricsResult: (new (init: ModelInit<RefreshPlayerMetricsResult>) => RefreshPlayerMetricsResult)
+
+type EagerPlayerMetricsUpdateResult = {
+  readonly id?: string | null;
+  readonly name?: string | null;
+  readonly type?: string | null;
+  readonly timeRange?: string | null;
+  readonly success?: boolean | null;
+  readonly playerCount?: number | null;
+  readonly error?: string | null;
+  readonly durationMs?: number | null;
+}
+
+type LazyPlayerMetricsUpdateResult = {
+  readonly id?: string | null;
+  readonly name?: string | null;
+  readonly type?: string | null;
+  readonly timeRange?: string | null;
+  readonly success?: boolean | null;
+  readonly playerCount?: number | null;
+  readonly error?: string | null;
+  readonly durationMs?: number | null;
+}
+
+export declare type PlayerMetricsUpdateResult = LazyLoading extends LazyLoadingDisabled ? EagerPlayerMetricsUpdateResult : LazyPlayerMetricsUpdateResult
+
+export declare const PlayerMetricsUpdateResult: (new (init: ModelInit<PlayerMetricsUpdateResult>) => PlayerMetricsUpdateResult)
+
+type EagerPlayerMetricsDashboard = {
+  readonly globalMetrics?: GlobalPlayerMetrics | null;
+  readonly entityMetrics?: EntityPlayerMetrics | null;
+  readonly venueMetrics?: (VenuePlayerMetrics | null)[] | null;
+  readonly totalPlayers?: number | null;
+  readonly activePlayers?: number | null;
+  readonly newPlayersThisMonth?: number | null;
+  readonly churnedPlayersThisMonth?: number | null;
+  readonly playersMultiVenue?: number | null;
+  readonly playersMultiEntity?: number | null;
+  readonly playerGrowthTrend?: string | null;
+  readonly churnRate?: number | null;
+}
+
+type LazyPlayerMetricsDashboard = {
+  readonly globalMetrics: AsyncItem<GlobalPlayerMetrics | undefined>;
+  readonly entityMetrics: AsyncItem<EntityPlayerMetrics | undefined>;
+  readonly venueMetrics: AsyncCollection<VenuePlayerMetrics>;
+  readonly totalPlayers?: number | null;
+  readonly activePlayers?: number | null;
+  readonly newPlayersThisMonth?: number | null;
+  readonly churnedPlayersThisMonth?: number | null;
+  readonly playersMultiVenue?: number | null;
+  readonly playersMultiEntity?: number | null;
+  readonly playerGrowthTrend?: string | null;
+  readonly churnRate?: number | null;
+}
+
+export declare type PlayerMetricsDashboard = LazyLoading extends LazyLoadingDisabled ? EagerPlayerMetricsDashboard : LazyPlayerMetricsDashboard
+
+export declare const PlayerMetricsDashboard: (new (init: ModelInit<PlayerMetricsDashboard>) => PlayerMetricsDashboard)
+
 type EagerRefreshAllMetricsResult = {
   readonly success: boolean;
   readonly message?: string | null;
@@ -5992,6 +6096,7 @@ type EagerEntity = {
   readonly venueMetrics?: (VenueMetrics | null)[] | null;
   readonly recurringGameMetrics?: (RecurringGameMetrics | null)[] | null;
   readonly tournamentSeriesMetrics?: (TournamentSeriesMetrics | null)[] | null;
+  readonly playerMetrics?: (EntityPlayerMetrics | null)[] | null;
   readonly socialAccounts?: (SocialAccount | null)[] | null;
 }
 
@@ -6026,6 +6131,7 @@ type LazyEntity = {
   readonly venueMetrics: AsyncCollection<VenueMetrics>;
   readonly recurringGameMetrics: AsyncCollection<RecurringGameMetrics>;
   readonly tournamentSeriesMetrics: AsyncCollection<TournamentSeriesMetrics>;
+  readonly playerMetrics: AsyncCollection<EntityPlayerMetrics>;
   readonly socialAccounts: AsyncCollection<SocialAccount>;
 }
 
@@ -6121,6 +6227,7 @@ type EagerVenue = {
   readonly recurringGames?: (RecurringGame | null)[] | null;
   readonly venueMetrics?: (VenueMetrics | null)[] | null;
   readonly recurringGameMetrics?: (RecurringGameMetrics | null)[] | null;
+  readonly playerMetrics?: (VenuePlayerMetrics | null)[] | null;
   readonly socialAccounts?: (SocialAccount | null)[] | null;
   readonly entityId?: string | null;
   readonly entity?: Entity | null;
@@ -6159,6 +6266,7 @@ type LazyVenue = {
   readonly recurringGames: AsyncCollection<RecurringGame>;
   readonly venueMetrics: AsyncCollection<VenueMetrics>;
   readonly recurringGameMetrics: AsyncCollection<RecurringGameMetrics>;
+  readonly playerMetrics: AsyncCollection<VenuePlayerMetrics>;
   readonly socialAccounts: AsyncCollection<SocialAccount>;
   readonly entityId?: string | null;
   readonly entity: AsyncItem<Entity | undefined>;
@@ -8055,6 +8163,412 @@ export declare type PlayerMarketingPreferences = LazyLoading extends LazyLoading
 
 export declare const PlayerMarketingPreferences: (new (init: ModelInit<PlayerMarketingPreferences>) => PlayerMarketingPreferences) & {
   copyOf(source: PlayerMarketingPreferences, mutator: (draft: MutableModel<PlayerMarketingPreferences>) => MutableModel<PlayerMarketingPreferences> | void): PlayerMarketingPreferences;
+}
+
+type EagerGlobalPlayerMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<GlobalPlayerMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly timeRange: string;
+  readonly totalPlayers: number;
+  readonly totalEntities: number;
+  readonly totalVenues: number;
+  readonly activePlayerCount: number;
+  readonly suspendedPlayerCount: number;
+  readonly pendingVerificationPlayerCount: number;
+  readonly newPlayerCount: number;
+  readonly recreationalPlayerCount: number;
+  readonly regularPlayerCount: number;
+  readonly vipPlayerCount: number;
+  readonly lapsedPlayerCount: number;
+  readonly notPlayedCount: number;
+  readonly activeELCount: number;
+  readonly activeCount: number;
+  readonly retain31to60Count: number;
+  readonly retain61to90Count: number;
+  readonly churned91to120Count: number;
+  readonly churned121to180Count: number;
+  readonly churned181to360Count: number;
+  readonly churned361PlusCount: number;
+  readonly venuePlayDistribution?: string | null;
+  readonly entityPlayDistribution?: string | null;
+  readonly playersMultiVenue: number;
+  readonly playersMultiEntity: number;
+  readonly playersSingleVenue: number;
+  readonly playersSingleEntity: number;
+  readonly avgVenuesPerPlayer?: number | null;
+  readonly avgEntitiesPerPlayer?: number | null;
+  readonly maxVenuesPlayed?: number | null;
+  readonly maxEntitiesPlayed?: number | null;
+  readonly playersRegisteredLast30Days: number;
+  readonly playersRegisteredLast90Days: number;
+  readonly playersRegisteredLast365Days: number;
+  readonly playersActiveLast30Days: number;
+  readonly playersActiveLast90Days: number;
+  readonly avgGamesPerPlayer?: number | null;
+  readonly avgNetBalancePerPlayer?: number | null;
+  readonly totalPlayerNetBalance: number;
+  readonly totalPlayerWinnings: number;
+  readonly totalPlayerBuyIns: number;
+  readonly totalCreditBalance: number;
+  readonly totalPointsBalance: number;
+  readonly topEntitiesByPlayers?: string | null;
+  readonly topVenuesByRegistrations?: string | null;
+  readonly topPlayersByNetBalance?: string | null;
+  readonly topPlayersByVenueCount?: string | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy: string;
+  readonly calculationDurationMs?: number | null;
+  readonly playersScanned?: number | null;
+  readonly playerVenuesScanned?: number | null;
+  readonly entitiesIncluded?: number | null;
+  readonly venuesIncluded?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyGlobalPlayerMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<GlobalPlayerMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly timeRange: string;
+  readonly totalPlayers: number;
+  readonly totalEntities: number;
+  readonly totalVenues: number;
+  readonly activePlayerCount: number;
+  readonly suspendedPlayerCount: number;
+  readonly pendingVerificationPlayerCount: number;
+  readonly newPlayerCount: number;
+  readonly recreationalPlayerCount: number;
+  readonly regularPlayerCount: number;
+  readonly vipPlayerCount: number;
+  readonly lapsedPlayerCount: number;
+  readonly notPlayedCount: number;
+  readonly activeELCount: number;
+  readonly activeCount: number;
+  readonly retain31to60Count: number;
+  readonly retain61to90Count: number;
+  readonly churned91to120Count: number;
+  readonly churned121to180Count: number;
+  readonly churned181to360Count: number;
+  readonly churned361PlusCount: number;
+  readonly venuePlayDistribution?: string | null;
+  readonly entityPlayDistribution?: string | null;
+  readonly playersMultiVenue: number;
+  readonly playersMultiEntity: number;
+  readonly playersSingleVenue: number;
+  readonly playersSingleEntity: number;
+  readonly avgVenuesPerPlayer?: number | null;
+  readonly avgEntitiesPerPlayer?: number | null;
+  readonly maxVenuesPlayed?: number | null;
+  readonly maxEntitiesPlayed?: number | null;
+  readonly playersRegisteredLast30Days: number;
+  readonly playersRegisteredLast90Days: number;
+  readonly playersRegisteredLast365Days: number;
+  readonly playersActiveLast30Days: number;
+  readonly playersActiveLast90Days: number;
+  readonly avgGamesPerPlayer?: number | null;
+  readonly avgNetBalancePerPlayer?: number | null;
+  readonly totalPlayerNetBalance: number;
+  readonly totalPlayerWinnings: number;
+  readonly totalPlayerBuyIns: number;
+  readonly totalCreditBalance: number;
+  readonly totalPointsBalance: number;
+  readonly topEntitiesByPlayers?: string | null;
+  readonly topVenuesByRegistrations?: string | null;
+  readonly topPlayersByNetBalance?: string | null;
+  readonly topPlayersByVenueCount?: string | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy: string;
+  readonly calculationDurationMs?: number | null;
+  readonly playersScanned?: number | null;
+  readonly playerVenuesScanned?: number | null;
+  readonly entitiesIncluded?: number | null;
+  readonly venuesIncluded?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type GlobalPlayerMetrics = LazyLoading extends LazyLoadingDisabled ? EagerGlobalPlayerMetrics : LazyGlobalPlayerMetrics
+
+export declare const GlobalPlayerMetrics: (new (init: ModelInit<GlobalPlayerMetrics>) => GlobalPlayerMetrics) & {
+  copyOf(source: GlobalPlayerMetrics, mutator: (draft: MutableModel<GlobalPlayerMetrics>) => MutableModel<GlobalPlayerMetrics> | void): GlobalPlayerMetrics;
+}
+
+type EagerEntityPlayerMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<EntityPlayerMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly entity?: Entity | null;
+  readonly entityName: string;
+  readonly timeRange: string;
+  readonly totalPlayers: number;
+  readonly totalVenues: number;
+  readonly activePlayerCount: number;
+  readonly suspendedPlayerCount: number;
+  readonly pendingVerificationPlayerCount: number;
+  readonly newPlayerCount: number;
+  readonly recreationalPlayerCount: number;
+  readonly regularPlayerCount: number;
+  readonly vipPlayerCount: number;
+  readonly lapsedPlayerCount: number;
+  readonly notPlayedCount: number;
+  readonly activeELCount: number;
+  readonly activeCount: number;
+  readonly retain31to60Count: number;
+  readonly retain61to90Count: number;
+  readonly churned91to120Count: number;
+  readonly churned121to180Count: number;
+  readonly churned181to360Count: number;
+  readonly churned361PlusCount: number;
+  readonly venuePlayDistribution?: string | null;
+  readonly playersMultiVenue: number;
+  readonly playersSingleVenue: number;
+  readonly avgVenuesPerPlayer?: number | null;
+  readonly playersSharedWithOtherEntities: number;
+  readonly playersExclusiveToEntity: number;
+  readonly playersRegisteredAllTime: number;
+  readonly playersRegisteredLast30Days: number;
+  readonly playersRegisteredLast90Days: number;
+  readonly playersActiveLast30Days: number;
+  readonly playersActiveLast90Days: number;
+  readonly totalGamesPlayed: number;
+  readonly avgGamesPerPlayer?: number | null;
+  readonly avgNetBalancePerPlayer?: number | null;
+  readonly totalPlayerNetBalance: number;
+  readonly totalPlayerWinnings: number;
+  readonly totalPlayerBuyIns: number;
+  readonly totalCreditBalance: number;
+  readonly totalPointsBalance: number;
+  readonly venueBreakdown?: string | null;
+  readonly topVenuesByPlayers?: string | null;
+  readonly topVenuesByRegistrations?: string | null;
+  readonly topPlayersByNetBalance?: string | null;
+  readonly topPlayersByGamesPlayed?: string | null;
+  readonly topPlayersByVenueCount?: string | null;
+  readonly playerGrowthTrend?: string | null;
+  readonly playerGrowthPercent?: number | null;
+  readonly activePlayerTrend?: string | null;
+  readonly activePlayerPercent?: number | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy: string;
+  readonly calculationDurationMs?: number | null;
+  readonly playersScanned?: number | null;
+  readonly venuesIncluded?: number | null;
+  readonly playerVenuesScanned?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyEntityPlayerMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<EntityPlayerMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly entity: AsyncItem<Entity | undefined>;
+  readonly entityName: string;
+  readonly timeRange: string;
+  readonly totalPlayers: number;
+  readonly totalVenues: number;
+  readonly activePlayerCount: number;
+  readonly suspendedPlayerCount: number;
+  readonly pendingVerificationPlayerCount: number;
+  readonly newPlayerCount: number;
+  readonly recreationalPlayerCount: number;
+  readonly regularPlayerCount: number;
+  readonly vipPlayerCount: number;
+  readonly lapsedPlayerCount: number;
+  readonly notPlayedCount: number;
+  readonly activeELCount: number;
+  readonly activeCount: number;
+  readonly retain31to60Count: number;
+  readonly retain61to90Count: number;
+  readonly churned91to120Count: number;
+  readonly churned121to180Count: number;
+  readonly churned181to360Count: number;
+  readonly churned361PlusCount: number;
+  readonly venuePlayDistribution?: string | null;
+  readonly playersMultiVenue: number;
+  readonly playersSingleVenue: number;
+  readonly avgVenuesPerPlayer?: number | null;
+  readonly playersSharedWithOtherEntities: number;
+  readonly playersExclusiveToEntity: number;
+  readonly playersRegisteredAllTime: number;
+  readonly playersRegisteredLast30Days: number;
+  readonly playersRegisteredLast90Days: number;
+  readonly playersActiveLast30Days: number;
+  readonly playersActiveLast90Days: number;
+  readonly totalGamesPlayed: number;
+  readonly avgGamesPerPlayer?: number | null;
+  readonly avgNetBalancePerPlayer?: number | null;
+  readonly totalPlayerNetBalance: number;
+  readonly totalPlayerWinnings: number;
+  readonly totalPlayerBuyIns: number;
+  readonly totalCreditBalance: number;
+  readonly totalPointsBalance: number;
+  readonly venueBreakdown?: string | null;
+  readonly topVenuesByPlayers?: string | null;
+  readonly topVenuesByRegistrations?: string | null;
+  readonly topPlayersByNetBalance?: string | null;
+  readonly topPlayersByGamesPlayed?: string | null;
+  readonly topPlayersByVenueCount?: string | null;
+  readonly playerGrowthTrend?: string | null;
+  readonly playerGrowthPercent?: number | null;
+  readonly activePlayerTrend?: string | null;
+  readonly activePlayerPercent?: number | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy: string;
+  readonly calculationDurationMs?: number | null;
+  readonly playersScanned?: number | null;
+  readonly venuesIncluded?: number | null;
+  readonly playerVenuesScanned?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type EntityPlayerMetrics = LazyLoading extends LazyLoadingDisabled ? EagerEntityPlayerMetrics : LazyEntityPlayerMetrics
+
+export declare const EntityPlayerMetrics: (new (init: ModelInit<EntityPlayerMetrics>) => EntityPlayerMetrics) & {
+  copyOf(source: EntityPlayerMetrics, mutator: (draft: MutableModel<EntityPlayerMetrics>) => MutableModel<EntityPlayerMetrics> | void): EntityPlayerMetrics;
+}
+
+type EagerVenuePlayerMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<VenuePlayerMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly venueId: string;
+  readonly venue?: Venue | null;
+  readonly venueName: string;
+  readonly timeRange: string;
+  readonly totalPlayers: number;
+  readonly registeredPlayers: number;
+  readonly activePlayerCount: number;
+  readonly suspendedPlayerCount: number;
+  readonly pendingVerificationPlayerCount: number;
+  readonly newPlayerCount: number;
+  readonly recreationalPlayerCount: number;
+  readonly regularPlayerCount: number;
+  readonly vipPlayerCount: number;
+  readonly lapsedPlayerCount: number;
+  readonly activeELCount: number;
+  readonly activeCount: number;
+  readonly retain31to60Count: number;
+  readonly retain61to90Count: number;
+  readonly churned91to120Count: number;
+  readonly churned121to180Count: number;
+  readonly churned181to360Count: number;
+  readonly churned361PlusCount: number;
+  readonly playersExclusiveToVenue: number;
+  readonly playersSharedWithOtherVenues: number;
+  readonly avgOtherVenuesPerPlayer?: number | null;
+  readonly registrationsAllTime: number;
+  readonly registrationsLast30Days: number;
+  readonly registrationsLast90Days: number;
+  readonly playersActiveLast30Days: number;
+  readonly playersActiveLast90Days: number;
+  readonly totalGamesAtVenue: number;
+  readonly avgGamesPerPlayer?: number | null;
+  readonly avgNetBalancePerPlayer?: number | null;
+  readonly totalPlayerNetBalance: number;
+  readonly totalPlayerWinnings: number;
+  readonly totalPlayerBuyIns: number;
+  readonly topPlayersByGamesPlayed?: string | null;
+  readonly topPlayersByNetBalance?: string | null;
+  readonly regularPlayers?: string | null;
+  readonly playerGrowthTrend?: string | null;
+  readonly playerGrowthPercent?: number | null;
+  readonly registrationTrend?: string | null;
+  readonly registrationTrendPercent?: number | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy: string;
+  readonly calculationDurationMs?: number | null;
+  readonly playersScanned?: number | null;
+  readonly playerVenuesScanned?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyVenuePlayerMetrics = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<VenuePlayerMetrics, 'id'>;
+  };
+  readonly id: string;
+  readonly entityId: string;
+  readonly venueId: string;
+  readonly venue: AsyncItem<Venue | undefined>;
+  readonly venueName: string;
+  readonly timeRange: string;
+  readonly totalPlayers: number;
+  readonly registeredPlayers: number;
+  readonly activePlayerCount: number;
+  readonly suspendedPlayerCount: number;
+  readonly pendingVerificationPlayerCount: number;
+  readonly newPlayerCount: number;
+  readonly recreationalPlayerCount: number;
+  readonly regularPlayerCount: number;
+  readonly vipPlayerCount: number;
+  readonly lapsedPlayerCount: number;
+  readonly activeELCount: number;
+  readonly activeCount: number;
+  readonly retain31to60Count: number;
+  readonly retain61to90Count: number;
+  readonly churned91to120Count: number;
+  readonly churned121to180Count: number;
+  readonly churned181to360Count: number;
+  readonly churned361PlusCount: number;
+  readonly playersExclusiveToVenue: number;
+  readonly playersSharedWithOtherVenues: number;
+  readonly avgOtherVenuesPerPlayer?: number | null;
+  readonly registrationsAllTime: number;
+  readonly registrationsLast30Days: number;
+  readonly registrationsLast90Days: number;
+  readonly playersActiveLast30Days: number;
+  readonly playersActiveLast90Days: number;
+  readonly totalGamesAtVenue: number;
+  readonly avgGamesPerPlayer?: number | null;
+  readonly avgNetBalancePerPlayer?: number | null;
+  readonly totalPlayerNetBalance: number;
+  readonly totalPlayerWinnings: number;
+  readonly totalPlayerBuyIns: number;
+  readonly topPlayersByGamesPlayed?: string | null;
+  readonly topPlayersByNetBalance?: string | null;
+  readonly regularPlayers?: string | null;
+  readonly playerGrowthTrend?: string | null;
+  readonly playerGrowthPercent?: number | null;
+  readonly registrationTrend?: string | null;
+  readonly registrationTrendPercent?: number | null;
+  readonly calculatedAt: string;
+  readonly calculatedBy: string;
+  readonly calculationDurationMs?: number | null;
+  readonly playersScanned?: number | null;
+  readonly playerVenuesScanned?: number | null;
+  readonly dateRangeStart?: string | null;
+  readonly dateRangeEnd?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type VenuePlayerMetrics = LazyLoading extends LazyLoadingDisabled ? EagerVenuePlayerMetrics : LazyVenuePlayerMetrics
+
+export declare const VenuePlayerMetrics: (new (init: ModelInit<VenuePlayerMetrics>) => VenuePlayerMetrics) & {
+  copyOf(source: VenuePlayerMetrics, mutator: (draft: MutableModel<VenuePlayerMetrics>) => MutableModel<VenuePlayerMetrics> | void): VenuePlayerMetrics;
 }
 
 type EagerEntityMetrics = {

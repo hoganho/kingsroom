@@ -1,169 +1,74 @@
 // src/pages/players/PlayerSearch.tsx
+// Player Search Page - Search and browse players with real-time search
 
-import { useState, useEffect } from 'react';
-import { getClient } from '../../utils/apiClient';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+
 import { PageWrapper } from '../../components/layout/PageWrapper';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { format } from 'date-fns';
-import { debounce } from 'lodash';
+import { PlayerCard, PlayerCardSkeleton } from '../../components/players/PlayerCard';
+import { usePlayerSearch, usePlayersList } from '../../hooks/usePlayer';
+import type { PlayerListItem } from '../../types/player';
 
-
-interface Player {
-  id: string;
-  firstName: string;
-  lastName: string;
-  registrationDate?: string;
-  lastPlayedDate?: string;
-  creditBalance?: number;
-  pointsBalance?: number;
-  registrationVenue?: {
-    name: string;
-  };
-  updatedAt?: string;
-}
-
-export const PlayerSearch = () => {
+export const PlayerSearch: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [recentPlayers, setRecentPlayers] = useState<Player[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searching, setSearching] = useState(false);
+  const [isSearchMode, setIsSearchMode] = useState(false);
 
-  // Fetch 100 most recently active players on mount
-  useEffect(() => {
-    fetchRecentPlayers();
-  }, []);
+  // Hook for recent players (initial view)
+  const {
+    players: recentPlayers,
+    loading: loadingRecent,
+    error: recentError,
+    hasMore: hasMoreRecent,
+    loadMore: loadMoreRecent,
+  } = usePlayersList({}, 100);
 
-  // Debounced search function
-  const debouncedSearch = debounce(async (term: string) => {
-    if (term.length === 0) {
-      setPlayers(recentPlayers);
-      setSearching(false);
-      return;
-    }
+  // Hook for search results
+  const {
+    players: searchResults,
+    loading: searching,
+    error: searchError,
+    search,
+    clear: clearSearch,
+  } = usePlayerSearch(300);
 
-    setSearching(true);
-    try {
-      const client = getClient();
-      const response = await client.graphql({
-        query: /* GraphQL */ `
-          query SearchPlayers($searchTerm: String!) {
-            listPlayers(
-              filter: {
-                or: [
-                  { firstName: { contains: $searchTerm } },
-                  { lastName: { contains: $searchTerm } }
-                ]
-              }
-              limit: 100
-            ) {
-              items {
-                id
-                firstName
-                lastName
-                registrationDate
-                lastPlayedDate
-                creditBalance
-                pointsBalance
-                registrationVenue {
-                  name
-                }
-              }
-            }
-          }
-        `,
-        variables: {
-          searchTerm: term.toLowerCase()
-        }
-      });
+  // Determine which players to show
+  const displayPlayers = isSearchMode ? searchResults : recentPlayers;
+  const isLoading = isSearchMode ? searching : loadingRecent;
+  const error = isSearchMode ? searchError : recentError;
 
-      if ('data' in response && response.data) {
-        const searchResults = response.data.listPlayers.items
-          .filter(Boolean)
-          .sort((a: Player, b: Player) => {
-            const dateA = new Date(a.lastPlayedDate || a.updatedAt || 0);
-            const dateB = new Date(b.lastPlayedDate || b.updatedAt || 0);
-            return dateB.getTime() - dateA.getTime();
-          }) as Player[];
-        
-        setPlayers(searchResults);
+  // Handle search input changes
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setSearchTerm(value);
+
+      if (value.length > 0) {
+        setIsSearchMode(true);
+        search(value);
+      } else {
+        setIsSearchMode(false);
+        clearSearch();
       }
-    } catch (error) {
-      console.error('Error searching players:', error);
-    } finally {
-      setSearching(false);
-    }
-  }, 300);
+    },
+    [search, clearSearch]
+  );
 
-  useEffect(() => {
-    debouncedSearch(searchTerm);
-    return () => {
-      debouncedSearch.cancel();
-    };
-  }, [searchTerm]);
+  // Clear search
+  const handleClearSearch = useCallback(() => {
+    setSearchTerm('');
+    setIsSearchMode(false);
+    clearSearch();
+  }, [clearSearch]);
 
-  const fetchRecentPlayers = async () => {
-    const client = getClient();
-    setLoading(true);
-    try {
-      const response = await client.graphql({
-        query: /* GraphQL */ `
-          query GetRecentPlayers {
-            listPlayers(
-              limit: 100
-            ) {
-              items {
-                id
-                firstName
-                lastName
-                registrationDate
-                lastPlayedDate
-                creditBalance
-                pointsBalance
-                registrationVenue {
-                  name
-                }
-                updatedAt
-              }
-            }
-          }
-        `
-      });
-
-      if ('data' in response && response.data) {
-        const recent = response.data.listPlayers.items
-          .filter(Boolean)
-          .sort((a: Player, b: Player) => {
-            const dateA = new Date(a.lastPlayedDate || a.updatedAt || 0);
-            const dateB = new Date(b.lastPlayedDate || b.updatedAt || 0);
-            return dateB.getTime() - dateA.getTime();
-          })
-          .slice(0, 100) as Player[];
-        
-        setRecentPlayers(recent);
-        setPlayers(recent);
-      }
-    } catch (error) {
-      console.error('Error fetching recent players:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePlayerClick = (playerId: string) => {
-    navigate(`/players/profile/${playerId}`);
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '-';
-    try {
-      return format(new Date(dateString), 'dd MMM yyyy');
-    } catch {
-      return '-';
-    }
-  };
+  // Navigate to player profile
+  const handlePlayerClick = useCallback(
+    (player: PlayerListItem) => {
+      navigate(`/players/profile/${player.id}`);
+    },
+    [navigate]
+  );
 
   return (
     <PageWrapper title="Player Search" maxWidth="7xl">
@@ -176,10 +81,22 @@ export const PlayerSearch = () => {
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            placeholder="Search by first or last name..."
+            onChange={handleSearchChange}
+            className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            placeholder="Search by first name, last name, or email..."
+            aria-label="Search players"
           />
+          {/* Clear button */}
+          {searchTerm && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute inset-y-0 right-8 pr-3 flex items-center"
+              aria-label="Clear search"
+            >
+              <XMarkIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+            </button>
+          )}
+          {/* Loading indicator */}
           {searching && (
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
               <div className="animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full" />
@@ -188,86 +105,97 @@ export const PlayerSearch = () => {
         </div>
       </div>
 
-      {/* Players Table */}
+      {/* Error Display */}
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-red-600 text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Players List */}
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            {searchTerm ? `Search Results (${players.length})` : '100 Most Recently Active Players'}
+            {isSearchMode
+              ? `Search Results (${searchResults.length})`
+              : `Recently Active Players (${recentPlayers.length})`}
           </h3>
+          {!isSearchMode && (
+            <p className="mt-1 text-sm text-gray-500">
+              Showing the 100 most recently active players
+            </p>
+          )}
         </div>
-        
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="text-gray-500">Loading players...</div>
+
+        {/* Loading State */}
+        {isLoading && displayPlayers.length === 0 ? (
+          <div>
+            {[...Array(5)].map((_, i) => (
+              <PlayerCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : displayPlayers.length === 0 ? (
+          /* Empty State */
+          <div className="px-4 py-12 text-center text-gray-500">
+            {isSearchMode
+              ? 'No players found matching your search'
+              : 'No players found'}
           </div>
         ) : (
-          <ul className="divide-y divide-gray-200">
-            {players.length === 0 ? (
-              <li className="px-4 py-12 text-center text-gray-500">
-                No players found matching your search
-              </li>
-            ) : (
-              players.map((player) => (
-                <li key={player.id}>
-                  <button
-                    onClick={() => handlePlayerClick(player.id)}
-                    className="w-full px-4 py-4 hover:bg-gray-50 flex items-center justify-between text-left"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-indigo-600 truncate">
-                          {player.firstName} {player.lastName}
-                        </p>
-                        <div className="ml-2 flex-shrink-0 flex">
-                          {player.creditBalance && player.creditBalance > 0 && (
-                            <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                              £{player.creditBalance} credit
-                            </p>
-                          )}
-                          {player.pointsBalance && player.pointsBalance > 0 && (
-                            <p className="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                              {player.pointsBalance} pts
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center text-sm text-gray-500">
-                        <span>
-                          Registered: {formatDate(player.registrationDate)}
-                        </span>
-                        <span className="mx-2">•</span>
-                        <span>
-                          Last played: {formatDate(player.lastPlayedDate)}
-                        </span>
-                        {player.registrationVenue && (
-                          <>
-                            <span className="mx-2">•</span>
-                            <span>Venue: {player.registrationVenue.name}</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <svg
-                        className="h-5 w-5 text-gray-400"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                  </button>
-                </li>
-              ))
+          /* Player List */
+          <>
+            <div className="divide-y divide-gray-200">
+              {displayPlayers.map((player) => (
+                <PlayerCard
+                  key={player.id}
+                  player={player}
+                  showEntityInfo={true}
+                  onClick={handlePlayerClick}
+                />
+              ))}
+            </div>
+
+            {/* Load More Button (only for recent players view) */}
+            {!isSearchMode && hasMoreRecent && (
+              <div className="px-4 py-3 bg-gray-50 sm:px-6 border-t border-gray-200">
+                <button
+                  onClick={loadMoreRecent}
+                  disabled={loadingRecent}
+                  className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                >
+                  {loadingRecent ? 'Loading...' : 'Load More Players'}
+                </button>
+              </div>
             )}
-          </ul>
+          </>
         )}
       </div>
+
+      {/* Quick Stats (shown when not searching) */}
+      {!isSearchMode && recentPlayers.length > 0 && (
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white shadow rounded-lg p-4">
+            <h4 className="text-sm font-medium text-gray-500">Total Displayed</h4>
+            <p className="mt-1 text-2xl font-semibold text-gray-900">
+              {recentPlayers.length}
+            </p>
+          </div>
+          <div className="bg-white shadow rounded-lg p-4">
+            <h4 className="text-sm font-medium text-gray-500">With Credit Balance</h4>
+            <p className="mt-1 text-2xl font-semibold text-green-600">
+              {recentPlayers.filter((p) => (p.creditBalance ?? 0) > 0).length}
+            </p>
+          </div>
+          <div className="bg-white shadow rounded-lg p-4">
+            <h4 className="text-sm font-medium text-gray-500">With Points</h4>
+            <p className="mt-1 text-2xl font-semibold text-blue-600">
+              {recentPlayers.filter((p) => (p.pointsBalance ?? 0) > 0).length}
+            </p>
+          </div>
+        </div>
+      )}
     </PageWrapper>
   );
 };
+
+export default PlayerSearch;
