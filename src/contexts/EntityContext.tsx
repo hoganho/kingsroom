@@ -172,7 +172,7 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
     }
 
     // === 2. Multi Selection Logic (Dashboard/Viewing) ===
-    // Priority: LocalStorage -> Fallback to Current Single Entity
+    // Priority: LocalStorage -> Default to ALL entities
     const validSavedIds = savedSelectedIds.filter((id: string) =>
       entities.some((e) => e.id === id)
     );
@@ -182,15 +182,9 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
       const savedSelected = entities.filter((e) => validSavedIds.includes(e.id));
       setSelectedEntitiesState(savedSelected);
     } else {
-      // No valid saved selection found, default to the Single Entity
-      if (entityToSet) {
-        setSelectedEntitiesState([entityToSet]);
-        localStorage.setItem('selectedEntityIds', JSON.stringify([entityToSet.id]));
-      } else {
-        // Fallback: Select all if no single entity is determined
-        setSelectedEntitiesState(entities);
-        localStorage.setItem('selectedEntityIds', JSON.stringify(entities.map((e) => e.id)));
-      }
+      // No valid saved selection found - DEFAULT TO ALL ENTITIES
+      setSelectedEntitiesState(entities);
+      localStorage.setItem('selectedEntityIds', JSON.stringify(entities.map((e) => e.id)));
     }
   }, [loading, entities, userDefaultEntityId]);
 

@@ -1,5 +1,5 @@
 // src/pages/HomePage.tsx
-// VERSION: 3.2.0 - Added: GameCard navigation to GameDetails page
+// VERSION: 3.3.0 - Added: MultiEntitySelector for filtering games by selected entities
 //
 // ARCHITECTURE:
 // - ActiveGame table: Fast queries for RUNNING, REGISTERING, CLOCK_STOPPED, INITIATING, SCHEDULED games
@@ -49,6 +49,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { KpiCard } from '@/components/ui/KpiCard';
 import { useEntity } from '@/contexts/EntityContext';
+import { MultiEntitySelector } from '@/components/entities/MultiEntitySelector';
 import { toAEST, formatRelativeAEST, formatAEST } from '@/utils/dateUtils';
 import { useScraperSettings } from '@/hooks/scraper/useScraperSettings';
 
@@ -1254,7 +1255,7 @@ const RefreshStatusBanner: React.FC<RefreshStatusBannerProps> = ({
 // ============================================
 
 export const HomePage: React.FC = () => {
-  const { selectedEntities, loading: entityLoading } = useEntity();
+  const { entities, selectedEntities, loading: entityLoading } = useEntity();
   const client = useMemo(() => generateClient(), []);
   
   // Global scraper settings - controls auto-refresh behavior
@@ -1946,6 +1947,8 @@ export const HomePage: React.FC = () => {
           <p className="text-sm text-gray-500 dark:text-gray-400">Tournament overview and live updates</p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Multi-Entity Selector - Only show if user has access to multiple entities */}
+          {entities.length > 1 && <MultiEntitySelector />}
           <LiveIndicator 
             isAutoRefreshEnabled={isAutoRefreshEnabled} 
             isSubscribed={isSubscribed} 
