@@ -3,9 +3,13 @@
  * webScraperFunction - Entry Point
  * ===================================================================
  * 
- * VERSION: 2.2.0
+ * VERSION: 2.3.0
  * 
  * CHANGELOG:
+ * - v2.3.0: SECURITY - Removed process.env.SCRAPERAPI_KEY fallback
+ *           ScraperAPI key is now retrieved ONLY from SSM Parameter Store
+ *           via http-client.js -> secrets.js -> getScraperApiKey()
+ *           Optional scraperApiKey parameter retained for testing only
  * - v2.2.0: Added saveAfterFetch option passthrough to fetch handler
  *           This enables refreshRunningGames to fetch AND save in one call
  *           When saveAfterFetch=true, fetch-handler auto-invokes save-handler
@@ -93,17 +97,19 @@ exports.handler = async (event) => {
         );
         
         // Extract common options
+        // v2.3.0: ScraperAPI key is now retrieved from SSM Parameter Store by http-client.js
+        // The scraperApiKey option is retained ONLY for testing/override purposes
         const options = {
             entityId,
             forceRefresh: args.forceRefresh || false,
             overrideDoNotScrape: args.overrideDoNotScrape || false,
             scraperJobId: args.scraperJobId || args.jobId || "MANUAL_RUN",
-            scraperApiKey: args.scraperApiKey || process.env.SCRAPERAPI_KEY || null,
+            scraperApiKey: args.scraperApiKey || null, // v2.3.0: No env var fallback - SSM is source of truth
             // v2.2.0: New saveAfterFetch option for auto-save after fetch
             saveAfterFetch: args.saveAfterFetch || false
         };
         
-        console.log(`[Handler] v2.2.0 Operation: ${fieldName}, EntityId: ${entityId}, saveAfterFetch: ${options.saveAfterFetch}`);
+        console.log(`[Handler] v2.3.0 Operation: ${fieldName}, EntityId: ${entityId}, saveAfterFetch: ${options.saveAfterFetch}`);
         
         // Route to appropriate handler
         switch (fieldName) {

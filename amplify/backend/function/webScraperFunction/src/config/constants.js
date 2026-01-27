@@ -1,15 +1,20 @@
 /**
  * ===================================================================
- * Configuration Constants (v1.1.0)
+ * Configuration Constants (v1.2.0)
  * ===================================================================
  * 
  * Centralized constants for the webScraperFunction.
  * All magic numbers and configuration values live here.
  * 
+ * UPDATED v1.2.0:
+ * - REMOVED: SCRAPERAPI_KEY constant entirely
+ * - ScraperAPI key is now ONLY retrieved from SSM Parameter Store
+ * - See config/secrets.js for secure secret retrieval via getScraperApiKey()
+ * - Local development should use SSM or set SCRAPERAPI_KEY env var as fallback
+ * 
  * UPDATED v1.1.0:
  * - REMOVED: SCRAPERAPI_KEY constant (moved to SSM Parameter Store)
  * - ADDED: SCRAPERAPI_KEY_PARAM for SSM parameter name override
- * - See config/secrets.js for secure secret retrieval
  * 
  * ===================================================================
  */
@@ -30,25 +35,15 @@ const REQUEST_TIMEOUT = 90000;
 /** Timeout for HEAD requests (ms) */
 const HEAD_TIMEOUT = 5000;
 
-/**
- * ScraperAPI key
- * 
- * DEPRECATED: Use getScraperApiKey() from config/secrets.js instead!
- * This fallback exists only for backwards compatibility during migration.
- * 
- * The key should be stored in SSM Parameter Store:
- *   /pokerpro/{env}/scraperapi-key
- * 
- * For local development, you can still set SCRAPERAPI_KEY env var.
- */
-const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY || '';
-
 /** ScraperAPI base URL */
 const SCRAPERAPI_URL = 'http://api.scraperapi.com';
 
 /**
  * SSM Parameter name for ScraperAPI key (optional override)
  * Default: /pokerpro/{env}/scraperapi-key
+ * 
+ * To use a custom parameter name, set this environment variable.
+ * Otherwise, the default naming convention is used.
  */
 const SCRAPERAPI_KEY_PARAM = process.env.SCRAPERAPI_KEY_PARAM || null;
 
@@ -211,8 +206,7 @@ module.exports = {
     RETRY_DELAY,
     REQUEST_TIMEOUT,
     HEAD_TIMEOUT,
-    SCRAPERAPI_KEY,          // DEPRECATED - use getScraperApiKey() from secrets.js
-    SCRAPERAPI_KEY_PARAM,    // NEW v1.1.0
+    SCRAPERAPI_KEY_PARAM,    // For SSM parameter name override only
     SCRAPERAPI_URL,
     
     // S3 Storage

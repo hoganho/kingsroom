@@ -1,6 +1,6 @@
 /**
  * ===================================================================
- * HTTP Client (v1.2.0)
+ * HTTP Client (v1.3.0)
  * ===================================================================
  * 
  * HTTP fetching utilities including ScraperAPI integration.
@@ -10,6 +10,12 @@
  * - ScraperAPI proxy support
  * - Retry logic with exponential backoff
  * - HTTP 304 cache validation
+ * 
+ * UPDATED v1.3.0:
+ * - REMOVED: SCRAPERAPI_KEY import from constants.js (fully deprecated)
+ * - API key is now ONLY retrieved via getScraperApiKey() from config/secrets.js
+ * - SSM Parameter Store is the single source of truth for the API key
+ * - Environment variable fallback retained ONLY for local development
  * 
  * UPDATED v1.2.0:
  * - SECURITY: API key now fetched from SSM Parameter Store
@@ -39,11 +45,10 @@ const {
     RETRY_DELAY,
     REQUEST_TIMEOUT,
     HEAD_TIMEOUT,
-    SCRAPERAPI_KEY,  // Fallback only - prefer SSM
     SCRAPERAPI_URL
 } = require('../config/constants');
 
-// Import secure secret retrieval
+// Import secure secret retrieval (SSM Parameter Store)
 const { getScraperApiKey } = require('../config/secrets');
 
 // ===================================================================
@@ -168,6 +173,11 @@ const getHttpStatusMessage = (statusCode) => {
 /**
  * Fetch HTML from live website using ScraperAPI
  * 
+ * API Key Retrieval (v1.3.0):
+ * 1. Optional parameter override (for testing/migration)
+ * 2. SSM Parameter Store via getScraperApiKey()
+ * 3. Environment variable fallback (local dev only)
+ * 
  * @param {string} url - URL to fetch
  * @param {string} scraperApiKey - Optional API key override (for testing/migration)
  * @returns {object} Fetch result { success, html, headers, error, errorType }
@@ -176,12 +186,12 @@ const fetchFromLiveSite = async (url, scraperApiKey = null) => {
     let apiKey;
     
     try {
-        // Priority: 1) Parameter override, 2) SSM Parameter Store, 3) Environment fallback
+        // Priority: 1) Parameter override, 2) SSM Parameter Store (with env var fallback)
         if (scraperApiKey) {
             apiKey = scraperApiKey;
-            console.log(`[HttpClient] Using API key from parameter`);
+            console.log(`[HttpClient] Using API key from parameter override`);
         } else {
-            // getScraperApiKey() handles SSM lookup with env var fallback
+            // getScraperApiKey() handles SSM lookup with env var fallback for local dev
             apiKey = await getScraperApiKey();
         }
     } catch (keyError) {
@@ -197,7 +207,7 @@ const fetchFromLiveSite = async (url, scraperApiKey = null) => {
         console.error('[HttpClient] ScraperAPI key not configured');
         return { 
             success: false, 
-            error: 'ScraperAPI key is not configured.',
+            error: 'ScraperAPI key is not configured. Check SSM Parameter Store: /pokerpro/{env}/scraperapi-key',
             errorType: 'CONFIG_ERROR'
         };
     }

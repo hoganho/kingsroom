@@ -32,9 +32,6 @@
     },
     "saveGameFunctionName": {
       "Type": "String"
-    },
-    "scraperApiKey": {
-      "Type": "String"
     }
   },
   "Conditions": {
@@ -416,9 +413,6 @@
             },
             "SAVE_GAME_FUNCTION_NAME": {
               "Ref": "saveGameFunctionName"
-            },
-            "SCRAPERAPI_KEY": {
-              "Ref": "scraperApiKey"
             }
           }
         },

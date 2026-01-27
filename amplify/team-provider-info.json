@@ -118,8 +118,7 @@
           "s3Key": "amplify-builds/webScraperFunction-4f616537464b42427433-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "scraperS3Bucket": "pokerpro-scraper-storage",
-          "saveGameFunctionName": "saveGameFunction-dev",
-          "scraperApiKey": "36d459477ec3e6fc8d8fb67851cae225"
+          "saveGameFunctionName": "saveGameFunction-dev"
         },
         "kingsroom": {},
         "kingsroomauth": {},
@@ -183,7 +182,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/autoScraper-366259663141582b4545-build.zip"
+          "s3Key": "amplify-builds/autoScraper-4d334d63725844336332-build.zip"
         },
         "deleteGameFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -195,7 +194,7 @@
         },
         "gameDataEnricher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/gameDataEnricher-476a3650424167765270-build.zip"
+          "s3Key": "amplify-builds/gameDataEnricher-495141664675596e6f71-build.zip"
         },
         "gameFinancialsProcessor": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -296,11 +295,10 @@
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-4a36686b2b4e63395575-build.zip",
+          "s3Key": "amplify-builds/webScraperFunction-313030433377616f5944-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue-prod.fifo",
           "scraperS3Bucket": "kingsroom-storage-prod",
-          "saveGameFunctionName": "saveGameFunction-prod",
-          "scraperApiKey": "36d459477ec3e6fc8d8fb67851cae225"
+          "saveGameFunctionName": "saveGameFunction-prod"
         },
         "kingsroom": {},
         "kingsroomauth": {},
