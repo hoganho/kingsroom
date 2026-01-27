@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-01-27T10:48:41.169Z",
+  "mode": "EXECUTE",
+  "environment": "prod",
+  "table": "SocialAccount-ynuahifnznb5zddz727oiqnicy-prod",
+  "summary": {
+    "checked": 18,
+    "alreadyCorrect": 17,
+    "needsFix": 1,
+    "fieldCounts": {
+      "fullSyncOldestPostDate": 1
+    },
+    "updated": 1,
+    "errors": 0
+  },
+  "fixes": [
+    {
+      "accountId": "bd7730a8-6a81-4ddf-a6c7-1d1a1c2a8f90",
+      "accountName": "Poker Palace Australia",
+      "platform": "FACEBOOK",
+      "fixes": {
+        "fullSyncOldestPostDate": {
+          "current": "2024-05-12T07:49:46+0000",
+          "fixed": "2024-05-12T07:49:46.000Z"
+        }
+      }
+    }
+  ]
+}

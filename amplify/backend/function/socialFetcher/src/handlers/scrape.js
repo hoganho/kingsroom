@@ -25,6 +25,24 @@ const {
 const { processPostsInBatches } = require('../services/processor');
 
 /**
+ * Normalize a date string to proper ISO 8601 format with Z suffix.
+ * Facebook returns dates like "2024-05-12T07:49:46+0000" but AppSync expects "2024-05-12T07:49:46.000Z"
+ * 
+ * @param {string} dateString - Date string in any format
+ * @returns {string} ISO 8601 formatted date string with Z suffix
+ */
+function normalizeToISO(dateString) {
+  if (!dateString) return null;
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString(); // Always returns "YYYY-MM-DDTHH:mm:ss.sssZ" format
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Trigger a scrape for a specific account
  * Entry point for GraphQL mutations and direct invokes
  */
@@ -149,10 +167,11 @@ async function scrapeAccount(account, options = {}, context = null) {
       ...(nextScrapeTime && { nextScheduledScrapeAt: nextScrapeTime }),
     });
 
-    // Track full sync progress
+    // Track full sync progress - NORMALIZE THE DATE FORMAT
     if (fetchAllHistory && fetchResult.oldestPostDate) {
+      const normalizedOldestDate = normalizeToISO(fetchResult.oldestPostDate);
       await db.updateAccountAfterScrape(account.id, {
-        fullSyncOldestPostDate: fetchResult.oldestPostDate,
+        fullSyncOldestPostDate: normalizedOldestDate,
         hasFullHistory: !fetchResult.hasMore,
       });
     }
@@ -374,10 +393,11 @@ async function fetchAndSavePosts(account, pageId, fetchOptions, attemptId, conte
           result.savedPostIds.push(saveResult.postId);
         }
         
-        // Track oldest post date
+        // Track oldest post date - NORMALIZE to ISO format
         if (fbPost.created_time) {
-          if (!result.oldestPostDate || fbPost.created_time < result.oldestPostDate) {
-            result.oldestPostDate = fbPost.created_time;
+          const normalizedDate = normalizeToISO(fbPost.created_time);
+          if (normalizedDate && (!result.oldestPostDate || normalizedDate < result.oldestPostDate)) {
+            result.oldestPostDate = normalizedDate;
           }
         }
       }
@@ -428,46 +448,73 @@ async function savePost(account, fbPost) {
   }
 
   const now = new Date().toISOString();
-  const postedAt = fbPost.created_time ? new Date(fbPost.created_time).toISOString() : now;
+  const postedAt = fbPost.created_time ? normalizeToISO(fbPost.created_time) : now;
   
-  // Extract image URLs from attachments
-  const mediaUrls = [];
-  let thumbnailUrl = fbPost.full_picture || null;
+  // ============================================
+  // FIXED: Collect ALL image URLs for S3 storage
+  // ============================================
+  const imageUrlsToStore = [];
   
+  // 1. Add full_picture if available (this is the main post image)
+  if (fbPost.full_picture) {
+    imageUrlsToStore.push(fbPost.full_picture);
+  }
+  
+  // 2. Add images from attachments (for multi-image posts)
   if (fbPost.attachments?.data) {
     for (const attachment of fbPost.attachments.data) {
+      // Direct attachment image
       if (attachment.media?.image?.src) {
-        mediaUrls.push(attachment.media.image.src);
+        // Avoid duplicates - full_picture is often the same as the first attachment
+        if (!imageUrlsToStore.includes(attachment.media.image.src)) {
+          imageUrlsToStore.push(attachment.media.image.src);
+        }
       }
+      // Subattachments (for albums/multiple images)
       if (attachment.subattachments?.data) {
         for (const sub of attachment.subattachments.data) {
-          if (sub.media?.image?.src) {
-            mediaUrls.push(sub.media.image.src);
+          if (sub.media?.image?.src && !imageUrlsToStore.includes(sub.media.image.src)) {
+            imageUrlsToStore.push(sub.media.image.src);
           }
         }
       }
     }
   }
 
-  // Store images to S3
-  const storedMediaUrls = await storePostAttachments(account.id, postId, mediaUrls);
+  // Store ALL images to S3
+  const storedMediaUrls = await storePostAttachments(account.id, postId, imageUrlsToStore);
+  
+  // Determine thumbnail - use first S3 URL if available, otherwise first source URL
+  let thumbnailUrl = null;
   if (storedMediaUrls.length > 0) {
     thumbnailUrl = storedMediaUrls[0];
+  } else if (imageUrlsToStore.length > 0) {
+    thumbnailUrl = imageUrlsToStore[0];
   }
 
   // Build post object
   const content = fbPost.message || '';
+  
+  // Determine post type based on media presence
+  let postType = 'TEXT';
+  if (fbPost.attachments?.data?.[0]?.media_type === 'video') {
+    postType = 'VIDEO';
+  } else if (imageUrlsToStore.length > 0) {
+    postType = 'IMAGE';
+  }
+  
   const newPost = {
     id: postId,
     platformPostId: fbPost.id,
     postUrl: fbPost.permalink_url,
-    postType: fbPost.full_picture ? 'IMAGE' : 'TEXT',
+    postType,
     
     content,
     contentPreview: content.substring(0, 200),
     rawContent: buildRawContent(fbPost),
     
-    mediaUrls: storedMediaUrls.length > 0 ? storedMediaUrls : (fbPost.full_picture ? [fbPost.full_picture] : []),
+    // FIXED: Use S3 URLs if available, fallback to source URLs
+    mediaUrls: storedMediaUrls.length > 0 ? storedMediaUrls : imageUrlsToStore,
     thumbnailUrl,
     
     likeCount: fbPost.reactions?.summary?.total_count || 0,
@@ -498,6 +545,11 @@ async function savePost(account, fbPost) {
   
   if (account.entityId) newPost.entityId = account.entityId;
   if (account.venueId) newPost.venueId = account.venueId;
+
+  // Log media storage result for debugging
+  if (imageUrlsToStore.length > 0) {
+    console.log(`[Scrape] Post ${postId}: ${imageUrlsToStore.length} source images, ${storedMediaUrls.length} stored to S3`);
+  }
 
   await db.savePost(newPost);
   return { isNew: true, postId };

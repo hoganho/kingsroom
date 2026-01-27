@@ -1514,11 +1514,11 @@ export const HomePage: React.FC = () => {
       }
 
       // Sort by finished time descending (most recent first)
-        return recentFinished.sort((a, b) => {
-            const aFinish = a.finishedAt || a.gameEndDateTime || a.gameStartDateTime;
-            const bFinish = b.finishedAt || b.gameEndDateTime || b.gameStartDateTime;
-            return new Date(aFinish).getTime() - new Date(bFinish).getTime();  // Swapped a and b
-        });
+      return recentFinished.sort((a, b) => {
+        const aFinish = a.finishedAt || a.gameEndDateTime || a.gameStartDateTime;
+        const bFinish = b.finishedAt || b.gameEndDateTime || b.gameStartDateTime;
+        return new Date(bFinish).getTime() - new Date(aFinish).getTime();
+      });
     } catch (err) {
       console.error('[HomePage] Error fetching finished games:', err);
       throw err;
