@@ -824,22 +824,6 @@
         }
       ]
     },
-    "AMPLIFY_function_refreshPlayerMetrics_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "refreshPlayerMetrics"
-        }
-      ]
-    },
-    "AMPLIFY_function_refreshPlayerMetrics_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "refreshPlayerMetrics"
-        }
-      ]
-    },
     "AMPLIFY_function_refreshRunningGames_deploymentBucketName": {
       "usedBy": [
         {
