@@ -388,38 +388,210 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ summary, venues, perfStats })
       </div>
     </div>
 
-    {/* Venues Played */}
+    {/* Venues Played - Enhanced Section */}
     <div>
-      <h3 className="text-lg font-medium mb-4">Venues Played</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium">Venue Activity</h3>
+        <span className="text-sm text-gray-500">
+          {venues.length} venue{venues.length !== 1 ? 's' : ''} visited
+        </span>
+      </div>
+      
       {venues.length === 0 ? (
         <p className="text-gray-500">No venue data available</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {venues.map((venue) => (
-            <div key={venue.id} className="border rounded-lg p-4 hover:bg-gray-50">
-              <h4 className="font-medium">{venue.venue?.name || 'Unknown Venue'}</h4>
-              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-gray-500">Games:</span>
-                  <span className="ml-1 font-medium">{formatNumber(venue.totalGamesPlayed)}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Avg Buy-in:</span>
-                  <span className="ml-1 font-medium">{formatCurrency(venue.averageBuyIn)}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Net Profit:</span>
-                  <span className={`ml-1 font-medium ${getNetBalanceColor(venue.netProfit)}`}>
-                    {formatCurrency(venue.netProfit, { showSign: true })}
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Venue
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Games
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  First Played
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Last Played
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Total Buy-ins
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Total Winnings
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Net Profit
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {venues
+                .sort((a, b) => (b.totalGamesPlayed || 0) - (a.totalGamesPlayed || 0))
+                .map((venue) => {
+                  const daysSinceLastPlayed = venue.lastPlayedDate 
+                    ? Math.floor((Date.now() - new Date(venue.lastPlayedDate).getTime()) / (1000 * 60 * 60 * 24))
+                    : null;
+                  
+                  return (
+                    <tr key={venue.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-4">
+                        <div className="flex items-center">
+                          <MapPinIcon className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0" />
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {venue.venue?.name || 'Unknown Venue'}
+                            </p>
+                            {venue.venue?.entity?.entityName && (
+                              <p className="text-xs text-gray-500">
+                                {venue.venue.entity.entityName}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <span className="font-semibold text-gray-900">
+                          {formatNumber(venue.totalGamesPlayed)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-center text-sm text-gray-500">
+                        {venue.firstPlayedDate ? formatDate(venue.firstPlayedDate) : '-'}
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <div>
+                          <p className="text-sm text-gray-900">
+                            {venue.lastPlayedDate ? formatDate(venue.lastPlayedDate) : '-'}
+                          </p>
+                          {daysSinceLastPlayed !== null && (
+                            <p className={`text-xs ${
+                              daysSinceLastPlayed <= 30 ? 'text-green-600' : 
+                              daysSinceLastPlayed <= 90 ? 'text-yellow-600' : 'text-red-600'
+                            }`}>
+                              {daysSinceLastPlayed === 0 ? 'Today' : 
+                               daysSinceLastPlayed === 1 ? 'Yesterday' : 
+                               `${daysSinceLastPlayed}d ago`}
+                            </p>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-right text-sm text-red-600">
+                        {formatCurrency(venue.totalBuyIns)}
+                      </td>
+                      <td className="px-4 py-4 text-right text-sm text-green-600">
+                        {formatCurrency(venue.totalWinnings)}
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <span className={`font-semibold ${getNetBalanceColor(venue.netProfit)}`}>
+                          {formatCurrency(venue.netProfit, { showSign: true })}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        {venue.targetingClassification && (
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                            venue.targetingClassification.includes('Active') ? 'bg-green-100 text-green-800' :
+                            venue.targetingClassification.includes('Retain') ? 'bg-yellow-100 text-yellow-800' :
+                            venue.targetingClassification.includes('Churned') ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {venue.targetingClassification.replace(/_/g, ' ').replace('Inactive', '').replace('d', 'd')}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+            {/* Summary Row */}
+            <tfoot className="bg-gray-50">
+              <tr className="font-semibold">
+                <td className="px-4 py-3 text-sm text-gray-900">
+                  Total ({venues.length} venue{venues.length !== 1 ? 's' : ''})
+                </td>
+                <td className="px-4 py-3 text-center text-sm text-gray-900">
+                  {formatNumber(venues.reduce((sum, v) => sum + (v.totalGamesPlayed || 0), 0))}
+                </td>
+                <td className="px-4 py-3"></td>
+                <td className="px-4 py-3"></td>
+                <td className="px-4 py-3 text-right text-sm text-red-600">
+                  {formatCurrency(venues.reduce((sum, v) => sum + (v.totalBuyIns || 0), 0))}
+                </td>
+                <td className="px-4 py-3 text-right text-sm text-green-600">
+                  {formatCurrency(venues.reduce((sum, v) => sum + (v.totalWinnings || 0), 0))}
+                </td>
+                <td className="px-4 py-3 text-right text-sm">
+                  <span className={getNetBalanceColor(venues.reduce((sum, v) => sum + (v.netProfit || 0), 0))}>
+                    {formatCurrency(venues.reduce((sum, v) => sum + (v.netProfit || 0), 0), { showSign: true })}
                   </span>
+                </td>
+                <td className="px-4 py-3"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )}
+
+      {/* Venue Cards for Mobile - shown below md breakpoint */}
+      {venues.length > 0 && (
+        <div className="md:hidden mt-4 space-y-4">
+          {venues
+            .sort((a, b) => (b.totalGamesPlayed || 0) - (a.totalGamesPlayed || 0))
+            .map((venue) => {
+              return (
+                <div key={venue.id} className="border rounded-lg p-4 bg-white shadow-sm">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center">
+                      <MapPinIcon className="h-5 w-5 text-indigo-500 mr-2" />
+                      <div>
+                        <h4 className="font-medium text-gray-900">{venue.venue?.name || 'Unknown'}</h4>
+                        {venue.venue?.entity?.entityName && (
+                          <p className="text-xs text-gray-500">{venue.venue.entity.entityName}</p>
+                        )}
+                      </div>
+                    </div>
+                    {venue.targetingClassification && (
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        venue.targetingClassification.includes('Active') ? 'bg-green-100 text-green-800' :
+                        venue.targetingClassification.includes('Retain') ? 'bg-yellow-100 text-yellow-800' :
+                        venue.targetingClassification.includes('Churned') ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {venue.targetingClassification.replace(/_/g, ' ').replace('Inactive', '').replace('d', 'd')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-gray-500">Games Played</p>
+                      <p className="font-semibold">{formatNumber(venue.totalGamesPlayed)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Last Played</p>
+                      <p className="font-semibold">{venue.lastPlayedDate ? formatDate(venue.lastPlayedDate) : '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Buy-ins</p>
+                      <p className="font-semibold text-red-600">{formatCurrency(venue.totalBuyIns)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Winnings</p>
+                      <p className="font-semibold text-green-600">{formatCurrency(venue.totalWinnings)}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-gray-500">Net Profit</p>
+                      <p className={`font-semibold text-lg ${getNetBalanceColor(venue.netProfit)}`}>
+                        {formatCurrency(venue.netProfit, { showSign: true })}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-gray-500">Last Played:</span>
-                  <span className="ml-1 font-medium">{formatDate(venue.lastPlayedDate)}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+              );
+            })}
         </div>
       )}
     </div>

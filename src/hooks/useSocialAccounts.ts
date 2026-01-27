@@ -48,6 +48,10 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
   const hasFetchedRef = useRef(false);
   const currentEntityIdRef = useRef<string | undefined>(undefined);
 
+  // Compute the effective entityId based on filterByEntity option
+  // This ensures consistent behavior across initial fetch and post-mutation refreshes
+  const effectiveEntityId = filterByEntity ? currentEntity?.id : undefined;
+
   // Extract platform account ID from URL
   const extractPlatformAccountId = useCallback((url: string, platform: string): string => {
     try {
@@ -142,8 +146,8 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
       });
 
       if (hasGraphQLData<{ createSocialAccount: SocialAccount }>(response) && response.data?.createSocialAccount) {
-        // Force refresh after create
-        await fetchAccounts(currentEntity?.id, true);
+        // Force refresh after create - use effectiveEntityId to respect filterByEntity option
+        await fetchAccounts(effectiveEntityId, true);
         return response.data.createSocialAccount;
       }
       return null;
@@ -151,7 +155,7 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
       console.error('Error creating social account:', err);
       throw new Error('Failed to create social account. Please check the URL and try again.');
     }
-  }, [client, fetchAccounts, currentEntity?.id, extractPlatformAccountId]);
+  }, [client, fetchAccounts, effectiveEntityId, extractPlatformAccountId]);
 
   // Update account
   const updateAccountFn = useCallback(async (input: UpdateSocialAccountInput): Promise<SocialAccount | null> => {
@@ -169,8 +173,8 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
         if ('errors' in response && Array.isArray((response as any).errors) && (response as any).errors.length > 0) {
           console.warn(`[useSocialAccounts] Update succeeded with ${(response as any).errors.length} field warnings (nested relations with missing data)`);
         }
-        // Force refresh after update
-        await fetchAccounts(currentEntity?.id, true);
+        // Force refresh after update - use effectiveEntityId to respect filterByEntity option
+        await fetchAccounts(effectiveEntityId, true);
         return response.data.updateSocialAccount;
       }
       return null;
@@ -179,15 +183,15 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
       // Check if the error contains data - if so, the mutation actually worked
       if (err?.data?.updateSocialAccount) {
         console.warn(`[useSocialAccounts] Update succeeded despite errors (${err?.errors?.length || 0} field warnings)`);
-        // Force refresh after update
-        await fetchAccounts(currentEntity?.id, true);
+        // Force refresh after update - use effectiveEntityId to respect filterByEntity option
+        await fetchAccounts(effectiveEntityId, true);
         return err.data.updateSocialAccount;
       }
       
       console.error('Error updating social account:', err);
       throw new Error('Failed to update social account. Please try again.');
     }
-  }, [client, fetchAccounts, currentEntity?.id]);
+  }, [client, fetchAccounts, effectiveEntityId]);
 
   // Delete account
   const deleteAccountFn = useCallback(async (id: string, version?: number): Promise<boolean> => {
@@ -202,14 +206,14 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
         },
       });
       
-      // Force refresh after delete
-      await fetchAccounts(currentEntity?.id, true);
+      // Force refresh after delete - use effectiveEntityId to respect filterByEntity option
+      await fetchAccounts(effectiveEntityId, true);
       return true;
     } catch (err) {
       console.error('Error deleting social account:', err);
       throw new Error('Failed to delete social account. It may have associated posts.');
     }
-  }, [client, fetchAccounts, currentEntity?.id]);
+  }, [client, fetchAccounts, effectiveEntityId]);
 
   // Toggle scraping enabled
   const toggleScrapingEnabled = useCallback(async (account: SocialAccount): Promise<void> => {
@@ -233,13 +237,11 @@ export const useSocialAccounts = (options: UseSocialAccountsOptions = {}) => {
 
   // Initial fetch - only runs when entity actually changes
   useEffect(() => {
-    const entityId = filterByEntity ? currentEntity?.id : undefined;
-    
     // Only fetch if entity changed or we haven't fetched yet
-    if (!hasFetchedRef.current || currentEntityIdRef.current !== entityId) {
-      fetchAccounts(entityId);
+    if (!hasFetchedRef.current || currentEntityIdRef.current !== effectiveEntityId) {
+      fetchAccounts(effectiveEntityId);
     }
-  }, [currentEntity?.id, fetchAccounts, filterByEntity]);
+  }, [effectiveEntityId, fetchAccounts]);
 
   return {
     accounts,
