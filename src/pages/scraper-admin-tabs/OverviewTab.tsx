@@ -21,8 +21,10 @@ import {
 } from 'lucide-react';
 import { 
     getScraperMetrics,
-    getScraperJobsReport,
 } from '../../graphql/queries';
+import { 
+    getScraperJobsReportClean,
+} from '../../graphql/customQueries';
 import { TimeRange, type ScraperJob } from '../../API';
 import { MetricCard, JobStatusBadge } from '../../components/scraper/shared/StatusBadges';
 import { useEntity } from '../../contexts/EntityContext';
@@ -241,7 +243,7 @@ export const OverviewTab: React.FC = () => {
             // Load recent jobs with full query (includes all stats fields)
             try {
                 const jobsResponse = await client.graphql({
-                    query: getScraperJobsReport,
+                    query: getScraperJobsReportClean,
                     variables: { limit: 5 }
                 }) as any;
                 

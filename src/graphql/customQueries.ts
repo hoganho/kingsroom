@@ -1298,3 +1298,65 @@ export const getTournamentStructureCount = /* GraphQL */ `
     tournamentStructureCount
   }
 `;
+
+/**
+ * Custom getScraperJobsReport that excludes entity.playerMetrics 
+ * (or removes _version/_lastChangedAt if you still need playerMetrics)
+ */
+export const getScraperJobsReportClean = /* GraphQL */ `
+  query GetScraperJobsReport(
+    $entityId: ID
+    $status: ScraperJobStatus
+    $limit: Int
+    $nextToken: String
+  ) {
+    getScraperJobsReport(
+      entityId: $entityId
+      status: $status
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        jobId
+        triggerSource
+        triggeredBy
+        startTime
+        endTime
+        durationSeconds
+        status
+        totalURLsProcessed
+        newGamesScraped
+        gamesUpdated
+        gamesSkipped
+        errors
+        blanks
+        s3CacheHits
+        successRate
+        errorMessages
+        currentId
+        stopReason
+        lastErrorMessage
+        entityId
+        createdAt
+        updatedAt
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+        }
+      }
+      nextToken
+      totalCount
+      entitySummary {
+        entityId
+        entityName
+        totalJobs
+        runningJobs
+        completedJobs
+        failedJobs
+      }
+    }
+  }
+`;

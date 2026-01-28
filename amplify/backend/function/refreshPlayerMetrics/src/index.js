@@ -1022,7 +1022,9 @@ function calculateGlobalMetrics(players, playerVenues, entities, venues, timeRan
     venuesIncluded: totalVenues,
     
     createdAt: nowIso,
-    updatedAt: nowIso
+    updatedAt: nowIso,
+    _version: 1,
+    _lastChangedAt: Date.now()
   };
 }
 
@@ -1290,7 +1292,9 @@ function calculateEntityMetrics(entity, players, playerVenues, venues, playersRe
     playerVenuesScanned: playerVenues.length,
     
     createdAt: nowIso,
-    updatedAt: nowIso
+    updatedAt: nowIso,
+    _version: 1,
+    _lastChangedAt: Date.now()
   };
 }
 
@@ -1486,7 +1490,9 @@ function calculateVenueMetrics(venue, players, playerVenues, playersRegisteredHe
     playerVenuesScanned: playerVenues.length,
     
     createdAt: nowIso,
-    updatedAt: nowIso
+    updatedAt: nowIso,
+    _version: 1,
+    _lastChangedAt: Date.now()
   };
 }
 
