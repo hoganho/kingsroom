@@ -144,6 +144,54 @@ function isS3Url(url) {
 }
 
 /**
+ * Get canonical path from a Facebook CDN URL (strips query params)
+ * This allows detecting duplicate images that have different query parameters
+ * 
+ * Example:
+ *   Input:  https://scontent.fbcdn.net/v/t1.6435-9/123_n.jpg?_nc_cat=111&ccb=1-7
+ *   Output: /v/t1.6435-9/123_n.jpg
+ */
+function getCanonicalImagePath(url) {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.pathname;
+  } catch {
+    return url; // Return original if parsing fails
+  }
+}
+
+/**
+ * Deduplicate media URLs by canonical path
+ * Facebook often returns the same image with different query parameters
+ * (e.g., full_picture vs attachment.media.image.src)
+ * 
+ * @param {string[]} urls - Array of media URLs
+ * @returns {{ uniqueUrls: string[], duplicatesRemoved: number }}
+ */
+function deduplicateMediaUrls(urls) {
+  if (!urls || urls.length === 0) {
+    return { uniqueUrls: [], duplicatesRemoved: 0 };
+  }
+
+  const seenPaths = new Set();
+  const uniqueUrls = [];
+  let duplicatesRemoved = 0;
+
+  for (const url of urls) {
+    const canonicalPath = getCanonicalImagePath(url);
+    
+    if (!seenPaths.has(canonicalPath)) {
+      seenPaths.add(canonicalPath);
+      uniqueUrls.push(url);
+    } else {
+      duplicatesRemoved++;
+    }
+  }
+
+  return { uniqueUrls, duplicatesRemoved };
+}
+
+/**
  * Download image from URL with proper headers
  * Uses User-Agent header to avoid being blocked by Facebook CDN
  */
@@ -389,6 +437,7 @@ async function processPosts(posts) {
     partiallyFixed: 0,
     totalImagesDownloaded: 0,
     totalImagesFailed: 0,
+    totalDuplicatesRemoved: 0,
     details: [],
     errors: [],
   };
@@ -399,6 +448,14 @@ async function processPosts(posts) {
     console.log(`\n[${ i + 1}/${posts.length}] Processing: ${post.accountName} - ${post.id}`);
     console.log(`  Posted: ${post.postedAt}`);
     console.log(`  Images: ${post.totalImages} total (${post.fbUrlCount} FB, ${post.s3UrlCount} S3)`);
+
+    // Deduplicate URLs before processing
+    const { uniqueUrls, duplicatesRemoved } = deduplicateMediaUrls(post.mediaUrls);
+    if (duplicatesRemoved > 0) {
+      logger.fix(`  Removed ${duplicatesRemoved} duplicate image(s)`);
+      post.mediaUrls = uniqueUrls;
+      results.totalDuplicatesRemoved += duplicatesRemoved;
+    }
 
     const detail = {
       postId: post.id,
@@ -546,6 +603,7 @@ Posts failed: ${processResults.failed}
 
 Images downloaded: ${processResults.totalImagesDownloaded}
 Images failed: ${processResults.totalImagesFailed}
+Duplicate images removed: ${processResults.totalDuplicatesRemoved}
 
 ${processResults.errors.length > 0 ? `
 ERRORS
@@ -556,9 +614,10 @@ ${processResults.errors.map(e => `${e.postId}: ${e.error}`).join('\n')}
 WHAT WAS FIXED
 --------------
 For each post with Facebook CDN URLs:
-1. Downloaded image from Facebook CDN
-2. Uploaded to S3 bucket: ${config.S3_BUCKET}
-3. Updated mediaUrls and thumbnailUrl in DynamoDB
+1. Removed duplicate images (same image with different query params)
+2. Downloaded image from Facebook CDN
+3. Uploaded to S3 bucket: ${config.S3_BUCKET}
+4. Updated mediaUrls and thumbnailUrl in DynamoDB
 `;
 
   await fs.writeFile(summaryPath, summaryContent);
@@ -721,6 +780,7 @@ async function main() {
   
   Images downloaded: ${processResults.totalImagesDownloaded}
   Images failed: ${processResults.totalImagesFailed}
+  Duplicate images removed: ${processResults.totalDuplicatesRemoved}
   
   Report saved to: ${reportDir}
   
