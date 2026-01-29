@@ -1,0 +1,30 @@
+
+RECENTLY FINISHED GAME TIMING SYNC REPORT
+==========================================
+Generated: 2026-01-29T07:05:52.472Z
+Environment: DEV
+Dry Run: NO
+
+SCAN STATISTICS
+---------------
+Total RecentlyFinishedGame records: 10
+Need sync from Game table: 10
+Already correct: 0
+Game not found: 0
+Game has no timing data: 0
+
+SYNC RESULTS
+------------
+Successfully synced: 10
+Failed to sync: 0
+
+
+
+WHAT WAS SYNCED
+---------------
+For each RecentlyFinishedGame record:
+- finishedAt: Synced from Game.gameEndDateTime
+- totalDuration: Synced from Game.totalDuration
+
+NOTE: Run backfill-game-duration-fields.mjs FIRST to fix the Game table,
+then run this script to sync the fixes to RecentlyFinishedGame.

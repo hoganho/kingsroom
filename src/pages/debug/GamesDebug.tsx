@@ -81,7 +81,7 @@ export const GamesDebug = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [countsLoading, setCountsLoading] = useState(true);
   
-  // S3 storage lookup map: "entityId-tournamentId" -> S3StorageInfo
+  // S3 storage lookup map: sourceUrl -> S3StorageInfo
   const [s3StorageMap, setS3StorageMap] = useState<Record<string, S3StorageInfo>>({});
   const [s3LoadingKeys, setS3LoadingKeys] = useState<Set<string>>(new Set());
   const [s3OpeningKey, setS3OpeningKey] = useState<string | null>(null);
@@ -104,23 +104,23 @@ export const GamesDebug = () => {
     }
   }, []);
 
-  // Build a lookup key from entityId and tournamentId
-  const getS3LookupKey = (entityId: string | null, tournamentId: number | null): string | null => {
-    if (!entityId || !tournamentId) return null;
-    return `${entityId}-${tournamentId}`;
+  // Build a lookup key from sourceUrl
+  const getS3LookupKey = (sourceUrl: string | null): string | null => {
+    if (!sourceUrl) return null;
+    return sourceUrl;
   };
 
-  // Fetch S3 storage info for a game by tournamentId (using ScrapeURL table)
-  const fetchS3StorageForGame = async (entityId: string, tournamentId: number) => {
-    const lookupKey = `${entityId}-${tournamentId}`;
+  // Fetch S3 storage info for a game by sourceUrl (using ScrapeURL table)
+  const fetchS3StorageForGame = async (sourceUrl: string) => {
+    const lookupKey = sourceUrl;
     if (s3StorageMap[lookupKey] || s3LoadingKeys.has(lookupKey)) return;
     
-    console.log(`[S3 Fetch] Starting fetch for entityId=${entityId}, tournamentId=${tournamentId}`);
+    console.log(`[S3 Fetch] Starting fetch for sourceUrl=${sourceUrl}`);
     
     setS3LoadingKeys(prev => new Set(prev).add(lookupKey));
     
     try {
-      const s3Key = await lookupS3KeyForGame(entityId, tournamentId);
+      const s3Key = await lookupS3KeyForGame(sourceUrl);
       
       if (s3Key) {
         setS3StorageMap(prev => ({
@@ -132,7 +132,7 @@ export const GamesDebug = () => {
         console.log(`[S3 Fetch] No S3 key found for ${lookupKey}`);
       }
     } catch (err) {
-      console.error(`[S3 Fetch] Error fetching S3 key for tournament ${tournamentId}:`, err);
+      console.error(`[S3 Fetch] Error fetching S3 key for sourceUrl ${sourceUrl}:`, err);
     } finally {
       setS3LoadingKeys(prev => {
         const next = new Set(prev);
@@ -147,22 +147,21 @@ export const GamesDebug = () => {
     console.log(`[S3 Batch] Processing ${games.length} games`);
     console.log(`[S3 Batch] Sample game data:`, games.slice(0, 3).map(g => ({
       id: g.id,
-      tournamentId: g.tournamentId,
-      entityId: g.entityId,
+      sourceUrl: g.sourceUrl,
       name: g.name
     })));
     
     const gamesToFetch = games.filter(g => {
-      if (!g.entityId || !g.tournamentId) {
-        console.log(`[S3 Batch] Skipping game ${g.id} - missing entityId=${g.entityId} or tournamentId=${g.tournamentId}`);
+      if (!g.sourceUrl) {
+        console.log(`[S3 Batch] Skipping game ${g.id} - missing sourceUrl`);
         return false;
       }
-      const key = getS3LookupKey(g.entityId, g.tournamentId);
+      const key = getS3LookupKey(g.sourceUrl);
       return key && !s3StorageMap[key];
     });
     
     console.log(`[S3 Batch] Fetching S3 storage for ${gamesToFetch.length} games`);
-    await Promise.all(gamesToFetch.map(g => fetchS3StorageForGame(g.entityId, g.tournamentId)));
+    await Promise.all(gamesToFetch.map(g => fetchS3StorageForGame(g.sourceUrl)));
   };
 
   // Debug: Log when s3StorageMap changes
@@ -383,8 +382,8 @@ export const GamesDebug = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {gamesData.map((game, index) => {
-                // Look up S3 storage info from the map using entityId-tournamentId
-                const lookupKey = getS3LookupKey(game.entityId, game.tournamentId);
+                // Look up S3 storage info from the map using sourceUrl
+                const lookupKey = getS3LookupKey(game.sourceUrl);
                 const s3Info = lookupKey ? s3StorageMap[lookupKey] : null;
                 const hasS3Key = !!s3Info?.s3Key;
                 const isLoadingS3 = lookupKey ? s3LoadingKeys.has(lookupKey) : false;
@@ -394,8 +393,7 @@ export const GamesDebug = () => {
                 if (index < 5) {
                   console.log(`[Render] Game ${index}:`, {
                     id: game.id,
-                    tournamentId: game.tournamentId,
-                    entityId: game.entityId,
+                    sourceUrl: game.sourceUrl,
                     lookupKey,
                     s3Info,
                     hasS3Key,

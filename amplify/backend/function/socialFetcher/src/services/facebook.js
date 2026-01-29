@@ -24,21 +24,103 @@ function httpGet(url) {
 }
 
 /**
- * Fetch binary data (for images)
+ * Fetch binary data (for images) with proper error handling
+ * 
+ * Improvements over basic https.get:
+ * - Checks HTTP status codes and rejects on non-2xx
+ * - Adds User-Agent header (required by some CDNs)
+ * - Handles redirects
+ * - Detailed error logging
  */
-function httpGetBinary(url) {
+function httpGetBinary(url, retries = 2) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      // Handle redirects
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return httpGetBinary(res.headers.location).then(resolve).catch(reject);
-      }
+    const urlObj = new URL(url);
+    
+    const options = {
+      hostname: urlObj.hostname,
+      path: urlObj.pathname + urlObj.search,
+      method: 'GET',
+      headers: {
+        // Add User-Agent to avoid being blocked by CDNs
+        'User-Agent': 'Mozilla/5.0 (compatible; KingsroomBot/1.0; +https://kingsroom.com.au)',
+        'Accept': 'image/*,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      },
+    };
+
+    const makeRequest = (attemptsLeft) => {
+      const req = https.request(options, (res) => {
+        // Handle redirects (3xx)
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          console.log(`[FB] Following redirect: ${res.statusCode} -> ${res.headers.location}`);
+          return httpGetBinary(res.headers.location, attemptsLeft).then(resolve).catch(reject);
+        }
+        
+        // Check for non-2xx status codes
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          const error = new Error(`HTTP ${res.statusCode}: ${res.statusMessage || 'Request failed'}`);
+          error.statusCode = res.statusCode;
+          error.url = url.substring(0, 100);
+          
+          console.error(`[FB] Image download failed:`, {
+            statusCode: res.statusCode,
+            statusMessage: res.statusMessage,
+            url: url.substring(0, 100),
+            attemptsLeft,
+          });
+          
+          // Retry on 5xx errors or 429 (rate limit)
+          if (attemptsLeft > 0 && (res.statusCode >= 500 || res.statusCode === 429)) {
+            const delay = res.statusCode === 429 ? 2000 : 500;
+            console.log(`[FB] Retrying in ${delay}ms... (${attemptsLeft} attempts left)`);
+            setTimeout(() => makeRequest(attemptsLeft - 1), delay);
+            return;
+          }
+          
+          reject(error);
+          return;
+        }
+        
+        // Success - collect binary data
+        const chunks = [];
+        res.on('data', chunk => chunks.push(chunk));
+        res.on('end', () => {
+          const buffer = Buffer.concat(chunks);
+          if (buffer.length === 0) {
+            reject(new Error('Empty response body'));
+            return;
+          }
+          resolve(buffer);
+        });
+        res.on('error', reject);
+      });
       
-      const chunks = [];
-      res.on('data', chunk => chunks.push(chunk));
-      res.on('end', () => resolve(Buffer.concat(chunks)));
-      res.on('error', reject);
-    }).on('error', reject);
+      req.on('error', (err) => {
+        console.error(`[FB] Request error:`, err.message);
+        if (attemptsLeft > 0) {
+          console.log(`[FB] Retrying... (${attemptsLeft} attempts left)`);
+          setTimeout(() => makeRequest(attemptsLeft - 1), 500);
+          return;
+        }
+        reject(err);
+      });
+      
+      // Set timeout
+      req.setTimeout(15000, () => {
+        req.destroy();
+        const error = new Error('Request timeout (15s)');
+        if (attemptsLeft > 0) {
+          console.log(`[FB] Timeout, retrying... (${attemptsLeft} attempts left)`);
+          setTimeout(() => makeRequest(attemptsLeft - 1), 500);
+          return;
+        }
+        reject(error);
+      });
+      
+      req.end();
+    };
+    
+    makeRequest(retries);
   });
 }
 
@@ -174,8 +256,19 @@ async function downloadImage(imageUrl) {
   if (!imageUrl) return null;
   
   try {
-    console.log(`[FB] Downloading image...`);
+    // Log truncated URL for debugging
+    const urlPreview = imageUrl.length > 80 
+      ? imageUrl.substring(0, 80) + '...' 
+      : imageUrl;
+    console.log(`[FB] Downloading image: ${urlPreview}`);
+    
     const buffer = await httpGetBinary(imageUrl);
+    
+    // Validate we got actual image data
+    if (!buffer || buffer.length < 100) {
+      console.warn(`[FB] Downloaded buffer too small (${buffer?.length || 0} bytes), likely not a valid image`);
+      return null;
+    }
     
     // Detect content type from URL or default to jpeg
     let contentType = 'image/jpeg';
@@ -183,9 +276,14 @@ async function downloadImage(imageUrl) {
     else if (imageUrl.includes('.gif')) contentType = 'image/gif';
     else if (imageUrl.includes('.webp')) contentType = 'image/webp';
     
+    console.log(`[FB] Downloaded ${buffer.length} bytes (${contentType})`);
     return { buffer, contentType };
   } catch (error) {
-    console.error('[FB] Error downloading image:', error.message);
+    console.error('[FB] Error downloading image:', {
+      message: error.message,
+      statusCode: error.statusCode,
+      url: imageUrl?.substring(0, 80),
+    });
     return null;
   }
 }

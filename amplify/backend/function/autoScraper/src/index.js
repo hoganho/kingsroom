@@ -1044,24 +1044,51 @@ async function executeJob(event) {
         const isScheduledTrigger = job.triggerSource === 'SCHEDULED' || job.triggeredBy === 'eventbridge';
         
         if (isScheduledTrigger) {
-          // Query for recently created/updated games to include in summary
-          let gameSummary = [];
-          try {
-            const recentGames = await getRecentlyUpdatedGames(entityId, jobStartTime);
-            gameSummary = recentGames.map(g => ({
-              id: g.id,
-              name: g.name || g.title || 'Unnamed',
-              status: g.status || g.gameStatus,
-              runners: g.runners || g.totalEntries || 0,
-              prizePool: g.prizePool || g.guaranteedPrize || 0,
-            }));
-          } catch (gameQueryErr) {
-            console.warn('[NOTIFICATION] Could not query recent games:', gameQueryErr.message);
+          // Import the success check helper
+          const { isSuccessStopReason } = require('./ses-notification');
+          
+          // Determine if this is actually a success
+          // STOPPED_NOT_FOUND is a normal completion (reached end of ID range)
+          const isSuccess = isSuccessStopReason(finalStatus);
+          
+          // Build game details from results tracking arrays (if available)
+          // These arrays are populated by scrapingEngine v1.18.0+
+          const gameDetails = {
+            created: results.createdGames || [],
+            updated: results.updatedGames || [],
+            skipped: results.skippedGames || [],
+          };
+          
+          // Fall back to querying recent games if tracking arrays empty
+          if (gameDetails.created.length === 0 && gameDetails.updated.length === 0) {
+            try {
+              const recentGames = await getRecentlyUpdatedGames(entityId, jobStartTime);
+              // Categorize by action if available
+              recentGames.forEach(g => {
+                const detail = {
+                  id: g.id,
+                  tournamentId: g.tournamentId,
+                  name: g.name || g.title || 'Unnamed',
+                  gameStatus: g.status || g.gameStatus,
+                };
+                // If we can't determine action, put in updated
+                if (g.createdAt && new Date(g.createdAt) >= new Date(jobStartTime)) {
+                  gameDetails.created.push(detail);
+                } else {
+                  gameDetails.updated.push(detail);
+                }
+              });
+            } catch (gameQueryErr) {
+              console.warn('[NOTIFICATION] Could not query recent games:', gameQueryErr.message);
+            }
           }
+
+          // Get URL processing details from results (if available)
+          const processedURLs = results.processedURLs || [];
 
           await sendNotification({
             lambdaName: 'autoScraper',
-            status: finalStatus === STOP_REASON.COMPLETED ? 'success' : 'failure',
+            status: isSuccess ? 'success' : 'failure',
             triggerSource: 'EVENTBRIDGE',
             durationMs: durationSeconds * 1000,
             summary: {
@@ -1073,13 +1100,13 @@ async function executeJob(event) {
               gamesUpdated: results.gamesUpdated,
               gamesSkipped: results.gamesSkipped,
               errors: results.errors,
+              notFoundCount: results.notFoundCount,
+              notPublishedCount: results.notPublishedCount,
               s3CacheHits: results.s3CacheHits,
               stopReason: finalStatus,
-              // Include game details if available
-              ...(gameSummary.length > 0 && { 
-                recentGames: gameSummary.slice(0, 10) // Limit to 10 for email readability
-              }),
             },
+            gameDetails: gameDetails,
+            processedURLs: processedURLs,
             error: results.lastErrorMessage || null,
           });
         }

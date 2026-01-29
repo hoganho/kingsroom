@@ -16,7 +16,7 @@ Amplify Params - DO NOT EDIT */
 /**
  * Social Fetcher Lambda - Main Entry Point
  * 
- * VERSION: 3.0.0 - Modular architecture refactor
+ * VERSION: 3.0.1 - Modular architecture refactor
  * 
  * This is a lightweight router that delegates to specialized handlers.
  * All business logic lives in the handlers/ and services/ directories.
@@ -30,12 +30,17 @@ Amplify Params - DO NOT EDIT */
 const { handleScheduledScrape } = require('./handlers/scheduled');
 const { handleGraphQLRequest } = require('./handlers/graphql');
 const { triggerScrape } = require('./handlers/scrape');
+const { runDiagnostics } = require('./diagnostics');
 
 /**
  * Detect the trigger source and route to appropriate handler
  */
 exports.handler = async (event, context) => {
   console.log('[socialFetcher] Event:', JSON.stringify(event, null, 2));
+
+  if (event.runDiagnostics) {
+    return runDiagnostics();
+  }
 
   try {
     // ============================================

@@ -1456,51 +1456,146 @@ const defaultStrategy = {
     },
     
     /**
-     * Get total duration (enhanced version with embedded data)
+     * getTotalDurationEnhanced - ROBUST VERSION
+     * 
+     * Extracts timing fields with smart fallback logic:
+     * 
+     * PRIORITY ORDER for gameEndDateTime:
+     * 1. CALCULATE from gameActualStartDateTime + totalDuration (most accurate for flights)
+     * 2. FALLBACK to finished_utc when no duration available (may be parent's end time)
+     * 3. NULL if no timing data available
+     * 
+     * WHY THIS MATTERS:
+     * The source data's `finished_utc` contains the PARENT tournament's end time
+     * (Final Day completion), NOT the individual flight's end time. But ttime 
+     * (duration) is always correct for the individual game.
+     * 
+     * EXAMPLES:
+     * - Flight 1C with ttime=29551 → End = Start + 29551s ✅
+     * - Final Day with no ttime → End = finished_utc (correct for final day)
+     * - Flight with no ttime → End = finished_utc (may be wrong, but best we have)
+     * 
+     * Replace the existing getTotalDurationEnhanced method in html-parser.js (lines 1461-1517)
      */
+
     getTotalDurationEnhanced(ctx) {
         if (ctx.data.scrapeStatus === 'NOT_FOUND') return;
         
-        if (ctx.gameData) {
-            // Extract duration in seconds
-            if (ctx.gameData.ttime !== undefined && ctx.gameData.ttime > 0) {
-                const duration = parseInt(ctx.gameData.ttime, 10);
-                if (!isNaN(duration)) {
-                    ctx.add('totalDuration', duration);
-                    console.log(`[HtmlParser] Duration: ${duration} seconds`);
-                }
+        if (!ctx.gameData) {
+            // Fallback: Parse from HTML elements when no gameData available
+            this._parseDurationFromHtmlElements(ctx);
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // STEP 1: Extract totalDuration from ttime (always accurate for individual game)
+        // ═══════════════════════════════════════════════════════════════════════
+        let durationSeconds = null;
+        if (ctx.gameData.ttime !== undefined && ctx.gameData.ttime > 0) {
+            durationSeconds = parseInt(ctx.gameData.ttime, 10);
+            if (!isNaN(durationSeconds) && durationSeconds > 0) {
+                ctx.add('totalDuration', durationSeconds);
+                console.log(`[HtmlParser] Duration: ${durationSeconds} seconds (${(durationSeconds / 3600).toFixed(2)} hours)`);
+            } else {
+                durationSeconds = null;
             }
-            
-            // Extract actual start time
-            if (ctx.gameData.started_utc) {
-                const actualStartIso = cwTimestampToISO(ctx.gameData.started_utc);
-                if (actualStartIso) {
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // STEP 2: Extract gameActualStartDateTime (always accurate for individual game)
+        // ═══════════════════════════════════════════════════════════════════════
+        let actualStartIso = null;
+        let actualStartMs = null;
+        if (ctx.gameData.started_utc) {
+            actualStartIso = cwTimestampToISO(ctx.gameData.started_utc);
+            if (actualStartIso) {
+                actualStartMs = new Date(actualStartIso).getTime();
+                if (!isNaN(actualStartMs)) {
                     ctx.add('gameActualStartDateTime', actualStartIso);
                     console.log(`[HtmlParser] Actual start: ${actualStartIso}`);
+                } else {
+                    actualStartMs = null;
                 }
             }
-            
-            // Extract end time (direct - preferred over calculation)
-            if (ctx.gameData.finished_utc) {
-                const finishedIso = cwTimestampToISO(ctx.gameData.finished_utc);
-                if (finishedIso) {
-                    ctx.add('gameEndDateTime', finishedIso);
-                    console.log(`[HtmlParser] End time: ${finishedIso}`);
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // STEP 3: Determine gameEndDateTime using priority order
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        // Get finished_utc for reference/fallback
+        let sourceFinishedIso = null;
+        let sourceFinishedMs = null;
+        if (ctx.gameData.finished_utc) {
+            sourceFinishedIso = cwTimestampToISO(ctx.gameData.finished_utc);
+            if (sourceFinishedIso) {
+                sourceFinishedMs = new Date(sourceFinishedIso).getTime();
+                if (isNaN(sourceFinishedMs)) {
+                    sourceFinishedMs = null;
+                    sourceFinishedIso = null;
                 }
             }
+        }
+        
+        // PRIORITY 1: Calculate from start + duration (most accurate)
+        if (actualStartMs && durationSeconds) {
+            const calculatedEndMs = actualStartMs + (durationSeconds * 1000);
+            const calculatedEndIso = new Date(calculatedEndMs).toISOString();
+            ctx.add('gameEndDateTime', calculatedEndIso);
             
-            // Calculate duration if we have timestamps but no ttime
-            if (!ctx.data.totalDuration && ctx.data.gameActualStartDateTime && ctx.data.gameEndDateTime) {
-                const startMs = new Date(ctx.data.gameActualStartDateTime).getTime();
-                const endMs = new Date(ctx.data.gameEndDateTime).getTime();
-                if (!isNaN(startMs) && !isNaN(endMs) && endMs > startMs) {
-                    ctx.add('totalDuration', Math.floor((endMs - startMs) / 1000));
+            // Log comparison with source finished_utc if available
+            if (sourceFinishedMs) {
+                const diffMs = Math.abs(sourceFinishedMs - calculatedEndMs);
+                const diffHours = diffMs / (1000 * 60 * 60);
+                
+                if (diffHours < 0.5) {
+                    // Within 30 minutes - likely accurate (final day or same-day event)
+                    console.log(`[HtmlParser] End time: ${calculatedEndIso} (calculated, matches source)`);
+                } else {
+                    // Significant difference - this is a flight/day, not final
+                    console.log(`[HtmlParser] End time: ${calculatedEndIso} (calculated from start+duration)`);
+                    console.log(`[HtmlParser] ⚠️ Source finished_utc differs by ${diffHours.toFixed(1)} hours (multi-day tournament detected)`);
+                }
+            } else {
+                console.log(`[HtmlParser] End time: ${calculatedEndIso} (calculated from start+duration)`);
+            }
+            return;
+        }
+        
+        // PRIORITY 2: Fallback to finished_utc when no duration available
+        if (sourceFinishedIso) {
+            ctx.add('gameEndDateTime', sourceFinishedIso);
+            console.log(`[HtmlParser] End time: ${sourceFinishedIso} (from finished_utc - no duration available)`);
+            
+            // Try to calculate duration from timestamps
+            if (actualStartMs && sourceFinishedMs && sourceFinishedMs > actualStartMs) {
+                const calculatedDuration = Math.floor((sourceFinishedMs - actualStartMs) / 1000);
+                
+                // Sanity check: duration should be reasonable (< 30 days)
+                const maxReasonableDuration = 30 * 24 * 60 * 60; // 30 days in seconds
+                if (calculatedDuration > 0 && calculatedDuration < maxReasonableDuration) {
+                    ctx.add('totalDuration', calculatedDuration);
+                    console.log(`[HtmlParser] Duration: ${calculatedDuration} seconds (calculated from timestamps)`);
+                    
+                    // Warn if duration seems too long for a single session (> 24 hours)
+                    if (calculatedDuration > 24 * 60 * 60) {
+                        console.log(`[HtmlParser] ⚠️ Duration > 24 hours - this may be using parent tournament's end time`);
+                    }
+                } else {
+                    console.log(`[HtmlParser] ⚠️ Calculated duration (${calculatedDuration}s) seems unreasonable, not setting`);
                 }
             }
             return;
         }
         
-        // Fallback: Parse from HTML
+        // PRIORITY 3: No end time data available
+        console.log(`[HtmlParser] ⚠️ No end time available (no duration or finished_utc)`);
+    },
+
+    /**
+     * Helper: Parse duration from HTML elements (fallback when no cw_tt data)
+     */
+    _parseDurationFromHtmlElements(ctx) {
         try {
             const totalTimeLabel = ctx.$('.cw-clock-label').filter((i, el) => 
                 ctx.$(el).text().trim().toLowerCase() === 'total time'
@@ -1508,11 +1603,13 @@ const defaultStrategy = {
             if (totalTimeLabel.length > 0) {
                 const rawValue = totalTimeLabel.siblings('.cw-clock-value-side').text().trim();
                 if (/^\d{1,2}:\d{2}:\d{2}$/.test(rawValue)) {
-                    ctx.add('totalDuration', parseHHMMSSToSeconds(rawValue));
+                    const duration = parseHHMMSSToSeconds(rawValue);
+                    ctx.add('totalDuration', duration);
+                    console.log(`[HtmlParser] Duration: ${duration} seconds (from HTML element)`);
                 }
             }
         } catch (err) {
-            console.warn('[HtmlParser] Error parsing Total Time:', err.message);
+            console.warn('[HtmlParser] Error parsing Total Time from HTML:', err.message);
         }
     },
 };

@@ -84,7 +84,7 @@
           "s3Key": "amplify-builds/socialFetcher-396b76707577426f496c-build.zip",
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "socialPostProcessorFunction": "socialPostProcessor-dev",
-          "appsyncEndpoint": "https://ht3nugt6lvddpeeuwj3x6mkite.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+          "appsyncEndpoint": "https://lxsp5uuctbdmxje4ddronfxky4.appsync-api.ap-southeast-2.amazonaws.com/graphql",
           "socialMediaBucket": "pokerpro-scraper-storage"
         },
         "socialPostProcessor": {
@@ -182,7 +182,7 @@
       "function": {
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/autoScraper-39677248314575415a69-build.zip"
+          "s3Key": "amplify-builds/autoScraper-346b623958736e7a5955-build.zip"
         },
         "deleteGameFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
@@ -257,10 +257,10 @@
         },
         "socialFetcher": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/socialFetcher-49626434736448676d69-build.zip",
+          "s3Key": "amplify-builds/socialFetcher-6361625456474b376753-build.zip",
           "fbAccessToken": "2409157512601402|ZPBbZDM3ctYIb9CbLAtSdH_2KW8",
           "socialPostProcessorFunction": "socialPostProcessor-prod",
-          "appsyncEndpoint": "https://ynuahifnznb5zddz727oiqnicy.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+          "appsyncEndpoint": "https://ee4nnfa2mzg5pasbzvlo4ogxui.appsync-api.ap-southeast-2.amazonaws.com/graphql",
           "socialMediaBucket": "kingsroom-storage-prod"
         },
         "socialPostProcessor": {
@@ -295,7 +295,7 @@
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-prod-e073a-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-48474f53765171587265-build.zip",
+          "s3Key": "amplify-builds/webScraperFunction-436d6648356e76752f42-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue-prod.fifo",
           "scraperS3Bucket": "kingsroom-storage-prod",
           "saveGameFunctionName": "saveGameFunction-prod"

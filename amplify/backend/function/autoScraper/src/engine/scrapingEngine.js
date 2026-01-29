@@ -4,8 +4,17 @@
  * Core scraping logic extracted from index.js for maintainability.
  * Handles bulk scraping, gap processing, and event streaming.
  * 
- * VERSION: 1.17.0
+ * VERSION: 1.18.0
  * 
+ * UPDATED v1.18.0:
+ * - NEW: Track game details for notifications (created, updated, skipped with names)
+ * - NEW: Track URL processing details with reasons (new, rescrape, refresh, gap)
+ * - NEW: trackProcessedURL() helper to record why each URL is being processed
+ * - NEW: trackGameAction() helper to record game outcomes with details
+ * - Results now include: createdGames[], updatedGames[], skippedGames[], processedURLs[]
+ * - Arrays are size-limited to prevent memory issues (50 games, 100 URLs)
+ * - Used by autoScraper for enhanced SES email notifications
+ *
  * UPDATED v1.17.0:
  * - CRITICAL FIX: Added ScraperAPI/proxy service error detection
  *   - Detects credit exhaustion ("You have exhausted the API Credits")
@@ -321,6 +330,73 @@ const IN_PROGRESS_GAME_STATUSES = [
 function isInProgressGameStatus(status) {
     if (!status) return false;
     return IN_PROGRESS_GAME_STATUSES.includes(status.toUpperCase());
+}
+
+// ===================================================================
+// TRACKING HELPERS (NEW v1.18.0)
+// ===================================================================
+
+/**
+ * Track a processed URL with its reason
+ * Limits array size to prevent memory issues
+ * 
+ * @param {object} results - Results object with processedURLs array
+ * @param {string} url - The URL being processed
+ * @param {number} tournamentId - Tournament ID
+ * @param {string} reason - Why this URL is being processed (new, rescrape, refresh, gap, etc.)
+ */
+function trackProcessedURL(results, url, tournamentId, reason) {
+    if (!results.processedURLs) results.processedURLs = [];
+    // Limit to 100 URLs to prevent memory issues
+    if (results.processedURLs.length < 100) {
+        results.processedURLs.push({
+            url,
+            tournamentId,
+            reason,
+            timestamp: new Date().toISOString()
+        });
+    }
+}
+
+/**
+ * Track a game that was created/updated/skipped
+ * Limits array size to prevent memory issues
+ * 
+ * @param {object} results - Results object
+ * @param {string} action - 'CREATED', 'UPDATED', or 'SKIPPED'
+ * @param {object} gameInfo - Game details { tournamentId, name, gameStatus, reason? }
+ */
+function trackGameAction(results, action, gameInfo) {
+    const info = {
+        tournamentId: gameInfo.tournamentId,
+        name: gameInfo.name || 'Unnamed',
+        gameStatus: gameInfo.gameStatus,
+        reason: gameInfo.reason || null,
+    };
+    
+    // Limit to 50 per category
+    const limit = 50;
+    
+    switch (action) {
+        case 'CREATED':
+            if (!results.createdGames) results.createdGames = [];
+            if (results.createdGames.length < limit) {
+                results.createdGames.push(info);
+            }
+            break;
+        case 'UPDATED':
+            if (!results.updatedGames) results.updatedGames = [];
+            if (results.updatedGames.length < limit) {
+                results.updatedGames.push(info);
+            }
+            break;
+        case 'SKIPPED':
+            if (!results.skippedGames) results.skippedGames = [];
+            if (results.skippedGames.length < limit) {
+                results.skippedGames.push(info);
+            }
+            break;
+    }
 }
 
 // ===================================================================
@@ -1036,7 +1112,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
     const MAX_CONSECUTIVE_NOT_FOUND = options.maxConsecutiveNotFound || DEFAULT_MAX_CONSECUTIVE_NOT_FOUND || 10;
     const MAX_CONSECUTIVE_BLANKS = options.maxConsecutiveBlanks || DEFAULT_MAX_CONSECUTIVE_BLANKS || 5;
     
-    console.log(`[ScrapingEngine] v1.11.0: Stop on first error (except "Tournament not found"). NOT_FOUND threshold=${MAX_CONSECUTIVE_NOT_FOUND}, BLANKS threshold=${MAX_CONSECUTIVE_BLANKS}`);
+    console.log(`[ScrapingEngine] v1.18.0: Stop on first error (except "Tournament not found"). NOT_FOUND threshold=${MAX_CONSECUTIVE_NOT_FOUND}, BLANKS threshold=${MAX_CONSECUTIVE_BLANKS}`);
     
     // Initialize results - merge with accumulated results from previous invocation if continuing
     const accumulated = options.accumulatedResults || {};
@@ -1058,6 +1134,12 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         lastErrorMessage: null,
         // NEW v1.3.0: NOT_PUBLISHED tracking (no Game save, just count)
         notPublishedCount: accumulated.notPublishedCount || 0,
+        // NEW v1.18.0: Track game details for notifications
+        createdGames: accumulated.createdGames || [],
+        updatedGames: accumulated.updatedGames || [],
+        skippedGames: accumulated.skippedGames || [],
+        // NEW v1.18.0: Track URLs processed with reasons
+        processedURLs: accumulated.processedURLs || [],
     };
     
     if (accumulated.totalProcessed) {
@@ -1091,6 +1173,20 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         results.notFoundCount += gapResults.notFoundCount || 0;
         results.s3CacheHits += gapResults.s3CacheHits || 0;
         results.notPublishedCount += gapResults.notPublishedCount || 0;
+        
+        // v1.18.0: Merge tracking arrays from gap processing
+        if (gapResults.createdGames) {
+            results.createdGames = results.createdGames.concat(gapResults.createdGames).slice(0, 50);
+        }
+        if (gapResults.updatedGames) {
+            results.updatedGames = results.updatedGames.concat(gapResults.updatedGames).slice(0, 50);
+        }
+        if (gapResults.skippedGames) {
+            results.skippedGames = results.skippedGames.concat(gapResults.skippedGames).slice(0, 50);
+        }
+        if (gapResults.processedURLs) {
+            results.processedURLs = results.processedURLs.concat(gapResults.processedURLs).slice(0, 100);
+        }
         
         // If gaps processing hit error threshold, stop early
         if (gapResults.stopReason && gapResults.stopReason !== STOP_REASON.COMPLETED) {
@@ -1267,6 +1363,9 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
         let gameForceRefresh = options.forceRefresh || false;
         let scrapeURLStatus = null;
         
+        // v1.18.0: Track URL reason for notifications
+        let urlReason = 'new';  // Default for new IDs
+        
         // Skip checks and per-game forceRefresh using prefetch cache
         if (prefetchCache) {
             try {
@@ -1310,6 +1409,7 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                 // ═══════════════════════════════════════════════════════════════
                 if (!options.skipNotFoundGaps && isNotFoundGapStatus(scrapeURLStatus) && !gameForceRefresh) {
                     gameForceRefresh = true;
+                    urlReason = 'not_found_gap';
                     console.log(`[ScrapingEngine] ID ${currentId} was NOT_FOUND - forcing web refresh to check for new tournament`);
                 }
                 
@@ -1319,14 +1419,23 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     const existingStatus = scrapeURLStatus.gameStatus;
                     if (isInProgressGameStatus(existingStatus)) {
                         gameForceRefresh = true;
+                        urlReason = 'refresh';
                         console.log(`[ScrapingEngine] Auto mode: ID ${currentId} has in-progress status "${existingStatus}", forcing refresh`);
                     }
+                }
+                
+                // v1.18.0: If record exists but not refreshing, mark as rescrape
+                if (scrapeURLStatus.found && urlReason === 'new') {
+                    urlReason = 'rescrape';
                 }
                 
             } catch (error) {
                 console.warn(`[ScrapingEngine] Prefetch error, continuing: ${error.message}`);
             }
         }
+        
+        // v1.18.0: Track URL being processed with reason
+        trackProcessedURL(results, url, currentId, urlReason);
         
         results.totalProcessed++;
 
@@ -1609,6 +1718,12 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     if (!venueId) {
                         console.warn(`[ScrapingEngine] No venue for ID ${currentId}, skipping save`);
                         results.gamesSkipped++;
+                        trackGameAction(results, 'SKIPPED', {
+                            tournamentId: currentId,
+                            name: parsedData.name || 'Unnamed',
+                            gameStatus: parsedData.gameStatus,
+                            reason: 'No venue available',
+                        });
                         
                         publishGameProcessedEvent(jobId, entityId, currentId, url, {
                             action: 'SKIPPED',
@@ -1623,6 +1738,12 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     } else if (!parsedData.gameStartDateTime) {
                         console.warn(`[ScrapingEngine] No gameStartDateTime for ID ${currentId}, skipping save`);
                         results.gamesSkipped++;
+                        trackGameAction(results, 'SKIPPED', {
+                            tournamentId: currentId,
+                            name: parsedData.name || 'Unnamed',
+                            gameStatus: parsedData.gameStatus,
+                            reason: 'No gameStartDateTime',
+                        });
                         
                         publishGameProcessedEvent(jobId, entityId, currentId, url, {
                             action: 'SKIPPED',
@@ -1637,6 +1758,12 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                     } else if (!parsedData.name) {
                         console.warn(`[ScrapingEngine] No name for ID ${currentId}, skipping save`);
                         results.gamesSkipped++;
+                        trackGameAction(results, 'SKIPPED', {
+                            tournamentId: currentId,
+                            name: 'Unnamed',
+                            gameStatus: parsedData.gameStatus,
+                            reason: 'No game name',
+                        });
                         
                         publishGameProcessedEvent(jobId, entityId, currentId, url, {
                             action: 'SKIPPED',
@@ -1662,10 +1789,26 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                                 const action = saveResult.enrichGameData.saveResult?.action;
                                 if (action === 'CREATED') {
                                     results.newGamesScraped++;
+                                    trackGameAction(results, 'CREATED', {
+                                        tournamentId: currentId,
+                                        name: parsedData.name || 'Unnamed',
+                                        gameStatus: parsedData.gameStatus,
+                                    });
                                 } else if (action === 'UPDATED') {
                                     results.gamesUpdated++;
+                                    trackGameAction(results, 'UPDATED', {
+                                        tournamentId: currentId,
+                                        name: parsedData.name || 'Unnamed',
+                                        gameStatus: parsedData.gameStatus,
+                                    });
                                 } else {
                                     results.gamesSkipped++;
+                                    trackGameAction(results, 'SKIPPED', {
+                                        tournamentId: currentId,
+                                        name: parsedData.name || 'Unnamed',
+                                        gameStatus: parsedData.gameStatus,
+                                        reason: 'No action returned',
+                                    });
                                 }
                                 
                                 publishGameProcessedEvent(jobId, entityId, currentId, url, {
@@ -1689,6 +1832,12 @@ async function performScrapingEnhanced(entityId, scraperState, jobId, options = 
                                     'Enrichment failed';
                                 console.warn(`[ScrapingEngine] Enrichment failed for ID ${currentId}: ${errorMsg}`);
                                 results.gamesSkipped++;
+                                trackGameAction(results, 'SKIPPED', {
+                                    tournamentId: currentId,
+                                    name: parsedData.name || 'Unnamed',
+                                    gameStatus: parsedData.gameStatus,
+                                    reason: errorMsg,
+                                });
                                 
                                 publishGameProcessedEvent(jobId, entityId, currentId, url, {
                                     action: 'SKIPPED',
@@ -1875,7 +2024,7 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
     } = ctx;
     
     // v1.8.0: No error thresholds - we stop on first error
-    console.log(`[ScrapingEngine] Processing ${gapIds.length} gap IDs (stop on first error, v1.11.0 with cancellation/timeout support)`);
+    console.log(`[ScrapingEngine] Processing ${gapIds.length} gap IDs (stop on first error, v1.18.0 with tracking)`);
     
     const entity = await getEntity(entityId);
     console.log(`[ScrapingEngine] Entity: ${entity.entityName}, URL pattern: ${entity.gameUrlDomain}${entity.gameUrlPath}{id}`);
@@ -1895,6 +2044,13 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
         stopReason: STOP_REASON.COMPLETED,
         lastErrorMessage: null,
         notPublishedCount: 0,
+        currentId: null,
+        // NEW v1.18.0: Track game details for notifications
+        createdGames: [],
+        updatedGames: [],
+        skippedGames: [],
+        // NEW v1.18.0: Track URLs processed with reasons
+        processedURLs: [],
     };
     
     // v1.10.1: Initialize prefetch cache to check status of each gap ID
@@ -1916,6 +2072,9 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
     for (const tournamentId of gapIds) {
         const gameStartTime = Date.now();
         const url = await buildTournamentUrl(entityId, tournamentId);
+        
+        // v1.18.0: Track URL being processed (gap mode)
+        trackProcessedURL(results, url, tournamentId, 'gap');
         
         results.totalProcessed++;
         results.currentId = tournamentId;
@@ -2326,10 +2485,26 @@ async function processGapIds(entityId, jobId, gapIds, options, startTime, ctx) {
                         const action = saveResult.enrichGameData.saveResult?.action;
                         if (action === 'CREATED') {
                             results.newGamesScraped++;
+                            trackGameAction(results, 'CREATED', {
+                                tournamentId: tournamentId,
+                                name: parsedData.name || 'Unnamed',
+                                gameStatus: parsedData.gameStatus,
+                            });
                         } else if (action === 'UPDATED') {
                             results.gamesUpdated++;
+                            trackGameAction(results, 'UPDATED', {
+                                tournamentId: tournamentId,
+                                name: parsedData.name || 'Unnamed',
+                                gameStatus: parsedData.gameStatus,
+                            });
                         } else {
                             results.gamesSkipped++;
+                            trackGameAction(results, 'SKIPPED', {
+                                tournamentId: tournamentId,
+                                name: parsedData.name || 'Unnamed',
+                                gameStatus: parsedData.gameStatus,
+                                reason: 'No action returned',
+                            });
                         }
                         
                         publishGameProcessedEvent(jobId, entityId, tournamentId, url, {
@@ -2477,5 +2652,8 @@ module.exports = {
     // NEW v1.14.0: Duration parsing for GraphQL Int compatibility
     parseDurationToInt,
     // NEW v1.4.0: Export for testing
-    buildProgressStats
+    buildProgressStats,
+    // NEW v1.18.0: Tracking helpers for notifications
+    trackProcessedURL,
+    trackGameAction,
 };
